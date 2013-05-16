@@ -185,6 +185,11 @@ void Plugin::onMessage(Server *server, const string &channel, const string &who,
 	callLua("onMessage", 0, "S s s s", server, channel.c_str(), who.c_str(), message.c_str());
 }
 
+void Plugin::onNick(Server *server, const string &oldnick, const string &newnick)
+{
+	callLua("onNick", 0, "S s s", server, oldnick.c_str(), newnick.c_str());
+}
+
 void Plugin::onCommand(Server *server, const string &channel, const string &who, const string &message)
 {
 	callLua("onCommand", 0, "S s s s", server, channel.c_str(), who.c_str(), message.c_str());

@@ -44,7 +44,7 @@ static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
 {
 	Server *server = (Server *)irc_get_ctx(s);
 	string who, channel, message = "";
-	const string &cmdToken = server->getCommandToken();
+	const string &cmdToken = server->getCommandChar();
 
 	channel = params[0];
 	if (params[1] != nullptr)
@@ -122,10 +122,19 @@ static void handleJoin(irc_session_t *s, const char *ev, const char *orig,
 static void handleNick(irc_session_t *s, const char *ev, const char *orig,
 			  const char **params, unsigned int count)
 {
-	(void)s;
+	Server *server = (Server *)irc_get_ctx(s);
+	string oldnick, newnick;
+
+	oldnick = getNick(orig);
+	newnick = getNick(params[0]);
+
+	// do not log self, XXX: add an option to allow that
+	if (server->getIdentity().m_nickname != oldnick) {
+		for (Plugin *p : Irccd::getInstance()->getPlugins())
+			p->onNick(server, oldnick, newnick);
+	}
+
 	(void)ev;
-	(void)orig;
-	(void)params;
 	(void)count;
 }
 
@@ -181,16 +190,19 @@ Server::~Server(void)
 	stopConnection();
 }
 
-void Server::setConnection(const std::string &name, const std::string &host,
-			   unsigned port, bool ssl, const std::string &password)
+const string & Server::getCommandChar(void) const
 {
-	m_name = name;
-	m_host = host;
-	m_port = port;
-	m_password = password;
+	return m_commandChar;
+}
 
-	if (ssl)
-		m_host.insert(0, 1, '#');
+void Server::setCommandChar(const string &commandChar)
+{
+	m_commandChar = commandChar;
+}
+
+const vector<Server::Channel> & Server::getChannels(void)
+{
+	return m_channels;
 }
 
 const Identity & Server::getIdentity(void) const
@@ -201,6 +213,28 @@ const Identity & Server::getIdentity(void) const
 void Server::setIdentity(const Identity &identity)
 {
 	m_identity = identity;
+}
+
+const string & Server::getName(void) const
+{
+	return m_name;
+}
+
+const string & Server::getHost(void) const
+{
+	return m_host;
+}
+
+void Server::setConnection(const std::string &name, const std::string &host,
+			   unsigned port, bool ssl, const std::string &password)
+{
+	m_name = name;
+	m_host = host;
+	m_port = port;
+	m_password = password;
+
+	if (ssl)
+		m_host.insert(0, 1, '#');
 }
 
 void Server::addChannel(const std::string &name, const std::string &password)

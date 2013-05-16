@@ -60,53 +60,69 @@ public:
 
 
 private:
-	Identity m_identity;			/*! identity to use */
+	// Some options
 	std::string m_commandChar;		/*! command token */
+	bool m_joinInvite;			/*! auto join on invites */
+	std::vector<Channel> m_channels;	/*! list of channels */
 
+	// Connection settings
+	Identity m_identity;			/*! identity to use */
 	std::string m_name;			/*! server's name */
 	std::string m_host;			/*! hostname */
 	unsigned m_port;			/*! server's port */
 	std::string m_password;			/*! optional server password */
 
+	// IRC thread
 	std::thread m_thread;			/*! server's thread */
 	bool m_threadStarted;			/*! thread's status */
-
-	std::vector<Channel> m_channels;	/*! list of channels */
-
 	irc_session_t *m_session;		/*! libircclient session */
 
 public:
 	Server(void);
 	~Server(void);
 
-	const std::string & getName(void) const
-	{
-		return m_name;
-	}
-
-	const std::string & getHost(void) const
-	{
-		return m_host;
-	}
+	/**
+	 * Get the command character.
+	 *
+	 * @return the command character
+	 */
+	const std::string & getCommandChar(void) const;
 
 	/**
-	 * Get all channels
+	 * Set the command character.
+	 *
+	 * @param commandChar the command character
 	 */
-	const std::vector<Channel> & getChannels(void)
-	{
-		return m_channels;
-	}
+	void setCommandChar(const std::string &commandChar);
 
-	const std::string & getCommandToken(void) const
-	{
-		return m_commandChar;
-	}
+	/**
+	 * Get all channels that will be auto joined
+	 *
+	 * @return the list of channels
+	 */
+	const std::vector<Channel> & getChannels(void);
 
+	/**
+	 * Get the identity used for that server
+	 *
+	 * @return the identity
+	 */
+	const Identity & getIdentity(void) const;
 
-	void setCommandToken(const std::string &commandToken)
-	{
-		m_commandChar = commandToken;
-	}
+	/**
+	 * Get the server instance name. This is only used
+	 * to reference a server from irccd controllers.
+	 *
+	 * @return the name
+	 */
+	const std::string & getName(void) const;
+
+	/**
+	 * Get the server host name.
+	 *
+	 * @return the hostname
+	 */
+	const std::string & getHost(void) const;
 
 	/**
 	 * Set connections settings.
@@ -120,12 +136,6 @@ public:
 	void setConnection(const std::string &name, const std::string &host,
 			   unsigned port, bool ssl = false, const std::string &password = "");
 
-	/**
-	 * Get the identity used for that server
-	 *
-	 * @return the identity
-	 */
-	const Identity & getIdentity(void) const;
 
 	/**
 	 * Set the user identity.

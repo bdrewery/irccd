@@ -87,7 +87,6 @@ This event is triggered when someone has joined a specific channel.
 function onJoin(server, channel, nickname)
 .Ed
 .Pp
-.Pp
 Parameters:
 .Bl -tag -compact -width PARAMETERXXXX -offset indent
 .It server
@@ -100,8 +99,37 @@ The user nickname.
 .\" Message
 .Ss Message
 This event is triggered when someone said something on a specific channel.
+.Bd -literal -offset indent
+function onMessage(server, channel, nickname, message)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel.
+.It nickname
+The person that said something.
+.It message
+The message sent.
+.El
+.\" Part
 .Ss Part
 This event is triggered when someone has left a specific channel.
+.Bd -literal -offset indent
+function onPart(server, channel, nickname)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel.
+.It nickname
+The person that left.
+.El
 .\" SUPPORTED SOCKET MESSAGES
 .Sh SUPPORTED SOCKET MESSAGES
 This section explain how to control

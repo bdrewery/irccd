@@ -307,7 +307,7 @@ void Irccd::readServers(const Parser &config)
 
 			// General parameters
 			if (s.getOption<string>("command-char", commandToken))
-				server->setCommandToken(commandToken);
+				server->setCommandChar(commandToken);
 
 			// Get connection parameters
 			s.getOption<string>("name", name, true);

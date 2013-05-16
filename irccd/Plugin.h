@@ -111,9 +111,6 @@ public:
 	/**
 	 * a Lua function triggered on a message event.
 	 *
-	 * The lua function should have this signature:
-	 *	function onMessage(server, channel, nick, message)
-	 *
 	 * @param server the server
 	 * @param channel on which channel
 	 * @param who who spoke
@@ -121,6 +118,15 @@ public:
 	 */
 	void onMessage(Server *server, const std::string &channel, const std::string &who,
 		       const std::string &message);
+
+	/**
+	 * A Lua function triggered on a nick event.
+	 *
+	 * @param server the server
+	 * @param oldnick the old nickname
+	 * @param newnick the new nickname
+	 */
+	void onNick(Server *server, const std::string &oldnick, const std::string &newnick);
 
 	/**
 	 * A lua function triggered on a special command, this is a channel
