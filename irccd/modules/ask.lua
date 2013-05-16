@@ -17,6 +17,7 @@
 --
 
 local parser = require("parser")
+local server = require("server")
 
 local answers = {
 	"definitely no.",

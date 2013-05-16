@@ -60,6 +60,39 @@ static const Library libIrccd[] = {
  * private methods and members
  * -------------------------------------------------------- */
 
+void Plugin::callLua(const string &name, int nret, const string &fmt, ...)
+{
+	va_list ap;
+	int count = 0;
+
+	va_start(ap, fmt);
+	lua_getglobal(m_state, name.c_str());
+	if (lua_type(m_state, -1) != LUA_TFUNCTION)
+		return;
+
+	for (size_t i = 0; i < fmt.length(); ++i) {
+		switch (fmt[i]) {
+		case 'S':
+			LuaServer::pushObject(m_state, va_arg(ap, Server *));
+			++ count;
+			break;
+		case 'i':
+			lua_pushinteger(m_state, va_arg(ap, int));
+			++ count;
+			break;
+		case 's':
+			lua_pushstring(m_state, va_arg(ap, const char *));
+			++ count;
+			break;
+		default:
+			break;
+		}
+	}
+
+	if (lua_pcall(m_state, count, nret, 0) != LUA_OK)
+		Logger::warn("error in plugin: %s", lua_tostring(m_state, -1));
+}
+
 bool Plugin::loadLua(const std::string &path)
 {
 	m_state = luaL_newstate();
@@ -139,43 +172,20 @@ bool Plugin::open(const std::string &path)
 
 void Plugin::onConnect(Server *server)
 {
-	// Open a function on connect success
-	lua_getglobal(m_state, "onConnect");
-	if (lua_type(m_state, -1) == LUA_TFUNCTION) {
-		LuaServer::pushObject(m_state, server);
+	callLua("onConnect", 0, "S", server);
+}
 
-		if (lua_pcall(m_state, 1, 0, 0) != LUA_OK) {
-			Logger::warn("error in plugin: %s", lua_tostring(m_state, -1));
-		}
-	}
+void Plugin::onJoin(Server *server, const string &channel, const string &nickname)
+{
+	callLua("onJoin", 0, "S s s", server, channel.c_str(), nickname.c_str());
 }
 
 void Plugin::onMessage(Server *server, const string &channel, const string &who, const string &message)
 {
-	lua_getglobal(m_state, "onMessage");
-	if (lua_type(m_state, -1) == LUA_TFUNCTION) {
-		LuaServer::pushObject(m_state, server);
-		lua_pushstring(m_state, channel.c_str());
-		lua_pushstring(m_state, who.c_str());
-		lua_pushstring(m_state, message.c_str());
-
-		if (lua_pcall(m_state, 4, 0, 0) != LUA_OK) {
-			Logger::warn("error in plugin: %s", lua_tostring(m_state, -1));
-		}
-	}
+	callLua("onMessage", 0, "S s s s", server, channel.c_str(), who.c_str(), message.c_str());
 }
 
 void Plugin::onCommand(Server *server, const string &channel, const string &who, const string &message)
 {
-	lua_getglobal(m_state, "onCommand");
-	if (lua_type(m_state, -1) == LUA_TFUNCTION) {
-		LuaServer::pushObject(m_state, server);
-		lua_pushstring(m_state, channel.c_str());
-		lua_pushstring(m_state, who.c_str());
-		lua_pushstring(m_state, message.c_str());
-
-		if (lua_pcall(m_state, 4, 0, 0) != LUA_OK) {
-			Logger::warn("error in plugin: %s", lua_tostring(m_state, -1));
-		}
-	}
+	callLua("onCommand", 0, "S s s s", server, channel.c_str(), who.c_str(), message.c_str());
 }

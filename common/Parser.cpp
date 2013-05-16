@@ -150,7 +150,13 @@ void Parser::readLine(int lineno, const string &line)
  * public members
  * -------------------------------------------------------- */
 
-bool Section::hasOption(const std::string &name) const {
+const vector<Option> & Section::getOptions(void) const
+{
+	return m_options;
+}
+
+bool Section::hasOption(const std::string &name) const
+{
 	for (const Option &o : m_options)
 		if (o.m_key == name)
 			return true;
@@ -158,7 +164,8 @@ bool Section::hasOption(const std::string &name) const {
 	return false;
 }
 
-const Option & Section::findOption(const std::string &name) const {
+const Option & Section::findOption(const std::string &name) const
+{
 	for (const Option &o : m_options)
 		if (o.m_key == name)
 			return o;

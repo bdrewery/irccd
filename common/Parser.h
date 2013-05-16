@@ -67,6 +67,13 @@ struct Section {
 	bool m_allowed;			/*! is authorized to push */
 
 	/**
+	 * Get all options from that section.
+	 *
+	 * @return the list of options
+	 */
+	const std::vector<Option> & getOptions(void) const;
+
+	/**
 	 * Tells if that section has the specified option name.
 	 *
 	 * @param name the option name

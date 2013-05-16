@@ -121,6 +121,13 @@ public:
 			   unsigned port, bool ssl = false, const std::string &password = "");
 
 	/**
+	 * Get the identity used for that server
+	 *
+	 * @return the identity
+	 */
+	const Identity & getIdentity(void) const;
+
+	/**
 	 * Set the user identity.
 	 *
 	 * @param identity the identity to use

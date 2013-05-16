@@ -39,12 +39,12 @@ Highly extensible with Lua plugins,
 .El
 .Pp
 The application run as daemon and wait for events in both IRC servers
-or with the irccdctl(8) utility.
+or from the irccdctl(8) utility.
 .Pp
 For instance, when IRC events happen, it calls Lua functions from plugins to
 execute specific actions. Example: someone join the channel, the
 .Nm irccd
-daemon will notify all plugins that a specific used joined.
+daemon will notify all plugins that a specific user joined.
 .Pp
 But it is also possible to use irccdctl(8) to control
 .Nm irccd .
@@ -58,18 +58,46 @@ A path to a config file.
 .It Fl v
 Be more verbose
 .El
-.\" SUPPORTED IRC EVENTS
-.Sh SUPPORTED IRC EVENTS
-Currently,
-.Nm irccd
-supports all of these events listed:
-.\" List and descriptions
+.\" LUA INTERFACE
+.Sh LUA INTERFACE
+This expose the Lua function that are called with their parameters. That
+section is only for short information.
+.Pp
+For more
+information about all irccd Lua API, see
+.Em @DOCDIR@/irccd/lua/index.html .
+.\" Connect
 .Ss Connect
 This event is triggered usually at startup, when
 .Nm irccd
 successfully connected to a server.
+.Bd -literal -offset indent
+function onConnect(server)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.El
+.\" Join
 .Ss Join
 This event is triggered when someone has joined a specific channel.
+.Bd -literal -offset indent
+function onJoin(server, channel, nickname)
+.Ed
+.Pp
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel the user has joined.
+.It nickname
+The user nickname.
+.El
+.\" Message
 .Ss Message
 This event is triggered when someone said something on a specific channel.
 .Ss Part

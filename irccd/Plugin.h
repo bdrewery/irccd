@@ -43,6 +43,19 @@ private:
 
 	lua_State *m_state;		//! Lua state
 
+	/**
+	 * Call a Lua function and pass parameters to it. Format is one of them:
+	 *
+	 * 'S' => Server *
+	 * 's' => const char *
+	 * 'i' => int
+	 *
+	 * @param name the function name
+	 * @param nret the number of param the function should returns
+	 * @param fmt the format, see description
+	 */
+	void callLua(const std::string &name, int nret, const std::string &fmt, ...);
+
 	bool loadLua(const std::string &path);
 public:
 	Plugin(void);
@@ -73,6 +86,7 @@ public:
 	 */
 	bool open(const std::string &path);
 
+
 	/* ------------------------------------------------
 	 * IRC commands
 	 * ------------------------------------------------ */
@@ -84,6 +98,15 @@ public:
 	 * @param server the current server
 	 */
 	void onConnect(Server *server);
+
+	/**
+	 * A Lua function triggered on a join event.
+	 *
+	 * @param server the server
+	 * @param channel on which channel
+	 * @param nickname the nickname
+	 */
+	void onJoin(Server *server, const std::string &channel, const std::string &nickname);
 
 	/**
 	 * a Lua function triggered on a message event.

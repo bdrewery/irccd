@@ -503,8 +503,8 @@ int Irccd::run(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
-	openConfig();
 	openModules();
+	openConfig();
 
 	// Start all servers
 	for (auto s : m_servers) {

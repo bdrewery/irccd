@@ -29,22 +29,28 @@ using namespace std;
 
 /* {{{ IRC handlers */
 
+static string getNick(const char *target)
+{
+	char nickname[64 + 1];
+
+	memset(nickname, 0, sizeof (nickname));
+	irc_target_get_nick(target, nickname, sizeof (nickname) - 1);
+
+	return string(nickname);
+}
+
 static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
 			  const char **params, unsigned int count)
 {
 	Server *server = (Server *)irc_get_ctx(s);
 	string who, channel, message = "";
 	const string &cmdToken = server->getCommandToken();
-	char nickname[64 + 1];
 
 	channel = params[0];
 	if (params[1] != nullptr)
 		message = params[1];
 
-	// I'm not sure that a lot of people want's the full nick...
-	memset(nickname, 0, sizeof (nickname));
-	irc_target_get_nick(orig, nickname, sizeof (nickname) - 1);
-	who = nickname;
+	who = getNick(orig);
 
 	for (Plugin *p : Irccd::getInstance()->getPlugins()) {
 		/*
@@ -97,7 +103,33 @@ static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
 	(void)count;
 }
 
+static void handleJoin(irc_session_t *s, const char *ev, const char *orig,
+			  const char **params, unsigned int count)
+{
+	Server *server = (Server *)irc_get_ctx(s);
+	string nickname = getNick(orig);
+
+	// do not log self, XXX: add an option to allow that
+	if (server->getIdentity().m_nickname != nickname) {
+		for (Plugin *p : Irccd::getInstance()->getPlugins())
+			p->onJoin(server, params[0], nickname);
+	}
+
+	(void)ev;
+	(void)count;
+}
+
 static void handleNick(irc_session_t *s, const char *ev, const char *orig,
+			  const char **params, unsigned int count)
+{
+	(void)s;
+	(void)ev;
+	(void)orig;
+	(void)params;
+	(void)count;
+}
+
+static void handleNumeric(irc_session_t *s, unsigned int ev, const char *orig,
 			  const char **params, unsigned int count)
 {
 	(void)s;
@@ -117,27 +149,7 @@ static void handleQuit(irc_session_t *s, const char *ev, const char *orig,
 	(void)count;
 }
 
-static void handleJoin(irc_session_t *s, const char *ev, const char *orig,
-			  const char **params, unsigned int count)
-{
-	(void)s;
-	(void)ev;
-	(void)orig;
-	(void)params;
-	(void)count;
-}
-
 static void handlePart(irc_session_t *s, const char *ev, const char *orig,
-			  const char **params, unsigned int count)
-{
-	(void)s;
-	(void)ev;
-	(void)orig;
-	(void)params;
-	(void)count;
-}
-
-static void handleNumeric(irc_session_t *s, unsigned int ev, const char *orig,
 			  const char **params, unsigned int count)
 {
 	(void)s;
@@ -179,6 +191,11 @@ void Server::setConnection(const std::string &name, const std::string &host,
 
 	if (ssl)
 		m_host.insert(0, 1, '#');
+}
+
+const Identity & Server::getIdentity(void) const
+{
+	return m_identity;
 }
 
 void Server::setIdentity(const Identity &identity)

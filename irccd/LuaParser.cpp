@@ -44,16 +44,18 @@ static int open(lua_State *L)
 
 	p = new Parser(path);
 	if (!p->open()) {
+		lua_pushnil(L);
 		lua_pushstring(L, p->getError().c_str());
+
 		delete p;
-		return 1;
+		return 2;
 	}
 
 	ptr = (Parser **)lua_newuserdata(L, sizeof (Parser *));
 	luaL_setmetatable(L, PARSER_TYPE);
 	*ptr = p;
 
-	return 0;
+	return 1;
 }
 
 } // !functions
@@ -65,10 +67,37 @@ const luaL_Reg functionList[] = {
 
 namespace methods {
 
+static void pushSection(const Section &s, lua_State *L, int idx)
+{
+	const vector<Option> & options = s.getOptions();
+
+	lua_pushnumber(L, idx);
+	lua_createtable(L, options.size(), options.size());
+
+	for (const Option &o : options) {
+		lua_pushstring(L, o.m_value.c_str());
+		lua_setfield(L, -2, o.m_key.c_str());
+	}
+
+	// Add that section to the list
+	lua_settable(L, -3);
+}
+
 static int findSections(lua_State *L)
 {
+	Parser *p = *(Parser **)luaL_checkudata(L, 1, PARSER_TYPE);
+	string name = luaL_checkstring(L, 2);
+	const vector<Section> & list = p->findSections(name);
 
-	return 0;
+	// Add a table, even if there is no section, we return
+	// an empty table then.
+	lua_createtable(L, list.size(), list.size());
+
+	int i = 1;
+	for (const Section &s : list)
+		pushSection(s, L, i++);
+	
+	return 1;
 }
 
 } // !methods

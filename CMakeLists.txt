@@ -19,25 +19,27 @@
 # General
 cmake_minimum_required(VERSION 2.8)
 
+# Project
+project(irccd)
+
 # General settings
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11 -stdlib=libc++")	# c++11
-set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS})
-set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS})
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")		# own modules
 
 # Installation paths
-set(MODDIR "share/irccd/modules"
+set(PREFIX "${CMAKE_INSTALL_PREFIX}")
+set(MODDIR "${PREFIX}/share/irccd/modules"
     CACHE STRING "Module prefix where to install")
-set(MANDIR "share/man"
-    CACHE STRING "Man prefix")
+set(DOCDIR "${PREFIX}/share/doc"
+    CACHE STRING "Documentation directory")
+set(MANDIR "${PREFIX}/share/man"
+    CACHE STRING "Man directory")
 
 configure_file(
 	"${CMAKE_SOURCE_DIR}/cmake/config.h.in"
 	"${CMAKE_BINARY_DIR}/config.h"
 )
 
-# Project
-project(irccd)
 
 # Include path to common
 include_directories(
@@ -46,9 +48,10 @@ include_directories(
 )
 
 message("Configuration:")
-message("\tPREFIX\t${CMAKE_INSTALL_PREFIX}")
-message("\tMANDIR\t${CMAKE_INSTALL_PREFIX}/${MANDIR}")
-message("\tMODDIR\t${CMAKE_INSTALL_PREFIX}/${MODDIR}")
+message("\tPREFIX\t${PREFIX}")
+message("\tMANDIR\t${MANDIR}")
+message("\tDOCDIR\t${DOCDIR}")
+message("\tMODDIR\t${MODDIR}")
 
 # For documentation and man pages
 add_subdirectory(doc)
