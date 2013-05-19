@@ -21,7 +21,22 @@
 
 #include <lua.hpp>
 
+#include <Parser.h>
+
 namespace irccd {
+
+class LuaParser {
+public:
+	static int readTuning(lua_State *L, int idx);
+
+	/**
+	 * Add a section as a userdata at the top of the stack.
+	 *
+	 * @param L the Lua state
+	 * @param s the section to push
+	 */
+	static void pushSection(lua_State *L, const parser::Section &s);
+};
 
 int luaopen_parser(lua_State *L);
 

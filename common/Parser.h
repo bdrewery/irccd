@@ -20,6 +20,7 @@
 #define _PARSER_H_
 
 #include <exception>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -66,6 +67,21 @@ struct Section {
 	std::vector<Option> m_options;	/*! list of options inside */
 	bool m_allowed;			/*! is authorized to push */
 
+	Section(void);
+	~Section(void);
+
+	/**
+	 * Copy constructor
+	 */
+	Section(const Section &s);
+
+	/**
+	 * Get the section name
+	 *
+	 * @return the section name
+	 */
+	const std::string & getName(void) const;
+
 	/**
 	 * Get all options from that section.
 	 *
@@ -95,6 +111,16 @@ struct Section {
 	 */
 	template <typename T>
 	bool getOption(const std::string &, T &, bool required = false) const;
+
+	friend std::ostream & operator<<(std::ostream & stream, const Section &section)
+	{
+		stream << "[" << section.getName() << "]" << std::endl;
+
+		for (auto p : section.getOptions())
+			stream << p.m_key << "=" << p.m_value << std::endl;
+
+		return stream;
+	}
 };
 
 class Parser {
@@ -107,7 +133,6 @@ public:
 		DisableRedefinition	= 2,	/*! disable multiple redefinition */
 		DisableVerbosity	= 4	/*! be verbose by method */
 	};
-
 
 private:
 	std::vector<Section> m_sections;	/*! list of sections found */
@@ -125,6 +150,8 @@ private:
 	void readLine(int lineno, const std::string &line);
 
 public:
+	static const char DEFAULT_COMMENT_CHAR;
+
 	/**
 	 * Create a parser at the specified file path. Optional
 	 * options may be added.
@@ -134,7 +161,7 @@ public:
 	 * @param commentToken an optional comment delimiter
 	 * @see Tuning
 	 */
-	Parser(const std::string &path, int tuning = 0, char commentToken = '#');
+	Parser(const std::string &path, int tuning = 0, char commentToken = Parser::DEFAULT_COMMENT_CHAR);
 
 	/**
 	 * Default destructor.
@@ -170,6 +197,13 @@ public:
 	 * @return a section
 	 */
 	const Section & getSection(const std::string &name) const;
+
+	/**
+	 * Get all sections found
+	 *
+	 * @return all sections
+	 */
+	const std::vector<Section> & getSections(void) const;
 
 	/**
 	 * Get a list of sections for config which multiple
@@ -235,6 +269,14 @@ public:
 	 * @see dump
 	 */
 	virtual void dumpOption(const Option &option);
+
+	friend std::ostream & operator<<(std::ostream & stream, const Parser &parser)
+	{
+		for (auto s : parser.m_sections)
+			stream << s;;
+
+		return stream;
+	}
 };
 
 } // !parser

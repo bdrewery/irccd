@@ -71,6 +71,13 @@ void Parser::readSection(int lineno, const string &line)
 			} else {
 				addSection(name);
 			}
+		} else if (!(m_tuning & DisableVerbosity)) {
+			/*
+			 * Do not add options at this step because it will
+			 * corrupt the previous one.
+			 */
+			m_sections.back().m_allowed = false;
+			log(lineno, "", "empty section name");
 		}
 	}
 }
@@ -82,11 +89,21 @@ void Parser::readOption(int lineno, const string &line)
 	Section &current = m_sections.back();
 
 	// Error on last section?
-	if (!current.m_allowed)
+	if (!current.m_allowed) {
+		/*
+		 * If it is the root section, this has been probably set by
+		 * DisableRootSection flag, otherwise an error has occured
+		 * so no need to log.
+		 */
+		if (current.m_name == "" && !(m_tuning == DisableVerbosity))
+			log(lineno, "", "option not allowed in that scope");
+
 		return;
+	}
 
 	if ((epos = line.find_first_of('=')) == string::npos) {
-		log(lineno, current.m_name, "missing `=' keyword");
+		if (!(m_tuning & DisableVerbosity))
+			log(lineno, current.m_name, "missing `=' keyword");
 		return;
 	}
 
@@ -113,7 +130,8 @@ void Parser::readOption(int lineno, const string &line)
 			for (last = begin = 1; value[last] != c && last < value.length(); ++last)
 				continue;
 			if (value[last] != c && !(m_tuning & DisableVerbosity))
-				log(lineno, current.m_name, "undisclosed string");
+				if (!(m_tuning & DisableVerbosity))
+					log(lineno, current.m_name, "undisclosed string");
 		} else {
 			for (last = begin; !isspace(value[last]) && last < value.length(); ++last)
 				continue;
@@ -149,6 +167,27 @@ void Parser::readLine(int lineno, const string &line)
 /* --------------------------------------------------------
  * public members
  * -------------------------------------------------------- */
+
+Section::Section(void)
+	:m_allowed(true)
+{
+}
+
+Section::~Section(void)
+{
+}
+
+Section::Section(const Section &s)
+{
+	m_name = s.m_name;
+	m_options = s.m_options;
+	m_allowed = s.m_allowed;
+}
+
+const string & Section::getName(void) const
+{
+	return m_name;
+}
 
 const vector<Option> & Section::getOptions(void) const
 {
@@ -219,6 +258,8 @@ template <> bool Section::getOption(const std::string &name, std::string &result
 	return success;
 }
 
+const char Parser::DEFAULT_COMMENT_CHAR = '#';
+
 Parser::Parser(const string &path, int tuning, char commentToken)
 	:m_path(path), m_tuning(tuning), m_commentChar(commentToken)
 {
@@ -278,6 +319,11 @@ const Section & Parser::getSection(const string &name) const
 			return s;
 
 	throw NotFoundException(name);
+}
+
+const vector<Section> & Parser::getSections(void) const
+{
+	return m_sections;
 }
 
 vector<Section> Parser::findSections(const std::string &name) const
