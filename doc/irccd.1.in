@@ -66,6 +66,25 @@ section is only for short information.
 For more
 information about all irccd Lua API, see
 .Em @DOCDIR@/lua/index.html .
+.\" Action
+.Ss Action
+This event is triggered when someone said a message as a CTCP ACTION, most
+known as /me.
+.Bd -literal -offset indent
+function onMe(server, channel, nickname, message)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel.
+.It nickname
+The person that said something.
+.It message
+The message sent.
+.El
 .\" Command
 .Ss Command
 This event is not a real IRC event. It is triggered when a special
@@ -173,7 +192,7 @@ The new nickname.
 .Ss Part
 This event is triggered when someone has left a specific channel.
 .Bd -literal -offset indent
-function onPart(server, channel, nickname)
+function onPart(server, channel, nickname, reason)
 .Ed
 .Pp
 Parameters:
@@ -184,6 +203,8 @@ The current server.
 The channel.
 .It nickname
 The person that left.
+.It reason
+An optional reason.
 .El
 .\" SUPPORTED SOCKET MESSAGES
 .Sh SUPPORTED SOCKET MESSAGES
@@ -220,7 +241,7 @@ An optional password
 Kick someone from a channel. You obviously need to have +o mode on that
 channel.
 .Bd -literal -offset indent
-KICK server nick channel [reason]
+KICK server nick channel [reason]\\n
 .Ed
 .Pp
 Parameters:

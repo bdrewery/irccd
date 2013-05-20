@@ -18,12 +18,33 @@
 
 #include <sstream>
 
+#include <sys/stat.h>
+#include <libgen.h>
+
 #include <basedir.h>
 
 #include "Util.h"
 
 using namespace irccd;
 using namespace std;
+
+Util::ErrorException::ErrorException(void)
+{
+}
+
+Util::ErrorException::ErrorException(const std::string &error)
+	:m_error(error)
+{
+}
+
+Util::ErrorException::~ErrorException(void) throw()
+{
+}
+
+const char * Util::ErrorException::what(void) const throw()
+{
+	return m_error.c_str();
+}
 
 vector<string> Util::split(const string &list, const string &delimiter, int max)
 {
@@ -84,4 +105,52 @@ string Util::configFilePath(const std::string filename)
 	oss << filename;
 
 	return oss.str();
+}
+
+string Util::getHome(void)
+{
+	return string(getenv("HOME"));
+}
+
+string Util::dirname(const string &file)
+{
+#if defined(_WIN32) || defined(_MSC_VER)
+	// XXX TODO
+#else
+	return string(::dirname(file.c_str()));
+#endif
+}
+
+bool Util::exist(const string &path)
+{
+	struct stat st;
+
+	return (stat(path.c_str(), &st) != -1);
+}
+
+void Util::mkdir(const std::string &dir, int mode)
+{
+	ostringstream oss;
+
+	oss << "mkdir: ";
+
+	for (size_t i = 0; i < dir.length(); ++i) {
+		if (dir[i] != '/')
+			continue;
+
+		string part = dir.substr(0, i);
+		if (part.length() <= 0 || exist(part))
+			continue;
+
+		if (::mkdir(part.c_str(), mode) == -1) {
+			oss << part << ": " << strerror(errno);
+			throw Util::ErrorException(oss.str());
+		}
+	}
+
+	// Last part
+	if (::mkdir(dir.c_str(), mode) == -1) {
+		oss << dir << ": " << strerror(errno);
+		throw Util::ErrorException(oss.str());
+	}
 }

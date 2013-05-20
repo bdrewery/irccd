@@ -1,5 +1,5 @@
 /*
- * main.cpp -- irccd main file
+ * Date.h -- date and time manipulation
  *
  * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
  *
@@ -16,48 +16,33 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cstdlib>
+#ifndef _DATE_H_
+#define _DATE_H_
 
-#include <unistd.h>
+#include <cstdint>
+#include <ctime>
+#include <string>
 
-#include "Logger.h"
-#include "Irccd.h"
+namespace irccd {
 
-using namespace irccd;
-using namespace std;
+struct Date {
+	struct tm m_tm;		//! time calendar
+	time_t m_timestamp;	//! time epoch
 
-void quit(void)
-{
-	for (Server *s : Irccd::getInstance()->getServers())
-		delete s;
-	for (Plugin *p : Irccd::getInstance()->getPlugins())
-		delete p;
-}
+	Date(void);
+	Date(time_t timestamp);
+	~Date(void);
 
-#include <Util.h>
+	/**
+	 * Format the current that in the specified format,
+	 * see strftime(3) for patterns.
+	 *
+	 * @param format the format
+	 * @return the date formated
+	 */
+	std::string format(const std::string &format);
+};
 
-int main(int argc, char **argv)
-{
-	Irccd *irccd = Irccd::getInstance();
-	int ch;
+} // !irccd
 
-	while ((ch = getopt(argc, argv, "c:m:v")) != -1) {
-		switch (ch) {
-		case 'c':
-			irccd->setConfigPath(string(optarg));
-			break;
-		case 'm':
-			irccd->setModulePath(string(optarg));
-			break;
-		case 'v':
-			irccd->setVerbosity(true);
-			break;
-		}
-	}
-	argc -= optind;
-	argv += optind;
-
-	atexit(quit);
-
-	return irccd->run(argc, argv);
-}
+#endif // !_DATE_H_

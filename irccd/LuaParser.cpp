@@ -278,20 +278,17 @@ const luaL_Reg parserList[] = {
 
 namespace section {
 
-static int getOptions(lua_State *L)
+static int hasOption(lua_State *L)
 {
 	Section *s = *(Section **)luaL_checkudata(L, 1, SECTION_TYPE);
+	string name = luaL_checkstring(L, 2);
 
-	lua_createtable(L, s->getOptions().size(), s->getOptions().size());
-	for (const Option &o : s->getOptions()) {
-		lua_pushstring(L, o.m_key.c_str());
-		lua_setfield(L, -2, o.m_value.c_str());
-	}
+	lua_pushboolean(L, s->hasOption(name));
 
 	return 1;
 }
 
-static int findOption(lua_State *L)
+static int getOption(lua_State *L)
 {
 	Section *s = *(Section **)luaL_checkudata(L, 1, SECTION_TYPE);
 	string name = luaL_checkstring(L, 2);
@@ -304,6 +301,34 @@ static int findOption(lua_State *L)
 	}
 
 	lua_pushstring(L, value.c_str());
+
+	return 1;
+}
+
+static int requireOption(lua_State *L)
+{
+	Section *s = *(Section **)luaL_checkudata(L, 1, SECTION_TYPE);
+	string name = luaL_checkstring(L, 2);
+	string value;
+
+	if (!s->getOption<string>(name, value)) {
+		return luaL_error(L, "required option %s not found", name.c_str());
+	}
+
+	lua_pushstring(L, value.c_str());
+
+	return 1;
+}
+
+static int getOptions(lua_State *L)
+{
+	Section *s = *(Section **)luaL_checkudata(L, 1, SECTION_TYPE);
+
+	lua_createtable(L, s->getOptions().size(), s->getOptions().size());
+	for (const Option &o : s->getOptions()) {
+		lua_pushstring(L, o.m_key.c_str());
+		lua_setfield(L, -2, o.m_value.c_str());
+	}
 
 	return 1;
 }
@@ -332,8 +357,10 @@ static int tostring(lua_State *L)
 } // }}} !section
 
 const luaL_Reg sectionList[] = {
+	{ "hasOption",		section::hasOption	},
+	{ "getOption",		section::getOption	},
+	{ "requireOption",	section::requireOption	},
 	{ "getOptions",		section::getOptions	},
-	{ "findOption",		section::findOption	},
 	{ "__gc",		section::gc		},
 	{ "__tostring",		section::tostring	},
 	{ nullptr,		nullptr			}

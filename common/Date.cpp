@@ -1,5 +1,5 @@
 /*
- * main.cpp -- irccd main file
+ * Date.cpp -- date and time manipulation
  *
  * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
  *
@@ -16,48 +16,33 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cstdlib>
-
-#include <unistd.h>
-
-#include "Logger.h"
-#include "Irccd.h"
+#include "Date.h"
 
 using namespace irccd;
 using namespace std;
 
-void quit(void)
+
+Date::Date(void)
 {
-	for (Server *s : Irccd::getInstance()->getServers())
-		delete s;
-	for (Plugin *p : Irccd::getInstance()->getPlugins())
-		delete p;
+	m_timestamp = time(NULL);
+	m_tm = *localtime(&m_timestamp);
 }
 
-#include <Util.h>
-
-int main(int argc, char **argv)
+Date::Date(time_t timestamp)
 {
-	Irccd *irccd = Irccd::getInstance();
-	int ch;
+	m_timestamp = time(&timestamp);
+	m_tm = *localtime(&m_timestamp);
+}
 
-	while ((ch = getopt(argc, argv, "c:m:v")) != -1) {
-		switch (ch) {
-		case 'c':
-			irccd->setConfigPath(string(optarg));
-			break;
-		case 'm':
-			irccd->setModulePath(string(optarg));
-			break;
-		case 'v':
-			irccd->setVerbosity(true);
-			break;
-		}
-	}
-	argc -= optind;
-	argv += optind;
+Date::~Date(void)
+{
+}
 
-	atexit(quit);
+string Date::format(const string &format)
+{
+	char buffer[512];
 
-	return irccd->run(argc, argv);
+	strftime(buffer, sizeof (buffer), format.c_str(), &m_tm);
+
+	return string(buffer);
 }

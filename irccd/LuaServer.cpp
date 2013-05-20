@@ -28,6 +28,15 @@ using namespace std;
 
 namespace methods {
 
+static int getName(lua_State *L)
+{
+	Server *s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+
+	lua_pushstring(L, s->getName().c_str());
+
+	return 1;
+}
+
 static int join(lua_State *L)
 {
 	if (lua_gettop(L) < 2) {
@@ -127,6 +136,7 @@ static int say(lua_State *L)
 } // !methods
 
 static const luaL_Reg methodList[] = {
+	{ "getName",	methods::getName		},
 	{ "join",	methods::join			},
 	{ "kick",	methods::kick			},
 	{ "me",		methods::me			},

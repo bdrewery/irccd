@@ -19,6 +19,7 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
+#include <exception>
 #include <string>
 #include <vector>
 
@@ -26,6 +27,17 @@ namespace irccd {
 
 class Util {
 public:
+	class ErrorException : public std::exception {
+		std::string m_error;
+
+	public:
+		ErrorException(void);
+		ErrorException(const std::string &error);
+		~ErrorException(void) throw();
+
+		virtual const char * what(void) const throw();
+	};
+
 	/**
 	 * Split a string by delimiters.
 	 *
@@ -52,6 +64,38 @@ public:
 	 * @return the final string ready for use
 	 */
 	static std::string configFilePath(const std::string filename);
+
+	/**
+	 * Get home directory usually /home/foo
+	 *
+	 * @return the home directory
+	 */
+	static std::string getHome(void);
+
+	/**
+	 * Wrapper around dirname(3) for portability. Returns the parent
+	 * directory of the file
+	 *
+	 * @param file the filename to check
+	 * @return the parent directory
+	 */
+	static std::string dirname(const std::string &file);
+
+	/**
+	 * Tell if a specified file or directory exists
+	 *
+	 * @param path the file / directory to check
+	 * @return true on success
+	 */
+	static bool exist(const std::string &path);
+
+	/**
+	 * Create a directory.
+	 *
+	 * @param dir the directory path
+	 * @param mode the mode
+	 */
+	static void mkdir(const std::string &dir, int mode);
 };
 
 } // !irccd

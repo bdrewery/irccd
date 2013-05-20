@@ -28,6 +28,7 @@
 #include "LuaParser.h"
 #include "LuaPlugin.h"
 #include "LuaServer.h"
+#include "LuaUtil.h"
 
 using namespace irccd;
 using namespace std;
@@ -54,6 +55,7 @@ static const Library libLua[] = {
 static const Library libIrccd[] = {
 	{ "parser",	luaopen_parser	},
 	{ "plugin",	luaopen_plugin	},
+	{ "util",	luaopen_util	}
 };
 
 /* --------------------------------------------------------
@@ -114,7 +116,9 @@ bool Plugin::loadLua(const std::string &path)
 	lua_pop(m_state, 2);
 
 	if (luaL_dofile(m_state, path.c_str())) {
-		m_error = lua_tostring(m_state, -1);
+		if (lua_type(m_state, -1) == LUA_TSTRING)
+			m_error = lua_tostring(m_state, -1);
+		lua_pop(m_state, 1);
 		return false;
 	}
 

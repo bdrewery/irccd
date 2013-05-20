@@ -19,6 +19,7 @@
 project(common)
 
 set(SOURCES
+	Date.cpp
 	Directory.cpp
 	Logger.cpp
 	Socket.cpp

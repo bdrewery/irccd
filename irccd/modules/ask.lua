@@ -17,7 +17,6 @@
 --
 
 local parser = require("parser")
-local server = require("server")
 
 local answers = {
 	"definitely no.",
@@ -25,8 +24,6 @@ local answers = {
 	"for sure!",
 	"are you still believing about X-Mas dad?"
 }
-
-local p = parser.open("test.conf")
 
 function onCommand(server, channel, nick, message)
 	local pick = math.random(1, #answers)
