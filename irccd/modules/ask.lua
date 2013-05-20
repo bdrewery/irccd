@@ -16,14 +16,30 @@
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --
 
-local parser = require("parser")
+-- Modules
+local plugin = require("plugin")
 
-local answers = {
-	"definitely no.",
-	"you'll probably.",
-	"for sure!",
-	"are you still believing about X-Mas dad?"
+local default = {
+	"Yes",
+	"No"
 }
+
+local answers = { }
+
+-- Load every words
+local function loadWords()
+	local file, err = io.open(plugin.getHome() .. "/answers.txt")
+
+	if file == nil then
+		answers = default
+	else
+		for l in file:lines() do
+			table.insert(answers, l)
+		end
+	end
+end
+
+loadWords()
 
 function onCommand(server, channel, nick, message)
 	local pick = math.random(1, #answers)

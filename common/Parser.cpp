@@ -26,7 +26,119 @@ using namespace parser;
 using namespace std;
 
 /* --------------------------------------------------------
- * private members
+ * Section public members
+ * -------------------------------------------------------- */
+
+Section::Section(void)
+	:m_allowed(true)
+{
+}
+
+Section::~Section(void)
+{
+}
+
+Section::Section(const Section &s)
+{
+	m_name = s.m_name;
+	m_options = s.m_options;
+	m_allowed = s.m_allowed;
+}
+
+const string & Section::getName(void) const
+{
+	return m_name;
+}
+
+const vector<Option> & Section::getOptions(void) const
+{
+	return m_options;
+}
+
+bool Section::hasOption(const std::string &name) const
+{
+	for (const Option &o : m_options)
+		if (o.m_key == name)
+			return true;
+
+	return false;
+}
+
+const Option & Section::findOption(const std::string &name) const
+{
+	for (const Option &o : m_options)
+		if (o.m_key == name)
+			return o;
+
+	throw NotFoundException(name);
+}
+
+template <> bool Section::getOption(const string &name) const
+{
+	bool result = false;
+
+	if (hasOption(name)) {
+		string value = findOption(name).m_value;
+
+		if (value == "yes" || value == "true"|| value == "1")
+			result = true;
+		else if (value == "no" || value == "false" || value == "0")
+			result = false;
+	}
+
+	return result;
+}
+
+template <> int Section::getOption(const string &name) const
+{
+	int result = -1;
+
+	if (hasOption(name)) {
+		try {
+			result = stoi(findOption(name).m_value);
+		} catch (std::exception ex) {
+		}
+	}
+
+	return result;
+}
+
+template <> string Section::getOption(const string &name) const
+{
+	string result;
+
+	if (hasOption(name))
+		result = findOption(name).m_value;
+
+	return result;
+}
+
+template <> bool Section::requireOption(const string &name) const
+{
+	if (!hasOption(name))
+		throw NotFoundException(name);
+
+	return getOption<bool>(name);
+}
+
+template <> int Section::requireOption(const string &name) const
+{
+	if (!hasOption(name))
+		throw NotFoundException(name);
+
+	return getOption<int>(name);
+}
+
+template <> string Section::requireOption(const string &name) const
+{
+	if (!hasOption(name))
+		throw NotFoundException(name);
+
+	return getOption<string>(name);
+}
+
+/* --------------------------------------------------------
+ * Parser private members
  * -------------------------------------------------------- */
 
 void Parser::addSection(const string &name)
@@ -165,98 +277,8 @@ void Parser::readLine(int lineno, const string &line)
 }
 
 /* --------------------------------------------------------
- * public members
+ * Parser public methods
  * -------------------------------------------------------- */
-
-Section::Section(void)
-	:m_allowed(true)
-{
-}
-
-Section::~Section(void)
-{
-}
-
-Section::Section(const Section &s)
-{
-	m_name = s.m_name;
-	m_options = s.m_options;
-	m_allowed = s.m_allowed;
-}
-
-const string & Section::getName(void) const
-{
-	return m_name;
-}
-
-const vector<Option> & Section::getOptions(void) const
-{
-	return m_options;
-}
-
-bool Section::hasOption(const std::string &name) const
-{
-	for (const Option &o : m_options)
-		if (o.m_key == name)
-			return true;
-
-	return false;
-}
-
-const Option & Section::findOption(const std::string &name) const
-{
-	for (const Option &o : m_options)
-		if (o.m_key == name)
-			return o;
-
-	throw NotFoundException(name);
-}
-
-template <> bool Section::getOption(const std::string &name, int &result, bool req) const
-{
-	bool success = true;
-
-	if (hasOption(name)) {
-		try {
-			result = std::stoi(findOption(name).m_value);
-		} catch (std::exception ex) {
-			success = false;
-		}
-	} else if (req)
-		throw NotFoundException(name);
-
-	return success;
-}
-
-template <> bool Section::getOption(const std::string &name, bool &result, bool req) const
-{
-	bool success = true;
-
-	if (hasOption(name)) {
-		std::string value = findOption(name).m_value;
-
-		if (value == "yes" || value == "true"|| value == "1")
-			result = true;
-		else if (value == "no" || value == "false" || value == "0")
-			result = false;
-	} else if (req)
-		throw NotFoundException(name);
-
-	return success;
-}
-
-template <> bool Section::getOption(const std::string &name, std::string &result, bool req) const
-{
-	bool success = false;
-
-	if (hasOption(name)) {
-		result = findOption(name).m_value;
-		success = true;
-	} else if (req)
-		throw NotFoundException(name);
-
-	return success;
-}
 
 const char Parser::DEFAULT_COMMENT_CHAR = '#';
 

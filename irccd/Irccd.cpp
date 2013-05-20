@@ -202,9 +202,9 @@ void Irccd::extractInternet(const Section &s)
 	string address, family;
 	int port, finalFamily = SocketServerInet::Inet4;
 
-	s.getOption<string>("address", address, true);
-	s.getOption<string>("family", family, true);
-	s.getOption<int>("port", port, true);
+	address = s.getOption<string>("address");
+	family = s.getOption<string>("family");
+	port = s.getOption<int>("port");
 
 	// extract list of family
 	protocols = Util::split(family, " \t");
@@ -235,8 +235,7 @@ void Irccd::extractUnix(const Section &s)
 	string path;
 	SocketServerUnix *unix;
 
-	s.getOption<string>("path", path, true);
-
+	path = s.requireOption<string>("path");
 	unix = new SocketServerUnix(path);
 
 	if (unix->create() && unix->bind() && unix->listen(16)) {
@@ -255,7 +254,7 @@ void Irccd::readListeners(const Parser &config)
 		try {
 			string type;
 
-			s.getOption<string>("type", type);
+			type = s.requireOption<string>("type");
 
 			if (type == "internet")
 				extractInternet(s);
@@ -264,7 +263,7 @@ void Irccd::readListeners(const Parser &config)
 			else
 				Logger::warn("unknown listener type `%s'", type.c_str());
 		} catch (NotFoundException ex) {
-			Logger::warn("missing required parameter %s", ex.which().c_str());
+			Logger::warn("Listener requires %s", ex.which().c_str());
 		}
 	}
 }
@@ -276,7 +275,7 @@ void Irccd::extractChannels(const Section &section, Server *server)
 	size_t colon;
 
 	if (section.hasOption("channels")) {
-		section.getOption<string>("channels", list);
+		list = section.getOption<string>("channels");
 		channels = Util::split(list, " \t");
 
 		for (string s : channels) {
@@ -303,31 +302,31 @@ void Irccd::readServers(const Parser &config)
 		try {
 			string name, address, commandToken, password, ident;
 			int port;
-			bool ssl = false, joinInvite = false;
 
 			// General parameters
-			if (s.getOption<string>("command-char", commandToken))
-				server->setCommandChar(commandToken);
-			s.getOption<bool>("join-invite", joinInvite);
+			if (s.hasOption("command-char"))
+				server->setCommandChar(s.getOption<string>("command-char"));
+			if (s.hasOption("join-invite"))
+				server->setJoinInvite(s.getOption<bool>("join-invite"));
+			if (s.hasOption("identity"))
+				server->setIdentity(findIdentity(s.getOption<string>("identity")));
 
 			// Get connection parameters
-			s.getOption<string>("name", name, true);
-			s.getOption<string>("address", address, true);
-			s.getOption<int>("port", port, true);
-			s.getOption<string>("password", password);
-			s.getOption<bool>("ssl", ssl);
+			name = s.requireOption<string>("name");
+			address = s.requireOption<string>("address");
+			port = s.requireOption<int>("port");
 
-			// Extract the identity
-			s.getOption<string>("identity", ident);
+			if (s.hasOption("password"))
+				password = s.getOption<string>("password");
 
-			server->setJoinInvite(joinInvite);
-			server->setConnection(name, address, port, ssl, password);
-			server->setIdentity(findIdentity(ident));
+			server->setConnection(name, address, port, false, password);
 
+			// Extract channels to auto join
 			extractChannels(s, server);
+
 			m_servers.push_back(server);
 		} catch (NotFoundException ex) {
-			Logger::warn("missing required parameter %s", ex.which().c_str());
+			Logger::warn("Section \"server\" require %s", ex.which().c_str());
 		}
 	}
 }
@@ -337,17 +336,26 @@ void Irccd::readIdentities(const parser::Parser &config)
 	for (Section &s: config.findSections("identity")) {
 		Identity identity;
 
-		s.getOption<string>("name", identity.m_name);
-		s.getOption<string>("nickname", identity.m_nickname);
-		s.getOption<string>("username", identity.m_username);
-		s.getOption<string>("realname", identity.m_realname);
-		s.getOption<string>("version", identity.m_ctcpversion);
+		try {
+			identity.m_name = s.requireOption<string>("name");
 
-		Logger::log("Found identity %s (%s, %s, \"%s\")", identity.m_name.c_str(),
-		    identity.m_nickname.c_str(), identity.m_username.c_str(),
-		    identity.m_realname.c_str());
+			if (s.hasOption("nickname"))
+				identity.m_nickname = s.getOption<string>("nickname");
+			if (s.hasOption("username"))
+				identity.m_username = s.getOption<string>("username");
+			if (s.hasOption("realname"))
+				identity.m_realname = s.getOption<string>("realname");
+			if (s.hasOption("version"))
+				identity.m_ctcpversion = s.getOption<string>("version");
 
-		m_identities.push_back(identity);
+			Logger::log("Found identity %s (%s, %s, \"%s\")", identity.m_name.c_str(),
+			    identity.m_nickname.c_str(), identity.m_username.c_str(),
+			    identity.m_realname.c_str());
+
+			m_identities.push_back(identity);
+		} catch (NotFoundException ex) {
+			Logger::log("Section \"identity\" requires %s", ex.which().c_str());
+		}
 	};
 }
 

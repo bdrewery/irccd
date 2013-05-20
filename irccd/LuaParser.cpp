@@ -292,15 +292,14 @@ static int getOption(lua_State *L)
 {
 	Section *s = *(Section **)luaL_checkudata(L, 1, SECTION_TYPE);
 	string name = luaL_checkstring(L, 2);
-	string value;
 
-	if (!s->getOption<string>(name, value)) {
+	if (!s->hasOption(name)) {
 		lua_pushnil(L);
 		lua_pushfstring(L, "option %s not found", name.c_str());
 		return 2;
 	}
 
-	lua_pushstring(L, value.c_str());
+	lua_pushstring(L, s->getOption<string>(name).c_str());
 
 	return 1;
 }
@@ -311,11 +310,11 @@ static int requireOption(lua_State *L)
 	string name = luaL_checkstring(L, 2);
 	string value;
 
-	if (!s->getOption<string>(name, value)) {
-		return luaL_error(L, "required option %s not found", name.c_str());
+	try {
+		lua_pushstring(L, s->requireOption<string>(name).c_str());
+	} catch (NotFoundException ex) {
+		return luaL_error(L, "required option %s not found", ex.which().c_str());
 	}
-
-	lua_pushstring(L, value.c_str());
 
 	return 1;
 }

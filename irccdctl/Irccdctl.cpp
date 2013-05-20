@@ -247,7 +247,7 @@ void Irccdctl::connectUnix(const Section &section)
 {
 	string path;
 
-	section.getOption<string>("path", path);
+	path = section.requireOption<string>("path");
 
 	try {
 		m_socket = SocketUtil::connectUnix(path);
@@ -262,9 +262,9 @@ void Irccdctl::connectInet(const Section &section)
 	string host, inet;
 	int port, family = 0;
 
-	section.getOption<string>("host", host);
-	section.getOption<int>("port", port);
-	section.getOption<string>("family", inet);
+	host = section.requireOption<string>("host");
+	port = section.requireOption<int>("port");
+	inet = section.requireOption<string>("family");
 
 	if (inet == "ipv4")
 		family = Socket::Inet4;
@@ -296,7 +296,7 @@ void Irccdctl::readConfig(void)
 		const Section &sectionSocket = config.getSection("socket");
 		string type;
 
-		sectionSocket.getOption<string>("type", type);
+		type = sectionSocket.requireOption<string>("type");
 
 		if (type.compare("unix") == 0)
 			connectUnix(sectionSocket);

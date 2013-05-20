@@ -108,9 +108,24 @@ struct Section {
 
 	/**
 	 * Template all functions for retrieving options value.
+	 *
+	 * @param name the option name
+	 * @return the value if found
 	 */
 	template <typename T>
-	bool getOption(const std::string &, T &, bool required = false) const;
+	T getOption(const std::string &name) const;
+
+	/**
+	 * Requires an option, this works like getOption except
+	 * that if an option is not found, an exception is
+	 * thrown.
+	 *
+	 * @param name the name
+	 * @throw NotFoundException if not found
+	 * @return the value
+	 */
+	template <typename T>
+	T requireOption(const std::string &name) const;
 
 	friend std::ostream & operator<<(std::ostream & stream, const Section &section)
 	{
