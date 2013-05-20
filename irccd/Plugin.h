@@ -54,7 +54,7 @@ private:
 	 * @param nret the number of param the function should returns
 	 * @param fmt the format, see description
 	 */
-	void callLua(const std::string &name, int nret, const std::string &fmt, ...);
+	void callLua(const std::string &name, int nret, std::string fmt, ...);
 
 	bool loadLua(const std::string &path);
 public:
@@ -86,10 +86,25 @@ public:
 	 */
 	bool open(const std::string &path);
 
-
 	/* ------------------------------------------------
 	 * IRC commands
 	 * ------------------------------------------------ */
+
+	/**
+	 * A lua function triggered on a special command, this is a channel
+	 * message but that starts with the command-char defined in the config.
+	 * Some modules needs that, example:
+	 *
+	 * !google something
+	 * !help
+	 *
+	 * @param server the server
+	 * @param channel on which channel
+	 * @param who who spoke
+	 * @param message the message sent without the command and plugin
+	 */
+	void onCommand(Server *server, const std::string &channel, const std::string &who,
+		       const std::string &message);
 
 	/**
 	 * A Lua function "onConnect" will be called
@@ -109,7 +124,7 @@ public:
 	void onJoin(Server *server, const std::string &channel, const std::string &nickname);
 
 	/**
-	 * a Lua function triggered on a message event.
+	 * A Lua function triggered on a message event.
 	 *
 	 * @param server the server
 	 * @param channel on which channel
@@ -129,20 +144,15 @@ public:
 	void onNick(Server *server, const std::string &oldnick, const std::string &newnick);
 
 	/**
-	 * A lua function triggered on a special command, this is a channel
-	 * message but that starts with the command-char defined in the config.
-	 * Some modules needs that, example:
-	 *
-	 * !google something
-	 * !help
+	 * A Lua function triggered when someone leave a channel.
 	 *
 	 * @param server the server
-	 * @param channel on which channel
-	 * @param who who spoke
-	 * @param message the message sent without the command and plugin
+	 * @param channel from which channel
+	 * @param who who left
+	 * @param reason an optional reason
 	 */
-	void onCommand(Server *server, const std::string &channel, const std::string &who,
-		       const std::string &message);
+	void onPart(Server *server, const std::string &channel, const std::string &who,
+		    const std::string reason);
 };
 
 } // !irccd

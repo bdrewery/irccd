@@ -161,10 +161,21 @@ static void handleQuit(irc_session_t *s, const char *ev, const char *orig,
 static void handlePart(irc_session_t *s, const char *ev, const char *orig,
 			  const char **params, unsigned int count)
 {
-	(void)s;
+	Server *server = (Server *)irc_get_ctx(s);
+	string reason = "", nick;
+
+	nick = getNick(orig);
+
+	// params[1] is an optional reason
+	if (params[1] != nullptr)
+		reason = params[1];
+
+	if (server->getIdentity().m_nickname != nick) {
+		for (Plugin *p : Irccd::getInstance()->getPlugins())
+			p->onPart(server, params[0], nick, reason);
+	}
+
 	(void)ev;
-	(void)orig;
-	(void)params;
 	(void)count;
 }
 
