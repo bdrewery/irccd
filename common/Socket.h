@@ -46,7 +46,7 @@ public:
 			m_isDisconnected = isDisconneted;
 		}
 
-		~Exception(void)
+		~Exception(void) throw()
 		{
 		}
 
