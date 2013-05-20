@@ -146,11 +146,6 @@ void LuaServer::pushObject(lua_State *L, Server *server)
 
 int irccd::luaopen_server(lua_State *L)
 {
-#if 0
-	// DO NOT FORGET TO CHANGE RETURN IF NEEDED
-	luaL_newlib(L, functionList);
-#endif
-
 	// Create the metatable for Server
 	luaL_newmetatable(L, SERVER_TYPE);
 	lua_pushvalue(L, -1);

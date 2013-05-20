@@ -17,6 +17,7 @@
 #
 
 option(WITH_MAN "Install man pages" On)
+option(WITH_LDOC "Install Lua API documentation" On)
 
 function(DEFINE_MAN file man)
 	if (WITH_MAN)
@@ -34,5 +35,21 @@ endfunction()
 DEFINE_MAN(irccd.1.in man1)
 DEFINE_MAN(irccd.conf.5.in man5)
 DEFINE_MAN(irccdctl.conf.5.in man5)
+
+find_file(
+	LDOC ldoc
+	NAMES ldoc ldoc.lua
+)
+
+# Install Lua API
+if (WITH_LDOC)
+	if (LDOC)
+		add_custom_target(
+			generate-doc
+			COMMAND ${LDOC} *.luadoc
+			WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/doc/lua"
+		)
+	endif ()
+endif ()
 
 # vim: set syntax=cmake:

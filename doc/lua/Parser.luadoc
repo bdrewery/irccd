@@ -1,0 +1,37 @@
+--- Parser
+-- @module Parser
+-- @pragma nostrip
+
+--- Create a new parser object.
+-- This function does not open any file, you need to call open.
+-- @param path the path
+-- @param tuning optional table of tuning options
+-- @param commentChar optional comment delimiter
+-- @return a parser object
+function parser.new(path, tuning, commentChar)
+end
+
+--- Open the file and read config.
+-- This function will read and extract any section found in the file
+function Parser:open()
+end
+
+--- Iterator over all sections that matches name. Note that this function
+-- will be relevant only if DisableRedefinition is not set.
+-- @param name the sections name
+function Parser:findSection(name)
+end
+
+--- Get a specific section.
+-- @param name the section name
+-- @return a Section object
+function Parser:getSection(name)
+end
+
+--- Find an option.
+-- @param name the name
+-- @return the table with a key value pair
+function Section:findOption(name)
+end
+
+-- vim: set syntax=lua:

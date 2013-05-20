@@ -30,7 +30,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")		# own modules
 set(PREFIX "${CMAKE_INSTALL_PREFIX}")
 set(MODDIR "${PREFIX}/share/irccd/modules"
     CACHE STRING "Module prefix where to install")
-set(DOCDIR "${PREFIX}/share/doc"
+set(DOCDIR "${PREFIX}/share/doc/irccd"
     CACHE STRING "Documentation directory")
 set(MANDIR "${PREFIX}/share/man"
     CACHE STRING "Man directory")
@@ -39,7 +39,6 @@ configure_file(
 	"${CMAKE_SOURCE_DIR}/cmake/config.h.in"
 	"${CMAKE_BINARY_DIR}/config.h"
 )
-
 
 # Include path to common
 include_directories(

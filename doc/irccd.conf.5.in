@@ -115,6 +115,8 @@ in the file.
 (string) Required. A unique id, default: empty.
 .It port
 (int) Required, The server port, default: empty.
+.It command-char
+(string) The prefix for invoking special commands, default: !.
 .El
 .\" EXAMPLES
 .Sh EXAMPLES

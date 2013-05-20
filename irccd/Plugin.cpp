@@ -48,12 +48,12 @@ static const Library libLua[] = {
 	{ "package",	luaopen_package	},
 	{ "string",	luaopen_string	},
 	{ "table",	luaopen_table	},
+	{ "server",	luaopen_server	},
 };
 
 static const Library libIrccd[] = {
 	{ "parser",	luaopen_parser	},
 	{ "plugin",	luaopen_plugin	},
-	{ "server",	luaopen_server	},
 };
 
 /* --------------------------------------------------------
