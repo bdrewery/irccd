@@ -1,0 +1,55 @@
+--- Utilitities.
+-- Some utilities.
+--
+-- @module Util
+
+--- Get the parent path of a file.
+-- This function may be used to get the parent path of a file. Example:
+-- calling dirname on "/foo/bar/test.txt" will returns "/foo/bar".
+-- @param path the full file path
+-- @return the parent path
+function util.dirname(path)
+end
+
+--- Get the home directory.
+-- This function returns the home directory of the current user. This
+-- is usually /home/foo on Unix.
+-- @return the home directory
+function util.getHome()
+end
+
+--- Check if a file exists.
+-- Tests if a directory or a file exists.
+-- @param path the path to check
+-- @return true if exists
+function util.exist(path)
+end
+
+--- Create a directory.
+-- Create recursively a directory, like <code>mkdir -p</code>. This function
+-- will return two values on error.
+-- @param path the path
+-- @return true on success or false plus an error
+-- @return the error message
+function util.mkdir(path)
+end
+
+--- Create a Date object.
+-- This function returns a date object with the current time from the
+-- system.
+-- @see Date
+-- @return a Date object
+function util.dateNow()
+end
+
+--- Date
+-- @type Date
+
+--- Format a date.
+-- Format the date with a specific format, see strftime(3) for keywords.
+-- @param format the format
+-- @return the date formatted
+function Date:format(format)
+end
+
+-- vim: set syntax=lua:

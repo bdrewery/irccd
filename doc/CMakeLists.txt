@@ -44,12 +44,19 @@ find_file(
 # Install Lua API
 if (WITH_LDOC)
 	if (LDOC)
+		# Add a target make generate-doc for
+		# developers.
 		add_custom_target(
 			generate-doc
-			COMMAND ${LDOC} *.luadoc
-			WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/doc/lua"
+			COMMAND ${LDOC} .
+			WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/doc"
 		)
 	endif ()
+
+	install(
+		DIRECTORY "generated/"
+		DESTINATION "${DOCDIR}/lua"
+	)
 endif ()
 
 # vim: set syntax=cmake:

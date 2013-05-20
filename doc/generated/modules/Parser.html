@@ -1,0 +1,411 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Irccd Lua API Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Irccd</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+<li><a href="#Class_Parser">Class Parser </a></li>
+<li><a href="#Class_Section">Class Section </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul>
+  <li><strong>Parser</strong></li>
+  <li><a href="../modules/Plugin.html">Plugin</a></li>
+  <li><a href="../modules/Server.html">Server</a></li>
+  <li><a href="../modules/Util.html">Util</a></li>
+</ul>
+<h2>Topics</h2>
+<ul>
+  <li><a href="../topics/00-basic.md.html">00-basic.md</a></li>
+</ul>
+<h2>Examples</h2>
+<ul>
+  <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>Parser</code></h1>
+
+<p>Config file parser.</p>
+<p> This API provides basic support of .ini syntax based configurations files.
+ It provides support of multiple redefinition of sections, so it is
+ possible to have one or more section with the same name in a
+ file config.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#parser.new">parser.new&nbsp;(path, tuning, commentChar)</a></td>
+	<td class="summary">Create a new Parser object.</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#parser">parser</a></td>
+	<td class="summary">Tuning options</td>
+	</tr>
+</table>
+<h2><a href="#Class_Parser">Class Parser </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Parser:open">Parser:open&nbsp;()</a></td>
+	<td class="summary">Open the file and read config.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Parser:findSections">Parser:findSections&nbsp;(name)</a></td>
+	<td class="summary">Iterator over all sections that matches name.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Parser:getSection">Parser:getSection&nbsp;(name)</a></td>
+	<td class="summary">Get a specific section.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Parser:onLog">Parser:onLog&nbsp;(func)</a></td>
+	<td class="summary">Add a specific logging function.</td>
+	</tr>
+</table>
+<h2><a href="#Class_Section">Class Section </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Section:hasOption">Section:hasOption&nbsp;(name)</a></td>
+	<td class="summary">Tells if the section has an option.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Section:getOption">Section:getOption&nbsp;(name)</a></td>
+	<td class="summary">Get an option value.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Section:getOptions">Section:getOptions&nbsp;()</a></td>
+	<td class="summary">Get all options in a table.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Section:requireOption">Section:requireOption&nbsp;(name)</a></td>
+	<td class="summary">Requires an option.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2><a name="Functions"></a>Functions</h2>
+    <dl class="function">
+    <dt>
+    <a name = "parser.new"></a>
+    <strong>parser.new&nbsp;(path, tuning, commentChar)</strong>
+    </dt>
+    <dd>
+    Create a new Parser object.
+ This function does not open any file, you need to call open.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path</li>
+        <li><span class="parameter">tuning</span>
+         optional table of tuning options</li>
+        <li><span class="parameter">commentChar</span>
+         optional comment delimiter</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Parser object
+    </ol>
+
+
+    <h3>see also:</h3>
+    <ul>
+         <a href="../modules/Parser.html#">Parser</a>
+    </ul>
+
+
+</dd>
+</dl>
+    <h2><a name="Tables"></a>Tables</h2>
+    <dl class="function">
+    <dt>
+    <a name = "parser"></a>
+    <strong>parser</strong>
+    </dt>
+    <dd>
+    Tuning options
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">DisableVerbosity</span>
+         disable the verbosity</li>
+        <li><span class="parameter">DisableRootSection</span>
+         forbid options on root</li>
+        <li><span class="parameter">DisableRedefinition</span>
+         disable multiple sections</li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2><a name="Class_Parser"></a>Class Parser </h2>
+        Parser
+    <dl class="function">
+    <dt>
+    <a name = "Parser:open"></a>
+    <strong>Parser:open&nbsp;()</strong>
+    </dt>
+    <dd>
+    Open the file and read config.
+ This function will read and extract any section found in the file.
+
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        true on success</li>
+        <li>
+        error message if failed</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Parser:findSections"></a>
+    <strong>Parser:findSections&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Iterator over all sections that matches name.  Note that this function
+ will be relevant only if DisableRedefinition is not set.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the sections name</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Parser:getSection"></a>
+    <strong>Parser:getSection&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Get a specific section.
+ Check if the parser has a specific section and return it, otherwise
+ return nil plus an error message.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the section name</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        a Section object or nil</li>
+        <li>
+        error message if not found</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Parser:onLog"></a>
+    <strong>Parser:onLog&nbsp;(func)</strong>
+    </dt>
+    <dd>
+    Add a specific logging function.
+ This add a logging function for verbosity warnings. The function must have
+ the following signature:</p>
+
+<p> <code>function log(lineno, section, warning)</code></p>
+
+<p> The parameters are:
+ <ul></p>
+<pre><code>&lt;li&gt;lineno: the current line number&lt;/li&gt;
+&lt;li&gt;section: the current section&lt;/li&gt;
+&lt;li&gt;warning: the message&lt;/li&gt;
+</code></pre>
+<p> </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">func</span>
+         the function to use</li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2><a name="Class_Section"></a>Class Section </h2>
+        Section
+    <dl class="function">
+    <dt>
+    <a name = "Section:hasOption"></a>
+    <strong>Section:hasOption&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Tells if the section has an option.
+ Check if the section contains a specific option.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the option's name</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the value
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Section:getOption"></a>
+    <strong>Section:getOption&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Get an option value.
+ This function returns the value if found and nil plus an error
+ message in the other case.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the option name</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the option's value or nil</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+    <h3>see also:</h3>
+    <ul>
+         <a href="../modules/Parser.html#Section:requireOption">Section:requireOption</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "Section:getOptions"></a>
+    <strong>Section:getOptions&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get all options in a table.
+ This function will return a table with all options in a
+ key / value pair basis.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a table
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Section:requireOption"></a>
+    <strong>Section:requireOption&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Requires an option.
+ This returns a value but if the option
+ is not found it calls luaL_error, thus aborting the script.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the option name</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the option's value
+    </ol>
+
+
+    <h3>see also:</h3>
+    <ul>
+         <a href="../modules/Parser.html#Section:getOption">Section:getOption</a>
+    </ul>
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.3.12</a></i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

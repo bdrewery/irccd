@@ -1,0 +1,261 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Irccd Lua API Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Irccd</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Class_Date">Class Date </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul>
+  <li><a href="../modules/Parser.html">Parser</a></li>
+  <li><a href="../modules/Plugin.html">Plugin</a></li>
+  <li><a href="../modules/Server.html">Server</a></li>
+  <li><strong>Util</strong></li>
+</ul>
+<h2>Topics</h2>
+<ul>
+  <li><a href="../topics/00-basic.md.html">00-basic.md</a></li>
+</ul>
+<h2>Examples</h2>
+<ul>
+  <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>Util</code></h1>
+
+<p>Utilitities.</p>
+<p> Some utilities.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#util.dirname">util.dirname&nbsp;(path)</a></td>
+	<td class="summary">Get the parent path of a file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#util.getHome">util.getHome&nbsp;()</a></td>
+	<td class="summary">Get the home directory.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#util.exist">util.exist&nbsp;(path)</a></td>
+	<td class="summary">Check if a file exists.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#util.mkdir">util.mkdir&nbsp;(path)</a></td>
+	<td class="summary">Create a directory.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#util.dateNow">util.dateNow&nbsp;()</a></td>
+	<td class="summary">Create a Date object.</td>
+	</tr>
+</table>
+<h2><a href="#Class_Date">Class Date </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Date:format">Date:format&nbsp;(format)</a></td>
+	<td class="summary">Format a date.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2><a name="Functions"></a>Functions</h2>
+    <dl class="function">
+    <dt>
+    <a name = "util.dirname"></a>
+    <strong>util.dirname&nbsp;(path)</strong>
+    </dt>
+    <dd>
+    Get the parent path of a file.
+ This function may be used to get the parent path of a file. Example:
+ calling dirname on "/foo/bar/test.txt" will returns "/foo/bar".
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the full file path</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the parent path
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "util.getHome"></a>
+    <strong>util.getHome&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get the home directory.
+ This function returns the home directory of the current user. This
+ is usually /home/foo on Unix.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the home directory
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "util.exist"></a>
+    <strong>util.exist&nbsp;(path)</strong>
+    </dt>
+    <dd>
+    Check if a file exists.
+ Tests if a directory or a file exists.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path to check</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if exists
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "util.mkdir"></a>
+    <strong>util.mkdir&nbsp;(path)</strong>
+    </dt>
+    <dd>
+    Create a directory.
+ Create recursively a directory, like <code>mkdir -p</code>. This function
+ will return two values on error.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        true on success or false plus an error</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "util.dateNow"></a>
+    <strong>util.dateNow&nbsp;()</strong>
+    </dt>
+    <dd>
+    Create a Date object.
+ This function returns a date object with the current time from the
+ system.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Date object
+    </ol>
+
+
+    <h3>see also:</h3>
+    <ul>
+         <a href="../modules/Util.html#Class_Date">Date</a>
+    </ul>
+
+
+</dd>
+</dl>
+    <h2><a name="Class_Date"></a>Class Date </h2>
+        Date
+    <dl class="function">
+    <dt>
+    <a name = "Date:format"></a>
+    <strong>Date:format&nbsp;(format)</strong>
+    </dt>
+    <dd>
+    Format a date.
+ Format the date with a specific format, see strftime(3) for keywords.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">format</span>
+         the format</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the date formatted
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.3.12</a></i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

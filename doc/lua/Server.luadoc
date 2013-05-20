@@ -1,0 +1,54 @@
+--- Server class.
+-- The server class is usually passed through every Lua callbacks, on IRC
+-- events.
+--
+-- @module Server
+
+--- Server
+-- @type Server
+
+--- Get the server name id.
+-- Returns the server id.
+-- @return the name id
+function Server:getName()
+end
+
+--- Join a channel.
+-- Join a specific IRC channel, the channel must starts with a
+-- hash '#'.
+-- @param channel the channel to join
+-- @param password an optional password
+function Server:join(channel, password)
+end
+
+--- Kick someone.
+-- Kick someone from a channel. Note that you obviously need rights
+-- on the channel.
+-- @param nickname the person to kick
+-- @param channel from which channel
+-- @param reason an optional reason
+function Server:kick(nickname, channel, reason)
+end
+
+--- Invoke a CTCP Action.
+-- Send a message as known as /me. The target may be a nick
+-- or a channel.
+-- @param target a nick or a channel
+-- @param message the message to send
+function Server:me(target, message)
+end
+
+--- Change nickname
+-- Change your nickname.
+-- @param nickname the new nickname
+function Server:nick(nickname)
+end
+
+--- Send a message.
+-- Send a message to a channel or a nickname.
+-- @param target a nick or a channel
+-- @param message the message to send
+function Server:say(target, message)
+end
+
+-- vim: set syntax=lua:

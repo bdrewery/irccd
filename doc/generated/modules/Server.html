@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Irccd Lua API Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Irccd</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Class_Server">Class Server </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul>
+  <li><a href="../modules/Parser.html">Parser</a></li>
+  <li><a href="../modules/Plugin.html">Plugin</a></li>
+  <li><strong>Server</strong></li>
+  <li><a href="../modules/Util.html">Util</a></li>
+</ul>
+<h2>Topics</h2>
+<ul>
+  <li><a href="../topics/00-basic.md.html">00-basic.md</a></li>
+</ul>
+<h2>Examples</h2>
+<ul>
+  <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>Server</code></h1>
+
+<p>Server class.</p>
+<p> The server class is usually passed through every Lua callbacks, on IRC
+ events.</p>
+
+
+<h2><a href="#Class_Server">Class Server </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Server:getName">Server:getName&nbsp;()</a></td>
+	<td class="summary">Get the server name id.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:join">Server:join&nbsp;(channel, password)</a></td>
+	<td class="summary">Join a channel.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:kick">Server:kick&nbsp;(nickname, channel, reason)</a></td>
+	<td class="summary">Kick someone.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:me">Server:me&nbsp;(target, message)</a></td>
+	<td class="summary">Invoke a CTCP Action.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:nick">Server:nick&nbsp;(nickname)</a></td>
+	<td class="summary">Change nickname
+ Change your nickname.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:say">Server:say&nbsp;(target, message)</a></td>
+	<td class="summary">Send a message.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2><a name="Class_Server"></a>Class Server </h2>
+        Server
+    <dl class="function">
+    <dt>
+    <a name = "Server:getName"></a>
+    <strong>Server:getName&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get the server name id.
+ Returns the server id.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the name id
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:join"></a>
+    <strong>Server:join&nbsp;(channel, password)</strong>
+    </dt>
+    <dd>
+    Join a channel.
+ Join a specific IRC channel, the channel must starts with a
+ hash '#'.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channel</span>
+         the channel to join</li>
+        <li><span class="parameter">password</span>
+         an optional password</li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:kick"></a>
+    <strong>Server:kick&nbsp;(nickname, channel, reason)</strong>
+    </dt>
+    <dd>
+    Kick someone.
+ Kick someone from a channel. Note that you obviously need rights
+ on the channel.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">nickname</span>
+         the person to kick</li>
+        <li><span class="parameter">channel</span>
+         from which channel</li>
+        <li><span class="parameter">reason</span>
+         an optional reason</li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:me"></a>
+    <strong>Server:me&nbsp;(target, message)</strong>
+    </dt>
+    <dd>
+    Invoke a CTCP Action.
+ Send a message as known as /me. The target may be a nick
+ or a channel.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">target</span>
+         a nick or a channel</li>
+        <li><span class="parameter">message</span>
+         the message to send</li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:nick"></a>
+    <strong>Server:nick&nbsp;(nickname)</strong>
+    </dt>
+    <dd>
+    Change nickname
+ Change your nickname.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">nickname</span>
+         the new nickname</li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:say"></a>
+    <strong>Server:say&nbsp;(target, message)</strong>
+    </dt>
+    <dd>
+    Send a message.
+ Send a message to a channel or a nickname.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">target</span>
+         a nick or a channel</li>
+        <li><span class="parameter">message</span>
+         the message to send</li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.3.12</a></i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
