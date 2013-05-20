@@ -272,6 +272,10 @@ Parser::Parser(const string &path, int tuning, char commentToken)
 	m_sections.push_back(root);
 }
 
+Parser::Parser(void)
+{
+}
+
 Parser::~Parser(void)
 {
 }

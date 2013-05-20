@@ -164,6 +164,11 @@ public:
 	Parser(const std::string &path, int tuning = 0, char commentToken = Parser::DEFAULT_COMMENT_CHAR);
 
 	/**
+	 * Default constructor.
+	 */
+	Parser(void);
+
+	/**
 	 * Default destructor.
 	 */
 	virtual ~Parser(void);

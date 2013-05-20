@@ -25,7 +25,11 @@
 
 namespace irccd {
 
-class LuaParser {
+class LuaParser : public parser::Parser {
+private:
+	lua_State *m_state;	//! back pointer for log
+	int m_logRef;		//! reference for log()
+
 public:
 	static int readTuning(lua_State *L, int idx);
 
@@ -36,6 +40,42 @@ public:
 	 * @param s the section to push
 	 */
 	static void pushSection(lua_State *L, const parser::Section &s);
+
+	/**
+	 * Wrapper for super constructor.
+	 *
+	 * @param path the file path
+	 * @param tuning optional tuning flags
+	 * @param commentToken an optional comment delimiter
+	 * @see Parser
+	 */
+	LuaParser(const std::string &path, int tuning = 0, char commentToken = Parser::DEFAULT_COMMENT_CHAR);
+
+	/**
+	 * Default constructor.
+	 */
+	LuaParser(void);
+
+	/**
+	 * Default destructor.
+	 */
+	~LuaParser(void);
+
+	/**
+	 * Set the Lua state, used for logging.
+	 *
+	 * @param L the Lua state.
+	 */
+	void setState(lua_State *L);
+
+	/**
+	 * Set the Lua function to call for logging.
+	 *
+	 * @param logRef the function reference
+	 */
+	void setLogRef(int logRef);
+
+	virtual void log(int number, const std::string &section, const std::string &message);
 };
 
 int luaopen_parser(lua_State *L);

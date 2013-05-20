@@ -18,7 +18,6 @@
 
 #define PARSER_TYPE	"ParserType"
 #define SECTION_TYPE	"SectionType"
-#define OPTION_TYPE	"OptionType"
 
 #include <sstream>
 
@@ -62,15 +61,53 @@ void LuaParser::pushSection(lua_State *L, const Section &s)
 	*ptr = copy;
 }
 
+LuaParser::LuaParser(const std::string &path, int tuning, char commentToken)
+	:Parser(path, tuning, commentToken), m_state(nullptr), m_logRef(LUA_NOREF)
+{
+}
+
+LuaParser::LuaParser(void)
+{
+}
+
+LuaParser::~LuaParser(void)
+{
+}
+
+void LuaParser::setState(lua_State *L)
+{
+	m_state = L;
+}
+
+void LuaParser::setLogRef(int logRef)
+{
+	m_logRef = logRef;
+}
+
+void LuaParser::log(int number, const string &section, const string &message)
+{
+	if (m_logRef == LUA_NOREF) {
+		Parser::log(number, section, message);
+	} else if (m_state != nullptr) {
+		// Call the Lua ref function
+		lua_rawgeti(m_state, LUA_REGISTRYINDEX, m_logRef);
+		lua_pushinteger(m_state, number);
+		lua_pushstring(m_state, section.c_str());
+		lua_pushstring(m_state, message.c_str());
+
+		(void)lua_pcall(m_state, 3, 0, 0);
+	}
+}
+
 // {{{ "Static" functions
 
 namespace functions {
 
-static int open(lua_State *L)
+static int create(lua_State *L)
 {
-	Parser **ptr, *p;
+	LuaParser **ptr, *p;
 	string path;
-	int tuning = 0, ch = Parser::DEFAULT_COMMENT_CHAR;
+	int tuning = 0, ch = LuaParser::DEFAULT_COMMENT_CHAR;
 
 	if (lua_gettop(L) < 1)
 		return luaL_error(L, "open() requires at least 1 argument");
@@ -84,16 +121,12 @@ static int open(lua_State *L)
 	if (lua_gettop(L) >= 3)
 		ch = luaL_checkstring(L, 1)[0];
 		
-	p = new Parser(path, tuning);
-	if (!p->open()) {
-		lua_pushnil(L);
-		lua_pushstring(L, p->getError().c_str());
+	p = new LuaParser(path, tuning, ch);
 
-		delete p;
-		return 2;
-	}
+	// Copy the state so I can call log() function
+	p->setState(L);
 
-	ptr = (Parser **)lua_newuserdata(L, sizeof (Parser *));
+	ptr = (LuaParser **)lua_newuserdata(L, sizeof (LuaParser *));
 	luaL_setmetatable(L, PARSER_TYPE);
 	*ptr = p;
 
@@ -103,7 +136,7 @@ static int open(lua_State *L)
 } // }}} !functions
 
 const luaL_Reg functionList[] = {
-	{ "open",		functions::open		},
+	{ "new",		functions::create	},
 	{ nullptr,		nullptr			}
 };
 
@@ -131,14 +164,30 @@ static int sectionIterator(lua_State *L)
 	return 1;
 }
 
+static int open(lua_State *L)
+{
+	LuaParser *p = *(LuaParser **)luaL_checkudata(L, 1, PARSER_TYPE);
+
+	if (!p->open()) {
+		lua_pushboolean(L, false);
+		lua_pushstring(L, p->getError().c_str());
+
+		return 2;
+	}
+
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
 static int findSections(lua_State *L)
 {
-	Parser *p;
+	LuaParser *p;
 	string name;
 	vector<Section> **ptr, *list;
 
 	// Get the parameters for that functions
-	p = *(Parser **)luaL_checkudata(L, 1, PARSER_TYPE);
+	p = *(LuaParser **)luaL_checkudata(L, 1, PARSER_TYPE);
 	name = luaL_checkstring(L, 2);
 	list = new vector<Section>(p->findSections(name));
 
@@ -154,7 +203,7 @@ static int findSections(lua_State *L)
 
 static int getSection(lua_State *L)
 {
-	Parser *p = *(Parser **)luaL_checkudata(L, 1, PARSER_TYPE);
+	LuaParser *p = *(LuaParser **)luaL_checkudata(L, 1, PARSER_TYPE);
 	string name = luaL_checkstring(L, 2);
 	int ret = 0;
 
@@ -178,9 +227,23 @@ static int getSection(lua_State *L)
 	return ret;
 }
 
+static int onLog(lua_State *L)
+{
+	LuaParser *p = *(LuaParser **)luaL_checkudata(L, 1, PARSER_TYPE);
+
+	// Must be a function
+	luaL_checktype(L, 2, LUA_TFUNCTION);
+
+	// luaL_ref needs at the top of the stack so put a copy
+	lua_pushvalue(L, 2);
+	p->setLogRef(luaL_ref(L, LUA_REGISTRYINDEX));
+
+	return 0;
+}
+
 static int gc(lua_State *L)
 {
-	Parser *p = *(Parser **)luaL_checkudata(L, 1, PARSER_TYPE);
+	LuaParser *p = *(LuaParser **)luaL_checkudata(L, 1, PARSER_TYPE);
 
 	delete p;
 
@@ -189,7 +252,7 @@ static int gc(lua_State *L)
 
 static int tostring(lua_State *L)
 {
-	Parser *p = *(Parser **)luaL_checkudata(L, 1, PARSER_TYPE);
+	LuaParser *p = *(LuaParser **)luaL_checkudata(L, 1, PARSER_TYPE);
 	ostringstream oss;
 
 	oss << *p;
@@ -202,8 +265,10 @@ static int tostring(lua_State *L)
 } // }}} !config
 
 const luaL_Reg parserList[] = {
+	{ "open",		config::open		},
 	{ "findSections",	config::findSections	},
 	{ "getSection",		config::getSection	},
+	{ "onLog",		config::onLog		},
 	{ "__gc",		config::gc		},
 	{ "__tostring",		config::tostring	},
 	{ nullptr,		nullptr			}
@@ -279,13 +344,13 @@ int irccd::luaopen_parser(lua_State *L)
 	luaL_newlib(L, functionList);
 
 	// Bind tuning enum
-	lua_pushinteger(L, Parser::DisableRootSection);
+	lua_pushinteger(L, LuaParser::DisableRootSection);
 	lua_setfield(L, -2, "DisableRootSection");
 
-	lua_pushinteger(L, Parser::DisableRedefinition);
+	lua_pushinteger(L, LuaParser::DisableRedefinition);
 	lua_setfield(L, -2, "DisableRedefinition");
 
-	lua_pushinteger(L, Parser::DisableVerbosity);
+	lua_pushinteger(L, LuaParser::DisableVerbosity);
 	lua_setfield(L, -2, "DisableVerbosity");
 
 	// Create Parser type
