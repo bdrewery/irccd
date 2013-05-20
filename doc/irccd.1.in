@@ -66,6 +66,29 @@ section is only for short information.
 For more
 information about all irccd Lua API, see
 .Em @DOCDIR@/irccd/lua/index.html .
+.\" Command
+.Ss Command
+This event is not a real IRC event. It is triggered when a special
+command is said on a channel. For instance if someone says on a channel
+"!ask will I be rich?". It will call the function
+.Nm onCommand
+from the plugin "ask.lua".
+The special character is specified in the [server] section, see irccd.conf(5).
+.Bd -literal -offset indent
+function onCommand(server, channel, who, message)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel where the message comes from.
+.It who
+Who invoked the command.
+.It message
+The real message, without the "!<name>" part.
+.El
 .\" Connect
 .Ss Connect
 This event is triggered usually at startup, when
@@ -79,6 +102,22 @@ Parameters:
 .Bl -tag -compact -width PARAMETERXXXX -offset indent
 .It server
 The current server.
+.El
+.\" Invite
+.Ss Invite
+This event is triggered when someone is inviting you.
+.Bd -literal -offset indent
+function onInvite(server, channel, who)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+On which channel you are invited to.
+.It who
+Who invited you.
 .El
 .\" Join
 .Ss Join
@@ -113,6 +152,22 @@ The channel.
 The person that said something.
 .It message
 The message sent.
+.El
+.\" Nick
+.Ss Nick
+This event is triggered when someone changed its nickname.
+.Bd -literal -offset indent
+function onNick(server, oldnickname, newnickname)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It oldnickname
+The old nickname.
+.It newnickname
+The new nickname.
 .El
 .\" Part
 .Ss Part

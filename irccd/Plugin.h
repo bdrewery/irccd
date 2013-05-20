@@ -115,6 +115,15 @@ public:
 	void onConnect(Server *server);
 
 	/**
+	 * A Lua function triggered on an invite event.
+	 *
+	 * @param server the server
+	 * @param channel on which channel
+	 * @param who who invited you
+	 */
+	void onInvite(Server *server, const std::string &channel, const std::string &who);
+
+	/**
 	 * A Lua function triggered on a join event.
 	 *
 	 * @param server the server

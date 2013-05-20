@@ -96,6 +96,20 @@ public:
 	void setCommandChar(const std::string &commandChar);
 
 	/**
+	 * Tell if we should join channel on /invite commands
+	 *
+	 * @return true if we should
+	 */
+	bool getJoinInvite(void) const;
+
+	/**
+	 * Set the join invite mode
+	 *
+	 * @param joinInvite the mode
+	 */
+	void setJoinInvite(bool joinInvite);
+
+	/**
 	 * Get all channels that will be auto joined
 	 *
 	 * @return the list of channels

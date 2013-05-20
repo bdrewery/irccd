@@ -303,11 +303,12 @@ void Irccd::readServers(const Parser &config)
 		try {
 			string name, address, commandToken, password, ident;
 			int port;
-			bool ssl = false;
+			bool ssl = false, joinInvite = false;
 
 			// General parameters
 			if (s.getOption<string>("command-char", commandToken))
 				server->setCommandChar(commandToken);
+			s.getOption<bool>("join-invite", joinInvite);
 
 			// Get connection parameters
 			s.getOption<string>("name", name, true);
@@ -319,6 +320,7 @@ void Irccd::readServers(const Parser &config)
 			// Extract the identity
 			s.getOption<string>("identity", ident);
 
+			server->setJoinInvite(joinInvite);
 			server->setConnection(name, address, port, ssl, password);
 			server->setIdentity(findIdentity(ident));
 
@@ -340,6 +342,10 @@ void Irccd::readIdentities(const parser::Parser &config)
 		s.getOption<string>("username", identity.m_username);
 		s.getOption<string>("realname", identity.m_realname);
 		s.getOption<string>("version", identity.m_ctcpversion);
+
+		Logger::log("Found identity %s (%s, %s, \"%s\")", identity.m_name.c_str(),
+		    identity.m_nickname.c_str(), identity.m_username.c_str(),
+		    identity.m_realname.c_str());
 
 		m_identities.push_back(identity);
 	};

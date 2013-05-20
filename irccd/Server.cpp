@@ -119,6 +119,23 @@ static void handleJoin(irc_session_t *s, const char *ev, const char *orig,
 	(void)count;
 }
 
+static void handleInvite(irc_session_t *s, const char *ev, const char *orig,
+			 const char **params, unsigned int count)
+{
+	Server *server = (Server *)irc_get_ctx(s);
+	string who = getNick(orig);
+
+	// if join-invite is set to true goes in
+	if (server->getJoinInvite())
+		server->join(params[1], "");
+
+	for (Plugin *p : Irccd::getInstance()->getPlugins())
+		p->onInvite(server, params[1], who);
+
+	(void)ev;
+	(void)count;
+}
+
 static void handleNick(irc_session_t *s, const char *ev, const char *orig,
 			  const char **params, unsigned int count)
 {
@@ -182,6 +199,7 @@ static void handlePart(irc_session_t *s, const char *ev, const char *orig,
 static irc_callbacks_t functions = {
 	.event_channel = handleChannel,
 	.event_connect = handleConnect,
+	.event_invite = handleInvite,
 	.event_nick = handleNick,
 	.event_quit = handleQuit,
 	.event_join = handleJoin,
@@ -209,6 +227,16 @@ const string & Server::getCommandChar(void) const
 void Server::setCommandChar(const string &commandChar)
 {
 	m_commandChar = commandChar;
+}
+
+bool Server::getJoinInvite(void) const
+{
+	return m_joinInvite;
+}
+
+void Server::setJoinInvite(bool joinInvite)
+{
+	m_joinInvite = joinInvite;
 }
 
 const vector<Server::Channel> & Server::getChannels(void)

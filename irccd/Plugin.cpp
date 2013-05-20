@@ -89,8 +89,10 @@ void Plugin::callLua(const string &name, int nret, string fmt, ...)
 		}
 	}
 
-	if (lua_pcall(m_state, count, nret, 0) != LUA_OK)
+	if (lua_pcall(m_state, count, nret, 0) != LUA_OK) {
 		Logger::warn("error in plugin: %s", lua_tostring(m_state, -1));
+		lua_pop(m_state, 1);
+	}
 }
 
 bool Plugin::loadLua(const std::string &path)
@@ -170,14 +172,19 @@ bool Plugin::open(const std::string &path)
 	return loadLua(path);
 }
 
+void Plugin::onCommand(Server *server, const string &channel, const string &who, const string &message)
+{
+	callLua("onCommand", 0, "S s s s", server, channel.c_str(), who.c_str(), message.c_str());
+}
+
 void Plugin::onConnect(Server *server)
 {
 	callLua("onConnect", 0, "S", server);
 }
 
-void Plugin::onCommand(Server *server, const string &channel, const string &who, const string &message)
+void Plugin::onInvite(Server *server, const std::string &channel, const std::string &who)
 {
-	callLua("onCommand", 0, "S s s s", server, channel.c_str(), who.c_str(), message.c_str());
+	callLua("onInvite", 0, "S s s", server, channel.c_str(), who.c_str());
 }
 
 void Plugin::onJoin(Server *server, const string &channel, const string &nickname)
