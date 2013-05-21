@@ -1,3 +1,4 @@
 o Add an option to do not call plugin if the origin is the bot itself.
 o Add option to disable / enable modules.
 o Read configurations files in a correct order.
+o Update logger to add []

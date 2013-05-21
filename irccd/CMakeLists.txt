@@ -24,6 +24,7 @@ add_subdirectory(modules)
 set(SOURCES
 	Server.cpp
 	Plugin.cpp
+	LuaLogger.cpp
 	LuaParser.cpp
 	LuaPlugin.cpp
 	LuaServer.cpp

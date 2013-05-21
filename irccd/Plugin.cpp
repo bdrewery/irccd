@@ -25,6 +25,7 @@
 
 #include "Irccd.h"
 #include "Plugin.h"
+#include "LuaLogger.h"
 #include "LuaParser.h"
 #include "LuaPlugin.h"
 #include "LuaServer.h"
@@ -53,6 +54,7 @@ static const Library libLua[] = {
 };
 
 static const Library libIrccd[] = {
+	{ "logger",	luaopen_logger	},
 	{ "parser",	luaopen_parser	},
 	{ "plugin",	luaopen_plugin	},
 	{ "util",	luaopen_util	}

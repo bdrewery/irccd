@@ -18,6 +18,7 @@
 
 -- Modules
 local plugin = require("plugin")
+local logger = require("logger")
 
 local default = {
 	"Yes",
@@ -28,9 +29,12 @@ local answers = { }
 
 -- Load every words
 local function loadWords()
-	local file, err = io.open(plugin.getHome() .. "/answers.txt")
+	local path = plugin.getHome() .. "/answers.txt"
+	local file, err = io.open(path)
 
 	if file == nil then
+		logger.log("Could not open: " .. path .. ": " .. err)
+		logger.log("Using default answers")
 		answers = default
 	else
 		for l in file:lines() do
