@@ -172,6 +172,26 @@ The person that said something.
 .It message
 The message sent.
 .El
+.\" Mode
+.Ss Mode
+This event is triggered when someone changed the channel's mode.
+.Bd -literal -offset indent
+function onMode(server, channel, nickname, mode, modeArg)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel.
+.It nickname
+The person who changed the mode.
+.It mode
+The new mode.
+.It modeArg
+The mode argument, if supported.
+.El
 .\" Nick
 .Ss Nick
 This event is triggered when someone changed its nickname.
@@ -205,6 +225,24 @@ The channel.
 The person that left.
 .It reason
 An optional reason.
+.El
+.\" Topic
+.Ss Topic
+This event is triggered when someone changed the channel's topic.
+.Bd -literal -offset indent
+function onTopic(server, channel, who, topic)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel.
+.It who
+The person who changed the topic.
+.It topic
+The new topic (may be empty).
 .El
 .\" SUPPORTED SOCKET MESSAGES
 .Sh SUPPORTED SOCKET MESSAGES

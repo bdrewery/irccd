@@ -103,6 +103,23 @@ static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
 	(void)count;
 }
 
+static void handleInvite(irc_session_t *s, const char *ev, const char *orig,
+			 const char **params, unsigned int count)
+{
+	Server *server = (Server *)irc_get_ctx(s);
+	string who = getNick(orig);
+
+	// if join-invite is set to true goes in
+	if (server->getJoinInvite())
+		server->join(params[1], "");
+
+	for (Plugin *p : Irccd::getInstance()->getPlugins())
+		p->onInvite(server, params[1], who);
+
+	(void)ev;
+	(void)count;
+}
+
 static void handleJoin(irc_session_t *s, const char *ev, const char *orig,
 			  const char **params, unsigned int count)
 {
@@ -119,18 +136,22 @@ static void handleJoin(irc_session_t *s, const char *ev, const char *orig,
 	(void)count;
 }
 
-static void handleInvite(irc_session_t *s, const char *ev, const char *orig,
-			 const char **params, unsigned int count)
+static void handleMode(irc_session_t *s, const char *ev, const char *orig,
+		       const char **params, unsigned int count)
 {
 	Server *server = (Server *)irc_get_ctx(s);
-	string who = getNick(orig);
+	string nick, modeValue;
 
-	// if join-invite is set to true goes in
-	if (server->getJoinInvite())
-		server->join(params[1], "");
+	nick = getNick(orig);
 
-	for (Plugin *p : Irccd::getInstance()->getPlugins())
-		p->onInvite(server, params[1], who);
+	// params[2] is optional mode argument
+	if (params[2] != nullptr)
+		modeValue = params[2];
+
+	if (server->getIdentity().m_nickname != nick) {
+		for (Plugin *p : Irccd::getInstance()->getPlugins())
+			p->onMode(server, params[0], nick, params[1], modeValue);
+	}
 
 	(void)ev;
 	(void)count;
@@ -221,12 +242,13 @@ static irc_callbacks_t functions = {
 	.event_channel	= handleChannel,
 	.event_connect	= handleConnect,
 	.event_invite	= handleInvite,
+	.event_mode	= handleMode,
 	.event_nick	= handleNick,
+	.event_numeric	= handleNumeric,
 	.event_quit	= handleQuit,
 	.event_join	= handleJoin,
 	.event_part	= handlePart,
 	.event_topic	= handleTopic,
-	.event_numeric	= handleNumeric
 };
 
 /* }}} */

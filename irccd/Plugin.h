@@ -144,6 +144,18 @@ public:
 		       const std::string &message);
 
 	/**
+	 * A Lua function triggered on a channel mode event.
+	 *
+	 * @param server the server
+	 * @param channel on which channel
+	 * @param who who changed the mode
+	 * @param mode the mode
+	 * @param modeArg an optional mode argument
+	 */
+	void onMode(Server *server, const std::string &channel, const std::string &who,
+		    const std::string &mode, const std::string &modeArg);
+
+	/**
 	 * A Lua function triggered on a nick event.
 	 *
 	 * @param server the server

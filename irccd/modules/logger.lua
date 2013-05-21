@@ -28,6 +28,7 @@ local format = {
 	join	= ">> #u joined #c",
 	me	= "* #u #m",
 	message	= "%H:%M #u: #m",
+	mode	= ":: #u changed the mode to: #m #M",
 	part	= "<< #u left #c [#m]",
 	topic	= ":: #u changed the topic to: #m"
 }
@@ -52,6 +53,7 @@ local function loadConfig()
 	-- Extract parameters
 	configuration.home = general:requireOption("directory")
 
+	-- TODO: Beautify this.
 	if general:hasOption("format-join") then
 		format.join	= general:getOption("format-join")
 	end
@@ -60,6 +62,9 @@ local function loadConfig()
 	end
 	if general:hasOption("format-message") then
 		format.message	= general:getOption("format-message")
+	end
+	if general:hasOption("format-mode") then
+		format.message	= general:getOption("format-mode")
 	end
 	if general:hasOption("format-part") then
 		format.part	= general:getOption("format-part")
@@ -79,29 +84,22 @@ end
 loadConfig()
 
 -- Formatter, used to convert % and # variables
-local function convert(what, server, channel, who, message)
+local function convert(what, keywords)
 	-- First convert dates from % with date:format.
 	local date = util.dateNow()
 	local line = date:format(what)
 
-	-- Remove ~ if found
+	-- Remove ~ if found.
 	line = line:gsub("~", util.getHome())
 
 	-- Now convert the # with gsub.
-	local t = {
-		[ "c" ] = channel,
-		[ "m" ] = message,
-		[ "u" ] = who,
-		[ "s" ] = server:getName()
-	}
-
-	return line:gsub("#(.)", t)
+	return line:gsub("#(.)", keywords)
 end
 
 -- Open the file
-local function open(server, channel)
+local function open(keywords)
 	-- Convert variable substitutions
-	local path = convert(configuration.home, server, channel)
+	local path = convert(configuration.home, keywords)
 
 	-- Test if parent directory exists
 	local parent = util.dirname(path)
@@ -122,61 +120,82 @@ local function open(server, channel)
 	return file
 end
 
--- Log joins
-function onJoin(server, channel, nickname)
-	local file = open(server, channel)
-
-	if format.join ~= nil then
-		local line = convert(format.join, server, channel, nickname)
+local function write(what, table)
+	if what ~= nil then
+		local file = open(table)
+		local line = convert(what, table)
 
 		file:write(line .. "\n")
 		file:close()
 	end
 end
 
+-- Log joins
+function onJoin(server, channel, nickname)
+	local keywords = {
+		c = channel,
+		s = server:getName(),
+		u = nickname
+	}
+
+	write(format.join, keywords)
+end
+
 function onMe(server, channel, who, message)
-	local file = open(server, channel)
+	local keywords = {
+		c = channel,
+		s = server:getName(),
+		m = message,
+		u = who
+	}
 
-	if format.me ~= nil then
-		local line = convert(format.me, server, channel, who, message)
-
-		file:write(line .. "\n")
-		file:close()
-	end
+	write(format.me, keywords)
 end
 
 -- Log message
 function onMessage(server, channel, who, message)
-	local file = open(server, channel)
+	local keywords = {
+		c = channel,
+		s = server:getName(),
+		m = message,
+		u = who
+	}
 
-	if format.message ~= nil then
-		local line = convert(format.message, server, channel, who, message)
+	write(format.message, keywords)
+end
 
-		file:write(line .. "\n")
-		file:close()
-	end
+function onMode(server, channel, who, mode, modeArg)
+	local keywords = {
+		c = channel,
+		s = server:getName(),
+		m = mode,
+		M = modeArg,
+		u = who
+	}
+
+	write(format.mode, keywords)
 end
 
 -- Log parts
 function onPart(server, channel, nickname, reason)
-	local file = open(server, channel)
+	local keywords = {
+		c = channel,
+		s = server:getName(),
+		m = reason,
+		u = who
+	}
 
-	if format.part ~= nil then
-		local line = convert(format.part, server, channel, nickname, reason)
-
-		file:write(line .. "\n")
-		file:close()
-	end
+	write(format.part, keywords)
 end
 
 -- Log topic
 function onTopic(server, channel, who, topic)
-	local file = open(server, channel)
+	local keywords = {
+		c = channel,
+		s = server:getName(),
+		m = topic,
+		u = who
+	}
 
-	if format.topic ~= nil then
-		local line = convert(format.topic, server, channel, who, topic)
-
-		file:write(line .. "\n")
-		file:close()
-	end
+	write(format.topic, keywords)
 end
