@@ -135,6 +135,11 @@ Plugin::Plugin(void)
 {
 }
 
+Plugin::Plugin(const string &name)
+	:m_name(name)
+{
+}
+
 Plugin::~Plugin(void)
 {
 	lua_close(m_state);
@@ -162,12 +167,6 @@ const string & Plugin::getError(void) const
 bool Plugin::open(const std::string &path)
 {
 	ostringstream oss;
-
-	// Get plugin name and extract .lua from it
-	m_name = basename(path.c_str());
-	size_t pos;
-	if ((pos = m_name.find(".lua")) != string::npos)
-		m_name = m_name.substr(0, pos);
 
 	// Get the plugin directory, XDG config irccd + plugin name
 	oss << Util::configDirectory();

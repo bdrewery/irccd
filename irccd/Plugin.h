@@ -59,6 +59,7 @@ private:
 	bool loadLua(const std::string &path);
 public:
 	Plugin(void);
+	Plugin(const std::string &name);
 	~Plugin(void);
 
 	const std::string & getName(void) const;

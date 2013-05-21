@@ -34,8 +34,6 @@ void quit(void)
 		delete p;
 }
 
-#include <Util.h>
-
 int main(int argc, char **argv)
 {
 	Irccd *irccd = Irccd::getInstance();
@@ -47,7 +45,7 @@ int main(int argc, char **argv)
 			irccd->setConfigPath(string(optarg));
 			break;
 		case 'm':
-			irccd->setModulePath(string(optarg));
+			irccd->addPluginPath(string(optarg));
 			break;
 		case 'v':
 			irccd->setVerbosity(true);

@@ -34,49 +34,50 @@ namespace irccd {
 
 class Irccd {
 private:
-	static Irccd *m_instance;			/*! unique instance */
-
-	// Plugins
-	std::vector<Plugin *> m_plugins;		/*! list of plugins */
+	static Irccd *m_instance;			//! unique instance
 
 	// Config
-	std::string m_configPath;			/*! config file path */
+	std::string m_configPath;			//! config file path
 
-	std::vector<Server *> m_servers;		/*! list of servers */
+	// Plugins
+	std::vector<std::string> m_pluginDirs;		//! list of plugin directories
+	std::vector<std::string> m_pluginWanted;	//! list of wanted modules
+	std::vector<Plugin *> m_plugins;		//! list of plugins loaded
+
+	std::vector<Server *> m_servers;		//! list of servers
 
 	// Socket clients and listeners
-	std::vector<SocketServer *> m_socketServers;	/*! socket servers */
-	std::vector<SocketClient *> m_clients;		/*! socket clients */
-	SocketListener m_listener;			/*! socket listener */
+	std::vector<SocketServer *> m_socketServers;	//! socket servers
+	std::vector<SocketClient *> m_clients;		//! socket clients
+	SocketListener m_listener;			//! socket listener
 
 	// Identities
-	std::vector<Identity> m_identities;		/*! user identities */
-	Identity m_defaultIdentity;			/*! default identity */
+	std::vector<Identity> m_identities;		//! user identities
+	Identity m_defaultIdentity;			//! default identity
 
-	// Some paths
-	std::string m_modulePath;			/*! plugin directory */
-
-	void execute(const std::string &cmd);
 	void clientRead(SocketClient *client);
+	void execute(const std::string &cmd);
 
-	/* [listener] */
-
-	void extractInternet(const parser::Section &s);
-	void extractUnix(const parser::Section &s);
-	void readListeners(const parser::Parser &config);
-
-	/* [server] */
-
-	void extractChannels(const parser::Section &section, Server *server);
-	void readServers(const parser::Parser &config);
-
-	/* [identity] */
-	void readIdentities(const parser::Parser &config);
-
-	void readConfig(void);
+	/**
+	 * Open will call the below function in the same order they are
+	 * declared, do not change that.
+	 */
 	void openConfig(void);
 
-	void openModules(void);
+	// [general]
+	void openPlugins(void);
+
+	// [identity]
+	void openIdentities(const parser::Parser &config);
+
+	// [listener]
+	void openListeners(const parser::Parser &config);
+	void extractInternet(const parser::Section &s);
+	void extractUnix(const parser::Section &s);
+
+	// [server]
+	void openServers(const parser::Parser &config);
+	void extractChannels(const parser::Section &section, Server *server);
 
 	Irccd(void);
 public:
@@ -90,6 +91,22 @@ public:
 	static Irccd * getInstance(void);
 
 	/**
+	 * Add a plugin path to find other plugins.
+	 *
+	 * @param path the directory path
+	 */
+	void addPluginPath(const std::string &path);
+
+	/**
+	 * Add a wanted plugin, irccd will concatenate ".lua"
+	 * to the plugin name and try to find it in the
+	 * plugin directories.
+	 *
+	 * @param name the plugin name
+	 */
+	void addWantedPlugin(const std::string &name);
+
+	/**
 	 * Find a plugin by it's associated Lua State, so it can
 	 * be retrieved by every Lua bindings.
 	 *
@@ -97,13 +114,6 @@ public:
 	 * @return the plugin
 	 */
 	Plugin * findPlugin(lua_State *state) const;
-
-	/**
-	 * Set the plugin directory where to find .lua files
-	 *
-	 * @param path the directory path
-	 */
-	void setModulePath(const std::string &path);
 
 	/**
 	 * Get the servers list

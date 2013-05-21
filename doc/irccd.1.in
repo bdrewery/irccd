@@ -23,6 +23,7 @@
 .Nm irccd
 .Op Fl v
 .Op Fl c Ar config
+.Op Fl m Ar directory
 .Sh DESCRIPTION
 The irccd program aims to provide an IRC client that acts as a daemon.
 .Pp
@@ -55,6 +56,9 @@ The following options are available:
 .Bl -tag -width indent
 .It Fl c Ar config
 A path to a config file.
+.It Fl m Ar directory
+Add a directory where to find plugins. This option may be passed more than
+one time.
 .It Fl v
 Be more verbose
 .El

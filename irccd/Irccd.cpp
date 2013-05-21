@@ -151,22 +151,6 @@ static map<string, Handler> handlers = createHandlers();
 
 Irccd * Irccd::m_instance = nullptr;
 
-void Irccd::execute(const std::string &cmd)
-{
-	string cmdName;
-	size_t cmdDelim;
-
-	cmdDelim = cmd.find_first_of(" \t");
-	if (cmdDelim != string::npos) {
-		cmdName = cmd.substr(0, cmdDelim);
-		try {
-			handlers.at(cmdName)(this, cmd.substr(cmdDelim + 1));
-		} catch (out_of_range ex) {
-			Logger::warn("invalid command %s", cmdName.c_str());
-		}
-	}
-}
-
 void Irccd::clientRead(SocketClient *client)
 {
 	char data[128 + 1];
@@ -193,6 +177,152 @@ void Irccd::clientRead(SocketClient *client)
 
 	if (client->isFinished())
 		execute(client->getCommand());
+}
+
+void Irccd::execute(const std::string &cmd)
+{
+	string cmdName;
+	size_t cmdDelim;
+
+	cmdDelim = cmd.find_first_of(" \t");
+	if (cmdDelim != string::npos) {
+		cmdName = cmd.substr(0, cmdDelim);
+		try {
+			handlers.at(cmdName)(this, cmd.substr(cmdDelim + 1));
+		} catch (out_of_range ex) {
+			Logger::warn("invalid command %s", cmdName.c_str());
+		}
+	}
+}
+
+/* --------------------------------------------------------
+ * Open functions, read config and servers
+ * -------------------------------------------------------- */
+
+void Irccd::openConfig(void)
+{
+	if (m_configPath.length() == 0)
+		m_configPath = Util::configFilePath("irccd.conf");
+
+	Parser config(m_configPath);
+
+	if (!config.open()) {
+		Logger::warn("failed to open: %s", m_configPath.c_str());
+		exit(1);
+	}
+
+	// Extract parameters that are needed for the next
+	if (config.hasOption("general", "plugin-path"))
+		addPluginPath(config.getOption("general", "plugin-path").m_value);
+	if (config.hasOption("general", "plugins")) {
+		string list = config.getOption("general", "plugins").m_value;
+		for (string s : Util::split(list, " \t"))
+			addWantedPlugin(s);
+	}
+
+	// Modules should be opened first.
+	openPlugins();
+
+	openIdentities(config);
+	openListeners(config);
+	openServers(config);
+}
+
+void Irccd::openPlugins(void)
+{
+	// Get list of modules to load from config
+	for (const string &s : m_pluginWanted) {
+		Plugin *plugin;
+		ostringstream oss;
+		string finalPath;
+		bool found = false;
+
+		// Seek the plugin in the directories.
+		for (const string &path : m_pluginDirs) {
+			oss.clear();
+			oss << path << "/" << s << ".lua";
+
+			finalPath = oss.str();
+			if (Util::exist(finalPath)) {
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			Logger::warn("Plugin %s not found", s.c_str());
+			continue;
+		}
+
+		plugin = new Plugin(s);
+
+		/*
+		 * At this step, the open function will open the lua
+		 * script, that script may want to call some bindings
+		 * directly so we need to add it to the registered
+		 * Lua plugins even if it has failed. So we remove
+		 * it only on failure and expect plugins to be well
+		 * coded.
+		 */
+		m_plugins.push_back(plugin);	// don't remove that
+
+		if (!plugin->open(finalPath)) {
+			Logger::warn("Failed to load module %s: %s",
+			    s.c_str(), plugin->getError().c_str());
+
+			m_plugins.erase(remove(m_plugins.begin(),
+			    m_plugins.end(), plugin), m_plugins.end());
+			delete plugin;
+		}
+	}
+}
+
+void Irccd::openIdentities(const parser::Parser &config)
+{
+	for (Section &s: config.findSections("identity")) {
+		Identity identity;
+
+		try {
+			identity.m_name = s.requireOption<string>("name");
+
+			if (s.hasOption("nickname"))
+				identity.m_nickname = s.getOption<string>("nickname");
+			if (s.hasOption("username"))
+				identity.m_username = s.getOption<string>("username");
+			if (s.hasOption("realname"))
+				identity.m_realname = s.getOption<string>("realname");
+			if (s.hasOption("version"))
+				identity.m_ctcpversion = s.getOption<string>("version");
+
+			Logger::log("Found identity %s (%s, %s, \"%s\")", identity.m_name.c_str(),
+			    identity.m_nickname.c_str(), identity.m_username.c_str(),
+			    identity.m_realname.c_str());
+
+			m_identities.push_back(identity);
+		} catch (NotFoundException ex) {
+			Logger::log("Section \"identity\" requires %s", ex.which().c_str());
+		}
+	};
+}
+
+void Irccd::openListeners(const Parser &config)
+{
+	for (Section &s : config.findSections("listener")) {
+		try {
+			string type;
+
+			type = s.requireOption<string>("type");
+
+			if (type == "internet")
+				extractInternet(s);
+			else if (type == "unix")
+				extractUnix(s);
+			else
+				Logger::warn("unknown listener type `%s'", type.c_str());
+		} catch (NotFoundException ex) {
+			Logger::warn("Listener requires %s", ex.which().c_str());
+		}
+	}
 }
 
 void Irccd::extractInternet(const Section &s)
@@ -248,53 +378,7 @@ void Irccd::extractUnix(const Section &s)
 	}
 }
 
-void Irccd::readListeners(const Parser &config)
-{
-	for (Section &s : config.findSections("listener")) {
-		try {
-			string type;
-
-			type = s.requireOption<string>("type");
-
-			if (type == "internet")
-				extractInternet(s);
-			else if (type == "unix")
-				extractUnix(s);
-			else
-				Logger::warn("unknown listener type `%s'", type.c_str());
-		} catch (NotFoundException ex) {
-			Logger::warn("Listener requires %s", ex.which().c_str());
-		}
-	}
-}
-
-void Irccd::extractChannels(const Section &section, Server *server)
-{
-	vector<string> channels;
-	string list, name, password;
-	size_t colon;
-
-	if (section.hasOption("channels")) {
-		list = section.getOption<string>("channels");
-		channels = Util::split(list, " \t");
-
-		for (string s : channels) {
-			// detect an optional channel password
-			colon = s.find_first_of(':');
-			if (colon != string::npos) {
-				name = s.substr(0, colon);
-				password = s.substr(colon + 1);
-			} else {
-				name = s;
-				password = "";
-			}
-
-			server->addChannel(name, password);
-		}
-	}
-}
-
-void Irccd::readServers(const Parser &config)
+void Irccd::openServers(const Parser &config)
 {
 	for (Section &s: config.findSections("server")) {
 		Server *server = new Server();
@@ -331,97 +415,28 @@ void Irccd::readServers(const Parser &config)
 	}
 }
 
-void Irccd::readIdentities(const parser::Parser &config)
+void Irccd::extractChannels(const Section &section, Server *server)
 {
-	for (Section &s: config.findSections("identity")) {
-		Identity identity;
+	vector<string> channels;
+	string list, name, password;
+	size_t colon;
 
-		try {
-			identity.m_name = s.requireOption<string>("name");
+	if (section.hasOption("channels")) {
+		list = section.getOption<string>("channels");
+		channels = Util::split(list, " \t");
 
-			if (s.hasOption("nickname"))
-				identity.m_nickname = s.getOption<string>("nickname");
-			if (s.hasOption("username"))
-				identity.m_username = s.getOption<string>("username");
-			if (s.hasOption("realname"))
-				identity.m_realname = s.getOption<string>("realname");
-			if (s.hasOption("version"))
-				identity.m_ctcpversion = s.getOption<string>("version");
-
-			Logger::log("Found identity %s (%s, %s, \"%s\")", identity.m_name.c_str(),
-			    identity.m_nickname.c_str(), identity.m_username.c_str(),
-			    identity.m_realname.c_str());
-
-			m_identities.push_back(identity);
-		} catch (NotFoundException ex) {
-			Logger::log("Section \"identity\" requires %s", ex.which().c_str());
-		}
-	};
-}
-
-void Irccd::readConfig(void)
-{
-	Parser config(m_configPath);
-
-	if (!config.open()) {
-		Logger::warn("failed to open: %s", m_configPath.c_str());
-		exit(1);
-	}
-
-	readIdentities(config);
-	readListeners(config);
-	readServers(config);
-}
-
-void Irccd::openConfig(void)
-{
-	if (m_configPath.length() == 0) {
-		m_configPath = Util::configFilePath("irccd.conf");
-		readConfig();
-	} else
-		readConfig();
-}
-
-void Irccd::openModules(void)
-{
-	Directory dir(m_modulePath);
-
-	if (!dir.open(true)) {
-		Logger::warn("Failed to open %s: %s", m_modulePath.c_str(),
-		    dir.getError().c_str());
-	} else {
-		for (const Entry &s : dir.getEntries()) {
-			Plugin *plugin;
-			ostringstream oss;
-
-			if (s.m_isDirectory) {
-				Logger::warn("%s is a directory", s.m_name.c_str());
-				continue;
+		for (string s : channels) {
+			// detect an optional channel password
+			colon = s.find_first_of(':');
+			if (colon != string::npos) {
+				name = s.substr(0, colon);
+				password = s.substr(colon + 1);
+			} else {
+				name = s;
+				password = "";
 			}
 
-			Logger::log("Opening module %s", s.m_name.c_str());
-
-			plugin = new Plugin();
-			oss << m_modulePath;
-			oss << "/" << s.m_name;
-
-			/*
-			 * At this step, the open function will open the lua
-			 * script, that script may want to call some bindings
-			 * directly so we need to add it to the registered
-			 * Lua plugins even if it has failed. So we remove
-			 * it only on failure and expect plugins to be well
-			 * coded.
-			 */
-			m_plugins.push_back(plugin);
-			if (!plugin->open(oss.str())) {
-				Logger::warn("failed to load module %s: %s",
-				    s.m_name.c_str(), plugin->getError().c_str());
-
-				m_plugins.erase(remove(m_plugins.begin(),
-				    m_plugins.end(), plugin), m_plugins.end());
-				delete plugin;
-			}
+			server->addChannel(name, password);
 		}
 	}
 }
@@ -435,7 +450,7 @@ Irccd::Irccd(void)
 	Logger::setVerbose(false);
 
 	// Set some defaults
-	m_modulePath = string(MODDIR);		// see config.h.in
+	addPluginPath(MODDIR);		// see config.h.in
 }
 
 Irccd::~Irccd(void)
@@ -450,6 +465,16 @@ Irccd * Irccd::getInstance(void)
 	return m_instance;
 }
 
+void Irccd::addPluginPath(const string &path)
+{
+	m_pluginDirs.push_back(path);
+}
+
+void Irccd::addWantedPlugin(const string &name)
+{
+	m_pluginWanted.push_back(name);
+}
+
 Plugin * Irccd::findPlugin(lua_State *state) const
 {
 	for (Plugin *p: m_plugins)
@@ -457,11 +482,6 @@ Plugin * Irccd::findPlugin(lua_State *state) const
 			return p;
 
 	return nullptr;
-}
-
-void Irccd::setModulePath(const std::string &path)
-{
-	m_modulePath = path;
 }
 	
 vector<Server *> & Irccd::getServers(void)
@@ -517,7 +537,6 @@ int Irccd::run(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
-	openModules();
 	openConfig();
 
 	// Start all servers
