@@ -33,8 +33,8 @@ local function loadWords()
 	local file, err = io.open(path)
 
 	if file == nil then
-		logger.log("Could not open: " .. path .. ": " .. err)
-		logger.log("Using default answers")
+		logger.warn("Could not open file: " .. err)
+		logger.warn("Using default answers")
 		answers = default
 	else
 		for l in file:lines() do

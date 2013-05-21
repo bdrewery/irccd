@@ -28,16 +28,27 @@ using namespace std;
 
 namespace logger {
 
-static int log(lua_State *L)
+static string makeMessage(lua_State *L, const string &message)
 {
 	Plugin *p;
 	ostringstream oss;
 
 	p = Irccd::getInstance()->findPlugin(L);
-	oss << "[plugin]" << " " << p->getName() << ": ";
-	oss << luaL_checkstring(L, 1);
+	oss << "[plugin]" << " " << p->getName() << ": " << message;
 
-	Logger::log("%s", oss.str().c_str());
+	return oss.str();
+}
+
+static int log(lua_State *L)
+{
+	Logger::log("%s", makeMessage(L, luaL_checkstring(L, 1)).c_str());
+
+	return 0;
+}
+
+static int warn(lua_State *L)
+{
+	Logger::warn("%s", makeMessage(L, luaL_checkstring(L, 1)).c_str());
 
 	return 0;
 }
@@ -46,6 +57,7 @@ static int log(lua_State *L)
 
 const luaL_Reg functions[] = {
 	{ "log",	logger::log		},
+	{ "warn",	logger::warn		},
 	{ nullptr,	nullptr			}
 };
 
