@@ -206,7 +206,12 @@ void Plugin::onNick(Server *server, const string &oldnick, const string &newnick
 	callLua("onNick", 0, "S s s", server, oldnick.c_str(), newnick.c_str());
 }
 
-void Plugin::onPart(Server *server, const string &channel, const string &who, const string reason)
+void Plugin::onPart(Server *server, const string &channel, const string &who, const string &reason)
 {
 	callLua("onPart", 0, "S s s s", server, channel.c_str(), who.c_str(), reason.c_str());
+}
+
+void Plugin::onTopic(Server *server, const string &channel, const string &who, const string &topic)
+{
+	callLua("onTopic", 0, "S s s s", server, channel.c_str(), who.c_str(), topic.c_str());
 }

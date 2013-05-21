@@ -196,15 +196,37 @@ static void handlePart(irc_session_t *s, const char *ev, const char *orig,
 	(void)count;
 }
 
+static void handleTopic(irc_session_t *s, const char *ev, const char *orig,
+			const char **params, unsigned int count)
+{
+	Server *server = (Server *)irc_get_ctx(s);
+	string topic = "", nick;
+
+	nick = getNick(orig);
+
+	// params[1] is the optional new topic
+	if (params[1] != nullptr)
+		topic = params[1];
+
+	if (server->getIdentity().m_nickname != nick) {
+		for (Plugin *p : Irccd::getInstance()->getPlugins())
+			p->onTopic(server, params[0], nick, topic);
+	}
+
+	(void)ev;
+	(void)count;
+}
+
 static irc_callbacks_t functions = {
-	.event_channel = handleChannel,
-	.event_connect = handleConnect,
-	.event_invite = handleInvite,
-	.event_nick = handleNick,
-	.event_quit = handleQuit,
-	.event_join = handleJoin,
-	.event_part = handlePart,
-	.event_numeric = handleNumeric
+	.event_channel	= handleChannel,
+	.event_connect	= handleConnect,
+	.event_invite	= handleInvite,
+	.event_nick	= handleNick,
+	.event_quit	= handleQuit,
+	.event_join	= handleJoin,
+	.event_part	= handlePart,
+	.event_topic	= handleTopic,
+	.event_numeric	= handleNumeric
 };
 
 /* }}} */

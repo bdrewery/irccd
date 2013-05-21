@@ -28,7 +28,8 @@ local format = {
 	join	= ">> #u joined #c",
 	me	= "* #u #m",
 	message	= "%H:%M #u: #m",
-	part	= "<< #u left #c [#m]"
+	part	= "<< #u left #c [#m]",
+	topic	= ":: #u changed the topic to: #m"
 }
 
 -- Load the config.
@@ -51,7 +52,7 @@ local function loadConfig()
 	-- Extract parameters
 	configuration.home = general:requireOption("directory")
 
-	if (general:hasOption("format-join")) then
+	if general:hasOption("format-join") then
 		format.join	= general:getOption("format-join")
 	end
 	if general:hasOption("format-me") then
@@ -60,8 +61,18 @@ local function loadConfig()
 	if general:hasOption("format-message") then
 		format.message	= general:getOption("format-message")
 	end
-	if (general:hasOption("format-part")) then
+	if general:hasOption("format-part") then
 		format.part	= general:getOption("format-part")
+	end
+	if general:hasOption("format-topic") then
+		format.topic	= general:getOption("format-topic")
+	end
+
+	-- Set to nil means no log, so in config is ""
+	for k, v in pairs(format) do
+		if #format[k] <= 0 then
+			format[k] = nil
+		end
 	end
 end
 
@@ -115,39 +126,57 @@ end
 function onJoin(server, channel, nickname)
 	local file = open(server, channel)
 
-	local line = convert(format.join, server, channel, nickname)
+	if format.join ~= nil then
+		local line = convert(format.join, server, channel, nickname)
 
-	file:write(line .. "\n")
-	file:close()
+		file:write(line .. "\n")
+		file:close()
+	end
 end
 
 function onMe(server, channel, who, message)
 	local file = open(server, channel)
 
-	-- Convert the message line
-	local line = convert(format.me, server, channel, who, message)
+	if format.me ~= nil then
+		local line = convert(format.me, server, channel, who, message)
 
-	file:write(line .. "\n")
-	file:close()
+		file:write(line .. "\n")
+		file:close()
+	end
 end
 
 -- Log message
 function onMessage(server, channel, who, message)
 	local file = open(server, channel)
 
-	-- Convert the message line
-	local line = convert(format.message, server, channel, who, message)
+	if format.message ~= nil then
+		local line = convert(format.message, server, channel, who, message)
 
-	file:write(line .. "\n")
-	file:close()
+		file:write(line .. "\n")
+		file:close()
+	end
 end
 
 -- Log parts
 function onPart(server, channel, nickname, reason)
 	local file = open(server, channel)
 
-	local line = convert(format.part, server, channel, nickname, reason)
+	if format.part ~= nil then
+		local line = convert(format.part, server, channel, nickname, reason)
 
-	file:write(line .. "\n")
-	file:close()
+		file:write(line .. "\n")
+		file:close()
+	end
+end
+
+-- Log topic
+function onTopic(server, channel, who, topic)
+	local file = open(server, channel)
+
+	if format.topic ~= nil then
+		local line = convert(format.topic, server, channel, who, topic)
+
+		file:write(line .. "\n")
+		file:close()
+	end
 end

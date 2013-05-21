@@ -161,7 +161,18 @@ public:
 	 * @param reason an optional reason
 	 */
 	void onPart(Server *server, const std::string &channel, const std::string &who,
-		    const std::string reason);
+		    const std::string &reason);
+
+	/**
+	 * A Lua function triggered when someone change the channel topic.
+	 *
+	 * @param server the server
+	 * @param channel on which channel
+	 * @param who who changed the topic
+	 * @param topic the new topic
+	 */
+	void onTopic(Server *server, const std::string &channel, const std::string &who,
+		     const std::string &topic);
 };
 
 } // !irccd

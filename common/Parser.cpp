@@ -251,6 +251,10 @@ void Parser::readOption(int lineno, const string &line)
 
 		if (last - begin > 0)
 			value = value.substr(begin, last - begin);
+		else
+			value.clear();
+
+		// Add the option if the key is not empty
 		if (key.length() > 0)
 			addOption(key, value);
 	}
