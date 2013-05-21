@@ -1,0 +1,7 @@
+IRC Client Daemon CREDITS:
+
+* libircclient, http://www.ulduzsoft.com/linux/libircclient/.
+	Very powerful and great IRC C library.
+
+* Lua, http://www.lua.org
+	My favorite scripting language, small, fast, very convenient library.

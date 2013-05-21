@@ -17,9 +17,10 @@
 --
 
 local plugin = require("plugin")
+local parser = require("parser")
 
 local words = { }
-local authorized = { }
+local answer = "Please check your spelling"
 
 function readFile(table, filename)
 	local f, err = io.open(plugin.getHome() .. "/" .. filename)
@@ -37,11 +38,6 @@ end
 -- Reload every words
 function reloadWords()
 	readFile(words, "words.txt")
-end
-
--- Reload every users allowed to add, remove or reload
-function reloadUsers()
-	readFile(authorized, "users.txt")
 end
 
 reloadWords()
