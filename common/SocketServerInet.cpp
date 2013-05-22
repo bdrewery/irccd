@@ -57,13 +57,11 @@ bool SocketServerInet::bind6(void)
 		sin.sin6_port = htons(m_port);
 		sin.sin6_addr = (any) ? in6addr_any : addr;
 
-		ret = ::bind(m_sock, (sockaddr *)&sin, sizeof (sin)) != -1;
+		// Disable IPV6_V6ONLY if v4 is wanted too
+		int mode = (m_inet & Socket::Inet4) ? 0 : 1;
+		setsockopt(m_sock, IPPROTO_IPV6, IPV6_V6ONLY, &mode, sizeof (mode));
 
-		// On success, disable ipv6 only if v4 is wanted too
-		if (ret) {
-			int mode = (m_family & Socket::Inet4) ? 0 : 1;
-			setsockopt(m_sock, IPPROTO_IPV6, IPV6_V6ONLY, &mode, sizeof (mode));
-		}
+		ret = ::bind(m_sock, (sockaddr *)&sin, sizeof (sin)) != -1;
 	}
 
 	return ret;

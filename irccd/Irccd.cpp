@@ -344,7 +344,7 @@ void Irccd::extractInternet(const Section &s)
 	SocketServerInet *inet;
 	vector<string> protocols;
 	string address, family;
-	int port, finalFamily = SocketServerInet::Inet4;
+	int port, finalFamily = 0;
 
 	address = s.getOption<string>("address");
 	family = s.getOption<string>("family");
@@ -354,12 +354,14 @@ void Irccd::extractInternet(const Section &s)
 	protocols = Util::split(family, " \t");
 	for (string p : protocols) {
 		if (p == "ipv4")
-			finalFamily |= SocketServerInet::Inet4;
+			finalFamily |= Socket::Inet4;
 		else if (p == "ipv6")
-			finalFamily |= SocketServerInet::Inet6;
+			finalFamily |= Socket::Inet6;
 		else {
 			Logger::warn("parameter family is one of them: ipv4, ipv6");
 			Logger::warn("defaulting to ipv4");
+	
+			finalFamily |= Socket::Inet4;
 		}
 	}
 

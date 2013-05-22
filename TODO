@@ -2,4 +2,3 @@ IRC Client Daemon TODO:
 
 	o Add an option to do not call plugin if the origin is the bot itself.
 	o Update logger to add [].
-	o Fix ipv4 + ipv6 listener problem.
