@@ -230,6 +230,14 @@ public:
 	 * @param message the message to send
 	 */
 	void say(const std::string &target, const std::string &message);
+
+	/**
+	 * Change a channel topic.
+	 *
+	 * @param channel the channel target
+	 * @param topic the new topic
+	 */
+	void topic(const std::string &channel, const std::string &topic);
 };
 
 } // !irccd

@@ -37,8 +37,8 @@ static void helpJoin(void)
 {
 	Logger::warn("usage: %s join server channel [password]\n", getprogname());
 	Logger::warn("Join a channel on a specific server registered in irccd. The server");
-	Logger::warn(" is referenced by the parameter server. Parameter channel is the channel");
-	Logger::warn(" to join. An optional password may be set as password parameter.\n");
+	Logger::warn("is referenced by the parameter server. Parameter channel is the channel");
+	Logger::warn("to join. An optional password may be set as password parameter.\n");
 
 	Logger::warn("Example:");
 	Logger::warn("\t%s join freenode #staff", getprogname());
@@ -48,7 +48,7 @@ static void helpKick(void)
 {
 	Logger::warn("usage: %s kick server nick channel [reason]\n", getprogname());
 	Logger::warn("Kick someone from a channel. The parameter reason is optional and");
-	Logger::warn(" may be ommited but when specified it must be unclosed between quotes.\n");
+	Logger::warn("may be ommited but when specified it must be unclosed between quotes.\n");
 
 	Logger::warn("Example:");
 	Logger::warn("\t%s kick freenode jean #staff \"Stop flooding\"", getprogname());
@@ -67,9 +67,9 @@ static void helpMessage(void)
 {
 	Logger::warn("usage: %s message server target message\n", getprogname());
 	Logger::warn("Send a message to someone or a channel. The server parameter is one registered");
-	Logger::warn(" in irccd config. The target may be a channel or a real person");
-	Logger::warn(" a real person. If the message contains more than one word it must be enclosed between");
-	Logger::warn(" between quotes.\n");
+	Logger::warn("in irccd config. The target may be a channel or a real person");
+	Logger::warn("a real person. If the message contains more than one word it must be enclosed between");
+	Logger::warn("between quotes.\n");
 
 	Logger::warn("Example:");
 	Logger::warn("\t%s message freenode #staff \"Hello from irccd\"", getprogname());
@@ -94,6 +94,16 @@ static void helpPart(void)
 	Logger::warn("\t%s part freenode #staff", getprogname());
 }
 
+static void helpTopic(void)
+{
+	Logger::warn("usage: %s topic server channel topic\n", getprogname());
+	Logger::warn("Set the new topic of a channel. Topic must be enclosed between");
+	Logger::warn("quotes.\n");
+
+	Logger::warn("Example:");
+	Logger::warn("\t%s topic freenode #wmfs \"This is the best channel\"");
+}
+
 static map<string, HelpHandler> createHelpHandlers(void)
 {
 	map<string, HelpHandler> helpHandlers;
@@ -104,6 +114,7 @@ static map<string, HelpHandler> createHelpHandlers(void)
 	helpHandlers["message"] = helpMessage;
 	helpHandlers["nick"] = helpNick;
 	helpHandlers["part"] = helpPart;
+	helpHandlers["topic"] = helpTopic;
 
 	return helpHandlers;
 }
@@ -216,6 +227,19 @@ static void handlePart(Irccdctl *ctl, int argc, char **argv)
 	}
 }
 
+static void handleTopic(Irccdctl *ctl, int argc, char **argv)
+{
+	ostringstream oss;
+
+	if (argc < 3)
+		Logger::warn("topic requires 3 arguments");
+	else {
+		oss << "TOPIC " << argv[0] << " " << argv[1] << " ";
+		oss << argv[2] << "\n";
+		ctl->sendRaw(oss.str());
+	}
+}
+
 static map<string, Handler> createHandlers(void)
 {
 	map<string, Handler> handlers;
@@ -227,6 +251,7 @@ static map<string, Handler> createHandlers(void)
 	handlers["message"] = handleMessage;
 	handlers["nick"] = handleNick;
 	handlers["part"] = handlePart;
+	handlers["topic"] = handleTopic;
 
 	return handlers;
 }
@@ -330,9 +355,14 @@ void Irccdctl::usage(void)
 	Logger::warn("usage: %s [-cv] <commands> [<args>]\n", getprogname());
 
 	Logger::warn("Commands supported:");
+	Logger::warn("\thelp\t\tGet this help");
 	Logger::warn("\tjoin\t\tJoin a channel");
+	Logger::warn("\tkick\t\tKick someone from a channel");
+	Logger::warn("\tme\t\tSend a CTCP Action (same as /me)");
 	Logger::warn("\tmessage\t\tSend a message to someone or a channel");
+	Logger::warn("\tnick\t\tChange your nickname");
 	Logger::warn("\tpart\t\tLeave a channel");
+	Logger::warn("\ttopic\t\tChange a channel topic");
 
 	Logger::warn("\nFor more information on a command, type %s help <command>", getprogname());
 

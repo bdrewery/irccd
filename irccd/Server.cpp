@@ -405,3 +405,9 @@ void Server::say(const string &target, const string &message)
 	if (m_threadStarted)
 		irc_cmd_msg(m_session, target.c_str(), message.c_str());
 }
+
+void Server::topic(const string &channel, const string &topic)
+{
+	if (m_threadStarted)
+		irc_cmd_topic(m_session, channel.c_str(), topic.c_str());
+}

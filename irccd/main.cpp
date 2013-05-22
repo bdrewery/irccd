@@ -39,12 +39,12 @@ int main(int argc, char **argv)
 	Irccd *irccd = Irccd::getInstance();
 	int ch;
 
-	while ((ch = getopt(argc, argv, "c:m:v")) != -1) {
+	while ((ch = getopt(argc, argv, "c:p:v")) != -1) {
 		switch (ch) {
 		case 'c':
 			irccd->setConfigPath(string(optarg));
 			break;
-		case 'm':
+		case 'p':
 			irccd->addPluginPath(string(optarg));
 			break;
 		case 'v':

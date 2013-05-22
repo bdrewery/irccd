@@ -39,12 +39,12 @@ using namespace std;
 
 /* {{{ Client handlers */
 
-typedef function<void(Irccd *, const std::string &params)> Handler;
+typedef function<void(Irccd *, const string &params)> Handler;
 
 static void handleJoin(Irccd *irccd, const string &cmd)
 {
 	Server *server;
-	std::vector<string> params = Util::split(cmd, " \t", 3);
+	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() < 2) {
 		Logger::warn("JOIN needs at least 2 arguments");
@@ -61,7 +61,7 @@ static void handleJoin(Irccd *irccd, const string &cmd)
 static void handleKick(Irccd *irccd, const string &cmd)
 {
 	Server *server;
-	std::vector<string> params = Util::split(cmd, " \t", 4);
+	vector<string> params = Util::split(cmd, " \t", 4);
 
 	if (params.size() < 2) {
 		Logger::warn("KICK needs at least 3 arguments");
@@ -78,7 +78,7 @@ static void handleKick(Irccd *irccd, const string &cmd)
 static void handleMe(Irccd *irccd, const string &cmd)
 {
 	Server *server;
-	std::vector<string> params = Util::split(cmd, " \t", 3);
+	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() != 3) {
 		Logger::warn("ME needs 3 arguments");
@@ -91,7 +91,7 @@ static void handleMe(Irccd *irccd, const string &cmd)
 static void handleMessage(Irccd *irccd, const string &cmd)
 {
 	Server *server;
-	std::vector<string> params = Util::split(cmd, " \t", 3);
+	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() != 3) {
 		Logger::warn("MSG needs 3 arguments");
@@ -104,7 +104,7 @@ static void handleMessage(Irccd *irccd, const string &cmd)
 static void handleNick(Irccd *irccd, const string &cmd)
 {
 	Server *server;
-	std::vector<string> params = Util::split(cmd, " \t", 2);
+	vector<string> params = Util::split(cmd, " \t", 2);
 
 	if (params.size() != 2) {
 		Logger::warn("NICK needs 2 arguments");
@@ -117,13 +117,26 @@ static void handleNick(Irccd *irccd, const string &cmd)
 static void handlePart(Irccd *irccd, const string &cmd)
 {
 	Server *server;
-	std::vector<string> params = Util::split(cmd, " \t", 2);
+	vector<string> params = Util::split(cmd, " \t", 2);
 
 	if (params.size() != 2) {
 		Logger::warn("PART needs 2 arguments");
 	} else {
 		if ((server = irccd->findServer(params[0])) != nullptr)
 			server->part(params[1]);
+	}
+}
+
+static void handleTopic(Irccd *irccd, const string &cmd)
+{
+	Server *server;
+	vector<string> params = Util::split(cmd, " \t", 3);
+
+	if (params.size() != 3) {
+		Logger::warn("TOPIC needs 3 arguments");
+	} else {
+		if ((server = irccd->findServer(params[0])) != nullptr)
+			server->topic(params[1], params[2]);
 	}
 }
 
@@ -137,6 +150,7 @@ static map<string, Handler> createHandlers(void)
 	handlers["MSG"] = handleMessage;
 	handlers["NICK"] = handleNick;
 	handlers["PART"] = handlePart;
+	handlers["TOPIC"] = handleTopic;
 
 	return handlers;
 }
@@ -171,7 +185,7 @@ void Irccd::clientRead(SocketClient *client)
 		if (!ex.disconnected())
 			Logger::log("%s", ex.what());
 
-		m_clients.erase(std::remove(m_clients.begin(), m_clients.end(), client), m_clients.end());
+		m_clients.erase(remove(m_clients.begin(), m_clients.end(), client), m_clients.end());
 		m_listener.removeClient(client);
 	}
 
@@ -179,7 +193,7 @@ void Irccd::clientRead(SocketClient *client)
 		execute(client->getCommand());
 }
 
-void Irccd::execute(const std::string &cmd)
+void Irccd::execute(const string &cmd)
 {
 	string cmdName;
 	size_t cmdDelim;
@@ -494,7 +508,7 @@ vector<Plugin *> & Irccd::getPlugins(void)
 	return m_plugins;
 }
 
-void Irccd::setConfigPath(const std::string &path)
+void Irccd::setConfigPath(const string &path)
 {
 	m_configPath = path;
 }
@@ -504,7 +518,7 @@ void Irccd::setVerbosity(bool verbose)
 	Logger::setVerbose(verbose);
 }
 
-Server * Irccd::findServer(const std::string &name)
+Server * Irccd::findServer(const string &name)
 {
 	for (Server *s : m_servers)
 		if (s->getName() == name)
@@ -514,7 +528,7 @@ Server * Irccd::findServer(const std::string &name)
 	return nullptr;
 }
 
-const Identity & Irccd::findIdentity(const std::string &name)
+const Identity & Irccd::findIdentity(const string &name)
 {
 	/*
 	 * When name is length 0 that mean user hasn't defined an identity

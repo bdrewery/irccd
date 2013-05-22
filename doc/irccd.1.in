@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd MONTH DAY, YEAR
+.Dd @MONTH@ @DAY@, @YEAR@
 .Dt IRCCD 1
 .Os
 .Sh NAME
@@ -23,7 +23,7 @@
 .Nm irccd
 .Op Fl v
 .Op Fl c Ar config
-.Op Fl m Ar directory
+.Op Fl p Ar directory
 .Sh DESCRIPTION
 The irccd program aims to provide an IRC client that acts as a daemon.
 .Pp
@@ -40,14 +40,14 @@ Highly extensible with Lua plugins,
 .El
 .Pp
 The application run as daemon and wait for events in both IRC servers
-or from the irccdctl(8) utility.
+or from the irccdctl(1) utility.
 .Pp
 For instance, when IRC events happen, it calls Lua functions from plugins to
 execute specific actions. Example: someone join the channel, the
 .Nm irccd
 daemon will notify all plugins that a specific user joined.
 .Pp
-But it is also possible to use irccdctl(8) to control
+But it is also possible to use irccdctl(1) to control
 .Nm irccd .
 For instance, you may want at any time to change the nick of the irccd daemon,
 is it possible with one command.
@@ -56,11 +56,11 @@ The following options are available:
 .Bl -tag -width indent
 .It Fl c Ar config
 A path to a config file.
-.It Fl m Ar directory
+.It Fl p Ar directory
 Add a directory where to find plugins. This option may be passed more than
 one time.
 .It Fl v
-Be more verbose
+Be more verbose.
 .El
 .\" LUA INTERFACE
 .Sh LUA INTERFACE
@@ -252,7 +252,7 @@ The new topic (may be empty).
 .Sh SUPPORTED SOCKET MESSAGES
 This section explain how to control
 .Nm irccd
-with socket messages. While a lot of people should use irccdctl(8) to control
+with socket messages. While a lot of people should use irccdctl(1) to control
 .Nm irccd
 sometimes it is useful to connect to it directly.
 .Pp
@@ -346,9 +346,40 @@ The server.
 .It nickname
 The new nickname.
 .El
+.\" PART
+.Ss PART
+This command is used to leave a channel from a specific server.
+.Bd -literal -offset indent
+PART server channel\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It channel
+The channel to leave.
+.El
+.\" TOPIC
+.Ss TOPIC
+This command is used to set a channel topic. Note that you obviously need
+the rights to do that.
+.Bd -literal -offset indent
+TOPIC server channel topic\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It channel
+The channel.
+.It topic
+The new topic.
+.El
 .\" SEE ALSO
 .Sh SEE ALSO
-.Xr irccdctl 8 ,
+.Xr irccdctl 1 ,
 .Xr irccd.conf 5
 .\" AUTHORS
 .Sh AUTHORS

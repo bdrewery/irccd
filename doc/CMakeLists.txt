@@ -19,6 +19,11 @@
 option(WITH_MAN "Install man pages" On)
 option(WITH_LDOC "Install Lua API documentation" On)
 
+# Update man pages date
+set(MONTH "May")
+set(DAY 30)
+set(YEAR 2013)
+
 function(DEFINE_MAN file man)
 	if (WITH_MAN)
 		# Remove .in end
@@ -34,6 +39,7 @@ endfunction()
 
 DEFINE_MAN(irccd.1.in man1)
 DEFINE_MAN(irccd.conf.5.in man5)
+DEFINE_MAN(irccdctl.1.in man1)
 DEFINE_MAN(irccdctl.conf.5.in man5)
 
 find_file(
