@@ -67,24 +67,28 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#util.dirname">util.dirname&nbsp;(path)</a></td>
-	<td class="summary">Get the parent path of a file.</td>
+	<td class="name" nowrap><a href="#util.basename">util.basename&nbsp;(path)</a></td>
+	<td class="summary">Get the file name of a full path.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#util.getHome">util.getHome&nbsp;()</a></td>
-	<td class="summary">Get the home directory.</td>
+	<td class="name" nowrap><a href="#util.dateNow">util.dateNow&nbsp;()</a></td>
+	<td class="summary">Create a Date object.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#util.dirname">util.dirname&nbsp;(path)</a></td>
+	<td class="summary">Get the parent path of a file.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#util.exist">util.exist&nbsp;(path)</a></td>
 	<td class="summary">Check if a file exists.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#util.mkdir">util.mkdir&nbsp;(path)</a></td>
-	<td class="summary">Create a directory.</td>
+	<td class="name" nowrap><a href="#util.getHome">util.getHome&nbsp;()</a></td>
+	<td class="summary">Get the home directory.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#util.dateNow">util.dateNow&nbsp;()</a></td>
-	<td class="summary">Create a Date object.</td>
+	<td class="name" nowrap><a href="#util.mkdir">util.mkdir&nbsp;(path)</a></td>
+	<td class="summary">Create a directory.</td>
 	</tr>
 </table>
 <h2><a href="#Class_Date">Class Date </a></h2>
@@ -92,6 +96,10 @@
 	<tr>
 	<td class="name" nowrap><a href="#Date:format">Date:format&nbsp;(format)</a></td>
 	<td class="summary">Format a date.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#date:getCalendar">date:getCalendar&nbsp;()</a></td>
+	<td class="summary">Get the date calendar.</td>
 	</tr>
 </table>
 
@@ -101,6 +109,55 @@
 
     <h2><a name="Functions"></a>Functions</h2>
     <dl class="function">
+    <dt>
+    <a name = "util.basename"></a>
+    <strong>util.basename&nbsp;(path)</strong>
+    </dt>
+    <dd>
+    Get the file name of a full path.
+ Returns the file name only of a full path. For instance, returns
+ "foo.lua" when calling with "/usr/local/foo.lua"
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the file path</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the file name
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "util.dateNow"></a>
+    <strong>util.dateNow&nbsp;()</strong>
+    </dt>
+    <dd>
+    Create a Date object.
+ This function returns a date object with the current time from the
+ system.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Date object
+    </ol>
+
+
+    <h3>see also:</h3>
+    <ul>
+         <a href="../modules/Util.html#Class_Date">Date</a>
+    </ul>
+
+
+</dd>
     <dt>
     <a name = "util.dirname"></a>
     <strong>util.dirname&nbsp;(path)</strong>
@@ -127,26 +184,6 @@
 
 </dd>
     <dt>
-    <a name = "util.getHome"></a>
-    <strong>util.getHome&nbsp;()</strong>
-    </dt>
-    <dd>
-    Get the home directory.
- This function returns the home directory of the current user. This
- is usually /home/foo on Unix.
-
-
-    <h3>Returns:</h3>
-    <ol>
-
-        the home directory
-    </ol>
-
-
-
-
-</dd>
-    <dt>
     <a name = "util.exist"></a>
     <strong>util.exist&nbsp;(path)</strong>
     </dt>
@@ -164,6 +201,26 @@
     <ol>
 
         true if exists
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "util.getHome"></a>
+    <strong>util.getHome&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get the home directory.
+ This function returns the home directory of the current user. This
+ is usually /home/foo on Unix.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the home directory
     </ol>
 
 
@@ -197,30 +254,6 @@
 
 
 </dd>
-    <dt>
-    <a name = "util.dateNow"></a>
-    <strong>util.dateNow&nbsp;()</strong>
-    </dt>
-    <dd>
-    Create a Date object.
- This function returns a date object with the current time from the
- system.
-
-
-    <h3>Returns:</h3>
-    <ol>
-
-        a Date object
-    </ol>
-
-
-    <h3>see also:</h3>
-    <ul>
-         <a href="../modules/Util.html#Class_Date">Date</a>
-    </ul>
-
-
-</dd>
 </dl>
     <h2><a name="Class_Date"></a>Class Date </h2>
         Date
@@ -244,6 +277,19 @@
 
         the date formatted
     </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "date:getCalendar"></a>
+    <strong>date:getCalendar&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get the date calendar.
+
+
 
 
 

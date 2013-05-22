@@ -39,6 +39,15 @@ public:
 	};
 
 	/**
+	 * Get the basename of a file path, that is, remove
+	 * all parent path from it.
+	 *
+	 * @param path the full file path
+	 * @return the file name
+	 */
+	static std::string basename(const std::string &path);
+
+	/**
 	 * Split a string by delimiters.
 	 *
 	 * @param list the string to split
@@ -63,7 +72,7 @@ public:
 	 * @param filename the config filename
 	 * @return the final string ready for use
 	 */
-	static std::string configFilePath(const std::string filename);
+	static std::string configFilePath(const std::string &filename);
 
 	/**
 	 * Get home directory usually /home/foo

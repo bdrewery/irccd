@@ -3,19 +3,28 @@
 --
 -- @module Util
 
+--- Get the file name of a full path.
+-- Returns the file name only of a full path. For instance, returns
+-- "foo.lua" when calling with "/usr/local/foo.lua"
+-- @param path the file path
+-- @return the file name
+function util.basename(path)
+end
+
+--- Create a Date object.
+-- This function returns a date object with the current time from the
+-- system.
+-- @see Date
+-- @return a Date object
+function util.dateNow()
+end
+
 --- Get the parent path of a file.
 -- This function may be used to get the parent path of a file. Example:
 -- calling dirname on "/foo/bar/test.txt" will returns "/foo/bar".
 -- @param path the full file path
 -- @return the parent path
 function util.dirname(path)
-end
-
---- Get the home directory.
--- This function returns the home directory of the current user. This
--- is usually /home/foo on Unix.
--- @return the home directory
-function util.getHome()
 end
 
 --- Check if a file exists.
@@ -25,6 +34,13 @@ end
 function util.exist(path)
 end
 
+--- Get the home directory.
+-- This function returns the home directory of the current user. This
+-- is usually /home/foo on Unix.
+-- @return the home directory
+function util.getHome()
+end
+
 --- Create a directory.
 -- Create recursively a directory, like <code>mkdir -p</code>. This function
 -- will return two values on error.
@@ -32,14 +48,6 @@ end
 -- @return true on success or false plus an error
 -- @return the error message
 function util.mkdir(path)
-end
-
---- Create a Date object.
--- This function returns a date object with the current time from the
--- system.
--- @see Date
--- @return a Date object
-function util.dateNow()
 end
 
 --- Date
@@ -52,4 +60,8 @@ end
 function Date:format(format)
 end
 
--- vim: set syntax=lua:
+--- Get a calendar
+function Date:getCalendar()
+end
+
+-- vim: set syntax=lua nu:

@@ -28,6 +28,28 @@ using namespace std;
 
 namespace util {
 
+static int basename(lua_State *L)
+{
+	string path = luaL_checkstring(L, 1);
+	string ret = Util::basename(path);
+
+	lua_pushstring(L, ret.c_str());
+
+	return 1;
+}
+
+static int dateNow(lua_State *L)
+{
+	Date **ptr;
+
+	ptr = (Date **)lua_newuserdata(L, sizeof (Date *));
+	luaL_setmetatable(L, DATE_TYPE);
+
+	*ptr = new Date();
+
+	return 1;
+}
+
 static int dirname(lua_State *L)
 {
 	string path = luaL_checkstring(L, 1);
@@ -38,19 +60,19 @@ static int dirname(lua_State *L)
 	return 1;
 }
 
-static int getHome(lua_State *L)
-{
-	lua_pushstring(L, Util::getHome().c_str());
-
-	return 1;
-}
-
 static int exist(lua_State *L)
 {
 	string path = luaL_checkstring(L, 1);
 	bool ret = Util::exist(path);
 
 	lua_pushboolean(L, ret);
+
+	return 1;
+}
+
+static int getHome(lua_State *L)
+{
+	lua_pushstring(L, Util::getHome().c_str());
 
 	return 1;
 }
@@ -78,27 +100,16 @@ static int mkdir(lua_State *L)
 	return 1;
 }
 
-static int dateNow(lua_State *L)
-{
-	Date **ptr;
-
-	ptr = (Date **)lua_newuserdata(L, sizeof (Date *));
-	luaL_setmetatable(L, DATE_TYPE);
-
-	*ptr = new Date();
-
-	return 1;
-}
-
 } // !util
 
 const luaL_Reg functions[] = {
-	{ "dirname",		util::dirname	},
-	{ "getHome",		util::getHome	},
-	{ "exist",		util::exist	},
-	{ "mkdir",		util::mkdir	},
-	{ "dateNow",		util::dateNow	},
-	{ nullptr,		nullptr		}
+	{ "basename",		util::basename		},
+	{ "dateNow",		util::dateNow		},
+	{ "dirname",		util::dirname		},
+	{ "exist",		util::exist		},
+	{ "getHome",		util::getHome		},
+	{ "mkdir",		util::mkdir		},
+	{ nullptr,		nullptr			}
 };
 
 namespace date {
@@ -139,7 +150,7 @@ static int getCalendar(lua_State *L)
 	lua_pushinteger(L, d->m_tm.tm_mon + 1);
 	lua_setfield(L, -2, "month");
 
-	lua_pushinteger(L, d->m_tm.tm_year);
+	lua_pushinteger(L, d->m_tm.tm_year + 1900);
 	lua_setfield(L, -2, "year");
 
 	return 1;

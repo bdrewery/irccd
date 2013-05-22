@@ -5,5 +5,6 @@ title = 'Irccd Lua API Documentation'
 dir = 'generated'
 topics = "lua/manual"
 examples = "lua/examples"
-format = 'discount'
+format = 'markdown'
 file = 'lua'
+style = "lua/style.css"

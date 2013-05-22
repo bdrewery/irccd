@@ -97,7 +97,7 @@ string Util::configDirectory(void)
 	return oss.str();
 }
 
-string Util::configFilePath(const std::string filename)
+string Util::configFilePath(const std::string &filename)
 {
 	ostringstream oss;
 
@@ -110,6 +110,15 @@ string Util::configFilePath(const std::string filename)
 string Util::getHome(void)
 {
 	return string(getenv("HOME"));
+}
+
+string Util::basename(const string &path)
+{
+#if defined(_WIN32) || defined(_MSC_VER)
+	// XXX TODO
+#else
+	return string(::basename(path.c_str()));
+#endif
 }
 
 string Util::dirname(const string &file)
