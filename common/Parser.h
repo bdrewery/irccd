@@ -57,6 +57,8 @@ struct Option {
 	std::string m_value;		/*! option value */
 };
 
+bool operator==(const Option &o1, const Option &o2);
+
 /**
  * A list of section found in the file. If root
  * options are allowed (default behavior), the root
@@ -137,6 +139,8 @@ struct Section {
 		return stream;
 	}
 };
+
+bool operator==(const Section &s1, const Section &s2);
 
 class Parser {
 public:

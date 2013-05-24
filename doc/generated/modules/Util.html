@@ -34,6 +34,7 @@
 <ul>
 <li><a href="#Functions">Functions</a></li>
 <li><a href="#Class_Date">Class Date </a></li>
+<li><a href="#Date_metamethods">Date metamethods </a></li>
 </ul>
 
 
@@ -99,7 +100,22 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Date:getCalendar">Date:getCalendar&nbsp;()</a></td>
-	<td class="summary">Get a calendar</td>
+	<td class="summary">Get a calendar.</td>
+	</tr>
+</table>
+<h2><a href="#Date_metamethods">Date metamethods </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Date:__eq">Date:__eq&nbsp;(other)</a></td>
+	<td class="summary">Test equality.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Date:__le">Date:__le&nbsp;(other)</a></td>
+	<td class="summary">Test inferiority</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Date:__tostring">Date:__tostring&nbsp;()</a></td>
+	<td class="summary">Convert object to string.</td>
 	</tr>
 </table>
 
@@ -287,9 +303,91 @@
     <strong>Date:getCalendar&nbsp;()</strong>
     </dt>
     <dd>
-    Get a calendar
+    Get a calendar.
+ Return a table with the following fields:
+ <ul>
+ <li><strong>seconds</strong>: seconds elapsed [0-60]</li>
+ <li><strong>minutes</strong>: minutes elapsed [0-59]</li>
+ <li><strong>hours</strong>: hours elapsed [0-23]</li>
+ <li><strong>month</strong>: number of month [1-12]</li>
+ <li><strong>year</strong>: the real year</li>
+ </ul>
 
 
+    <h3>Returns:</h3>
+    <ol>
+
+        a table
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2><a name="Date_metamethods"></a>Date metamethods </h2>
+        Date metamethods.
+ The metamethods available for object Date.
+    <dl class="function">
+    <dt>
+    <a name = "Date:__eq"></a>
+    <strong>Date:__eq&nbsp;(other)</strong>
+    </dt>
+    <dd>
+    Test equality.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other date</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if they equals
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Date:__le"></a>
+    <strong>Date:__le&nbsp;(other)</strong>
+    </dt>
+    <dd>
+    Test inferiority
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other date</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        self &lt;= other comparison
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Date:__tostring"></a>
+    <strong>Date:__tostring&nbsp;()</strong>
+    </dt>
+    <dd>
+    Convert object to string.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string
+    </ol>
 
 
 

@@ -33,6 +33,16 @@ using namespace std;
 
 typedef function<void(void)> HelpHandler;
 
+static void helpChannelNotice(void)
+{
+	Logger::warn("usage: %s cnotice server channel message\n", getprogname());
+	Logger::warn("Send a notice to a public channel. This is a notice that everyone");
+	Logger::warn("will be notified by.\n");
+
+	Logger::warn("Example:");
+	Logger::warn("\t%s cnotice freenode #staff \"Don't flood\"", getprogname());
+}
+
 static void helpInvite(void)
 {
 	Logger::warn("usage: %s invite server nickname channel\n", getprogname());
@@ -69,7 +79,7 @@ static void helpMe(void)
 	Logger::warn("Send a CTCP ACTION message. It is exactly the same syntax as %s message.\n");
 
 	Logger::warn("Example:");
-	Logger::warn("\t%sme freenode #staff \"going back soon\"", getprogname());
+	Logger::warn("\t%s me freenode #staff \"going back soon\"", getprogname());
 }
 
 static void helpMessage(void)
@@ -84,6 +94,16 @@ static void helpMessage(void)
 	Logger::warn("\t%s message freenode #staff \"Hello from irccd\"", getprogname());
 }
 
+static void helpMode(void)
+{
+	Logger::warn("usage: %s mode server channel mode\n", getprogname());
+	Logger::warn("Change the mode of the specified channel. The mode contains full parameters");
+	Logger::warn("like \"+b\" or \"+k secret\".\n");
+
+	Logger::warn("Example:");
+	Logger::warn("\t%s mode freenode #staff +t");
+}
+
 static void helpNick(void)
 {
 	Logger::warn("usage: %s nick server nickname\n", getprogname());
@@ -91,6 +111,15 @@ static void helpNick(void)
 
 	Logger::warn("Example:");
 	Logger::warn("\t%snick freenode david", getprogname());
+}
+
+static void helpNotice(void)
+{
+	Logger::warn("usage: %s notice server target message\n", getprogname());
+	Logger::warn("Send a private notice to a target user.\n");
+
+	Logger::warn("Example:");
+	Logger::warn("\t%s notice freenode jean \"Private notice\"", getprogname());
 }
 
 static void helpPart(void)
@@ -110,21 +139,34 @@ static void helpTopic(void)
 	Logger::warn("quotes.\n");
 
 	Logger::warn("Example:");
-	Logger::warn("\t%s topic freenode #wmfs \"This is the best channel\"");
+	Logger::warn("\t%s topic freenode #wmfs \"This is the best channel\"", getprogname());
+}
+
+static void helpUserMode(void)
+{
+	Logger::warn("usage: %s mode server mode\n", getprogname());
+	Logger::warn("Change your own user mode.\n");
+
+	Logger::warn("Example:");
+	Logger::warn("\t%s mode freenode +i");
 }
 
 static map<string, HelpHandler> createHelpHandlers(void)
 {
 	map<string, HelpHandler> helpHandlers;
 
+	helpHandlers["cnotice"]	= helpChannelNotice;
 	helpHandlers["invite"]	= helpInvite;
 	helpHandlers["join"]	= helpJoin;
 	helpHandlers["kick"]	= helpKick;
 	helpHandlers["me"]	= helpMe;
 	helpHandlers["message"]	= helpMessage;
+	helpHandlers["mode"]	= helpMode;
+	helpHandlers["notice"]	= helpNotice;
 	helpHandlers["nick"]	= helpNick;
 	helpHandlers["part"]	= helpPart;
 	helpHandlers["topic"]	= helpTopic;
+	helpHandlers["umode"]	= helpUserMode;
 
 	return helpHandlers;
 }
@@ -153,6 +195,19 @@ static void handleHelp(Irccdctl *ctl, int argc, char **argv)
 	}
 
 	exit(1);
+}
+
+static void handleChannelNotice(Irccdctl *ctl, int argc, char **argv)
+{
+	ostringstream oss;
+
+	if (argc < 3)
+		Logger::warn("cnotice requires 3 arguments");
+	else {
+		oss << "CNOTICE " << argv[0] << " " << argv[1];
+		oss << " " << argv[2] << "\n";
+		ctl->sendRaw(oss.str());
+	}
 }
 
 static void handleInvite(Irccdctl *ctl, int argc, char **argv)
@@ -227,6 +282,19 @@ static void handleMessage(Irccdctl *ctl, int argc, char **argv)
 	}
 }
 
+static void handleMode(Irccdctl *ctl, int argc, char **argv)
+{
+	ostringstream oss;
+
+	if (argc < 3)
+		Logger::warn("mode requires 3 arguments");
+	else {
+		oss << "MODE " << argv[0] << " " << argv[1];
+		oss << " " << argv[2] << "\n";
+		ctl->sendRaw(oss.str());
+	}
+}
+
 static void handleNick(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
@@ -235,6 +303,19 @@ static void handleNick(Irccdctl *ctl, int argc, char **argv)
 		Logger::warn("nick requires 2 arguments");
 	else {
 		oss << "NICK " << argv[0] << " " << argv[1] << "\n";
+		ctl->sendRaw(oss.str());
+	}
+}
+
+static void handleNotice(Irccdctl *ctl, int argc, char **argv)
+{
+	ostringstream oss;
+
+	if (argc < 3)
+		Logger::warn("notice requires 3 arguments");
+	else {
+		oss << "NOTICE " << argv[0] << " " << argv[1];
+		oss << " " << argv[2] << "\n";
 		ctl->sendRaw(oss.str());
 	}
 }
@@ -264,19 +345,35 @@ static void handleTopic(Irccdctl *ctl, int argc, char **argv)
 	}
 }
 
+static void handleUserMode(Irccdctl *ctl, int argc, char **argv)
+{
+	ostringstream oss;
+
+	if (argc < 2)
+		Logger::warn("umode requires 2 arguments");
+	else {
+		oss << "UMODE " << argv[0] << " " << argv[1] << "\n";
+		ctl->sendRaw(oss.str());
+	}
+}
+
 static map<string, Handler> createHandlers(void)
 {
 	map<string, Handler> handlers;
 
+	handlers["cnotice"]	= handleChannelNotice;
 	handlers["help"]	= handleHelp;
 	handlers["invite"]	= handleInvite;
 	handlers["join"]	= handleJoin;
 	handlers["kick"]	= handleKick;
 	handlers["me"]		= handleMe;
 	handlers["message"]	= handleMessage;
+	handlers["mode"]	= handleMode;
+	handlers["notice"]	= handleNotice;
 	handlers["nick"]	= handleNick;
 	handlers["part"]	= handlePart;
 	handlers["topic"]	= handleTopic;
+	handlers["umode"]	= handleUserMode;
 
 	return handlers;
 }
@@ -386,9 +483,11 @@ void Irccdctl::usage(void)
 	Logger::warn("\tkick\t\tKick someone from a channel");
 	Logger::warn("\tme\t\tSend a CTCP Action (same as /me)");
 	Logger::warn("\tmessage\t\tSend a message to someone or a channel");
+	Logger::warn("\tmode\t\tChange a channel mode");
 	Logger::warn("\tnick\t\tChange your nickname");
 	Logger::warn("\tpart\t\tLeave a channel");
 	Logger::warn("\ttopic\t\tChange a channel topic");
+	Logger::warn("\tumode\t\tChange a user mode");
 
 	Logger::warn("\nFor more information on a command, type %s help <command>", getprogname());
 

@@ -70,6 +70,15 @@ end
 function Parser:onLog(func)
 end
 
+--- Parser metamethods.
+-- The metamethods available for object Parser.
+-- @section
+
+--- Convert object to string.
+-- @return a string
+function Parser:__tostring()
+end
+
 --- Section
 -- @type Section
 
@@ -104,6 +113,27 @@ end
 -- @param name the option name
 -- @return the option's value
 function Section:requireOption(name)
+end
+
+--- Section metamethods.
+-- The metamethods available for object Section.
+-- @section
+
+--- Test equality.
+-- @param other the other section
+-- @return true if they equals
+function Section:__eq(other)
+end
+
+--- Test inferiority
+-- @param other the other section
+-- @return self <= other comparison
+function Section:__le(other)
+end
+
+--- Convert object to string.
+-- @return a string
+function Sectio:__tostring()
 end
 
 -- vim: set syntax=lua:

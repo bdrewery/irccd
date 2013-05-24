@@ -142,7 +142,7 @@ const luaL_Reg functionList[] = {
 
 // "Parser" methods {{{
 
-namespace config {
+namespace parserMethod {
 
 static int sectionIterator(lua_State *L)
 {
@@ -241,6 +241,20 @@ static int onLog(lua_State *L)
 	return 0;
 }
 
+} // }}} !parserMethods
+
+static const luaL_Reg parserMethodList[] = {
+	{ "open",		parserMethod::open		},
+	{ "findSections",	parserMethod::findSections	},
+	{ "getSection",		parserMethod::getSection	},
+	{ "onLog",		parserMethod::onLog		},
+	{ nullptr,		nullptr				}
+};
+
+// {{{ "Parser" metamethods
+
+namespace parserMt {
+
 static int gc(lua_State *L)
 {
 	LuaParser *p = *(LuaParser **)luaL_checkudata(L, 1, PARSER_TYPE);
@@ -262,21 +276,17 @@ static int tostring(lua_State *L)
 	return 1;
 }
 
-} // }}} !config
+} // }}} !parserMt
 
-const luaL_Reg parserList[] = {
-	{ "open",		config::open		},
-	{ "findSections",	config::findSections	},
-	{ "getSection",		config::getSection	},
-	{ "onLog",		config::onLog		},
-	{ "__gc",		config::gc		},
-	{ "__tostring",		config::tostring	},
-	{ nullptr,		nullptr			}
+static const luaL_Reg parserMtList[] = {
+	{ "__gc",		parserMt::gc			},
+	{ "__tostring",		parserMt::tostring		},
+	{ nullptr,		nullptr				}
 };
 
 // "Section" methods {{{
 
-namespace section {
+namespace sectionMethod {
 
 static int hasOption(lua_State *L)
 {
@@ -332,6 +342,32 @@ static int getOptions(lua_State *L)
 	return 1;
 }
 
+} // }}} !section
+
+static const luaL_Reg sectionMethodList[] = {
+	{ "hasOption",		sectionMethod::hasOption	},
+	{ "getOption",		sectionMethod::getOption	},
+	{ "requireOption",	sectionMethod::requireOption	},
+	{ "getOptions",		sectionMethod::getOptions	},
+	{ nullptr,		nullptr				}
+};
+
+// {{{ "Section" metamethods
+
+namespace sectionMt {
+
+static int eq(lua_State *L)
+{
+	Section *s1, *s2;
+
+	s1 = *(Section **)luaL_checkudata(L, 1, SECTION_TYPE);
+	s2 = *(Section **)luaL_checkudata(L, 2, SECTION_TYPE);
+
+	lua_pushboolean(L, *s1 == *s2);
+
+	return 1;
+}
+
 static int gc(lua_State *L)
 {
 	Section *s = *(Section **)luaL_checkudata(L, 1, SECTION_TYPE);
@@ -353,16 +389,13 @@ static int tostring(lua_State *L)
 	return 1;
 }
 
-} // }}} !section
+} // }}} !sectionMt
 
-const luaL_Reg sectionList[] = {
-	{ "hasOption",		section::hasOption	},
-	{ "getOption",		section::getOption	},
-	{ "requireOption",	section::requireOption	},
-	{ "getOptions",		section::getOptions	},
-	{ "__gc",		section::gc		},
-	{ "__tostring",		section::tostring	},
-	{ nullptr,		nullptr			}
+static const luaL_Reg sectionMtList[] = {
+	{ "__eq",		sectionMt::eq			},
+	{ "__gc",		sectionMt::gc			},
+	{ "__tostring",		sectionMt::tostring		},
+	{ nullptr,		nullptr				}
 };
 
 int irccd::luaopen_parser(lua_State *L)
@@ -381,16 +414,16 @@ int irccd::luaopen_parser(lua_State *L)
 
 	// Create Parser type
 	luaL_newmetatable(L, PARSER_TYPE);
-	lua_pushvalue(L, -1);
-	lua_setfield(L, -1, "__index");
-	luaL_setfuncs(L, parserList, 0);
+	luaL_setfuncs(L, parserMtList, 0);
+	luaL_newlib(L, parserMethodList);
+	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 
 	// Create Section type
 	luaL_newmetatable(L, SECTION_TYPE);
-	lua_pushvalue(L, -1);
-	lua_setfield(L, -1, "__index");
-	luaL_setfuncs(L, sectionList, 0);
+	luaL_setfuncs(L, sectionMtList, 0);
+	luaL_newlib(L, sectionMethodList);
+	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 
 	return 1;

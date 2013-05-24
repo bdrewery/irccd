@@ -26,6 +26,16 @@ using namespace parser;
 using namespace std;
 
 /* --------------------------------------------------------
+ * Option public members
+ * -------------------------------------------------------- */
+
+bool irccd::parser::operator==(const Option &o1, const Option &o2)
+{
+	return o1.m_key == o2.m_key &&
+	    o1.m_value == o2.m_value;
+}
+
+/* --------------------------------------------------------
  * Section public members
  * -------------------------------------------------------- */
 
@@ -135,6 +145,14 @@ template <> string Section::requireOption(const string &name) const
 		throw NotFoundException(name);
 
 	return getOption<string>(name);
+}
+
+bool irccd::parser::operator==(const Section &s1, const Section &s2)
+{
+	if (s1.m_name != s2.m_name)	
+		return false;
+
+	return s1.m_options == s2.m_options;
 }
 
 /* --------------------------------------------------------

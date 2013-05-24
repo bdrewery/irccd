@@ -157,6 +157,28 @@ static void handleJoin(irc_session_t *s, const char *ev, const char *orig,
 	(void)count;
 }
 
+static void handleKick(irc_session_t *s, const char *ev, const char *orig,
+		       const char **params, unsigned int count)
+{
+	Server *server = (Server *)irc_get_ctx(s);
+	string who, kicked, reason = "";
+
+	who = getNick(orig);
+	kicked = getNick(params[1]);
+
+	// params[2] is an optional kick text
+	if (params[2] != nullptr)
+		reason = params[2];
+
+	if (server->getIdentity().m_nickname != who) {
+		for (Plugin *p : Irccd::getInstance()->getPlugins())
+			p->onKick(server, params[0], who, kicked, reason);
+	}
+
+	(void)ev;
+	(void)count;
+}
+
 static void handleMode(irc_session_t *s, const char *ev, const char *orig,
 		       const char **params, unsigned int count)
 {
@@ -325,12 +347,13 @@ static irc_callbacks_t functions = {
 	.event_channel_notice	= handleChannelNotice,
 	.event_connect		= handleConnect,
 	.event_invite		= handleInvite,
+	.event_join		= handleJoin,
+	.event_kick		= handleKick,
 	.event_mode		= handleMode,
 	.event_nick		= handleNick,
 	.event_notice		= handleNotice,
 	.event_numeric		= handleNumeric,
 	.event_quit		= handleQuit,
-	.event_join		= handleJoin,
 	.event_part		= handlePart,
 	.event_privmsg		= handleQuery,
 	.event_topic		= handleTopic,
@@ -455,6 +478,12 @@ void Server::stopConnection(void)
 	}
 }
 
+void Server::cnotice(const string &channel, const string &message)
+{
+	if (m_threadStarted && channel[0] == '#')
+		irc_cmd_notice(m_session, channel.c_str(), message.c_str());
+}
+
 void Server::invite(const string &target, const string &channel)
 {
 	if (m_threadStarted)
@@ -474,13 +503,19 @@ void Server::kick(const string &name, const string &channel, const string &reaso
 		    (reason.length() == 0) ? nullptr : reason.c_str());
 }
 
-void Server::me(const std::string &target, const std::string &message)
+void Server::me(const string &target, const string &message)
 {
 	if (m_threadStarted)
 		irc_cmd_me(m_session, target.c_str(), message.c_str());
 }
 
-void Server::nick(const std::string &nick)
+void Server::mode(const string &channel, const string &mode)
+{
+	if (m_threadStarted)
+		irc_cmd_channel_mode(m_session, channel.c_str(), mode.c_str());
+}
+
+void Server::nick(const string &nick)
 {
 	if (m_threadStarted)
 		irc_cmd_nick(m_session, nick.c_str());
@@ -489,13 +524,19 @@ void Server::nick(const std::string &nick)
 	m_identity.m_nickname = nick;
 }
 
+void Server::notice(const string &nickname, const string &message)
+{
+	if (m_threadStarted && nickname[0] != '#')
+		irc_cmd_notice(m_session, nickname.c_str(), message.c_str());
+}
+
 void Server::part(const string &channel)
 {
 	if (m_threadStarted)
 		irc_cmd_part(m_session, channel.c_str());
 }
 
-void Server::query(const std::string &who, const std::string &message)
+void Server::query(const string &who, const string &message)
 {
 	// Do not write to public channel
 	if (m_threadStarted && who[0] != '#')
@@ -512,4 +553,10 @@ void Server::topic(const string &channel, const string &topic)
 {
 	if (m_threadStarted)
 		irc_cmd_topic(m_session, channel.c_str(), topic.c_str());
+}
+
+void Server::umode(const string &mode)
+{
+	if (m_threadStarted)
+		irc_cmd_user_mode(m_session, mode.c_str());
 }

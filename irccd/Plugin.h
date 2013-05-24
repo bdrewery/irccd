@@ -30,12 +30,6 @@ class Server;
 
 class Plugin {
 private:
-	/*
-	 * Store plugins mapped by lua_State so C function can retrieve their
-	 * respective Plugin from anywhere.
-	 */
-	static std::map<lua_State *, Plugin *> m_mapped;
-
 	// Plugin identity
 	std::string m_name;		//! name like "foo"
 	std::string m_home;		//! home, usuall ~/.config/<name>/
@@ -143,6 +137,18 @@ public:
 	 * @param nickname the nickname
 	 */
 	void onJoin(Server *server, const std::string &channel, const std::string &nickname);
+
+	/**
+	 * A Lua function triggered on a kick event.
+	 *
+	 * @param server the server
+	 * @param channel from which channel
+	 * @param who who kicked
+	 * @param kicked the person kicked
+	 * @param reason an optional reason
+	 */
+	void onKick(Server *server, const std::string &channel, const std::string &who,
+		    const std::string &kicked, const std::string &reason);
 
 	/**
 	 * A Lua function triggered on a message event.

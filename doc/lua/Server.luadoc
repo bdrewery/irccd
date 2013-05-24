@@ -26,6 +26,13 @@ end
 function Server:getName()
 end
 
+--- Send a channel notice.
+-- Send a public notice on a channel.
+-- @param channel the target channel
+-- @param message the message
+function Server:cnotice(channel, message)
+end
+
 --- Join a channel.
 -- Join a specific IRC channel, the channel must starts with a
 -- hash '#'.
@@ -51,10 +58,39 @@ end
 function Server:me(target, message)
 end
 
---- Change nickname
+--- Change the channel mode.
+-- Change the channel mode. Mode can contains additional parameters
+-- if supported, such as: "+k secret".
+-- @param channel the channel target
+-- @param mode the mode
+function Server:mode(channel, mode)
+end
+
+--- Change nickname.
 -- Change your nickname.
 -- @param nickname the new nickname
 function Server:nick(nickname)
+end
+
+--- Send a private notice.
+-- Send a private notice to a user.
+-- @param nickname the target nickname
+-- @param message the notice message
+function Server:notice(nickname, message)
+end
+
+--- Leave a channel.
+-- Leave a specific channel. At the moment, is it not possible
+-- to leave a channel with a quit message.
+-- @param channel the channel to leave
+function Server:part(channel)
+end
+
+--- Send a private message.
+-- Send a private message to the specified target.
+-- @param nickname the target
+-- @param message the message
+function Server:query(nickname, message)
 end
 
 --- Send a message.
@@ -62,6 +98,20 @@ end
 -- @param target a nick or a channel
 -- @param message the message to send
 function Server:say(target, message)
+end
+
+--- Change the channel topic.
+-- Change the topic on the specified channel, you obviously
+-- need rights to do that.
+-- @param channel the channel
+-- @param topic the new topic
+function Server:topic(channel, topic)
+end
+
+--- Change your user mode.
+-- Change your own user mode.
+-- @param mode the new mode
+function Server:umode(mode)
 end
 
 -- vim: set syntax=lua:

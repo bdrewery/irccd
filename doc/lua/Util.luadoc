@@ -60,8 +60,38 @@ end
 function Date:format(format)
 end
 
---- Get a calendar
+--- Get a calendar.
+-- Return a table with the following fields:
+-- <ul>
+-- <li><strong>seconds</strong>: seconds elapsed [0-60]</li>
+-- <li><strong>minutes</strong>: minutes elapsed [0-59]</li>
+-- <li><strong>hours</strong>: hours elapsed [0-23]</li>
+-- <li><strong>month</strong>: number of month [1-12]</li>
+-- <li><strong>year</strong>: the real year</li>
+-- </ul>
+-- @return a table
 function Date:getCalendar()
+end
+
+--- Date metamethods.
+-- The metamethods available for object Date.
+-- @section
+
+--- Test equality.
+-- @param other the other date
+-- @return true if they equals
+function Date:__eq(other)
+end
+
+--- Test inferiority
+-- @param other the other date
+-- @return self <= other comparison
+function Date:__le(other)
+end
+
+--- Convert object to string.
+-- @return a string
+function Date:__tostring()
 end
 
 -- vim: set syntax=lua nu:

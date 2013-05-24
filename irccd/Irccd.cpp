@@ -41,6 +41,19 @@ using namespace std;
 
 typedef function<void(Irccd *, const string &params)> Handler;
 
+static void handleChannelNotice(Irccd *irccd, const string &cmd)
+{
+	Server *server;
+	vector<string> params = Util::split(cmd, " \t", 3);
+
+	if (params.size() != 3) {
+		Logger::warn("CNOTICE needs 3 arguments");
+	} else {
+		if ((server = irccd->findServer(params[0])) != nullptr)
+			server->cnotice(params[1], params[2]);
+	}
+}
+
 static void handleInvite(Irccd *irccd, const string &cmd)
 {
 	Server *server;
@@ -114,6 +127,19 @@ static void handleMessage(Irccd *irccd, const string &cmd)
 	}
 }
 
+static void handleMode(Irccd *irccd, const string &cmd)
+{
+	Server *server;
+	vector<string> params = Util::split(cmd, " \t", 2);
+
+	if (params.size() != 3) {
+		Logger::warn("MODE needs 3 arguments");
+	} else {
+		if ((server = irccd->findServer(params[0])) != nullptr)
+			server->mode(params[1], params[2]);
+	}
+}
+
 static void handleNick(Irccd *irccd, const string &cmd)
 {
 	Server *server;
@@ -124,6 +150,19 @@ static void handleNick(Irccd *irccd, const string &cmd)
 	} else {
 		if ((server = irccd->findServer(params[0])) != nullptr)
 			server->nick(params[1]);
+	}
+}
+
+static void handleNotice(Irccd *irccd, const string &cmd)
+{
+	Server *server;
+	vector<string> params = Util::split(cmd, " \t", 3);
+
+	if (params.size() != 3) {
+		Logger::warn("NOTICE needs 3 arguments");
+	} else {
+		if ((server = irccd->findServer(params[0])) != nullptr)
+			server->notice(params[1], params[2]);
 	}
 }
 
@@ -153,18 +192,36 @@ static void handleTopic(Irccd *irccd, const string &cmd)
 	}
 }
 
+static void handleUserMode(Irccd *irccd, const string &cmd)
+{
+	Server *server;
+	vector<string> params = Util::split(cmd, " \t", 1);
+
+	if (params.size() != 2) {
+		Logger::warn("UMODE needs 2 arguments");
+	} else {
+		if ((server = irccd->findServer(params[0])) != nullptr)
+			server->umode(params[1]);
+	}
+}
+
 static map<string, Handler> createHandlers(void)
 {
 	map<string, Handler> handlers;
 
+	handlers["CNOTICE"]	= handleChannelNotice;
 	handlers["INVITE"]	= handleInvite;
 	handlers["JOIN"]	= handleJoin;
 	handlers["KICK"]	= handleKick;
+	handlers["MODE"]	= handleMode;
 	handlers["ME"]		= handleMe;
+	handlers["MODE"]	= handleMode;
 	handlers["MSG"]		= handleMessage;
+	handlers["NOTICE"]	= handleNotice;
 	handlers["NICK"]	= handleNick;
 	handlers["PART"]	= handlePart;
 	handlers["TOPIC"]	= handleTopic;
+	handlers["UMODE"]	= handleUserMode;
 
 	return handlers;
 }

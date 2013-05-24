@@ -75,6 +75,10 @@
 	<td class="summary">Get the server name id.</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#Server:cnotice">Server:cnotice&nbsp;(channel, message)</a></td>
+	<td class="summary">Send a channel notice.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#Server:join">Server:join&nbsp;(channel, password)</a></td>
 	<td class="summary">Join a channel.</td>
 	</tr>
@@ -87,13 +91,36 @@
 	<td class="summary">Invoke a CTCP Action.</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#Server:mode">Server:mode&nbsp;(channel, mode)</a></td>
+	<td class="summary">Change the channel mode.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#Server:nick">Server:nick&nbsp;(nickname)</a></td>
-	<td class="summary">Change nickname
- Change your nickname.</td>
+	<td class="summary">Change nickname.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:notice">Server:notice&nbsp;(nickname, message)</a></td>
+	<td class="summary">Send a private notice.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:part">Server:part&nbsp;(channel)</a></td>
+	<td class="summary">Leave a channel.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:query">Server:query&nbsp;(nickname, message)</a></td>
+	<td class="summary">Send a private message.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Server:say">Server:say&nbsp;(target, message)</a></td>
 	<td class="summary">Send a message.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:topic">Server:topic&nbsp;(channel, topic)</a></td>
+	<td class="summary">Change the channel topic.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:umode">Server:umode&nbsp;(mode)</a></td>
+	<td class="summary">Change your user mode.</td>
 	</tr>
 </table>
 
@@ -144,6 +171,27 @@
 
         the name id
     </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:cnotice"></a>
+    <strong>Server:cnotice&nbsp;(channel, message)</strong>
+    </dt>
+    <dd>
+    Send a channel notice.
+ Send a public notice on a channel.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channel</span>
+         the target channel</li>
+        <li><span class="parameter">message</span>
+         the message</li>
+    </ul>
+
 
 
 
@@ -218,17 +266,101 @@
 
 </dd>
     <dt>
+    <a name = "Server:mode"></a>
+    <strong>Server:mode&nbsp;(channel, mode)</strong>
+    </dt>
+    <dd>
+    Change the channel mode.
+ Change the channel mode. Mode can contains additional parameters
+ if supported, such as: "+k secret".
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channel</span>
+         the channel target</li>
+        <li><span class="parameter">mode</span>
+         the mode</li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
     <a name = "Server:nick"></a>
     <strong>Server:nick&nbsp;(nickname)</strong>
     </dt>
     <dd>
-    Change nickname
+    Change nickname.
  Change your nickname.
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">nickname</span>
          the new nickname</li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:notice"></a>
+    <strong>Server:notice&nbsp;(nickname, message)</strong>
+    </dt>
+    <dd>
+    Send a private notice.
+ Send a private notice to a user.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">nickname</span>
+         the target nickname</li>
+        <li><span class="parameter">message</span>
+         the notice message</li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:part"></a>
+    <strong>Server:part&nbsp;(channel)</strong>
+    </dt>
+    <dd>
+    Leave a channel.
+ Leave a specific channel. At the moment, is it not possible
+ to leave a channel with a quit message.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channel</span>
+         the channel to leave</li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:query"></a>
+    <strong>Server:query&nbsp;(nickname, message)</strong>
+    </dt>
+    <dd>
+    Send a private message.
+ Send a private message to the specified target.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">nickname</span>
+         the target</li>
+        <li><span class="parameter">message</span>
+         the message</li>
     </ul>
 
 
@@ -250,6 +382,47 @@
          a nick or a channel</li>
         <li><span class="parameter">message</span>
          the message to send</li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:topic"></a>
+    <strong>Server:topic&nbsp;(channel, topic)</strong>
+    </dt>
+    <dd>
+    Change the channel topic.
+ Change the topic on the specified channel, you obviously
+ need rights to do that.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channel</span>
+         the channel</li>
+        <li><span class="parameter">topic</span>
+         the new topic</li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:umode"></a>
+    <strong>Server:umode&nbsp;(mode)</strong>
+    </dt>
+    <dd>
+    Change your user mode.
+ Change your own user mode.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">mode</span>
+         the new mode</li>
     </ul>
 
 

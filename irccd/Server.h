@@ -58,7 +58,6 @@ public:
 		std::string m_password;		/*! channel optional password */
 	};
 
-
 private:
 	// Some options
 	std::string m_commandChar;		/*! command token */
@@ -79,7 +78,7 @@ private:
 
 public:
 	Server(void);
-	~Server(void);
+	virtual ~Server(void);
 
 	/**
 	 * Get the command character.
@@ -184,12 +183,20 @@ public:
 	 * ------------------------------------------------ */
 
 	/**
-	 * Invite someone to a channel
+	 * Send a notice to a public channel.
+	 *
+	 * @param channel the target channel
+	 * @param message the message to send
+	 */
+	virtual void cnotice(const std::string &channel, const std::string &message);
+
+	/**
+	 * Invite someone to a channel.
 	 *
 	 * @param target the target nickname
 	 * @param channel the channel
 	 */
-	void invite(const std::string &target, const std::string &channel);
+	virtual void invite(const std::string &target, const std::string &channel);
 
 	/**
 	 * Join a channel.
@@ -197,7 +204,7 @@ public:
 	 * @param channel the channel name
 	 * @param password an optional password
 	 */
-	void join(const std::string &name, const std::string &password = "");
+	virtual void join(const std::string &name, const std::string &password = "");
 
 	/**
 	 * Kick someone from a channel.
@@ -206,7 +213,7 @@ public:
 	 * @param channel the channel from
 	 * @param reason an optional reason
 	 */
-	void kick(const std::string &name, const std::string &channel, const std::string &reason = "");
+	virtual void kick(const std::string &name, const std::string &channel, const std::string &reason = "");
 
 	/**
 	 * Send a CTCP ACTION known as /me.
@@ -214,21 +221,37 @@ public:
 	 * @param target the nickname or channel
 	 * @param message the message to send
 	 */
-	void me(const std::string &target, const std::string &message);
+	virtual void me(const std::string &target, const std::string &message);
+
+	/**
+	 * Change the channel mode.
+	 *
+	 * @param channel the target channel
+	 * @param mode the mode
+	 */
+	virtual void mode(const std::string &channel, const std::string &mode);
 
 	/**
 	 * Change your nickname.
 	 *
 	 * @param nick the new nickname
 	 */
-	void nick(const std::string &nick);
+	virtual void nick(const std::string &nick);
+
+	/**
+	 * Send a notice to someone.
+	 *
+	 * @param nickname the target nickname
+	 * @param message the message
+	 */
+	virtual void notice(const std::string &nickname, const std::string &message);
 
 	/**
 	 * Leave a channel.
 	 *
 	 * @param channel the channel to leave
 	 */
-	void part(const std::string &channel);
+	virtual void part(const std::string &channel);
 
 	/**
 	 * Send a query message.
@@ -236,7 +259,7 @@ public:
 	 * @param who the target nickname
 	 * @param message the message
 	 */
-	void query(const std::string &who, const std::string &message);
+	virtual void query(const std::string &who, const std::string &message);
 
 	/**
 	 * Say something to a channel or to a nickname.
@@ -244,7 +267,7 @@ public:
 	 * @param target the nickname or channel
 	 * @param message the message to send
 	 */
-	void say(const std::string &target, const std::string &message);
+	virtual void say(const std::string &target, const std::string &message);
 
 	/**
 	 * Change a channel topic.
@@ -252,7 +275,14 @@ public:
 	 * @param channel the channel target
 	 * @param topic the new topic
 	 */
-	void topic(const std::string &channel, const std::string &topic);
+	virtual void topic(const std::string &channel, const std::string &topic);
+
+	/**
+	 * Change your own user mode.
+	 *
+	 * @param mode the mode
+	 */
+	virtual void umode(const std::string &mode);
 };
 
 } // !irccd

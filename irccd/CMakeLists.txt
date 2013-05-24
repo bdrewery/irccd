@@ -31,6 +31,7 @@ set(SOURCES
 	LuaUtil.cpp
 	Irccd.cpp
 	main.cpp
+	Test.cpp
 )
 
 find_package(Libircclient REQUIRED)

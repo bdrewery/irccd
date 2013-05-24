@@ -202,6 +202,11 @@ void Plugin::onJoin(Server *server, const string &channel, const string &nicknam
 	callLua("onJoin", 0, "S s s", server, channel.c_str(), nickname.c_str());
 }
 
+void Plugin::onKick(Server *server, const string &channel, const string &who, const string &kicked, const string &reason)
+{
+	callLua("onKick", 0, "S s s s s", server, channel.c_str(), who.c_str(), kicked.c_str(), reason.c_str());
+}
+
 void Plugin::onMessage(Server *server, const string &channel, const string &who, const string &message)
 {
 	callLua("onMessage", 0, "S s s s", server, channel.c_str(), who.c_str(), message.c_str());

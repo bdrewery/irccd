@@ -20,13 +20,15 @@
 
 #include <unistd.h>
 
-#include "Logger.h"
+#include <Logger.h>
+
 #include "Irccd.h"
+#include "Test.h"
 
 using namespace irccd;
 using namespace std;
 
-void quit(void)
+static void quit(void)
 {
 	for (Server *s : Irccd::getInstance()->getServers())
 		delete s;
@@ -38,6 +40,8 @@ int main(int argc, char **argv)
 {
 	Irccd *irccd = Irccd::getInstance();
 	int ch;
+
+	setprogname(argv[0]);
 
 	while ((ch = getopt(argc, argv, "c:p:v")) != -1) {
 		switch (ch) {
@@ -55,6 +59,10 @@ int main(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
+	if (strcmp(argv[0], "test") == 0)
+		test(argc, argv);
+		// NOTREACHED
+	
 	atexit(quit);
 
 	return irccd->run(argc, argv);

@@ -35,7 +35,9 @@
 <li><a href="#Functions">Functions</a></li>
 <li><a href="#Tables">Tables</a></li>
 <li><a href="#Class_Parser">Class Parser </a></li>
+<li><a href="#Parser_metamethods">Parser metamethods </a></li>
 <li><a href="#Class_Section">Class Section </a></li>
+<li><a href="#Section_metamethods">Section metamethods </a></li>
 </ul>
 
 
@@ -102,6 +104,13 @@
 	<td class="summary">Add a specific logging function.</td>
 	</tr>
 </table>
+<h2><a href="#Parser_metamethods">Parser metamethods </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Parser:__tostring">Parser:__tostring&nbsp;()</a></td>
+	<td class="summary">Convert object to string.</td>
+	</tr>
+</table>
 <h2><a href="#Class_Section">Class Section </a></h2>
 <table class="function_list">
 	<tr>
@@ -119,6 +128,21 @@
 	<tr>
 	<td class="name" nowrap><a href="#Section:requireOption">Section:requireOption&nbsp;(name)</a></td>
 	<td class="summary">Requires an option.</td>
+	</tr>
+</table>
+<h2><a href="#Section_metamethods">Section metamethods </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Section:__eq">Section:__eq&nbsp;(other)</a></td>
+	<td class="summary">Test equality.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Section:__le">Section:__le&nbsp;(other)</a></td>
+	<td class="summary">Test inferiority</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Sectio:__tostring">Sectio:__tostring&nbsp;()</a></td>
+	<td class="summary">Convert object to string.</td>
 	</tr>
 </table>
 
@@ -291,6 +315,29 @@
 
 </dd>
 </dl>
+    <h2><a name="Parser_metamethods"></a>Parser metamethods </h2>
+        Parser metamethods.
+ The metamethods available for object Parser.
+    <dl class="function">
+    <dt>
+    <a name = "Parser:__tostring"></a>
+    <strong>Parser:__tostring&nbsp;()</strong>
+    </dt>
+    <dd>
+    Convert object to string.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string
+    </ol>
+
+
+
+
+</dd>
+</dl>
     <h2><a name="Class_Section"></a>Class Section </h2>
         Section
     <dl class="function">
@@ -395,6 +442,75 @@
     <ul>
          <a href="../modules/Parser.html#Section:getOption">Section:getOption</a>
     </ul>
+
+
+</dd>
+</dl>
+    <h2><a name="Section_metamethods"></a>Section metamethods </h2>
+        Section metamethods.
+ The metamethods available for object Section.
+    <dl class="function">
+    <dt>
+    <a name = "Section:__eq"></a>
+    <strong>Section:__eq&nbsp;(other)</strong>
+    </dt>
+    <dd>
+    Test equality.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other section</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if they equals
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Section:__le"></a>
+    <strong>Section:__le&nbsp;(other)</strong>
+    </dt>
+    <dd>
+    Test inferiority
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other section</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        self &lt;= other comparison
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Sectio:__tostring"></a>
+    <strong>Sectio:__tostring&nbsp;()</strong>
+    </dt>
+    <dd>
+    Convert object to string.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string
+    </ol>
+
+
 
 
 </dd>

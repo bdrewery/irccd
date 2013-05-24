@@ -329,6 +329,22 @@ irccd.conf(5) file.
 .Pp
 The syntax of each message is a simple ASCII string that ends with a trailing '\\n'.
 Optional parameters are enclosed betweens brackets.
+.\" CNOTICE
+.Ss CNOTICE
+This command is used to send a message a private notice to a user.
+.Bd -literal -offset indent
+CNOTICE server nickname message\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It nickname
+The user nickname target.
+.It message
+The message.
+.El
 .\" INVITE
 .Ss INVITE
 This command is used to invite someone on a channel, needed for channels with
@@ -399,6 +415,22 @@ A channel or a private query.
 .It message
 The message.
 .El
+.\" MODE
+.Ss MODE
+This command is used to set a channel mode.
+.Bd -literal -offset indent
+MODE server channel mode\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It channel
+The target channel.
+.It mode
+The new mode.
+.El
 .\" MSG
 .Ss MSG
 This command is used to send a message to a global channel or to a private query.
@@ -430,6 +462,22 @@ Parameters:
 The server.
 .It nickname
 The new nickname.
+.El
+.\" NOTICE
+.Ss NOTICE
+This command is used to send a message to a global channel notice.
+.Bd -literal -offset indent
+NOTICE server channel message\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It channel
+The channel target.
+.It message
+The message.
 .El
 .\" PART
 .Ss PART
@@ -477,6 +525,20 @@ The server.
 The channel.
 .It topic
 The new topic.
+.El
+.\" UMODE
+.Ss UMODE
+This command is used to set your user mode.
+.Bd -literal -offset indent
+UMODE server mode\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It mode
+The new mode.
 .El
 .\" SEE ALSO
 .Sh SEE ALSO
