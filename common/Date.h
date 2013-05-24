@@ -26,12 +26,18 @@
 namespace irccd {
 
 struct Date {
-	struct tm m_tm;		//! time calendar
-	time_t m_timestamp;	//! time epoch
+	time_t m_timestamp;		//! time epoch
 
 	Date(void);
 	Date(time_t timestamp);
 	~Date(void);
+
+	/**
+	 * Get the timestamp.
+	 *
+	 * @return the timestamp
+	 */
+	time_t getTimestamp(void) const;
 
 	/**
 	 * Format the current that in the specified format,
@@ -42,6 +48,10 @@ struct Date {
 	 */
 	std::string format(const std::string &format);
 };
+
+bool operator==(const Date &, const Date &);
+
+bool operator<=(const Date &, const Date &);
 
 } // !irccd
 

@@ -126,6 +126,24 @@ Parameters:
 .It server
 The current server.
 .El
+.\" Channel notice
+.Ss Channel notice
+This event is triggered when someone sent a notice to a channel.
+.Bd -literal -offset indent
+function onNotice(server, who, channel, notice)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It who
+The one that sent the notice.
+.It channel
+The target channel.
+.It message
+The notice message.
+.El
 .\" Invite
 .Ss Invite
 This event is triggered when someone is inviting you.
@@ -212,6 +230,24 @@ The old nickname.
 .It newnickname
 The new nickname.
 .El
+.\" Notice
+.Ss Notice
+This event is triggered when someone sent a notice someone.
+.Bd -literal -offset indent
+function onNotice(server, who, target, notice)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It who
+The one that sent the notice.
+.It target
+The target nickname.
+.It message
+The notice message.
+.El
 .\" Part
 .Ss Part
 This event is triggered when someone has left a specific channel.
@@ -229,6 +265,22 @@ The channel.
 The person that left.
 .It reason
 An optional reason.
+.El
+.\" Query
+.Ss Query
+This event is triggered when someone sent a private message to you.
+.Bd -literal -offset indent
+function onQuery(server, who, message)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It who
+The person that said something.
+.It message
+The message sent.
 .El
 .\" Topic
 .Ss Topic
@@ -248,6 +300,22 @@ The person who changed the topic.
 .It topic
 The new topic (may be empty).
 .El
+.\" User mode
+.Ss User mode
+This event is triggered when someone changed your mode.
+.Bd -literal -offset indent
+function onUserMode(server, nickname, mode)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It nickname
+The person who changed the mode.
+.It mode
+The new mode.
+.El
 .\" SUPPORTED SOCKET MESSAGES
 .Sh SUPPORTED SOCKET MESSAGES
 This section explain how to control
@@ -261,6 +329,23 @@ irccd.conf(5) file.
 .Pp
 The syntax of each message is a simple ASCII string that ends with a trailing '\\n'.
 Optional parameters are enclosed betweens brackets.
+.\" INVITE
+.Ss INVITE
+This command is used to invite someone on a channel, needed for channels with
+mode +i.
+.Bd -literal -offset indent
+INVITE server target channel\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It target
+The target nickname to invite.
+.It channel
+The channel name prepended by a '#'
+.El
 .\" JOIN
 .Ss JOIN
 This command is used to join a specific channel. Note that a leading '#' is required
@@ -359,6 +444,22 @@ Parameters:
 The server.
 .It channel
 The channel to leave.
+.El
+.\" QUERY
+.Ss QUERY
+This command to send a private message.
+.Bd -literal -offset indent
+QUERY server target message\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It target
+The target nickname.
+.It message
+The message.
 .El
 .\" TOPIC
 .Ss TOPIC

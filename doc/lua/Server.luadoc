@@ -7,6 +7,19 @@
 --- Server
 -- @type Server
 
+--- Get the server identity.
+-- Returns a table with the following fields:
+-- <ul>
+-- <li>name: the identity name</li>
+-- <li>nickname: the nickname currently in use</li>
+-- <li>username: the username</li>
+-- <li>realname: the full name</li>
+-- <li>ctcpversion: the CTCP Version reply</li>
+-- </ul>
+-- @return an identity table
+function Server:getIdentity()
+end
+
 --- Get the server name id.
 -- Returns the server id.
 -- @return the name id

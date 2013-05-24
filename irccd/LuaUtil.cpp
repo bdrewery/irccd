@@ -112,6 +112,10 @@ const luaL_Reg functions[] = {
 	{ nullptr,		nullptr			}
 };
 
+/* --------------------------------------------------------
+ * Date methods
+ * -------------------------------------------------------- */
+
 namespace date {
 
 static int format(lua_State *L)
@@ -131,47 +135,102 @@ static int format(lua_State *L)
 
 static int getCalendar(lua_State *L)
 {
-	Date *d;
+	Date *date;
+	time_t stamp;
+	struct tm tm;
 
-	d = *(Date **)luaL_checkudata(L, 1, DATE_TYPE);
+	date = *(Date **)luaL_checkudata(L, 1, DATE_TYPE);
+	stamp = date->getTimestamp();
+	tm = *localtime(&stamp);
 
 	// Create the table result
 	lua_createtable(L, 8, 8);
 
-	lua_pushinteger(L, d->m_tm.tm_sec);
+	lua_pushinteger(L, tm.tm_sec);
 	lua_setfield(L, -2, "seconds");
 
-	lua_pushinteger(L, d->m_tm.tm_min);
+	lua_pushinteger(L, tm.tm_min);
 	lua_setfield(L, -2, "minutes");
 
-	lua_pushinteger(L, d->m_tm.tm_hour);
+	lua_pushinteger(L, tm.tm_hour);
 	lua_setfield(L, -2, "hours");
 
-	lua_pushinteger(L, d->m_tm.tm_mon + 1);
+	lua_pushinteger(L, tm.tm_mon + 1);
 	lua_setfield(L, -2, "month");
 
-	lua_pushinteger(L, d->m_tm.tm_year + 1900);
+	lua_pushinteger(L, tm.tm_year + 1900);
 	lua_setfield(L, -2, "year");
 
 	return 1;
 }
 
-} // !date
+} // !dateMethods
 
-const luaL_Reg dateList[] = {
+/* --------------------------------------------------------
+ * Date meta methods
+ * -------------------------------------------------------- */
+
+namespace dateMt {
+
+static int equals(lua_State *L)
+{
+	Date *d1, *d2;
+
+	d1 = *(Date **)luaL_checkudata(L, 1, DATE_TYPE);
+	d2 = *(Date **)luaL_checkudata(L, 2, DATE_TYPE);
+
+	lua_pushboolean(L, *d1 == *d2);
+
+	return 1;
+}
+
+static int le(lua_State *L)
+{
+	Date *d1, *d2;
+
+	d1 = *(Date **)luaL_checkudata(L, 1, DATE_TYPE);
+	d2 = *(Date **)luaL_checkudata(L, 2, DATE_TYPE);
+
+	lua_pushboolean(L, *d1 <= *d2);
+
+	return 1;
+}
+
+static int tostring(lua_State *L)
+{
+	Date *date;
+
+	date = *(Date **)luaL_checkudata(L, 1, DATE_TYPE);
+	lua_pushfstring(L, "%d", date->getTimestamp());
+
+	return 1;
+}
+
+} // !dateMt
+
+static const luaL_Reg dateMethodsList[] = {
 	{ "format",		date::format		},
 	{ "getCalendar",	date::getCalendar	},
 	{ nullptr,		nullptr			}
 };
 
+static const luaL_Reg dateMtList[] = {
+	{ "__eq",		dateMt::equals		},
+	{ "__le",		dateMt::le		},
+	{ "__tostring",		dateMt::tostring	},
+	{ nullptr,		nullptr			}
+};
+
 int irccd::luaopen_util(lua_State *L)
 {
+	// Util library
 	luaL_newlib(L, functions);
 
+	// Date type
 	luaL_newmetatable(L, DATE_TYPE);
-	lua_pushvalue(L, -1);
-	lua_setfield(L, -1, "__index");
-	luaL_setfuncs(L, dateList, 0);
+	luaL_setfuncs(L, dateMethodsList, 0);
+	luaL_newlib(L, dateMtList);
+	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 
 	return 1;

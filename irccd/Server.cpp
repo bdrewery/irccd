@@ -103,6 +103,27 @@ static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
 	(void)count;
 }
 
+static void handleChannelNotice(irc_session_t *s, const char *ev, const char *orig,
+				const char **params, unsigned int count)
+{
+	Server *server = (Server *)irc_get_ctx(s);
+	string nick, target, notice;
+
+	nick = getNick(orig);
+	target = getNick(params[0]);
+
+	if (params[1] != nullptr)
+		notice = params[1];
+
+	if (server->getIdentity().m_nickname != nick) {
+		for (Plugin *p : Irccd::getInstance()->getPlugins())
+			p->onChannelNotice(server, nick, target, notice);
+	}
+
+	(void)ev;
+	(void)count;
+}
+
 static void handleInvite(irc_session_t *s, const char *ev, const char *orig,
 			 const char **params, unsigned int count)
 {
@@ -166,10 +187,35 @@ static void handleNick(irc_session_t *s, const char *ev, const char *orig,
 	oldnick = getNick(orig);
 	newnick = getNick(params[0]);
 
+	// Don't forget to update our own nickname
+	if (oldnick == server->getIdentity().m_nickname)
+		server->getIdentity().m_nickname = newnick;
+
 	// do not log self, XXX: add an option to allow that
 	if (server->getIdentity().m_nickname != oldnick) {
 		for (Plugin *p : Irccd::getInstance()->getPlugins())
 			p->onNick(server, oldnick, newnick);
+	}
+
+	(void)ev;
+	(void)count;
+}
+
+static void handleNotice(irc_session_t *s, const char *ev, const char *orig,
+			 const char **params, unsigned int count)
+{
+	Server *server = (Server *)irc_get_ctx(s);
+	string nick, target, notice;
+
+	nick = getNick(orig);
+	target = getNick(params[0]);
+
+	if (params[1] != nullptr)
+		notice = params[1];
+
+	if (server->getIdentity().m_nickname != nick) {
+		for (Plugin *p : Irccd::getInstance()->getPlugins())
+			p->onNotice(server, nick, target, notice);
 	}
 
 	(void)ev;
@@ -217,6 +263,25 @@ static void handlePart(irc_session_t *s, const char *ev, const char *orig,
 	(void)count;
 }
 
+static void handleQuery(irc_session_t *s, const char *ev, const char *orig,
+			const char **params, unsigned int count)
+{
+	Server *server = (Server *)irc_get_ctx(s);
+	string who, message = "";
+
+	who = getNick(orig);
+	if (params[1] != nullptr)
+		message = params[1];
+
+	if (server->getIdentity().m_nickname != who) {
+		for (Plugin *p : Irccd::getInstance()->getPlugins())
+			p->onQuery(server, who, message);
+	}
+
+	(void)ev;
+	(void)count;
+}
+
 static void handleTopic(irc_session_t *s, const char *ev, const char *orig,
 			const char **params, unsigned int count)
 {
@@ -238,17 +303,38 @@ static void handleTopic(irc_session_t *s, const char *ev, const char *orig,
 	(void)count;
 }
 
+static void handleUserMode(irc_session_t *s, const char *ev, const char *orig,
+			   const char **params, unsigned int count)
+{
+	Server *server = (Server *)irc_get_ctx(s);
+	string nick;
+
+	nick = getNick(orig);
+
+	if (server->getIdentity().m_nickname != nick) {
+		for (Plugin *p : Irccd::getInstance()->getPlugins())
+			p->onUserMode(server, nick, params[0]);
+	}
+
+	(void)ev;
+	(void)count;
+}
+
 static irc_callbacks_t functions = {
-	.event_channel	= handleChannel,
-	.event_connect	= handleConnect,
-	.event_invite	= handleInvite,
-	.event_mode	= handleMode,
-	.event_nick	= handleNick,
-	.event_numeric	= handleNumeric,
-	.event_quit	= handleQuit,
-	.event_join	= handleJoin,
-	.event_part	= handlePart,
-	.event_topic	= handleTopic,
+	.event_channel		= handleChannel,
+	.event_channel_notice	= handleChannelNotice,
+	.event_connect		= handleConnect,
+	.event_invite		= handleInvite,
+	.event_mode		= handleMode,
+	.event_nick		= handleNick,
+	.event_notice		= handleNotice,
+	.event_numeric		= handleNumeric,
+	.event_quit		= handleQuit,
+	.event_join		= handleJoin,
+	.event_part		= handlePart,
+	.event_privmsg		= handleQuery,
+	.event_topic		= handleTopic,
+	.event_umode		= handleUserMode
 };
 
 /* }}} */
@@ -288,7 +374,7 @@ const vector<Server::Channel> & Server::getChannels(void)
 	return m_channels;
 }
 
-const Identity & Server::getIdentity(void) const
+Identity & Server::getIdentity(void)
 {
 	return m_identity;
 }
@@ -369,6 +455,12 @@ void Server::stopConnection(void)
 	}
 }
 
+void Server::invite(const string &target, const string &channel)
+{
+	if (m_threadStarted)
+		irc_cmd_invite(m_session, target.c_str(), channel.c_str());
+}
+
 void Server::join(const string &name, const string &password)
 {
 	if (m_threadStarted)
@@ -392,12 +484,22 @@ void Server::nick(const std::string &nick)
 {
 	if (m_threadStarted)
 		irc_cmd_nick(m_session, nick.c_str());
+
+	// Don't forget to change our own name
+	m_identity.m_nickname = nick;
 }
 
 void Server::part(const string &channel)
 {
 	if (m_threadStarted)
 		irc_cmd_part(m_session, channel.c_str());
+}
+
+void Server::query(const std::string &who, const std::string &message)
+{
+	// Do not write to public channel
+	if (m_threadStarted && who[0] != '#')
+		irc_cmd_msg(m_session, who.c_str(), message.c_str());
 }
 
 void Server::say(const string &target, const string &message)

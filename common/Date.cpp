@@ -25,24 +25,39 @@ using namespace std;
 Date::Date(void)
 {
 	m_timestamp = time(NULL);
-	m_tm = *localtime(&m_timestamp);
 }
 
 Date::Date(time_t timestamp)
 {
 	m_timestamp = time(&timestamp);
-	m_tm = *localtime(&m_timestamp);
 }
 
 Date::~Date(void)
 {
 }
 
+time_t Date::getTimestamp(void) const
+{
+	return m_timestamp;
+}
+
 string Date::format(const string &format)
 {
 	char buffer[512];
+	struct tm *tm;
 
-	strftime(buffer, sizeof (buffer), format.c_str(), &m_tm);
+	tm = localtime(&m_timestamp);
+	strftime(buffer, sizeof (buffer), format.c_str(), tm);
 
 	return string(buffer);
+}
+
+bool irccd::operator==(const Date &d1, const Date &d2)
+{
+	return d1.getTimestamp() == d2.getTimestamp();
+}
+
+bool irccd::operator<=(const Date &d1, const Date &d2)
+{
+	return d1.getTimestamp() <= d2.getTimestamp();
 }

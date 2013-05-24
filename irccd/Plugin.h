@@ -116,6 +116,17 @@ public:
 	void onConnect(Server *server);
 
 	/**
+	 * A Lua function triggered on a channel notice
+	 *
+	 * @param server the server
+	 * @param nick who generated the message
+	 * @param target the target channel
+	 * @param notice the optional notice
+	 */
+	void onChannelNotice(Server *server, const std::string &nick, const std::string &target,
+			     const std::string &notice);
+
+	/**
 	 * A Lua function triggered on an invite event.
 	 *
 	 * @param server the server
@@ -166,6 +177,17 @@ public:
 	void onNick(Server *server, const std::string &oldnick, const std::string &newnick);
 
 	/**
+	 * A Lua function triggered on a private notice.
+	 *
+	 * @param server the server
+	 * @param nick who generated the message
+	 * @param target the target nickname
+	 * @param notice the optional notice
+	 */
+	void onNotice(Server *server, const std::string &nick, const std::string &target,
+		      const std::string &notice);
+
+	/**
 	 * A Lua function triggered when someone leave a channel.
 	 *
 	 * @param server the server
@@ -177,6 +199,15 @@ public:
 		    const std::string &reason);
 
 	/**
+	 * A Lua function triggered on a private message.
+	 *
+	 * @param server the server
+	 * @param who who sent
+	 * @param message the message
+	 */
+	void onQuery(Server *server, const std::string &who, const std::string &message);
+
+	/**
 	 * A Lua function triggered when someone change the channel topic.
 	 *
 	 * @param server the server
@@ -186,6 +217,15 @@ public:
 	 */
 	void onTopic(Server *server, const std::string &channel, const std::string &who,
 		     const std::string &topic);
+
+	/**
+	 * A Lua function triggered on a user mode change event.
+	 *
+	 * @param server the server
+	 * @param who who changed *your* mode
+	 * @param mode the mode
+	 */
+	void onUserMode(Server *server, const std::string &who, const std::string &mode);
 };
 
 } // !irccd

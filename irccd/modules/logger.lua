@@ -25,12 +25,15 @@ local util = require("util")
 local configuration = { }
 
 local format = {
+	cnotice	= "[#c] #m",
 	join	= ">> #u joined #c",
 	me	= "* #u #m",
 	message	= "%H:%M #u: #m",
 	mode	= ":: #u changed the mode to: #m #M",
+	notice	= "[notice] (#u) #t: #m",
 	part	= "<< #u left #c [#m]",
-	topic	= ":: #u changed the topic to: #m"
+	topic	= ":: #u changed the topic to: #m",
+	umode	= "#u set mode #m to #t"
 }
 
 -- Load the config.
@@ -54,6 +57,9 @@ local function loadConfig()
 	configuration.home = general:requireOption("directory")
 
 	-- TODO: Beautify this.
+	if general:hasOption("format-cnotice") then
+		format.cnotice	= general:getOption("format-cnotice")
+	end
 	if general:hasOption("format-join") then
 		format.join	= general:getOption("format-join")
 	end
@@ -66,11 +72,17 @@ local function loadConfig()
 	if general:hasOption("format-mode") then
 		format.message	= general:getOption("format-mode")
 	end
+	if general:hasOption("format-notice") then
+		format.notice	= general:getOption("format-notice")
+	end
 	if general:hasOption("format-part") then
 		format.part	= general:getOption("format-part")
 	end
 	if general:hasOption("format-topic") then
 		format.topic	= general:getOption("format-topic")
+	end
+	if general:hasOption("format-umode") then
+		format.umode	= general:getOption("format-umode")
 	end
 
 	-- Set to nil means no log, so in config is ""
@@ -130,6 +142,17 @@ local function write(what, table)
 	end
 end
 
+function onChannelNotice(server, who, channel, notice)
+	local keywords = {
+		c = channel,
+		m = notice,
+		s = server:getName(),
+		u = who
+	}
+
+	write(format.cnotice, keywords)
+end
+
 -- Log joins
 function onJoin(server, channel, nickname)
 	local keywords = {
@@ -176,13 +199,25 @@ function onMode(server, channel, who, mode, modeArg)
 	write(format.mode, keywords)
 end
 
+function onNotice(server, who, target, notice)
+	local keywords = {
+		c = who,			-- for file loggin like channel
+		m = notice,
+		s = server:getName(),
+		t = target,
+		u = who
+	}
+
+	write(format.notice, keywords)
+end
+
 -- Log parts
 function onPart(server, channel, nickname, reason)
 	local keywords = {
 		c = channel,
 		s = server:getName(),
 		m = reason,
-		u = who
+		u = nickname
 	}
 
 	write(format.part, keywords)
@@ -198,4 +233,16 @@ function onTopic(server, channel, who, topic)
 	}
 
 	write(format.topic, keywords)
+end
+
+function onUserMode(server, who, mode)
+	local identity = server:getIdentity()
+
+	local keywords = {
+		m = mode,
+		s = server:getName(),
+		t = identity.nickname,
+	}
+
+	write(format.umode, keywords)
 end

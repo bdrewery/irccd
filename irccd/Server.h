@@ -121,7 +121,7 @@ public:
 	 *
 	 * @return the identity
 	 */
-	const Identity & getIdentity(void) const;
+	Identity & getIdentity(void);
 
 	/**
 	 * Get the server instance name. This is only used
@@ -149,7 +149,6 @@ public:
 	 */
 	void setConnection(const std::string &name, const std::string &host,
 			   unsigned port, bool ssl = false, const std::string &password = "");
-
 
 	/**
 	 * Set the user identity.
@@ -183,6 +182,14 @@ public:
 	/* ------------------------------------------------
 	 * IRC commands
 	 * ------------------------------------------------ */
+
+	/**
+	 * Invite someone to a channel
+	 *
+	 * @param target the target nickname
+	 * @param channel the channel
+	 */
+	void invite(const std::string &target, const std::string &channel);
 
 	/**
 	 * Join a channel.
@@ -222,6 +229,14 @@ public:
 	 * @param channel the channel to leave
 	 */
 	void part(const std::string &channel);
+
+	/**
+	 * Send a query message.
+	 *
+	 * @param who the target nickname
+	 * @param message the message
+	 */
+	void query(const std::string &who, const std::string &message);
 
 	/**
 	 * Say something to a channel or to a nickname.

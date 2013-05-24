@@ -33,6 +33,15 @@ using namespace std;
 
 typedef function<void(void)> HelpHandler;
 
+static void helpInvite(void)
+{
+	Logger::warn("usage: %s invite server nickname channel\n", getprogname());
+	Logger::warn("Invite someone to a channel, needed for channel with mode +i\n");
+
+	Logger::warn("Example:");
+	Logger::warn("\t%s invite freenode xorg62 #staff", getprogname());
+}
+
 static void helpJoin(void)
 {
 	Logger::warn("usage: %s join server channel [password]\n", getprogname());
@@ -108,13 +117,14 @@ static map<string, HelpHandler> createHelpHandlers(void)
 {
 	map<string, HelpHandler> helpHandlers;
 
-	helpHandlers["join"] = helpJoin;
-	helpHandlers["kick"] = helpKick;
-	helpHandlers["me"] = helpMe;
-	helpHandlers["message"] = helpMessage;
-	helpHandlers["nick"] = helpNick;
-	helpHandlers["part"] = helpPart;
-	helpHandlers["topic"] = helpTopic;
+	helpHandlers["invite"]	= helpInvite;
+	helpHandlers["join"]	= helpJoin;
+	helpHandlers["kick"]	= helpKick;
+	helpHandlers["me"]	= helpMe;
+	helpHandlers["message"]	= helpMessage;
+	helpHandlers["nick"]	= helpNick;
+	helpHandlers["part"]	= helpPart;
+	helpHandlers["topic"]	= helpTopic;
 
 	return helpHandlers;
 }
@@ -145,12 +155,26 @@ static void handleHelp(Irccdctl *ctl, int argc, char **argv)
 	exit(1);
 }
 
+static void handleInvite(Irccdctl *ctl, int argc, char **argv)
+{
+	ostringstream oss;
+
+	if (argc < 3)
+		Logger::warn("invite requires 3 arguments");
+	else {
+		oss << "INVITE " << argv[0] << " " << argv[1];
+		oss << " " << argv[2] << "\n";
+
+		ctl->sendRaw(oss.str());
+	}
+}
+
 static void handleJoin(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
 	if (argc < 2)
-		Logger::warn("join requires 2 arguments");
+		Logger::warn("join requires at least 2 arguments");
 	else {
 		oss << "JOIN " << argv[0] << " " << argv[1];
 
@@ -244,14 +268,15 @@ static map<string, Handler> createHandlers(void)
 {
 	map<string, Handler> handlers;
 
-	handlers["help"] = handleHelp;
-	handlers["join"] = handleJoin;
-	handlers["kick"] = handleKick;
-	handlers["me"] = handleMe;
-	handlers["message"] = handleMessage;
-	handlers["nick"] = handleNick;
-	handlers["part"] = handlePart;
-	handlers["topic"] = handleTopic;
+	handlers["help"]	= handleHelp;
+	handlers["invite"]	= handleInvite;
+	handlers["join"]	= handleJoin;
+	handlers["kick"]	= handleKick;
+	handlers["me"]		= handleMe;
+	handlers["message"]	= handleMessage;
+	handlers["nick"]	= handleNick;
+	handlers["part"]	= handlePart;
+	handlers["topic"]	= handleTopic;
 
 	return handlers;
 }
@@ -356,6 +381,7 @@ void Irccdctl::usage(void)
 
 	Logger::warn("Commands supported:");
 	Logger::warn("\thelp\t\tGet this help");
+	Logger::warn("\tinvite\t\tInvite someone to a channel");
 	Logger::warn("\tjoin\t\tJoin a channel");
 	Logger::warn("\tkick\t\tKick someone from a channel");
 	Logger::warn("\tme\t\tSend a CTCP Action (same as /me)");

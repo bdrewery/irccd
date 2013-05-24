@@ -187,7 +187,12 @@ void Plugin::onConnect(Server *server)
 	callLua("onConnect", 0, "S", server);
 }
 
-void Plugin::onInvite(Server *server, const std::string &channel, const std::string &who)
+void Plugin::onChannelNotice(Server *server, const string &nick, const string &target, const string &notice)
+{
+	callLua("onChannelNotice", 0, "S s s s", server, nick.c_str(), target.c_str(), notice.c_str());
+}
+
+void Plugin::onInvite(Server *server, const string &channel, const string &who)
 {
 	callLua("onInvite", 0, "S s s", server, channel.c_str(), who.c_str());
 }
@@ -212,12 +217,27 @@ void Plugin::onNick(Server *server, const string &oldnick, const string &newnick
 	callLua("onNick", 0, "S s s", server, oldnick.c_str(), newnick.c_str());
 }
 
+void Plugin::onNotice(Server *server, const string &nick, const string &target, const string &notice)
+{
+	callLua("onNotice", 0, "S s s s", server, nick.c_str(), target.c_str(), notice.c_str());
+}
+
 void Plugin::onPart(Server *server, const string &channel, const string &who, const string &reason)
 {
 	callLua("onPart", 0, "S s s s", server, channel.c_str(), who.c_str(), reason.c_str());
 }
 
+void Plugin::onQuery(Server *server, const std::string &who, const std::string &message)
+{
+	callLua("onQuery", 0, "S s s", server, who.c_str(), message.c_str());
+}
+
 void Plugin::onTopic(Server *server, const string &channel, const string &who, const string &topic)
 {
 	callLua("onTopic", 0, "S s s s", server, channel.c_str(), who.c_str(), topic.c_str());
+}
+
+void Plugin::onUserMode(Server *server, const string &who, const string &mode)
+{
+	callLua("onUserMode", 0, "S s s", server, who.c_str(), mode.c_str());
 }

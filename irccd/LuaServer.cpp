@@ -18,6 +18,8 @@
 
 #define SERVER_TYPE	"ServerType"
 
+#include <sstream>
+
 #include <Logger.h>
 
 #include "Server.h"
@@ -26,7 +28,42 @@
 using namespace irccd;
 using namespace std;
 
+void LuaServer::pushObject(lua_State *L, Server *server)
+{
+	Server **ptr;
+	ptr = (Server **)lua_newuserdata(L, sizeof (Server *));
+	luaL_setmetatable(L, SERVER_TYPE);
+
+	*ptr = server;
+}
+
 namespace methods {
+
+static int getIdentity(lua_State *L)
+{
+	Server *s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	const Identity &ident = s->getIdentity();
+
+	// Create the identity table result
+	lua_createtable(L, 5, 5);
+
+	lua_pushstring(L, ident.m_name.c_str());
+	lua_setfield(L, -2, "name");
+
+	lua_pushstring(L, ident.m_nickname.c_str());
+	lua_setfield(L, -2, "nickname");
+
+	lua_pushstring(L, ident.m_username.c_str());
+	lua_setfield(L, -2, "username");
+
+	lua_pushstring(L, ident.m_realname.c_str());
+	lua_setfield(L, -2, "realname");
+
+	lua_pushstring(L, ident.m_ctcpversion.c_str());
+	lua_setfield(L, -2, "ctcpversion");
+
+	return 1;
+}
 
 static int getName(lua_State *L)
 {
@@ -135,32 +172,61 @@ static int say(lua_State *L)
 
 } // !methods
 
-static const luaL_Reg methodList[] = {
-	{ "getName",	methods::getName		},
-	{ "join",	methods::join			},
-	{ "kick",	methods::kick			},
-	{ "me",		methods::me			},
-	{ "nick",	methods::nick			},
-	{ "say",	methods::say			},
-	{ nullptr,	nullptr				}
+static const luaL_Reg serverMethods[] = {
+	{ "getIdentity",	methods::getIdentity		},
+	{ "getName",		methods::getName		},
+	{ "join",		methods::join			},
+	{ "kick",		methods::kick			},
+	{ "me",			methods::me			},
+	{ "nick",		methods::nick			},
+	{ "say",		methods::say			},
+	{ nullptr,		nullptr				}
 };
 
-void LuaServer::pushObject(lua_State *L, Server *server)
-{
-	Server **ptr;
-	ptr = (Server **)lua_newuserdata(L, sizeof (Server *));
-	luaL_setmetatable(L, SERVER_TYPE);
+namespace mt {
 
-	*ptr = server;
+static int tostring(lua_State *L)
+{
+	Server *server;
+	ostringstream oss;
+
+	server = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	oss << "Server " << server->getName() << " at " << server->getHost();
+
+	lua_pushstring(L, oss.str().c_str());
+
+	return 1;
 }
+
+static int equals(lua_State *L)
+{
+	Server *s1, *s2;
+
+	s1 = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s2 = *(Server **)luaL_checkudata(L, 2, SERVER_TYPE);
+
+	lua_pushboolean(L, s1 == s2);
+
+	return 1;
+}
+
+} // !mt
+
+static const luaL_Reg serverMt[] = {
+	{ "__tostring",		mt::tostring			},
+	{ "__eq",		mt::equals			},
+	{ nullptr,		nullptr				}
+};
 
 int irccd::luaopen_server(lua_State *L)
 {
 	// Create the metatable for Server
 	luaL_newmetatable(L, SERVER_TYPE);
-	lua_pushvalue(L, -1);
-	lua_setfield(L, -1, "__index");
-	luaL_setfuncs(L, methodList, 0);
+	luaL_setfuncs(L, serverMt, 0);
+
+	luaL_newlib(L, serverMethods);
+	lua_setfield(L, -2, "__index");
+
 	lua_pop(L, 1);
 
 	return 0;

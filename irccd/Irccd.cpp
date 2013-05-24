@@ -41,6 +41,19 @@ using namespace std;
 
 typedef function<void(Irccd *, const string &params)> Handler;
 
+static void handleInvite(Irccd *irccd, const string &cmd)
+{
+	Server *server;
+	vector<string> params = Util::split(cmd, " \t", 3);
+
+	if (params.size() < 2) {
+		Logger::warn("INVITE needs 3 arguments");
+	} else {
+		if ((server = irccd->findServer(params[0])) != nullptr)
+			server->invite(params[1], params[2]);
+	}
+}
+
 static void handleJoin(Irccd *irccd, const string &cmd)
 {
 	Server *server;
@@ -144,13 +157,14 @@ static map<string, Handler> createHandlers(void)
 {
 	map<string, Handler> handlers;
 
-	handlers["JOIN"] = handleJoin;
-	handlers["KICK"] = handleKick;
-	handlers["ME"] = handleMe;
-	handlers["MSG"] = handleMessage;
-	handlers["NICK"] = handleNick;
-	handlers["PART"] = handlePart;
-	handlers["TOPIC"] = handleTopic;
+	handlers["INVITE"]	= handleInvite;
+	handlers["JOIN"]	= handleJoin;
+	handlers["KICK"]	= handleKick;
+	handlers["ME"]		= handleMe;
+	handlers["MSG"]		= handleMessage;
+	handlers["NICK"]	= handleNick;
+	handlers["PART"]	= handlePart;
+	handlers["TOPIC"]	= handleTopic;
 
 	return handlers;
 }
