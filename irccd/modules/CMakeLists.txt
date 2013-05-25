@@ -17,14 +17,15 @@
 #
 
 # Shortcut for installing modules
-macro(DEFINE_MODULE name file description default)
+function(DEFINE_MODULE name file description default)
 	option(${name} ${description} ${default})
 
 	if (${name})
 		install(FILES ${file} DESTINATION ${MODDIR})
 	endif()
-endmacro()
+endfunction()
 
+DEFINE_MODULE(MOD_ANTIFLOOD antiflood.lua "Avoid flood on channel" On)
 DEFINE_MODULE(MOD_ASK ask.lua "Ask sage irccd about something" On)
 DEFINE_MODULE(MOD_BADWORDS badwords.lua "Anti bad words modules" On)
 DEFINE_MODULE(MOD_LOGGER logger.lua "A simple server logger" On)

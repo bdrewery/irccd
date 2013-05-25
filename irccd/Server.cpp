@@ -46,6 +46,8 @@ static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
 	string who, channel, message = "";
 	const string &cmdToken = server->getCommandChar();
 
+	puts("HANDLE CHANNEL");
+
 	channel = params[0];
 	if (params[1] != nullptr)
 		message = params[1];

@@ -79,6 +79,13 @@ static int getHome(lua_State *L)
 	return 1;
 }
 
+static int getTicks(lua_State *L)
+{
+	lua_pushinteger(L, Util::getTicks());
+
+	return 1;
+}
+
 static int mkdir(lua_State *L)
 {
 	int mode = 0700;
@@ -139,6 +146,7 @@ const luaL_Reg functions[] = {
 	{ "dirname",		util::dirname		},
 	{ "exist",		util::exist		},
 	{ "getHome",		util::getHome		},
+	{ "getTicks",		util::getTicks		},
 	{ "mkdir",		util::mkdir		},
 	{ "openDir",		util::openDir		},
 	{ nullptr,		nullptr			}

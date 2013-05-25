@@ -82,6 +82,14 @@ public:
 	static std::string getHome(void);
 
 	/**
+	 * Get the milliseconds elapsed since the application
+	 * startup.
+	 *
+	 * @return the milliseconds
+	 */
+	static uint64_t getTicks(void);
+
+	/**
 	 * Wrapper around dirname(3) for portability. Returns the parent
 	 * directory of the file
 	 *

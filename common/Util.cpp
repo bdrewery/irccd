@@ -18,6 +18,12 @@
 
 #include <sstream>
 
+#if defined(_WIN32) || defined(_MSC_VER)
+#  include <sys/timeb.h>
+#else
+#  include <sys/time.h>
+#endif
+
 #include <sys/stat.h>
 #include <libgen.h>
 
@@ -110,6 +116,23 @@ string Util::configFilePath(const std::string &filename)
 string Util::getHome(void)
 {
 	return string(getenv("HOME"));
+}
+
+uint64_t Util::getTicks(void)
+{
+#if defined(_WIN32) || defined(_MSC_VER)
+	_timeb tp;
+
+	_ftime(tp);
+
+	return tp.time * 1000LL + tp.millitm;
+#else
+        struct timeval tp;
+
+        gettimeofday(&tp, NULL);
+
+        return tp.tv_sec * 1000LL + tp.tv_usec / 1000;
+#endif
 }
 
 string Util::basename(const string &path)
