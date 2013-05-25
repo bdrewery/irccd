@@ -79,6 +79,11 @@ void LuaParser::setState(lua_State *L)
 	m_state = L;
 }
 
+int LuaParser::getLogRef(void) const
+{
+	return m_logRef;
+}
+
 void LuaParser::setLogRef(int logRef)
 {
 	m_logRef = logRef;
@@ -258,6 +263,7 @@ namespace parserMt {
 static int gc(lua_State *L)
 {
 	LuaParser *p = *(LuaParser **)luaL_checkudata(L, 1, PARSER_TYPE);
+	luaL_unref(L, LUA_REGISTRYINDEX, p->getLogRef());
 
 	delete p;
 

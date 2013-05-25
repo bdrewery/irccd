@@ -50,6 +50,16 @@ end
 function util.mkdir(path)
 end
 
+--- Open a directory.
+-- This function will open the directory specified by path. Optional boolean
+-- skipSpecial may be passed to avoid ".", ".." for being treated.
+-- @param path the path
+-- @param skipSpecial forget "." and "..", default: false
+-- @see Directory
+-- @return a Directory object
+function util.openDir(path, skipSpecial)
+end
+
 --- Date
 -- @type Date
 
@@ -92,6 +102,40 @@ end
 --- Convert object to string.
 -- @return a string
 function Date:__tostring()
+end
+
+--- Directory
+-- @type Directory
+
+--- Count the number of elements.
+-- Return the number of elements found in the directory. Note that
+-- if you didn't passed true to util.openDir() you will have
+-- "." and ".." counted int.
+-- @return the number of entries in the directory
+function Directory:count()
+end
+
+--- Iterate over the entries.
+-- Iterate over the entries, this function returns 2 arguments
+-- the entry and a boolean telling if is a directory.
+-- @return the entry name
+-- @return true if it is a directory
+function Directory:read()
+end
+
+--- Directory metamethods.
+-- The metamethods available for object Directory.
+-- @section
+
+--- Test equality.
+-- @param other the other directory
+-- @return true if they equals
+function Directory:__eq(other)
+end
+
+--- Convert object to string.
+-- @return a string
+function Directory:__tostring()
 end
 
 -- vim: set syntax=lua nu:

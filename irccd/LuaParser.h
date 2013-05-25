@@ -69,6 +69,13 @@ public:
 	void setState(lua_State *L);
 
 	/**
+	 * Get the logging function reference.
+	 *
+	 * @return the integer reference
+	 */
+	int getLogRef(void) const;
+
+	/**
 	 * Set the Lua function to call for logging.
 	 *
 	 * @param logRef the function reference
