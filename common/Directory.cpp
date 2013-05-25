@@ -62,6 +62,11 @@ bool Directory::open(bool skipParents)
 	return true;
 }
 
+const string & Directory::getPath(void) const
+{
+	return m_path;
+}
+
 const std::string & Directory::getError(void) const
 {
 	return m_error;
@@ -70,4 +75,16 @@ const std::string & Directory::getError(void) const
 const std::vector<Entry> & Directory::getEntries(void) const
 {
 	return m_entries;
+}
+
+bool irccd::operator==(const Entry &e1, const Entry &e2)
+{
+	return e1.m_name == e2.m_name &&
+	    e1.m_isDirectory == e2.m_isDirectory;
+}
+
+bool irccd::operator==(const Directory &d1, const Directory &d2)
+{
+	return d1.getPath() == d2.getPath() &&
+	    d1.getEntries() == d2.getEntries();
 }

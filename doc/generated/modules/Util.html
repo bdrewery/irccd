@@ -35,6 +35,8 @@
 <li><a href="#Functions">Functions</a></li>
 <li><a href="#Class_Date">Class Date </a></li>
 <li><a href="#Date_metamethods">Date metamethods </a></li>
+<li><a href="#Class_Directory">Class Directory </a></li>
+<li><a href="#Directory_metamethods">Directory metamethods </a></li>
 </ul>
 
 
@@ -91,6 +93,10 @@
 	<td class="name" nowrap><a href="#util.mkdir">util.mkdir&nbsp;(path)</a></td>
 	<td class="summary">Create a directory.</td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#util.openDir">util.openDir&nbsp;(path, skipSpecial)</a></td>
+	<td class="summary">Open a directory.</td>
+	</tr>
 </table>
 <h2><a href="#Class_Date">Class Date </a></h2>
 <table class="function_list">
@@ -115,6 +121,28 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Date:__tostring">Date:__tostring&nbsp;()</a></td>
+	<td class="summary">Convert object to string.</td>
+	</tr>
+</table>
+<h2><a href="#Class_Directory">Class Directory </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Directory:count">Directory:count&nbsp;()</a></td>
+	<td class="summary">Count the number of elements.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Directory:read">Directory:read&nbsp;()</a></td>
+	<td class="summary">Iterate over the entries.</td>
+	</tr>
+</table>
+<h2><a href="#Directory_metamethods">Directory metamethods </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Directory:__eq">Directory:__eq&nbsp;(other)</a></td>
+	<td class="summary">Test equality.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Directory:__tostring">Directory:__tostring&nbsp;()</a></td>
 	<td class="summary">Convert object to string.</td>
 	</tr>
 </table>
@@ -270,6 +298,37 @@
 
 
 </dd>
+    <dt>
+    <a name = "util.openDir"></a>
+    <strong>util.openDir&nbsp;(path, skipSpecial)</strong>
+    </dt>
+    <dd>
+    Open a directory.
+ This function will open the directory specified by path. Optional boolean
+ skipSpecial may be passed to avoid ".", ".." for being treated.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path</li>
+        <li><span class="parameter">skipSpecial</span>
+         forget "." and "..", default: false</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Directory object
+    </ol>
+
+
+    <h3>see also:</h3>
+    <ul>
+         <a href="../modules/Util.html#Class_Directory">Directory</a>
+    </ul>
+
+
+</dd>
 </dl>
     <h2><a name="Class_Date"></a>Class Date </h2>
         Date
@@ -378,6 +437,99 @@
     <dt>
     <a name = "Date:__tostring"></a>
     <strong>Date:__tostring&nbsp;()</strong>
+    </dt>
+    <dd>
+    Convert object to string.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2><a name="Class_Directory"></a>Class Directory </h2>
+        Directory
+    <dl class="function">
+    <dt>
+    <a name = "Directory:count"></a>
+    <strong>Directory:count&nbsp;()</strong>
+    </dt>
+    <dd>
+    Count the number of elements.
+ Return the number of elements found in the directory. Note that
+ if you didn't passed true to util.openDir() you will have
+ "." and ".." counted int.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the number of entries in the directory
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Directory:read"></a>
+    <strong>Directory:read&nbsp;()</strong>
+    </dt>
+    <dd>
+    Iterate over the entries.
+ Iterate over the entries, this function returns 2 arguments
+ the entry and a boolean telling if is a directory.
+
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the entry name</li>
+        <li>
+        true if it is a directory</li>
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2><a name="Directory_metamethods"></a>Directory metamethods </h2>
+        Directory metamethods.
+ The metamethods available for object Directory.
+    <dl class="function">
+    <dt>
+    <a name = "Directory:__eq"></a>
+    <strong>Directory:__eq&nbsp;(other)</strong>
+    </dt>
+    <dd>
+    Test equality.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other directory</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if they equals
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Directory:__tostring"></a>
+    <strong>Directory:__tostring&nbsp;()</strong>
     </dt>
     <dd>
     Convert object to string.

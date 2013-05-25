@@ -48,6 +48,13 @@ public:
 	bool open(bool skipParents = false);
 
 	/**
+	 * Get the directory path
+	 *
+	 * @return the path
+	 */
+	const std::string & getPath(void) const;
+
+	/**
 	 * Get the error
 	 *
 	 * @return the error
@@ -61,6 +68,9 @@ public:
 	 */
 	const std::vector<Entry> & getEntries(void) const;
 };
+
+bool operator==(const Entry &e1, const Entry &e2);
+bool operator==(const Directory &d1, const Directory &d2);
 
 } // !irccd
 

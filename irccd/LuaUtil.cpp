@@ -16,9 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define DATE_TYPE "DateType"
+#define DATE_TYPE	"DateType"
+#define DIR_TYPE	"DirectoryType"
 
 #include <Date.h>
+#include <Directory.h>
 #include <Util.h>
 
 #include "LuaUtil.h"
@@ -100,6 +102,35 @@ static int mkdir(lua_State *L)
 	return 1;
 }
 
+static int openDir(lua_State *L)
+{
+	Directory **ptr, *d;
+	string path;
+	bool skipParents = false;
+
+	path = luaL_checkstring(L, 1);
+
+	// Optional boolean
+	if (lua_gettop(L) >= 2) {
+	       	luaL_checktype(L, 2, LUA_TBOOLEAN);
+		skipParents = lua_toboolean(L, 2);
+	}
+
+	d = new Directory(path);
+	if (!d->open(skipParents)) {
+		lua_pushnil(L);
+		lua_pushstring(L, d->getError().c_str());
+
+		return 2;
+	}
+
+	ptr = (Directory **)lua_newuserdata(L, sizeof (Directory *));
+	luaL_setmetatable(L, DIR_TYPE);
+	*ptr = d;
+
+	return 1;
+}
+
 } // !util
 
 const luaL_Reg functions[] = {
@@ -109,6 +140,7 @@ const luaL_Reg functions[] = {
 	{ "exist",		util::exist		},
 	{ "getHome",		util::getHome		},
 	{ "mkdir",		util::mkdir		},
+	{ "openDir",		util::openDir		},
 	{ nullptr,		nullptr			}
 };
 
@@ -208,6 +240,103 @@ static int tostring(lua_State *L)
 
 } // !dateMt
 
+/* --------------------------------------------------------
+ * Directory methods
+ * -------------------------------------------------------- */
+
+namespace dir {
+
+static int iter(lua_State *L)
+{
+	Directory *d;
+	int idx;
+
+	d = (Directory *)lua_topointer(L, lua_upvalueindex(1));
+	idx = lua_tointeger(L, lua_upvalueindex(2));
+
+	// End
+	if ((size_t)idx >= d->getEntries().size()) {
+		delete d;
+		return 0;
+	}
+
+	// Push name + isDirectory
+	lua_pushstring(L, d->getEntries()[idx].m_name.c_str());
+	lua_pushboolean(L, d->getEntries()[idx].m_isDirectory);
+
+	lua_pushinteger(L, ++idx);
+	lua_replace(L, lua_upvalueindex(2));
+
+	return 2;
+}
+
+static int count(lua_State *L)
+{
+	Directory *d;
+
+	d = *(Directory **)luaL_checkudata(L, 1, DIR_TYPE);
+	lua_pushinteger(L, d->getEntries().size());
+
+	return 1;
+}
+
+static int read(lua_State *L)
+{
+	Directory *d, *copy;
+
+	d = *(Directory **)luaL_checkudata(L, 1, DIR_TYPE);
+
+	copy = new Directory(*d);
+	lua_pushlightuserdata(L, copy);
+	lua_pushinteger(L, 0);
+	lua_pushcclosure(L, iter, 2);
+
+	return 1;
+}
+
+} // !dir
+
+/* --------------------------------------------------------
+ * Directory metamethods
+ * -------------------------------------------------------- */
+
+namespace dirMt {
+
+static int eq(lua_State *L)
+{
+	Directory *d1, *d2;
+
+	d1 = *(Directory **)luaL_checkudata(L, 1, DIR_TYPE);
+	d2 = *(Directory **)luaL_checkudata(L, 2, DIR_TYPE);
+
+	lua_pushboolean(L, *d1 == *d2);
+
+	return 1;
+}
+
+static int gc(lua_State *L)
+{
+	Directory *d;
+
+	d = *(Directory **)luaL_checkudata(L, 1, DIR_TYPE);
+	delete d;
+
+	return 0;
+}
+
+static int tostring(lua_State *L)
+{
+	Directory *d;
+
+	d = *(Directory **)luaL_checkudata(L, 1, DIR_TYPE);
+	lua_pushfstring(L, "Directory %s has %d entries", d->getPath().c_str(),
+	    d->getEntries().size());
+
+	return 1;
+}
+
+} // !dirMt
+
 static const luaL_Reg dateMethodsList[] = {
 	{ "format",		date::format		},
 	{ "getCalendar",	date::getCalendar	},
@@ -221,6 +350,19 @@ static const luaL_Reg dateMtList[] = {
 	{ nullptr,		nullptr			}
 };
 
+static const luaL_Reg dirMethodsList[] = {
+	{ "count",		dir::count		},
+	{ "read",		dir::read		},
+	{ nullptr,		nullptr			}
+};
+
+static const luaL_Reg dirMtList[] = {
+	{ "__eq",		dirMt::eq		},
+	{ "__gc",		dirMt::gc		},
+	{ "__tostring",		dirMt::tostring		},
+	{ nullptr,		nullptr			}
+};
+
 int irccd::luaopen_util(lua_State *L)
 {
 	// Util library
@@ -228,8 +370,15 @@ int irccd::luaopen_util(lua_State *L)
 
 	// Date type
 	luaL_newmetatable(L, DATE_TYPE);
-	luaL_setfuncs(L, dateMethodsList, 0);
-	luaL_newlib(L, dateMtList);
+	luaL_setfuncs(L, dateMtList, 0);
+	luaL_newlib(L, dateMethodsList);
+	lua_setfield(L, -2, "__index");
+	lua_pop(L, 1);
+
+	// Directory type
+	luaL_newmetatable(L, DIR_TYPE);
+	luaL_setfuncs(L, dirMtList, 0);
+	luaL_newlib(L, dirMethodsList);
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 
