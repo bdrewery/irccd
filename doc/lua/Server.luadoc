@@ -7,14 +7,14 @@
 --- Server
 -- @type Server
 
---- Get the server identity.
+--- Get the identity used for this server.
 -- Returns a table with the following fields:
 -- <ul>
--- <li>name: the identity name</li>
--- <li>nickname: the nickname currently in use</li>
--- <li>username: the username</li>
--- <li>realname: the full name</li>
--- <li>ctcpversion: the CTCP Version reply</li>
+-- <li><strong>name (string)</strong>: the identity name</li>
+-- <li><strong>nickname (string)</strong>: the nickname currently in use</li>
+-- <li><strong>username (string)</strong>: the username</li>
+-- <li><strong>realname (string)</strong>: the full name</li>
+-- <li><strong>ctcpversion (string)</strong>: the CTCP Version reply</li>
 -- </ul>
 -- @return an identity table
 function Server:getIdentity()
@@ -24,6 +24,18 @@ end
 -- Returns the server id.
 -- @return the name id
 function Server:getName()
+end
+
+--- Get the server information.
+-- Returns a table with the server connection information with
+-- the following fields:
+-- <ul>
+-- <li><strong>name (string)</strong>: the server ident</li>
+-- <li><strong>hostname (string)</strong>: the hostname</li>
+-- <li><strong>port (int)</strong>: the port</li>
+-- </ul>
+-- @return the information table
+function Server:getInfo()
 end
 
 --- Send a channel notice.

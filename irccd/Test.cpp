@@ -417,6 +417,7 @@ static void testPlugin(const char *file, int argc, char **argv)
 {
 	Plugin *plugin = new Plugin("Test case");
 	FakeServer *server = new FakeServer();
+	Identity ident;
 
 	if (strcmp(argv[0], "help") == 0) {
 		if (argc > 1) {
@@ -433,23 +434,28 @@ static void testPlugin(const char *file, int argc, char **argv)
 		}
 	}
 
+	server->setConnection("local", "local", 6667);
+
 	// Always push before calling it
 	Irccd::getInstance()->getPlugins().push_back(plugin);
 	if (!plugin->open(file)) {
 		Logger::warn("Failed to open plugin: %s", plugin->getError().c_str());
 	}
 
-	try {
-		testCommands.at(argv[1])(plugin, server, argc - 2, argv + 2);
-	} catch (out_of_range ex) {
-		Logger::warn("Unknown test case named %s", argv[0]);
+	// Simulate handler is optional
+	if (argc > 1) {
+		try {
+			testCommands.at(argv[1])(plugin, server, argc - 2, argv + 2);
+		} catch (out_of_range ex) {
+			Logger::warn("Unknown test case named %s", argv[0]);
+		}
 	}
 }
 
 void irccd::test(int argc, char **argv)
 {
-	if (argc < 3) {
-		Logger::warn("usage: %s test plugin.lua command [parameters...]", getprogname());
+	if (argc < 2) {
+		Logger::warn("usage: %s test plugin.lua [command] [parameters...]", getprogname());
 
 		Logger::warn("Commands supported:");
 		Logger::warn("\tonConnect\t\tSimulate a connection");

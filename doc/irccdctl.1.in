@@ -19,10 +19,92 @@
 .Sh NAME
 .Nm irccdctl
 .Nd irccd controller utility
+.\" SYNOPSIS
 .Sh SYNOPSIS
-.Nm irccd
+.Nm irccdctl
 .Op Fl v
 .Op Fl c Ar config
+.Ar command
+.Ar parameters
+.Pp
+This is the list of commands supported by
+.Ns Nm
+utility:
+.Pp
+.\" CNOTICE
+.Nm
+.Cm cnotice
+.Ar server
+.Ar channel
+.Ar message
+.\" HELP
+.Nm
+.Cm help
+.Ar subject
+.\" INVITE
+.Nm
+.Cm invite
+.Ar server
+.Ar target
+.Ar channel
+.\" JOIN
+.Nm
+.Cm join
+.Ar server
+.Ar channel
+.Op Ar password
+.\" KICK
+.Nm
+.Cm kick
+.Ar server
+.Ar nickname
+.Ar channel
+.Op Ar reason
+.\" ME
+.Nm
+.Cm me
+.Ar server
+.Ar target
+.Ar message
+.\" MESSAGE
+.Nm
+.Cm message
+.Ar server
+.Ar target
+.Ar message
+.\" MODE
+.Nm
+.Cm mode
+.Ar server
+.Ar channel
+.Ar mode
+.\" NICK
+.Nm
+.Cm nick
+.Ar server
+.Ar newnickname
+.\" NOTICE
+.Nm
+.Cm notice
+.Ar server
+.Ar nickname
+.Ar message
+.\" PART
+.Nm
+.Cm part
+.Ar server
+.Ar channel
+.\" TOPIC
+.Nm
+.Cm topic
+.Ar server
+.Ar channel
+.Ar topic
+.\" UMODE
+.Nm
+.Cm umode
+.Ar server
+.Ar mode
 .\" DESCRIPTION
 .Sh DESCRIPTION
 The
@@ -40,10 +122,6 @@ A path to a config file.
 .It Fl v
 Be more verbose.
 .El
-.\" COMMANDS
-.Sh COMMANDS
-This is the list of commands supported by
-.Nm irccdctl :
 .\" SEE ALSO
 .Sh SEE ALSO
 .Xr irccd 1 ,

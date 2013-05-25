@@ -369,8 +369,8 @@ static map<string, Handler> createHandlers(void)
 	handlers["me"]		= handleMe;
 	handlers["message"]	= handleMessage;
 	handlers["mode"]	= handleMode;
-	handlers["notice"]	= handleNotice;
 	handlers["nick"]	= handleNick;
+	handlers["notice"]	= handleNotice;
 	handlers["part"]	= handlePart;
 	handlers["topic"]	= handleTopic;
 	handlers["umode"]	= handleUserMode;

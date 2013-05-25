@@ -36,6 +36,7 @@ struct Identity {
 
 	Identity(void)
 	{
+		m_name = "__irccd__";
 		m_nickname = "irccd";
 		m_username = "irccd";
 		m_realname = "IRC Client Daemon";
@@ -138,6 +139,13 @@ public:
 	const std::string & getHost(void) const;
 
 	/**
+	 * Get the port connection.
+	 *
+	 * @return the port used
+	 */
+	unsigned getPort(void) const;
+
+	/**
 	 * Set connections settings.
 	 *
 	 * @param name the server resource name
@@ -164,6 +172,21 @@ public:
 	 * @param password an optional channel password
 	 */
 	void addChannel(const std::string &name, const std::string &password = "");
+
+	/**
+	 * Tells if we already have a channel in the list.
+	 *
+	 * @param name the channel to test
+	 * @return true if has
+	 */
+	bool hasChannel(const std::string &name);
+
+	/**
+	 * Remove a channel from the server list.
+	 *
+	 * @param name the channel name
+	 */
+	void removeChannel(const std::string &name);
 
 	/**
 	 * Start listening on that server, this will create a thread that

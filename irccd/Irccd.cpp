@@ -324,10 +324,11 @@ void Irccd::openPlugins(void)
 
 		// Seek the plugin in the directories.
 		for (const string &path : m_pluginDirs) {
-			oss.clear();
+			oss.str("");
 			oss << path << "/" << s << ".lua";
 
 			finalPath = oss.str();
+			Logger::log("Checking for plugin %s", finalPath.c_str());
 			if (Util::exist(finalPath)) {
 				found = true;
 				break;

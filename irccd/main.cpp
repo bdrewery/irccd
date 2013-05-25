@@ -36,6 +36,14 @@ static void quit(void)
 		delete p;
 }
 
+static void usage(void)
+{
+	Logger::warn("usage: %s [-v] [-c config] [-p pluginpath]", getprogname());
+	Logger::warn("       %s test plugin.lua [command] [parameters...]", getprogname());
+
+	exit(1);
+}
+
 int main(int argc, char **argv)
 {
 	Irccd *irccd = Irccd::getInstance();
@@ -54,12 +62,16 @@ int main(int argc, char **argv)
 		case 'v':
 			irccd->setVerbosity(true);
 			break;
+		case '?':
+		default:
+			usage();
+			// NOTREACHED
 		}
 	}
 	argc -= optind;
 	argv += optind;
 
-	if (strcmp(argv[0], "test") == 0)
+	if (argc > 1 && strcmp(argv[0], "test") == 0)
 		test(argc, argv);
 		// NOTREACHED
 	

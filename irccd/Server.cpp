@@ -82,14 +82,10 @@ static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
 
 	// Autojoin requested channels.
 	for (Server::Channel c : server->getChannels()) {
-		const char *password = nullptr;
-		if (c.m_password.length() > 0)
-			password = c.m_password.c_str();
-
 		Logger::log("Autojoining channel %s on server %s",
 		    c.m_name.c_str(), server->getName().c_str());
 
-		irc_cmd_join(s, c.m_name.c_str(), password);
+		server->join(c.m_name, c.m_password);
 	}
 
 	for (Plugin *p : Irccd::getInstance()->getPlugins())
@@ -170,6 +166,10 @@ static void handleKick(irc_session_t *s, const char *ev, const char *orig,
 	if (params[2] != nullptr)
 		reason = params[2];
 
+	// If I've been kicked, I need to remove my own channel
+	if (server->getIdentity().m_nickname == who)
+		server->removeChannel(params[0]);
+
 	if (server->getIdentity().m_nickname != who) {
 		for (Plugin *p : Irccd::getInstance()->getPlugins())
 			p->onKick(server, params[0], who, kicked, reason);
@@ -241,26 +241,6 @@ static void handleNotice(irc_session_t *s, const char *ev, const char *orig,
 	}
 
 	(void)ev;
-	(void)count;
-}
-
-static void handleNumeric(irc_session_t *s, unsigned int ev, const char *orig,
-			  const char **params, unsigned int count)
-{
-	(void)s;
-	(void)ev;
-	(void)orig;
-	(void)params;
-	(void)count;
-}
-
-static void handleQuit(irc_session_t *s, const char *ev, const char *orig,
-			  const char **params, unsigned int count)
-{
-	(void)s;
-	(void)ev;
-	(void)orig;
-	(void)params;
 	(void)count;
 }
 
@@ -352,8 +332,6 @@ static irc_callbacks_t functions = {
 	.event_mode		= handleMode,
 	.event_nick		= handleNick,
 	.event_notice		= handleNotice,
-	.event_numeric		= handleNumeric,
-	.event_quit		= handleQuit,
 	.event_part		= handlePart,
 	.event_privmsg		= handleQuery,
 	.event_topic		= handleTopic,
@@ -417,8 +395,13 @@ const string & Server::getHost(void) const
 	return m_host;
 }
 
-void Server::setConnection(const std::string &name, const std::string &host,
-			   unsigned port, bool ssl, const std::string &password)
+unsigned Server::getPort(void) const
+{
+	return m_port;
+}
+
+void Server::setConnection(const string &name, const string &host,
+			   unsigned port, bool ssl, const string &password)
 {
 	m_name = name;
 	m_host = host;
@@ -429,14 +412,41 @@ void Server::setConnection(const std::string &name, const std::string &host,
 		m_host.insert(0, 1, '#');
 }
 
-void Server::addChannel(const std::string &name, const std::string &password)
+void Server::addChannel(const string &name, const string &password)
 {
 	Channel channel;
 
-	channel.m_name = name;
-	channel.m_password = password;
+	if (!hasChannel(name)) {
+		channel.m_name = name;
+		channel.m_password = password;
 
-	m_channels.push_back(channel);
+		m_channels.push_back(channel);
+	}
+}
+
+bool Server::hasChannel(const string &name)
+{
+	for (const Channel &c : m_channels)
+		if (c.m_name == name)
+			return true;
+
+	return false;
+}
+
+void Server::removeChannel(const string &name)
+{
+	vector<Channel>::const_iterator iter;
+	bool found = false;
+
+	for (iter = m_channels.begin(); iter != m_channels.end(); ++iter) {
+		if ((*iter).m_name == name) {
+			found = true;
+			break;
+		}
+	}
+
+	if (found)
+		m_channels.erase(iter);
 }
 
 void Server::startConnection(void)
@@ -492,8 +502,15 @@ void Server::invite(const string &target, const string &channel)
 
 void Server::join(const string &name, const string &password)
 {
-	if (m_threadStarted)
+	if (m_threadStarted) {
+		Channel c;
+
+		c.m_name = name;
+		c.m_password = password;
+
 		irc_cmd_join(m_session, name.c_str(), password.c_str());
+		addChannel(name, password);
+	}
 }
 
 void Server::kick(const string &name, const string &channel, const string &reason)
@@ -532,8 +549,10 @@ void Server::notice(const string &nickname, const string &message)
 
 void Server::part(const string &channel)
 {
-	if (m_threadStarted)
+	if (m_threadStarted) {
 		irc_cmd_part(m_session, channel.c_str());
+		removeChannel(channel);
+	}
 }
 
 void Server::query(const string &who, const string &message)

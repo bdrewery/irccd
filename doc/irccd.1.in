@@ -20,10 +20,15 @@
 .Nm irccd
 .Nd an IRC client daemon
 .Sh SYNOPSIS
-.Nm irccd
+.Nm
 .Op Fl v
 .Op Fl c Ar config
 .Op Fl p Ar directory
+.Nm
+.Cm test
+.Ar plugin.lua
+.Op Ar command
+.Op Ar parameters...
 .Sh DESCRIPTION
 The irccd program aims to provide an IRC client that acts as a daemon.
 .Pp
@@ -176,6 +181,26 @@ The channel the user has joined.
 .It nickname
 The user nickname.
 .El
+.\" Kick
+.Ss Kick
+This event is triggered when someone has been kicked from a channel.
+.Bd -literal -offset indent
+function onKick(server, channel, who, kicked, reason)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel.
+.It who
+Who kicked the person.
+.It kicked
+The kicked person.
+.It reason
+An optional reason.
+.El
 .\" Message
 .Ss Message
 This event is triggered when someone said something on a specific channel.
@@ -316,6 +341,33 @@ The person who changed the mode.
 .It mode
 The new mode.
 .El
+.\" TESTING LUA PLUGINS
+.Sh TESTING LUA PLUGINS
+It is possible to test Lua plugins with a special command to avoid flooding a
+real IRC server. This also let you test all IRC events that you may not test
+on IRC servers since you may have not rights to.
+.Pp
+The basic syntax is to call
+.Nm irccd
+with the
+.Ar test
+sub command. The argument
+.Ar command
+is one of the on* functions defined in
+.Sx "LUA INTERFACE" .
+You may pass parameters to the function as it was pass from the server.
+The only one exception is that you do not need to pass a server as parameter,
+a fake local server will be automatically given for you.
+.Pp
+For instance, if you want to do a fake
+.Ar onConnect
+function call, you just need to pass as
+.Ar command
+value "onConnect".
+.Pp
+Please see
+.Sx "EXAMPLES"
+below for more information.
 .\" SUPPORTED SOCKET MESSAGES
 .Sh SUPPORTED SOCKET MESSAGES
 This section explain how to control
@@ -540,6 +592,26 @@ The server.
 .It mode
 The new mode.
 .El
+.\" EXAMPLES
+.Sh EXAMPLES
+.Ss Testing a Lua plugin
+.Pp
+Do a fake connection
+.Bd -literal -offset indent
+irccd test myplugin.lua onConnect
+.Ed
+.Pp
+Do a fake message, john will be the sender on the channel #staff
+and message is the content.
+.Bd -literal -offset indent
+irccd test myplugin.lua onMessage #staff john "Hello World"
+.Ed
+.Pp
+You may also just want to test the Lua API without any fake IRC events. You
+just need to call the plugin without any other parameters.
+.Bd -literal -offset indent
+irccd test myplugin.lua
+.Ed
 .\" SEE ALSO
 .Sh SEE ALSO
 .Xr irccdctl 1 ,

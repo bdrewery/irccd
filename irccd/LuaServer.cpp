@@ -39,6 +39,25 @@ void LuaServer::pushObject(lua_State *L, Server *server)
 
 namespace methods {
 
+static int getChannels(lua_State *L)
+{
+	Server *s;
+	int i = 0;
+
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+
+	// Create table even if no channels
+	lua_createtable(L, s->getChannels().size(), s->getChannels().size());
+	i = 0;
+	for (const Server::Channel &c : s->getChannels()) {
+		lua_pushinteger(L, ++i);
+		lua_pushstring(L, c.m_name.c_str());
+		lua_settable(L, -3);
+	}
+
+	return 1;
+}
+
 static int getIdentity(lua_State *L)
 {
 	Server *s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
@@ -61,6 +80,24 @@ static int getIdentity(lua_State *L)
 
 	lua_pushstring(L, ident.m_ctcpversion.c_str());
 	lua_setfield(L, -2, "ctcpversion");
+
+	return 1;
+}
+
+static int getInfo(lua_State *L)
+{
+	Server *s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+
+	lua_createtable(L, 3, 3);
+
+	lua_pushstring(L, s->getName().c_str());
+	lua_setfield(L, -2, "name");
+
+	lua_pushstring(L, s->getHost().c_str());
+	lua_setfield(L, -2, "hostname");
+
+	lua_pushinteger(L, s->getPort());
+	lua_setfield(L, -2, "port");
 
 	return 1;
 }
@@ -315,7 +352,9 @@ static int umode(lua_State *L)
 } // !methods
 
 static const luaL_Reg serverMethods[] = {
+	{ "getChannels",	methods::getChannels		},
 	{ "getIdentity",	methods::getIdentity		},
+	{ "getInfo",		methods::getInfo		},
 	{ "getName",		methods::getName		},
 	{ "cnotice",		methods::cnotice		},
 	{ "invite",		methods::invite			},
