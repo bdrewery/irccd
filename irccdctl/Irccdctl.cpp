@@ -26,7 +26,6 @@
 #include "Irccdctl.h"
 
 using namespace irccd;
-using namespace parser;
 using namespace std;
 
 /* {{{ help messages */

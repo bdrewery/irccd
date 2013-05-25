@@ -44,6 +44,13 @@ end
 function Parser:findSections(name)
 end
 
+--- Checks for a section.
+-- Checks if a specific section exists.
+-- @param name
+-- @return true if exists
+function Parser:hasSection(name)
+end
+
 --- Get a specific section.
 -- Check if the parser has a specific section and return it, otherwise
 -- return nil plus an error message.
@@ -51,6 +58,15 @@ end
 -- @return a Section object or nil
 -- @return error message if not found
 function Parser:getSection(name)
+end
+
+--- Get a specific section.
+-- This returns a section but if the section
+-- is not found it calls luaL_error, thus aborting the script.
+-- @see Parser:getSection
+-- @param name the section name
+-- @return a Section
+function Parser:requireSection(name)
 end
 
 --- Add a specific logging function.

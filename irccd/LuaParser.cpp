@@ -26,7 +26,6 @@
 #include "LuaParser.h"
 
 using namespace irccd;
-using namespace parser;
 using namespace std;
 
 int LuaParser::readTuning(lua_State *L, int idx)
@@ -206,6 +205,19 @@ static int findSections(lua_State *L)
 	return 1;
 }
 
+static int hasSection(lua_State *L)
+{
+	LuaParser *p;
+	string name;
+
+	p = *(LuaParser **)luaL_checkudata(L, 1, PARSER_TYPE);
+	name = luaL_checkstring(L, 2);
+
+	lua_pushboolean(L, p->hasSection(name));
+
+	return 1;
+}
+
 static int getSection(lua_State *L)
 {
 	LuaParser *p = *(LuaParser **)luaL_checkudata(L, 1, PARSER_TYPE);
@@ -232,6 +244,26 @@ static int getSection(lua_State *L)
 	return ret;
 }
 
+static int requireSection(lua_State *L)
+{
+	LuaParser *p;
+	Section **ptr;
+	string name;
+
+	p = *(LuaParser **)luaL_checkudata(L, 1, PARSER_TYPE);
+	name = luaL_checkstring(L, 2);
+
+	if (!p->hasSection(name))
+		return luaL_error(L, "Section %s not found", name.c_str());
+
+	// Copy the section
+	ptr = (Section **)lua_newuserdata(L, sizeof (Section *));
+	luaL_setmetatable(L, SECTION_TYPE);
+	*ptr = new Section(p->getSection(name));
+
+	return 1;
+}
+
 static int onLog(lua_State *L)
 {
 	LuaParser *p = *(LuaParser **)luaL_checkudata(L, 1, PARSER_TYPE);
@@ -251,7 +283,9 @@ static int onLog(lua_State *L)
 static const luaL_Reg parserMethodList[] = {
 	{ "open",		parserMethod::open		},
 	{ "findSections",	parserMethod::findSections	},
+	{ "hasSection",		parserMethod::hasSection	},
 	{ "getSection",		parserMethod::getSection	},
+	{ "requireSection",	parserMethod::requireSection	},
 	{ "onLog",		parserMethod::onLog		},
 	{ nullptr,		nullptr				}
 };

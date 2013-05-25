@@ -25,7 +25,7 @@
 
 namespace irccd {
 
-class LuaParser : public parser::Parser {
+class LuaParser : public Parser {
 private:
 	lua_State *m_state;	//! back pointer for log
 	int m_logRef;		//! reference for log()
@@ -39,7 +39,7 @@ public:
 	 * @param L the Lua state
 	 * @param s the section to push
 	 */
-	static void pushSection(lua_State *L, const parser::Section &s);
+	static void pushSection(lua_State *L, const Section &s);
 
 	/**
 	 * Wrapper for super constructor.
@@ -49,7 +49,7 @@ public:
 	 * @param commentToken an optional comment delimiter
 	 * @see Parser
 	 */
-	LuaParser(const std::string &path, int tuning = 0, char commentToken = Parser::DEFAULT_COMMENT_CHAR);
+	LuaParser(const std::string &path, int tuning = 0, char commentToken = DEFAULT_COMMENT_CHAR);
 
 	/**
 	 * Default constructor.

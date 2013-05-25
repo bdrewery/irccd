@@ -34,7 +34,6 @@
 #include "Irccd.h"
 
 using namespace irccd;
-using namespace parser;
 using namespace std;
 
 /* {{{ Client handlers */
@@ -296,11 +295,13 @@ void Irccd::openConfig(void)
 		exit(1);
 	}
 
+	Section general = config.getSection("general");
+
 	// Extract parameters that are needed for the next
-	if (config.hasOption("general", "plugin-path"))
-		addPluginPath(config.getOption("general", "plugin-path").m_value);
-	if (config.hasOption("general", "plugins")) {
-		string list = config.getOption("general", "plugins").m_value;
+	if (general.hasOption("plugin-path"))
+		addPluginPath(general.getOption<string>("plugin-path"));
+	if (general.hasOption("plugins")) {
+		string list = general.getOption<string>("plugins");
 		for (string s : Util::split(list, " \t"))
 			addWantedPlugin(s);
 	}
@@ -363,7 +364,7 @@ void Irccd::openPlugins(void)
 	}
 }
 
-void Irccd::openIdentities(const parser::Parser &config)
+void Irccd::openIdentities(const Parser &config)
 {
 	for (Section &s: config.findSections("identity")) {
 		Identity identity;

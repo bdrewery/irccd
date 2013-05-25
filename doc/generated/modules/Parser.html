@@ -88,7 +88,15 @@
 	<td class="summary">Iterator over all sections that matches name.</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#Parser:hasSection">Parser:hasSection&nbsp;(name)</a></td>
+	<td class="summary">Checks for a section.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#Parser:getSection">Parser:getSection&nbsp;(name)</a></td>
+	<td class="summary">Get a specific section.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Parser:requireSection">Parser:requireSection&nbsp;(name)</a></td>
 	<td class="summary">Get a specific section.</td>
 	</tr>
 	<tr>
@@ -251,6 +259,32 @@
 
 </dd>
     <dt>
+    <a name = "Parser:hasSection"></a>
+    <strong>Parser:hasSection&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Checks for a section.
+ Checks if a specific section exists.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+
+
+</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if exists
+    </ol>
+
+
+
+
+</dd>
+    <dt>
     <a name = "Parser:getSection"></a>
     <strong>Parser:getSection&nbsp;(name)</strong>
     </dt>
@@ -274,6 +308,35 @@
     </ol>
 
 
+
+
+</dd>
+    <dt>
+    <a name = "Parser:requireSection"></a>
+    <strong>Parser:requireSection&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Get a specific section.
+ This returns a section but if the section
+ is not found it calls luaL_error, thus aborting the script.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the section name</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Section
+    </ol>
+
+
+    <h3>see also:</h3>
+    <ul>
+         <a href="../modules/Parser.html#Parser:getSection">Parser:getSection</a>
+    </ul>
 
 
 </dd>

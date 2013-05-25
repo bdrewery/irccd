@@ -31,8 +31,8 @@ private:
 	SocketClient * m_socket;
 	std::string m_configPath;
 
-	void connectUnix(const parser::Section &section);
-	void connectInet(const parser::Section &section);
+	void connectUnix(const Section &section);
+	void connectInet(const Section &section);
 
 	void readConfig(void);
 	void openConfig(void);

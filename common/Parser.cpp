@@ -22,14 +22,26 @@
 #include "Parser.h"
 
 using namespace irccd;
-using namespace parser;
 using namespace std;
+
+static const string findOption(const vector<Option> & options, const string &name)
+{
+	string ret;
+
+	for (const Option &o : options)
+		if (o.m_key == name) {
+			ret = o.m_value;
+			break;
+		}
+
+	return ret;
+}
 
 /* --------------------------------------------------------
  * Option public members
  * -------------------------------------------------------- */
 
-bool irccd::parser::operator==(const Option &o1, const Option &o2)
+bool irccd::operator==(const Option &o1, const Option &o2)
 {
 	return o1.m_key == o2.m_key &&
 	    o1.m_value == o2.m_value;
@@ -74,21 +86,12 @@ bool Section::hasOption(const std::string &name) const
 	return false;
 }
 
-const Option & Section::findOption(const std::string &name) const
-{
-	for (const Option &o : m_options)
-		if (o.m_key == name)
-			return o;
-
-	throw NotFoundException(name);
-}
-
 template <> bool Section::getOption(const string &name) const
 {
 	bool result = false;
 
 	if (hasOption(name)) {
-		string value = findOption(name).m_value;
+		string value = findOption(m_options, name);
 
 		if (value == "yes" || value == "true"|| value == "1")
 			result = true;
@@ -105,7 +108,7 @@ template <> int Section::getOption(const string &name) const
 
 	if (hasOption(name)) {
 		try {
-			result = stoi(findOption(name).m_value);
+			result = stoi(findOption(m_options, name));
 		} catch (std::exception ex) {
 		}
 	}
@@ -118,7 +121,7 @@ template <> string Section::getOption(const string &name) const
 	string result;
 
 	if (hasOption(name))
-		result = findOption(name).m_value;
+		result = findOption(m_options, name);
 
 	return result;
 }
@@ -147,7 +150,7 @@ template <> string Section::requireOption(const string &name) const
 	return getOption<string>(name);
 }
 
-bool irccd::parser::operator==(const Section &s1, const Section &s2)
+bool irccd::operator==(const Section &s1, const Section &s2)
 {
 	if (s1.m_name != s2.m_name)	
 		return false;
@@ -351,24 +354,6 @@ const std::string & Parser::getError(void) const
 	return m_error;
 }
 
-bool Parser::hasSection(const string &name)
-{
-	for (const Section &s : m_sections)
-		if (s.m_name == name)
-			return true;
-
-	return false;
-}
-
-const Section & Parser::getSection(const string &name) const
-{
-	for (const Section &s : m_sections)
-		if (s.m_name == name)
-			return s;
-
-	throw NotFoundException(name);
-}
-
 const vector<Section> & Parser::getSections(void) const
 {
 	return m_sections;
@@ -388,33 +373,33 @@ vector<Section> Parser::findSections(const std::string &name) const
 	return list;
 }
 
-bool Parser::hasOption(const string &section, const string &name) const
+bool Parser::hasSection(const string &name) const
 {
-	try {
-		const Section &s = getSection(section);
-		for (const Option &o : s.m_options)
-			if (o.m_key == name)
-				return true;
-	} catch (NotFoundException ex) {
-		return false;
-	}
+	for (const Section &s : m_sections)
+		if (s.m_name == name)
+			return true;
 
 	return false;
 }
 
-const Option & Parser::getOption(const string &section, const string &name) const
+Section Parser::getSection(const string &name) const
 {
-	try {
-		const Section &s = getSection(section);
-		for (const Option &o : s.m_options)
-			if (o.m_key == name)
-				return o;
-	} catch (NotFoundException ex) {
-	}
+	Section ret;	
 
-	throw NotFoundException(name);
+	for (const Section &s : m_sections)
+		if (s.m_name == name)
+			ret = s;
+
+	return ret;
 }
 
+Section Parser::requireSection(const string &name) const
+{
+	if (!hasSection(name))
+		throw NotFoundException(name);
+
+	return getSection(name);
+}
 
 void Parser::log(int number, const string &section, const string &message)
 {

@@ -25,7 +25,6 @@
 #include <vector>
 
 namespace irccd {
-namespace parser {
 
 /**
  * Thrown when a section or an option is not found.
@@ -98,15 +97,6 @@ struct Section {
 	 * @return true if has
 	 */
 	bool hasOption(const std::string &name) const;
-
-	/**
-	 * Get an option specified by name.
-	 *
-	 * @param name the option name
-	 * @throw NotFoundException
-	 * @return the option
-	 */
-	const Option & findOption(const std::string &name) const;
 
 	/**
 	 * Template all functions for retrieving options value.
@@ -207,22 +197,6 @@ public:
 	const std::string & getError(void) const;
 
 	/**
-	 * Tell if a section is existing.
-	 *
-	 * @return true if exists
-	 */
-	bool hasSection(const std::string &name);
-
-	/**
-	 * Get a specified section.
-	 *
-	 * @param name the section name
-	 * @throw NotFoundException if not found
-	 * @return a section
-	 */
-	const Section & getSection(const std::string &name) const;
-
-	/**
 	 * Get all sections found
 	 *
 	 * @return all sections
@@ -240,23 +214,29 @@ public:
 	std::vector<Section> findSections(const std::string &name) const;
 
 	/**
-	 * Tells if a section has an option registered.
+	 * Tell if a section is existing.
 	 *
-	 * @param section the section name
-	 * @param name the option name
-	 * @return true on success
+	 * @return true if exists
 	 */
-	bool hasOption(const std::string &section, const std::string &name) const;
+	bool hasSection(const std::string &name) const;
 
 	/**
-	 * Get an option value
+	 * Get a specified section.
 	 *
-	 * @param section the section name
-	 * @param name the option name
-	 * @throw NotFoundException if not found
-	 * @return the value
+	 * @param name the section name
+	 * @return a section
 	 */
-	const Option & getOption(const std::string &section, const std::string &key) const;
+	Section getSection(const std::string &name) const;
+
+	/**
+	 * Same as getSection except that throws an exception if
+	 * the section is not found.
+	 *
+	 * @param name the section name
+	 * @throw NotFoundException if not found
+	 * @return the section
+	 */
+	Section requireSection(const std::string &name) const;
 
 	/**
 	 * Logging function, used only if DisableVerbosity is not set. The
@@ -303,7 +283,6 @@ public:
 	}
 };
 
-} // !parser
 } // !irccd
 
 #endif // !_PARSER_H_

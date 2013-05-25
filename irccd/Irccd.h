@@ -68,16 +68,16 @@ private:
 	void openPlugins(void);
 
 	// [identity]
-	void openIdentities(const parser::Parser &config);
+	void openIdentities(const Parser &config);
 
 	// [listener]
-	void openListeners(const parser::Parser &config);
-	void extractInternet(const parser::Section &s);
-	void extractUnix(const parser::Section &s);
+	void openListeners(const Parser &config);
+	void extractInternet(const Section &s);
+	void extractUnix(const Section &s);
 
 	// [server]
-	void openServers(const parser::Parser &config);
-	void extractChannels(const parser::Section &section, Server *server);
+	void openServers(const Parser &config);
+	void extractChannels(const Section &section, Server *server);
 
 	Irccd(void);
 public:

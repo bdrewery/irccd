@@ -32,7 +32,10 @@ config = nil
 local config = parser.new("Parser-correct.conf")
 
 config:open()
-local general = config:getSection("general")
+
+print("Config has general: " .. tostring(config:hasSection("general")))
+
+local general = config:requireSection("general")
 
 print("general.verbose = " .. general:getOption("verbose"))
 print("general.nickname = " .. general:getOption("nickname"))
@@ -41,5 +44,3 @@ print("general.nickname = " .. general:getOption("nickname"))
 for s in config:findSections("object") do
 	print("object " .. s:getOption("id") .. " is named " .. s:getOption("name"))
 end
-
--- Open and read sections
