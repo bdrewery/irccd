@@ -642,7 +642,6 @@ int Irccd::run(int argc, char **argv)
 		try {
 			s = m_listener.select(0);
 		} catch (SocketListener::EmptyException ex) {
-			puts("HERE");
 			sleep(1);
 			continue;
 		}
