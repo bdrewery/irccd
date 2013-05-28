@@ -71,9 +71,15 @@ int main(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	if (argc > 1 && strcmp(argv[0], "test") == 0)
+	if (argc > 0 && strcmp(argv[0], "test") == 0) {
+#if defined(WITH_LUA)
 		test(argc, argv);
 		// NOTREACHED
+#else
+		Logger::warn("The command test is not available, Lua support is disabled");
+		exit(1);
+#endif
+	}
 	
 	atexit(quit);
 

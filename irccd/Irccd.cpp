@@ -318,6 +318,7 @@ void Irccd::openPlugins(void)
 {
 	// Get list of modules to load from config
 	for (const string &s : m_pluginWanted) {
+#if defined(WITH_LUA)
 		Plugin *plugin;
 		ostringstream oss;
 		string finalPath;
@@ -361,6 +362,9 @@ void Irccd::openPlugins(void)
 			    m_plugins.end(), plugin), m_plugins.end());
 			delete plugin;
 		}
+#else
+		Logger::warn("Not opening plugin %s, Lua support disabled", s.c_str());
+#endif
 	}
 }
 
@@ -564,6 +568,7 @@ void Irccd::addWantedPlugin(const string &name)
 	m_pluginWanted.push_back(name);
 }
 
+#if defined(WITH_LUA)
 Plugin * Irccd::findPlugin(lua_State *state) const
 {
 	for (Plugin *p: m_plugins)
@@ -572,6 +577,7 @@ Plugin * Irccd::findPlugin(lua_State *state) const
 
 	return nullptr;
 }
+#endif
 	
 vector<Server *> & Irccd::getServers(void)
 {

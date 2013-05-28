@@ -22,7 +22,9 @@
 #include <map>
 #include <string>
 
-#include <lua.hpp>
+#if defined(WITH_LUA)
+#  include <lua.hpp>
+#endif
 
 namespace irccd {
 
@@ -35,7 +37,9 @@ private:
 	std::string m_home;		//! home, usuall ~/.config/<name>/
 	std::string m_error;		//! error message if needed
 
+#if defined(WITH_LUA)
 	lua_State *m_state;		//! Lua state
+#endif
 
 	/**
 	 * Call a Lua function and pass parameters to it. Format is one of them:
@@ -59,12 +63,14 @@ public:
 	const std::string & getName(void) const;
 	const std::string & getHome(void) const;
 
+#if defined(WITH_LUA)
 	/**
 	 * Get the plugin Lua state.
 	 *
 	 * @return the Lua state
 	 */
 	lua_State * getState(void) const;
+#endif
 
 	/**
 	 * Get the error message if something failed.

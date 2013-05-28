@@ -25,11 +25,14 @@
 
 #include "Irccd.h"
 #include "Plugin.h"
-#include "LuaLogger.h"
-#include "LuaParser.h"
-#include "LuaPlugin.h"
-#include "LuaServer.h"
-#include "LuaUtil.h"
+
+#if defined(WITH_LUA)
+#include "Lua/LuaLogger.h"
+#include "Lua/LuaParser.h"
+#include "Lua/LuaPlugin.h"
+#include "Lua/LuaServer.h"
+#include "Lua/LuaUtil.h"
+#endif
 
 using namespace irccd;
 using namespace std;
@@ -37,6 +40,8 @@ using namespace std;
 /* --------------------------------------------------------
  * list of libraries to load
  * -------------------------------------------------------- */
+
+#if defined(WITH_LUA)
 
 struct Library {
 	const char *	m_name;		//! name of library to load
@@ -59,6 +64,7 @@ static const Library libIrccd[] = {
 	{ "plugin",	luaopen_plugin	},
 	{ "util",	luaopen_util	}
 };
+#endif
 
 /* --------------------------------------------------------
  * private methods and members
@@ -66,6 +72,7 @@ static const Library libIrccd[] = {
 
 void Plugin::callLua(const string &name, int nret, string fmt, ...)
 {
+#if defined(WITH_LUA)
 	va_list ap;
 	int count = 0;
 
@@ -97,10 +104,16 @@ void Plugin::callLua(const string &name, int nret, string fmt, ...)
 		Logger::warn("error in plugin: %s", lua_tostring(m_state, -1));
 		lua_pop(m_state, 1);
 	}
+#else
+	(void)name;
+	(void)nret;
+	(void)fmt;
+#endif
 }
 
 bool Plugin::loadLua(const std::string &path)
 {
+#if defined(WITH_LUA)
 	m_state = luaL_newstate();
 
 	// Load default library as it was done by require.
@@ -125,6 +138,11 @@ bool Plugin::loadLua(const std::string &path)
 	}
 
 	return true;
+#else
+	(void)path;
+
+	return true;
+#endif
 }
 
 /* --------------------------------------------------------
@@ -142,7 +160,9 @@ Plugin::Plugin(const string &name)
 
 Plugin::~Plugin(void)
 {
+#if defined(WITH_LUA)
 	lua_close(m_state);
+#endif
 }
 
 const string & Plugin::getName(void) const
@@ -154,10 +174,12 @@ const string & Plugin::getHome(void) const
 	return m_home;
 }
 
+#if defined(WITH_LUA)
 lua_State * Plugin::getState(void) const
 {
 	return m_state;
 }
+#endif
 
 const string & Plugin::getError(void) const
 {

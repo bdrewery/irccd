@@ -19,29 +19,65 @@
 # Project
 project(irccd)
 
-add_subdirectory(modules)
+option(WITH_LUA "Build with Lua plugin support" On)
+
+if (WITH_LUA)
+	add_subdirectory(modules)
+endif ()
 
 set(SOURCES
 	Server.cpp
 	Plugin.cpp
-	LuaLogger.cpp
-	LuaParser.cpp
-	LuaPlugin.cpp
-	LuaServer.cpp
-	LuaUtil.cpp
 	Irccd.cpp
 	main.cpp
 	Test.cpp
 )
 
+set(LUA_SUPPORT "disabled")
+
+if (WITH_LUA)
+	find_package(Lua52 QUIET)
+
+	if (LUA52_FOUND)
+		# Optional Lua sources
+		list(
+			APPEND
+			SOURCES
+			Lua/LuaLogger.cpp
+			Lua/LuaParser.cpp
+			Lua/LuaPlugin.cpp
+			Lua/LuaServer.cpp
+			Lua/LuaUtil.cpp
+		)
+
+		# Optional Lua includes
+		list(
+			APPEND
+			INCLUDES
+			${LUA_INCLUDE_DIR}
+			${CMAKE_CURRENT_SOURCE_DIR}
+		)
+
+		# Optional Lua libraries
+		list(
+			APPEND
+			LIBRARIES
+			${LUA_LIBRARIES}
+		)
+
+		set(LUA_SUPPORT "enabled")
+		set(USE_LUA 1 PARENT_SCOPE)		# for config.h
+	endif ()
+
+endif ()
+
 find_package(Libircclient REQUIRED)
 find_package(XDG REQUIRED)
-find_package(Lua52 REQUIRED)
 
 include_directories(
 	${LIBIRCCLIENT_INCLUDE_DIR}
 	${XDG_INCLUDE_DIR}
-	${LUA_INCLUDE_DIR}
+	${INCLUDES}
 )
 
 add_executable(irccd ${SOURCES})
@@ -52,8 +88,11 @@ target_link_libraries(
 	pthread
 	${LIBIRCCLIENT_LIBRARIES}
 	${XDG_LIBRARY}
-	${LUA_LIBRARIES}
+	${LIBRARIES}
 )
+
+message("Compiling irccd with following options:")
+message("\tLua support:\t${LUA_SUPPORT}")
 
 install(TARGETS irccd RUNTIME DESTINATION bin)
 

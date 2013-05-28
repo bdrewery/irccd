@@ -1,5 +1,5 @@
 /*
- * config.h.in -- configuration for irccd
+ * LuaPlugin.cpp -- Lua bindings for class Plugin
  *
  * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,42 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#cmakedefine PREFIX	"@PREFIX@"
-#cmakedefine MODDIR	"@MODDIR@"
+#include "Irccd.h"
+#include "LuaPlugin.h"
 
-// Optional Lua support
-#cmakedefine USE_LUA
+using namespace irccd;
 
-#if defined(USE_LUA)
-#  define WITH_LUA
-#endif
+namespace functions {
+
+static int getName(lua_State *L)
+{
+	Irccd *irccd = Irccd::getInstance();
+
+	lua_pushstring(L, irccd->findPlugin(L)->getName().c_str());
+
+	return 1;
+}
+
+static int getHome(lua_State *L)
+{
+	Irccd *irccd = Irccd::getInstance();
+
+	lua_pushstring(L, irccd->findPlugin(L)->getHome().c_str());
+
+	return 1;
+}
+
+} // !functions
+
+const luaL_Reg functionList[] = {
+	{ "getName",		functions::getName	},
+	{ "getHome",		functions::getHome	},
+	{ nullptr,		nullptr			}
+};
+
+int irccd::luaopen_plugin(lua_State *L)
+{
+	luaL_newlib(L, functionList);
+
+	return 1;
+}

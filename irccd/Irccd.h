@@ -106,6 +106,7 @@ public:
 	 */
 	void addWantedPlugin(const std::string &name);
 
+#if defined(WITH_LUA)
 	/**
 	 * Find a plugin by it's associated Lua State, so it can
 	 * be retrieved by every Lua bindings.
@@ -114,6 +115,7 @@ public:
 	 * @return the plugin
 	 */
 	Plugin * findPlugin(lua_State *state) const;
+#endif
 
 	/**
 	 * Get the servers list

@@ -35,11 +35,6 @@ set(DOCDIR "${PREFIX}/share/doc/irccd"
 set(MANDIR "${PREFIX}/share/man"
     CACHE STRING "Man directory")
 
-configure_file(
-	"${CMAKE_SOURCE_DIR}/cmake/config.h.in"
-	"${CMAKE_BINARY_DIR}/config.h"
-)
-
 # Include path to common
 include_directories(
 	"${CMAKE_BINARY_DIR}"
@@ -47,10 +42,10 @@ include_directories(
 )
 
 message("Configuration:")
-message("\tPREFIX\t${PREFIX}")
-message("\tMANDIR\t${MANDIR}")
-message("\tDOCDIR\t${DOCDIR}")
-message("\tMODDIR\t${MODDIR}")
+message("\tPREFIX\t\t${PREFIX}")
+message("\tMANDIR\t\t${MANDIR}")
+message("\tDOCDIR\t\t${DOCDIR}")
+message("\tMODDIR\t\t${MODDIR}")
 
 # For documentation and man pages
 add_subdirectory(doc)
@@ -63,5 +58,13 @@ add_subdirectory(irccd)
 
 # irccd controller
 add_subdirectory(irccdctl)
+
+# Configure the file after so every project can set more variables
+# if needed
+configure_file(
+	"${CMAKE_SOURCE_DIR}/cmake/config.h.in"
+	"${CMAKE_BINARY_DIR}/config.h"
+)
+
 
 # vim: set syntax=cmake:

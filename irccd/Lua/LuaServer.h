@@ -1,5 +1,5 @@
 /*
- * config.h.in -- configuration for irccd
+ * LuaServer.h -- Lua API for Server class
  *
  * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,28 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#cmakedefine PREFIX	"@PREFIX@"
-#cmakedefine MODDIR	"@MODDIR@"
+#ifndef _LUA_SERVER_H_
+#define _LUA_SERVER_H_
 
-// Optional Lua support
-#cmakedefine USE_LUA
+#include <lua.hpp>
 
-#if defined(USE_LUA)
-#  define WITH_LUA
-#endif
+#include "Server.h"
+
+namespace irccd {
+
+class LuaServer {
+public:
+	/**
+	 * Push the object on the stack so it can
+	 * be used for a further call.
+	 *
+	 * @param L the Lua state
+	 */
+	static void pushObject(lua_State *L, Server *);
+};
+
+int luaopen_server(lua_State *L);
+
+} // !irccd
+
+#endif // !_LUA_SERVER_H_

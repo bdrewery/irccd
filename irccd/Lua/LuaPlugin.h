@@ -1,5 +1,5 @@
 /*
- * config.h.in -- configuration for irccd
+ * LuaPlugin.h -- Lua bindings for class Plugin
  *
  * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#cmakedefine PREFIX	"@PREFIX@"
-#cmakedefine MODDIR	"@MODDIR@"
+#ifndef _LUA_PLUGIN_H_
+#define _LUA_PLUGIN_H
 
-// Optional Lua support
-#cmakedefine USE_LUA
+#include <lua.hpp>
 
-#if defined(USE_LUA)
-#  define WITH_LUA
-#endif
+namespace irccd {
+
+int luaopen_plugin(lua_State *L);
+
+};
+
+#endif // !_LUA_PLUGIN_H_

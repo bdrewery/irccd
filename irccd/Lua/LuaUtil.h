@@ -1,5 +1,5 @@
 /*
- * config.h.in -- configuration for irccd
+ * LuaUtil.h -- Lua bindings for class Util
  *
  * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#cmakedefine PREFIX	"@PREFIX@"
-#cmakedefine MODDIR	"@MODDIR@"
+#ifndef _LUA_UTIL_H_
+#define _LUA_UTIL_H_
 
-// Optional Lua support
-#cmakedefine USE_LUA
+#include <lua.hpp>
 
-#if defined(USE_LUA)
-#  define WITH_LUA
-#endif
+namespace irccd {
+
+int luaopen_util(lua_State *L);
+
+} // !irccd
+
+#endif // !_LUA_UTIL_H_
