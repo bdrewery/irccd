@@ -93,11 +93,11 @@ target_link_libraries(
 	${LIBRARIES}
 )
 
-message("Compiling irccd with following options:")
-message("\tLua support:\t${LUA_SUPPORT}")
-message("\tDefault config:\t${DEFAULT_IRCCD_CONFIG}")
-message("")
-
 install(TARGETS irccd RUNTIME DESTINATION bin)
+install(
+	FILES "${CMAKE_SOURCE_DIR}/doc/examples/irccd.conf"
+	DESTINATION "${ETCDIR}"
+	RENAME "irccd.conf.sample"
+)
 
 # vim: set syntax=cmake:

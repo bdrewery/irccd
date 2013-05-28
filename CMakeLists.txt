@@ -43,12 +43,6 @@ include_directories(
 	"${CMAKE_SOURCE_DIR}/common"
 )
 
-message("Installation directories:")
-message("\tPREFIX\t\t${PREFIX}")
-message("\tMANDIR\t\t${MANDIR}")
-message("\tDOCDIR\t\t${DOCDIR}")
-message("\tMODDIR\t\t${MODDIR}")
-message("")
 
 # For documentation and man pages
 add_subdirectory(doc)
@@ -61,6 +55,18 @@ add_subdirectory(irccd)
 
 # irccd controller
 add_subdirectory(irccdctl)
+
+message("Installation directories:")
+message("\tPREFIX\t\t${PREFIX}")
+message("\tMANDIR\t\t${MANDIR}")
+message("\tDOCDIR\t\t${DOCDIR}")
+message("\tMODDIR\t\t${MODDIR}")
+message("")
+
+message("Compiling irccd with following options:")
+message("\tLua support:\t${LUA_SUPPORT}")
+message("\tDefault config:\t${DEFAULT_IRCCD_CONFIG}")
+message("")
 
 # Configure the file after so every project can set more variables
 # if needed
