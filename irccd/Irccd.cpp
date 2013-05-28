@@ -283,17 +283,33 @@ void Irccd::execute(const string &cmd)
  * Open functions, read config and servers
  * -------------------------------------------------------- */
 
+/*
+ * Order is:
+ * 1. Option -c passed to the command line
+ * 2. User defined, usually ~/.config/irccd/irccd.conf
+ * 3. Default cmake configured path, usually /usr/local/etc/irccd.conf
+ */
 void Irccd::openConfig(void)
 {
-	if (m_configPath.length() == 0)
+	// Length empty means use user or default
+	if (m_configPath.length() == 0) {
+		// 2. User defined
 		m_configPath = Util::configFilePath("irccd.conf");
+
+		// 3. Not found, fallback to default path
+		if (!Util::exist(m_configPath))
+			m_configPath = DEFAULT_IRCCD_CONFIG;
+	}
 
 	Parser config(m_configPath);
 
 	if (!config.open()) {
-		Logger::warn("failed to open: %s", m_configPath.c_str());
+		Logger::warn("Failed to open: %s", m_configPath.c_str());
+		Logger::warn("No configuration could be found, exiting");
 		exit(1);
 	}
+
+	Logger::log("Using configuration %s", m_configPath.c_str());
 
 	Section general = config.getSection("general");
 

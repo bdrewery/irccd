@@ -19,11 +19,11 @@
 # Project
 project(irccd)
 
-option(WITH_LUA "Build with Lua plugin support" On)
+set(DEFAULT_IRCCD_CONFIG "${ETCDIR}/irccd.conf"
+    CACHE STRING "Default irccd config file path")
 
-if (WITH_LUA)
-	add_subdirectory(modules)
-endif ()
+# Optional Lua support
+option(WITH_LUA "Build with Lua plugin support" On)
 
 set(SOURCES
 	Server.cpp
@@ -39,6 +39,8 @@ if (WITH_LUA)
 	find_package(Lua52 QUIET)
 
 	if (LUA52_FOUND)
+		add_subdirectory(modules)
+
 		# Optional Lua sources
 		list(
 			APPEND
@@ -93,6 +95,8 @@ target_link_libraries(
 
 message("Compiling irccd with following options:")
 message("\tLua support:\t${LUA_SUPPORT}")
+message("\tDefault config:\t${DEFAULT_IRCCD_CONFIG}")
+message("")
 
 install(TARGETS irccd RUNTIME DESTINATION bin)
 

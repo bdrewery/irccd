@@ -34,6 +34,8 @@ set(DOCDIR "${PREFIX}/share/doc/irccd"
     CACHE STRING "Documentation directory")
 set(MANDIR "${PREFIX}/share/man"
     CACHE STRING "Man directory")
+set(ETCDIR "${PREFIX}/etc"
+    CACHE STRING "Configuration directory")
 
 # Include path to common
 include_directories(
@@ -41,11 +43,12 @@ include_directories(
 	"${CMAKE_SOURCE_DIR}/common"
 )
 
-message("Configuration:")
+message("Installation directories:")
 message("\tPREFIX\t\t${PREFIX}")
 message("\tMANDIR\t\t${MANDIR}")
 message("\tDOCDIR\t\t${DOCDIR}")
 message("\tMODDIR\t\t${MODDIR}")
+message("")
 
 # For documentation and man pages
 add_subdirectory(doc)
