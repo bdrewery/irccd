@@ -69,7 +69,7 @@ vector<string> Util::split(const string &list, const string &delimiter, int max)
 		if (max >= 0 && count++ >= max) {
 			val = list.substr(current, string::npos);
 			finished = true;
-		} else{
+		} else {
 			val = list.substr(current, next - current);
 			finished = next == string::npos;
 		}

@@ -60,6 +60,10 @@ utility:
 .Ar nickname
 .Ar channel
 .Op Ar reason
+.\" LOAD
+.Nm
+.Cm load
+.Ar name
 .\" ME
 .Nm
 .Cm me
@@ -94,6 +98,10 @@ utility:
 .Cm part
 .Ar server
 .Ar channel
+.\" RELOAD
+.Nm
+.Cm reload
+.Ar name
 .\" TOPIC
 .Nm
 .Cm topic
@@ -105,6 +113,10 @@ utility:
 .Cm umode
 .Ar server
 .Ar mode
+.\" UNLOAD
+.Nm
+.Cm unload
+.Ar name
 .\" DESCRIPTION
 .Sh DESCRIPTION
 The

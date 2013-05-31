@@ -37,6 +37,7 @@ local function loadWords()
 		logger.warn("Using default answers")
 		answers = default
 	else
+		answers = { }
 		for l in file:lines() do
 			table.insert(answers, l)
 		end
@@ -48,4 +49,9 @@ loadWords()
 function onCommand(server, channel, nick, message)
 	local pick = math.random(1, #answers)
 	server:say(channel, nick .. ": " .. answers[pick])
+end
+
+function onReload()
+	logger.log("Reloading words")
+	loadWords()
 end

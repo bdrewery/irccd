@@ -149,7 +149,7 @@ bool Plugin::loadLua(const std::string &path)
  * public methods and members
  * -------------------------------------------------------- */
 
-Plugin::Plugin(void)
+Plugin::Plugin()
 {
 }
 
@@ -158,27 +158,27 @@ Plugin::Plugin(const string &name)
 {
 }
 
-Plugin::~Plugin(void)
+Plugin::~Plugin()
 {
 }
 
-const string & Plugin::getName(void) const
+const string & Plugin::getName() const
 {
 	return m_name;
 }
-const string & Plugin::getHome(void) const
+const string & Plugin::getHome() const
 {
 	return m_home;
 }
 
 #if defined(WITH_LUA)
-lua_State * Plugin::getState(void) const
+lua_State * Plugin::getState() const
 {
 	return m_state.get();
 }
 #endif
 
-const string & Plugin::getError(void) const
+const string & Plugin::getError() const
 {
 	return m_error;
 }
@@ -254,6 +254,11 @@ void Plugin::onPart(Server *server, const string &channel, const string &who, co
 void Plugin::onQuery(Server *server, const std::string &who, const std::string &message)
 {
 	callLua("onQuery", 0, "S s s", server, who.c_str(), message.c_str());
+}
+
+void Plugin::onReload()
+{
+	callLua("onReload", 0, "");
 }
 
 void Plugin::onTopic(Server *server, const string &channel, const string &who, const string &topic)

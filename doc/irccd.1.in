@@ -307,6 +307,12 @@ The person that said something.
 .It message
 The message sent.
 .El
+.\" Reload
+.Ss Reload
+This event is triggered when someone want to reload a plugin.
+.Bd -literal -offset indent
+function onReload()
+.Ed
 .\" Topic
 .Ss Topic
 This event is triggered when someone changed the channel's topic.
@@ -450,6 +456,18 @@ The channel prepended by a '#' to kick from
 .It reason
 An optional reason.
 .El
+.\" LOAD
+.Ss LOAD
+Load a plugin. This load for all servers.
+.Bd -literal -offset indent
+LOAD name\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It name
+The plugin name.
+.El
 .\" ME
 .Ss ME
 This command is used to send a message to a global channel or to a private
@@ -561,6 +579,18 @@ The target nickname.
 .It message
 The message.
 .El
+.\" RELOAD
+.Ss RELOAD
+Reload a plugin, this will call a specific Lua function.
+.Bd -literal -offset indent
+RELOAD name\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It name
+The plugin name.
+.El
 .\" TOPIC
 .Ss TOPIC
 This command is used to set a channel topic. Note that you obviously need
@@ -591,6 +621,18 @@ Parameters:
 The server.
 .It mode
 The new mode.
+.El
+.\" UNLOAD
+.Ss UNLOAD
+Unload a loaded plugin.
+.Bd -literal -offset indent
+RELOAD name\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It name
+The plugin name.
 .El
 .\" EXAMPLES
 .Sh EXAMPLES

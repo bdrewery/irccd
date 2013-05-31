@@ -19,6 +19,7 @@
 #ifndef _IRCCD_H_
 #define _IRCCD_H_
 
+#include <exception>
 #include <sstream>
 
 #include <Parser.h>
@@ -43,6 +44,7 @@ private:
 	std::vector<std::string> m_pluginDirs;		//! list of plugin directories
 	std::vector<std::string> m_pluginWanted;	//! list of wanted modules
 	std::vector<Plugin> m_plugins;			//! list of plugins loaded
+	std::mutex m_pluginLock;
 	std::vector<Server> m_servers;			//! list of servers
 
 	// Socket clients and listeners
@@ -56,6 +58,7 @@ private:
 
 	void clientRead(SocketClient *client);
 	void execute(const std::string &cmd);
+	bool isPluginLoaded(const std::string &name);
 
 	/**
 	 * Open will call the below function in the same order they are
@@ -105,6 +108,28 @@ public:
 	 */
 	void addWantedPlugin(const std::string &name);
 
+	/**
+	 * Load a plugin externally, used for irccdctl.
+	 *
+	 * @param name the plugin name to load
+	 */
+	void loadPlugin(const std::string &name);
+
+	/**
+	 * Unload a plugin.
+	 *
+	 * @param name the plugin name to unload.
+	 */
+	void unloadPlugin(const std::string &name);
+
+	/**
+	 * Reload a plugin, it does not close but calls a specific
+	 * Lua function defined in the file.
+	 *
+	 * @param name the plugin name
+	 */
+	void reloadPlugin(const std::string &name);
+
 #if defined(WITH_LUA)
 	/**
 	 * Find a plugin by it's associated Lua State, so it can
@@ -112,8 +137,19 @@ public:
 	 *
 	 * @param state the Lua state
 	 * @return the plugin
+	 * @throw out_of_range when not found
 	 */
 	Plugin & findPlugin(lua_State *state);
+
+	/**
+	 * Find a plugin by it's name. It is used by irccdctl
+	 * to load, unload and reload on command.
+	 *
+	 * @param name the plugin name
+	 * @return the plugin
+	 * @throw out_of_range when not found
+	 */
+	Plugin & findPlugin(const std::string &name);
 #endif
 
 	/**
@@ -129,6 +165,13 @@ public:
 	 * @return a list of plugins
 	 */
 	std::vector<Plugin> & getPlugins(void);
+
+	/**
+	 * Get the plugin lock, used to load / unload module.
+	 *
+	 * @return the mutex lock
+	 */
+	std::mutex & getPluginLock();
 
 	/**
 	 * Set the config path to open.

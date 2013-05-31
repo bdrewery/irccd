@@ -31,12 +31,14 @@ namespace irccd {
 
 class Server;
 
+#if defined(WITH_LUA)
 class LuaDeleter {
 public:
 	void operator()(lua_State *L) {
 		lua_close(L);
 	}
 };
+#endif
 
 class Plugin {
 private:
@@ -64,13 +66,14 @@ private:
 
 	bool loadLua(const std::string &path);
 public:
-	Plugin(void);
-	Plugin(Plugin &&src) = default;
+	Plugin();
 	Plugin(const std::string &name);
-	~Plugin(void);
+	Plugin(Plugin &&src) = default;
+	Plugin & operator=(Plugin &&src) = default;
+	~Plugin();
 
-	const std::string & getName(void) const;
-	const std::string & getHome(void) const;
+	const std::string & getName() const;
+	const std::string & getHome() const;
 
 #if defined(WITH_LUA)
 	/**
@@ -78,7 +81,7 @@ public:
 	 *
 	 * @return the Lua state
 	 */
-	lua_State * getState(void) const;
+	lua_State * getState() const;
 #endif
 
 	/**
@@ -86,7 +89,7 @@ public:
 	 *
 	 * @return the message
 	 */
-	const std::string & getError(void) const;
+	const std::string & getError() const;
 
 	/**
 	 * Open the plugin specified by path.
@@ -227,6 +230,11 @@ public:
 	 * @param message the message
 	 */
 	void onQuery(Server *server, const std::string &who, const std::string &message);
+
+	/**
+	 * A Lua function triggered when user want's to reload the plugin.
+	 */
+	void onReload();
 
 	/**
 	 * A Lua function triggered when someone change the channel topic.

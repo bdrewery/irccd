@@ -171,12 +171,43 @@ static void handleTopic(Irccd *irccd, const string &cmd)
 
 static void handleUserMode(Irccd *irccd, const string &cmd)
 {
-	vector<string> params = Util::split(cmd, " \t", 1);
+	vector<string> params = Util::split(cmd, " \t", 2);
 
 	if (params.size() != 2) {
 		Logger::warn("UMODE needs 2 arguments");
 	} else {
 		irccd->findServer(params[0]).umode(params[1]);
+	}
+}
+
+static void handleLoad(Irccd *irccd, const string &cmd)
+{
+	vector<string> params = Util::split(cmd, " \t", 1);
+
+	if (params.size() != 1) {
+		Logger::warn("LOAD needs 1 argument");
+	} else {
+		irccd->loadPlugin(params[0]);
+	}
+}
+
+static void handleUnload(Irccd *irccd, const string &cmd)
+{
+	vector<string> params = Util::split(cmd, " \t", 1);
+	if (params.size() != 1) {
+		Logger::warn("UNLOAD needs 1 argument");
+	} else {
+		irccd->unloadPlugin(params[0]);
+	}
+}
+
+static void handleReload(Irccd *irccd, const string &cmd)
+{
+	vector<string> params = Util::split(cmd, " \t", 1);
+	if (params.size() != 1) {
+		Logger::warn("RELOAD needs 1 argument");
+	} else {
+		irccd->reloadPlugin(params[0]);
 	}
 }
 
@@ -197,6 +228,11 @@ static map<string, Handler> createHandlers(void)
 	handlers["PART"]	= handlePart;
 	handlers["TOPIC"]	= handleTopic;
 	handlers["UMODE"]	= handleUserMode;
+
+	// Commands specific to modules
+	handlers["LOAD"]	= handleLoad;
+	handlers["UNLOAD"]	= handleUnload;
+	handlers["RELOAD"]	= handleReload;
 
 	return handlers;
 }
@@ -247,12 +283,35 @@ void Irccd::execute(const string &cmd)
 	cmdDelim = cmd.find_first_of(" \t");
 	if (cmdDelim != string::npos) {
 		cmdName = cmd.substr(0, cmdDelim);
-		try {
-			handlers.at(cmdName)(this, cmd.substr(cmdDelim + 1));
-		} catch (out_of_range ex) {
+		if (handlers.find(cmdName) == handlers.end())
 			Logger::warn("invalid command %s", cmdName.c_str());
+		else {
+			try {
+				handlers[cmdName](this, cmd.substr(cmdDelim + 1));
+			} catch (out_of_range ex) {
+				Logger::warn("%s", ex.what());
+			}
 		}
 	}
+}
+
+bool Irccd::isPluginLoaded(const string &name)
+{
+#if defined(WITH_LUA)
+	bool ret = true;
+
+	try {
+		(void)findPlugin(name);
+	} catch (out_of_range ex) {
+		ret = false;
+	}
+
+	return ret;
+#else
+	(void)name;
+
+	return false;
+#endif
 }
 
 /* --------------------------------------------------------
@@ -306,33 +365,34 @@ void Irccd::openConfig(void)
 	openServers(config);
 }
 
-void Irccd::openPlugins(void)
+void Irccd::loadPlugin(const string &name)
 {
-	// Get list of modules to load from config
-	for (const string &s : m_pluginWanted) {
 #if defined(WITH_LUA)
-		ostringstream oss;
-		string finalPath;
-		bool found = false;
+	ostringstream oss;
+	string finalPath;
+	bool found = false;
 
-		// Seek the plugin in the directories.
-		for (const string &path : m_pluginDirs) {
-			oss.str("");
-			oss << path << "/" << s << ".lua";
+	if (isPluginLoaded(name)) {
+		Logger::warn("Plugin %s is already loaded", name.c_str());
+		return;
+	}
 
-			finalPath = oss.str();
-			Logger::log("Checking for plugin %s", finalPath.c_str());
-			if (Util::exist(finalPath)) {
-				found = true;
-				break;
-			}
+	// Seek the plugin in the directories.
+	for (const string &path : m_pluginDirs) {
+		oss.str("");
+		oss << path << "/" << name << ".lua";
+
+		finalPath = oss.str();
+		Logger::log("Checking for plugin %s", finalPath.c_str());
+		if (Util::exist(finalPath)) {
+			found = true;
+			break;
 		}
+	}
 
-		if (!found) {
-			Logger::warn("Plugin %s not found", s.c_str());
-			continue;
-		}
-
+	if (!found) {
+		Logger::warn("Plugin %s not found", name.c_str());
+	} else {
 		/*
 		 * At this step, the open function will open the lua
 		 * script, that script may want to call some bindings
@@ -342,18 +402,65 @@ void Irccd::openPlugins(void)
 		 * coded.
 		 */
 		
-		m_plugins.push_back(Plugin(s));	// don't remove that
+		m_pluginLock.lock();
+		m_plugins.push_back(Plugin(name));		// don't remove that
+
 		Plugin & plugin = m_plugins.back();
+		m_pluginLock.unlock();
 
 		if (!plugin.open(finalPath)) {
 			Logger::warn("Failed to load module %s: %s",
-			    s.c_str(), plugin.getError().c_str());
+			    name.c_str(), plugin.getError().c_str());
 
+			m_pluginLock.lock();
 			m_plugins.pop_back();
+			m_pluginLock.unlock();
 		}
+	}
 #else
-		Logger::warn("Not opening plugin %s, Lua support disabled", s.c_str());
+	Logger::warn("Can't load plugin %s, Lua support disabled", name.c_str());
 #endif
+}
+
+void Irccd::unloadPlugin(const string &name)
+{
+#if defined(WITH_LUA)
+	vector<Plugin>::iterator i;	
+
+	m_pluginLock.lock();
+	i = find_if(m_plugins.begin(), m_plugins.end(), [&] (Plugin &p) -> bool {
+		return p.getName() == name;
+	});
+
+	if (i == m_plugins.end())
+		Logger::warn("There is no module %s loaded", name.c_str());
+	else
+		m_plugins.erase(i);
+
+	m_pluginLock.unlock();
+#else
+	Logger::warn("Can't unload plugin %s, Lua support disabled", name.c_str());
+#endif
+}
+
+void Irccd::reloadPlugin(const string &name)
+{
+#if defined(WITH_LUA)
+	try {
+		findPlugin(name).onReload();
+	} catch (out_of_range ex) {
+		Logger::warn("%s", ex.what());
+	}
+#else
+	Logger::warn("Can't reload plugin %s, Lua support disabled", name.c_str());
+#endif
+}
+
+void Irccd::openPlugins(void)
+{
+	// Get list of modules to load from config
+	for (const string &s : m_pluginWanted) {
+		loadPlugin(s);
 	}
 }
 
@@ -558,14 +665,35 @@ void Irccd::addWantedPlugin(const string &name)
 }
 
 #if defined(WITH_LUA)
+
 Plugin & Irccd::findPlugin(lua_State *state)
 {
+	m_pluginLock.lock();
 	for (Plugin &p : m_plugins)
-		if (p.getState() == state)
+		if (p.getState() == state) {
+			m_pluginLock.unlock();
 			return p;
+		}
+
+	m_pluginLock.unlock();
 
 	throw out_of_range("Plugin not found");
 }
+
+Plugin & Irccd::findPlugin(const string &name)
+{
+	m_pluginLock.lock();
+	for (Plugin &p : m_plugins)
+		if (p.getName() == name) {
+			m_pluginLock.unlock();
+			return p;
+		}
+
+	m_pluginLock.unlock();
+
+	throw out_of_range("Plugin not found");
+}
+
 #endif
 	
 vector<Server> & Irccd::getServers(void)
