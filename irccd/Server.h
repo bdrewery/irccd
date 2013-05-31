@@ -19,6 +19,7 @@
 #ifndef _SERVER_H_
 #define _SERVER_H_
 
+#include <memory>
 #include <string>
 #include <thread>
 #include <vector>
@@ -48,6 +49,14 @@ struct Identity {
 	}
 };
 
+class IrcDeleter {
+public:
+	void operator()(irc_session_t *s)
+	{
+		irc_destroy_session(s);
+	}
+};
+
 /**
  * Server class, each class define a server that irccd
  * can connect to
@@ -74,8 +83,8 @@ private:
 
 	// IRC thread
 	std::thread m_thread;			/*! server's thread */
+	std::unique_ptr<irc_session_t, IrcDeleter> m_session;
 	bool m_threadStarted;			/*! thread's status */
-	irc_session_t *m_session;		/*! libircclient session */
 
 public:
 	Server(void);

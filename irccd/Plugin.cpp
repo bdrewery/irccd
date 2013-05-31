@@ -77,22 +77,22 @@ void Plugin::callLua(const string &name, int nret, string fmt, ...)
 	int count = 0;
 
 	va_start(ap, fmt);
-	lua_getglobal(m_state, name.c_str());
-	if (lua_type(m_state, -1) != LUA_TFUNCTION)
+	lua_getglobal(m_state.get(), name.c_str());
+	if (lua_type(m_state.get(), -1) != LUA_TFUNCTION)
 		return;
 
 	for (size_t i = 0; i < fmt.length(); ++i) {
 		switch (fmt[i]) {
 		case 'S':
-			LuaServer::pushObject(m_state, va_arg(ap, Server *));
+			LuaServer::pushObject(m_state.get(), va_arg(ap, Server *));
 			++ count;
 			break;
 		case 'i':
-			lua_pushinteger(m_state, va_arg(ap, int));
+			lua_pushinteger(m_state.get(), va_arg(ap, int));
 			++ count;
 			break;
 		case 's':
-			lua_pushstring(m_state, va_arg(ap, const char *));
+			lua_pushstring(m_state.get(), va_arg(ap, const char *));
 			++ count;
 			break;
 		default:
@@ -100,9 +100,9 @@ void Plugin::callLua(const string &name, int nret, string fmt, ...)
 		}
 	}
 
-	if (lua_pcall(m_state, count, nret, 0) != LUA_OK) {
-		Logger::warn("error in plugin: %s", lua_tostring(m_state, -1));
-		lua_pop(m_state, 1);
+	if (lua_pcall(m_state.get(), count, nret, 0) != LUA_OK) {
+		Logger::warn("error in plugin: %s", lua_tostring(m_state.get(), -1));
+		lua_pop(m_state.get(), 1);
 	}
 #else
 	(void)name;
@@ -114,26 +114,26 @@ void Plugin::callLua(const string &name, int nret, string fmt, ...)
 bool Plugin::loadLua(const std::string &path)
 {
 #if defined(WITH_LUA)
-	m_state = luaL_newstate();
+	m_state = unique_ptr<lua_State, LuaDeleter>(luaL_newstate());
 
 	// Load default library as it was done by require.
 	for (const Library &l : libLua)
-		(void)luaL_requiref(m_state, l.m_name, l.m_func, 1);
+		(void)luaL_requiref(m_state.get(), l.m_name, l.m_func, 1);
 
 	// Put external modules in package.preload so user
 	// will need require (modname)
-	lua_getglobal(m_state, "package");
-	lua_getfield(m_state, -1, "preload");
+	lua_getglobal(m_state.get(), "package");
+	lua_getfield(m_state.get(), -1, "preload");
 	for (const Library &l : libIrccd) {
-		lua_pushcfunction(m_state, l.m_func);
-		lua_setfield(m_state, -2, l.m_name);
+		lua_pushcfunction(m_state.get(), l.m_func);
+		lua_setfield(m_state.get(), -2, l.m_name);
 	}
-	lua_pop(m_state, 2);
+	lua_pop(m_state.get(), 2);
 
-	if (luaL_dofile(m_state, path.c_str())) {
-		if (lua_type(m_state, -1) == LUA_TSTRING)
-			m_error = lua_tostring(m_state, -1);
-		lua_pop(m_state, 1);
+	if (luaL_dofile(m_state.get(), path.c_str())) {
+		if (lua_type(m_state.get(), -1) == LUA_TSTRING)
+			m_error = lua_tostring(m_state.get(), -1);
+		lua_pop(m_state.get(), 1);
 		return false;
 	}
 
@@ -161,7 +161,7 @@ Plugin::Plugin(const string &name)
 Plugin::~Plugin(void)
 {
 #if defined(WITH_LUA)
-	lua_close(m_state);
+	lua_close(m_state.get());
 #endif
 }
 
@@ -177,7 +177,7 @@ const string & Plugin::getHome(void) const
 #if defined(WITH_LUA)
 lua_State * Plugin::getState(void) const
 {
-	return m_state;
+	return m_state.get();
 }
 #endif
 

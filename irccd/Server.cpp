@@ -52,23 +52,23 @@ static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
 
 	who = getNick(orig);
 
-	for (Plugin *p : Irccd::getInstance()->getPlugins()) {
+	for (Plugin &p : Irccd::getInstance()->getPlugins()) {
 		/*
 		 * Get the context for that plugin and try to concatenate
 		 * the command token with the plugin name so we can call the good command
 		 *
 		 * like !ask will call onCommand for plugin ask
 		 */
-		string spCmd = cmdToken + p->getName();
+		string spCmd = cmdToken + p.getName();
 
 		// handle special commands
 		if (cmdToken.length() > 0 && message.compare(0, spCmd.length(), spCmd) == 0) {
 			string module = message.substr(cmdToken.length(), spCmd.length() - cmdToken.length());
 
-			if (module == p->getName())
-				p->onCommand(server, channel, who, message.substr(spCmd.length()));
+			if (module == p.getName())
+				p.onCommand(server, channel, who, message.substr(spCmd.length()));
 		} else
-			p->onMessage(server, channel, who, message);
+			p.onMessage(server, channel, who, message);
 	}
 
 	(void)ev;
@@ -88,8 +88,8 @@ static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
 		server->join(c.m_name, c.m_password);
 	}
 
-	for (Plugin *p : Irccd::getInstance()->getPlugins())
-		p->onConnect(server);
+	for (Plugin &p : Irccd::getInstance()->getPlugins())
+		p.onConnect(server);
 
 	Logger::log("Successfully connected on server %s", server->getName().c_str());
 
@@ -112,8 +112,8 @@ static void handleChannelNotice(irc_session_t *s, const char *ev, const char *or
 		notice = params[1];
 
 	if (server->getIdentity().m_nickname != nick) {
-		for (Plugin *p : Irccd::getInstance()->getPlugins())
-			p->onChannelNotice(server, nick, target, notice);
+		for (Plugin &p : Irccd::getInstance()->getPlugins())
+			p.onChannelNotice(server, nick, target, notice);
 	}
 
 	(void)ev;
@@ -130,8 +130,8 @@ static void handleInvite(irc_session_t *s, const char *ev, const char *orig,
 	if (server->getJoinInvite())
 		server->join(params[1], "");
 
-	for (Plugin *p : Irccd::getInstance()->getPlugins())
-		p->onInvite(server, params[1], who);
+	for (Plugin &p : Irccd::getInstance()->getPlugins())
+		p.onInvite(server, params[1], who);
 
 	(void)ev;
 	(void)count;
@@ -145,8 +145,8 @@ static void handleJoin(irc_session_t *s, const char *ev, const char *orig,
 
 	// do not log self, XXX: add an option to allow that
 	if (server->getIdentity().m_nickname != nickname) {
-		for (Plugin *p : Irccd::getInstance()->getPlugins())
-			p->onJoin(server, params[0], nickname);
+		for (Plugin &p : Irccd::getInstance()->getPlugins())
+			p.onJoin(server, params[0], nickname);
 	}
 
 	(void)ev;
@@ -171,8 +171,8 @@ static void handleKick(irc_session_t *s, const char *ev, const char *orig,
 		server->removeChannel(params[0]);
 
 	if (server->getIdentity().m_nickname != who) {
-		for (Plugin *p : Irccd::getInstance()->getPlugins())
-			p->onKick(server, params[0], who, kicked, reason);
+		for (Plugin &p : Irccd::getInstance()->getPlugins())
+			p.onKick(server, params[0], who, kicked, reason);
 	}
 
 	(void)ev;
@@ -192,8 +192,8 @@ static void handleMode(irc_session_t *s, const char *ev, const char *orig,
 		modeValue = params[2];
 
 	if (server->getIdentity().m_nickname != nick) {
-		for (Plugin *p : Irccd::getInstance()->getPlugins())
-			p->onMode(server, params[0], nick, params[1], modeValue);
+		for (Plugin &p : Irccd::getInstance()->getPlugins())
+			p.onMode(server, params[0], nick, params[1], modeValue);
 	}
 
 	(void)ev;
@@ -215,8 +215,8 @@ static void handleNick(irc_session_t *s, const char *ev, const char *orig,
 
 	// do not log self, XXX: add an option to allow that
 	if (server->getIdentity().m_nickname != oldnick) {
-		for (Plugin *p : Irccd::getInstance()->getPlugins())
-			p->onNick(server, oldnick, newnick);
+		for (Plugin &p : Irccd::getInstance()->getPlugins())
+			p.onNick(server, oldnick, newnick);
 	}
 
 	(void)ev;
@@ -236,8 +236,8 @@ static void handleNotice(irc_session_t *s, const char *ev, const char *orig,
 		notice = params[1];
 
 	if (server->getIdentity().m_nickname != nick) {
-		for (Plugin *p : Irccd::getInstance()->getPlugins())
-			p->onNotice(server, nick, target, notice);
+		for (Plugin &p : Irccd::getInstance()->getPlugins())
+			p.onNotice(server, nick, target, notice);
 	}
 
 	(void)ev;
@@ -257,8 +257,8 @@ static void handlePart(irc_session_t *s, const char *ev, const char *orig,
 		reason = params[1];
 
 	if (server->getIdentity().m_nickname != nick) {
-		for (Plugin *p : Irccd::getInstance()->getPlugins())
-			p->onPart(server, params[0], nick, reason);
+		for (Plugin &p : Irccd::getInstance()->getPlugins())
+			p.onPart(server, params[0], nick, reason);
 	}
 
 	(void)ev;
@@ -276,8 +276,8 @@ static void handleQuery(irc_session_t *s, const char *ev, const char *orig,
 		message = params[1];
 
 	if (server->getIdentity().m_nickname != who) {
-		for (Plugin *p : Irccd::getInstance()->getPlugins())
-			p->onQuery(server, who, message);
+		for (Plugin &p : Irccd::getInstance()->getPlugins())
+			p.onQuery(server, who, message);
 	}
 
 	(void)ev;
@@ -297,8 +297,8 @@ static void handleTopic(irc_session_t *s, const char *ev, const char *orig,
 		topic = params[1];
 
 	if (server->getIdentity().m_nickname != nick) {
-		for (Plugin *p : Irccd::getInstance()->getPlugins())
-			p->onTopic(server, params[0], nick, topic);
+		for (Plugin &p : Irccd::getInstance()->getPlugins())
+			p.onTopic(server, params[0], nick, topic);
 	}
 
 	(void)ev;
@@ -314,8 +314,8 @@ static void handleUserMode(irc_session_t *s, const char *ev, const char *orig,
 	nick = getNick(orig);
 
 	if (server->getIdentity().m_nickname != nick) {
-		for (Plugin *p : Irccd::getInstance()->getPlugins())
-			p->onUserMode(server, nick, params[0]);
+		for (Plugin &p : Irccd::getInstance()->getPlugins())
+			p.onUserMode(server, nick, params[0]);
 	}
 
 	(void)ev;
@@ -452,17 +452,19 @@ void Server::removeChannel(const string &name)
 void Server::startConnection(void)
 {
 	m_thread = thread([=] () {
-		m_session = irc_create_session(&functions);
-		if (m_session != nullptr) {
+		irc_session_t *s = irc_create_session(&functions);
+		if (s != nullptr) {
 			const char *password = nullptr;	
 			int error;
 
+			// Copy the unique pointer.
+			m_session = unique_ptr<irc_session_t, IrcDeleter>(s);
 			if (m_password.length() > 0)
 				password = m_password.c_str();
 
-			irc_set_ctx(m_session, this);
+			irc_set_ctx(m_session.get(), this);
 			error = irc_connect(
-			    m_session,
+			    m_session.get(),
 			    m_host.c_str(),
 			    m_port,
 			    password,
@@ -472,8 +474,8 @@ void Server::startConnection(void)
 
 			if (error)
 				Logger::warn("failed to connect to %s: %s", m_host.c_str(),
-				    irc_strerror(irc_errno(m_session)));
-			irc_run(m_session);
+				    irc_strerror(irc_errno(m_session.get())));
+			irc_run(m_session.get());
 		}
 	});
 
@@ -491,13 +493,13 @@ void Server::stopConnection(void)
 void Server::cnotice(const string &channel, const string &message)
 {
 	if (m_threadStarted && channel[0] == '#')
-		irc_cmd_notice(m_session, channel.c_str(), message.c_str());
+		irc_cmd_notice(m_session.get(), channel.c_str(), message.c_str());
 }
 
 void Server::invite(const string &target, const string &channel)
 {
 	if (m_threadStarted)
-		irc_cmd_invite(m_session, target.c_str(), channel.c_str());
+		irc_cmd_invite(m_session.get(), target.c_str(), channel.c_str());
 }
 
 void Server::join(const string &name, const string &password)
@@ -508,7 +510,7 @@ void Server::join(const string &name, const string &password)
 		c.m_name = name;
 		c.m_password = password;
 
-		irc_cmd_join(m_session, name.c_str(), password.c_str());
+		irc_cmd_join(m_session.get(), name.c_str(), password.c_str());
 		addChannel(name, password);
 	}
 }
@@ -516,26 +518,26 @@ void Server::join(const string &name, const string &password)
 void Server::kick(const string &name, const string &channel, const string &reason)
 {
 	if (m_threadStarted)
-		irc_cmd_kick(m_session, name.c_str(), channel.c_str(),
+		irc_cmd_kick(m_session.get(), name.c_str(), channel.c_str(),
 		    (reason.length() == 0) ? nullptr : reason.c_str());
 }
 
 void Server::me(const string &target, const string &message)
 {
 	if (m_threadStarted)
-		irc_cmd_me(m_session, target.c_str(), message.c_str());
+		irc_cmd_me(m_session.get(), target.c_str(), message.c_str());
 }
 
 void Server::mode(const string &channel, const string &mode)
 {
 	if (m_threadStarted)
-		irc_cmd_channel_mode(m_session, channel.c_str(), mode.c_str());
+		irc_cmd_channel_mode(m_session.get(), channel.c_str(), mode.c_str());
 }
 
 void Server::nick(const string &nick)
 {
 	if (m_threadStarted)
-		irc_cmd_nick(m_session, nick.c_str());
+		irc_cmd_nick(m_session.get(), nick.c_str());
 
 	// Don't forget to change our own name
 	m_identity.m_nickname = nick;
@@ -544,13 +546,13 @@ void Server::nick(const string &nick)
 void Server::notice(const string &nickname, const string &message)
 {
 	if (m_threadStarted && nickname[0] != '#')
-		irc_cmd_notice(m_session, nickname.c_str(), message.c_str());
+		irc_cmd_notice(m_session.get(), nickname.c_str(), message.c_str());
 }
 
 void Server::part(const string &channel)
 {
 	if (m_threadStarted) {
-		irc_cmd_part(m_session, channel.c_str());
+		irc_cmd_part(m_session.get(), channel.c_str());
 		removeChannel(channel);
 	}
 }
@@ -559,23 +561,23 @@ void Server::query(const string &who, const string &message)
 {
 	// Do not write to public channel
 	if (m_threadStarted && who[0] != '#')
-		irc_cmd_msg(m_session, who.c_str(), message.c_str());
+		irc_cmd_msg(m_session.get(), who.c_str(), message.c_str());
 }
 
 void Server::say(const string &target, const string &message)
 {
 	if (m_threadStarted)
-		irc_cmd_msg(m_session, target.c_str(), message.c_str());
+		irc_cmd_msg(m_session.get(), target.c_str(), message.c_str());
 }
 
 void Server::topic(const string &channel, const string &topic)
 {
 	if (m_threadStarted)
-		irc_cmd_topic(m_session, channel.c_str(), topic.c_str());
+		irc_cmd_topic(m_session.get(), channel.c_str(), topic.c_str());
 }
 
 void Server::umode(const string &mode)
 {
 	if (m_threadStarted)
-		irc_cmd_user_mode(m_session, mode.c_str());
+		irc_cmd_user_mode(m_session.get(), mode.c_str());
 }

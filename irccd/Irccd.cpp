@@ -42,33 +42,28 @@ typedef function<void(Irccd *, const string &params)> Handler;
 
 static void handleChannelNotice(Irccd *irccd, const string &cmd)
 {
-	Server *server;
 	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() != 3) {
 		Logger::warn("CNOTICE needs 3 arguments");
 	} else {
-		if ((server = irccd->findServer(params[0])) != nullptr)
-			server->cnotice(params[1], params[2]);
+		irccd->findServer(params[0]).cnotice(params[1], params[2]);
 	}
 }
 
 static void handleInvite(Irccd *irccd, const string &cmd)
 {
-	Server *server;
 	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() < 2) {
 		Logger::warn("INVITE needs 3 arguments");
 	} else {
-		if ((server = irccd->findServer(params[0])) != nullptr)
-			server->invite(params[1], params[2]);
+		irccd->findServer(params[0]).invite(params[1], params[2]);
 	}
 }
 
 static void handleJoin(Irccd *irccd, const string &cmd)
 {
-	Server *server;
 	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() < 2) {
@@ -78,14 +73,12 @@ static void handleJoin(Irccd *irccd, const string &cmd)
 		if (params.size() == 3)
 			password = params[2];
 
-		if ((server = irccd->findServer(params[0])) != nullptr)
-			server->join(params[1], password);
+		irccd->findServer(params[0]).join(params[1], password);
 	}
 }
 
 static void handleKick(Irccd *irccd, const string &cmd)
 {
-	Server *server;
 	vector<string> params = Util::split(cmd, " \t", 4);
 
 	if (params.size() < 2) {
@@ -95,112 +88,95 @@ static void handleKick(Irccd *irccd, const string &cmd)
 		if (params.size() == 4)
 			reason = params[3];
 
-		if ((server = irccd->findServer(params[0])) != nullptr)
-			server->kick(params[1], params[2], reason);
+		irccd->findServer(params[0]).kick(params[1], params[2], reason);
 	}
 }
 
 static void handleMe(Irccd *irccd, const string &cmd)
 {
-	Server *server;
 	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() != 3) {
 		Logger::warn("ME needs 3 arguments");
 	} else {
-		if ((server = irccd->findServer(params[0])) != nullptr)
-			server->me(params[1], params[2]);
+		irccd->findServer(params[0]).me(params[1], params[2]);
 	}
 }
 
 static void handleMessage(Irccd *irccd, const string &cmd)
 {
-	Server *server;
 	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() != 3) {
 		Logger::warn("MSG needs 3 arguments");
 	} else {
-		if ((server = irccd->findServer(params[0])) != nullptr)
-			server->say(params[1], params[2]);
+		irccd->findServer(params[0]).say(params[1], params[2]);
 	}
 }
 
 static void handleMode(Irccd *irccd, const string &cmd)
 {
-	Server *server;
 	vector<string> params = Util::split(cmd, " \t", 2);
 
 	if (params.size() != 3) {
 		Logger::warn("MODE needs 3 arguments");
 	} else {
-		if ((server = irccd->findServer(params[0])) != nullptr)
-			server->mode(params[1], params[2]);
+		irccd->findServer(params[0]).mode(params[1], params[2]);
 	}
 }
 
 static void handleNick(Irccd *irccd, const string &cmd)
 {
-	Server *server;
 	vector<string> params = Util::split(cmd, " \t", 2);
 
 	if (params.size() != 2) {
 		Logger::warn("NICK needs 2 arguments");
 	} else {
-		if ((server = irccd->findServer(params[0])) != nullptr)
-			server->nick(params[1]);
+		irccd->findServer(params[0]).nick(params[1]);
 	}
 }
 
 static void handleNotice(Irccd *irccd, const string &cmd)
 {
-	Server *server;
 	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() != 3) {
 		Logger::warn("NOTICE needs 3 arguments");
 	} else {
-		if ((server = irccd->findServer(params[0])) != nullptr)
-			server->notice(params[1], params[2]);
+		irccd->findServer(params[0]).notice(params[1], params[2]);
 	}
 }
 
 static void handlePart(Irccd *irccd, const string &cmd)
 {
-	Server *server;
 	vector<string> params = Util::split(cmd, " \t", 2);
 
 	if (params.size() != 2) {
 		Logger::warn("PART needs 2 arguments");
 	} else {
-		if ((server = irccd->findServer(params[0])) != nullptr)
-			server->part(params[1]);
+		irccd->findServer(params[0]).part(params[1]);
 	}
 }
 
 static void handleTopic(Irccd *irccd, const string &cmd)
 {
-	Server *server;
 	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() != 3) {
 		Logger::warn("TOPIC needs 3 arguments");
 	} else {
-		if ((server = irccd->findServer(params[0])) != nullptr)
-			server->topic(params[1], params[2]);
+		irccd->findServer(params[0]).topic(params[1], params[2]);
 	}
 }
 
 static void handleUserMode(Irccd *irccd, const string &cmd)
 {
-	Server *server;
 	vector<string> params = Util::split(cmd, " \t", 1);
 
 	if (params.size() != 2) {
 		Logger::warn("UMODE needs 2 arguments");
 	} else {
-		if ((server = irccd->findServer(params[0])) != nullptr)
-			server->umode(params[1]);
+		irccd->findServer(params[0]).umode(params[1]);
 	}
 }
 
@@ -335,7 +311,7 @@ void Irccd::openPlugins(void)
 	// Get list of modules to load from config
 	for (const string &s : m_pluginWanted) {
 #if defined(WITH_LUA)
-		Plugin *plugin;
+		Plugin plugin;
 		ostringstream oss;
 		string finalPath;
 		bool found = false;
@@ -358,8 +334,6 @@ void Irccd::openPlugins(void)
 			continue;
 		}
 
-		plugin = new Plugin(s);
-
 		/*
 		 * At this step, the open function will open the lua
 		 * script, that script may want to call some bindings
@@ -368,15 +342,14 @@ void Irccd::openPlugins(void)
 		 * it only on failure and expect plugins to be well
 		 * coded.
 		 */
-		m_plugins.push_back(plugin);	// don't remove that
+		m_plugins.push_back(std::move(Plugin(s)));	// don't remove that
 
-		if (!plugin->open(finalPath)) {
+		if (!plugin.open(finalPath)) {
 			Logger::warn("Failed to load module %s: %s",
-			    s.c_str(), plugin->getError().c_str());
+			    s.c_str(), plugin.getError().c_str());
 
 			m_plugins.erase(remove(m_plugins.begin(),
 			    m_plugins.end(), plugin), m_plugins.end());
-			delete plugin;
 		}
 #else
 		Logger::warn("Not opening plugin %s, Lua support disabled", s.c_str());
@@ -490,7 +463,7 @@ void Irccd::extractUnix(const Section &s)
 void Irccd::openServers(const Parser &config)
 {
 	for (Section &s: config.findSections("server")) {
-		Server *server = new Server();
+		Server server;
 
 		try {
 			string name, address, commandToken, password, ident;
@@ -498,11 +471,11 @@ void Irccd::openServers(const Parser &config)
 
 			// General parameters
 			if (s.hasOption("command-char"))
-				server->setCommandChar(s.getOption<string>("command-char"));
+				server.setCommandChar(s.getOption<string>("command-char"));
 			if (s.hasOption("join-invite"))
-				server->setJoinInvite(s.getOption<bool>("join-invite"));
+				server.setJoinInvite(s.getOption<bool>("join-invite"));
 			if (s.hasOption("identity"))
-				server->setIdentity(findIdentity(s.getOption<string>("identity")));
+				server.setIdentity(findIdentity(s.getOption<string>("identity")));
 
 			// Get connection parameters
 			name = s.requireOption<string>("name");
@@ -512,19 +485,19 @@ void Irccd::openServers(const Parser &config)
 			if (s.hasOption("password"))
 				password = s.getOption<string>("password");
 
-			server->setConnection(name, address, port, false, password);
+			server.setConnection(name, address, port, false, password);
 
 			// Extract channels to auto join
 			extractChannels(s, server);
 
-			m_servers.push_back(server);
+			m_servers.push_back(std::move(server));
 		} catch (NotFoundException ex) {
 			Logger::warn("Section \"server\" require %s", ex.which().c_str());
 		}
 	}
 }
 
-void Irccd::extractChannels(const Section &section, Server *server)
+void Irccd::extractChannels(const Section &section, Server &server)
 {
 	vector<string> channels;
 	string list, name, password;
@@ -545,7 +518,7 @@ void Irccd::extractChannels(const Section &section, Server *server)
 				password = "";
 			}
 
-			server->addChannel(name, password);
+			server.addChannel(name, password);
 		}
 	}
 }
@@ -585,22 +558,22 @@ void Irccd::addWantedPlugin(const string &name)
 }
 
 #if defined(WITH_LUA)
-Plugin * Irccd::findPlugin(lua_State *state) const
+Plugin & Irccd::findPlugin(lua_State *state)
 {
-	for (Plugin *p: m_plugins)
-		if (p->getState() == state)
+	for (Plugin &p : m_plugins)
+		if (p.getState() == state)
 			return p;
 
-	return nullptr;
+	throw out_of_range("Plugin not found");
 }
 #endif
 	
-vector<Server *> & Irccd::getServers(void)
+vector<Server> & Irccd::getServers(void)
 {
 	return m_servers;
 }
 
-vector<Plugin *> & Irccd::getPlugins(void)
+vector<Plugin> & Irccd::getPlugins(void)
 {
 	return m_plugins;
 }
@@ -615,14 +588,13 @@ void Irccd::setVerbosity(bool verbose)
 	Logger::setVerbose(verbose);
 }
 
-Server * Irccd::findServer(const string &name)
+Server & Irccd::findServer(const string &name)
 {
-	for (Server *s : m_servers)
-		if (s->getName() == name)
+	for (Server &s : m_servers)
+		if (s.getName() == name)
 			return s;
 
-	Logger::warn("Could not find server with resource %s", name.c_str());
-	return nullptr;
+	throw out_of_range("Could not find server with resource " + name);
 }
 
 const Identity & Irccd::findIdentity(const string &name)
@@ -651,9 +623,9 @@ int Irccd::run(int argc, char **argv)
 	openConfig();
 
 	// Start all servers
-	for (auto s : m_servers) {
-		Logger::log("Trying to connect to %s...", s->getHost().c_str());
-		s->startConnection();
+	for (Server &s : m_servers) {
+		Logger::log("Trying to connect to %s...", s.getHost().c_str());
+		s.startConnection();
 	}
 
 	// Wait for input

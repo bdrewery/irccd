@@ -20,6 +20,7 @@
 #define _PLUGIN_H_
 
 #include <map>
+#include <memory>
 #include <string>
 
 #if defined(WITH_LUA)
@@ -30,6 +31,13 @@ namespace irccd {
 
 class Server;
 
+class LuaDeleter {
+public:
+	void operator()(lua_State *L) {
+		lua_close(L);
+	}
+};
+
 class Plugin {
 private:
 	// Plugin identity
@@ -38,7 +46,7 @@ private:
 	std::string m_error;		//! error message if needed
 
 #if defined(WITH_LUA)
-	lua_State *m_state;		//! Lua state
+	std::unique_ptr<lua_State, LuaDeleter> m_state;
 #endif
 
 	/**

@@ -42,9 +42,8 @@ private:
 	// Plugins
 	std::vector<std::string> m_pluginDirs;		//! list of plugin directories
 	std::vector<std::string> m_pluginWanted;	//! list of wanted modules
-	std::vector<Plugin *> m_plugins;		//! list of plugins loaded
-
-	std::vector<Server *> m_servers;		//! list of servers
+	std::vector<Plugin> m_plugins;			//! list of plugins loaded
+	std::vector<Server> m_servers;			//! list of servers
 
 	// Socket clients and listeners
 	std::vector<SocketServer *> m_socketServers;	//! socket servers
@@ -77,7 +76,7 @@ private:
 
 	// [server]
 	void openServers(const Parser &config);
-	void extractChannels(const Section &section, Server *server);
+	void extractChannels(const Section &section, Server &server);
 
 	Irccd(void);
 public:
@@ -114,7 +113,7 @@ public:
 	 * @param state the Lua state
 	 * @return the plugin
 	 */
-	Plugin * findPlugin(lua_State *state) const;
+	Plugin & findPlugin(lua_State *state);
 #endif
 
 	/**
@@ -122,14 +121,14 @@ public:
 	 *
 	 * @return the list of servers
 	 */
-	std::vector<Server *> & getServers(void);
+	std::vector<Server> & getServers(void);
 
 	/**
 	 * Get plugins.
 	 *
 	 * @return a list of plugins
 	 */
-	std::vector<Plugin *> & getPlugins(void);
+	std::vector<Plugin> & getPlugins(void);
 
 	/**
 	 * Set the config path to open.
@@ -151,7 +150,7 @@ public:
 	 * @param name the server's resource name
 	 * @return a server
 	 */
-	Server * findServer(const std::string &name);
+	Server & findServer(const std::string &name);
 
 	/**
 	 * Find an identity.
