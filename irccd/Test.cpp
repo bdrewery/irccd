@@ -415,8 +415,7 @@ static map<string, TestFunction> testCommands = createCommands();
 
 static void testPlugin(const char *file, int argc, char **argv)
 {
-	Plugin *plugin = new Plugin("Test case");
-	FakeServer *server = new FakeServer();
+	FakeServer server;
 	Identity ident;
 
 	if (strcmp(argv[0], "help") == 0) {
@@ -434,18 +433,20 @@ static void testPlugin(const char *file, int argc, char **argv)
 		}
 	}
 
-	server->setConnection("local", "local", 6667);
+	server.setConnection("local", "local", 6667);
 
 	// Always push before calling it
-	Irccd::getInstance()->getPlugins().push_back(plugin);
-	if (!plugin->open(file)) {
-		Logger::warn("Failed to open plugin: %s", plugin->getError().c_str());
+	Irccd::getInstance()->getPlugins().push_back(Plugin("Test case"));
+
+	Plugin &plugin = Irccd::getInstance()->getPlugins().back();
+	if (!plugin.open(file)) {
+		Logger::warn("Failed to open plugin: %s", plugin.getError().c_str());
 	}
 
 	// Simulate handler is optional
 	if (argc > 1) {
 		try {
-			testCommands.at(argv[1])(plugin, server, argc - 2, argv + 2);
+			testCommands.at(argv[1])(&plugin, &server, argc - 2, argv + 2);
 		} catch (out_of_range ex) {
 			Logger::warn("Unknown test case named %s", argv[0]);
 		}

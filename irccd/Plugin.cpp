@@ -160,9 +160,6 @@ Plugin::Plugin(const string &name)
 
 Plugin::~Plugin(void)
 {
-#if defined(WITH_LUA)
-	lua_close(m_state.get());
-#endif
 }
 
 const string & Plugin::getName(void) const

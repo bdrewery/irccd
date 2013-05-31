@@ -88,6 +88,7 @@ private:
 
 public:
 	Server(void);
+	Server(Server &&src) = default;
 	virtual ~Server(void);
 
 	/**

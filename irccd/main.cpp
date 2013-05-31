@@ -30,10 +30,6 @@ using namespace std;
 
 static void quit(void)
 {
-	for (Server *s : Irccd::getInstance()->getServers())
-		delete s;
-	for (Plugin *p : Irccd::getInstance()->getPlugins())
-		delete p;
 }
 
 static void usage(void)

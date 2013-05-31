@@ -27,7 +27,7 @@ static int getName(lua_State *L)
 {
 	Irccd *irccd = Irccd::getInstance();
 
-	lua_pushstring(L, irccd->findPlugin(L)->getName().c_str());
+	lua_pushstring(L, irccd->findPlugin(L).getName().c_str());
 
 	return 1;
 }
@@ -36,7 +36,7 @@ static int getHome(lua_State *L)
 {
 	Irccd *irccd = Irccd::getInstance();
 
-	lua_pushstring(L, irccd->findPlugin(L)->getHome().c_str());
+	lua_pushstring(L, irccd->findPlugin(L).getHome().c_str());
 
 	return 1;
 }

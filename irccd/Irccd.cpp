@@ -311,7 +311,6 @@ void Irccd::openPlugins(void)
 	// Get list of modules to load from config
 	for (const string &s : m_pluginWanted) {
 #if defined(WITH_LUA)
-		Plugin plugin;
 		ostringstream oss;
 		string finalPath;
 		bool found = false;
@@ -342,14 +341,15 @@ void Irccd::openPlugins(void)
 		 * it only on failure and expect plugins to be well
 		 * coded.
 		 */
-		m_plugins.push_back(std::move(Plugin(s)));	// don't remove that
+		
+		m_plugins.push_back(Plugin(s));	// don't remove that
+		Plugin & plugin = m_plugins.back();
 
 		if (!plugin.open(finalPath)) {
 			Logger::warn("Failed to load module %s: %s",
 			    s.c_str(), plugin.getError().c_str());
 
-			m_plugins.erase(remove(m_plugins.begin(),
-			    m_plugins.end(), plugin), m_plugins.end());
+			m_plugins.pop_back();
 		}
 #else
 		Logger::warn("Not opening plugin %s, Lua support disabled", s.c_str());

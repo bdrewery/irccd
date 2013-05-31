@@ -65,6 +65,7 @@ private:
 	bool loadLua(const std::string &path);
 public:
 	Plugin(void);
+	Plugin(Plugin &&src) = default;
 	Plugin(const std::string &name);
 	~Plugin(void);
 
