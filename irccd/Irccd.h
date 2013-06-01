@@ -23,8 +23,8 @@
 #include <sstream>
 
 #include <Parser.h>
-#include <SocketServer.h>
 #include <SocketListener.h>
+#include <SocketTCP.h>
 
 #include <config.h>
 
@@ -48,15 +48,16 @@ private:
 	std::vector<Server> m_servers;			//! list of servers
 
 	// Socket clients and listeners
-	std::vector<SocketServer *> m_socketServers;	//! socket servers
-	std::vector<SocketClient *> m_clients;		//! socket clients
+	std::vector<SocketTCP> m_socketServers;		//! socket servers
+	std::map<SocketTCP, std::string> m_clients;	//! socket clients
 	SocketListener m_listener;			//! socket listener
 
 	// Identities
 	std::vector<Identity> m_identities;		//! user identities
 	Identity m_defaultIdentity;			//! default identity
 
-	void clientRead(SocketClient *client);
+	void clientAdd(SocketTCP &client);
+	void clientRead(SocketTCP &client);
 	void execute(const std::string &cmd);
 	bool isPluginLoaded(const std::string &name);
 
@@ -75,7 +76,10 @@ private:
 	// [listener]
 	void openListeners(const Parser &config);
 	void extractInternet(const Section &s);
+
+#if !defined(_WIN32)
 	void extractUnix(const Section &s);
+#endif
 
 	// [server]
 	void openServers(const Parser &config);

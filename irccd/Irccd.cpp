@@ -21,14 +21,14 @@
 #include <map>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 #include <unistd.h>
 
 #include <Directory.h>
 #include <Logger.h>
 #include <Parser.h>
-#include <SocketServerInet.h>
-#include <SocketServerUnix.h>
+#include <SocketTCP.h>
 #include <Util.h>
 
 #include "Irccd.h"
@@ -89,6 +89,17 @@ static void handleKick(Irccd *irccd, const string &cmd)
 			reason = params[3];
 
 		irccd->findServer(params[0]).kick(params[1], params[2], reason);
+	}
+}
+
+static void handleLoad(Irccd *irccd, const string &cmd)
+{
+	vector<string> params = Util::split(cmd, " \t", 1);
+
+	if (params.size() != 1) {
+		Logger::warn("LOAD needs 1 argument");
+	} else {
+		irccd->loadPlugin(params[0]);
 	}
 }
 
@@ -158,6 +169,16 @@ static void handlePart(Irccd *irccd, const string &cmd)
 	}
 }
 
+static void handleReload(Irccd *irccd, const string &cmd)
+{
+	vector<string> params = Util::split(cmd, " \t", 1);
+	if (params.size() != 1) {
+		Logger::warn("RELOAD needs 1 argument");
+	} else {
+		irccd->reloadPlugin(params[0]);
+	}
+}
+
 static void handleTopic(Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
@@ -166,6 +187,16 @@ static void handleTopic(Irccd *irccd, const string &cmd)
 		Logger::warn("TOPIC needs 3 arguments");
 	} else {
 		irccd->findServer(params[0]).topic(params[1], params[2]);
+	}
+}
+
+static void handleUnload(Irccd *irccd, const string &cmd)
+{
+	vector<string> params = Util::split(cmd, " \t", 1);
+	if (params.size() != 1) {
+		Logger::warn("UNLOAD needs 1 argument");
+	} else {
+		irccd->unloadPlugin(params[0]);
 	}
 }
 
@@ -180,37 +211,6 @@ static void handleUserMode(Irccd *irccd, const string &cmd)
 	}
 }
 
-static void handleLoad(Irccd *irccd, const string &cmd)
-{
-	vector<string> params = Util::split(cmd, " \t", 1);
-
-	if (params.size() != 1) {
-		Logger::warn("LOAD needs 1 argument");
-	} else {
-		irccd->loadPlugin(params[0]);
-	}
-}
-
-static void handleUnload(Irccd *irccd, const string &cmd)
-{
-	vector<string> params = Util::split(cmd, " \t", 1);
-	if (params.size() != 1) {
-		Logger::warn("UNLOAD needs 1 argument");
-	} else {
-		irccd->unloadPlugin(params[0]);
-	}
-}
-
-static void handleReload(Irccd *irccd, const string &cmd)
-{
-	vector<string> params = Util::split(cmd, " \t", 1);
-	if (params.size() != 1) {
-		Logger::warn("RELOAD needs 1 argument");
-	} else {
-		irccd->reloadPlugin(params[0]);
-	}
-}
-
 static map<string, Handler> createHandlers(void)
 {
 	map<string, Handler> handlers;
@@ -219,6 +219,7 @@ static map<string, Handler> createHandlers(void)
 	handlers["INVITE"]	= handleInvite;
 	handlers["JOIN"]	= handleJoin;
 	handlers["KICK"]	= handleKick;
+	handlers["LOAD"]	= handleLoad;
 	handlers["MODE"]	= handleMode;
 	handlers["ME"]		= handleMe;
 	handlers["MODE"]	= handleMode;
@@ -226,13 +227,10 @@ static map<string, Handler> createHandlers(void)
 	handlers["NOTICE"]	= handleNotice;
 	handlers["NICK"]	= handleNick;
 	handlers["PART"]	= handlePart;
+	handlers["RELOAD"]	= handleReload;
 	handlers["TOPIC"]	= handleTopic;
 	handlers["UMODE"]	= handleUserMode;
-
-	// Commands specific to modules
-	handlers["LOAD"]	= handleLoad;
 	handlers["UNLOAD"]	= handleUnload;
-	handlers["RELOAD"]	= handleReload;
 
 	return handlers;
 }
@@ -247,32 +245,57 @@ static map<string, Handler> handlers = createHandlers();
 
 Irccd * Irccd::m_instance = nullptr;
 
-void Irccd::clientRead(SocketClient *client)
+void Irccd::clientAdd(SocketTCP &server)
+{
+	SocketTCP client;
+
+	try {
+		SocketTCP client = server.accept();
+
+		// Add to clients to read data
+		m_clients[client] = "";
+		m_listener.add(client);
+	} catch (Socket::ErrorException ex) {
+		Logger::warn("Could not accept client: %s", ex.what());
+	}
+}
+
+void Irccd::clientRead(SocketTCP &client)
 {
 	char data[128 + 1];
 	int length;
+	bool removeIt = false;
 
 	/*
 	 * First, read what is available and execute the command
 	 * even if the client has disconnected.
 	 */
 	try {
-		length = client->receive(data, sizeof (data) - 1);
-		if (length > 0) {
-			data[length] = '\0';
-			client->addData(data);
-		}
-	} catch (Socket::Exception ex) {
-		// do not log disconnected client, it's not really an error
-		if (!ex.disconnected())
-			Logger::log("%s", ex.what());
+		length = client.recv(data, sizeof (data) - 1);
 
-		m_clients.erase(remove(m_clients.begin(), m_clients.end(), client), m_clients.end());
-		m_listener.removeClient(client);
+		// Disconnection?
+		if (length == 0) {
+			removeIt = true;
+		} else {
+			data[length] = '\0';
+
+			// Copy the result
+			string cmd = m_clients[client] + string(data);
+			m_clients[client] = cmd;
+
+			size_t position = cmd.find_first_of('\n');
+			if (position != string::npos)
+				execute(cmd.substr(0, position));
+		}
+	} catch (Socket::ErrorException ex) {
+		Logger::log("%s", ex.what());
+		removeIt = true;
 	}
 
-	if (client->isFinished())
-		execute(client->getCommand());
+	if (removeIt) {
+		m_clients.erase(client);
+		m_listener.remove(client);
+	}
 }
 
 void Irccd::execute(const string &cmd)
@@ -502,9 +525,13 @@ void Irccd::openListeners(const Parser &config)
 
 			if (type == "internet")
 				extractInternet(s);
-			else if (type == "unix")
+			else if (type == "unix") {
+#if !defined(_WIN32)
 				extractUnix(s);
-			else
+#else
+				Logger::warn("Unix sockets are not supported on Windows");
+#endif
+			} else
 				Logger::warn("unknown listener type `%s'", type.c_str());
 		} catch (NotFoundException ex) {
 			Logger::warn("Listener requires %s", ex.which().c_str());
@@ -514,10 +541,11 @@ void Irccd::openListeners(const Parser &config)
 
 void Irccd::extractInternet(const Section &s)
 {
-	SocketServerInet *inet;
+	SocketTCP inet;
 	vector<string> protocols;
 	string address, family;
-	int port, finalFamily = 0;
+	int port;
+	bool ipv4 = false, ipv6 = false;
 
 	address = s.getOption<string>("address");
 	family = s.getOption<string>("family");
@@ -525,47 +553,63 @@ void Irccd::extractInternet(const Section &s)
 
 	// extract list of family
 	protocols = Util::split(family, " \t");
+
 	for (string p : protocols) {
 		if (p == "ipv4")
-			finalFamily |= Socket::Inet4;
+			ipv4 = true;
 		else if (p == "ipv6")
-			finalFamily |= Socket::Inet6;
+			ipv6 = true;
 		else {
 			Logger::warn("parameter family is one of them: ipv4, ipv6");
 			Logger::warn("defaulting to ipv4");
 	
-			finalFamily |= Socket::Inet4;
+			ipv4 = true;
+			ipv6 = false;
 		}
 	}
 
-	inet = new SocketServerInet(address, port, finalFamily);
-	if (inet->bind() && inet->listen(16)) {
-		Logger::log("Listening on port %u...", port);
+	try {
+		int reuse = 1;
 
+		inet.create((ipv6) ? AF_INET6 : AF_INET);
+		inet.set(SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof (reuse));
+		if (ipv6) {
+			int mode = !ipv4;
+			inet.set(IPPROTO_IPV6, IPV6_V6ONLY, &mode, sizeof (mode));
+		}
+
+		inet.bind(BindPointIP(address, port, (ipv6) ? AF_INET6 : AF_INET));
+		inet.listen(64);
+
+		// On success add to listener and servers
 		m_socketServers.push_back(inet);
-		m_listener.addClient(inet);
-	} else {
-		Logger::warn("%s", inet->getErrorMessage().c_str());
+		m_listener.add(inet);
+
+		Logger::log("Listening for clients on port %d...", port);
+	} catch (Socket::ErrorException ex) {
+		Logger::warn("===> %s", ex.what());
 	}
 }
 
+#if !defined(_WIN32)
 void Irccd::extractUnix(const Section &s)
 {
 	string path;
-	SocketServerUnix *unix;
+	SocketTCP unix;
 
 	path = s.requireOption<string>("path");
-	unix = new SocketServerUnix(path);
 
-	if (unix->create() && unix->bind() && unix->listen(16)) {
-		Logger::log("Listening on %s...", path.c_str());
+	try {
+		unix.create(AF_UNIX);
+		unix.bind(UnixPoint(path));
+		unix.listen(64);
 
-		m_socketServers.push_back(unix);
-		m_listener.addClient(unix);
-	} else {
-		Logger::warn("%s", unix->getErrorMessage().c_str());
+		Logger::log("Listening for clients on %s...", path.c_str());
+	} catch (Socket::ErrorException ex) {
+		Logger::warn("%s", ex.what());
 	}
 }
+#endif
 
 void Irccd::openServers(const Parser &config)
 {
@@ -759,28 +803,19 @@ int Irccd::run(int argc, char **argv)
 	// Wait for input
 	for (;;) {
 		// Todo: add a better thing there
-		Socket *s;
-
 		try {
-			s = m_listener.select(0);
-		} catch (SocketListener::EmptyException ex) {
+			SocketTCP &s = (SocketTCP &)m_listener.select(0);
+
+			// Check if this is on a listening socket
+			if (find(m_socketServers.begin(), m_socketServers.end(), s) != m_socketServers.end()) {
+				clientAdd(s);
+			} else {
+				clientRead(s);
+			}
+		} catch (Socket::ErrorException ex) {
+			Logger::warn("select: %s", ex.what());
 			sleep(1);
 			continue;
-		}
-
-		// Check if this is on a listening socket
-		if (find(m_socketServers.begin(), m_socketServers.end(), s) != m_socketServers.end()) {
-			SocketServer *server = (SocketServer *)s;
-			SocketClient *clientSocket = server->accept();
-
-			if (clientSocket == nullptr) {
-				Logger::warn("Someone failed to connect %s", server->getErrorMessage().c_str());
-			} else {
-				m_listener.addClient(clientSocket);
-				m_clients.push_back(clientSocket);
-			}
-		} else {
-			clientRead((SocketClient *)s);
 		}
 	}
 

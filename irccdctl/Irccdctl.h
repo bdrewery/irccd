@@ -22,17 +22,20 @@
 #include <string>
 
 #include <Parser.h>
-#include <SocketUtil.h>
+#include <SocketTCP.h>
 
 namespace irccd {
 
 class Irccdctl {
 private:
-	SocketClient * m_socket;
+	SocketTCP m_socket;
 	std::string m_configPath;
 
 	void connectUnix(const Section &section);
+
+#if !defined(_WIN32)
 	void connectInet(const Section &section);
+#endif
 
 	void readConfig(void);
 	void openConfig(void);

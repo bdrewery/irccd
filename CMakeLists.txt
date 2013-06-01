@@ -24,6 +24,7 @@ project(irccd)
 
 # General settings
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11 -stdlib=libc++")	# c++11
+set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -D_DEBUG")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")		# own modules
 
 # Installation paths

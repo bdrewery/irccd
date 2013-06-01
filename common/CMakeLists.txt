@@ -22,14 +22,10 @@ set(SOURCES
 	Date.cpp
 	Directory.cpp
 	Logger.cpp
-	Socket.cpp
-	SocketClient.cpp
-	SocketListener.cpp
-	SocketServer.cpp
-	SocketServerInet.cpp
-	SocketServerUnix.cpp
-	SocketUtil.cpp
 	Parser.cpp
+	Socket.cpp
+	SocketListener.cpp
+	SocketTCP.cpp
 	Util.cpp
 )
 

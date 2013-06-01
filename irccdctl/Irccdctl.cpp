@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <map>
+#include <sstream>
 
 #include <Logger.h>
 #include <Parser.h>
@@ -459,6 +460,7 @@ Irccdctl::~Irccdctl(void)
 {
 }
 
+#if !defined(_WIN32)
 void Irccdctl::connectUnix(const Section &section)
 {
 	string path;
@@ -466,12 +468,14 @@ void Irccdctl::connectUnix(const Section &section)
 	path = section.requireOption<string>("path");
 
 	try {
-		m_socket = SocketUtil::connectUnix(path);
-	} catch (SocketUtil::ErrorException error) {
+		m_socket.create(AF_UNIX);
+		m_socket.connect(UnixPoint(path));
+	} catch (Socket::ErrorException error) {
 		Logger::warn("Failed to connect to %s: %s", path.c_str(), error.what());
 		exit(1);
 	}
 }
+#endif
 
 void Irccdctl::connectInet(const Section &section)
 {
@@ -483,17 +487,18 @@ void Irccdctl::connectInet(const Section &section)
 	inet = section.requireOption<string>("family");
 
 	if (inet == "ipv4")
-		family = Socket::Inet4;
+		family = AF_INET;
 	else if (inet == "ipv6")
-		family = Socket::Inet6;
+		family = AF_INET6;
 	else {
 		Logger::warn("parameter family is one of them: ipv4, ipv6");
 		exit(1);
 	}
 
 	try {
-		m_socket = SocketUtil::connectInet(host, port, family);
-	} catch (SocketUtil::ErrorException error) {
+		m_socket.create(family);
+		m_socket.connect(ConnectPointIP(host, port, family));
+	} catch (Socket::ErrorException error) {
 		Logger::warn("Failed to connect: %s", error.what());
 		exit(1);
 	}
@@ -516,8 +521,13 @@ void Irccdctl::readConfig(void)
 
 		if (type.compare("unix") == 0)
 			connectUnix(sectionSocket);
-		else if (type.compare("inet") == 0)
+		else if (type.compare("inet") == 0) {
+#if !defined(_WIN32)
 			connectInet(sectionSocket);
+#else
+			Logger::warn("Unix sockets are not supported on Windows");
+#endif
+		}
 	} catch (NotFoundException ex) {
 		Logger::warn("Config misses %s", ex.which().c_str());
 	}
@@ -535,8 +545,8 @@ void Irccdctl::openConfig(void)
 void Irccdctl::sendRaw(const std::string &message)
 {
 	try {
-		m_socket->send(message.c_str(), message.length());
-	} catch (Socket::Exception ex) {
+		m_socket.send(message.c_str(), message.length());
+	} catch (Socket::ErrorException ex) {
 		Logger::warn("Failed to send message: %s", ex.what());
 	}
 }
