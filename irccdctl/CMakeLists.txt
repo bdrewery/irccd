@@ -24,18 +24,11 @@ set(SOURCES
 	Irccdctl.cpp
 )
 
-find_package(XDG REQUIRED)
-
-include_directories(
-	${XDG_INCLUDE_DIR}
-)
-
 add_executable(irccdctl ${SOURCES})
 
 target_link_libraries(
 	irccdctl
 	common
-	${XDG_LIBRARY}
 )
 
 install(TARGETS irccdctl RUNTIME DESTINATION bin)

@@ -29,17 +29,22 @@ set(SOURCES
 	Util.cpp
 )
 
-find_package(XDG REQUIRED)
+if (UNIX)
+	find_package(XDG REQUIRED)
+
+	list(APPEND INCLUDES ${XDG_INCLUDE_DIR})
+	list(APPEND LIBRARIES ${XDG_LIBRARY})
+endif ()
 
 include_directories(
-	${XDG_INCLUDE_DIR}
+	${INCLUDES}
 )
 
 add_library(common STATIC ${SOURCES})
 
 target_link_libraries(
 	common
-	${XDG_LIBRARY}
+	${LIBRARIES}
 )
 
 # vim: set syntax=cmake:

@@ -19,6 +19,7 @@
 #ifndef _PARSER_H_
 #define _PARSER_H_
 
+#include <cstdlib>
 #include <exception>
 #include <iostream>
 #include <string>
@@ -83,6 +84,8 @@ struct Section {
 	 */
 	const std::string & getName(void) const;
 
+	const std::string findOption(const std::string &name) const;
+
 	/**
 	 * Get all options from that section.
 	 *
@@ -117,7 +120,13 @@ struct Section {
 	 * @return the value
 	 */
 	template <typename T>
-	T requireOption(const std::string &name) const;
+	T requireOption(const std::string &name) const
+	{
+		if (!hasOption(name))
+			throw NotFoundException(name);
+
+		return getOption<T>(name);
+	}
 
 	friend std::ostream & operator<<(std::ostream & stream, const Section &section)
 	{
@@ -129,6 +138,43 @@ struct Section {
 		return stream;
 	}
 };
+
+template <> bool Section::getOption(const std::string &name) const
+{
+	bool result = false;
+
+	if (hasOption(name)) {
+		std::string value = findOption(name);
+
+		if (value == "yes" || value == "true"|| value == "1")
+			result = true;
+		else if (value == "no" || value == "false" || value == "0")
+			result = false;
+	}
+
+	return result;
+}
+
+template <> int Section::getOption(const std::string &name) const
+{
+	int result = -1;
+
+	if (hasOption(name)) {
+		result = atoi(findOption(name).c_str());
+	}
+
+	return result;
+}
+
+template <> std::string Section::getOption(const std::string &name) const
+{
+	std::string result;
+
+	if (hasOption(name))
+		result = findOption(name);
+
+	return result;
+}
 
 bool operator==(const Section &s1, const Section &s2);
 

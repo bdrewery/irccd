@@ -18,7 +18,12 @@
 
 #include <cerrno>
 
+#if defined(_WIN32)
+#include <sstream>
+#include <windows.h>
+#else
 #include <dirent.h>
+#endif
 
 #include "Directory.h"
 
@@ -36,6 +41,35 @@ Directory::~Directory(void)
 
 bool Directory::open(bool skipParents)
 {
+#if defined(_WIN32)
+	ostringstream oss;
+	WIN32_FIND_DATA fdata;
+	HANDLE hd;
+
+	oss << m_path;
+	oss << "\\*";
+
+	hd = FindFirstFile(m_path.c_str(), &fdata);
+	if (hd == INVALID_HANDLE_VALUE) {
+		m_error = "Could not open directory " + m_path;
+		return false;
+	}
+
+	do {
+		Entry entry;
+
+		if (skipParents &&
+		    (strcmp(fdata.cFileName, ".") == 0 || strcmp(fdata.cFileName, "..") == 0))
+			continue;
+
+		entry.m_isDirectory = (fdata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? true : false;
+		entry.m_name = fdata.cFileName;
+
+	} while (FindNextFile(hd, &fdata) != 0);
+
+	return true;
+	
+#else
 	DIR *dir;
 	struct dirent *dp;
 
@@ -60,6 +94,7 @@ bool Directory::open(bool skipParents)
 	closedir(dir);
 
 	return true;
+#endif
 }
 
 const string & Directory::getPath(void) const

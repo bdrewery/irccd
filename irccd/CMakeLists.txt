@@ -74,11 +74,9 @@ if (WITH_LUA)
 endif ()
 
 find_package(Libircclient REQUIRED)
-find_package(XDG REQUIRED)
 
 include_directories(
 	${LIBIRCCLIENT_INCLUDE_DIR}
-	${XDG_INCLUDE_DIR}
 	${INCLUDES}
 )
 
@@ -89,7 +87,6 @@ target_link_libraries(
 	common
 	pthread
 	${LIBIRCCLIENT_LIBRARIES}
-	${XDG_LIBRARY}
 	${LIBRARIES}
 )
 

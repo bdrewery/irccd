@@ -18,16 +18,23 @@
 
 #include <sstream>
 
-#if defined(_WIN32) || defined(_MSC_VER)
+#if defined(_WIN32)
 #  include <sys/timeb.h>
+#  include <direct.h>
+#  include <windows.h>
+#  include <shlobj.h>
+
+#  define _CRT_SECURE_NO_WARNINGS
+#  define mkdir(p, x)	mkdir(p)
+
 #else
 #  include <sys/time.h>
+#  include <libgen.h>
+
+#  include <basedir.h>
 #endif
 
 #include <sys/stat.h>
-#include <libgen.h>
-
-#include <basedir.h>
 
 #include "Util.h"
 
@@ -82,6 +89,14 @@ vector<string> Util::split(const string &list, const string &delimiter, int max)
 
 string Util::configDirectory(void)
 {
+#if defined(_WIN32)
+	char path[MAX_PATH];
+
+	if (SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path ) != S_OK)
+		return "";
+
+	return string(path);
+#else
 	xdgHandle handle;
 	ostringstream oss;
 
@@ -101,6 +116,7 @@ string Util::configDirectory(void)
 	xdgWipeHandle(&handle);
 
 	return oss.str();
+#endif
 }
 
 string Util::configFilePath(const std::string &filename)
@@ -115,7 +131,16 @@ string Util::configFilePath(const std::string &filename)
 
 string Util::getHome(void)
 {
+#if defined(_WIN32)
+	char path[MAX_PATH];
+
+	if (SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path ) != S_OK)
+		return "";
+
+	return string(path);
+#else
 	return string(getenv("HOME"));
+#endif
 }
 
 uint64_t Util::getTicks(void)
@@ -123,7 +148,7 @@ uint64_t Util::getTicks(void)
 #if defined(_WIN32) || defined(_MSC_VER)
 	_timeb tp;
 
-	_ftime(tp);
+	_ftime(&tp);
 
 	return tp.time * 1000LL + tp.millitm;
 #else
@@ -138,7 +163,17 @@ uint64_t Util::getTicks(void)
 string Util::basename(const string &path)
 {
 #if defined(_WIN32) || defined(_MSC_VER)
-	// XXX TODO
+	string copy = path;
+	size_t pos;
+
+	pos = copy.find_last_of('\\');
+	if (pos == string::npos)
+		pos = copy.find_last_of('/');
+
+	if (pos == string::npos)
+		return copy;
+
+	return copy.substr(pos + 1);
 #else
 	return string(::basename(path.c_str()));
 #endif
@@ -147,7 +182,17 @@ string Util::basename(const string &path)
 string Util::dirname(const string &file)
 {
 #if defined(_WIN32) || defined(_MSC_VER)
-	// XXX TODO
+	string copy = file;
+	size_t pos;
+
+	pos = copy.find_last_of('\\');
+	if (pos == string::npos)
+		pos = copy.find_last_of('/');
+
+	if (pos == string::npos)
+		return copy;
+
+	return copy.substr(0, pos);
 #else
 	return string(::dirname(file.c_str()));
 #endif

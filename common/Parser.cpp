@@ -24,19 +24,6 @@
 using namespace irccd;
 using namespace std;
 
-static const string findOption(const vector<Option> & options, const string &name)
-{
-	string ret;
-
-	for (const Option &o : options)
-		if (o.m_key == name) {
-			ret = o.m_value;
-			break;
-		}
-
-	return ret;
-}
-
 /* --------------------------------------------------------
  * Option public members
  * -------------------------------------------------------- */
@@ -67,6 +54,19 @@ Section::Section(const Section &s)
 	m_allowed = s.m_allowed;
 }
 
+const string Section::findOption(const string &name) const
+{
+	string ret;
+
+	for (const Option &o : m_options)
+		if (o.m_key == name) {
+			ret = o.m_value;
+			break;
+		}
+
+	return ret;
+}
+
 const string & Section::getName(void) const
 {
 	return m_name;
@@ -84,70 +84,6 @@ bool Section::hasOption(const std::string &name) const
 			return true;
 
 	return false;
-}
-
-template <> bool Section::getOption(const string &name) const
-{
-	bool result = false;
-
-	if (hasOption(name)) {
-		string value = findOption(m_options, name);
-
-		if (value == "yes" || value == "true"|| value == "1")
-			result = true;
-		else if (value == "no" || value == "false" || value == "0")
-			result = false;
-	}
-
-	return result;
-}
-
-template <> int Section::getOption(const string &name) const
-{
-	int result = -1;
-
-	if (hasOption(name)) {
-		try {
-			result = stoi(findOption(m_options, name));
-		} catch (std::exception ex) {
-		}
-	}
-
-	return result;
-}
-
-template <> string Section::getOption(const string &name) const
-{
-	string result;
-
-	if (hasOption(name))
-		result = findOption(m_options, name);
-
-	return result;
-}
-
-template <> bool Section::requireOption(const string &name) const
-{
-	if (!hasOption(name))
-		throw NotFoundException(name);
-
-	return getOption<bool>(name);
-}
-
-template <> int Section::requireOption(const string &name) const
-{
-	if (!hasOption(name))
-		throw NotFoundException(name);
-
-	return getOption<int>(name);
-}
-
-template <> string Section::requireOption(const string &name) const
-{
-	if (!hasOption(name))
-		throw NotFoundException(name);
-
-	return getOption<string>(name);
 }
 
 bool irccd::operator==(const Section &s1, const Section &s2)

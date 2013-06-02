@@ -19,6 +19,7 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
+#include <cstdint>
 #include <exception>
 #include <string>
 #include <vector>
