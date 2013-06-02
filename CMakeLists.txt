@@ -20,7 +20,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 # Project
-project(irccd)
+project(irccd-all)
 
 # General settings
 if (UNIX)
@@ -52,7 +52,7 @@ include_directories(
 )
 
 # Some non portable code
-set(EXTERNDIR "${irccd_SOURCE_DIR}/extern")
+set(EXTERNDIR "${CMAKE_SOURCE_DIR}/extern")
 
 include(CheckFunctionExists)
 include(CheckIncludeFile)
