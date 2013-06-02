@@ -22,6 +22,9 @@ cmake_minimum_required(VERSION 2.8)
 # Project
 project(irccd-all)
 
+set(MAJOR "0")
+set(MINOR "1")
+
 # General settings
 if (UNIX)
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11 -stdlib=libc++")	# c++11
@@ -115,5 +118,23 @@ configure_file(
 	"${CMAKE_BINARY_DIR}/config.h"
 )
 
+# CPack
+if (WIN32)
+else ()
+	set(CPACK_GENERATOR "TGZ")
+endif ()
+
+set(CPACK_PACKAGE_VENDOR "Malikania")
+set(CPACK_PACKAGE_VERSION "${MAJOR}.${MINOR}")
+set(CPACK_PACKAGE_VERSION_MAJOR ${MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${MINOR})
+set(CPACK_PACKAGE_FILE_NAME "irccd-${MAJOR}.${MINOR}-${CMAKE_SYSTEM_NAME}")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "IRC Client Daemon")
+
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "irccd-${MAJOR}.${MINOR}-source")
+set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
+set(CPACK_SOURCE_IGNORE_FILES ".hg")
+
+include(CPack)
 
 # vim: set syntax=cmake:
