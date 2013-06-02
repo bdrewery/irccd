@@ -27,13 +27,17 @@ option(WITH_LUA "Build with Lua plugin support" On)
 
 set(SOURCES
 	Server.cpp
+	Server.h
 	Plugin.cpp
+	Plugin.h
 	Irccd.cpp
+	Irccd.h
 	main.cpp
 	Test.cpp
+	Test.h
 )
 
-set(LUA_SUPPORT "disabled")
+set(LUA_SUPPORT "disabled" PARENT_SCOPE)
 
 if (WITH_LUA)
 	find_package(Lua52 QUIET)
@@ -67,7 +71,7 @@ if (WITH_LUA)
 			${LUA_LIBRARIES}
 		)
 
-		set(LUA_SUPPORT "enabled")
+		set(LUA_SUPPORT "enabled" PARENT_SCOPE)
 		set(USE_LUA 1 PARENT_SCOPE)		# for config.h
 	endif ()
 
@@ -82,10 +86,13 @@ include_directories(
 
 add_executable(irccd ${SOURCES})
 
+if (UNIX)
+	list(APPEND LIBRARIES "pthread")
+endif ()
+
 target_link_libraries(
 	irccd
 	common
-	pthread
 	${LIBIRCCLIENT_LIBRARIES}
 	${LIBRARIES}
 )

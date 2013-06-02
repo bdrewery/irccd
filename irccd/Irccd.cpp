@@ -23,8 +23,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <unistd.h>
-
 #include <Directory.h>
 #include <Logger.h>
 #include <Parser.h>
@@ -38,36 +36,39 @@ using namespace std;
 
 /* {{{ Client handlers */
 
-typedef function<void(Irccd *, const string &params)> Handler;
+typedef function<void(SocketTCP &, Irccd *, const string &params)> Handler;
 
-static void handleChannelNotice(Irccd *irccd, const string &cmd)
+static void handleChannelNotice(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() != 3) {
-		Logger::warn("CNOTICE needs 3 arguments");
+		string error = "CNOTICE needs 3 arguments\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		irccd->findServer(params[0]).cnotice(params[1], params[2]);
 	}
 }
 
-static void handleInvite(Irccd *irccd, const string &cmd)
+static void handleInvite(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
-	if (params.size() < 2) {
-		Logger::warn("INVITE needs 3 arguments");
+	if (params.size() < 3) {
+		string error = "INVITE needs 3 arguments\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		irccd->findServer(params[0]).invite(params[1], params[2]);
 	}
 }
 
-static void handleJoin(Irccd *irccd, const string &cmd)
+static void handleJoin(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() < 2) {
-		Logger::warn("JOIN needs at least 2 arguments");
+		string error = "JOIN needs at least 2 arguments\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		string password = "";
 		if (params.size() == 3)
@@ -77,12 +78,13 @@ static void handleJoin(Irccd *irccd, const string &cmd)
 	}
 }
 
-static void handleKick(Irccd *irccd, const string &cmd)
+static void handleKick(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 4);
 
-	if (params.size() < 2) {
-		Logger::warn("KICK needs at least 3 arguments");
+	if (params.size() < 3) {
+		string error = "KICK needs at least 3 arguments\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		string reason = "";
 		if (params.size() == 4)
@@ -92,120 +94,131 @@ static void handleKick(Irccd *irccd, const string &cmd)
 	}
 }
 
-static void handleLoad(Irccd *irccd, const string &cmd)
+static void handleLoad(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 1);
 
 	if (params.size() != 1) {
-		Logger::warn("LOAD needs 1 argument");
+		string error = "LOAD needs 1 argument\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		irccd->loadPlugin(params[0]);
 	}
 }
 
-static void handleMe(Irccd *irccd, const string &cmd)
+static void handleMe(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() != 3) {
-		Logger::warn("ME needs 3 arguments");
+		string error = "ME needs 3 arguments\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		irccd->findServer(params[0]).me(params[1], params[2]);
 	}
 }
 
-static void handleMessage(Irccd *irccd, const string &cmd)
+static void handleMessage(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() != 3) {
-		Logger::warn("MSG needs 3 arguments");
+		string error = "MSG needs 3 arguments\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		irccd->findServer(params[0]).say(params[1], params[2]);
 	}
 }
 
-static void handleMode(Irccd *irccd, const string &cmd)
+static void handleMode(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
-	vector<string> params = Util::split(cmd, " \t", 2);
+	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() != 3) {
-		Logger::warn("MODE needs 3 arguments");
+		string error = "MODE needs 3 arguments\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		irccd->findServer(params[0]).mode(params[1], params[2]);
 	}
 }
 
-static void handleNick(Irccd *irccd, const string &cmd)
+static void handleNick(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 2);
 
 	if (params.size() != 2) {
-		Logger::warn("NICK needs 2 arguments");
+		string error = "NICK needs 2 arguments\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		irccd->findServer(params[0]).nick(params[1]);
 	}
 }
 
-static void handleNotice(Irccd *irccd, const string &cmd)
+static void handleNotice(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() != 3) {
-		Logger::warn("NOTICE needs 3 arguments");
+		string error = "NOTICE needs 3 arguments\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		irccd->findServer(params[0]).notice(params[1], params[2]);
 	}
 }
 
-static void handlePart(Irccd *irccd, const string &cmd)
+static void handlePart(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 2);
 
 	if (params.size() != 2) {
-		Logger::warn("PART needs 2 arguments");
+		string error = "PART needs 2 arguments\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		irccd->findServer(params[0]).part(params[1]);
 	}
 }
 
-static void handleReload(Irccd *irccd, const string &cmd)
+static void handleReload(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 1);
 	if (params.size() != 1) {
-		Logger::warn("RELOAD needs 1 argument");
+		string error = "RELOAD needs 1 argument\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		irccd->reloadPlugin(params[0]);
 	}
 }
 
-static void handleTopic(Irccd *irccd, const string &cmd)
+static void handleTopic(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
 	if (params.size() != 3) {
-		Logger::warn("TOPIC needs 3 arguments");
+		string error = "TOPIC needs 3 arguments\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		irccd->findServer(params[0]).topic(params[1], params[2]);
 	}
 }
 
-static void handleUnload(Irccd *irccd, const string &cmd)
+static void handleUnload(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 1);
 	if (params.size() != 1) {
-		Logger::warn("UNLOAD needs 1 argument");
+		string error = "UNLOAD needs 1 argument\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		irccd->unloadPlugin(params[0]);
 	}
 }
 
-static void handleUserMode(Irccd *irccd, const string &cmd)
+static void handleUserMode(SocketTCP &client, Irccd *irccd, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 2);
 
 	if (params.size() != 2) {
-		Logger::warn("UMODE needs 2 arguments");
+		string error = "UMODE needs 2 arguments\n";
+		client.send(error.c_str(), error.length());
 	} else {
 		irccd->findServer(params[0]).umode(params[1]);
 	}
@@ -285,10 +298,10 @@ void Irccd::clientRead(SocketTCP &client)
 
 			size_t position = cmd.find_first_of('\n');
 			if (position != string::npos)
-				execute(cmd.substr(0, position));
+				execute(client, cmd.substr(0, position));
 		}
 	} catch (Socket::ErrorException ex) {
-		Logger::log("%s", ex.what());
+		Logger::log("Could not read from client %s", ex.what());
 		removeIt = true;
 	}
 
@@ -298,7 +311,7 @@ void Irccd::clientRead(SocketTCP &client)
 	}
 }
 
-void Irccd::execute(const string &cmd)
+void Irccd::execute(SocketTCP &client, const string &cmd)
 {
 	string cmdName;
 	size_t cmdDelim;
@@ -310,9 +323,11 @@ void Irccd::execute(const string &cmd)
 			Logger::warn("invalid command %s", cmdName.c_str());
 		else {
 			try {
-				handlers[cmdName](this, cmd.substr(cmdDelim + 1));
+				handlers[cmdName](client, this, cmd.substr(cmdDelim + 1));
+				client.send("OK\n", 3);
 			} catch (out_of_range ex) {
-				Logger::warn("%s", ex.what());
+				string error = "Server not found\n";
+				client.send(error.c_str(), error.length());
 			}
 		}
 	}
@@ -680,6 +695,8 @@ void Irccd::extractChannels(const Section &section, Server &server)
 
 Irccd::Irccd(void)
 {
+	Socket::init();
+
 	Logger::setVerbose(false);
 
 	// Set some defaults
@@ -688,6 +705,7 @@ Irccd::Irccd(void)
 
 Irccd::~Irccd(void)
 {
+	Socket::finish();
 }
 
 Irccd * Irccd::getInstance(void)
@@ -814,7 +832,7 @@ int Irccd::run(int argc, char **argv)
 			}
 		} catch (Socket::ErrorException ex) {
 			Logger::warn("select: %s", ex.what());
-			sleep(1);
+			//sleep(1);
 			continue;
 		}
 	}

@@ -67,6 +67,43 @@ const string Section::findOption(const string &name) const
 	return ret;
 }
 
+template <> bool Section::getOption(const std::string &name) const
+{
+	bool result = false;
+
+	if (hasOption(name)) {
+		std::string value = findOption(name);
+
+		if (value == "yes" || value == "true"|| value == "1")
+			result = true;
+		else if (value == "no" || value == "false" || value == "0")
+			result = false;
+	}
+
+	return result;
+}
+
+template <> int Section::getOption(const std::string &name) const
+{
+	int result = -1;
+
+	if (hasOption(name)) {
+		result = atoi(findOption(name).c_str());
+	}
+
+	return result;
+}
+
+template <> std::string Section::getOption(const std::string &name) const
+{
+	std::string result;
+
+	if (hasOption(name))
+		result = findOption(name);
+
+	return result;
+}
+
 const string & Section::getName(void) const
 {
 	return m_name;

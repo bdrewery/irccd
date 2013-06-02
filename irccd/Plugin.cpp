@@ -18,8 +18,6 @@
 
 #include <sstream>
 
-#include <libgen.h>
-
 #include <Logger.h>
 #include <Util.h>
 

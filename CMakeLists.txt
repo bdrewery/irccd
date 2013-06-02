@@ -27,7 +27,11 @@ if (UNIX)
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11 -stdlib=libc++")	# c++11
 endif ()
 
-set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -D_DEBUG")
+if (WIN32)
+	add_definitions("-D_CRT_SECURE_NO_WARNINGS")
+	set(CMAKE_CXX_FLAGS_DEBUG_INIT "/MDd /EHsc")
+endif ()
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")		# own modules
 
 # Installation paths
@@ -47,6 +51,38 @@ include_directories(
 	"${CMAKE_SOURCE_DIR}/common"
 )
 
+# Some non portable code
+set(EXTERNDIR "${irccd_SOURCE_DIR}/extern")
+
+include(CheckFunctionExists)
+include(CheckIncludeFile)
+
+# Check of getopt(3) function.
+check_function_exists(getopt HAVE_GETOPT)
+if (NOT HAVE_GETOPT)
+	include_directories("${EXTERNDIR}/getopt")
+	list(
+		APPEND
+		EXTSOURCES
+		"${EXTERNDIR}/getopt/getopt.c"
+		"${EXTERNDIR}/getopt/getopt.h"
+	)
+endif ()
+
+# Check of setprogname(3) function.
+check_function_exists(setprogname HAVE_SETPROGNAME)
+if (NOT HAVE_SETPROGNAME)
+	include_directories("${EXTERNDIR}/setprogname")
+	list(
+		APPEND
+		EXTSOURCES
+		"${EXTERNDIR}/setprogname/setprogname.c"
+		"${EXTERNDIR}/setprogname/setprogname.h"
+	)
+endif ()
+
+# unistd.h has some useful routines.
+check_include_file(unistd.h HAVE_UNISTD_H)
 
 # For documentation and man pages
 add_subdirectory(doc)

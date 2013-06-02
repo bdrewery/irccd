@@ -21,6 +21,7 @@
 
 #include <exception>
 #include <sstream>
+#include <mutex>
 
 #include <Parser.h>
 #include <SocketListener.h>
@@ -58,7 +59,7 @@ private:
 
 	void clientAdd(SocketTCP &client);
 	void clientRead(SocketTCP &client);
-	void execute(const std::string &cmd);
+	void execute(SocketTCP &client, const std::string &cmd);
 	bool isPluginLoaded(const std::string &name);
 
 	/**

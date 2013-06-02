@@ -18,8 +18,6 @@
 
 #include <cstdlib>
 
-#include <unistd.h>
-
 #include <Logger.h>
 
 #include "Irccd.h"

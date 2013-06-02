@@ -19,9 +19,13 @@
 # Project
 project(irccdctl)
 
+set(DEFAULT_IRCCDCTL_CONFIG "${ETCDIR}/irccdctl.conf"
+    CACHE STRING "Default irccdctl config file path")
+
 set(SOURCES
 	main.cpp
 	Irccdctl.cpp
+	Irccdctl.h
 )
 
 add_executable(irccdctl ${SOURCES})

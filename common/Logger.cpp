@@ -23,7 +23,7 @@ using namespace std;
 
 bool Logger::m_verbose = true;
 
-void Logger::printFile(FILE *fp, const std::string &fmt, va_list ap)
+void Logger::printFile(FILE *fp, string fmt, va_list ap)
 {
 	vfprintf(fp, fmt.c_str(), ap);
 	fputc('\n', fp);
@@ -34,7 +34,7 @@ void Logger::setVerbose(bool verbose)
 	Logger::m_verbose = verbose;
 }
 
-void Logger::log(const string &fmt, ...)
+void Logger::log(string fmt, ...)
 {
 	va_list ap;
 
@@ -44,7 +44,7 @@ void Logger::log(const string &fmt, ...)
 	va_end(ap);
 }
 
-void Logger::warn(const string &fmt, ...)
+void Logger::warn(string fmt, ...)
 {
 	va_list ap;
 
@@ -53,7 +53,7 @@ void Logger::warn(const string &fmt, ...)
 	va_end(ap);
 }
 
-void Logger::debug(const string &fmt, ...)
+void Logger::debug(string fmt, ...)
 {
 #if defined(DEBUG)
 	va_list ap;

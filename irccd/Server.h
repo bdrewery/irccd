@@ -82,13 +82,30 @@ private:
 	std::string m_password;			/*! optional server password */
 
 	// IRC thread
+	irc_callbacks_t m_callbacks;		//! callbacks for libircclient
 	std::thread m_thread;			/*! server's thread */
 	std::unique_ptr<irc_session_t, IrcDeleter> m_session;
 	bool m_threadStarted;			/*! thread's status */
 
 public:
 	Server(void);
-	Server(Server &&src) = default;
+
+	Server(Server &&src)
+	{
+		m_commandChar = std::move(src.m_commandChar);
+		m_joinInvite = src.m_joinInvite;
+		m_channels = std::move(src.m_channels);
+		m_identity = std::move(src.m_identity);
+		m_name = std::move(src.m_name);
+		m_host = std::move(src.m_host);
+		m_port = src.m_port;
+		m_password = std::move(src.m_password);
+		m_callbacks = std::move(src.m_callbacks);
+		m_thread = std::move(src.m_thread);
+		m_session = std::move(src.m_session);
+		m_threadStarted = src.m_threadStarted;
+	}
+
 	virtual ~Server(void);
 
 	/**

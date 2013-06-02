@@ -322,27 +322,31 @@ static void handleUserMode(irc_session_t *s, const char *ev, const char *orig,
 	(void)count;
 }
 
-static irc_callbacks_t functions = {
-	.event_channel		= handleChannel,
-	.event_channel_notice	= handleChannelNotice,
-	.event_connect		= handleConnect,
-	.event_invite		= handleInvite,
-	.event_join		= handleJoin,
-	.event_kick		= handleKick,
-	.event_mode		= handleMode,
-	.event_nick		= handleNick,
-	.event_notice		= handleNotice,
-	.event_part		= handlePart,
-	.event_privmsg		= handleQuery,
-	.event_topic		= handleTopic,
-	.event_umode		= handleUserMode
-};
+
+
+
+
 
 /* }}} */
 
 Server::Server(void)
 	:m_commandChar("!"), m_threadStarted(false)
 {
+	memset(&m_callbacks, 0, sizeof (irc_callbacks_t));
+
+	m_callbacks.event_channel		= handleChannel;
+	m_callbacks.event_channel_notice	= handleChannelNotice;
+	m_callbacks.event_connect		= handleConnect;
+	m_callbacks.event_invite		= handleInvite;
+	m_callbacks.event_join			= handleJoin;
+	m_callbacks.event_kick			= handleKick;
+	m_callbacks.event_mode			= handleMode;
+	m_callbacks.event_nick			= handleNick;
+	m_callbacks.event_notice		= handleNotice;
+	m_callbacks.event_part			= handlePart;
+	m_callbacks.event_privmsg		= handleQuery;
+	m_callbacks.event_topic			= handleTopic;
+	m_callbacks.event_umode			= handleUserMode;
 }
 
 Server::~Server(void)
@@ -451,8 +455,10 @@ void Server::removeChannel(const string &name)
 
 void Server::startConnection(void)
 {
+
+
 	m_thread = thread([=] () {
-		irc_session_t *s = irc_create_session(&functions);
+		irc_session_t *s = irc_create_session(&m_callbacks);
 		if (s != nullptr) {
 			const char *password = nullptr;	
 			int error;

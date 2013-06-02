@@ -1,7 +1,7 @@
 /*
- * main.cpp -- irccd controller main
+ * setprogname.h -- get or set the program name
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2011, 2012 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,30 +16,18 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <iostream>
+#ifndef _SETPROGNAME_H_
+#define _SETPROGNAME_H_
 
-#include "Irccdctl.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-using namespace irccd;
-using namespace std;
+void		setprogname(const char *);
+const char	*getprogname(void);
 
-int main(int argc, char **argv)
-{
-	Irccdctl ctl;
-	int ch;
-
-	while ((ch = getopt(argc, argv, "c:v")) != -1) {
-		switch (ch) {
-		case 'c':
-			ctl.setConfigPath(string(optarg));
-			break;
-		case 'v':
-			ctl.setVerbosity(true);
-			break;
-		}
-	}
-	argc -= optind;
-	argv += optind;
-
-	return ctl.run(argc, argv);
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* !_SETPROGNAME_H_ */

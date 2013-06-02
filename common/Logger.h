@@ -29,7 +29,7 @@ class Logger {
 private:
 	static bool m_verbose;
 
-	static void printFile(FILE *fp, const std::string &fmt, va_list ap);
+	static void printFile(FILE *fp, std::string fmt, va_list ap);
 
 public:
 	/**
@@ -47,7 +47,7 @@ public:
 	 * @param fmt format
 	 * @param ... arguments
 	 */
-	static void log(const std::string &fmt, ...);
+	static void log(std::string fmt, ...);
 
 	/**
 	 * Write a warning message, it will be printed
@@ -56,7 +56,7 @@ public:
 	 * @param fmt format
 	 * @param ... arguments
 	 */
-	static void warn(const std::string &fmt, ...);
+	static void warn(std::string fmt, ...);
 
 	/**
 	 * Write a message used as debugging, messages will
@@ -66,7 +66,7 @@ public:
 	 * @param fmt format
 	 * @param ... arguments
 	 */
-	static void debug(const std::string &fmt, ...);
+	static void debug(std::string fmt, ...);
 };
 
 } // !irccd

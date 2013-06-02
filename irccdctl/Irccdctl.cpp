@@ -22,6 +22,7 @@
 
 #include <Logger.h>
 #include <Parser.h>
+#include <SocketListener.h>
 #include <Util.h>
 
 #include "Irccdctl.h"
@@ -454,10 +455,14 @@ static map<string, Handler> handlers = createHandlers();
 
 Irccdctl::Irccdctl(void)
 {
+	Socket::init();
+
+	Logger::setVerbose(false);
 }
 
 Irccdctl::~Irccdctl(void)
 {
+	Socket::finish();
 }
 
 #if !defined(_WIN32)
@@ -519,17 +524,21 @@ void Irccdctl::readConfig(void)
 
 		type = sectionSocket.requireOption<string>("type");
 
-		if (type.compare("unix") == 0)
-			connectUnix(sectionSocket);
-		else if (type.compare("inet") == 0) {
+		if (type.compare("unix") == 0) {
 #if !defined(_WIN32)
-			connectInet(sectionSocket);
+			connectUnix(sectionSocket);
 #else
 			Logger::warn("Unix sockets are not supported on Windows");
 #endif
+		} else if (type.compare("internet") == 0) {
+			connectInet(sectionSocket);
+		} else {
+			Logger::warn("Invalid socket type %s", type.c_str());
+			exit(1);
 		}
 	} catch (NotFoundException ex) {
 		Logger::warn("Config misses %s", ex.which().c_str());
+		exit(1);
 	}
 }
 
@@ -537,6 +546,10 @@ void Irccdctl::openConfig(void)
 {
 	if (m_configPath.length() == 0) {
 		m_configPath = Util::configFilePath("irccdctl.conf");
+
+		// 3. Not found, fallback to default path
+		if (!Util::exist(m_configPath))
+			m_configPath = DEFAULT_IRCCDCTL_CONFIG;
 		readConfig();
 	} else
 		readConfig();
@@ -549,6 +562,56 @@ void Irccdctl::sendRaw(const std::string &message)
 	} catch (Socket::ErrorException ex) {
 		Logger::warn("Failed to send message: %s", ex.what());
 	}
+}
+
+int Irccdctl::getResponse()
+{
+	SocketListener listener;
+	ostringstream oss;
+	bool finished = false;
+	int ret = 0;
+
+	listener.add(m_socket);
+	try {
+		while (!finished) {
+			char data[128];
+			unsigned nbread;
+			size_t pos;
+
+			listener.select(30);
+			nbread = m_socket.recv(data, sizeof (data) - 1);
+			if (nbread == 0) {
+				finished = true;
+			} else {
+				string result;
+
+				data[nbread] = '\0';
+				oss << data;
+
+				pos = oss.str().find_first_of('\n');
+				if (pos == string::npos)
+					continue;
+
+				result = oss.str().substr(0, pos);
+				if (result != "OK") {
+					Logger::warn("Error, server said: %s", result.c_str());
+					ret = 1;
+				}
+
+				finished = true;
+			}
+		}
+	} catch (Socket::ErrorException ex) {
+		Logger::warn("Error: %s", ex.what());
+		ret = 1;
+	} catch (SocketListener::TimeoutException ex) {
+		(void)ex;
+
+		Logger::warn("Didn't get a response from irccd");
+		ret = 1;
+	}
+
+	return ret;
 }
 
 void Irccdctl::usage(void)
@@ -585,6 +648,8 @@ void Irccdctl::setVerbosity(bool verbose)
 
 int Irccdctl::run(int argc, char **argv)
 {
+	int ret;
+
 	if (argc < 1)
 		usage();
 		/* NOTREACHED */
@@ -594,11 +659,16 @@ int Irccdctl::run(int argc, char **argv)
 		openConfig();
 
 	try {
-		handlers.at(string(argv[0]))(this, --argc, ++argv);
+		string cmd = argv[0];
+
+		handlers.at(cmd)(this, --argc, ++argv);
+		ret = getResponse();
 	} catch (out_of_range ex) {
 		Logger::warn("Unknown command %s", argv[0]);
 		return 1;
 	}
+
+	m_socket.close();
 	
-	return 0;
+	return ret;
 }

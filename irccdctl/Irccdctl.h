@@ -21,6 +21,8 @@
 
 #include <string>
 
+#include <config.h>
+
 #include <Parser.h>
 #include <SocketTCP.h>
 
@@ -31,11 +33,11 @@ private:
 	SocketTCP m_socket;
 	std::string m_configPath;
 
-	void connectUnix(const Section &section);
-
 #if !defined(_WIN32)
-	void connectInet(const Section &section);
+	void connectUnix(const Section &section);
 #endif
+
+	void connectInet(const Section &section);
 
 	void readConfig(void);
 	void openConfig(void);
@@ -65,6 +67,13 @@ public:
 	 * @param message the message
 	 */
 	void sendRaw(const std::string &message);
+
+	/**
+	 * Get the server response.
+	 *
+	 * @return the code to return to main
+	 */
+	int getResponse();
 
 	/**
 	 * Run the application with the arguments.

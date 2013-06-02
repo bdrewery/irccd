@@ -68,8 +68,25 @@ private:
 public:
 	Plugin();
 	Plugin(const std::string &name);
-	Plugin(Plugin &&src) = default;
-	Plugin & operator=(Plugin &&src) = default;
+
+	Plugin(Plugin &&src)
+	{
+		m_name = std::move(src.m_name);
+		m_home = std::move(src.m_home);
+		m_error = std::move(src.m_error);
+		m_state = std::move(src.m_state);
+	}
+
+	Plugin & operator=(Plugin &&src)
+	{
+		m_name = std::move(src.m_name);
+		m_home = std::move(src.m_home);
+		m_error = std::move(src.m_error);
+		m_state = std::move(src.m_state);
+
+		return *this;
+	}
+
 	~Plugin();
 
 	const std::string & getName() const;

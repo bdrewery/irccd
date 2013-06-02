@@ -21,10 +21,28 @@
 
 // Default config paths
 #cmakedefine DEFAULT_IRCCD_CONFIG	"@DEFAULT_IRCCD_CONFIG@"
+#cmakedefine DEFAULT_IRCCDCTL_CONFIG	"@DEFAULT_IRCCDCTL_CONFIG@"
 
 // Optional Lua support
 #cmakedefine USE_LUA
 
 #if defined(USE_LUA)
 #  define WITH_LUA
+#endif
+
+// Some non portable code
+#cmakedefine	HAVE_GETOPT	1
+#ifndef HAVE_GETOPT
+#  include <getopt.h>
+#endif
+
+#cmakedefine	HAVE_SETPROGNAME 1
+#ifndef HAVE_SETPROGNAME
+#  include <setprogname.h>
+#endif
+
+// Some includes
+#cmakedefine	HAVE_UNISTD_H	1
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
 #endif

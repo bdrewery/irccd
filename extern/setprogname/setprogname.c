@@ -1,7 +1,7 @@
 /*
- * main.cpp -- irccd controller main
+ * setprogname.c -- get or set the program name
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2011, 2012 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,30 +16,30 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "Irccdctl.h"
+/*
+ * Do not return NULL if the developer didn't call setprogname to
+ * prevent useless segfault.
+ */
+static const char	*g_pname = "";
 
-using namespace irccd;
-using namespace std;
-
-int main(int argc, char **argv)
+void
+setprogname(const char *progname)
 {
-	Irccdctl ctl;
-	int ch;
+	const char *p;
 
-	while ((ch = getopt(argc, argv, "c:v")) != -1) {
-		switch (ch) {
-		case 'c':
-			ctl.setConfigPath(string(optarg));
-			break;
-		case 'v':
-			ctl.setVerbosity(true);
-			break;
-		}
-	}
-	argc -= optind;
-	argv += optind;
+	/* Seek last / or \ on windows */
+	if ((p = strrchr(progname, '/')) || (p = strrchr(progname, '\\')))
+		g_pname = &p[1];
+	else
+		g_pname = progname;
+}
 
-	return ctl.run(argc, argv);
+const char *
+getprogname(void)
+{
+	return g_pname;
 }

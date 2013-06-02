@@ -24,14 +24,15 @@
 #  include <windows.h>
 #  include <shlobj.h>
 
-#  define _CRT_SECURE_NO_WARNINGS
-#  define mkdir(p, x)	mkdir(p)
+#  define _MKDIR(p, x)	::_mkdir(p)
 
 #else
 #  include <sys/time.h>
 #  include <libgen.h>
 
 #  include <basedir.h>
+
+#  define _MKDIR(p, x)	::mkdir(p, x)
 #endif
 
 #include <sys/stat.h>
@@ -91,11 +92,16 @@ string Util::configDirectory(void)
 {
 #if defined(_WIN32)
 	char path[MAX_PATH];
+	ostringstream oss;
 
-	if (SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path ) != S_OK)
-		return "";
+	if (SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path) != S_OK)
+		oss << "";
+	else {
+		oss << path;
+		oss << "irccd\\";
+	}
 
-	return string(path);
+	return oss.str();
 #else
 	xdgHandle handle;
 	ostringstream oss;
@@ -219,14 +225,14 @@ void Util::mkdir(const std::string &dir, int mode)
 		if (part.length() <= 0 || exist(part))
 			continue;
 
-		if (::mkdir(part.c_str(), mode) == -1) {
+		if (_MKDIR(part.c_str(), mode) == -1) {
 			oss << part << ": " << strerror(errno);
 			throw Util::ErrorException(oss.str());
 		}
 	}
 
 	// Last part
-	if (::mkdir(dir.c_str(), mode) == -1) {
+	if (_MKDIR(dir.c_str(), mode) == -1) {
 		oss << dir << ": " << strerror(errno);
 		throw Util::ErrorException(oss.str());
 	}

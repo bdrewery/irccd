@@ -20,13 +20,22 @@ project(common)
 
 set(SOURCES
 	Date.cpp
+	Date.h
 	Directory.cpp
+	Directory.h
 	Logger.cpp
+	Logger.h
 	Parser.cpp
+	Parser.h
 	Socket.cpp
+	Socket.h
 	SocketListener.cpp
+	SocketListener.h
 	SocketTCP.cpp
+	SocketTCP.h
 	Util.cpp
+	Util.h
+	${EXTSOURCES}
 )
 
 if (UNIX)
@@ -34,6 +43,11 @@ if (UNIX)
 
 	list(APPEND INCLUDES ${XDG_INCLUDE_DIR})
 	list(APPEND LIBRARIES ${XDG_LIBRARY})
+endif ()
+
+if (WIN32)
+	list(APPEND LIBRARIES "ws2_32")
+	list(APPEND LIBRARIES "gdi32")
 endif ()
 
 include_directories(
