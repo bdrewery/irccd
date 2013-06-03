@@ -99,6 +99,9 @@ add_subdirectory(irccd)
 # irccd controller
 add_subdirectory(irccdctl)
 
+# Unit tests
+add_subdirectory(tests)
+
 message("Installation directories:")
 message("\tPREFIX\t\t${PREFIX}")
 message("\tMANDIR\t\t${MANDIR}")
@@ -108,6 +111,7 @@ message("")
 
 message("Compiling irccd with following options:")
 message("\tLua support:\t${LUA_SUPPORT}")
+message("\tUnit tests:\t${UNIT_TESTS}")
 message("\tDefault config:\t${DEFAULT_IRCCD_CONFIG}")
 message("")
 

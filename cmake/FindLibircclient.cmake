@@ -1,5 +1,5 @@
-# Find libintl used by gettext, this modules defines:
-# LIBIRCCLIENT_INCLUDE_DIR, where to find libintl.h
+# Find libircclient, this modules defines:
+# LIBIRCCLIENT_INCLUDE_DIR, where to find libircclient.h
 # LIBIRCCLIENT_LIBRARIES, where to find library
 # LIBIRCCLIENT_FOUND, if it is found
 

@@ -23,7 +23,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <Directory.h>
 #include <Logger.h>
 #include <Parser.h>
 #include <SocketTCP.h>
