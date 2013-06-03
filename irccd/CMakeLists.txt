@@ -49,11 +49,18 @@ if (WITH_LUA)
 		list(
 			APPEND
 			SOURCES
+			Lua/LuaIrccd.cpp
+			Lua/LuaIrccd.h
 			Lua/LuaLogger.cpp
+			Lua/LuaLogger.h
 			Lua/LuaParser.cpp
+			Lua/LuaParser.h
 			Lua/LuaPlugin.cpp
+			Lua/LuaPlugin.h
 			Lua/LuaServer.cpp
+			Lua/LuaServer.h
 			Lua/LuaUtil.cpp
+			Lua/LuaUtil.h
 		)
 
 		# Optional Lua includes

@@ -10,7 +10,9 @@
 <div id="container">
 
 <div id="product">
-  <img id="logo" src="logo.png" alt="irccd" />
+<!--<img id="logo" src="logo.png" alt="irccd" /> -->
+  <div id="product-logo"></div>
+
   <h2>irccd Lua API</h2>
   <p>Extend irccd with Lua plugins</p>
 </div>
@@ -21,8 +23,9 @@
 <!-- Menu -->
 
 <div id="navigation">
-<br/>
-<h1>Irccd</h1>
+<div id="navigation-header">
+  <h1>Irccd</h1>
+</div>
 
 <ul>
   <li><a href="../index.html">Index</a></li>
@@ -40,18 +43,19 @@
 
 <h2>Modules</h2>
 <ul>
-  <li><a href="../modules/Logger.html">Logger</a></li>
-  <li><a href="../modules/Parser.html">Parser</a></li>
-  <li><a href="../modules/Plugin.html">Plugin</a></li>
-  <li><a href="../modules/Server.html">Server</a></li>
-  <li><strong>Util</strong></li>
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><strong>irccd.util</strong></li>
 </ul>
 
 </div>
 
 <div id="content">
 
-<h1>Module <code>Util</code></h1>
+<h1>Module <code>irccd.util</code></h1>
 
 <p>Utilitities.</p>
 <p> Some utilities.</p>
@@ -60,31 +64,31 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#util.basename">util.basename&nbsp;(path)</a></td>
+	<td class="name" nowrap><a href="#basename">basename&nbsp;(path)</a></td>
 	<td class="summary">Get the file name of a full path.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#util.dateNow">util.dateNow&nbsp;()</a></td>
+	<td class="name" nowrap><a href="#dateNow">dateNow&nbsp;()</a></td>
 	<td class="summary">Create a Date object.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#util.dirname">util.dirname&nbsp;(path)</a></td>
+	<td class="name" nowrap><a href="#dirname">dirname&nbsp;(path)</a></td>
 	<td class="summary">Get the parent path of a file.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#util.exist">util.exist&nbsp;(path)</a></td>
+	<td class="name" nowrap><a href="#exist">exist&nbsp;(path)</a></td>
 	<td class="summary">Check if a file exists.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#util.getHome">util.getHome&nbsp;()</a></td>
+	<td class="name" nowrap><a href="#getHome">getHome&nbsp;()</a></td>
 	<td class="summary">Get the home directory.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#util.mkdir">util.mkdir&nbsp;(path)</a></td>
+	<td class="name" nowrap><a href="#mkdir">mkdir&nbsp;(path)</a></td>
 	<td class="summary">Create a directory.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#util.openDir">util.openDir&nbsp;(path, skipSpecial)</a></td>
+	<td class="name" nowrap><a href="#openDir">openDir&nbsp;(path, skipSpecial)</a></td>
 	<td class="summary">Open a directory.</td>
 	</tr>
 </table>
@@ -144,8 +148,8 @@
     <h2><a name="Functions"></a>Functions</h2>
     <dl class="function">
     <dt>
-    <a name = "util.basename"></a>
-    <strong>util.basename&nbsp;(path)</strong>
+    <a name = "basename"></a>
+    <strong>basename&nbsp;(path)</strong>
     </dt>
     <dd>
     Get the file name of a full path.
@@ -169,8 +173,8 @@
 
 </dd>
     <dt>
-    <a name = "util.dateNow"></a>
-    <strong>util.dateNow&nbsp;()</strong>
+    <a name = "dateNow"></a>
+    <strong>dateNow&nbsp;()</strong>
     </dt>
     <dd>
     Create a Date object.
@@ -187,14 +191,14 @@
 
     <h3>see also:</h3>
     <ul>
-         <a href="../modules/Util.html#Class_Date">Date</a>
+         <a href="../modules/irccd.util.html#Class_Date">Date</a>
     </ul>
 
 
 </dd>
     <dt>
-    <a name = "util.dirname"></a>
-    <strong>util.dirname&nbsp;(path)</strong>
+    <a name = "dirname"></a>
+    <strong>dirname&nbsp;(path)</strong>
     </dt>
     <dd>
     Get the parent path of a file.
@@ -218,8 +222,8 @@
 
 </dd>
     <dt>
-    <a name = "util.exist"></a>
-    <strong>util.exist&nbsp;(path)</strong>
+    <a name = "exist"></a>
+    <strong>exist&nbsp;(path)</strong>
     </dt>
     <dd>
     Check if a file exists.
@@ -242,8 +246,8 @@
 
 </dd>
     <dt>
-    <a name = "util.getHome"></a>
-    <strong>util.getHome&nbsp;()</strong>
+    <a name = "getHome"></a>
+    <strong>getHome&nbsp;()</strong>
     </dt>
     <dd>
     Get the home directory.
@@ -262,8 +266,8 @@
 
 </dd>
     <dt>
-    <a name = "util.mkdir"></a>
-    <strong>util.mkdir&nbsp;(path)</strong>
+    <a name = "mkdir"></a>
+    <strong>mkdir&nbsp;(path)</strong>
     </dt>
     <dd>
     Create a directory.
@@ -289,8 +293,8 @@
 
 </dd>
     <dt>
-    <a name = "util.openDir"></a>
-    <strong>util.openDir&nbsp;(path, skipSpecial)</strong>
+    <a name = "openDir"></a>
+    <strong>openDir&nbsp;(path, skipSpecial)</strong>
     </dt>
     <dd>
     Open a directory.
@@ -314,7 +318,7 @@
 
     <h3>see also:</h3>
     <ul>
-         <a href="../modules/Util.html#Class_Directory">Directory</a>
+         <a href="../modules/irccd.util.html#Class_Directory">Directory</a>
     </ul>
 
 

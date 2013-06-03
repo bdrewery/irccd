@@ -2,7 +2,7 @@
 -- The server class is usually passed through every Lua callbacks, on IRC
 -- events.
 --
--- @module Server
+-- @module irccd.server
 
 --- Server
 -- @type Server

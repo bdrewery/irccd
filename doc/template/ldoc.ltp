@@ -10,7 +10,9 @@
 <div id="container">
 
 <div id="product">
-  <img id="logo" src="logo.png" alt="irccd" />
+<!--<img id="logo" src="logo.png" alt="irccd" /> -->
+  <div id="product-logo"></div>
+
   <h2>irccd Lua API</h2>
   <p>Extend irccd with Lua plugins</p>
 </div>
@@ -27,8 +29,9 @@
 <!-- Menu -->
 
 <div id="navigation">
-<br/>
-<h1>$(ldoc.project)</h1>
+<div id="navigation-header">
+  <h1>$(ldoc.project)</h1>
+</div>
 
 # if not ldoc.single and module then -- reference back to project index
 <ul>

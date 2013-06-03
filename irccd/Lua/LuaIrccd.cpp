@@ -1,5 +1,5 @@
 /*
- * config.h.in -- configuration for irccd
+ * LuaIrccd.cpp -- Lua bindings for class Irccd
  *
  * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
  *
@@ -16,36 +16,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#cmakedefine PREFIX			"@PREFIX@"
-#cmakedefine MODDIR			"@MODDIR@"
+#include "Irccd.h"
+#include "LuaIrccd.h"
 
-#cmakedefine01 MAJOR
-#cmakedefine01 MINOR
+using namespace irccd;
+using namespace std;
 
-// Default config paths
-#cmakedefine DEFAULT_IRCCD_CONFIG	"@DEFAULT_IRCCD_CONFIG@"
-#cmakedefine DEFAULT_IRCCDCTL_CONFIG	"@DEFAULT_IRCCDCTL_CONFIG@"
+int irccd::luaopen_irccd(lua_State *L)
+{
+	// Use a standard table, for the moment there is no function
+	lua_createtable(L, 3, 3);
 
-// Optional Lua support
-#cmakedefine USE_LUA
+	lua_pushinteger(L, MAJOR);
+	lua_setfield(L, -2, "VERSION_MAJOR");
 
-#if defined(USE_LUA)
-#  define WITH_LUA
-#endif
+	lua_pushinteger(L, MINOR);
+	lua_setfield(L, -2, "VERSION_MINOR");
 
-// Some non portable code
-#cmakedefine	HAVE_GETOPT	1
-#ifndef HAVE_GETOPT
-#  include <getopt.h>
-#endif
+	lua_pushfstring(L, "%d.%d", MAJOR, MINOR);
+	lua_setfield(L, -2, "VERSION");
 
-#cmakedefine	HAVE_SETPROGNAME 1
-#ifndef HAVE_SETPROGNAME
-#  include <setprogname.h>
-#endif
-
-// Some includes
-#cmakedefine	HAVE_UNISTD_H	1
-#ifdef HAVE_UNISTD_H
-#  include <unistd.h>
-#endif
+	return 1;
+}

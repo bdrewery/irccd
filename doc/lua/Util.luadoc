@@ -1,7 +1,7 @@
 --- Utilitities.
 -- Some utilities.
 --
--- @module Util
+-- @module irccd.util
 
 --- Get the file name of a full path.
 -- Returns the file name only of a full path. For instance, returns

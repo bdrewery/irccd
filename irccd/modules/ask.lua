@@ -17,8 +17,8 @@
 --
 
 -- Modules
-local plugin = require("plugin")
-local logger = require("logger")
+local plugin = require "irccd.plugin"
+local logger = require "irccd.logger"
 
 local default = {
 	"Yes",

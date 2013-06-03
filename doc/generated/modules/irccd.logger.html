@@ -10,7 +10,9 @@
 <div id="container">
 
 <div id="product">
-  <img id="logo" src="logo.png" alt="irccd" />
+<!--<img id="logo" src="logo.png" alt="irccd" /> -->
+  <div id="product-logo"></div>
+
   <h2>irccd Lua API</h2>
   <p>Extend irccd with Lua plugins</p>
 </div>
@@ -21,8 +23,9 @@
 <!-- Menu -->
 
 <div id="navigation">
-<br/>
-<h1>Irccd</h1>
+<div id="navigation-header">
+  <h1>Irccd</h1>
+</div>
 
 <ul>
   <li><a href="../index.html">Index</a></li>
@@ -36,18 +39,19 @@
 
 <h2>Modules</h2>
 <ul>
-  <li><strong>Logger</strong></li>
-  <li><a href="../modules/Parser.html">Parser</a></li>
-  <li><a href="../modules/Plugin.html">Plugin</a></li>
-  <li><a href="../modules/Server.html">Server</a></li>
-  <li><a href="../modules/Util.html">Util</a></li>
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><strong>irccd.logger</strong></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
 </ul>
 
 </div>
 
 <div id="content">
 
-<h1>Module <code>Logger</code></h1>
+<h1>Module <code>irccd.logger</code></h1>
 
 <p>Logguer functions
  Log, emit a warning within a plugin.</p>
@@ -59,11 +63,11 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#logger.log">logger.log&nbsp;(message)</a></td>
+	<td class="name" nowrap><a href="#log">log&nbsp;(message)</a></td>
 	<td class="summary">Log something.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#logger.warn">logger.warn&nbsp;(message)</a></td>
+	<td class="name" nowrap><a href="#warn">warn&nbsp;(message)</a></td>
 	<td class="summary">Emit a warning.</td>
 	</tr>
 </table>
@@ -75,8 +79,8 @@
     <h2><a name="Functions"></a>Functions</h2>
     <dl class="function">
     <dt>
-    <a name = "logger.log"></a>
-    <strong>logger.log&nbsp;(message)</strong>
+    <a name = "log"></a>
+    <strong>log&nbsp;(message)</strong>
     </dt>
     <dd>
     Log something.
@@ -95,8 +99,8 @@
 
 </dd>
     <dt>
-    <a name = "logger.warn"></a>
-    <strong>logger.warn&nbsp;(message)</strong>
+    <a name = "warn"></a>
+    <strong>warn&nbsp;(message)</strong>
     </dt>
     <dd>
     Emit a warning.

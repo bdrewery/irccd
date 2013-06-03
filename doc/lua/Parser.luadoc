@@ -4,7 +4,7 @@
 -- possible to have one or more section with the same name in a
 -- file config.
 --
--- @module Parser
+-- @module irccd.parser
 
 --- Tuning options
 -- @class table

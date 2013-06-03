@@ -25,11 +25,12 @@
 #include "Plugin.h"
 
 #if defined(WITH_LUA)
-#include "Lua/LuaLogger.h"
-#include "Lua/LuaParser.h"
-#include "Lua/LuaPlugin.h"
-#include "Lua/LuaServer.h"
-#include "Lua/LuaUtil.h"
+#  include "Lua/LuaIrccd.h"
+#  include "Lua/LuaLogger.h"
+#  include "Lua/LuaParser.h"
+#  include "Lua/LuaPlugin.h"
+#  include "Lua/LuaServer.h"
+#  include "Lua/LuaUtil.h"
 #endif
 
 using namespace irccd;
@@ -47,20 +48,26 @@ struct Library {
 };
 
 static const Library libLua[] = {
-	{ "_G",		luaopen_base	},
-	{ "io",		luaopen_io	},
-	{ "math",	luaopen_math	},
-	{ "package",	luaopen_package	},
-	{ "string",	luaopen_string	},
-	{ "table",	luaopen_table	},
-	{ "server",	luaopen_server	},
+	{ "_G",			luaopen_base	},
+	{ "io",			luaopen_io	},
+	{ "math",		luaopen_math	},
+	{ "package",		luaopen_package	},
+	{ "string",		luaopen_string	},
+	{ "table",		luaopen_table	},
+
+	/*
+	 * There is no function for this one, but server object is passed
+	 * through almost every function, so we load it for convenience
+	 */
+	{ "irccd.server",	luaopen_server	},
 };
 
 static const Library libIrccd[] = {
-	{ "logger",	luaopen_logger	},
-	{ "parser",	luaopen_parser	},
-	{ "plugin",	luaopen_plugin	},
-	{ "util",	luaopen_util	}
+	{ "irccd",		luaopen_irccd	},
+	{ "irccd.logger",	luaopen_logger	},
+	{ "irccd.parser",	luaopen_parser	},
+	{ "irccd.plugin",	luaopen_plugin	},
+	{ "irccd.util",		luaopen_util	}
 };
 #endif
 

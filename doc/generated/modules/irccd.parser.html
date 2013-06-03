@@ -10,7 +10,9 @@
 <div id="container">
 
 <div id="product">
-  <img id="logo" src="logo.png" alt="irccd" />
+<!--<img id="logo" src="logo.png" alt="irccd" /> -->
+  <div id="product-logo"></div>
+
   <h2>irccd Lua API</h2>
   <p>Extend irccd with Lua plugins</p>
 </div>
@@ -21,8 +23,9 @@
 <!-- Menu -->
 
 <div id="navigation">
-<br/>
-<h1>Irccd</h1>
+<div id="navigation-header">
+  <h1>Irccd</h1>
+</div>
 
 <ul>
   <li><a href="../index.html">Index</a></li>
@@ -41,18 +44,19 @@
 
 <h2>Modules</h2>
 <ul>
-  <li><a href="../modules/Logger.html">Logger</a></li>
-  <li><strong>Parser</strong></li>
-  <li><a href="../modules/Plugin.html">Plugin</a></li>
-  <li><a href="../modules/Server.html">Server</a></li>
-  <li><a href="../modules/Util.html">Util</a></li>
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><strong>irccd.parser</strong></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
 </ul>
 
 </div>
 
 <div id="content">
 
-<h1>Module <code>Parser</code></h1>
+<h1>Module <code>irccd.parser</code></h1>
 
 <p>Config file parser.</p>
 <p> This API provides basic support of .ini syntax based configurations files.
@@ -64,7 +68,7 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#parser.new">parser.new&nbsp;(path, tuning, commentChar)</a></td>
+	<td class="name" nowrap><a href="#new">new&nbsp;(path, tuning, commentChar)</a></td>
 	<td class="summary">Create a new Parser object.</td>
 	</tr>
 </table>
@@ -151,8 +155,8 @@
     <h2><a name="Functions"></a>Functions</h2>
     <dl class="function">
     <dt>
-    <a name = "parser.new"></a>
-    <strong>parser.new&nbsp;(path, tuning, commentChar)</strong>
+    <a name = "new"></a>
+    <strong>new&nbsp;(path, tuning, commentChar)</strong>
     </dt>
     <dd>
     Create a new Parser object.
@@ -177,7 +181,7 @@
 
     <h3>see also:</h3>
     <ul>
-         <a href="../modules/Parser.html#">Parser</a>
+         <a href="../modules/irccd.parser.html#Class_Parser">Parser</a>
     </ul>
 
 
@@ -333,7 +337,7 @@
 
     <h3>see also:</h3>
     <ul>
-         <a href="../modules/Parser.html#Parser:getSection">Parser:getSection</a>
+         <a href="../modules/irccd.parser.html#Parser:getSection">Parser:getSection</a>
     </ul>
 
 
@@ -444,7 +448,7 @@
 
     <h3>see also:</h3>
     <ul>
-         <a href="../modules/Parser.html#Section:requireOption">Section:requireOption</a>
+         <a href="../modules/irccd.parser.html#Section:requireOption">Section:requireOption</a>
     </ul>
 
 
@@ -493,7 +497,7 @@
 
     <h3>see also:</h3>
     <ul>
-         <a href="../modules/Parser.html#Section:getOption">Section:getOption</a>
+         <a href="../modules/irccd.parser.html#Section:getOption">Section:getOption</a>
     </ul>
 
 

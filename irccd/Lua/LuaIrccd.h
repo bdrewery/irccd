@@ -1,5 +1,5 @@
 /*
- * config.h.in -- configuration for irccd
+ * LuaIrccd.h -- Lua bindings for class Irccd
  *
  * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
  *
@@ -16,36 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#cmakedefine PREFIX			"@PREFIX@"
-#cmakedefine MODDIR			"@MODDIR@"
+#ifndef _LUA_IRCCD_H_
+#define _LUA_IRCCD_H_
 
-#cmakedefine01 MAJOR
-#cmakedefine01 MINOR
+#include <lua.hpp>
 
-// Default config paths
-#cmakedefine DEFAULT_IRCCD_CONFIG	"@DEFAULT_IRCCD_CONFIG@"
-#cmakedefine DEFAULT_IRCCDCTL_CONFIG	"@DEFAULT_IRCCDCTL_CONFIG@"
+namespace irccd {
 
-// Optional Lua support
-#cmakedefine USE_LUA
+int luaopen_irccd(lua_State *L);
+	
+} // !irccd
 
-#if defined(USE_LUA)
-#  define WITH_LUA
-#endif
-
-// Some non portable code
-#cmakedefine	HAVE_GETOPT	1
-#ifndef HAVE_GETOPT
-#  include <getopt.h>
-#endif
-
-#cmakedefine	HAVE_SETPROGNAME 1
-#ifndef HAVE_SETPROGNAME
-#  include <setprogname.h>
-#endif
-
-// Some includes
-#cmakedefine	HAVE_UNISTD_H	1
-#ifdef HAVE_UNISTD_H
-#  include <unistd.h>
-#endif
+#endif // !_LUA_IRCCD_H_

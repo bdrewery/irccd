@@ -1,7 +1,7 @@
 --- Logguer functions
 -- Log, emit a warning within a plugin.
 --
--- @module Logger
+-- @module irccd.logger
 
 --- Log something.
 -- This will append a message into stdout only if irccd

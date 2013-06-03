@@ -3,7 +3,7 @@
 -- own Lua state so every of these functions knows which plugin is currently
 -- calling one of these
 --
--- @module Plugin
+-- @module irccd.plugin
 
 --- Get the plugin name.
 -- @return the current plugin name

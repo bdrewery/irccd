@@ -10,7 +10,9 @@
 <div id="container">
 
 <div id="product">
-  <img id="logo" src="logo.png" alt="irccd" />
+<!--<img id="logo" src="logo.png" alt="irccd" /> -->
+  <div id="product-logo"></div>
+
   <h2>irccd Lua API</h2>
   <p>Extend irccd with Lua plugins</p>
 </div>
@@ -21,8 +23,9 @@
 <!-- Menu -->
 
 <div id="navigation">
-<br/>
-<h1>Irccd</h1>
+<div id="navigation-header">
+  <h1>Irccd</h1>
+</div>
 
 <ul>
   <li><a href="../index.html">Index</a></li>
@@ -36,18 +39,19 @@
 
 <h2>Modules</h2>
 <ul>
-  <li><a href="../modules/Logger.html">Logger</a></li>
-  <li><a href="../modules/Parser.html">Parser</a></li>
-  <li><a href="../modules/Plugin.html">Plugin</a></li>
-  <li><strong>Server</strong></li>
-  <li><a href="../modules/Util.html">Util</a></li>
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><strong>irccd.server</strong></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
 </ul>
 
 </div>
 
 <div id="content">
 
-<h1>Module <code>Server</code></h1>
+<h1>Module <code>irccd.server</code></h1>
 
 <p>Server class.</p>
 <p> The server class is usually passed through every Lua callbacks, on IRC

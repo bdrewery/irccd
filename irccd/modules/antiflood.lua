@@ -16,7 +16,7 @@
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --
 
-local util = require("util")
+local util = require "irccd.util"
 
 local nicknames = { }
 local conf = {

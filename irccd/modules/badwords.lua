@@ -16,8 +16,8 @@
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --
 
-local plugin = require("plugin")
-local parser = require("parser")
+local plugin = require "irccd.plugin"
+local parser = require "irccd.parser"
 
 local words = { }
 local answer = "Please check your spelling"

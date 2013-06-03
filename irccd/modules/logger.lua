@@ -17,9 +17,9 @@
 --
 
 -- Modules
-local parser = require("parser")
-local plugin = require("plugin")
-local util = require("util")
+local parser = require "irccd.parser"
+local plugin = require "irccd.plugin"
+local util = require "irccd.util"
 
 -- Logger configuration
 local configuration = { }
