@@ -148,6 +148,10 @@ table.index td { text-align: left; vertical-align: top; }
     background-color: #ffffff;
 }
 
+#product #logo {
+	margin: 0 auto;
+}
+
 #product big {
     font-size: 2em;
 }

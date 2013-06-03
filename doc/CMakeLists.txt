@@ -55,7 +55,10 @@ if (WITH_LDOC)
 		add_custom_target(
 			generate-doc
 			COMMAND ${LDOC} .
-			WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/doc"
+			    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/doc"
+			COMMAND cmake -E copy
+			    "${CMAKE_CURRENT_SOURCE_DIR}/style/logo.png"
+			    "${CMAKE_CURRENT_SOURCE_DIR}/generated"
 		)
 	endif ()
 

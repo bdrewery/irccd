@@ -4,5 +4,6 @@ full_description = 'Irccd Lua API Documentation'
 title = 'Irccd Lua API Documentation'
 dir = 'generated'
 format = 'markdown'
+style = 'style'
+template = 'template'
 file = 'lua'
-style = "lua/style"
