@@ -448,7 +448,7 @@ static void testPlugin(const char *file, int argc, char **argv)
 		try {
 			testCommands.at(argv[1])(&plugin, &server, argc - 2, argv + 2);
 		} catch (out_of_range ex) {
-			Logger::warn("Unknown test case named %s", argv[0]);
+			Logger::warn("Unknown test command named %s", argv[1]);
 		}
 	}
 }
