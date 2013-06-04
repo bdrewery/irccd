@@ -395,6 +395,8 @@ void Irccd::execute(SocketTCP &client, const string &cmd)
 				error = oss.str();
 
 				client.send(error.c_str(), error.length());
+			} catch (Socket::ErrorException ex) {
+				Logger::warn("Failed to send: %s", ex.what());
 			}
 		}
 	}
