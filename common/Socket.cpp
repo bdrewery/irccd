@@ -98,6 +98,7 @@ UnixPoint::UnixPoint(const string &path)
 	strncpy(sun->sun_path, path.c_str(), sizeof (sun->sun_path) - 1);
 
 	sun->sun_family = AF_UNIX;
+	m_addrlen = SUN_LEN(sun);
 }
 #endif
 
