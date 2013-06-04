@@ -671,7 +671,7 @@ void Irccd::extractInternet(const Section &s)
 
 		Logger::log("Listening for clients on port %d...", port);
 	} catch (Socket::ErrorException ex) {
-		Logger::warn("===> %s", ex.what());
+		Logger::warn("Internet socket error: %s", ex.what());
 	}
 }
 
@@ -683,14 +683,20 @@ void Irccd::extractUnix(const Section &s)
 
 	path = s.requireOption<string>("path");
 
-	try {
-		unix.create(AF_UNIX);
-		unix.bind(UnixPoint(path));
-		unix.listen(64);
+	// First remove the dust
+	if (Util::exist(path) && remove(path.c_str()) < 0)
+		Logger::warn("Error removing %s: %s", path.c_str(), strerror(errno));
+		else {
 
-		Logger::log("Listening for clients on %s...", path.c_str());
-	} catch (Socket::ErrorException ex) {
-		Logger::warn("%s", ex.what());
+		try {
+			unix.create(AF_UNIX);
+			unix.bind(UnixPoint(path));
+			unix.listen(64);
+
+			Logger::log("Listening for clients on %s...", path.c_str());
+		} catch (Socket::ErrorException ex) {
+			Logger::warn("Unix socket error: %s", ex.what());
+		}
 	}
 }
 #endif
@@ -893,7 +899,13 @@ int Irccd::run(int argc, char **argv)
 
 	// Wait for input
 	for (;;) {
-		// Todo: add a better thing there
+		// Nothing to do, just do a sleep to avoid high process usage,
+		// the IRC servers thread do everything else.
+		if (m_listener.size() == 0) {
+			Util::usleep(500);
+			continue;
+		}
+
 		try {
 			SocketTCP &s = (SocketTCP &)m_listener.select(0);
 
@@ -904,9 +916,7 @@ int Irccd::run(int argc, char **argv)
 				clientRead(s);
 			}
 		} catch (Socket::ErrorException ex) {
-			Logger::warn("select: %s", ex.what());
-			//sleep(1);
-			continue;
+			Logger::warn("Client error: %s", ex.what());
 		}
 	}
 
