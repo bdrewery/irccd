@@ -53,7 +53,14 @@ public:
 	/**
 	 * Remove every sockets in the listener.
 	 */
-	void clear(void);
+	void clear();
+
+	/**
+	 * Get the number of sockets registered for listening.
+	 *
+	 * @return the number of sockets to listen
+	 */
+	size_t size();
 
 	/**
 	 * Wait for an event in the socket liste.

@@ -37,9 +37,14 @@ void SocketListener::remove(Socket &s)
 	m_clients.erase(std::remove(m_clients.begin(), m_clients.end(), s), m_clients.end());
 }
 
-void SocketListener::clear(void)
+void SocketListener::clear()
 {
 	m_clients.clear();
+}
+
+size_t SocketListener::size()
+{
+	return m_clients.size();
 }
 
 Socket & SocketListener::select(int timeout)
