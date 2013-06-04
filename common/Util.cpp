@@ -237,3 +237,12 @@ void Util::mkdir(const std::string &dir, int mode)
 		throw Util::ErrorException(oss.str());
 	}
 }
+
+void Util::usleep(int msec)
+{
+#if defined(_WIN32)
+	Sleep(msec);
+#else
+	::usleep(msec * 1000);
+#endif
+}

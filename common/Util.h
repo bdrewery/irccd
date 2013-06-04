@@ -24,6 +24,8 @@
 #include <string>
 #include <vector>
 
+#include <config.h>
+
 namespace irccd {
 
 class Util {
@@ -114,6 +116,13 @@ public:
 	 * @param mode the mode
 	 */
 	static void mkdir(const std::string &dir, int mode);
+
+	/**
+	 * Sleep for milli seconds.
+	 *
+	 * @param msec the number of milli seconds
+	 */
+	static void usleep(int msec);
 };
 
 } // !irccd
