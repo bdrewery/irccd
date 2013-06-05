@@ -122,7 +122,7 @@ static bool handleLoad(SocketTCP &client, const string &cmd)
 
 	Irccd::getInstance()->loadPlugin(params[0]);
 
-	return false;
+	return true;
 }
 
 static bool handleMe(SocketTCP &client, const string &cmd)
