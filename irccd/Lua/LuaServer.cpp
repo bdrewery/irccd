@@ -20,8 +20,6 @@
 
 #include <sstream>
 
-#include <Logger.h>
-
 #include "Server.h"
 #include "LuaServer.h"
 
@@ -113,238 +111,225 @@ static int getName(lua_State *L)
 
 static int cnotice(lua_State *L)
 {
-	if (lua_gettop(L) < 3) {
-		Logger::warn("server:cnotice needs 2 arguments");
-	} else {
-		Server *s;
-		string channel, notice;
+	if (lua_gettop(L) < 3)
+		return luaL_error(L, "server:cnotice needs 2 arguments");
 
-		s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
-		channel = luaL_checkstring(L, 2);
-		notice = luaL_checkstring(L, 3);
+	Server *s;
+	string channel, notice;
 
-		s->cnotice(channel, notice);
-	}
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	channel = luaL_checkstring(L, 2);
+	notice = luaL_checkstring(L, 3);
+
+	s->cnotice(channel, notice);
 
 	return 0;
 }
 
 static int invite(lua_State *L)
 {
-	if (lua_gettop(L) < 3) {
-		Logger::warn("server:invite needs 2 arguments");
-	} else {
-		Server *s;
-		string nick, channel;
+	if (lua_gettop(L) < 3)
+		return luaL_error(L, "server:invite needs 2 arguments");
 
-		s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
-		nick = luaL_checkstring(L, 2);
-		channel = luaL_checkstring(L, 3);
+	Server *s;
+	string nick, channel;
 
-		s->invite(nick, channel);
-	}
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	nick = luaL_checkstring(L, 2);
+	channel = luaL_checkstring(L, 3);
+
+	s->invite(nick, channel);
 
 	return 0;
 }
 
 static int join(lua_State *L)
 {
-	if (lua_gettop(L) < 2) {
-		Logger::warn("server:join needs at least 1 argument");
-	} else {
-		Server *s;
-		string channel, password = "";
+	if (lua_gettop(L) < 2)
+		return luaL_error(L, "server:join needs at least 1 argument");
 
-		s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
-		channel = luaL_checkstring(L, 2);
+	Server *s;
+	string channel, password = "";
 
-		// optional password
-		if (lua_gettop(L) == 3)
-			password = luaL_checkstring(L, 3);
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	channel = luaL_checkstring(L, 2);
 
-		s->join(channel, password);
-	}
+	// optional password
+	if (lua_gettop(L) == 3)
+		password = luaL_checkstring(L, 3);
+
+	s->join(channel, password);
 
 	return 0;
 }
 
 static int kick(lua_State *L)
 {
-	if (lua_gettop(L) < 3) {
-		Logger::warn("server:kick needs at least 2 arguments");
-	} else {
-		Server *s;
-		string channel, target, reason = "";
+	if (lua_gettop(L) < 3)
+		return luaL_error(L, "server:kick needs at least 2 arguments");
 
-		s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
-		target = luaL_checkstring(L, 2);
-		channel = luaL_checkstring(L, 3);
+	Server *s;
+	string channel, target, reason = "";
 
-		// optional reason
-		if (lua_gettop(L) == 4)
-			reason = luaL_checkstring(L, 4);
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	target = luaL_checkstring(L, 2);
+	channel = luaL_checkstring(L, 3);
 
-		s->kick(target, channel, reason);
-	}
+	// optional reason
+	if (lua_gettop(L) == 4)
+		reason = luaL_checkstring(L, 4);
+
+	s->kick(target, channel, reason);
 
 	return 0;
 }
 
 static int me(lua_State *L)
 {
-	if (lua_gettop(L) != 3) {
-		Logger::warn("server:me needs 2 arguments");
-	} else {
-		Server *s;
-		string target, message;
+	if (lua_gettop(L) != 3)
+		return luaL_error(L, "server:me needs 2 arguments");
 
-		s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
-		target = luaL_checkstring(L, 2);
-		message = luaL_checkstring(L, 3);
+	Server *s;
+	string target, message;
 
-		s->me(target, message);
-	}
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	target = luaL_checkstring(L, 2);
+	message = luaL_checkstring(L, 3);
+
+	s->me(target, message);
 
 	return 0;
 }
 
 static int mode(lua_State *L)
 {
-	if (lua_gettop(L) != 3) {
-		Logger::warn("server:mode needs 2 arguments");
-	} else {
-		Server *s;
-		string channel, mode;
+	if (lua_gettop(L) != 3)
+		return luaL_error(L, "server:mode needs 2 arguments");
 
-		s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
-		channel = luaL_checkstring(L, 2);
-		mode = luaL_checkstring(L, 3);
+	Server *s;
+	string channel, mode;
 
-		s->mode(channel, mode);
-	}
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	channel = luaL_checkstring(L, 2);
+	mode = luaL_checkstring(L, 3);
+
+	s->mode(channel, mode);
 
 	return 0;
 }
 
 static int nick(lua_State *L)
 {
-	if (lua_gettop(L) != 2) {
-		Logger::warn("server:nick needs 1 argument");
-	} else {
-		Server *s;
-		string newnick;
+	if (lua_gettop(L) != 2)
+		return luaL_error(L, "server:nick needs 1 argument");
 
-		s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
-		newnick = luaL_checkstring(L, 2);
+	Server *s;
+	string newnick;
 
-		s->nick(newnick);
-	}
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	newnick = luaL_checkstring(L, 2);
+
+	s->nick(newnick);
 
 	return 0;
 }
 
 static int notice(lua_State *L)
 {
-	if (lua_gettop(L) != 2) {
-		Logger::warn("server:notice needs 2 arguments");
-	} else {
-		Server *s;
-		string nickname, notice;
+	if (lua_gettop(L) != 2)
+		return luaL_error(L, "server:notice needs 2 arguments");
 
-		s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
-		nickname = luaL_checkstring(L, 2);
-		notice = luaL_checkstring(L, 3);
+	Server *s;
+	string nickname, notice;
 
-		s->notice(nickname, notice);
-	}
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	nickname = luaL_checkstring(L, 2);
+	notice = luaL_checkstring(L, 3);
+
+	s->notice(nickname, notice);
 
 	return 0;
 }
 
 static int part(lua_State *L)
 {
-	if (lua_gettop(L) != 2) {
-		Logger::warn("server:part needs 1 argument");
-	} else {
-		Server *s;
-		string channel;
+	if (lua_gettop(L) != 2)
+		return luaL_error(L, "server:part needs 1 argument");
 
-		s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
-		channel = luaL_checkstring(L, 2);
+	Server *s;
+	string channel;
 
-		s->part(channel);
-	}
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	channel = luaL_checkstring(L, 2);
+
+	s->part(channel);
 
 	return 0;
 }
 
 static int query(lua_State *L)
 {
-	if (lua_gettop(L) != 3) {
-		Logger::warn("server:query needs 2 arguments");
-	} else {
-		Server *s;
-		string target, message;
+	if (lua_gettop(L) != 3)
+		return luaL_error(L, "server:query needs 2 arguments");
 
-		s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
-		target = luaL_checkstring(L, 2);
-		message = luaL_checkstring(L, 3);
+	Server *s;
+	string target, message;
 
-		s->query(target, message);
-	}
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	target = luaL_checkstring(L, 2);
+	message = luaL_checkstring(L, 3);
+
+	s->query(target, message);
 
 	return 0;
 }
 
 static int say(lua_State *L)
 {
-	if (lua_gettop(L) != 3) {
-		Logger::warn("server:say needs 2 arguments");
-	} else {
-		Server *s;
-		string target, message;
+	if (lua_gettop(L) != 3)
+		return luaL_error(L, "server:say needs 2 arguments");
 
-		s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
-		target = luaL_checkstring(L, 2);
-		message = luaL_checkstring(L, 3);
+	Server *s;
+	string target, message;
 
-		s->say(target, message);
-	}
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	target = luaL_checkstring(L, 2);
+	message = luaL_checkstring(L, 3);
+
+	s->say(target, message);
 
 	return 0;
 }
 
 static int topic(lua_State *L)
 {
-	if (lua_gettop(L) != 3) {
-		Logger::warn("server:topic needs 2 arguments");
-	} else {
-		Server *s;
-		string channel, topic;
+	if (lua_gettop(L) != 3)
+		return luaL_error(L, "server:topic needs 2 arguments");
 
-		s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
-		channel = luaL_checkstring(L, 2);
-		topic = luaL_checkstring(L, 3);
+	Server *s;
+	string channel, topic;
 
-		s->topic(channel, topic);
-	}
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	channel = luaL_checkstring(L, 2);
+	topic = luaL_checkstring(L, 3);
+
+	s->topic(channel, topic);
 
 	return 0;
 }
 
 static int umode(lua_State *L)
 {
-	if (lua_gettop(L) != 2) {
-		Logger::warn("server:umode needs 1 argument");
-	} else {
-		Server *s;
-		string mode;
+	if (lua_gettop(L) != 2)
+		return luaL_error(L, "server:umode needs 1 argument");
 
-		s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
-		mode = luaL_checkstring(L, 2);
+	Server *s;
+	string mode;
 
-		s->umode(mode);
-	}
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	mode = luaL_checkstring(L, 2);
+
+	s->umode(mode);
 
 	return 0;
 }

@@ -330,7 +330,7 @@ void Irccd::clientAdd(SocketTCP &server)
 		m_clients[client] = "";
 		m_listener.add(client);
 	} catch (Socket::ErrorException ex) {
-		Logger::warn("Could not accept client: %s", ex.what());
+		Logger::warn("listener: could not accept client: %s", ex.what());
 	}
 }
 
@@ -362,7 +362,7 @@ void Irccd::clientRead(SocketTCP &client)
 				execute(client, cmd.substr(0, position));
 		}
 	} catch (Socket::ErrorException ex) {
-		Logger::log("Could not read from client %s", ex.what());
+		Logger::log("listener: Could not read from client %s", ex.what());
 		removeIt = true;
 	}
 
@@ -381,7 +381,7 @@ void Irccd::execute(SocketTCP &client, const string &cmd)
 	if (cmdDelim != string::npos) {
 		cmdName = cmd.substr(0, cmdDelim);
 		if (handlers.find(cmdName) == handlers.end())
-			Logger::warn("invalid command %s", cmdName.c_str());
+			Logger::warn("listener: invalid command %s", cmdName.c_str());
 		else {
 			try {
 				bool correct = handlers[cmdName](client, cmd.substr(cmdDelim + 1));
@@ -396,7 +396,7 @@ void Irccd::execute(SocketTCP &client, const string &cmd)
 
 				client.send(error.c_str(), error.length());
 			} catch (Socket::ErrorException ex) {
-				Logger::warn("Failed to send: %s", ex.what());
+				Logger::warn("listener: failed to send: %s", ex.what());
 			}
 		}
 	}
@@ -449,12 +449,12 @@ void Irccd::openConfig(void)
 	Parser config(m_configPath);
 
 	if (!config.open()) {
-		Logger::warn("Failed to open: %s", m_configPath.c_str());
-		Logger::warn("No configuration could be found, exiting");
+		Logger::warn("irccd: failed to open: %s", m_configPath.c_str());
+		Logger::warn("irccd: no configuration could be found, exiting");
 		exit(1);
 	}
 
-	Logger::log("Using configuration %s", m_configPath.c_str());
+	Logger::log("irccd: using configuration %s", m_configPath.c_str());
 
 	Section general = config.getSection("general");
 
@@ -482,10 +482,8 @@ void Irccd::loadPlugin(const string &name)
 	string finalPath;
 	bool found = false;
 
-	if (isPluginLoaded(name)) {
-		Logger::warn("Plugin %s is already loaded", name.c_str());
+	if (isPluginLoaded(name))
 		return;
-	}
 
 	// Seek the plugin in the directories.
 	for (const string &path : m_pluginDirs) {
@@ -493,7 +491,7 @@ void Irccd::loadPlugin(const string &name)
 		oss << path << "/" << name << ".lua";
 
 		finalPath = oss.str();
-		Logger::log("Checking for plugin %s", finalPath.c_str());
+		Logger::log("irccd: checking for plugin %s", finalPath.c_str());
 		if (Util::exist(finalPath)) {
 			found = true;
 			break;
@@ -501,7 +499,7 @@ void Irccd::loadPlugin(const string &name)
 	}
 
 	if (!found) {
-		Logger::warn("Plugin %s not found", name.c_str());
+		Logger::warn("irccd: plugin %s not found", name.c_str());
 	} else {
 		/*
 		 * At this step, the open function will open the lua
@@ -519,7 +517,7 @@ void Irccd::loadPlugin(const string &name)
 		m_pluginLock.unlock();
 
 		if (!plugin.open(finalPath)) {
-			Logger::warn("Failed to load module %s: %s",
+			Logger::warn("irccd: failed to load module %s: %s",
 			    name.c_str(), plugin.getError().c_str());
 
 			m_pluginLock.lock();
@@ -528,7 +526,7 @@ void Irccd::loadPlugin(const string &name)
 		}
 	}
 #else
-	Logger::warn("Can't load plugin %s, Lua support disabled", name.c_str());
+	Logger::warn("irccd: can't load plugin %s, Lua support disabled", name.c_str());
 #endif
 }
 
@@ -543,13 +541,13 @@ void Irccd::unloadPlugin(const string &name)
 	});
 
 	if (i == m_plugins.end())
-		Logger::warn("There is no module %s loaded", name.c_str());
+		Logger::warn("irccd: there is no module %s loaded", name.c_str());
 	else
 		m_plugins.erase(i);
 
 	m_pluginLock.unlock();
 #else
-	Logger::warn("Can't unload plugin %s, Lua support disabled", name.c_str());
+	Logger::warn("irccd: can't unload plugin %s, Lua support disabled", name.c_str());
 #endif
 }
 
@@ -559,10 +557,10 @@ void Irccd::reloadPlugin(const string &name)
 	try {
 		findPlugin(name).onReload();
 	} catch (out_of_range ex) {
-		Logger::warn("%s", ex.what());
+		Logger::warn("irccd: %s", ex.what());
 	}
 #else
-	Logger::warn("Can't reload plugin %s, Lua support disabled", name.c_str());
+	Logger::warn("irccd: can't reload plugin %s, Lua support disabled", name.c_str());
 #endif
 }
 
@@ -591,13 +589,13 @@ void Irccd::openIdentities(const Parser &config)
 			if (s.hasOption("version"))
 				identity.m_ctcpversion = s.getOption<string>("version");
 
-			Logger::log("Found identity %s (%s, %s, \"%s\")", identity.m_name.c_str(),
+			Logger::log("identity: found identity %s (%s, %s, \"%s\")", identity.m_name.c_str(),
 			    identity.m_nickname.c_str(), identity.m_username.c_str(),
 			    identity.m_realname.c_str());
 
 			m_identities.push_back(identity);
 		} catch (NotFoundException ex) {
-			Logger::log("Section \"identity\" requires %s", ex.which().c_str());
+			Logger::log("identity: missing parameter %s", ex.which().c_str());
 		}
 	};
 }
@@ -616,12 +614,12 @@ void Irccd::openListeners(const Parser &config)
 #if !defined(_WIN32)
 				extractUnix(s);
 #else
-				Logger::warn("Unix sockets are not supported on Windows");
+				Logger::warn("listener: unix sockets are not supported on Windows");
 #endif
 			} else
-				Logger::warn("unknown listener type `%s'", type.c_str());
+				Logger::warn("listener: unknown listener type `%s'", type.c_str());
 		} catch (NotFoundException ex) {
-			Logger::warn("Listener requires %s", ex.which().c_str());
+			Logger::warn("listener: missing parameter %s", ex.which().c_str());
 		}
 	}
 }
@@ -647,8 +645,8 @@ void Irccd::extractInternet(const Section &s)
 		else if (p == "ipv6")
 			ipv6 = true;
 		else {
-			Logger::warn("parameter family is one of them: ipv4, ipv6");
-			Logger::warn("defaulting to ipv4");
+			Logger::warn("listener: parameter family is one of them: ipv4, ipv6");
+			Logger::warn("listener: defaulting to ipv4");
 	
 			ipv4 = true;
 			ipv6 = false;
@@ -672,9 +670,9 @@ void Irccd::extractInternet(const Section &s)
 		m_socketServers.push_back(inet);
 		m_listener.add(inet);
 
-		Logger::log("Listening for clients on port %d...", port);
+		Logger::log("listener: listening for clients on port %d...", port);
 	} catch (Socket::ErrorException ex) {
-		Logger::warn("Internet socket error: %s", ex.what());
+		Logger::warn("listener: internet socket error: %s", ex.what());
 	}
 }
 
@@ -688,7 +686,7 @@ void Irccd::extractUnix(const Section &s)
 
 	// First remove the dust
 	if (Util::exist(path) && remove(path.c_str()) < 0)
-		Logger::warn("Error removing %s: %s", path.c_str(), strerror(errno));
+		Logger::warn("listener: error removing %s: %s", path.c_str(), strerror(errno));
 		else {
 
 		try {
@@ -696,9 +694,9 @@ void Irccd::extractUnix(const Section &s)
 			unix.bind(UnixPoint(path));
 			unix.listen(64);
 
-			Logger::log("Listening for clients on %s...", path.c_str());
+			Logger::log("listener: listening for clients on %s...", path.c_str());
 		} catch (Socket::ErrorException ex) {
-			Logger::warn("Unix socket error: %s", ex.what());
+			Logger::warn("listener: unix socket error: %s", ex.what());
 		}
 	}
 }
@@ -736,7 +734,7 @@ void Irccd::openServers(const Parser &config)
 
 			m_servers.push_back(std::move(server));
 		} catch (NotFoundException ex) {
-			Logger::warn("Section \"server\" require %s", ex.which().c_str());
+			Logger::warn("server: missing parameter %s", ex.which().c_str());
 		}
 	}
 }
@@ -814,7 +812,8 @@ Plugin & Irccd::findPlugin(lua_State *state)
 
 	m_pluginLock.unlock();
 
-	throw out_of_range("Plugin not found");
+	// This one should not happen
+	throw out_of_range("plugin not found");
 }
 
 Plugin & Irccd::findPlugin(const string &name)
@@ -830,7 +829,7 @@ Plugin & Irccd::findPlugin(const string &name)
 
 	m_pluginLock.unlock();
 
-	oss << "Plugin " << name << " not found";
+	oss << "plugin " << name << " not found";
 
 	throw out_of_range(oss.str());
 }
@@ -863,7 +862,7 @@ Server & Irccd::findServer(const string &name)
 		if (s.getName() == name)
 			return s;
 
-	throw out_of_range("Could not find server with resource " + name);
+	throw out_of_range("could not find server with resource " + name);
 }
 
 const Identity & Irccd::findIdentity(const string &name)
@@ -880,7 +879,8 @@ const Identity & Irccd::findIdentity(const string &name)
 		if (i.m_name == name)
 			return i;
 
-	Logger::warn("There is no identity named %s", name.c_str());
+	Logger::warn("identity: %s not found", name.c_str());
+
 	return m_defaultIdentity;
 }
 
@@ -893,7 +893,8 @@ int Irccd::run(int argc, char **argv)
 
 	// Start all servers
 	for (Server &s : m_servers) {
-		Logger::log("Trying to connect to %s...", s.getHost().c_str());
+		Logger::log("server %s: trying to connect to %s...",
+		    s.getName().c_str(), s.getHost().c_str());
 		s.startConnection();
 	}
 
@@ -916,7 +917,7 @@ int Irccd::run(int argc, char **argv)
 				clientRead(s);
 			}
 		} catch (Socket::ErrorException ex) {
-			Logger::warn("Client error: %s", ex.what());
+			Logger::warn("listener: client error: %s", ex.what());
 		}
 	}
 

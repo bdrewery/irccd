@@ -43,7 +43,7 @@ if (WITH_LUA)
 	find_package(Lua52 QUIET)
 
 	if (LUA52_FOUND)
-		add_subdirectory(modules)
+		add_subdirectory(plugins)
 
 		# Optional Lua sources
 		list(

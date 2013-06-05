@@ -39,7 +39,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")		# own modules
 
 # Installation paths
 set(PREFIX "${CMAKE_INSTALL_PREFIX}")
-set(MODDIR "${PREFIX}/share/irccd/modules"
+set(MODDIR "${PREFIX}/share/irccd/plugins"
     CACHE STRING "Module prefix where to install")
 set(DOCDIR "${PREFIX}/share/doc/irccd"
     CACHE STRING "Documentation directory")

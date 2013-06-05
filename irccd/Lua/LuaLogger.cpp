@@ -33,7 +33,7 @@ static string makeMessage(lua_State *L, const string &message)
 	ostringstream oss;
 	Plugin &p = Irccd::getInstance()->findPlugin(L);
 
-	oss << "[plugin]" << " " << p.getName() << ": " << message;
+	oss << "plugin " << p.getName() << ": " << message;
 
 	return oss.str();
 }

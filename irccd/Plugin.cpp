@@ -106,7 +106,7 @@ void Plugin::callLua(const string &name, int nret, string fmt, ...)
 	}
 
 	if (lua_pcall(m_state.get(), count, nret, 0) != LUA_OK) {
-		Logger::warn("error in plugin: %s", lua_tostring(m_state.get(), -1));
+		Logger::warn("plugin %s: %s", m_name.c_str(), lua_tostring(m_state.get(), -1));
 		lua_pop(m_state.get(), 1);
 	}
 #else

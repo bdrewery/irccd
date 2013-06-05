@@ -21,8 +21,6 @@
 
 #include <sstream>
 
-#include <Logger.h>
-
 #include "LuaParser.h"
 
 using namespace irccd;

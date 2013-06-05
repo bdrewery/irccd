@@ -82,8 +82,8 @@ static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
 
 	// Autojoin requested channels.
 	for (Server::Channel c : server->getChannels()) {
-		Logger::log("Autojoining channel %s on server %s",
-		    c.m_name.c_str(), server->getName().c_str());
+		Logger::log("server %s: autojoining channel %s",
+		    server->getName().c_str(), c.m_name.c_str());
 
 		server->join(c.m_name, c.m_password);
 	}
@@ -91,7 +91,7 @@ static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onConnect(server);
 
-	Logger::log("Successfully connected on server %s", server->getName().c_str());
+	Logger::log("server %s: successfully connected", server->getName().c_str());
 
 	(void)ev;
 	(void)orig;
@@ -455,8 +455,6 @@ void Server::removeChannel(const string &name)
 
 void Server::startConnection(void)
 {
-
-
 	m_thread = thread([=] () {
 		irc_session_t *s = irc_create_session(&m_callbacks);
 		if (s != nullptr) {
@@ -478,9 +476,13 @@ void Server::startConnection(void)
 			    m_identity.m_username.c_str(),
 			    m_identity.m_realname.c_str());
 
-			if (error)
-				Logger::warn("failed to connect to %s: %s", m_host.c_str(),
+			if (error) {
+				Logger::warn("server %s: failed to connect to %s: %s",
+				    m_name.c_str(),
+				    m_host.c_str(),
 				    irc_strerror(irc_errno(m_session.get())));
+			}
+
 			irc_run(m_session.get());
 		}
 	});
