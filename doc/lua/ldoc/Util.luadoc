@@ -12,11 +12,12 @@ function util.basename(path)
 end
 
 --- Create a Date object.
--- This function returns a date object with the current time from the
--- system.
+-- This function returns a date object with a specific time from the
+-- system. If no timestamp is provided, it use the current date.
 -- @see Date
+-- @param timestamp an optional timestamp
 -- @return a Date object
-function util.dateNow()
+function util.date(timestamp)
 end
 
 --- Get the parent path of a file.
@@ -63,13 +64,6 @@ end
 --- Date
 -- @type Date
 
---- Format a date.
--- Format the date with a specific format, see strftime(3) for keywords.
--- @param format the format
--- @return the date formatted
-function Date:format(format)
-end
-
 --- Get a calendar.
 -- Return a table with the following fields:
 -- <ul>
@@ -80,7 +74,20 @@ end
 -- <li><strong>year (int)</strong>: the real year</li>
 -- </ul>
 -- @return a table
-function Date:getCalendar()
+function Date:calendar()
+end
+
+--- Format a date.
+-- Format the date with a specific format, see strftime(3) for keywords.
+-- @param format the format
+-- @return the date formatted
+function Date:format(format)
+end
+
+--- Return the timestamp.
+-- Get the timestamp from the epoch (aka time_t).
+-- @return a timestamp
+function Date:timestamp()
 end
 
 --- Date metamethods.

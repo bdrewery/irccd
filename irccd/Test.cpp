@@ -21,6 +21,7 @@
 #include <string>
 
 #include <Logger.h>
+#include <Util.h>
 
 #include "Irccd.h"
 #include "Plugin.h"
@@ -436,7 +437,12 @@ static void testPlugin(const char *file, int argc, char **argv)
 	server.setConnection("local", "local", 6667);
 
 	// Always push before calling it
-	Irccd::getInstance()->getPlugins().push_back(Plugin("Test case"));
+	string name = Util::basename(string(file));
+	size_t epos = name.find_first_of(".lua");
+	if (epos != string::npos)
+		name.erase(epos);
+
+	Irccd::getInstance()->getPlugins().push_back(Plugin(name));
 
 	Plugin &plugin = Irccd::getInstance()->getPlugins().back();
 	if (!plugin.open(file)) {

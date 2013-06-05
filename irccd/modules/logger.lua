@@ -56,39 +56,14 @@ local function loadConfig()
 	-- Extract parameters
 	configuration.home = general:requireOption("directory")
 
-	-- TODO: Beautify this.
-	if general:hasOption("format-cnotice") then
-		format.cnotice	= general:getOption("format-cnotice")
-	end
-	if general:hasOption("format-join") then
-		format.join	= general:getOption("format-join")
-	end
-	if general:hasOption("format-me") then
-		format.me	= general:getOption("format-me")
-	end
-	if general:hasOption("format-message") then
-		format.message	= general:getOption("format-message")
-	end
-	if general:hasOption("format-mode") then
-		format.message	= general:getOption("format-mode")
-	end
-	if general:hasOption("format-notice") then
-		format.notice	= general:getOption("format-notice")
-	end
-	if general:hasOption("format-part") then
-		format.part	= general:getOption("format-part")
-	end
-	if general:hasOption("format-topic") then
-		format.topic	= general:getOption("format-topic")
-	end
-	if general:hasOption("format-umode") then
-		format.umode	= general:getOption("format-umode")
-	end
-
-	-- Set to nil means no log, so in config is ""
-	for k, v in pairs(format) do
-		if #format[k] <= 0 then
-			format[k] = nil
+	for k, _ in pairs(format) do
+		if general:hasOption(k) then
+			format[k] = general:getOption(k)
+	
+			-- Set to nil means no log, so in config is ""
+			if #format[k] <= 0 then
+				format[k] = nil
+			end
 		end
 	end
 end
@@ -98,7 +73,7 @@ loadConfig()
 -- Formatter, used to convert % and # variables
 local function convert(what, keywords)
 	-- First convert dates from % with date:format.
-	local date = util.dateNow()
+	local date = util.date()
 	local line = date:format(what)
 
 	-- Remove ~ if found.

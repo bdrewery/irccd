@@ -40,14 +40,23 @@ static int basename(lua_State *L)
 	return 1;
 }
 
-static int dateNow(lua_State *L)
+static int date(lua_State *L)
 {
 	Date **ptr;
+	Date *d;
+
+	if (lua_gettop(L) >= 1) {
+		int tm = luaL_checkinteger(L, 1);
+		d = new Date(tm);
+	} else {
+		d = new Date();
+	}
+
 
 	ptr = (Date **)lua_newuserdata(L, sizeof (Date *));
 	luaL_setmetatable(L, DATE_TYPE);
 
-	*ptr = new Date();
+	*ptr = d;
 
 	return 1;
 }
@@ -142,7 +151,7 @@ static int openDir(lua_State *L)
 
 const luaL_Reg functions[] = {
 	{ "basename",		util::basename		},
-	{ "dateNow",		util::dateNow		},
+	{ "date",		util::date		},
 	{ "dirname",		util::dirname		},
 	{ "exist",		util::exist		},
 	{ "getHome",		util::getHome		},
@@ -158,22 +167,7 @@ const luaL_Reg functions[] = {
 
 namespace date {
 
-static int format(lua_State *L)
-{
-	Date *d;
-	string fmt, result;
-
-	// Extract parameters
-	d = *(Date **)luaL_checkudata(L, 1, DATE_TYPE);
-	fmt = luaL_checkstring(L, 2);
-
-	result = d->format(fmt);
-	lua_pushstring(L, result.c_str());
-
-	return 1;
-}
-
-static int getCalendar(lua_State *L)
+static int calendar(lua_State *L)
 {
 	Date *date;
 	time_t stamp;
@@ -200,6 +194,31 @@ static int getCalendar(lua_State *L)
 
 	lua_pushinteger(L, tm.tm_year + 1900);
 	lua_setfield(L, -2, "year");
+
+	return 1;
+}
+
+static int format(lua_State *L)
+{
+	Date *d;
+	string fmt, result;
+
+	// Extract parameters
+	d = *(Date **)luaL_checkudata(L, 1, DATE_TYPE);
+	fmt = luaL_checkstring(L, 2);
+
+	result = d->format(fmt);
+	lua_pushstring(L, result.c_str());
+
+	return 1;
+}
+
+static int timestamp(lua_State *L)
+{
+	Date *date;
+
+	date = *(Date **)luaL_checkudata(L, 1, DATE_TYPE);
+	lua_pushinteger(L, (lua_Integer)date->getTimestamp());
 
 	return 1;
 }
@@ -346,8 +365,9 @@ static int tostring(lua_State *L)
 } // !dirMt
 
 static const luaL_Reg dateMethodsList[] = {
+	{ "calendar",		date::calendar		},
 	{ "format",		date::format		},
-	{ "getCalendar",	date::getCalendar	},
+	{ "timestamp",		date::timestamp		},
 	{ nullptr,		nullptr			}
 };
 

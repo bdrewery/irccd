@@ -93,7 +93,7 @@
 	<td class="summary">Get the file name of a full path.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#dateNow">dateNow&nbsp;()</a></td>
+	<td class="name" nowrap><a href="#date">date&nbsp;(timestamp)</a></td>
 	<td class="summary">Create a Date object.</td>
 	</tr>
 	<tr>
@@ -120,12 +120,16 @@
 <h2><a href="#Class_Date">Class Date </a></h2>
 <table class="function_list">
 	<tr>
+	<td class="name" nowrap><a href="#Date:calendar">Date:calendar&nbsp;()</a></td>
+	<td class="summary">Get a calendar.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#Date:format">Date:format&nbsp;(format)</a></td>
 	<td class="summary">Format a date.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Date:getCalendar">Date:getCalendar&nbsp;()</a></td>
-	<td class="summary">Get a calendar.</td>
+	<td class="name" nowrap><a href="#Date:timestamp">Date:timestamp&nbsp;()</a></td>
+	<td class="summary">Return the timestamp.</td>
 	</tr>
 </table>
 <h2><a href="#Date_metamethods">Date metamethods </a></h2>
@@ -198,14 +202,19 @@
 
 </dd>
     <dt>
-    <a name = "dateNow"></a>
-    <strong>dateNow&nbsp;()</strong>
+    <a name = "date"></a>
+    <strong>date&nbsp;(timestamp)</strong>
     </dt>
     <dd>
     Create a Date object.
- This function returns a date object with the current time from the
- system.
+ This function returns a date object with a specific time from the
+ system. If no timestamp is provided, it use the current date.
 
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">timestamp</span>
+         an optional timestamp</li>
+    </ul>
 
     <h3>Returns:</h3>
     <ol>
@@ -353,6 +362,32 @@
         Date
     <dl class="function">
     <dt>
+    <a name = "Date:calendar"></a>
+    <strong>Date:calendar&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get a calendar.
+ Return a table with the following fields:
+ <ul>
+ <li><strong>seconds (int)</strong>: seconds elapsed [0-60]</li>
+ <li><strong>minutes (int)</strong>: minutes elapsed [0-59]</li>
+ <li><strong>hours (int)</strong>: hours elapsed [0-23]</li>
+ <li><strong>month (int)</strong>: number of month [1-12]</li>
+ <li><strong>year (int)</strong>: the real year</li>
+ </ul>
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a table
+    </ol>
+
+
+
+
+</dd>
+    <dt>
     <a name = "Date:format"></a>
     <strong>Date:format&nbsp;(format)</strong>
     </dt>
@@ -377,25 +412,18 @@
 
 </dd>
     <dt>
-    <a name = "Date:getCalendar"></a>
-    <strong>Date:getCalendar&nbsp;()</strong>
+    <a name = "Date:timestamp"></a>
+    <strong>Date:timestamp&nbsp;()</strong>
     </dt>
     <dd>
-    Get a calendar.
- Return a table with the following fields:
- <ul>
- <li><strong>seconds (int)</strong>: seconds elapsed [0-60]</li>
- <li><strong>minutes (int)</strong>: minutes elapsed [0-59]</li>
- <li><strong>hours (int)</strong>: hours elapsed [0-23]</li>
- <li><strong>month (int)</strong>: number of month [1-12]</li>
- <li><strong>year (int)</strong>: the real year</li>
- </ul>
+    Return the timestamp.
+ Get the timestamp from the epoch (aka time_t).
 
 
     <h3>Returns:</h3>
     <ol>
 
-        a table
+        a timestamp
     </ol>
 
 

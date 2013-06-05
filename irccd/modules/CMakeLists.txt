@@ -28,6 +28,7 @@ endfunction()
 DEFINE_MODULE(MOD_ANTIFLOOD antiflood.lua "Avoid flood on channel" On)
 DEFINE_MODULE(MOD_ASK ask.lua "Ask sage irccd about something" On)
 DEFINE_MODULE(MOD_BADWORDS badwords.lua "Anti bad words modules" On)
+DEFINE_MODULE(MOD_HISTORY history.lua "Check for nickname history" On)
 DEFINE_MODULE(MOD_LOGGER logger.lua "A simple server logger" On)
 
 # vim: set syntax=cmake:
