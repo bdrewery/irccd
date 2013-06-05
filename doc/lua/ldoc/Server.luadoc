@@ -78,6 +78,16 @@ end
 function Server:mode(channel, mode)
 end
 
+--- Get the list of names.
+-- Get all nicknames on the channel, this is a deferred call,
+-- the function <strong>func</strong> must have the following signature
+--	function callback(list)
+-- where <strong>list</strong> is a sequence table with all nicknames.
+-- @param channel the channel to check
+-- @param func the function
+function Server:names(channel, func)
+end
+
 --- Change nickname.
 -- Change your nickname.
 -- @param nickname the new nickname

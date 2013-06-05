@@ -282,6 +282,15 @@ public:
 	virtual void mode(const std::string &channel, const std::string &mode);
 
 	/**
+	 * Get the list of names as a deferred call.
+	 *
+	 * @param channel which channel
+	 * @param plugin the plugin to call on end of list
+	 * @param ref the function reference
+	 */
+	virtual void names(const std::string &channel);
+
+	/**
 	 * Change your nickname.
 	 *
 	 * @param nick the new nickname

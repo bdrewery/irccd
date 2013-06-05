@@ -567,9 +567,8 @@ void Irccd::reloadPlugin(const string &name)
 void Irccd::openPlugins(void)
 {
 	// Get list of modules to load from config
-	for (const string &s : m_pluginWanted) {
+	for (const string &s : m_pluginWanted)
 		loadPlugin(s);
-	}
 }
 
 void Irccd::openIdentities(const Parser &config)
@@ -834,16 +833,16 @@ Plugin & Irccd::findPlugin(const string &name)
 	throw out_of_range(oss.str());
 }
 
+vector<Plugin> & Irccd::getPlugins(void)
+{
+	return m_plugins;
+}
+
 #endif
 	
 vector<Server> & Irccd::getServers(void)
 {
 	return m_servers;
-}
-
-vector<Plugin> & Irccd::getPlugins(void)
-{
-	return m_plugins;
 }
 
 void Irccd::setConfigPath(const string &path)

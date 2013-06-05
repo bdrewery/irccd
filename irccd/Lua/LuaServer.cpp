@@ -20,6 +20,7 @@
 
 #include <sstream>
 
+#include "Irccd.h"
 #include "Server.h"
 #include "LuaServer.h"
 
@@ -218,6 +219,36 @@ static int mode(lua_State *L)
 	return 0;
 }
 
+static int names(lua_State *L)
+{
+	if (lua_gettop(L) != 3)
+		return luaL_error(L, "server:names needs 2 arguments");
+
+	Server *s;
+	string channel;
+	int ref;
+
+	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	channel = luaL_checkstring(L, 2);
+	luaL_checktype(L, 3, LUA_TFUNCTION);
+
+	try {
+		Plugin &p = Irccd::getInstance()->findPlugin(L);
+
+		// Get the function reference.
+		lua_pushvalue(L, 3);
+		ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+		p.addDeferred(DeferredCall(DeferredType::Names, s, ref));
+		s->names(channel);
+	} catch (out_of_range) {
+		return 0;
+	}
+
+	// Deferred call
+	return 0;
+}
+
 static int nick(lua_State *L)
 {
 	if (lua_gettop(L) != 2)
@@ -347,6 +378,7 @@ static const luaL_Reg serverMethods[] = {
 	{ "kick",		methods::kick			},
 	{ "me",			methods::me			},
 	{ "mode",		methods::mode			},
+	{ "names",		methods::names			},
 	{ "nick",		methods::nick			},
 	{ "notice",		methods::notice			},
 	{ "part",		methods::part			},

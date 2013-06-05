@@ -28,13 +28,9 @@ option(WITH_LUA "Build with Lua plugin support" On)
 set(SOURCES
 	Server.cpp
 	Server.h
-	Plugin.cpp
-	Plugin.h
 	Irccd.cpp
 	Irccd.h
 	main.cpp
-	Test.cpp
-	Test.h
 )
 
 set(LUA_SUPPORT "disabled" PARENT_SCOPE)
@@ -61,6 +57,10 @@ if (WITH_LUA)
 			Lua/LuaServer.h
 			Lua/LuaUtil.cpp
 			Lua/LuaUtil.h
+			Plugin.cpp
+			Plugin.h
+			Test.cpp
+			Test.h
 		)
 
 		# Optional Lua includes

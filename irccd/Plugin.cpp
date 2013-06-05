@@ -17,6 +17,7 @@
  */
 
 #include <sstream>
+#include <stdexcept>
 
 #include <Logger.h>
 #include <Util.h>
@@ -24,14 +25,12 @@
 #include "Irccd.h"
 #include "Plugin.h"
 
-#if defined(WITH_LUA)
-#  include "Lua/LuaIrccd.h"
-#  include "Lua/LuaLogger.h"
-#  include "Lua/LuaParser.h"
-#  include "Lua/LuaPlugin.h"
-#  include "Lua/LuaServer.h"
-#  include "Lua/LuaUtil.h"
-#endif
+#include "Lua/LuaIrccd.h"
+#include "Lua/LuaLogger.h"
+#include "Lua/LuaParser.h"
+#include "Lua/LuaPlugin.h"
+#include "Lua/LuaServer.h"
+#include "Lua/LuaUtil.h"
 
 using namespace irccd;
 using namespace std;
@@ -39,8 +38,6 @@ using namespace std;
 /* --------------------------------------------------------
  * list of libraries to load
  * -------------------------------------------------------- */
-
-#if defined(WITH_LUA)
 
 struct Library {
 	const char *	m_name;		//! name of library to load
@@ -69,7 +66,73 @@ static const Library libIrccd[] = {
 	{ "irccd.plugin",	luaopen_plugin	},
 	{ "irccd.util",		luaopen_util	}
 };
-#endif
+
+/* --------------------------------------------------------
+ * Deffered calls commands
+ * -------------------------------------------------------- */
+
+DeferredCall::DeferredCall()
+{
+}
+
+DeferredCall::DeferredCall(DeferredType type, Server *server, int ref)
+	: m_type(type)
+	, m_server(server)
+	, m_ref(ref)
+{
+}
+
+DeferredType DeferredCall::type() const
+{
+	return m_type;
+}
+
+const Server * DeferredCall::server() const
+{
+	return m_server;
+}
+
+void DeferredCall::addParam(const vector<string> & list)
+{
+	m_params.push_back(list);
+}
+
+void DeferredCall::execute(Plugin &plugin)
+{
+	lua_rawgeti(plugin.getState(), LUA_REGISTRYINDEX, m_ref);
+	int nparams = 0;
+
+	switch (m_type) {
+	case DeferredType::Names:
+		lua_createtable(plugin.getState(), m_params.size(), m_params.size());
+
+		for (size_t i = 0; i < m_params.size(); ++i) {
+			lua_pushstring(plugin.getState(), m_params[i][0].c_str());
+			lua_rawseti(plugin.getState(), -2, i + 1);
+		}
+
+		nparams = 1;
+		break;
+	default:
+		break;
+	}
+
+	if (lua_pcall(plugin.getState(), nparams, 0, 0) != LUA_OK) {
+		Logger::warn("plugin %s: %s",
+		    plugin.getName().c_str(),
+		    lua_tostring(plugin.getState(), -1));
+	}
+
+	luaL_unref(plugin.getState(), LUA_REGISTRYINDEX, m_ref);
+}
+
+bool DeferredCall::operator==(const DeferredCall &c1)
+{
+	return m_type == c1.m_type &&
+	    m_server == c1.m_server &&
+	    m_params == c1.m_params &&
+	    m_ref == c1.m_ref;
+}
 
 /* --------------------------------------------------------
  * private methods and members
@@ -77,7 +140,6 @@ static const Library libIrccd[] = {
 
 void Plugin::callLua(const string &name, int nret, string fmt, ...)
 {
-#if defined(WITH_LUA)
 	va_list ap;
 	int count = 0;
 
@@ -109,16 +171,10 @@ void Plugin::callLua(const string &name, int nret, string fmt, ...)
 		Logger::warn("plugin %s: %s", m_name.c_str(), lua_tostring(m_state.get(), -1));
 		lua_pop(m_state.get(), 1);
 	}
-#else
-	(void)name;
-	(void)nret;
-	(void)fmt;
-#endif
 }
 
-bool Plugin::loadLua(const std::string &path)
+bool Plugin::loadLua(const string &path)
 {
-#if defined(WITH_LUA)
 	m_state = unique_ptr<lua_State, LuaDeleter>(luaL_newstate());
 
 	// Load default library as it was done by require.
@@ -143,11 +199,6 @@ bool Plugin::loadLua(const std::string &path)
 	}
 
 	return true;
-#else
-	(void)path;
-
-	return true;
-#endif
 }
 
 /* --------------------------------------------------------
@@ -163,6 +214,26 @@ Plugin::Plugin(const string &name)
 {
 }
 
+Plugin::Plugin(Plugin &&src)
+{
+	m_name = std::move(src.m_name);
+	m_home = std::move(src.m_home);
+	m_error = std::move(src.m_error);
+	m_state = std::move(src.m_state);
+	m_defcalls = std::move(src.m_defcalls);
+}
+
+Plugin & Plugin::operator=(Plugin &&src)
+{
+	m_name = std::move(src.m_name);
+	m_home = std::move(src.m_home);
+	m_error = std::move(src.m_error);
+	m_state = std::move(src.m_state);
+	m_defcalls = std::move(src.m_defcalls);
+
+	return *this;
+}
+
 Plugin::~Plugin()
 {
 }
@@ -176,19 +247,17 @@ const string & Plugin::getHome() const
 	return m_home;
 }
 
-#if defined(WITH_LUA)
 lua_State * Plugin::getState() const
 {
 	return m_state.get();
 }
-#endif
 
 const string & Plugin::getError() const
 {
 	return m_error;
 }
 
-bool Plugin::open(const std::string &path)
+bool Plugin::open(const string &path)
 {
 	ostringstream oss;
 
@@ -199,6 +268,35 @@ bool Plugin::open(const std::string &path)
 	m_home = oss.str();
 
 	return loadLua(path);
+}
+
+void Plugin::addDeferred(DeferredCall call)
+{
+	m_defcalls.push_back(call);
+}
+
+bool Plugin::hasDeferred(DeferredType type, const Server *sv)
+{
+	for (const DeferredCall &c : m_defcalls)
+		if (c.type() == type && c.server() == sv)
+			return true;
+
+	return false;
+}
+
+DeferredCall & Plugin::getDeferred(DeferredType type, const Server *sv)
+{
+	for (DeferredCall &c : m_defcalls)
+		if (c.type() == type && c.server() == sv)
+			return c;
+
+	throw out_of_range("not found");
+}
+
+void Plugin::removeDeferred(DeferredCall &dc)
+{
+	m_defcalls.erase(std::remove(m_defcalls.begin(), m_defcalls.end(), dc),
+	    m_defcalls.end());
 }
 
 void Plugin::onCommand(Server *server, const string &channel, const string &who, const string &message)
@@ -256,7 +354,7 @@ void Plugin::onPart(Server *server, const string &channel, const string &who, co
 	callLua("onPart", 0, "S s s s", server, channel.c_str(), who.c_str(), reason.c_str());
 }
 
-void Plugin::onQuery(Server *server, const std::string &who, const std::string &message)
+void Plugin::onQuery(Server *server, const string &who, const string &message)
 {
 	callLua("onQuery", 0, "S s s", server, who.c_str(), message.c_str());
 }

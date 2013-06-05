@@ -20,8 +20,9 @@
 #define _IRCCD_H_
 
 #include <exception>
-#include <sstream>
+#include <map>
 #include <mutex>
+#include <sstream>
 
 #include <Parser.h>
 #include <SocketListener.h>
@@ -30,7 +31,10 @@
 #include <config.h>
 
 #include "Server.h"
-#include "Plugin.h"
+
+#if defined(WITH_LUA)
+#  include "Plugin.h"
+#endif
 
 namespace irccd {
 
@@ -44,7 +48,11 @@ private:
 	// Plugins
 	std::vector<std::string> m_pluginDirs;		//! list of plugin directories
 	std::vector<std::string> m_pluginWanted;	//! list of wanted modules
+
+#if defined(WITH_LUA)
 	std::vector<Plugin> m_plugins;			//! list of plugins loaded
+#endif
+
 	std::mutex m_pluginLock;
 	std::vector<Server> m_servers;			//! list of servers
 
@@ -155,6 +163,13 @@ public:
 	 * @throw out_of_range when not found
 	 */
 	Plugin & findPlugin(const std::string &name);
+
+	/**
+	 * Get plugins.
+	 *
+	 * @return a list of plugins
+	 */
+	std::vector<Plugin> & getPlugins(void);
 #endif
 
 	/**
@@ -163,13 +178,6 @@ public:
 	 * @return the list of servers
 	 */
 	std::vector<Server> & getServers(void);
-
-	/**
-	 * Get plugins.
-	 *
-	 * @return a list of plugins
-	 */
-	std::vector<Plugin> & getPlugins(void);
 
 	/**
 	 * Get the plugin lock, used to load / unload module.

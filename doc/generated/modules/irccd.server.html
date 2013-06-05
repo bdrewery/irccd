@@ -118,6 +118,10 @@
 	<td class="summary">Change the channel mode.</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#Server:names">Server:names&nbsp;(channel, func)</a></td>
+	<td class="summary">Get the list of names.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#Server:nick">Server:nick&nbsp;(nickname)</a></td>
 	<td class="summary">Change nickname.</td>
 	</tr>
@@ -328,6 +332,31 @@
          the channel target</li>
         <li><span class="parameter">mode</span>
          the mode</li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:names"></a>
+    <strong>Server:names&nbsp;(channel, func)</strong>
+    </dt>
+    <dd>
+    Get the list of names.
+ Get all nicknames on the channel, this is a deferred call,
+ the function <strong>func</strong> must have the following signature</p>
+<pre><code>function callback(list)
+</code></pre>
+<p> where <strong>list</strong> is a sequence table with all nicknames.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channel</span>
+         the channel to check</li>
+        <li><span class="parameter">func</span>
+         the function</li>
     </ul>
 
 

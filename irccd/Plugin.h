@@ -23,22 +23,97 @@
 #include <memory>
 #include <string>
 
-#if defined(WITH_LUA)
-#  include <lua.hpp>
-#endif
+#include <lua.hpp>
 
 namespace irccd {
 
 class Server;
+class Plugin;
 
-#if defined(WITH_LUA)
+/**
+ * @enum DeferredType
+ * @brief Type for deferred calls.
+ *
+ * This type is used to do specific action on a deferred call.
+ */
+enum class DeferredType {
+	Names,
+};
+
+typedef std::vector<std::vector<std::string>> Params;
+
+/**
+ * @class DeferredCall
+ * @brief Deferred call class.
+ *
+ * This class is used to call deferred functions.
+ */
+class DeferredCall {
+private:
+	DeferredType m_type;		//! type of call
+	Server * m_server;		//! for which server
+	Params m_params;		//! list of list of string
+	int m_ref;			//! function reference
+
+public:
+	/**
+	 * Default constructor.
+	 */
+	DeferredCall();
+
+	/**
+	 * Constructor with specific parameters.
+	 *
+	 * @param type the type of deferred call
+	 * @param server  for which server
+	 * @param ref the function reference
+	 */
+	DeferredCall(DeferredType type, Server *server, int ref);
+
+	/**
+	 * Get the type.
+	 *
+	 * @return the deferred call type
+	 */
+	DeferredType type() const;
+
+	/**
+	 * Get which server we are working on.
+	 *
+	 * @return the server
+	 */
+	const Server * server() const;
+
+	/**
+	 * Add a list of parameters.
+	 *
+	 * @param list the list of parameters
+	 */
+	void addParam(const std::vector<std::string> & list);
+	
+	/**
+	 * Execute the function call and dereference the function
+	 * reference.
+	 *
+	 * @param plugin which plugin
+	 */
+	void execute(Plugin &plugin);
+
+	/**
+	 * Test the DeferredCall equality.
+	 *
+	 * @param c1 the object to test
+	 * @return true on equality
+	 */
+	bool operator==(const DeferredCall &c1);
+};
+
 class LuaDeleter {
 public:
 	void operator()(lua_State *L) {
 		lua_close(L);
 	}
 };
-#endif
 
 class Plugin {
 private:
@@ -47,9 +122,10 @@ private:
 	std::string m_home;		//! home, usuall ~/.config/<name>/
 	std::string m_error;		//! error message if needed
 
-#if defined(WITH_LUA)
 	std::unique_ptr<lua_State, LuaDeleter> m_state;
-#endif
+
+	// Deferred calls
+	std::vector<DeferredCall> m_defcalls;	//! list of deferred call
 
 	/**
 	 * Call a Lua function and pass parameters to it. Format is one of them:
@@ -67,39 +143,35 @@ private:
 	bool loadLua(const std::string &path);
 public:
 	Plugin();
+
 	Plugin(const std::string &name);
 
-	Plugin(Plugin &&src)
-	{
-		m_name = std::move(src.m_name);
-		m_home = std::move(src.m_home);
-		m_error = std::move(src.m_error);
-		m_state = std::move(src.m_state);
-	}
+	Plugin(Plugin &&src);
 
-	Plugin & operator=(Plugin &&src)
-	{
-		m_name = std::move(src.m_name);
-		m_home = std::move(src.m_home);
-		m_error = std::move(src.m_error);
-		m_state = std::move(src.m_state);
-
-		return *this;
-	}
+	Plugin & operator=(Plugin &&src);
 
 	~Plugin();
 
+	/**
+	 * Get the plugin name.
+	 *
+	 * @return the name
+	 */
 	const std::string & getName() const;
+
+	/**
+	 * Get the plugin home directory.
+	 *
+	 * @return the directory
+	 */
 	const std::string & getHome() const;
 
-#if defined(WITH_LUA)
 	/**
 	 * Get the plugin Lua state.
 	 *
 	 * @return the Lua state
 	 */
 	lua_State * getState() const;
-#endif
 
 	/**
 	 * Get the error message if something failed.
@@ -115,6 +187,43 @@ public:
 	 * @return true on success
 	 */
 	bool open(const std::string &path);
+
+	/* ------------------------------------------------
+	 * Deffered calls commands
+	 * ------------------------------------------------ */
+
+	/**
+	 * Add a new deferred call to be ran by the server
+	 * when the operation has complete.
+	 *
+	 * @param call the deferred call
+	 */
+	void addDeferred(DeferredCall call);
+
+	/**
+	 * Tell if the server has a deferred call to execute.
+	 *
+	 * @param type the type
+	 * @param sv for which server
+	 * @return true if has
+	 */
+	bool hasDeferred(DeferredType type, const Server *sv);
+
+	/**
+	 * Get a specified deferred call.
+	 *
+	 * @param type the type
+	 * @param sv for which server
+	 * @return the deferred call
+	 */
+	DeferredCall & getDeferred(DeferredType type, const Server *sv);
+
+	/**
+	 * Remove a deferred call.
+	 *
+	 * @param dc the deferred call
+	 */
+	void removeDeferred(DeferredCall &dc);
 
 	/* ------------------------------------------------
 	 * IRC commands

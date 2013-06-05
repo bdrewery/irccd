@@ -19,6 +19,8 @@
 #include <iostream>
 #include <map>
 
+#include <libirc_rfcnumeric.h>
+
 #include <Logger.h>
 
 #include "Irccd.h"
@@ -42,6 +44,7 @@ static string getNick(const char *target)
 static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
 			  const char **params, unsigned int count)
 {
+#if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
 	string who, channel, message = "";
 	const string &cmdToken = server->getCommandChar();
@@ -70,7 +73,11 @@ static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
 		} else
 			p.onMessage(server, channel, who, message);
 	}
-
+#else
+	(void)s;
+	(void)orig;
+	(void)params;
+#endif
 	(void)ev;
 	(void)count;
 }
@@ -88,8 +95,10 @@ static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
 		server->join(c.m_name, c.m_password);
 	}
 
+#if defined(WITH_LUA)
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onConnect(server);
+#endif
 
 	Logger::log("server %s: successfully connected", server->getName().c_str());
 
@@ -102,6 +111,7 @@ static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
 static void handleChannelNotice(irc_session_t *s, const char *ev, const char *orig,
 				const char **params, unsigned int count)
 {
+#if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
 	string nick, target, notice;
 
@@ -116,6 +126,11 @@ static void handleChannelNotice(irc_session_t *s, const char *ev, const char *or
 			p.onChannelNotice(server, nick, target, notice);
 	}
 
+#else
+	(void)s;
+	(void)orig;
+	(void)params;
+#endif
 	(void)ev;
 	(void)count;
 }
@@ -130,8 +145,10 @@ static void handleInvite(irc_session_t *s, const char *ev, const char *orig,
 	if (server->getJoinInvite())
 		server->join(params[1], "");
 
+#if defined(WITH_LUA)
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onInvite(server, params[1], who);
+#endif
 
 	(void)ev;
 	(void)count;
@@ -140,15 +157,19 @@ static void handleInvite(irc_session_t *s, const char *ev, const char *orig,
 static void handleJoin(irc_session_t *s, const char *ev, const char *orig,
 			  const char **params, unsigned int count)
 {
+#if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
 	string nickname = getNick(orig);
 
-	// do not log self, XXX: add an option to allow that
 	if (server->getIdentity().m_nickname != nickname) {
 		for (Plugin &p : Irccd::getInstance()->getPlugins())
 			p.onJoin(server, params[0], nickname);
 	}
-
+#else
+	(void)s;
+	(void)orig;
+	(void)params;
+#endif
 	(void)ev;
 	(void)count;
 }
@@ -170,10 +191,12 @@ static void handleKick(irc_session_t *s, const char *ev, const char *orig,
 	if (server->getIdentity().m_nickname == who)
 		server->removeChannel(params[0]);
 
+#if defined(WITH_LUA)
 	if (server->getIdentity().m_nickname != who) {
 		for (Plugin &p : Irccd::getInstance()->getPlugins())
 			p.onKick(server, params[0], who, kicked, reason);
 	}
+#endif
 
 	(void)ev;
 	(void)count;
@@ -182,6 +205,7 @@ static void handleKick(irc_session_t *s, const char *ev, const char *orig,
 static void handleMode(irc_session_t *s, const char *ev, const char *orig,
 		       const char **params, unsigned int count)
 {
+#if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
 	string nick, modeValue;
 
@@ -195,7 +219,11 @@ static void handleMode(irc_session_t *s, const char *ev, const char *orig,
 		for (Plugin &p : Irccd::getInstance()->getPlugins())
 			p.onMode(server, params[0], nick, params[1], modeValue);
 	}
-
+#else
+	(void)s;
+	(void)orig;
+	(void)params;
+#endif
 	(void)ev;
 	(void)count;
 }
@@ -213,11 +241,12 @@ static void handleNick(irc_session_t *s, const char *ev, const char *orig,
 	if (oldnick == server->getIdentity().m_nickname)
 		server->getIdentity().m_nickname = newnick;
 
-	// do not log self, XXX: add an option to allow that
+#if defined(WITH_LUA)
 	if (server->getIdentity().m_nickname != oldnick) {
 		for (Plugin &p : Irccd::getInstance()->getPlugins())
 			p.onNick(server, oldnick, newnick);
 	}
+#endif
 
 	(void)ev;
 	(void)count;
@@ -226,6 +255,7 @@ static void handleNick(irc_session_t *s, const char *ev, const char *orig,
 static void handleNotice(irc_session_t *s, const char *ev, const char *orig,
 			 const char **params, unsigned int count)
 {
+#if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
 	string nick, target, notice;
 
@@ -239,14 +269,63 @@ static void handleNotice(irc_session_t *s, const char *ev, const char *orig,
 		for (Plugin &p : Irccd::getInstance()->getPlugins())
 			p.onNotice(server, nick, target, notice);
 	}
-
+#else
+	(void)s;
+	(void)orig;
+	(void)params;
+#endif
 	(void)ev;
+	(void)count;
+}
+
+static void handleNumeric(irc_session_t *session,
+			  unsigned int event,
+			  const char *origin,
+			  const char **params,
+			  unsigned int count)
+{
+#if defined(WITH_LUA)
+	Server *server = (Server *)irc_get_ctx(session);
+	vector<string> list;
+
+	for (Plugin &p : Irccd::getInstance()->getPlugins()) {
+		switch (event) {
+		case LIBIRC_RFC_RPL_NAMREPLY:
+			if (p.hasDeferred(DeferredType::Names, server)) {
+				DeferredCall &c = p.getDeferred(DeferredType::Names, server);
+
+				// Add the nick
+				list.push_back(params[0]);
+				c.addParam(list);
+			}
+
+			break;
+		case LIBIRC_RFC_RPL_ENDOFNAMES:
+			if (p.hasDeferred(DeferredType::Names, server)) {
+				DeferredCall &c = p.getDeferred(DeferredType::Names, server);
+
+				c.execute(p);
+				p.removeDeferred(c);
+			}
+
+			break;
+		default:
+			break;
+		}
+	}
+#else
+	(void)session;
+	(void)event;
+	(void)params;
+#endif
+	(void)origin;
 	(void)count;
 }
 
 static void handlePart(irc_session_t *s, const char *ev, const char *orig,
 			  const char **params, unsigned int count)
 {
+#if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
 	string reason = "", nick;
 
@@ -260,7 +339,11 @@ static void handlePart(irc_session_t *s, const char *ev, const char *orig,
 		for (Plugin &p : Irccd::getInstance()->getPlugins())
 			p.onPart(server, params[0], nick, reason);
 	}
-
+#else
+	(void)s;
+	(void)orig;
+	(void)params;
+#endif
 	(void)ev;
 	(void)count;
 }
@@ -268,6 +351,7 @@ static void handlePart(irc_session_t *s, const char *ev, const char *orig,
 static void handleQuery(irc_session_t *s, const char *ev, const char *orig,
 			const char **params, unsigned int count)
 {
+#if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
 	string who, message = "";
 
@@ -279,7 +363,11 @@ static void handleQuery(irc_session_t *s, const char *ev, const char *orig,
 		for (Plugin &p : Irccd::getInstance()->getPlugins())
 			p.onQuery(server, who, message);
 	}
-
+#else
+	(void)s;
+	(void)orig;
+	(void)params;
+#endif
 	(void)ev;
 	(void)count;
 }
@@ -287,6 +375,7 @@ static void handleQuery(irc_session_t *s, const char *ev, const char *orig,
 static void handleTopic(irc_session_t *s, const char *ev, const char *orig,
 			const char **params, unsigned int count)
 {
+#if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
 	string topic = "", nick;
 
@@ -300,7 +389,11 @@ static void handleTopic(irc_session_t *s, const char *ev, const char *orig,
 		for (Plugin &p : Irccd::getInstance()->getPlugins())
 			p.onTopic(server, params[0], nick, topic);
 	}
-
+#else
+	(void)s;
+	(void)orig;
+	(void)params;
+#endif
 	(void)ev;
 	(void)count;
 }
@@ -308,6 +401,7 @@ static void handleTopic(irc_session_t *s, const char *ev, const char *orig,
 static void handleUserMode(irc_session_t *s, const char *ev, const char *orig,
 			   const char **params, unsigned int count)
 {
+#if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
 	string nick;
 
@@ -317,15 +411,14 @@ static void handleUserMode(irc_session_t *s, const char *ev, const char *orig,
 		for (Plugin &p : Irccd::getInstance()->getPlugins())
 			p.onUserMode(server, nick, params[0]);
 	}
-
+#else
+	(void)s;
+	(void)orig;
+	(void)params;
+#endif
 	(void)ev;
 	(void)count;
 }
-
-
-
-
-
 
 /* }}} */
 
@@ -341,6 +434,7 @@ Server::Server(void)
 	m_callbacks.event_join			= handleJoin;
 	m_callbacks.event_kick			= handleKick;
 	m_callbacks.event_mode			= handleMode;
+	m_callbacks.event_numeric		= handleNumeric;
 	m_callbacks.event_nick			= handleNick;
 	m_callbacks.event_notice		= handleNotice;
 	m_callbacks.event_part			= handlePart;
@@ -540,6 +634,12 @@ void Server::mode(const string &channel, const string &mode)
 {
 	if (m_threadStarted)
 		irc_cmd_channel_mode(m_session.get(), channel.c_str(), mode.c_str());
+}
+
+void Server::names(const string &channel)
+{
+	if (m_threadStarted)
+		irc_cmd_names(m_session.get(), channel.c_str());
 }
 
 void Server::nick(const string &nick)
