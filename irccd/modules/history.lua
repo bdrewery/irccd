@@ -24,7 +24,7 @@ local util = require "irccd.util"
 local format = {
 	error = "I could not open my database file",
 	seen = "I've seen #n for the last time on %m/%d/%y %H:%M",
-	said = "The last message that #n said is #m",
+	said = "The last message that #n said is: #m",
 	unknown = "I've never known #n"
 }
 
