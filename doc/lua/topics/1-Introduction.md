@@ -12,14 +12,18 @@ default path, which is usually */usr/local/share/irccd/plugins*.
 
 However, it's is possible to add modules in your home directory, so you don't
 require root rights to add them. Usually it is in your XDG config home,
-*${HOME}.config/irccd/plugins*.
+*${HOME}/.config/irccd/plugins*.
 
 ### Overriding an existing plugin
 
 Some people may want to tweak an existing plugin, you may edit directly
-in the default plugin path but this will be removed with a new release
+in the default plugin path but this will be overriden by a new release
 installation, so the better way is to copy it into your local plugin
 directory and edit it.
 
 Lua plugins are searched by default in user local directory and if not
 found, in the standard irccd plugins path said above.
+
+Next @{2-Plugin-creation.md}
+
+<!--- vim: set syntax=mkd: -->

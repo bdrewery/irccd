@@ -6,4 +6,6 @@ dir = 'generated'
 format = 'markdown'
 style = 'style'
 template = 'template'
-file = 'lua'
+file = "lua/ldoc"
+examples = "lua/examples"
+topics = "lua/topics"

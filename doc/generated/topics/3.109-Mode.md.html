@@ -32,19 +32,11 @@
 
 <h2>Contents</h2>
 <ul>
-<li><a href="#Functions">Functions</a></li>
+<li><a href="#Function">Function </a></li>
+<li><a href="#Parameters">Parameters </a></li>
 </ul>
 
 
-<h2>Modules</h2>
-<ul>
-  <li><a href="../modules/irccd.html">irccd</a></li>
-  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
-  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
-  <li><strong>irccd.plugin</strong></li>
-  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
-  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
-</ul>
 <h2>Topics</h2>
 <ul>
   <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
@@ -58,7 +50,7 @@
   <li><a href="../topics/3.106-Join.md.html">3.106-Join.md</a></li>
   <li><a href="../topics/3.107-Kick.md.html">3.107-Kick.md</a></li>
   <li><a href="../topics/3.108-Message.md.html">3.108-Message.md</a></li>
-  <li><a href="../topics/3.109-Mode.md.html">3.109-Mode.md</a></li>
+  <li><strong>3.109-Mode.md</strong></li>
   <li><a href="../topics/3.110-Nick.md.html">3.110-Nick.md</a></li>
   <li><a href="../topics/3.111-Notice.md.html">3.111-Notice.md</a></li>
   <li><a href="../topics/3.112-Part.md.html">3.112-Part.md</a></li>
@@ -66,6 +58,15 @@
   <li><a href="../topics/3.114-Reload.md.html">3.114-Reload.md</a></li>
   <li><a href="../topics/3.115-Topic.md.html">3.115-Topic.md</a></li>
   <li><a href="../topics/3.116-User-mode.md.html">3.116-User-mode.md</a></li>
+</ul>
+<h2>Modules</h2>
+<ul>
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
 </ul>
 <h2>Examples</h2>
 <ul>
@@ -76,73 +77,33 @@
 
 <div id="content">
 
-<h1>Module <code>irccd.plugin</code></h1>
-
-<p>Plugin modules
- This API provides function for the current plugin.</p>
-<p> Each plugin runs on its
- own Lua state so every of these functions knows which plugin is currently
- calling one of these</p>
+<h1>Topic <code>3.109-Mode.md</code></h1>
 
 
-<h2><a href="#Functions">Functions</a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#getName">getName&nbsp;()</a></td>
-	<td class="summary">Get the plugin name.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#getHome">getHome&nbsp;()</a></td>
-	<td class="summary">Get the plugin home.</td>
-	</tr>
-</table>
+<h2>Mode</h2>
 
-<br/>
-<br/>
+<p>This event is triggered when someone changed the channel's mode.</p>
+
+<p><a name="Function"></a></p>
+<h3>Function</h3>
 
 
-    <h2><a name="Functions"></a>Functions</h2>
-    <dl class="function">
-    <dt>
-    <a name = "getName"></a>
-    <strong>getName&nbsp;()</strong>
-    </dt>
-    <dd>
-    Get the plugin name.
+<pre>
+ <span class="keyword">function</span> onMode(server, channel, nickname, mode, modeArg)
+</pre>
+
+<p><a name="Parameters"></a></p>
+<h3>Parameters</h3>
+
+<p>server, the current server.
+channel, the channel.
+nickname, the person who changed the mode.
+mode, the new mode.
+modeArg, the mode argument, if supported.</p>
 
 
-    <h3>Returns:</h3>
-    <ol>
+<!--- vim: set syntax=mkd: -->
 
-        the current plugin name
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "getHome"></a>
-    <strong>getHome&nbsp;()</strong>
-    </dt>
-    <dd>
-    Get the plugin home.
- Returns the home configuration that lives in the user directory. Usually
- ~/.config/irccd/<strong>plugin</strong> where plugin is the plugin's
- name.
-
-
-    <h3>Returns:</h3>
-    <ol>
-
-        the plugin home
-    </ol>
-
-
-
-
-</dd>
-</dl>
 
 
 </div> <!-- id="content" -->

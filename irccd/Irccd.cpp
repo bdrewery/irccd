@@ -433,6 +433,9 @@ bool Irccd::isPluginLoaded(const string &name)
  */
 void Irccd::openConfig(void)
 {
+	// Set some defaults
+	addPluginPath(MODDIR);		// see config.h.in
+
 	// Length empty means use user or default
 	if (m_configPath.length() == 0) {
 		// 2. User defined
@@ -773,9 +776,6 @@ Irccd::Irccd(void)
 	Socket::init();
 
 	Logger::setVerbose(false);
-
-	// Set some defaults
-	addPluginPath(MODDIR);		// see config.h.in
 }
 
 Irccd::~Irccd(void)
