@@ -198,6 +198,19 @@ end
 
 function onJoin(server, channel, nickname)
 	updateDatabase(server, channel, nickname)
+
+	-- Update all nickname when I join a channel
+	local ident = server:getIdentity()
+	if ident.nickname == nickname then
+		server:names(
+			channel,
+			function (names)
+				for _, n in ipairs(names) do
+					updateDatabase(server, channel, n)
+				end
+			end
+		)
+	end
 end
 
 function onMessage(server, channel, nickname, message)

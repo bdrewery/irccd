@@ -22,6 +22,7 @@
 #include <libirc_rfcnumeric.h>
 
 #include <Logger.h>
+#include <Util.h>
 
 #include "Irccd.h"
 #include "Server.h"
@@ -121,10 +122,8 @@ static void handleChannelNotice(irc_session_t *s, const char *ev, const char *or
 	if (params[1] != nullptr)
 		notice = params[1];
 
-	if (server->getIdentity().m_nickname != nick) {
-		for (Plugin &p : Irccd::getInstance()->getPlugins())
-			p.onChannelNotice(server, nick, target, notice);
-	}
+	for (Plugin &p : Irccd::getInstance()->getPlugins())
+		p.onChannelNotice(server, nick, target, notice);
 
 #else
 	(void)s;
@@ -149,7 +148,6 @@ static void handleInvite(irc_session_t *s, const char *ev, const char *orig,
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onInvite(server, params[1], who);
 #endif
-
 	(void)ev;
 	(void)count;
 }
@@ -161,10 +159,8 @@ static void handleJoin(irc_session_t *s, const char *ev, const char *orig,
 	Server *server = (Server *)irc_get_ctx(s);
 	string nickname = getNick(orig);
 
-	if (server->getIdentity().m_nickname != nickname) {
-		for (Plugin &p : Irccd::getInstance()->getPlugins())
-			p.onJoin(server, params[0], nickname);
-	}
+	for (Plugin &p : Irccd::getInstance()->getPlugins())
+		p.onJoin(server, params[0], nickname);
 #else
 	(void)s;
 	(void)orig;
@@ -192,12 +188,9 @@ static void handleKick(irc_session_t *s, const char *ev, const char *orig,
 		server->removeChannel(params[0]);
 
 #if defined(WITH_LUA)
-	if (server->getIdentity().m_nickname != who) {
-		for (Plugin &p : Irccd::getInstance()->getPlugins())
-			p.onKick(server, params[0], who, kicked, reason);
-	}
+	for (Plugin &p : Irccd::getInstance()->getPlugins())
+		p.onKick(server, params[0], who, kicked, reason);
 #endif
-
 	(void)ev;
 	(void)count;
 }
@@ -215,10 +208,8 @@ static void handleMode(irc_session_t *s, const char *ev, const char *orig,
 	if (params[2] != nullptr)
 		modeValue = params[2];
 
-	if (server->getIdentity().m_nickname != nick) {
-		for (Plugin &p : Irccd::getInstance()->getPlugins())
-			p.onMode(server, params[0], nick, params[1], modeValue);
-	}
+	for (Plugin &p : Irccd::getInstance()->getPlugins())
+		p.onMode(server, params[0], nick, params[1], modeValue);
 #else
 	(void)s;
 	(void)orig;
@@ -242,12 +233,9 @@ static void handleNick(irc_session_t *s, const char *ev, const char *orig,
 		server->getIdentity().m_nickname = newnick;
 
 #if defined(WITH_LUA)
-	if (server->getIdentity().m_nickname != oldnick) {
-		for (Plugin &p : Irccd::getInstance()->getPlugins())
-			p.onNick(server, oldnick, newnick);
-	}
+	for (Plugin &p : Irccd::getInstance()->getPlugins())
+		p.onNick(server, oldnick, newnick);
 #endif
-
 	(void)ev;
 	(void)count;
 }
@@ -265,10 +253,8 @@ static void handleNotice(irc_session_t *s, const char *ev, const char *orig,
 	if (params[1] != nullptr)
 		notice = params[1];
 
-	if (server->getIdentity().m_nickname != nick) {
-		for (Plugin &p : Irccd::getInstance()->getPlugins())
-			p.onNotice(server, nick, target, notice);
-	}
+	for (Plugin &p : Irccd::getInstance()->getPlugins())
+		p.onNotice(server, nick, target, notice);
 #else
 	(void)s;
 	(void)orig;
@@ -286,7 +272,6 @@ static void handleNumeric(irc_session_t *session,
 {
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(session);
-	vector<string> list;
 
 	for (Plugin &p : Irccd::getInstance()->getPlugins()) {
 		switch (event) {
@@ -294,15 +279,25 @@ static void handleNumeric(irc_session_t *session,
 			if (p.hasDeferred(DeferredType::Names, server)) {
 				DeferredCall &c = p.getDeferred(DeferredType::Names, server);
 
-				// Add the nick
-				list.push_back(params[0]);
-				c.addParam(list);
+				// params[3] contain the list of nicknames separeted by spaces	
+				if (params[3] != nullptr) {
+					vector<string> names = Util::split(params[3], " \t");
+
+					for (string s : names) {
+						vector<string> list;
+
+						// Add the list of nicknames
+						list.push_back(s);
+						c.addParam(list);
+					}
+				}
 			}
 
 			break;
 		case LIBIRC_RFC_RPL_ENDOFNAMES:
 			if (p.hasDeferred(DeferredType::Names, server)) {
 				DeferredCall &c = p.getDeferred(DeferredType::Names, server);
+
 
 				c.execute(p);
 				p.removeDeferred(c);
@@ -318,8 +313,8 @@ static void handleNumeric(irc_session_t *session,
 	(void)event;
 	(void)params;
 #endif
-	(void)origin;
 	(void)count;
+	(void)origin;
 }
 
 static void handlePart(irc_session_t *s, const char *ev, const char *orig,
@@ -335,10 +330,8 @@ static void handlePart(irc_session_t *s, const char *ev, const char *orig,
 	if (params[1] != nullptr)
 		reason = params[1];
 
-	if (server->getIdentity().m_nickname != nick) {
-		for (Plugin &p : Irccd::getInstance()->getPlugins())
-			p.onPart(server, params[0], nick, reason);
-	}
+	for (Plugin &p : Irccd::getInstance()->getPlugins())
+		p.onPart(server, params[0], nick, reason);
 #else
 	(void)s;
 	(void)orig;
@@ -359,10 +352,8 @@ static void handleQuery(irc_session_t *s, const char *ev, const char *orig,
 	if (params[1] != nullptr)
 		message = params[1];
 
-	if (server->getIdentity().m_nickname != who) {
-		for (Plugin &p : Irccd::getInstance()->getPlugins())
-			p.onQuery(server, who, message);
-	}
+	for (Plugin &p : Irccd::getInstance()->getPlugins())
+		p.onQuery(server, who, message);
 #else
 	(void)s;
 	(void)orig;
@@ -385,10 +376,8 @@ static void handleTopic(irc_session_t *s, const char *ev, const char *orig,
 	if (params[1] != nullptr)
 		topic = params[1];
 
-	if (server->getIdentity().m_nickname != nick) {
-		for (Plugin &p : Irccd::getInstance()->getPlugins())
-			p.onTopic(server, params[0], nick, topic);
-	}
+	for (Plugin &p : Irccd::getInstance()->getPlugins())
+		p.onTopic(server, params[0], nick, topic);
 #else
 	(void)s;
 	(void)orig;
@@ -407,10 +396,8 @@ static void handleUserMode(irc_session_t *s, const char *ev, const char *orig,
 
 	nick = getNick(orig);
 
-	if (server->getIdentity().m_nickname != nick) {
-		for (Plugin &p : Irccd::getInstance()->getPlugins())
-			p.onUserMode(server, nick, params[0]);
-	}
+	for (Plugin &p : Irccd::getInstance()->getPlugins())
+		p.onUserMode(server, nick, params[0]);
 #else
 	(void)s;
 	(void)orig;
