@@ -16,13 +16,77 @@
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --
 
+local logger = require "irccd.logger"
+local parser = require "irccd.parser"
+local plugin = require "irccd.plugin"
 local util = require "irccd.util"
 
+-- Table of nicknames to check
 local nicknames = { }
+
+-- List of super user to ignore
+local ignored = { }
+
+-- Default configuration
 local conf = {
-	maxm	= 5,
-	delay	= 2000
+	[ "max-messages" ]	= 5,
+	[ "max-delay" ]		= 5000,
+	[ "action" ]		= "kick",		-- kick, ban or message
+	[ "reason" ]		= "please not flood"
 }
+
+local function loadIgnore(ignore)
+	if ignore:hasOption("list") then
+		local value = ignore:getOption("list")
+
+		for v in value:gmatch("(%w+)") do
+			table.insert(ignored, v)
+			logger.log("Ignoring " .. v)
+		end
+	end
+end
+
+local function loadGeneral(general)
+	for k in pairs(conf) do
+		if general:hasOption(k) then
+			if (type(conf[k] == "number")) then
+				conf[k] = tonumber(general:getOption(k)) or conf[k]
+			else
+				conf[k] = general:getOption(k)
+			end	
+		end
+	end
+end
+
+local function loadConfig()
+	local path = plugin.getHome() .. "/antiflood.conf"
+
+	local parser = parser.new(path, { parser.DisableRedefinition })
+	local ret, err = parser:open()
+
+	if not ret then
+		logger.log(err .. ", using defaults")
+		return
+	end
+
+	if parser:hasSection("general") then
+		loadGeneral(parser:getSection("general"))
+	end
+
+	if parser:hasSection("ignore") then
+		loadIgnore(parser:getSection("ignore"))
+	end
+end
+
+local function manage(server, channel, nickname)
+	if conf.action == "kick" then
+		logger.log("kicking " .. nickname .. " from " .. channel)
+		server:kick(nickname, channel, "stop flooding")
+	elseif conf.action == "ban" then
+		logger.log("banning " .. nickname .. " from " .. channel)
+		server:mode(channel, "+b " .. nickname)
+	end
+end
 
 function onMessage(server, channel, who, message)
 	if nicknames[who] == nil then
@@ -34,12 +98,12 @@ function onMessage(server, channel, who, message)
 	else
 		-- Spammed
 		nicknames[who].current = util.getTicks()
-		if nicknames[who].current - nicknames[who].last < conf.delay then
+		if nicknames[who].current - nicknames[who].last < conf["max-delay"] then
 			nicknames[who].last = nicknames[who].current
 			nicknames[who].count = nicknames[who].count + 1
 
-			if nicknames[who].count >= conf.maxm then
-				server:say(channel, "stop flooding")
+			if nicknames[who].count >= conf["max-messages"] then
+				manage(server, channel, who)
 				nicknames[who] = nil
 			end
 		else
@@ -47,3 +111,9 @@ function onMessage(server, channel, who, message)
 		end
 	end
 end
+
+function onReload()
+	loadConfig()
+end
+
+loadConfig()

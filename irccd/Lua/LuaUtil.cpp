@@ -147,6 +147,15 @@ static int openDir(lua_State *L)
 	return 1;
 }
 
+static int usleep(lua_State *L)
+{
+	int msec = lua_tointeger(L, 1);
+
+	Util::usleep(msec);
+
+	return 0;
+}
+
 } // !util
 
 const luaL_Reg functions[] = {
@@ -157,7 +166,8 @@ const luaL_Reg functions[] = {
 	{ "getHome",		util::getHome		},
 	{ "getTicks",		util::getTicks		},
 	{ "mkdir",		util::mkdir		},
-	{ "openDir",		util::openDir		},
+	{ "opendir",		util::openDir		},
+	{ "usleep",		util::usleep		},
 	{ nullptr,		nullptr			}
 };
 

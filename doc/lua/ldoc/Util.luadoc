@@ -42,6 +42,12 @@ end
 function util.getHome()
 end
 
+--- Get the time spent from start.
+-- Get how many milliseconds spent since the irccd startup.
+-- @return the number of seconds
+function util.getTicks()
+end
+
 --- Create a directory.
 -- Create recursively a directory, like <code>mkdir -p</code>. This function
 -- will return two values on error.
@@ -58,7 +64,7 @@ end
 -- @param skipSpecial forget "." and "..", default: false
 -- @see Directory
 -- @return a Directory object
-function util.openDir(path, skipSpecial)
+function util.opendir(path, skipSpecial)
 end
 
 --- Date
