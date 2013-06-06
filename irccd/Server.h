@@ -72,6 +72,7 @@ private:
 	// Some options
 	std::string m_commandChar;		/*! command token */
 	bool m_joinInvite;			/*! auto join on invites */
+	bool m_ctcpReply;			//! auto reply CTCP
 	std::vector<Channel> m_channels;	/*! list of channels */
 
 	// Connection settings
@@ -90,21 +91,7 @@ private:
 public:
 	Server(void);
 
-	Server(Server &&src)
-	{
-		m_commandChar = std::move(src.m_commandChar);
-		m_joinInvite = src.m_joinInvite;
-		m_channels = std::move(src.m_channels);
-		m_identity = std::move(src.m_identity);
-		m_name = std::move(src.m_name);
-		m_host = std::move(src.m_host);
-		m_port = src.m_port;
-		m_password = std::move(src.m_password);
-		m_callbacks = std::move(src.m_callbacks);
-		m_thread = std::move(src.m_thread);
-		m_session = std::move(src.m_session);
-		m_threadStarted = src.m_threadStarted;
-	}
+	Server(Server &&src);
 
 	virtual ~Server(void);
 
@@ -127,7 +114,7 @@ public:
 	 *
 	 * @return true if we should
 	 */
-	bool getJoinInvite(void) const;
+	bool autoJoinInvite(void) const;
 
 	/**
 	 * Set the join invite mode
@@ -135,6 +122,20 @@ public:
 	 * @param joinInvite the mode
 	 */
 	void setJoinInvite(bool joinInvite);
+
+	/**
+	 * Set if we should auto reply to ctcp request.
+	 *
+	 * @param autoCtcpReply true if we should
+	 */
+	void setAutoCtcpReply(bool autoCtcpReply);
+
+	/**
+	 * Tell if we should auto reply to ctcp request.
+	 *
+	 * @return true if we should
+	 */
+	bool autoCtcpReply(void) const;
 
 	/**
 	 * Get all channels that will be auto joined

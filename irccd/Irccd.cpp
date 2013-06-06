@@ -715,6 +715,8 @@ void Irccd::openServers(const Parser &config)
 				server.setCommandChar(s.getOption<string>("command-char"));
 			if (s.hasOption("join-invite"))
 				server.setJoinInvite(s.getOption<bool>("join-invite"));
+			if (s.hasOption("ctcp-autoreply"))
+				server.setAutoCtcpReply(s.getOption<bool>("ctcp-autoreply"));
 			if (s.hasOption("identity"))
 				server.setIdentity(findIdentity(s.getOption<string>("identity")));
 

@@ -69,6 +69,11 @@ public:
 		Logger::log("[test] mode: %s mode %s", channel.c_str(), mode.c_str());
 	}
 
+	void names(const std::string &channel)
+	{
+		Logger::log("[test] names: gettings names from %s", channel.c_str());
+	}
+
 	void nick(const string &nick)
 	{
 		Logger::log("[test] nick: changing nick to %s", nick.c_str());
@@ -461,6 +466,8 @@ static void testPlugin(const char *file, int argc, char **argv)
 
 void irccd::test(int argc, char **argv)
 {
+	Logger::setVerbose(true);
+
 	if (argc < 2) {
 		Logger::warn("usage: %s test plugin.lua [command] [parameters...]", getprogname());
 

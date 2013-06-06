@@ -109,6 +109,20 @@ static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
 	(void)count;
 }
 
+static void handleCtcpRequest(irc_session_t *s, const char *ev, const char *orig,
+			      const char **params, unsigned int count)
+{
+	Server *server = (Server *)irc_get_ctx(s);
+
+	// not implemented yet
+	(void)server;
+	(void)s;
+	(void)ev;
+	(void)orig;
+	(void)params;
+	(void)count;
+}
+
 static void handleChannelNotice(irc_session_t *s, const char *ev, const char *orig,
 				const char **params, unsigned int count)
 {
@@ -141,7 +155,7 @@ static void handleInvite(irc_session_t *s, const char *ev, const char *orig,
 	string who = getNick(orig);
 
 	// if join-invite is set to true goes in
-	if (server->getJoinInvite())
+	if (server->autoJoinInvite())
 		server->join(params[1], "");
 
 #if defined(WITH_LUA)
@@ -409,14 +423,18 @@ static void handleUserMode(irc_session_t *s, const char *ev, const char *orig,
 
 /* }}} */
 
-Server::Server(void)
-	:m_commandChar("!"), m_threadStarted(false)
+Server::Server()
+	: m_commandChar("!")
+	, m_joinInvite(false)
+	, m_ctcpReply(true)
+	, m_threadStarted(false)
 {
 	memset(&m_callbacks, 0, sizeof (irc_callbacks_t));
 
 	m_callbacks.event_channel		= handleChannel;
 	m_callbacks.event_channel_notice	= handleChannelNotice;
 	m_callbacks.event_connect		= handleConnect;
+	m_callbacks.event_ctcp_req		= handleCtcpRequest;
 	m_callbacks.event_invite		= handleInvite;
 	m_callbacks.event_join			= handleJoin;
 	m_callbacks.event_kick			= handleKick;
@@ -428,6 +446,23 @@ Server::Server(void)
 	m_callbacks.event_privmsg		= handleQuery;
 	m_callbacks.event_topic			= handleTopic;
 	m_callbacks.event_umode			= handleUserMode;
+}
+
+Server::Server(Server &&src)
+{
+	m_commandChar = std::move(src.m_commandChar);
+	m_joinInvite = src.m_joinInvite;
+	m_ctcpReply = src.m_ctcpReply;
+	m_channels = std::move(src.m_channels);
+	m_identity = std::move(src.m_identity);
+	m_name = std::move(src.m_name);
+	m_host = std::move(src.m_host);
+	m_port = src.m_port;
+	m_password = std::move(src.m_password);
+	m_callbacks = std::move(src.m_callbacks);
+	m_thread = std::move(src.m_thread);
+	m_session = std::move(src.m_session);
+	m_threadStarted = src.m_threadStarted;
 }
 
 Server::~Server(void)
@@ -445,7 +480,7 @@ void Server::setCommandChar(const string &commandChar)
 	m_commandChar = commandChar;
 }
 
-bool Server::getJoinInvite(void) const
+bool Server::autoJoinInvite(void) const
 {
 	return m_joinInvite;
 }
@@ -453,6 +488,16 @@ bool Server::getJoinInvite(void) const
 void Server::setJoinInvite(bool joinInvite)
 {
 	m_joinInvite = joinInvite;
+}
+
+void Server::setAutoCtcpReply(bool autoCtcpReply)
+{
+	m_ctcpReply = autoCtcpReply;
+}
+
+bool Server::autoCtcpReply(void) const
+{
+	return m_ctcpReply;
 }
 
 const vector<Server::Channel> & Server::getChannels(void)
