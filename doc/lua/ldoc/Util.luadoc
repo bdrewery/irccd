@@ -67,6 +67,22 @@ end
 function util.opendir(path, skipSpecial)
 end
 
+--- Split the nickname and host.
+-- Extract the nickname and host from a user, for instance with
+-- foo!~foo@localhost, foo will be returned as first value, localhost
+-- as second.
+-- @param user the user to split
+-- @return the nickname
+-- @return the hostname
+function util.splitUser(user)
+end
+
+--- Sleep for milliseconds.
+-- Suspend the execution thread.
+-- @param msec the number of milliseconds
+function util.usleep(msec)
+end
+
 --- Date
 -- @type Date
 

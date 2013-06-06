@@ -23,6 +23,7 @@
 #include <Directory.h>
 #include <Util.h>
 
+#include "Irccd.h"
 #include "LuaUtil.h"
 
 using namespace irccd;
@@ -118,7 +119,7 @@ static int mkdir(lua_State *L)
 	return 1;
 }
 
-static int openDir(lua_State *L)
+static int opendir(lua_State *L)
 {
 	Directory **ptr, *d;
 	string path;
@@ -147,6 +148,25 @@ static int openDir(lua_State *L)
 	return 1;
 }
 
+static int splitUser(lua_State *L)
+{
+	char nick[64], host[128];
+	const char* nickname;
+
+	nickname = luaL_checkstring(L, 1);
+
+	memset(nick, 0, sizeof (nick));
+	memset(host, 0, sizeof (host));
+
+	irc_target_get_nick(nickname, nick, sizeof (nick) - 1);
+	irc_target_get_host(nickname, host, sizeof (host) - 1);
+
+	lua_pushstring(L, nick);
+	lua_pushstring(L, host);
+
+	return 2;
+}
+
 static int usleep(lua_State *L)
 {
 	int msec = lua_tointeger(L, 1);
@@ -166,7 +186,8 @@ const luaL_Reg functions[] = {
 	{ "getHome",		util::getHome		},
 	{ "getTicks",		util::getTicks		},
 	{ "mkdir",		util::mkdir		},
-	{ "opendir",		util::openDir		},
+	{ "opendir",		util::opendir		},
+	{ "splitUser",		util::splitUser		},
 	{ "usleep",		util::usleep		},
 	{ nullptr,		nullptr			}
 };

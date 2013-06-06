@@ -32,6 +32,7 @@ using namespace std;
 
 /* {{{ IRC handlers */
 
+#if 0
 static string getNick(const char *target)
 {
 	char nickname[64 + 1];
@@ -41,20 +42,19 @@ static string getNick(const char *target)
 
 	return string(nickname);
 }
+#endif
 
 static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
 			  const char **params, unsigned int count)
 {
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
-	string who, channel, message = "";
+	string channel, message = "";
 	const string &cmdToken = server->getCommandChar();
 
 	channel = params[0];
 	if (params[1] != nullptr)
 		message = params[1];
-
-	who = getNick(orig);
 
 	for (Plugin &p : Irccd::getInstance()->getPlugins()) {
 		/*
@@ -70,9 +70,9 @@ static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
 			string module = message.substr(cmdToken.length(), spCmd.length() - cmdToken.length());
 
 			if (module == p.getName())
-				p.onCommand(server, channel, who, message.substr(spCmd.length()));
+				p.onCommand(server, channel, orig, message.substr(spCmd.length()));
 		} else
-			p.onMessage(server, channel, who, message);
+			p.onMessage(server, channel, orig, message);
 	}
 #else
 	(void)s;
@@ -128,16 +128,13 @@ static void handleChannelNotice(irc_session_t *s, const char *ev, const char *or
 {
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
-	string nick, target, notice;
-
-	nick = getNick(orig);
-	target = getNick(params[0]);
+	string notice;;
 
 	if (params[1] != nullptr)
 		notice = params[1];
 
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onChannelNotice(server, nick, target, notice);
+		p.onChannelNotice(server, orig, params[0], notice);
 
 #else
 	(void)s;
@@ -152,7 +149,6 @@ static void handleInvite(irc_session_t *s, const char *ev, const char *orig,
 			 const char **params, unsigned int count)
 {
 	Server *server = (Server *)irc_get_ctx(s);
-	string who = getNick(orig);
 
 	// if join-invite is set to true goes in
 	if (server->autoJoinInvite())
@@ -160,7 +156,7 @@ static void handleInvite(irc_session_t *s, const char *ev, const char *orig,
 
 #if defined(WITH_LUA)
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onInvite(server, params[1], who);
+		p.onInvite(server, params[1], orig);
 #endif
 	(void)ev;
 	(void)count;
@@ -171,10 +167,9 @@ static void handleJoin(irc_session_t *s, const char *ev, const char *orig,
 {
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
-	string nickname = getNick(orig);
 
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onJoin(server, params[0], nickname);
+		p.onJoin(server, params[0], orig);
 #else
 	(void)s;
 	(void)orig;
@@ -188,22 +183,19 @@ static void handleKick(irc_session_t *s, const char *ev, const char *orig,
 		       const char **params, unsigned int count)
 {
 	Server *server = (Server *)irc_get_ctx(s);
-	string who, kicked, reason = "";
-
-	who = getNick(orig);
-	kicked = getNick(params[1]);
+	string reason = "";
 
 	// params[2] is an optional kick text
 	if (params[2] != nullptr)
 		reason = params[2];
 
 	// If I've been kicked, I need to remove my own channel
-	if (server->getIdentity().m_nickname == who)
+	if (server->getIdentity().m_nickname == orig)
 		server->removeChannel(params[0]);
 
 #if defined(WITH_LUA)
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onKick(server, params[0], who, kicked, reason);
+		p.onKick(server, params[0], orig, params[1], reason);
 #endif
 	(void)ev;
 	(void)count;
@@ -214,16 +206,14 @@ static void handleMode(irc_session_t *s, const char *ev, const char *orig,
 {
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
-	string nick, modeValue;
-
-	nick = getNick(orig);
+	string modeValue;
 
 	// params[2] is optional mode argument
 	if (params[2] != nullptr)
 		modeValue = params[2];
 
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onMode(server, params[0], nick, params[1], modeValue);
+		p.onMode(server, params[0], orig, params[1], modeValue);
 #else
 	(void)s;
 	(void)orig;
@@ -237,18 +227,14 @@ static void handleNick(irc_session_t *s, const char *ev, const char *orig,
 			  const char **params, unsigned int count)
 {
 	Server *server = (Server *)irc_get_ctx(s);
-	string oldnick, newnick;
-
-	oldnick = getNick(orig);
-	newnick = getNick(params[0]);
 
 	// Don't forget to update our own nickname
-	if (oldnick == server->getIdentity().m_nickname)
-		server->getIdentity().m_nickname = newnick;
+	if (orig == server->getIdentity().m_nickname)
+		server->getIdentity().m_nickname = params[0];
 
 #if defined(WITH_LUA)
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onNick(server, oldnick, newnick);
+		p.onNick(server, orig, params[0]);
 #endif
 	(void)ev;
 	(void)count;
@@ -259,16 +245,13 @@ static void handleNotice(irc_session_t *s, const char *ev, const char *orig,
 {
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
-	string nick, target, notice;
-
-	nick = getNick(orig);
-	target = getNick(params[0]);
+	string notice;
 
 	if (params[1] != nullptr)
 		notice = params[1];
 
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onNotice(server, nick, target, notice);
+		p.onNotice(server, orig, params[0], notice);
 #else
 	(void)s;
 	(void)orig;
@@ -336,16 +319,14 @@ static void handlePart(irc_session_t *s, const char *ev, const char *orig,
 {
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
-	string reason = "", nick;
-
-	nick = getNick(orig);
+	string reason = "";
 
 	// params[1] is an optional reason
 	if (params[1] != nullptr)
 		reason = params[1];
 
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onPart(server, params[0], nick, reason);
+		p.onPart(server, params[0], orig, reason);
 #else
 	(void)s;
 	(void)orig;
@@ -360,14 +341,13 @@ static void handleQuery(irc_session_t *s, const char *ev, const char *orig,
 {
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
-	string who, message = "";
+	string message = "";
 
-	who = getNick(orig);
 	if (params[1] != nullptr)
 		message = params[1];
 
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onQuery(server, who, message);
+		p.onQuery(server, orig, message);
 #else
 	(void)s;
 	(void)orig;
@@ -382,16 +362,14 @@ static void handleTopic(irc_session_t *s, const char *ev, const char *orig,
 {
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
-	string topic = "", nick;
-
-	nick = getNick(orig);
+	string topic = "";
 
 	// params[1] is the optional new topic
 	if (params[1] != nullptr)
 		topic = params[1];
 
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onTopic(server, params[0], nick, topic);
+		p.onTopic(server, params[0], orig, topic);
 #else
 	(void)s;
 	(void)orig;
@@ -406,12 +384,9 @@ static void handleUserMode(irc_session_t *s, const char *ev, const char *orig,
 {
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
-	string nick;
-
-	nick = getNick(orig);
 
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onUserMode(server, nick, params[0]);
+		p.onUserMode(server, orig, params[0]);
 #else
 	(void)s;
 	(void)orig;

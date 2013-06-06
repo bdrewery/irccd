@@ -16,16 +16,17 @@
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --
 
+-- Modules
 local logger = require "irccd.logger"
 local parser = require "irccd.parser"
 local plugin = require "irccd.plugin"
 local util = require "irccd.util"
 
 local format = {
-	error = "I could not open my database file",
-	seen = "I've seen #u for the last time on %m/%d/%y %H:%M",
-	said = "The last message that #n said is: #m",
-	unknown = "I've never known #u"
+	error	= "I could not open my database file",
+	seen	= "I've seen #u for the last time on %m/%d/%y %H:%M",
+	said	= "The last message that #u said is: #m",
+	unknown	= "I've never known #u"
 }
 
 local function loadFormats()
@@ -164,6 +165,7 @@ end
 
 function onCommand(server, channel, who, message)
 	local f = openFile(server, channel, "r")
+	who = util.splitUser(who)
 
 	if f == nil then
 		server:say(channel, who .. ", " .. format.error)
@@ -197,6 +199,7 @@ function onCommand(server, channel, who, message)
 end
 
 function onJoin(server, channel, nickname)
+	nickname = util.splitUser(nickname)
 	updateDatabase(server, channel, nickname)
 
 	-- Update all nickname when I join a channel
@@ -214,7 +217,7 @@ function onJoin(server, channel, nickname)
 end
 
 function onMessage(server, channel, nickname, message)
-	updateDatabase(server, channel, nickname, message)
+	updateDatabase(server, channel, util.splitUser(nickname), message)
 end
 
 function onReload()

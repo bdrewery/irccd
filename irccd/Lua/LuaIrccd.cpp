@@ -24,7 +24,6 @@ using namespace std;
 
 int irccd::luaopen_irccd(lua_State *L)
 {
-	// Use a standard table, for the moment there is no function
 	lua_createtable(L, 3, 3);
 
 	lua_pushinteger(L, MAJOR);

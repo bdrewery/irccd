@@ -121,6 +121,14 @@
 	<td class="name" nowrap><a href="#opendir">opendir&nbsp;(path, skipSpecial)</a></td>
 	<td class="summary">Open a directory.</td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#splitUser">splitUser&nbsp;(user)</a></td>
+	<td class="summary">Split the nickname and host.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#usleep">usleep&nbsp;(msec)</a></td>
+	<td class="summary">Sleep for milliseconds.</td>
+	</tr>
 </table>
 <h2><a href="#Class_Date">Class Date </a></h2>
 <table class="function_list">
@@ -378,6 +386,53 @@
     <ul>
          <a href="../modules/irccd.util.html#Class_Directory">Directory</a>
     </ul>
+
+
+</dd>
+    <dt>
+    <a name = "splitUser"></a>
+    <strong>splitUser&nbsp;(user)</strong>
+    </dt>
+    <dd>
+    Split the nickname and host.
+ Extract the nickname and host from a user, for instance with
+ foo!~foo@localhost, foo will be returned as first value, localhost
+ as second.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">user</span>
+         the user to split</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the nickname</li>
+        <li>
+        the hostname</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "usleep"></a>
+    <strong>usleep&nbsp;(msec)</strong>
+    </dt>
+    <dd>
+    Sleep for milliseconds.
+ Suspend the execution thread.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">msec</span>
+         the number of milliseconds</li>
+    </ul>
+
+
+
 
 
 </dd>

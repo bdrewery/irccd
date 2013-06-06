@@ -16,6 +16,7 @@
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --
 
+-- Modules
 local logger = require "irccd.logger"
 local parser = require "irccd.parser"
 local plugin = require "irccd.plugin"
@@ -80,8 +81,10 @@ end
 
 local function manage(server, channel, nickname)
 	if conf.action == "kick" then
+		local realNick = util.splitUser(nickname)
+
 		logger.log("kicking " .. nickname .. " from " .. channel)
-		server:kick(nickname, channel, "stop flooding")
+		server:kick(realNick, channel, "stop flooding")
 	elseif conf.action == "ban" then
 		logger.log("banning " .. nickname .. " from " .. channel)
 		server:mode(channel, "+b " .. nickname)

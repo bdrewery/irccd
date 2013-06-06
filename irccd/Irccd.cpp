@@ -434,7 +434,8 @@ bool Irccd::isPluginLoaded(const string &name)
 void Irccd::openConfig(void)
 {
 	// Set some defaults
-	addPluginPath(MODDIR);		// see config.h.in
+	addPluginPath(Util::configDirectory() + "plugins");		// own directory
+	addPluginPath(MODDIR);					// see config.h.in
 
 	// Length empty means use user or default
 	if (m_configPath.length() == 0) {

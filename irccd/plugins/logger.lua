@@ -122,7 +122,8 @@ function onChannelNotice(server, who, channel, notice)
 		c = channel,
 		m = notice,
 		s = server:getName(),
-		u = who
+		u = util.splitUser(who),
+		U = who
 	}
 
 	write(format.cnotice, keywords)
@@ -133,7 +134,8 @@ function onJoin(server, channel, nickname)
 	local keywords = {
 		c = channel,
 		s = server:getName(),
-		u = nickname
+		u = util.splitUser(nickname),
+		U = nickname
 	}
 
 	write(format.join, keywords)
@@ -144,6 +146,7 @@ function onMe(server, channel, who, message)
 		c = channel,
 		s = server:getName(),
 		m = message,
+		U = util.splitUser(who),
 		u = who
 	}
 
@@ -156,6 +159,7 @@ function onMessage(server, channel, who, message)
 		c = channel,
 		s = server:getName(),
 		m = message,
+		U = util.splitUser(who),
 		u = who
 	}
 
@@ -168,7 +172,8 @@ function onMode(server, channel, who, mode, modeArg)
 		s = server:getName(),
 		m = mode,
 		M = modeArg,
-		u = who
+		u = util.splitUser(who),
+		U = who
 	}
 
 	write(format.mode, keywords)
@@ -180,7 +185,8 @@ function onNotice(server, who, target, notice)
 		m = notice,
 		s = server:getName(),
 		t = target,
-		u = who
+		u = util.splitUser(who),
+		U = who
 	}
 
 	write(format.notice, keywords)
@@ -192,7 +198,8 @@ function onPart(server, channel, nickname, reason)
 		c = channel,
 		s = server:getName(),
 		m = reason,
-		u = nickname
+		u = util.splitUser(nickname),
+		U = who
 	}
 
 	write(format.part, keywords)
@@ -204,7 +211,8 @@ function onTopic(server, channel, who, topic)
 		c = channel,
 		s = server:getName(),
 		m = topic,
-		u = who
+		u = util.splitUser(who),
+		U = who
 	}
 
 	write(format.topic, keywords)
