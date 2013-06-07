@@ -99,7 +99,7 @@ void LuaParser::log(int number, const string &section, const string &message)
 		lua_pushstring(m_state, section.c_str());
 		lua_pushstring(m_state, message.c_str());
 
-		lua_call(m_state, 3, 0, 0);
+		lua_call(m_state, 3, 0);
 	}
 }
 

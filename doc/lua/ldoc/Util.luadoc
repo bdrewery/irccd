@@ -35,13 +35,6 @@ end
 function util.exist(path)
 end
 
---- Get the home directory.
--- This function returns the home directory of the current user. This
--- is usually /home/foo on Unix.
--- @return the home directory
-function util.getHome()
-end
-
 --- Get the time spent from start.
 -- Get how many milliseconds spent since the irccd startup.
 -- @return the number of seconds
