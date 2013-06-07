@@ -221,7 +221,7 @@ public:
 	 *
 	 * @return the error code
 	 */
-	int run(int argc, char **argv);
+	int run();
 };
 
 } // !irccd

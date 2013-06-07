@@ -82,13 +82,6 @@ static int exist(lua_State *L)
 	return 1;
 }
 
-static int getHome(lua_State *L)
-{
-	lua_pushstring(L, Util::getHome().c_str());
-
-	return 1;
-}
-
 static int getTicks(lua_State *L)
 {
 	lua_pushinteger(L, Util::getTicks());
@@ -184,7 +177,6 @@ const luaL_Reg functions[] = {
 	{ "date",		util::date		},
 	{ "dirname",		util::dirname		},
 	{ "exist",		util::exist		},
-	{ "getHome",		util::getHome		},
 	{ "getTicks",		util::getTicks		},
 	{ "mkdir",		util::mkdir		},
 	{ "opendir",		util::opendir		},

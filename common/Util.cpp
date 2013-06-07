@@ -42,7 +42,11 @@
 using namespace irccd;
 using namespace std;
 
-Util::ErrorException::ErrorException(void)
+/* --------------------------------------------------------
+ * ErrorException class
+ * -------------------------------------------------------- */
+
+Util::ErrorException::ErrorException()
 {
 }
 
@@ -51,54 +55,55 @@ Util::ErrorException::ErrorException(const std::string &error)
 {
 }
 
-Util::ErrorException::~ErrorException(void) throw()
+Util::ErrorException::~ErrorException() throw()
 {
 }
 
-const char * Util::ErrorException::what(void) const throw()
+const char * Util::ErrorException::what() const throw()
 {
 	return m_error.c_str();
 }
 
-vector<string> Util::split(const string &list, const string &delimiter, int max)
+/* --------------------------------------------------------
+ * Util class
+ * -------------------------------------------------------- */
+
+#if defined(_WIN32)
+	const char Util::DIR_SEP = '\\';
+#else
+	const char Util::DIR_SEP = '/';
+#endif
+
+string Util::basename(const string &path)
 {
-	vector<string> result;
-	size_t next = -1, current;
-	int count = 1;
-	bool finished = false;
+#if defined(_WIN32) || defined(_MSC_VER)
+	string copy = path;
+	size_t pos;
 
-	do {
-		string val;
+	pos = copy.find_last_of('\\');
+	if (pos == string::npos)
+		pos = copy.find_last_of('/');
 
-		current = next + 1;
-		next = list.find_first_of(delimiter, current);
+	if (pos == string::npos)
+		return copy;
 
-		// split max, get until the end
-		if (max >= 0 && count++ >= max) {
-			val = list.substr(current, string::npos);
-			finished = true;
-		} else {
-			val = list.substr(current, next - current);
-			finished = next == string::npos;
-		}
-
-		result.push_back(val);
-	} while (!finished);
-
-	return result;
+	return copy.substr(pos + 1);
+#else
+	return string(::basename(path.c_str()));
+#endif
 }
 
-string Util::configDirectory(void)
+string Util::configDirectory()
 {
 #if defined(_WIN32)
 	char path[MAX_PATH];
 	ostringstream oss;
 
-	if (SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path) != S_OK)
+	if (SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, 0, path) != S_OK)
 		oss << "";
 	else {
 		oss << path;
-		oss << "irccd\\";
+		oss << "\\irccd\\";
 	}
 
 	return oss.str();
@@ -125,7 +130,7 @@ string Util::configDirectory(void)
 #endif
 }
 
-string Util::configFilePath(const std::string &filename)
+string Util::configFilePath(const string &filename)
 {
 	ostringstream oss;
 
@@ -133,56 +138,6 @@ string Util::configFilePath(const std::string &filename)
 	oss << filename;
 
 	return oss.str();
-}
-
-string Util::getHome(void)
-{
-#if defined(_WIN32)
-	char path[MAX_PATH];
-
-	if (SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path ) != S_OK)
-		return "";
-
-	return string(path);
-#else
-	return string(getenv("HOME"));
-#endif
-}
-
-uint64_t Util::getTicks(void)
-{
-#if defined(_WIN32) || defined(_MSC_VER)
-	_timeb tp;
-
-	_ftime(&tp);
-
-	return tp.time * 1000LL + tp.millitm;
-#else
-        struct timeval tp;
-
-        gettimeofday(&tp, NULL);
-
-        return tp.tv_sec * 1000LL + tp.tv_usec / 1000;
-#endif
-}
-
-string Util::basename(const string &path)
-{
-#if defined(_WIN32) || defined(_MSC_VER)
-	string copy = path;
-	size_t pos;
-
-	pos = copy.find_last_of('\\');
-	if (pos == string::npos)
-		pos = copy.find_last_of('/');
-
-	if (pos == string::npos)
-		return copy;
-
-	return copy.substr(pos + 1);
-#else
-	return string(::basename(path.c_str()));
-#endif
 }
 
 string Util::dirname(const string &file)
@@ -211,6 +166,23 @@ bool Util::exist(const string &path)
 	return (stat(path.c_str(), &st) != -1);
 }
 
+uint64_t Util::getTicks(void)
+{
+#if defined(_WIN32) || defined(_MSC_VER)
+	_timeb tp;
+
+	_ftime(&tp);
+
+	return tp.time * 1000LL + tp.millitm;
+#else
+        struct timeval tp;
+
+        gettimeofday(&tp, NULL);
+
+        return tp.tv_sec * 1000LL + tp.tv_usec / 1000;
+#endif
+}
+
 void Util::mkdir(const std::string &dir, int mode)
 {
 	ostringstream oss;
@@ -236,6 +208,58 @@ void Util::mkdir(const std::string &dir, int mode)
 		oss << dir << ": " << strerror(errno);
 		throw Util::ErrorException(oss.str());
 	}
+}
+
+string Util::pluginDirectory()
+{
+	/*
+	 * Under unix, we store local plugins under the same directory
+	 * as the config, plus /plugins suffix, so it's usually:
+	 *
+	 * ~/.config/irccd/plugins.
+	 *
+	 * On windows, it reside inside the user home like :
+	 * C:\Users\Simone\irccd\plugins
+	 */
+	ostringstream oss;
+
+	oss << configDirectory();
+
+#if defined(_WIN32)
+	oss << "plugins\\";
+#else
+	oss << "plugins/";
+#endif
+
+	return oss.str();
+}
+
+vector<string> Util::split(const string &list, const string &delimiter, int max)
+{
+	vector<string> result;
+	size_t next = -1, current;
+	int count = 1;
+	bool finished = false;
+
+	do {
+		string val;
+
+		current = next + 1;
+		next = list.find_first_of(delimiter, current);
+
+		// split max, get until the end
+		if (max >= 0 && count++ >= max) {
+			val = list.substr(current, string::npos);
+			finished = true;
+		} else {
+			val = list.substr(current, next - current);
+			finished = next == string::npos;
+		}
+
+		result.push_back(val);
+	} while (!finished);
+
+	return result;
 }
 
 void Util::usleep(int msec)

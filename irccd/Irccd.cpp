@@ -886,10 +886,10 @@ const Identity & Irccd::findIdentity(const string &name)
 	return m_defaultIdentity;
 }
 
-int Irccd::run(int argc, char **argv)
+int Irccd::run()
 {
-	(void)argc;
-	(void)argv;
+	Logger::log("irccd: user config path %s", Util::configDirectory());
+	Logger::log("irccd: user default plugin path %s", Util::pluginDirectory());
 
 	openConfig();
 

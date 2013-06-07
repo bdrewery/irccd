@@ -34,12 +34,17 @@ public:
 		std::string m_error;
 
 	public:
-		ErrorException(void);
+		ErrorException();
 		ErrorException(const std::string &error);
-		~ErrorException(void) throw();
+		~ErrorException() throw();
 
-		virtual const char * what(void) const throw();
+		virtual const char * what() const throw();
 	};
+
+	/**
+	 * Directory separator, / on unix, \ on Windows.
+	 */
+	static const char DIR_SEP;
 
 	/**
 	 * Get the basename of a file path, that is, remove
@@ -51,46 +56,22 @@ public:
 	static std::string basename(const std::string &path);
 
 	/**
-	 * Split a string by delimiters.
-	 *
-	 * @param list the string to split
-	 * @param delimiter a list of delimiters
-	 * @param max max number of split
-	 * @return a list of string splitted
-	 */
-	static std::vector<std::string> split(const std::string &list, const std::string &delimiter, int max = -1);
-
-	/**
 	 * Get the XDG config directory that is usually
-	 * ~/.config/.
+	 * ~/.config/irccd. On Windows, it is C:\Users\Foo\irccd.
+	 * This add a trailing slash.
 	 *
 	 * @return a string to the directory
 	 */
-	static std::string configDirectory(void);
+	static std::string configDirectory();
 
 	/**
-	 * Return the path at XDG_CONFIG_HOME or default
+	 * Return the path at the config path or default
 	 * if not found.
 	 *
 	 * @param filename the config filename
 	 * @return the final string ready for use
 	 */
 	static std::string configFilePath(const std::string &filename);
-
-	/**
-	 * Get home directory usually /home/foo
-	 *
-	 * @return the home directory
-	 */
-	static std::string getHome(void);
-
-	/**
-	 * Get the milliseconds elapsed since the application
-	 * startup.
-	 *
-	 * @return the milliseconds
-	 */
-	static uint64_t getTicks(void);
 
 	/**
 	 * Wrapper around dirname(3) for portability. Returns the parent
@@ -110,12 +91,37 @@ public:
 	static bool exist(const std::string &path);
 
 	/**
+	 * Get the milliseconds elapsed since the application
+	 * startup.
+	 *
+	 * @return the milliseconds
+	 */
+	static uint64_t getTicks();
+
+	/**
 	 * Create a directory.
 	 *
 	 * @param dir the directory path
 	 * @param mode the mode
 	 */
 	static void mkdir(const std::string &dir, int mode);
+
+	/**
+	 * Get the user plugin directory. This add a trailing slash.
+	 *
+	 * @return a string to the plugin path
+	 */
+	static std::string pluginDirectory();
+
+	/**
+	 * Split a string by delimiters.
+	 *
+	 * @param list the string to split
+	 * @param delimiter a list of delimiters
+	 * @param max max number of split
+	 * @return a list of string splitted
+	 */
+	static std::vector<std::string> split(const std::string &list, const std::string &delimiter, int max = -1);
 
 	/**
 	 * Sleep for milli seconds.

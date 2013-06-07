@@ -91,7 +91,14 @@ local function manage(server, channel, nickname)
 	end
 end
 
+function onConnect(server)
+	local ident = server:getIdentity()
+
+	table.insert(ignored, ident.nickname)
+end
+
 function onMessage(server, channel, who, message)
+	who = util.splitUser(who)
 	if nicknames[who] == nil then
 		nicknames[who] = {
 			current		= util.getTicks(),

@@ -24,6 +24,7 @@
 .Op Fl v
 .Op Fl c Ar config
 .Op Fl p Ar directory
+.Op Fl P Ar plugin
 .Nm
 .Cm test
 .Ar plugin.lua
@@ -64,6 +65,8 @@ A path to a config file.
 .It Fl p Ar directory
 Add a directory where to find plugins. This option may be passed more than
 one time.
+.It Fl P Ar plugin
+Add a plugin to load.
 .It Fl v
 Be more verbose.
 .El
