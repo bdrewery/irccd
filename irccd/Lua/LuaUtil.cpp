@@ -138,6 +138,7 @@ static int opendir(lua_State *L)
 		lua_pushnil(L);
 		lua_pushstring(L, d->getError().c_str());
 
+		delete d;
 		return 2;
 	}
 

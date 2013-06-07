@@ -59,7 +59,9 @@ void LuaParser::pushSection(lua_State *L, const Section &s)
 }
 
 LuaParser::LuaParser(const std::string &path, int tuning, char commentToken)
-	:Parser(path, tuning, commentToken), m_state(nullptr), m_logRef(LUA_NOREF)
+	: Parser(path, tuning, commentToken)
+	, m_state(nullptr)
+	, m_logRef(LUA_NOREF)
 {
 }
 
@@ -97,7 +99,7 @@ void LuaParser::log(int number, const string &section, const string &message)
 		lua_pushstring(m_state, section.c_str());
 		lua_pushstring(m_state, message.c_str());
 
-		(void)lua_pcall(m_state, 3, 0, 0);
+		lua_call(m_state, 3, 0, 0);
 	}
 }
 
