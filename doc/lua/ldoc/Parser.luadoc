@@ -1,0 +1,155 @@
+--- Config file parser.
+-- This API provides basic support of .ini syntax based configurations files.
+-- It provides support of multiple redefinition of sections, so it is
+-- possible to have one or more section with the same name in a
+-- file config.
+--
+-- @module irccd.parser
+
+--- Tuning options
+-- @class table
+-- @field DisableVerbosity disable the verbosity
+-- @field DisableRootSection forbid options on root
+-- @field DisableRedefinition disable multiple sections
+parser = {
+	DisableVerbosity = 1,
+	DisableRootSection = 2,
+	DisableRedefinition = 3
+}
+
+--- Create a new Parser object.
+-- This function does not open any file, you need to call open.
+-- @see Parser
+-- @param path the path
+-- @param tuning optional table of tuning options
+-- @param commentChar optional comment delimiter
+-- @return a Parser object
+function parser.new(path, tuning, commentChar)
+end
+
+--- Parser
+-- @type Parser
+
+--- Open the file and read config.
+-- This function will read and extract any section found in the file.
+-- @return true on success
+-- @return error message if failed
+function Parser:open()
+end
+
+--- Iterator over all sections that matches name. Note that this function
+-- will be relevant only if DisableRedefinition is not set.
+-- @param name the sections name
+-- @return an iterator
+function Parser:findSections(name)
+end
+
+--- Checks for a section.
+-- Checks if a specific section exists.
+-- @param name
+-- @return true if exists
+function Parser:hasSection(name)
+end
+
+--- Get a specific section.
+-- Check if the parser has a specific section and return it, otherwise
+-- return nil plus an error message.
+-- @param name the section name
+-- @return a Section object or nil
+-- @return error message if not found
+function Parser:getSection(name)
+end
+
+--- Get a specific section.
+-- This returns a section but if the section
+-- is not found it calls luaL_error, thus aborting the script.
+-- @see Parser:getSection
+-- @param name the section name
+-- @return a Section
+function Parser:requireSection(name)
+end
+
+--- Add a specific logging function.
+-- This add a logging function for verbosity warnings. The function must have
+-- the following signature:
+--
+-- <code>function log(lineno, section, warning)</code>
+--
+-- The parameters are:
+-- <ul>
+-- <li>lineno: the current line number</li>
+-- <li>section: the current section</li>
+-- <li>warning: the message</li>
+-- </ul>
+--
+-- @param func the function to use
+function Parser:onLog(func)
+end
+
+--- Parser metamethods.
+-- The metamethods available for object Parser.
+-- @section
+
+--- Convert object to string.
+-- @return a string
+function Parser:__tostring()
+end
+
+--- Section
+-- @type Section
+
+--- Tells if the section has an option.
+-- Check if the section contains a specific option.
+-- @param name the option's name
+-- @return the value
+function Section:hasOption(name)
+end
+
+--- Get an option value.
+-- This function returns the value if found and nil plus an error
+-- message in the other case.
+-- @see Section:requireOption
+-- @param name the option name
+-- @return the option's value or nil
+-- @return the error message
+function Section:getOption(name)
+end
+
+--- Get all options in a table.
+-- This function will return a table with all options in a
+-- key / value pair basis.
+-- @return a table
+function Section:getOptions()
+end
+
+--- Requires an option.
+-- This returns a value but if the option
+-- is not found it calls luaL_error, thus aborting the script.
+-- @see Section:getOption
+-- @param name the option name
+-- @return the option's value
+function Section:requireOption(name)
+end
+
+--- Section metamethods.
+-- The metamethods available for object Section.
+-- @section
+
+--- Test equality.
+-- @param other the other section
+-- @return true if they equals
+function Section:__eq(other)
+end
+
+--- Test inferiority
+-- @param other the other section
+-- @return self <= other comparison
+function Section:__le(other)
+end
+
+--- Convert object to string.
+-- @return a string
+function Sectio:__tostring()
+end
+
+-- vim: set syntax=lua:

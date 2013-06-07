@@ -1,0 +1,170 @@
+--- Utilitities.
+-- Some utilities.
+--
+-- @module irccd.util
+
+--- Get the file name of a full path.
+-- Returns the file name only of a full path. For instance, returns
+-- "foo.lua" when calling with "/usr/local/foo.lua"
+-- @param path the file path
+-- @return the file name
+function util.basename(path)
+end
+
+--- Create a Date object.
+-- This function returns a date object with a specific time from the
+-- system. If no timestamp is provided, it use the current date.
+-- @see Date
+-- @param timestamp an optional timestamp
+-- @return a Date object
+function util.date(timestamp)
+end
+
+--- Get the parent path of a file.
+-- This function may be used to get the parent path of a file. Example:
+-- calling dirname on "/foo/bar/test.txt" will returns "/foo/bar".
+-- @param path the full file path
+-- @return the parent path
+function util.dirname(path)
+end
+
+--- Check if a file exists.
+-- Tests if a directory or a file exists.
+-- @param path the path to check
+-- @return true if exists
+function util.exist(path)
+end
+
+--- Get the home directory.
+-- This function returns the home directory of the current user. This
+-- is usually /home/foo on Unix.
+-- @return the home directory
+function util.getHome()
+end
+
+--- Get the time spent from start.
+-- Get how many milliseconds spent since the irccd startup.
+-- @return the number of seconds
+function util.getTicks()
+end
+
+--- Create a directory.
+-- Create recursively a directory, like <code>mkdir -p</code>. This function
+-- will return two values on error.
+-- @param path the path
+-- @return true on success or false plus an error
+-- @return the error message
+function util.mkdir(path)
+end
+
+--- Open a directory.
+-- This function will open the directory specified by path. Optional boolean
+-- skipSpecial may be passed to avoid ".", ".." for being treated.
+-- @param path the path
+-- @param skipSpecial forget "." and "..", default: false
+-- @see Directory
+-- @return a Directory object
+function util.opendir(path, skipSpecial)
+end
+
+--- Split the nickname and host.
+-- Extract the nickname and host from a user, for instance with
+-- foo!~foo@localhost, foo will be returned as first value, localhost
+-- as second.
+-- @param user the user to split
+-- @return the nickname
+-- @return the hostname
+function util.splitUser(user)
+end
+
+--- Sleep for milliseconds.
+-- Suspend the execution thread.
+-- @param msec the number of milliseconds
+function util.usleep(msec)
+end
+
+--- Date
+-- @type Date
+
+--- Get a calendar.
+-- Return a table with the following fields:
+-- <ul>
+-- <li><strong>seconds (int)</strong>: seconds elapsed [0-60]</li>
+-- <li><strong>minutes (int)</strong>: minutes elapsed [0-59]</li>
+-- <li><strong>hours (int)</strong>: hours elapsed [0-23]</li>
+-- <li><strong>month (int)</strong>: number of month [1-12]</li>
+-- <li><strong>year (int)</strong>: the real year</li>
+-- </ul>
+-- @return a table
+function Date:calendar()
+end
+
+--- Format a date.
+-- Format the date with a specific format, see strftime(3) for keywords.
+-- @param format the format
+-- @return the date formatted
+function Date:format(format)
+end
+
+--- Return the timestamp.
+-- Get the timestamp from the epoch (aka time_t).
+-- @return a timestamp
+function Date:timestamp()
+end
+
+--- Date metamethods.
+-- The metamethods available for object Date.
+-- @section
+
+--- Test equality.
+-- @param other the other date
+-- @return true if they equals
+function Date:__eq(other)
+end
+
+--- Test inferiority
+-- @param other the other date
+-- @return self <= other comparison
+function Date:__le(other)
+end
+
+--- Convert object to string.
+-- @return a string
+function Date:__tostring()
+end
+
+--- Directory
+-- @type Directory
+
+--- Count the number of elements.
+-- Return the number of elements found in the directory. Note that
+-- if you didn't passed true to util.openDir() you will have
+-- "." and ".." counted int.
+-- @return the number of entries in the directory
+function Directory:count()
+end
+
+--- Iterate over the entries.
+-- Iterate over the entries, this function returns 2 arguments
+-- the entry and a boolean telling if is a directory.
+-- @return the entry name
+-- @return true if it is a directory
+function Directory:read()
+end
+
+--- Directory metamethods.
+-- The metamethods available for object Directory.
+-- @section
+
+--- Test equality.
+-- @param other the other directory
+-- @return true if they equals
+function Directory:__eq(other)
+end
+
+--- Convert object to string.
+-- @return a string
+function Directory:__tostring()
+end
+
+-- vim: set syntax=lua nu:
