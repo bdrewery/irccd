@@ -888,8 +888,8 @@ const Identity & Irccd::findIdentity(const string &name)
 
 int Irccd::run()
 {
-	Logger::log("irccd: user config path %s", Util::configDirectory());
-	Logger::log("irccd: user default plugin path %s", Util::pluginDirectory());
+	Logger::log("irccd: user config path %s", Util::configDirectory().c_str());
+	Logger::log("irccd: user default plugin path %s", Util::pluginDirectory().c_str());
 
 	openConfig();
 
