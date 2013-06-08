@@ -111,14 +111,16 @@ This define a server, you may add any as you want, at least one must be defined
 in the file.
 .Pp
 .Bl -tag -width PARAMETERXXX -compact
-.It host
-(string) Required. The server address, default: empty.
-.It identity
-(string) An identity to use.
 .It name
 (string) Required. A unique id, default: empty.
+.It host
+(string) Required. The server address, default: empty.
 .It port
 (int) Required, The server port, default: empty.
+.It identity
+(string) An identity to use.
+.It channels
+(string list) List of channel to auto join, default: empty.
 .It command-char
 (string) The prefix for invoking special commands, default: !.
 .El

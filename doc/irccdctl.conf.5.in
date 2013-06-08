@@ -14,18 +14,18 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .Dd MONTH DAY, YEAR
-.Dt IRCCD.CONF 5
+.Dt IRCCDCTL.CONF 5
 .Os
 .Sh NAME
-.Nm irccd.conf
-.Nd irccd configuration file
+.Nm irccdctl.conf
+.Nd irccdctl configuration file
 .Sh DESCRIPTION
 The file
-.Nm irccd.conf
+.Nm irccdctl.conf
 contains all parameters for the application
-.Nm irccd .
+.Nm irccdctl .
 .Pp
-The irccd.conf file is .ini based syntax, it supports sections enclosed
+The irccdctl.conf file is .ini based syntax, it supports sections enclosed
 between brackets where one or more options lives.
 .\" SYNTAX
 .Sh SYNTAX
@@ -74,7 +74,7 @@ The following parameters are available for type "internet":
 .It host
 (string) Required. Host to connect.
 .It family
-(string list) Internet family: ipv6, ipv4. Both are accepted, default: ipv4
+(string) Required. Internet family: ipv6 or ipv4.
 .It port
 (int) Required: port number.
 .El

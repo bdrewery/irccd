@@ -80,13 +80,13 @@ static void helpLoad()
 	Logger::warn("Load a plugin into the irccd instance.\n");
 
 	Logger::warn("Example:");
-	Logger::warn("\t%s load logger");
+	Logger::warn("\t%s load logger", getprogname());
 }
 
 static void helpMe()
 {
 	Logger::warn("usage: %s me server target message\n", getprogname());
-	Logger::warn("Send a CTCP ACTION message. It is exactly the same syntax as %s message.\n");
+	Logger::warn("Send a CTCP ACTION message. It is exactly the same syntax as message.\n");
 
 	Logger::warn("Example:");
 	Logger::warn("\t%s me freenode #staff \"going back soon\"", getprogname());
@@ -95,10 +95,8 @@ static void helpMe()
 static void helpMessage()
 {
 	Logger::warn("usage: %s message server target message\n", getprogname());
-	Logger::warn("Send a message to someone or a channel. The server parameter is one registered");
-	Logger::warn("in irccd config. The target may be a channel or a real person");
-	Logger::warn("a real person. If the message contains more than one word it must be enclosed between");
-	Logger::warn("between quotes.\n");
+	Logger::warn("Send a message to someone or a channel. The target may be a channel or a real person");
+	Logger::warn("If the message contains more than one word it must be enclosed between quotes.\n");
 
 	Logger::warn("Example:");
 	Logger::warn("\t%s message freenode #staff \"Hello from irccd\"", getprogname());
@@ -111,7 +109,7 @@ static void helpMode()
 	Logger::warn("like \"+b\" or \"+k secret\".\n");
 
 	Logger::warn("Example:");
-	Logger::warn("\t%s mode freenode #staff +t");
+	Logger::warn("\t%s mode freenode #staff +t", getprogname());
 }
 
 static void helpNick()
@@ -120,7 +118,7 @@ static void helpNick()
 	Logger::warn("Change your nickname. The parameter nickname is the new nickname\n");
 
 	Logger::warn("Example:");
-	Logger::warn("\t%snick freenode david", getprogname());
+	Logger::warn("\t%s nick freenode david", getprogname());
 }
 
 static void helpNotice()
@@ -168,16 +166,16 @@ static void helpUnload()
 	Logger::warn("Unload a loaded plugin from the irccd instance.\n");
 
 	Logger::warn("Example:");
-	Logger::warn("\t%s unload logger");
+	Logger::warn("\t%s unload logger", getprogname());
 }
 
 static void helpUserMode()
 {
-	Logger::warn("usage: %s mode server mode\n", getprogname());
+	Logger::warn("usage: %s umode server mode\n", getprogname());
 	Logger::warn("Change your own user mode.\n");
 
 	Logger::warn("Example:");
-	Logger::warn("\t%s mode freenode +i");
+	Logger::warn("\t%s umode +i", getprogname());
 }
 
 static map<string, HelpHandler> createHelpHandlers()
@@ -619,17 +617,22 @@ void Irccdctl::usage(void)
 	Logger::warn("usage: %s [-cv] <commands> [<args>]\n", getprogname());
 
 	Logger::warn("Commands supported:");
+	Logger::warn("\tcnotice\t\tSend a channel notice");
 	Logger::warn("\thelp\t\tGet this help");
 	Logger::warn("\tinvite\t\tInvite someone to a channel");
 	Logger::warn("\tjoin\t\tJoin a channel");
 	Logger::warn("\tkick\t\tKick someone from a channel");
+	Logger::warn("\tload\t\tLoad a Lua plugin");
 	Logger::warn("\tme\t\tSend a CTCP Action (same as /me)");
 	Logger::warn("\tmessage\t\tSend a message to someone or a channel");
 	Logger::warn("\tmode\t\tChange a channel mode");
+	Logger::warn("\tnotice\t\tSend a private notice");
 	Logger::warn("\tnick\t\tChange your nickname");
 	Logger::warn("\tpart\t\tLeave a channel");
+	Logger::warn("\treload\t\tReload a Lua plugin");
 	Logger::warn("\ttopic\t\tChange a channel topic");
 	Logger::warn("\tumode\t\tChange a user mode");
+	Logger::warn("\tunload\t\tUnload a Lua plugin");
 
 	Logger::warn("\nFor more information on a command, type %s help <command>", getprogname());
 
