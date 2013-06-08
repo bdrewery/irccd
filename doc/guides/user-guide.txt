@@ -711,3 +711,5 @@ $ irccdctl unload name
 ----
 $ irccdctl unload logger
 ----
+
+//// vim: set syntax=asciidoc:

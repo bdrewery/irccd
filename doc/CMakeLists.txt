@@ -18,6 +18,7 @@
 
 option(WITH_MAN "Install man pages" On)
 option(WITH_LDOC "Install Lua API documentation" On)
+option(WITH_DOC "Install user guides" On)
 
 # Update man pages date
 set(MONTH "May")
@@ -28,7 +29,7 @@ function(DEFINE_MAN file man)
 	if (WITH_MAN)
 		# Remove .in end
 		string(REGEX REPLACE "(.*)\\.in$" "\\1" output ${file})
-		configure_file(${file} "${CMAKE_BINARY_DIR}/${output}")
+		configure_file("man/${file}" "${CMAKE_BINARY_DIR}/${output}")
 
 		install(
 			FILES "${CMAKE_BINARY_DIR}/${output}"
@@ -47,27 +48,62 @@ find_file(
 	NAMES ldoc ldoc.lua
 )
 
+find_file(
+	ASCIIDOC asciidoc
+	NAMES asciidoc asciidoc.py
+)
+
+#
 # Install Lua API
+#
 if (WITH_LDOC)
 	if (LDOC)
-		# Add a target make generate-doc for
+		# Add a target make generate-ldoc for
 		# developers.
 		add_custom_target(
-			generate-doc
+			generate-ldoc
 			COMMAND ${LDOC} .
-			    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/doc"
+			    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/doc/ldoc"
 			COMMAND cmake -E copy
-			    "${CMAKE_CURRENT_SOURCE_DIR}/style/logo.png"
+			    "${CMAKE_CURRENT_SOURCE_DIR}/ldoc/style/logo.png"
 			    "${CMAKE_CURRENT_SOURCE_DIR}/generated/lua"
 			COMMAND cmake -E copy
-			    "${CMAKE_CURRENT_SOURCE_DIR}/style/robot.png"
+			    "${CMAKE_CURRENT_SOURCE_DIR}/ldoc/style/robot.png"
 			    "${CMAKE_CURRENT_SOURCE_DIR}/generated/lua/"
 		)
+
 	endif ()
 
 	install(
 		DIRECTORY "generated/lua"
-		DESTINATION "${DOCDIR}/lua"
+		DESTINATION "${DOCDIR}"
+	)
+endif ()
+
+#
+# User and developer guides.
+#
+if (WITH_DOC)
+	if (ASCIIDOC)
+		add_custom_target(
+			generate-doc
+			COMMAND cmake -E make_directory
+			    "${CMAKE_CURRENT_SOURCE_DIR}/generated/guides"
+			COMMAND cmake -E make_directory
+			    "${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/icons"
+			COMMAND cmake -E copy_directory
+			    "${CMAKE_CURRENT_SOURCE_DIR}/guides/icons/"
+			    "${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/icons/"
+			COMMAND
+			    ${ASCIIDOC} -o
+			    "${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/user-guide.html"
+			    "${CMAKE_CURRENT_SOURCE_DIR}/guides/user-guide.txt"
+		)
+	endif ()
+
+	install(
+		DIRECTORY "generated/guides"
+		DESTINATION "${DOCDIR}"
 	)
 endif ()
 
