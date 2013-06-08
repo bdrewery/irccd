@@ -708,7 +708,7 @@ void Irccd::openServers(const Parser &config)
 		Server server;
 
 		try {
-			string name, address, commandToken, password, ident;
+			string name, host, commandToken, password, ident;
 			int port;
 
 			// General parameters
@@ -723,13 +723,13 @@ void Irccd::openServers(const Parser &config)
 
 			// Get connection parameters
 			name = s.requireOption<string>("name");
-			address = s.requireOption<string>("address");
+			host = s.requireOption<string>("host");
 			port = s.requireOption<int>("port");
 
 			if (s.hasOption("password"))
 				password = s.getOption<string>("password");
 
-			server.setConnection(name, address, port, false, password);
+			server.setConnection(name, host, port, false, password);
 
 			// Extract channels to auto join
 			extractChannels(s, server);

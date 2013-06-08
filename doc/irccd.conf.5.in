@@ -76,7 +76,7 @@ binary and will use it if none is specified.
 .It realname
 (string) The realname, default: IRC Client daemon.
 .It username
-(string) The username, usually shown as left part of user@host, default: irccd.
+(string) The username, default: irccd.
 .El
 .\" LISTENER
 .Ss listener
