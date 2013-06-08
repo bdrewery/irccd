@@ -95,8 +95,10 @@ if (WITH_DOC)
 			    "${CMAKE_CURRENT_SOURCE_DIR}/guides/icons/"
 			    "${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/icons/"
 			COMMAND
-			    ${ASCIIDOC} -o
-			    "${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/user-guide.html"
+			    ${ASCIIDOC}
+			    -a themedir="${CMAKE_CURRENT_SOURCE_DIR}/guides/themes/irccd"
+			    -a theme=irccd
+			    -o "${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/user-guide.html"
 			    "${CMAKE_CURRENT_SOURCE_DIR}/guides/user-guide.txt"
 		)
 	endif ()

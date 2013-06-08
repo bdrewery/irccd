@@ -1,9 +1,10 @@
+
 Irccd 1.0 user guide
 ====================
 :Author: Demelier David
 :Email: demelier.david@gmail.com
 :Date: June, 8 2013
-:toc2:
+:toc:
 :icons:
 :iconsdir: icons
 
@@ -75,6 +76,31 @@ If you don't want to install Lua API documentation, use the above command.
 
 ----
 markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_LDOC=Off
+----
+
+.Disable user guides
+You can disable installation of user guides.
+
+----
+markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_DOC=Off
+----
+
+.Disable manual pages
+On Windows, man pages are not really useful, you can also disable them
+
+----
+markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_MAN=Off
+----
+
+.Changing the default installation path
+Sometimes, you may need to install irccd over other place, for that, you can
+specify the prefix where to install files. On unix systems, it's usually
+'/usr/local/' and 'C:/Program Files/' on Windows.
+
+To change this, use the following:
+
+----
+markand@localhost [irccd-1.0/_build_] $ cmake .. -DCMAKE_INSTALL_PREFIX=/opt/some/directory
 ----
 
 == Configuring irccd
@@ -337,7 +363,7 @@ The following options are available:
 === Using plugins
 
 Lua plugins can be used to manage IRC events, to let you overriding distributed
-plugins, irccd will try to open plugin in your home directory before 
+plugins, irccd will try to open plugin in your home directory before.
 
 On Unix, the paths are searched in the following order:
 
@@ -712,4 +738,4 @@ $ irccdctl unload name
 $ irccdctl unload logger
 ----
 
-//// vim: set syntax=asciidoc:
+// vim: set syntax=asciidoc:
