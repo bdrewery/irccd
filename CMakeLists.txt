@@ -22,8 +22,9 @@ cmake_minimum_required(VERSION 2.8)
 # Project
 project(irccd-all)
 
-set(MAJOR "0")
-set(MINOR "1")
+set(MAJOR "1")
+set(MINOR "0")
+set(VERSION "${MAJOR}.${MINOR}-rc1")
 
 # General settings
 if (UNIX)
@@ -40,13 +41,13 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")		# own modules
 # Installation paths
 set(PREFIX "${CMAKE_INSTALL_PREFIX}"
     CACHE STRING "Installation prefix")
-set(MODDIR "${PREFIX}/share/irccd/plugins"
+set(MODDIR "share/irccd/plugins"
     CACHE STRING "Module prefix where to install")
-set(DOCDIR "${PREFIX}/share/doc/irccd"
+set(DOCDIR "share/doc/irccd"
     CACHE STRING "Documentation directory")
-set(MANDIR "${PREFIX}/share/man"
+set(MANDIR "share/man"
     CACHE STRING "Man directory")
-set(ETCDIR "${PREFIX}/etc"
+set(ETCDIR "etc"
     CACHE STRING "Configuration directory")
 
 # Include path to common
@@ -104,10 +105,10 @@ add_subdirectory(irccdctl)
 add_subdirectory(tests)
 
 message("Installation directories:")
-message("\tPREFIX\t\t${PREFIX}")
-message("\tMANDIR\t\t${MANDIR}")
-message("\tDOCDIR\t\t${DOCDIR}")
-message("\tMODDIR\t\t${MODDIR}")
+message("\tPREFIX\t\t${CMAKE_INSTALL_PREFIX}")
+message("\tMANDIR\t\t${CMAKE_INSTALL_PREFIX}/${MANDIR}")
+message("\tDOCDIR\t\t${CMAKE_INSTALL_PREFIX}/${DOCDIR}")
+message("\tMODDIR\t\t${CMAKE_INSTALL_PREFIX}/${MODDIR}")
 message("")
 
 message("Compiling irccd with following options:")
@@ -130,15 +131,15 @@ else ()
 endif ()
 
 set(CPACK_PACKAGE_VENDOR "Malikania")
-set(CPACK_PACKAGE_VERSION "${MAJOR}.${MINOR}")
+set(CPACK_PACKAGE_VERSION "${VERSION}")
 set(CPACK_PACKAGE_VERSION_MAJOR ${MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${MINOR})
-set(CPACK_PACKAGE_FILE_NAME "irccd-${MAJOR}.${MINOR}-${CMAKE_SYSTEM_NAME}")
+set(CPACK_PACKAGE_FILE_NAME "irccd-${VERSION}-${CMAKE_SYSTEM_NAME}")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "IRC Client Daemon")
 
-set(CPACK_SOURCE_PACKAGE_FILE_NAME "irccd-${MAJOR}.${MINOR}-source")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "irccd-${VERSION}-source")
 set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
-set(CPACK_SOURCE_IGNORE_FILES ".hg")
+set(CPACK_SOURCE_IGNORE_FILES ".hg;_build_")
 
 include(CPack)
 

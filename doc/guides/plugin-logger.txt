@@ -43,7 +43,7 @@ The `logger.conf` uses link:user-guide.html#irccdsyntax[irccd syntax].
 
 === Section `general`
 
-This section configures everything.
+This section configures global options.
 
 .Option `directory` (required)
 
