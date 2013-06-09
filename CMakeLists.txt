@@ -20,7 +20,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 # Project
-project(irccd-all)
+project(irccd)
 
 set(MAJOR "1")
 set(MINOR "0")
@@ -33,7 +33,8 @@ endif ()
 
 if (WIN32)
 	add_definitions("-D_CRT_SECURE_NO_WARNINGS")
-	set(CMAKE_CXX_FLAGS_DEBUG_INIT "/MDd /EHsc")
+	set(CMAKE_EXE_LINKER_FLAGS "/SAFESEH:NO")
+	set(CMAKE_CXX_FLAGS_DEBUG "/MDd /EHsc")
 endif ()
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")		# own modules
@@ -126,16 +127,28 @@ configure_file(
 
 # CPack
 if (WIN32)
+	if (CMAKE_SIZEOF_VOID_P MATCHES "8")
+		set(WINARCH "amd64")
+	else ()
+		set(WINARCH "x86")
+	endif ()
+
+	set(CPACK_GENERATOR "ZIP;NSIS")
+	set(CPACK_MONOLITHIC_INSTALL FALSE)
+
+	set(CPACK_NSIS_DISPLAY_NAME "IRC Client daemon")
+	set(CPACK_NSIS_EXECUTABLES_DIRECTORY "bin")
+	set(CPACK_NSIS_CONTACT "demelier.david@gmail.com")
+
+	set(CPACK_PACKAGE_VENDOR "Malikania")
+	set(CPACK_PACKAGE_VERSION "${VERSION}")
+	set(CPACK_PACKAGE_VERSION_MAJOR ${MAJOR})
+	set(CPACK_PACKAGE_VERSION_MINOR ${MINOR})
+	set(CPACK_PACKAGE_FILE_NAME "irccd-${VERSION}-${CMAKE_SYSTEM_NAME}-${WINARCH}")
+	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "IRC Client Daemon")
 else ()
 	set(CPACK_GENERATOR "TGZ")
 endif ()
-
-set(CPACK_PACKAGE_VENDOR "Malikania")
-set(CPACK_PACKAGE_VERSION "${VERSION}")
-set(CPACK_PACKAGE_VERSION_MAJOR ${MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${MINOR})
-set(CPACK_PACKAGE_FILE_NAME "irccd-${VERSION}-${CMAKE_SYSTEM_NAME}")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "IRC Client Daemon")
 
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "irccd-${VERSION}-source")
 set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")

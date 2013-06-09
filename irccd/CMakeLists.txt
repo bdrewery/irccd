@@ -36,7 +36,7 @@ set(SOURCES
 set(LUA_SUPPORT "disabled" PARENT_SCOPE)
 
 if (WITH_LUA)
-	find_package(Lua52 QUIET)
+	find_package(Lua52)
 
 	if (LUA52_FOUND)
 		add_subdirectory(plugins)
