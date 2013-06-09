@@ -9,7 +9,7 @@
 
 /* Default font. */
 body {
-	font-family: "DejaVu Sans", Sans;
+	font-family: "DejaVu Sans", Sans, verdana;
 	font-size: 11px;
 }
 
@@ -42,7 +42,6 @@ h1, h2, h3, h4, h5, h6 {
   color: #214954;
   margin-bottom: 0.5em;
   line-height: 1.3;
-  letter-spacing:+0.15em;
 }
 
 h1, h2, h3 {
@@ -352,7 +351,6 @@ em {
   font-style: normal ! important;
   font-weight: bold ! important;
   color: #662222   ! important;
-  letter-spacing:+0.08em ! important;
 }
 
 
@@ -374,7 +372,6 @@ p.tableblock {
 }
 table.tableblock {
   border-width: 3px;
-  border-spacing: 0px;
   border-style: solid;
   border-color: #444466;
   border-collapse: collapse;
