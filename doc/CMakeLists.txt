@@ -62,7 +62,7 @@ if (WITH_LDOC)
 		# developers.
 		add_custom_target(
 			generate-ldoc
-			COMMAND ${LDOC} .
+			COMMAND ${LDOC} -q .
 			    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/doc/ldoc"
 			COMMAND cmake -E copy
 			    "${CMAKE_CURRENT_SOURCE_DIR}/ldoc/style/logo.png"
@@ -85,6 +85,26 @@ endif ()
 #
 if (WITH_DOC)
 	if (ASCIIDOC)
+		# Macro to define new guides to be processed.
+		macro(DEFINE_GUIDE file)
+			string(REGEX REPLACE "(.*)\\.txt$" "\\1" output ${file})
+
+			list(
+				APPEND
+				COMMANDS
+				    COMMAND ${ASCIIDOC}
+				    -a themedir="${CMAKE_CURRENT_SOURCE_DIR}/guides/themes/irccd"
+				    -a theme=irccd
+				    -o "${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/${output}.html"
+				       "${CMAKE_CURRENT_SOURCE_DIR}/guides/${file}"
+				)
+		endmacro ()
+
+		DEFINE_GUIDE(user-guide.txt)
+		DEFINE_GUIDE(plugin-ask.txt)		# ask.lua
+		DEFINE_GUIDE(plugin-history.txt)	# history.lua
+		DEFINE_GUIDE(plugin-logger.txt)		# logger.lua
+
 		add_custom_target(
 			generate-doc
 			COMMAND cmake -E make_directory
@@ -94,12 +114,7 @@ if (WITH_DOC)
 			COMMAND cmake -E copy_directory
 			    "${CMAKE_CURRENT_SOURCE_DIR}/guides/icons/"
 			    "${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/icons/"
-			COMMAND
-			    ${ASCIIDOC}
-			    -a themedir="${CMAKE_CURRENT_SOURCE_DIR}/guides/themes/irccd"
-			    -a theme=irccd
-			    -o "${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/user-guide.html"
-			    "${CMAKE_CURRENT_SOURCE_DIR}/guides/user-guide.txt"
+			${COMMANDS}
 		)
 	endif ()
 

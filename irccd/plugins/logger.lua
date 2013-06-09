@@ -30,10 +30,10 @@ local format = {
 	me	= "* #u #m",
 	message	= "%H:%M #u: #m",
 	mode	= ":: #u changed the mode to: #m #M",
-	notice	= "[notice] (#u) #t: #m",
+	notice	= "[notice] (#u) #T: #m",
 	part	= "<< #u left #c [#m]",
-	topic	= ":: #u changed the topic to: #m",
-	umode	= "#u set mode #m to #t"
+	topic	= ":: #u changed the topic to: #t",
+	umode	= "#u set mode #m to #T"
 }
 
 -- Load the config.
@@ -184,7 +184,7 @@ function onNotice(server, who, target, notice)
 		c = who,			-- for file loggin like channel
 		m = notice,
 		s = server:getName(),
-		t = target,
+		T = target,
 		u = util.splitUser(who),
 		U = who
 	}
@@ -210,7 +210,7 @@ function onTopic(server, channel, who, topic)
 	local keywords = {
 		c = channel,
 		s = server:getName(),
-		m = topic,
+		t = topic,
 		u = util.splitUser(who),
 		U = who
 	}
@@ -224,7 +224,7 @@ function onUserMode(server, who, mode)
 	local keywords = {
 		m = mode,
 		s = server:getName(),
-		t = identity.nickname,
+		T = identity.nickname,
 	}
 
 	write(format.umode, keywords)

@@ -1,4 +1,3 @@
-
 Irccd 1.0 user guide
 ====================
 :Author: Demelier David
@@ -138,6 +137,8 @@ failed to open it. Example: `irccd -c myconfig.conf`.
 [CAUTION]
 The default config paths are using the default prefixes, check the
 <<bfs,Building from sources>> section.
+
+anchor:irccdsyntax[]
 
 === Syntax
 
@@ -376,6 +377,79 @@ On Windows, the paths are searched in the following order:
 . Specified by -p on command line
 . 'C:\Users\YourUser\irccd\plugins'
 . 'C:\Program Files\irccd\plugins'
+
+anchor:irccdplugnote[]
+
+=== Note about plugins
+
+All plugins have a home directory. This allow configuring or caching some data
+needed for it. The home directory cannot be changed and is relative to the irccd
+<<irccdpaths,config paths>> plus the plugin name. For example, plugin the
+`ask.lua` will have the following home:
+
+On Unix: '~/.config/irccd/ask/'
+
+On Windows: 'C:/Users/YourUser/irccd/ask/'
+
+anchor:irccdpatterns[]
+
+=== Common patterns in plugins
+
+Some plugins can be configured, and some of them can use patterns to substitute
+variables.
+
+For instance, using the `logger` plugin, it's possible to customize the pattern
+to use when someone joins a channel like that:
+
+----
+#U joined #c
+----
+
+The keywords *#U*
+will be substituted to the nickname and *#C* to the channel name.
+
+Note, some keywords are obviously not available for all contexts. When plugins
+supports these patterns, they are marked as *Keywords supported: #c, #m*.
+
+.Time
+
+When you can use patterns, the date and time may be used just like `strftime(3)`
+so for the hours and minutes, you can use *%H:%M*.
+
+.Home
+
+To match your user directory, you can use the famous *~*.
+
+.List of keywords supported
+
+Here's the list of keywords that a lot of plugins uses:
+
+* `#c`, the channel name
+* `#m`, a message (depending on context)
+* `#s`, the current server name
+* `#t`, the topic
+* `#u`, the full user, i.e `markand!~mkd@localhost`
+* `#U`, the nickname
+
+.Example with `logger`
+
+Using the plugin logger, you can use a configuration like this:
+
+[source, ini]
+----
+[general]
+directory = "~/logs/#s/%y/%m/#c-%d.log"
+format-message  = "%H:%M #u: #m"
+----
+
+With this example, *~* will be substituted to the user home directory. With a
+server named `local`, a channel `#staff` everything would be stored like this:
+
+`/home/markand/local/13/07/#staff-08.log`
+
+Also the message would be stored like this:
+
+`20:50 markand: I'm watching TV.`
 
 == The irccdctl utility
 

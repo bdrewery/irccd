@@ -127,7 +127,7 @@ div.content { /* Block element content. */
 
 /* Block element titles. */
 div.title, caption.title {
-  color: #444466;
+  color: #214954;
   font-weight: bold;
   text-align: left;
   margin-top: 1.0em;
@@ -331,7 +331,6 @@ body {
   font-family:  Consolas, "Andale Mono", "Courier New", monospace;
   color: #004400;
   background: #f4f4f4;
-  max-width: 80em;
   line-height: 1.2em;
 }
 
@@ -339,9 +338,6 @@ body {
   line-height: 1.5em;
   margin-top: 1em;
 }
-
-.paragraph p, li, dd, .content { max-width: 45em; }
-.admonitionblock               { max-width: 35em; }
 
 div.sectionbody div.ulist > ul > li {
   list-style-type: square;
@@ -815,6 +811,7 @@ failed to open it. Example: <code>irccd -c myconfig.conf</code>.</td>
 <a href="#bfs">Building from sources</a> section.</td>
 </tr></table>
 </div>
+<div class="paragraph"><p><a id="irccdsyntax"></a></p></div>
 </div>
 <div class="sect2">
 <h3 id="_syntax">Syntax</h3>
@@ -1176,6 +1173,82 @@ Specified by -p on command line
 </p>
 </li>
 </ol></div>
+<div class="paragraph"><p><a id="irccdplugnote"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_note_about_plugins">Note about plugins</h3>
+<div class="paragraph"><p>All plugins have a home directory. This allow configuring or caching some data
+needed for it. The home directory cannot be changed and is relative to the irccd
+<a href="#irccdpaths">config paths</a> plus the plugin name. For example, plugin the
+<code>ask.lua</code> will have the following home:</p></div>
+<div class="paragraph"><p>On Unix: <em>~/.config/irccd/ask/</em></p></div>
+<div class="paragraph"><p>On Windows: <em>C:/Users/YourUser/irccd/ask/</em></p></div>
+<div class="paragraph"><p><a id="irccdpatterns"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_common_patterns_in_plugins">Common patterns in plugins</h3>
+<div class="paragraph"><p>Some plugins can be configured, and some of them can use patterns to substitute
+variables.</p></div>
+<div class="paragraph"><p>For instance, using the <code>logger</code> plugin, it&#8217;s possible to customize the pattern
+to use when someone joins a channel like that:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>#U joined #c</code></pre>
+</div></div>
+<div class="paragraph"><p>The keywords <strong>#U</strong>
+will be substituted to the nickname and <strong>#C</strong> to the channel name.</p></div>
+<div class="paragraph"><p>Note, some keywords are obviously not available for all contexts. When plugins
+supports these patterns, they are marked as <strong>Keywords supported: #c, #m</strong>.</p></div>
+<div class="paragraph"><div class="title">Time</div><p>When you can use patterns, the date and time may be used just like <code>strftime(3)</code>
+so for the hours and minutes, you can use <strong>%H:%M</strong>.</p></div>
+<div class="paragraph"><div class="title">Home</div><p>To match your user directory, you can use the famous <strong>~</strong>.</p></div>
+<div class="paragraph"><div class="title">List of keywords supported</div><p>Here&#8217;s the list of keywords that a lot of plugins uses:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<code>#c</code>, the channel name
+</p>
+</li>
+<li>
+<p>
+<code>#m</code>, a message (depending on context)
+</p>
+</li>
+<li>
+<p>
+<code>#s</code>, the current server name
+</p>
+</li>
+<li>
+<p>
+<code>#t</code>, the topic
+</p>
+</li>
+<li>
+<p>
+<code>#u</code>, the full user, i.e <code>markand!~mkd@localhost</code>
+</p>
+</li>
+<li>
+<p>
+<code>#U</code>, the nickname
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><div class="title">Example with <code>logger</code></div><p>Using the plugin logger, you can use a configuration like this:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">[general]</span></span>
+<span style="color: #009900">directory </span><span style="color: #990000">=</span> <span style="color: #FF0000">"~/logs/#s/%y/%m/#c-%d.log"</span>
+<span style="color: #009900">format-message  </span><span style="color: #990000">=</span> <span style="color: #FF0000">"%H:%M #u: #m"</span></tt></pre></div></div>
+<div class="paragraph"><p>With this example, <strong>~</strong> will be substituted to the user home directory. With a
+server named <code>local</code>, a channel <code>#staff</code> everything would be stored like this:</p></div>
+<div class="paragraph"><p><code>/home/markand/local/13/07/#staff-08.log</code></p></div>
+<div class="paragraph"><p>Also the message would be stored like this:</p></div>
+<div class="paragraph"><p><code>20:50 markand: I'm watching TV.</code></p></div>
 </div>
 </div>
 </div>
@@ -1615,7 +1688,7 @@ quotes.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-06-08 18:38:45 CEST
+Last updated 2013-06-09 11:23:42 CEST
 </div>
 </div>
 </body>

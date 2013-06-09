@@ -24,9 +24,9 @@ local util = require "irccd.util"
 
 local format = {
 	error	= "I could not open my database file",
-	seen	= "I've seen #u for the last time on %m/%d/%y %H:%M",
-	said	= "The last message that #u said is: #m",
-	unknown	= "I've never known #u"
+	seen	= "I've seen #U for the last time on %m/%d/%y %H:%M",
+	said	= "The last message that #U said is: #m",
+	unknown	= "I've never known #U"
 }
 
 local function loadFormats()
@@ -170,13 +170,13 @@ function onCommand(server, channel, who, message)
 	if f == nil then
 		server:say(channel, who .. ", " .. format.error)
 	else
-		local c, u = message:match("%s*(%w+)%s+(%w+)%s*")
+		local c, U = message:match("%s*(%w+)%s+(%w+)%s*")
 		local list = loadFile(f)
 		local entry = findEntry(list, u)
 
 		-- Convert format
 		local kw = {
-			u = u,
+			U = U,
 			c = c
 		}
 
