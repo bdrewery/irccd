@@ -18,35 +18,50 @@
 
 local plugin = require "irccd.plugin"
 local parser = require "irccd.parser"
+local util = require "irccd.util"
 
 local words = { }
 local answer = "Please check your spelling"
 
-function readFile(table, filename)
-	local f, err = io.open(plugin.getHome() .. "/" .. filename)
-	table = { }
+-- Reload every words
+function loadWords()
+	local f, err = io.open(plugin.getHome() .. "/words.txt")
 
 	if (f ~= nil) then
 		for w in f:lines() do
 			if #w > 0 then
-				table.insert(table, w)
+				table.insert(words, w)
 			end
 		end
 	end
 end
 
--- Reload every words
-function reloadWords()
-	readFile(words, "words.txt")
+function loadConfig()
+	local path = plugin.getHome() .. "/badwords.conf"
+	local parser = parser.new(path, { parser.DisableRedefinition })
+
+	local ret, err = parser:open()
+	if ret then
+		local general = parser:getSection("general")
+		if general then
+			if general:hasOption("response") then
+				answer = general:getOption("response")	
+			end
+		end
+	end
 end
 
-reloadWords()
-reloadUsers()
+loadWords()
+loadConfig()
 
 function onMessage(server, channel, nick, message)
 	for _, w in pairs(words) do
-		if string.find(message, " " .. w .. " ") then
-			server:say(channel, nick .. ": ne soyez pas vulgaire!")
+		-- I guess there is best way to handle this...
+		local p1 = "^" .. w .. "[%sp]*"
+		local p2 = "[%s]+" .. w .. "[%sp]*"
+
+		if message:find(p1) or message:find(p2) then
+			server:say(channel, util.splitUser(nick) .. ": " .. answer)
 
 			-- do not multiple
 			break;
@@ -54,6 +69,7 @@ function onMessage(server, channel, nick, message)
 	end
 end
 
-function onCommand(server, channel, nick, message)
-
+function onReload()
+	loadWords()
+	loadConfig()
 end
