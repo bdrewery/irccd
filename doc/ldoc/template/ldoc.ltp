@@ -67,9 +67,7 @@
 <div id="content">
 
 #if module then
-  <div id="content-top">
-    <h2>$(ldoc.titlecase(module.type)) <code>$(module.name)</code></h2>
-  </div>
+  <h2>$(ldoc.titlecase(module.type)) <code>$(module.name)</code></h2>
 # end
 
 # if ldoc.body then -- verbatim HTML as contents; 'non-code' entries
@@ -213,9 +211,7 @@
 # if ldoc.description then
 
 <!-- For "index" page -->
-<div id="content-top">
   <h2>$(M(ldoc.description,nil))</h2>
-</div>
 
 # end
 # if ldoc.full_description then
