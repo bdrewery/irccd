@@ -101,6 +101,7 @@ if (WITH_DOC)
 		endmacro ()
 
 		DEFINE_GUIDE(user-guide.txt)
+		DEFINE_GUIDE(plugin-antiflood.txt)	# antiflood.lua
 		DEFINE_GUIDE(plugin-ask.txt)		# ask.lua
 		DEFINE_GUIDE(plugin-history.txt)	# history.lua
 		DEFINE_GUIDE(plugin-logger.txt)		# logger.lua

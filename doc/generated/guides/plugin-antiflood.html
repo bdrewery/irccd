@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
 <meta name="generator" content="AsciiDoc 8.6.8" />
-<title>Plugin logger 1.0</title>
+<title>Plugin antiflood 1.0</title>
 <style type="text/css">
 /*
  * AsciiDoc 'volnitsky' theme for xhtml11 and html5 backends.
@@ -625,7 +625,7 @@ asciidoc.install(2);
 </head>
 <body class="article">
 <div id="header">
-<h1>Plugin logger 1.0</h1>
+<h1>Plugin antiflood 1.0</h1>
 <span id="author">Demelier David</span><br />
 <span id="email"><code>&lt;<a href="mailto:demelier.david@gmail.com">demelier.david@gmail.com</a>&gt;</code></span><br />
 <span id="revdate">June, 8 2013</span>
@@ -638,65 +638,18 @@ asciidoc.install(2);
 <div class="sect1">
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>logger</code> may be used to log everything you want. It supports the
-following events:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-Channel notice
-</p>
-</li>
-<li>
-<p>
-Join
-</p>
-</li>
-<li>
-<p>
-Me
-</p>
-</li>
-<li>
-<p>
-Message
-</p>
-</li>
-<li>
-<p>
-Mode
-</p>
-</li>
-<li>
-<p>
-Private notice
-</p>
-</li>
-<li>
-<p>
-Part
-</p>
-</li>
-<li>
-<p>
-Topic
-</p>
-</li>
-<li>
-<p>
-User mode
-</p>
-</li>
-</ul></div>
+<div class="paragraph"><p>The plugin <code>antiflood</code> can avoid people from flooding channels. It supports
+banning and kicking.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_installation">Installation</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>logger</code> is distributed with <code>irccd</code>. To enable it add the following
-to your <code>plugins</code> parameter:</p></div>
+<div class="paragraph"><p>The plugin <code>antiflood</code> is distributed with <code>irccd</code>. To enable it add the
+following to your <code>plugins</code> parameter:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>plugins = "logger"</code></pre>
+<pre><code>plugins = "antiflood"</code></pre>
 </div></div>
 </div>
 </div>
@@ -710,53 +663,53 @@ to your <code>plugins</code> parameter:</p></div>
 <div class="sect1">
 <h2 id="_configuration">Configuration</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>logger</code> can be configured to format logs.</p></div>
-<div class="paragraph"><p>The <code>logger.conf</code> uses <a href="user-guide.html#irccdsyntax">irccd syntax</a>.</p></div>
+<div class="paragraph"><p>The plugin <code>antiflood</code> can be configured in the file <code>antiflood.conf</code>. It allows
+changing the messages rate, the action to execute and an optional ignore list.</p></div>
+<div class="paragraph"><p>The <code>antiflood.conf</code> uses <a href="user-guide.html#irccdsyntax">irccd syntax</a>.</p></div>
 <div class="sect2">
 <h3 id="_section_code_general_code">Section <code>general</code></h3>
-<div class="paragraph"><p>This section configures global options.</p></div>
-<div class="paragraph"><div class="title">Option <code>directory</code> (required)</div><p>The directory where to store logs.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: ~, #s, #c, time</a></p></div>
+<div class="paragraph"><p>This section configures the general parameters. You may need fine tweaking to
+make it working better on some servers.</p></div>
+<div class="paragraph"><div class="title">Option <code>max-messages</code></div><p>Number of max messages that can be sent in a certain amount of time. Default: 5.</p></div>
+<div class="paragraph"><div class="title">Option <code>max-delay</code></div><p>Number of milliseconds between each messages. Default: 5000.</p></div>
+<div class="paragraph"><div class="title">Option <code>action</code></div><p>The action to execute, can be <code>kick</code> or <code>ban</code>. Default: kick.</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img src="icons/note.png" alt="Note" />
+</td>
+<td class="content">Unfortunately, it&#8217;s not possible to modify the ban mask, only nick bans are used
+yet.</td>
+</tr></table>
+</div>
+<div class="paragraph"><div class="title">Option <code>reason</code></div><p>An optional reason, it is used only as <code>kick</code> action. Default: "please not
+flood".</p></div>
 </div>
 <div class="sect2">
-<h3 id="_section_code_formats_code">Section <code>formats</code></h3>
-<div class="paragraph"><p>Event log formats. By default all events are logged, if you
-want to disable any of them, set the desired option to "".</p></div>
-<div class="paragraph"><div class="title">Option <code>cnotice</code></div><p>Format for channel notices.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #u, #s, #U, time</a></p></div>
-<div class="paragraph"><div class="title">Option <code>join</code></div><p>Format for channel joins.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #u, #s, #U, time</a></p></div>
-<div class="paragraph"><div class="title">Option <code>me</code> (CTCP Action)</div><p>Format for /me.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #u, #U, time</a></p></div>
-<div class="paragraph"><div class="title">Option <code>message</code></div><p>Format for messages.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #u, #U, time</a></p></div>
-<div class="paragraph"><div class="title">Option <code>mode</code></div><p>Format for channel mode changes.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #M, #s, #u, #U, time</a></p></div>
+<h3 id="_section_code_ignore_code">Section <code>ignore</code></h3>
+<div class="paragraph"><p>This section let you ignoring nicknames so these users are not tracked as
+possible flooders.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="icons/note.png" alt="Note" />
 </td>
-<td class="content">Keyword <strong>#m</strong> is the mode name such as <strong>+b</strong> and <strong>#M</strong> an optional argument.</td>
+<td class="content">Irccd automatically adds itself to the ignore list, there is no need to add the
+bot.</td>
 </tr></table>
 </div>
-<div class="paragraph"><div class="title">Option <code>notice</code></div><p>Format for private notices</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #T #u, #U, time</a></p></div>
-<div class="admonitionblock">
-<table><tr>
-<td class="icon">
-<img src="icons/note.png" alt="Note" />
-</td>
-<td class="content">Keyword <strong>#T</strong> is the targeted nicknamed for the notice, <strong>#u</strong> and <strong>#U</strong> are the
-sender nickname.</td>
-</tr></table>
-</div>
-<div class="paragraph"><div class="title">Option <code>part</code></div><p>Format for parts.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #u, #U, time</a></p></div>
-<div class="paragraph"><div class="title">Option <code>topic</code></div><p>Format for topic changes.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #s, #t, #u, #U, time</a></p></div>
-<div class="paragraph"><div class="title">Option <code>umode</code></div><p>Format for user mode change. This only affects you.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #m, #s, #T, time</a></p></div>
+<div class="paragraph"><div class="title">Option <code>list</code></div><p>A space separeted list of nicknames to ignore. Default: empty.</p></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">[general]</span></span>
+<span style="color: #009900">action </span><span style="color: #990000">=</span> <span style="color: #FF0000">"kick"</span>
+<span style="color: #009900">reason </span><span style="color: #990000">=</span> <span style="color: #FF0000">"don't write so fast please"</span>
+<span style="color: #009900">max-messages </span><span style="color: #990000">=</span> <span style="color: #FF0000">"3"</span>
+<span style="color: #009900">max-delay </span><span style="color: #990000">=</span> <span style="color: #FF0000">"4000"</span></tt></pre></div></div>
 </div>
 </div>
 </div>
@@ -764,7 +717,7 @@ sender nickname.</td>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-06-10 11:49:20 CEST
+Last updated 2013-06-10 11:59:49 CEST
 </div>
 </div>
 </body>

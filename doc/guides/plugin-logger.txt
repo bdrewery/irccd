@@ -35,6 +35,8 @@ plugins = "logger"
 
 There is nothing to do, except configuring it.
 
+See link:user-guide.html#irccdplugnote[irccd plugin notes].
+
 == Configuration
 
 The plugin `logger` can be configured to format logs.

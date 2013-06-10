@@ -43,7 +43,7 @@ See link:user-guide.html#irccdplugnote[irccd plugin notes].
 
 == Configuration
 
-The plugin history can be configured in the file `history.conf`. You can change
+The plugin `history` can be configured in the file `history.conf`. You can change
 the answers from irccd.
 
 The `history.conf` uses link:user-guide.html#irccdsyntax[irccd syntax].
@@ -56,8 +56,6 @@ This section configures the answers that irccd will uses to answers requests.
 
 When the plugin history could not open the database files, it uses this option
 to respond an error.
-
-No keywords supported.
 
 .Option `seen`
 
