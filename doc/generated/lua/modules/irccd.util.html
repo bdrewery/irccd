@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+  <title>Irccd Lua API Documentation</title>
+  <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+
+<!-- Menu -->
+<div id="menu">
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2 class="kind">Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Class_Date">Class Date </a></li>
+<li><a href="#Date_metamethods">Date metamethods </a></li>
+<li><a href="#Class_Directory">Class Directory </a></li>
+<li><a href="#Directory_metamethods">Directory metamethods </a></li>
+</ul>
+
+<h2 class="kind">Modules</h2>
+<ul>
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><strong>irccd.util</strong></li>
+</ul>
+<h2 class="kind">Topics</h2>
+<ul>
+  <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
+  <li><a href="../topics/2-Plugin-creation.md.html">2-Plugin-creation.md</a></li>
+  <li><a href="../topics/2.1-Using-irccd-test.md.html">2.1-Using-irccd-test.md</a></li>
+  <li><a href="../topics/3-Events.md.html">3-Events.md</a></li>
+  <li><a href="../topics/3.101-Action.md.html">3.101-Action.md</a></li>
+  <li><a href="../topics/3.102-Command.md.html">3.102-Command.md</a></li>
+  <li><a href="../topics/3.103-Connect.md.html">3.103-Connect.md</a></li>
+  <li><a href="../topics/3.104-Channel-notice.md.html">3.104-Channel-notice.md</a></li>
+  <li><a href="../topics/3.105-Invite.md.html">3.105-Invite.md</a></li>
+  <li><a href="../topics/3.106-Join.md.html">3.106-Join.md</a></li>
+  <li><a href="../topics/3.107-Kick.md.html">3.107-Kick.md</a></li>
+  <li><a href="../topics/3.108-Message.md.html">3.108-Message.md</a></li>
+  <li><a href="../topics/3.109-Mode.md.html">3.109-Mode.md</a></li>
+  <li><a href="../topics/3.110-Nick.md.html">3.110-Nick.md</a></li>
+  <li><a href="../topics/3.111-Notice.md.html">3.111-Notice.md</a></li>
+  <li><a href="../topics/3.112-Part.md.html">3.112-Part.md</a></li>
+  <li><a href="../topics/3.113-Query.md.html">3.113-Query.md</a></li>
+  <li><a href="../topics/3.114-Reload.md.html">3.114-Reload.md</a></li>
+  <li><a href="../topics/3.115-Topic.md.html">3.115-Topic.md</a></li>
+  <li><a href="../topics/3.116-User-mode.md.html">3.116-User-mode.md</a></li>
+</ul>
+<h2 class="kind">Examples</h2>
+<ul>
+  <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
+</ul>
+
+</div><!-- !menu -->
+
+<div id="content">
+
+  <div id="content-top">
+    <h2>Module <code>irccd.util</code></h2>
+  </div>
+
+<p>Utilitities.</p>
+<p> Some utilities.</p>
+
+
+<h2 class="kind"><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#basename">basename&nbsp;(path)</a></td>
+	<td class="summary">Get the file name of a full path.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#date">date&nbsp;(timestamp)</a></td>
+	<td class="summary">Create a Date object.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#dirname">dirname&nbsp;(path)</a></td>
+	<td class="summary">Get the parent path of a file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#exist">exist&nbsp;(path)</a></td>
+	<td class="summary">Check if a file exists.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getTicks">getTicks&nbsp;()</a></td>
+	<td class="summary">Get the time spent from start.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mkdir">mkdir&nbsp;(path)</a></td>
+	<td class="summary">Create a directory.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#opendir">opendir&nbsp;(path, skipSpecial)</a></td>
+	<td class="summary">Open a directory.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#splitUser">splitUser&nbsp;(user)</a></td>
+	<td class="summary">Split the nickname and host.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#usleep">usleep&nbsp;(msec)</a></td>
+	<td class="summary">Sleep for milliseconds.</td>
+	</tr>
+</table>
+<h2 class="kind"><a href="#Class_Date">Class Date </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Date:calendar">Date:calendar&nbsp;()</a></td>
+	<td class="summary">Get a calendar.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Date:format">Date:format&nbsp;(format)</a></td>
+	<td class="summary">Format a date.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Date:timestamp">Date:timestamp&nbsp;()</a></td>
+	<td class="summary">Return the timestamp.</td>
+	</tr>
+</table>
+<h2 class="kind"><a href="#Date_metamethods">Date metamethods </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Date:__eq">Date:__eq&nbsp;(other)</a></td>
+	<td class="summary">Test equality.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Date:__le">Date:__le&nbsp;(other)</a></td>
+	<td class="summary">Test inferiority</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Date:__tostring">Date:__tostring&nbsp;()</a></td>
+	<td class="summary">Convert object to string.</td>
+	</tr>
+</table>
+<h2 class="kind"><a href="#Class_Directory">Class Directory </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Directory:count">Directory:count&nbsp;()</a></td>
+	<td class="summary">Count the number of elements.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Directory:read">Directory:read&nbsp;()</a></td>
+	<td class="summary">Iterate over the entries.</td>
+	</tr>
+</table>
+<h2 class="kind"><a href="#Directory_metamethods">Directory metamethods </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Directory:__eq">Directory:__eq&nbsp;(other)</a></td>
+	<td class="summary">Test equality.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Directory:__tostring">Directory:__tostring&nbsp;()</a></td>
+	<td class="summary">Convert object to string.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="kind"><a name="Functions"></a>Functions</h2>
+    <dl class="function">
+    <dt>
+    <a name = "basename"></a>
+    <strong>basename&nbsp;(path)</strong>
+    </dt>
+    <dd>
+    Get the file name of a full path.
+ Returns the file name only of a full path. For instance, returns
+ "foo.lua" when calling with "/usr/local/foo.lua"
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the file path</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the file name
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "date"></a>
+    <strong>date&nbsp;(timestamp)</strong>
+    </dt>
+    <dd>
+    Create a Date object.
+ This function returns a date object with a specific time from the
+ system. If no timestamp is provided, it use the current date.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">timestamp</span>
+         an optional timestamp</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Date object
+    </ol>
+
+
+    <h3>see also:</h3>
+    <ul>
+         <a href="../modules/irccd.util.html#Class_Date">Date</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "dirname"></a>
+    <strong>dirname&nbsp;(path)</strong>
+    </dt>
+    <dd>
+    Get the parent path of a file.
+ This function may be used to get the parent path of a file. Example:
+ calling dirname on "/foo/bar/test.txt" will returns "/foo/bar".
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the full file path</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the parent path
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "exist"></a>
+    <strong>exist&nbsp;(path)</strong>
+    </dt>
+    <dd>
+    Check if a file exists.
+ Tests if a directory or a file exists.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path to check</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if exists
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "getTicks"></a>
+    <strong>getTicks&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get the time spent from start.
+ Get how many milliseconds spent since the irccd startup.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the number of seconds
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "mkdir"></a>
+    <strong>mkdir&nbsp;(path)</strong>
+    </dt>
+    <dd>
+    Create a directory.
+ Create recursively a directory, like <code>mkdir -p</code>. This function
+ will return two values on error.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        true on success or false plus an error</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "opendir"></a>
+    <strong>opendir&nbsp;(path, skipSpecial)</strong>
+    </dt>
+    <dd>
+    Open a directory.
+ This function will open the directory specified by path. Optional boolean
+ skipSpecial may be passed to avoid ".", ".." for being treated.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path</li>
+        <li><span class="parameter">skipSpecial</span>
+         forget "." and "..", default: false</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Directory object
+    </ol>
+
+
+    <h3>see also:</h3>
+    <ul>
+         <a href="../modules/irccd.util.html#Class_Directory">Directory</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "splitUser"></a>
+    <strong>splitUser&nbsp;(user)</strong>
+    </dt>
+    <dd>
+    Split the nickname and host.
+ Extract the nickname and host from a user, for instance with
+ foo!~foo@localhost, foo will be returned as first value, localhost
+ as second.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">user</span>
+         the user to split</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the nickname</li>
+        <li>
+        the hostname</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "usleep"></a>
+    <strong>usleep&nbsp;(msec)</strong>
+    </dt>
+    <dd>
+    Sleep for milliseconds.
+ Suspend the execution thread.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">msec</span>
+         the number of milliseconds</li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="kind"><a name="Class_Date"></a>Class Date </h2>
+        Date
+    <dl class="function">
+    <dt>
+    <a name = "Date:calendar"></a>
+    <strong>Date:calendar&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get a calendar.
+ Return a table with the following fields:
+ <ul>
+ <li><strong>seconds (int)</strong>: seconds elapsed [0-60]</li>
+ <li><strong>minutes (int)</strong>: minutes elapsed [0-59]</li>
+ <li><strong>hours (int)</strong>: hours elapsed [0-23]</li>
+ <li><strong>month (int)</strong>: number of month [1-12]</li>
+ <li><strong>year (int)</strong>: the real year</li>
+ </ul>
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a table
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Date:format"></a>
+    <strong>Date:format&nbsp;(format)</strong>
+    </dt>
+    <dd>
+    Format a date.
+ Format the date with a specific format, see strftime(3) for keywords.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">format</span>
+         the format</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the date formatted
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Date:timestamp"></a>
+    <strong>Date:timestamp&nbsp;()</strong>
+    </dt>
+    <dd>
+    Return the timestamp.
+ Get the timestamp from the epoch (aka time_t).
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a timestamp
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="kind"><a name="Date_metamethods"></a>Date metamethods </h2>
+        Date metamethods.
+ The metamethods available for object Date.
+    <dl class="function">
+    <dt>
+    <a name = "Date:__eq"></a>
+    <strong>Date:__eq&nbsp;(other)</strong>
+    </dt>
+    <dd>
+    Test equality.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other date</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if they equals
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Date:__le"></a>
+    <strong>Date:__le&nbsp;(other)</strong>
+    </dt>
+    <dd>
+    Test inferiority
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other date</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        self &lt;= other comparison
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Date:__tostring"></a>
+    <strong>Date:__tostring&nbsp;()</strong>
+    </dt>
+    <dd>
+    Convert object to string.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="kind"><a name="Class_Directory"></a>Class Directory </h2>
+        Directory
+    <dl class="function">
+    <dt>
+    <a name = "Directory:count"></a>
+    <strong>Directory:count&nbsp;()</strong>
+    </dt>
+    <dd>
+    Count the number of elements.
+ Return the number of elements found in the directory. Note that
+ if you didn't passed true to util.openDir() you will have
+ "." and ".." counted int.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the number of entries in the directory
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Directory:read"></a>
+    <strong>Directory:read&nbsp;()</strong>
+    </dt>
+    <dd>
+    Iterate over the entries.
+ Iterate over the entries, this function returns 2 arguments
+ the entry and a boolean telling if is a directory.
+
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the entry name</li>
+        <li>
+        true if it is a directory</li>
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="kind"><a name="Directory_metamethods"></a>Directory metamethods </h2>
+        Directory metamethods.
+ The metamethods available for object Directory.
+    <dl class="function">
+    <dt>
+    <a name = "Directory:__eq"></a>
+    <strong>Directory:__eq&nbsp;(other)</strong>
+    </dt>
+    <dd>
+    Test equality.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other directory</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if they equals
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Directory:__tostring"></a>
+    <strong>Directory:__tostring&nbsp;()</strong>
+    </dt>
+    <dd>
+    Convert object to string.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc</a></i>
+</div> <!-- id="about" -->
+</body>
+</html>
