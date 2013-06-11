@@ -89,18 +89,18 @@ private:
 	bool m_threadStarted;			/*! thread's status */
 
 public:
-	Server(void);
+	Server();
 
 	Server(Server &&src);
 
-	virtual ~Server(void);
+	virtual ~Server();
 
 	/**
 	 * Get the command character.
 	 *
 	 * @return the command character
 	 */
-	const std::string & getCommandChar(void) const;
+	const std::string & getCommandChar() const;
 
 	/**
 	 * Set the command character.
@@ -114,7 +114,7 @@ public:
 	 *
 	 * @return true if we should
 	 */
-	bool autoJoinInvite(void) const;
+	bool autoJoinInvite() const;
 
 	/**
 	 * Set the join invite mode
@@ -135,21 +135,21 @@ public:
 	 *
 	 * @return true if we should
 	 */
-	bool autoCtcpReply(void) const;
+	bool autoCtcpReply() const;
 
 	/**
 	 * Get all channels that will be auto joined
 	 *
 	 * @return the list of channels
 	 */
-	const std::vector<Channel> & getChannels(void);
+	const std::vector<Channel> & getChannels();
 
 	/**
 	 * Get the identity used for that server
 	 *
 	 * @return the identity
 	 */
-	Identity & getIdentity(void);
+	Identity & getIdentity();
 
 	/**
 	 * Get the server instance name. This is only used
@@ -157,21 +157,21 @@ public:
 	 *
 	 * @return the name
 	 */
-	const std::string & getName(void) const;
+	const std::string & getName() const;
 
 	/**
 	 * Get the server host name.
 	 *
 	 * @return the hostname
 	 */
-	const std::string & getHost(void) const;
+	const std::string & getHost() const;
 
 	/**
 	 * Get the port connection.
 	 *
 	 * @return the port used
 	 */
-	unsigned getPort(void) const;
+	unsigned getPort() const;
 
 	/**
 	 * Set connections settings.
@@ -222,12 +222,12 @@ public:
 	 *
 	 * @see stopConnection
 	 */
-	void startConnection(void);
+	void startConnection();
 
 	/**
 	 * Stop the connection on that server.
 	 */
-	void stopConnection(void);
+	void stopConnection();
 
 	/* ------------------------------------------------
 	 * IRC commands

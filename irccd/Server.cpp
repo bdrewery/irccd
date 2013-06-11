@@ -32,18 +32,6 @@ using namespace std;
 
 /* {{{ IRC handlers */
 
-#if 0
-static string getNick(const char *target)
-{
-	char nickname[64 + 1];
-
-	memset(nickname, 0, sizeof (nickname));
-	irc_target_get_nick(target, nickname, sizeof (nickname) - 1);
-
-	return string(nickname);
-}
-#endif
-
 static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
 			  const char **params, unsigned int count)
 {
@@ -163,7 +151,7 @@ static void handleInvite(irc_session_t *s, const char *ev, const char *orig,
 }
 
 static void handleJoin(irc_session_t *s, const char *ev, const char *orig,
-			  const char **params, unsigned int count)
+		       const char **params, unsigned int count)
 {
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
@@ -224,7 +212,7 @@ static void handleMode(irc_session_t *s, const char *ev, const char *orig,
 }
 
 static void handleNick(irc_session_t *s, const char *ev, const char *orig,
-			  const char **params, unsigned int count)
+		       const char **params, unsigned int count)
 {
 	Server *server = (Server *)irc_get_ctx(s);
 
@@ -315,7 +303,7 @@ static void handleNumeric(irc_session_t *session,
 }
 
 static void handlePart(irc_session_t *s, const char *ev, const char *orig,
-			  const char **params, unsigned int count)
+		       const char **params, unsigned int count)
 {
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
@@ -440,12 +428,12 @@ Server::Server(Server &&src)
 	m_threadStarted = src.m_threadStarted;
 }
 
-Server::~Server(void)
+Server::~Server()
 {
 	stopConnection();
 }
 
-const string & Server::getCommandChar(void) const
+const string & Server::getCommandChar() const
 {
 	return m_commandChar;
 }
@@ -455,7 +443,7 @@ void Server::setCommandChar(const string &commandChar)
 	m_commandChar = commandChar;
 }
 
-bool Server::autoJoinInvite(void) const
+bool Server::autoJoinInvite() const
 {
 	return m_joinInvite;
 }
@@ -470,7 +458,7 @@ void Server::setAutoCtcpReply(bool autoCtcpReply)
 	m_ctcpReply = autoCtcpReply;
 }
 
-bool Server::autoCtcpReply(void) const
+bool Server::autoCtcpReply() const
 {
 	return m_ctcpReply;
 }
@@ -480,7 +468,7 @@ const vector<Server::Channel> & Server::getChannels(void)
 	return m_channels;
 }
 
-Identity & Server::getIdentity(void)
+Identity & Server::getIdentity()
 {
 	return m_identity;
 }
@@ -490,17 +478,17 @@ void Server::setIdentity(const Identity &identity)
 	m_identity = identity;
 }
 
-const string & Server::getName(void) const
+const string & Server::getName() const
 {
 	return m_name;
 }
 
-const string & Server::getHost(void) const
+const string & Server::getHost() const
 {
 	return m_host;
 }
 
-unsigned Server::getPort(void) const
+unsigned Server::getPort() const
 {
 	return m_port;
 }
@@ -554,7 +542,7 @@ void Server::removeChannel(const string &name)
 		m_channels.erase(iter);
 }
 
-void Server::startConnection(void)
+void Server::startConnection()
 {
 	m_thread = thread([=] () {
 		irc_session_t *s = irc_create_session(&m_callbacks);
@@ -591,7 +579,7 @@ void Server::startConnection(void)
 	m_threadStarted = true;
 }
 
-void Server::stopConnection(void)
+void Server::stopConnection()
 {
 	if (m_threadStarted) {
 		m_threadStarted = false;
