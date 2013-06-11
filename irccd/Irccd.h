@@ -51,9 +51,9 @@ private:
 
 #if defined(WITH_LUA)
 	std::vector<Plugin> m_plugins;			//! list of plugins loaded
+	std::mutex m_pluginLock;			//! lock to add plugin
 #endif
 
-	std::mutex m_pluginLock;
 	std::vector<Server> m_servers;			//! list of servers
 
 	// Socket clients and listeners
@@ -74,10 +74,10 @@ private:
 	 * Open will call the below function in the same order they are
 	 * declared, do not change that.
 	 */
-	void openConfig(void);
+	void openConfig();
 
 	// [general]
-	void openPlugins(void);
+	void openPlugins();
 
 	// [identity]
 	void openIdentities(const Parser &config);
@@ -94,9 +94,9 @@ private:
 	void openServers(const Parser &config);
 	void extractChannels(const Section &section, Server &server);
 
-	Irccd(void);
+	Irccd();
 public:
-	~Irccd(void);
+	~Irccd();
 
 	/**
 	 * Get the unique irccd instance.
@@ -169,7 +169,7 @@ public:
 	 *
 	 * @return a list of plugins
 	 */
-	std::vector<Plugin> & getPlugins(void);
+	std::vector<Plugin> & getPlugins();
 #endif
 
 	/**
@@ -177,7 +177,7 @@ public:
 	 *
 	 * @return the list of servers
 	 */
-	std::vector<Server> & getServers(void);
+	std::vector<Server> & getServers();
 
 	/**
 	 * Get the plugin lock, used to load / unload module.

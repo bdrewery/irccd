@@ -285,7 +285,7 @@ static bool handleUserMode(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static map<string, Handler> createHandlers(void)
+static map<string, Handler> createHandlers()
 {
 	map<string, Handler> handlers;
 
@@ -431,7 +431,7 @@ bool Irccd::isPluginLoaded(const string &name)
  * 2. User defined, usually ~/.config/irccd/irccd.conf
  * 3. Default cmake configured path, usually /usr/local/etc/irccd.conf
  */
-void Irccd::openConfig(void)
+void Irccd::openConfig()
 {
 	// Set some defaults
 	addPluginPath(Util::configDirectory() + "plugins");		// own directory
@@ -565,7 +565,7 @@ void Irccd::reloadPlugin(const string &name)
 #endif
 }
 
-void Irccd::openPlugins(void)
+void Irccd::openPlugins()
 {
 	// Get list of modules to load from config
 	for (const string &s : m_pluginWanted)
@@ -774,19 +774,19 @@ void Irccd::extractChannels(const Section &section, Server &server)
  * public methods
  * -------------------------------------------------------- */
 
-Irccd::Irccd(void)
+Irccd::Irccd()
 {
 	Socket::init();
 
 	Logger::setVerbose(false);
 }
 
-Irccd::~Irccd(void)
+Irccd::~Irccd()
 {
 	Socket::finish();
 }
 
-Irccd * Irccd::getInstance(void)
+Irccd * Irccd::getInstance()
 {
 	if (m_instance == nullptr)
 		m_instance = new Irccd();
@@ -839,14 +839,14 @@ Plugin & Irccd::findPlugin(const string &name)
 	throw out_of_range(oss.str());
 }
 
-vector<Plugin> & Irccd::getPlugins(void)
+vector<Plugin> & Irccd::getPlugins()
 {
 	return m_plugins;
 }
 
 #endif
 	
-vector<Server> & Irccd::getServers(void)
+vector<Server> & Irccd::getServers()
 {
 	return m_servers;
 }
