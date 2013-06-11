@@ -522,13 +522,13 @@ void Irccdctl::readConfig(void)
 
 		type = sectionSocket.requireOption<string>("type");
 
-		if (type.compare("unix") == 0) {
+		if (type == "unix") {
 #if !defined(_WIN32)
 			connectUnix(sectionSocket);
 #else
 			Logger::warn("Unix sockets are not supported on Windows");
 #endif
-		} else if (type.compare("internet") == 0) {
+		} else if (type == "internet") {
 			connectInet(sectionSocket);
 		} else {
 			Logger::warn("Invalid socket type %s", type.c_str());

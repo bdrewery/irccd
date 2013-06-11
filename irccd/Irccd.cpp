@@ -685,14 +685,17 @@ void Irccd::extractUnix(const Section &s)
 	path = s.requireOption<string>("path");
 
 	// First remove the dust
-	if (Util::exist(path) && remove(path.c_str()) < 0)
+	if (Util::exist(path) && remove(path.c_str()) < 0) {
 		Logger::warn("listener: error removing %s: %s", path.c_str(), strerror(errno));
-		else {
-
+	} else {
 		try {
 			unix.create(AF_UNIX);
 			unix.bind(UnixPoint(path));
 			unix.listen(64);
+
+			// On success add to listener and servers
+			m_socketServers.push_back(unix);
+			m_listener.add(unix);
 
 			Logger::log("listener: listening for clients on %s...", path.c_str());
 		} catch (Socket::ErrorException ex) {

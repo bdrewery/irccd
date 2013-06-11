@@ -172,7 +172,7 @@ function onCommand(server, channel, who, message)
 	else
 		local c, U = message:match("%s*(%w+)%s+(%w+)%s*")
 		local list = loadFile(f)
-		local entry = findEntry(list, u)
+		local entry = findEntry(list, U)
 
 		-- Convert format
 		local kw = {
@@ -183,7 +183,6 @@ function onCommand(server, channel, who, message)
 		if entry == nil then
 			server:say(channel, who .. ", " .. convert(format.unknown, kw))
 		else
-			
 			local d = util.date(entry[2])
 
 			if c == "seen" then
