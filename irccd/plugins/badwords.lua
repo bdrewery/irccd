@@ -55,10 +55,12 @@ loadWords()
 loadConfig()
 
 function onMessage(server, channel, nick, message)
+	local message = message:lower()
+
 	for _, w in pairs(words) do
 		-- I guess there is best way to handle this...
-		local p1 = "^" .. w .. "[%sp]*"
-		local p2 = "[%s]+" .. w .. "[%sp]*"
+		local p1 = "^" .. w:lower() .. "[%sp]*"
+		local p2 = "[%s]+" .. w:lower() .. "[%sp]*"
 
 		if message:find(p1) or message:find(p2) then
 			server:say(channel, util.splitUser(nick) .. ": " .. answer)

@@ -9,7 +9,7 @@ Plugin antiflood 1.0
 
 == Introduction
 
-The plugin `antiflood` can avoid people from flooding channels. It supports
+The plugin `antiflood` can avoid people flooding channels. It supports
 banning and kicking.
 
 == Installation
