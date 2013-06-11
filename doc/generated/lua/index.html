@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+  <title>Irccd Lua API Documentation</title>
+  <link rel="stylesheet" href="ldoc.css" type="text/css" />
+</head>
+<body>
+
+
+<!-- Menu -->
+<div id="menu">
+
+
+
+<h2 class="kind">Modules</h2>
+<ul>
+  <li><a href="modules/irccd.html">irccd</a></li>
+  <li><a href="modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="modules/irccd.util.html">irccd.util</a></li>
+</ul>
+<h2 class="kind">Topics</h2>
+<ul>
+  <li><a href="topics/1-Introduction.md.html">1-Introduction.md</a></li>
+  <li><a href="topics/2-Plugin-creation.md.html">2-Plugin-creation.md</a></li>
+  <li><a href="topics/2.1-Using-irccd-test.md.html">2.1-Using-irccd-test.md</a></li>
+  <li><a href="topics/3-Events.md.html">3-Events.md</a></li>
+  <li><a href="topics/3.101-Action.md.html">3.101-Action.md</a></li>
+  <li><a href="topics/3.102-Command.md.html">3.102-Command.md</a></li>
+  <li><a href="topics/3.103-Connect.md.html">3.103-Connect.md</a></li>
+  <li><a href="topics/3.104-Channel-notice.md.html">3.104-Channel-notice.md</a></li>
+  <li><a href="topics/3.105-Invite.md.html">3.105-Invite.md</a></li>
+  <li><a href="topics/3.106-Join.md.html">3.106-Join.md</a></li>
+  <li><a href="topics/3.107-Kick.md.html">3.107-Kick.md</a></li>
+  <li><a href="topics/3.108-Message.md.html">3.108-Message.md</a></li>
+  <li><a href="topics/3.109-Mode.md.html">3.109-Mode.md</a></li>
+  <li><a href="topics/3.110-Nick.md.html">3.110-Nick.md</a></li>
+  <li><a href="topics/3.111-Notice.md.html">3.111-Notice.md</a></li>
+  <li><a href="topics/3.112-Part.md.html">3.112-Part.md</a></li>
+  <li><a href="topics/3.113-Query.md.html">3.113-Query.md</a></li>
+  <li><a href="topics/3.114-Reload.md.html">3.114-Reload.md</a></li>
+  <li><a href="topics/3.115-Topic.md.html">3.115-Topic.md</a></li>
+  <li><a href="topics/3.116-User-mode.md.html">3.116-User-mode.md</a></li>
+</ul>
+<h2 class="kind">Examples</h2>
+<ul>
+  <li><a href="examples/Welcome.lua.html">Welcome.lua</a></li>
+</ul>
+
+</div><!-- !menu -->
+
+<div id="content">
+
+
+
+
+<!-- For "index" page -->
+  <h2>Irccd</h2>
+
+  <p>Irccd Lua API Documentation</p>
+
+<h2 class="kind">Modules</h2>
+<table class="module_list">
+	<tr>
+		<td class="name"  nowrap><a href="modules/irccd.html">irccd</a></td>
+		<td class="summary">Main module
+ Main irccd module.</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/irccd.logger.html">irccd.logger</a></td>
+		<td class="summary">Logguer functions
+ Log, emit a warning within a plugin.</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/irccd.parser.html">irccd.parser</a></td>
+		<td class="summary">Config file parser.</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/irccd.plugin.html">irccd.plugin</a></td>
+		<td class="summary">Plugin modules
+ This API provides function for the current plugin.</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/irccd.server.html">irccd.server</a></td>
+		<td class="summary">Server class.</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/irccd.util.html">irccd.util</a></td>
+		<td class="summary">Utilitities.</td>
+	</tr>
+</table>
+<h2 class="kind">Topics</h2>
+<table class="module_list">
+	<tr>
+		<td class="name"  nowrap><a href="topics/1-Introduction.md.html">1-Introduction.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/2-Plugin-creation.md.html">2-Plugin-creation.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/2.1-Using-irccd-test.md.html">2.1-Using-irccd-test.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3-Events.md.html">3-Events.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.101-Action.md.html">3.101-Action.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.102-Command.md.html">3.102-Command.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.103-Connect.md.html">3.103-Connect.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.104-Channel-notice.md.html">3.104-Channel-notice.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.105-Invite.md.html">3.105-Invite.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.106-Join.md.html">3.106-Join.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.107-Kick.md.html">3.107-Kick.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.108-Message.md.html">3.108-Message.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.109-Mode.md.html">3.109-Mode.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.110-Nick.md.html">3.110-Nick.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.111-Notice.md.html">3.111-Notice.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.112-Part.md.html">3.112-Part.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.113-Query.md.html">3.113-Query.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.114-Reload.md.html">3.114-Reload.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.115-Topic.md.html">3.115-Topic.md</a></td>
+		<td class="summary"></td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="topics/3.116-User-mode.md.html">3.116-User-mode.md</a></td>
+		<td class="summary"></td>
+	</tr>
+</table>
+<h2 class="kind">Examples</h2>
+<table class="module_list">
+	<tr>
+		<td class="name"  nowrap><a href="examples/Welcome.lua.html">Welcome.lua</a></td>
+		<td class="summary"></td>
+	</tr>
+</table>
+
+</div> <!-- id="content" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc</a></i>
+</div> <!-- id="about" -->
+</body>
+</html>
