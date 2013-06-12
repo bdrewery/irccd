@@ -37,6 +37,7 @@ static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
 {
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
+	IrcEventParams evparams;
 	string channel, message = "";
 	const string &cmdToken = server->getCommandChar();
 
@@ -44,7 +45,10 @@ static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
 	if (params[1] != nullptr)
 		message = params[1];
 
-	Irccd::getInstance()->getPluginLock().lock();
+
+#if 0
+
+
 	for (Plugin &p : Irccd::getInstance()->getPlugins()) {
 		/*
 		 * Get the context for that plugin and try to concatenate
@@ -63,7 +67,7 @@ static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
 		} else
 			p.onMessage(server, channel, orig, message);
 	}
-	Irccd::getInstance()->getPluginLock().unlock();
+#endif
 #else
 	(void)s;
 	(void)orig;
@@ -77,6 +81,7 @@ static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
 			  const char **params, unsigned int count)
 {
 	Server *server = (Server *)irc_get_ctx(s);
+	IrcEventParams evparams;
 
 	// Autojoin requested channels.
 	for (Server::Channel c : server->getChannels()) {
@@ -86,6 +91,9 @@ static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
 		server->join(c.m_name, c.m_password);
 	}
 
+	//params.push_back();
+
+#if 0
 #if defined(WITH_LUA)
 	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
@@ -94,6 +102,7 @@ static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
 #endif
 
 	Logger::log("server %s: successfully connected", server->getName().c_str());
+#endif
 
 	(void)ev;
 	(void)orig;
@@ -421,9 +430,12 @@ Server::Server()
 {
 	memset(&m_callbacks, 0, sizeof (irc_callbacks_t));
 
+#if 0
 	m_callbacks.event_channel		= handleChannel;
 	m_callbacks.event_channel_notice	= handleChannelNotice;
+#endif
 	m_callbacks.event_connect		= handleConnect;
+#if 0
 	m_callbacks.event_ctcp_req		= handleCtcpRequest;
 	m_callbacks.event_invite		= handleInvite;
 	m_callbacks.event_join			= handleJoin;
@@ -436,6 +448,7 @@ Server::Server()
 	m_callbacks.event_privmsg		= handleQuery;
 	m_callbacks.event_topic			= handleTopic;
 	m_callbacks.event_umode			= handleUserMode;
+#endif
 }
 
 Server::Server(Server &&src)

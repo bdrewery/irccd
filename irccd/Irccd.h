@@ -19,6 +19,7 @@
 #ifndef _IRCCD_H_
 #define _IRCCD_H_
 
+#include <condition_variable>
 #include <exception>
 #include <map>
 #include <mutex>
@@ -38,6 +39,38 @@
 
 namespace irccd {
 
+/* --------------------------------------------------------
+ * IRC Events, used by Server
+ * -------------------------------------------------------- */
+
+enum class IrcEventType {
+	Connection
+};
+
+typedef std::vector<std::string> IrcEventParams;
+
+struct IrcEvent {
+	IrcEventType m_type;				//! event type
+	IrcEventParams m_params;			//! parameters
+
+	std::shared_ptr<Server> m_server;		//! on which server
+
+	IrcEvent(IrcEventType type, IrcEventParams params,
+		 std::shared_ptr<Server> server);
+
+	~IrcEvent();
+};
+
+/* --------------------------------------------------------
+ * User Events, used by Listener
+ * -------------------------------------------------------- */
+
+/* --------------------------------------------------------
+ * Irccd main class
+ * -------------------------------------------------------- */
+
+typedef std::vector<std::shared_ptr<Server>> ServerList;
+
 class Irccd {
 private:
 	static Irccd *m_instance;			//! unique instance
@@ -54,7 +87,13 @@ private:
 	std::mutex m_pluginLock;			//! lock to add plugin
 #endif
 
-	std::vector<Server> m_servers;			//! list of servers
+	// Irc & User event queues
+	std::vector<IrcEvent> m_ircEvents;		//! IRC events
+
+	std::mutex m_queueLock;				//! event queue lock
+	std::condition_variable m_queueCond;		//! queue waiting condition
+
+	ServerList m_servers;				//! list of servers
 
 	// Socket clients and listeners
 	std::vector<SocketTCP> m_socketServers;		//! socket servers
@@ -184,7 +223,7 @@ public:
 	 *
 	 * @return the list of servers
 	 */
-	std::vector<Server> & getServers();
+	ServerList & getServers();
 
 	/**
 	 * Set the config path to open.
@@ -206,7 +245,7 @@ public:
 	 * @param name the server's resource name
 	 * @return a server
 	 */
-	Server & findServer(const std::string &name);
+	std::shared_ptr<Server> & findServer(const std::string &name);
 
 	/**
 	 * Find an identity.
@@ -222,6 +261,9 @@ public:
 	 * @return the error code
 	 */
 	int run();
+
+	/* --- EXPERIMENTAL --- */
+	void pushIrcEvent(IrcEvent &event);
 };
 
 } // !irccd

@@ -37,6 +37,7 @@ using namespace std;
 
 typedef function<bool(SocketTCP &, const string &params)> Handler;
 
+#if 0
 static bool handleChannelNotice(SocketTCP &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
@@ -284,10 +285,12 @@ static bool handleUserMode(SocketTCP &client, const string &cmd)
 
 	return true;
 }
+#endif
 
 static map<string, Handler> createHandlers()
 {
 	map<string, Handler> handlers;
+#if 0
 
 	handlers["CNOTICE"]	= handleChannelNotice;
 	handlers["INVITE"]	= handleInvite;
@@ -305,6 +308,7 @@ static map<string, Handler> createHandlers()
 	handlers["TOPIC"]	= handleTopic;
 	handlers["UMODE"]	= handleUserMode;
 	handlers["UNLOAD"]	= handleUnload;
+#endif
 
 	return handlers;
 }
@@ -312,6 +316,21 @@ static map<string, Handler> createHandlers()
 static map<string, Handler> handlers = createHandlers();
 
 /* }}} */
+
+/* --------------------------------------------------------
+ * IRC Events, used by Server
+ * -------------------------------------------------------- */
+
+IrcEvent::IrcEvent(IrcEventType type, IrcEventParams params, std::shared_ptr<Server> server)
+	: m_type(type)
+	, m_params(params)
+	, m_server(server)
+{
+}
+
+IrcEvent::~IrcEvent()
+{
+}
 
 /* --------------------------------------------------------
  * private methods
@@ -708,7 +727,7 @@ void Irccd::extractUnix(const Section &s)
 void Irccd::openServers(const Parser &config)
 {
 	for (Section &s: config.findSections("server")) {
-		Server server;
+		shared_ptr<Server> server =  make_shared<Server>();
 
 		try {
 			string name, host, commandToken, password, ident;
@@ -716,13 +735,13 @@ void Irccd::openServers(const Parser &config)
 
 			// General parameters
 			if (s.hasOption("command-char"))
-				server.setCommandChar(s.getOption<string>("command-char"));
+				server->setCommandChar(s.getOption<string>("command-char"));
 			if (s.hasOption("join-invite"))
-				server.setJoinInvite(s.getOption<bool>("join-invite"));
+				server->setJoinInvite(s.getOption<bool>("join-invite"));
 			if (s.hasOption("ctcp-autoreply"))
-				server.setAutoCtcpReply(s.getOption<bool>("ctcp-autoreply"));
+				server->setAutoCtcpReply(s.getOption<bool>("ctcp-autoreply"));
 			if (s.hasOption("identity"))
-				server.setIdentity(findIdentity(s.getOption<string>("identity")));
+				server->setIdentity(findIdentity(s.getOption<string>("identity")));
 
 			// Get connection parameters
 			name = s.requireOption<string>("name");
@@ -732,10 +751,10 @@ void Irccd::openServers(const Parser &config)
 			if (s.hasOption("password"))
 				password = s.getOption<string>("password");
 
-			server.setConnection(name, host, port, false, password);
+			server->setConnection(name, host, port, false, password);
 
 			// Extract channels to auto join
-			extractChannels(s, server);
+			extractChannels(s, *server);
 
 			m_servers.push_back(std::move(server));
 		} catch (NotFoundException ex) {
@@ -841,7 +860,7 @@ std::mutex & Irccd::getPluginLock()
 
 #endif
 	
-vector<Server> & Irccd::getServers()
+ServerList & Irccd::getServers()
 {
 	return m_servers;
 }
@@ -856,10 +875,10 @@ void Irccd::setVerbosity(bool verbose)
 	Logger::setVerbose(verbose);
 }
 
-Server & Irccd::findServer(const string &name)
+shared_ptr<Server> & Irccd::findServer(const string &name)
 {
-	for (Server &s : m_servers)
-		if (s.getName() == name)
+	for (shared_ptr<Server> &s : m_servers)
+		if (s->getName() == name)
 			return s;
 
 	throw out_of_range("could not find server with resource " + name);
@@ -897,20 +916,25 @@ int Irccd::run()
 	}
 
 	// Start all servers
-	for (Server &s : m_servers) {
+	for (shared_ptr<Server> &s : m_servers) {
 		Logger::log("server %s: trying to connect to %s...",
-		    s.getName().c_str(), s.getHost().c_str());
-		s.startConnection();
+		    s->getName().c_str(), s->getHost().c_str());
+		s->startConnection();
 	}
 
-	// Wait for input
 	for (;;) {
-		// Nothing to do, just do a sleep to avoid high process usage,
-		// the IRC servers thread do everything else.
-		if (m_listener.size() == 0) {
-			Util::usleep(500);
-			continue;
+		// Wait for any listener or server to push something
+		unique_lock<mutex> ulock(m_queueLock);
+		m_queueCond.wait(ulock);
+
+		// Process IRC events
+		for (IrcEvent &e : m_ircEvents) {
+			for (Plugin &p : m_plugins) {
+				// P here
+			}
 		}
+
+#if 0
 
 		try {
 			SocketTCP &s = (SocketTCP &)m_listener.select(0);
@@ -924,7 +948,24 @@ int Irccd::run()
 		} catch (Socket::ErrorException ex) {
 			Logger::warn("listener: client error: %s", ex.what());
 		}
+#endif
 	}
 
 	return 0;
+}
+
+
+
+
+
+
+
+
+
+void Irccd::pushIrcEvent(IrcEvent &event)
+{
+	lock_guard<mutex> ulock(m_queueLock);
+
+	m_ircEvents.push_back(event);
+	m_queueCond.notify_all();
 }
