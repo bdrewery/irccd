@@ -808,14 +808,9 @@ void Irccd::addWantedPlugin(const string &name)
 
 Plugin & Irccd::findPlugin(lua_State *state)
 {
-	m_pluginLock.lock();
 	for (Plugin &p : m_plugins)
-		if (p.getState() == state) {
-			m_pluginLock.unlock();
+		if (p.getState() == state)
 			return p;
-		}
-
-	m_pluginLock.unlock();
 
 	// This one should not happen
 	throw out_of_range("plugin not found");
@@ -825,14 +820,9 @@ Plugin & Irccd::findPlugin(const string &name)
 {
 	ostringstream oss;
 
-	m_pluginLock.lock();
 	for (Plugin &p : m_plugins)
-		if (p.getName() == name) {
-			m_pluginLock.unlock();
+		if (p.getName() == name)
 			return p;
-		}
-
-	m_pluginLock.unlock();
 
 	oss << "plugin " << name << " not found";
 
@@ -842,6 +832,11 @@ Plugin & Irccd::findPlugin(const string &name)
 vector<Plugin> & Irccd::getPlugins()
 {
 	return m_plugins;
+}
+
+std::mutex & Irccd::getPluginLock()
+{
+	return m_pluginLock;
 }
 
 #endif

@@ -170,6 +170,13 @@ public:
 	 * @return a list of plugins
 	 */
 	std::vector<Plugin> & getPlugins();
+
+	/**
+	 * Get the plugin lock, used to load / unload module.
+	 *
+	 * @return the mutex lock
+	 */
+	std::mutex & getPluginLock();
 #endif
 
 	/**
@@ -178,13 +185,6 @@ public:
 	 * @return the list of servers
 	 */
 	std::vector<Server> & getServers();
-
-	/**
-	 * Get the plugin lock, used to load / unload module.
-	 *
-	 * @return the mutex lock
-	 */
-	std::mutex & getPluginLock();
 
 	/**
 	 * Set the config path to open.

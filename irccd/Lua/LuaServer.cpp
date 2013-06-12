@@ -242,7 +242,6 @@ static int names(lua_State *L)
 		p.addDeferred(DeferredCall(DeferredType::Names, s, ref));
 		s->names(channel);
 	} catch (out_of_range) {
-		return 0;
 	}
 
 	// Deferred call

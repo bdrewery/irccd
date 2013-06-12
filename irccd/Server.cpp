@@ -44,6 +44,7 @@ static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
 	if (params[1] != nullptr)
 		message = params[1];
 
+	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins()) {
 		/*
 		 * Get the context for that plugin and try to concatenate
@@ -62,6 +63,7 @@ static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
 		} else
 			p.onMessage(server, channel, orig, message);
 	}
+	Irccd::getInstance()->getPluginLock().unlock();
 #else
 	(void)s;
 	(void)orig;
@@ -85,8 +87,10 @@ static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
 	}
 
 #if defined(WITH_LUA)
+	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onConnect(server);
+	Irccd::getInstance()->getPluginLock().unlock();
 #endif
 
 	Logger::log("server %s: successfully connected", server->getName().c_str());
@@ -121,9 +125,10 @@ static void handleChannelNotice(irc_session_t *s, const char *ev, const char *or
 	if (params[1] != nullptr)
 		notice = params[1];
 
+	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onChannelNotice(server, orig, params[0], notice);
-
+	Irccd::getInstance()->getPluginLock().unlock();	
 #else
 	(void)s;
 	(void)orig;
@@ -143,8 +148,10 @@ static void handleInvite(irc_session_t *s, const char *ev, const char *orig,
 		server->join(params[1], "");
 
 #if defined(WITH_LUA)
+	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onInvite(server, params[1], orig);
+	Irccd::getInstance()->getPluginLock().unlock();
 #endif
 	(void)ev;
 	(void)count;
@@ -156,8 +163,10 @@ static void handleJoin(irc_session_t *s, const char *ev, const char *orig,
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
 
+	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onJoin(server, params[0], orig);
+	Irccd::getInstance()->getPluginLock().unlock();
 #else
 	(void)s;
 	(void)orig;
@@ -182,8 +191,10 @@ static void handleKick(irc_session_t *s, const char *ev, const char *orig,
 		server->removeChannel(params[0]);
 
 #if defined(WITH_LUA)
+	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onKick(server, params[0], orig, params[1], reason);
+	Irccd::getInstance()->getPluginLock().unlock();
 #endif
 	(void)ev;
 	(void)count;
@@ -200,8 +211,10 @@ static void handleMode(irc_session_t *s, const char *ev, const char *orig,
 	if (params[2] != nullptr)
 		modeValue = params[2];
 
+	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onMode(server, params[0], orig, params[1], modeValue);
+	Irccd::getInstance()->getPluginLock().unlock();
 #else
 	(void)s;
 	(void)orig;
@@ -221,8 +234,10 @@ static void handleNick(irc_session_t *s, const char *ev, const char *orig,
 		server->getIdentity().m_nickname = params[0];
 
 #if defined(WITH_LUA)
+	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onNick(server, orig, params[0]);
+	Irccd::getInstance()->getPluginLock().unlock();
 #endif
 	(void)ev;
 	(void)count;
@@ -238,8 +253,10 @@ static void handleNotice(irc_session_t *s, const char *ev, const char *orig,
 	if (params[1] != nullptr)
 		notice = params[1];
 
+	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onNotice(server, orig, params[0], notice);
+	Irccd::getInstance()->getPluginLock().unlock();
 #else
 	(void)s;
 	(void)orig;
@@ -258,6 +275,7 @@ static void handleNumeric(irc_session_t *session,
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(session);
 
+	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins()) {
 		switch (event) {
 		case LIBIRC_RFC_RPL_NAMREPLY:
@@ -293,6 +311,7 @@ static void handleNumeric(irc_session_t *session,
 			break;
 		}
 	}
+	Irccd::getInstance()->getPluginLock().unlock();
 #else
 	(void)session;
 	(void)event;
@@ -313,8 +332,10 @@ static void handlePart(irc_session_t *s, const char *ev, const char *orig,
 	if (params[1] != nullptr)
 		reason = params[1];
 
+	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onPart(server, params[0], orig, reason);
+	Irccd::getInstance()->getPluginLock().unlock();
 #else
 	(void)s;
 	(void)orig;
@@ -334,8 +355,10 @@ static void handleQuery(irc_session_t *s, const char *ev, const char *orig,
 	if (params[1] != nullptr)
 		message = params[1];
 
+	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onQuery(server, orig, message);
+	Irccd::getInstance()->getPluginLock().unlock();
 #else
 	(void)s;
 	(void)orig;
@@ -356,8 +379,10 @@ static void handleTopic(irc_session_t *s, const char *ev, const char *orig,
 	if (params[1] != nullptr)
 		topic = params[1];
 
+	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onTopic(server, params[0], orig, topic);
+	Irccd::getInstance()->getPluginLock().unlock();
 #else
 	(void)s;
 	(void)orig;
@@ -373,8 +398,10 @@ static void handleUserMode(irc_session_t *s, const char *ev, const char *orig,
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(s);
 
+	Irccd::getInstance()->getPluginLock().lock();
 	for (Plugin &p : Irccd::getInstance()->getPlugins())
 		p.onUserMode(server, orig, params[0]);
+	Irccd::getInstance()->getPluginLock().unlock();
 #else
 	(void)s;
 	(void)orig;
