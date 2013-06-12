@@ -21,29 +21,28 @@
 #include <sstream>
 
 #include "Irccd.h"
-#include "Server.h"
 #include "LuaServer.h"
+#include "LuaState.h"
 
 using namespace irccd;
 using namespace std;
 
-void LuaServer::pushObject(lua_State *L, Server *server)
+void LuaServer::pushObject(LuaState &L, shared_ptr<Server> server)
 {
-	Server **ptr;
-	ptr = (Server **)lua_newuserdata(L, sizeof (Server *));
-	luaL_setmetatable(L, SERVER_TYPE);
-
-	*ptr = server;
+	new (L.getState(), SERVER_TYPE) shared_ptr<Server>(server);
 }
+
+#define TO_SSERVER(L, idx) \
+	*reinterpret_cast<shared_ptr<Server> *>(luaL_checkudata((L), (idx), SERVER_TYPE));
 
 namespace methods {
 
 static int getChannels(lua_State *L)
 {
-	Server *s;
+	shared_ptr<Server> s;
 	int i = 0;
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 
 	// Create table even if no channels
 	lua_createtable(L, s->getChannels().size(), s->getChannels().size());
@@ -59,7 +58,7 @@ static int getChannels(lua_State *L)
 
 static int getIdentity(lua_State *L)
 {
-	Server *s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	shared_ptr<Server> s = TO_SSERVER(L, 1);
 	const Identity &ident = s->getIdentity();
 
 	// Create the identity table result
@@ -85,7 +84,7 @@ static int getIdentity(lua_State *L)
 
 static int getInfo(lua_State *L)
 {
-	Server *s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	shared_ptr<Server> s = TO_SSERVER(L, 1);
 
 	lua_createtable(L, 3, 3);
 
@@ -103,7 +102,7 @@ static int getInfo(lua_State *L)
 
 static int getName(lua_State *L)
 {
-	Server *s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	shared_ptr<Server> s = TO_SSERVER(L, 1);
 
 	lua_pushstring(L, s->getName().c_str());
 
@@ -115,10 +114,10 @@ static int cnotice(lua_State *L)
 	if (lua_gettop(L) < 3)
 		return luaL_error(L, "server:cnotice needs 2 arguments");
 
-	Server *s;
+	shared_ptr<Server> s;
 	string channel, notice;
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 	channel = luaL_checkstring(L, 2);
 	notice = luaL_checkstring(L, 3);
 
@@ -132,10 +131,10 @@ static int invite(lua_State *L)
 	if (lua_gettop(L) < 3)
 		return luaL_error(L, "server:invite needs 2 arguments");
 
-	Server *s;
+	shared_ptr<Server> s;
 	string nick, channel;
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 	nick = luaL_checkstring(L, 2);
 	channel = luaL_checkstring(L, 3);
 
@@ -149,10 +148,10 @@ static int join(lua_State *L)
 	if (lua_gettop(L) < 2)
 		return luaL_error(L, "server:join needs at least 1 argument");
 
-	Server *s;
+	shared_ptr<Server> s;
 	string channel, password = "";
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 	channel = luaL_checkstring(L, 2);
 
 	// optional password
@@ -169,10 +168,10 @@ static int kick(lua_State *L)
 	if (lua_gettop(L) < 3)
 		return luaL_error(L, "server:kick needs at least 2 arguments");
 
-	Server *s;
+	shared_ptr<Server> s;
 	string channel, target, reason = "";
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 	target = luaL_checkstring(L, 2);
 	channel = luaL_checkstring(L, 3);
 
@@ -190,10 +189,10 @@ static int me(lua_State *L)
 	if (lua_gettop(L) != 3)
 		return luaL_error(L, "server:me needs 2 arguments");
 
-	Server *s;
+	shared_ptr<Server> s;
 	string target, message;
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 	target = luaL_checkstring(L, 2);
 	message = luaL_checkstring(L, 3);
 
@@ -207,10 +206,10 @@ static int mode(lua_State *L)
 	if (lua_gettop(L) != 3)
 		return luaL_error(L, "server:mode needs 2 arguments");
 
-	Server *s;
+	shared_ptr<Server> s;
 	string channel, mode;
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 	channel = luaL_checkstring(L, 2);
 	mode = luaL_checkstring(L, 3);
 
@@ -221,6 +220,9 @@ static int mode(lua_State *L)
 
 static int names(lua_State *L)
 {
+	(void)L;
+
+#if 0
 	if (lua_gettop(L) != 3)
 		return luaL_error(L, "server:names needs 2 arguments");
 
@@ -243,7 +245,7 @@ static int names(lua_State *L)
 		s->names(channel);
 	} catch (out_of_range) {
 	}
-
+#endif
 	// Deferred call
 	return 0;
 }
@@ -253,10 +255,10 @@ static int nick(lua_State *L)
 	if (lua_gettop(L) != 2)
 		return luaL_error(L, "server:nick needs 1 argument");
 
-	Server *s;
+	shared_ptr<Server> s;
 	string newnick;
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 	newnick = luaL_checkstring(L, 2);
 
 	s->nick(newnick);
@@ -269,10 +271,10 @@ static int notice(lua_State *L)
 	if (lua_gettop(L) != 2)
 		return luaL_error(L, "server:notice needs 2 arguments");
 
-	Server *s;
+	shared_ptr<Server> s;
 	string nickname, notice;
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 	nickname = luaL_checkstring(L, 2);
 	notice = luaL_checkstring(L, 3);
 
@@ -286,10 +288,10 @@ static int part(lua_State *L)
 	if (lua_gettop(L) != 2)
 		return luaL_error(L, "server:part needs 1 argument");
 
-	Server *s;
+	shared_ptr<Server> s;
 	string channel;
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 	channel = luaL_checkstring(L, 2);
 
 	s->part(channel);
@@ -302,10 +304,10 @@ static int query(lua_State *L)
 	if (lua_gettop(L) != 3)
 		return luaL_error(L, "server:query needs 2 arguments");
 
-	Server *s;
+	shared_ptr<Server> s;
 	string target, message;
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 	target = luaL_checkstring(L, 2);
 	message = luaL_checkstring(L, 3);
 
@@ -319,10 +321,10 @@ static int say(lua_State *L)
 	if (lua_gettop(L) != 3)
 		return luaL_error(L, "server:say needs 2 arguments");
 
-	Server *s;
+	shared_ptr<Server> s;
 	string target, message;
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 	target = luaL_checkstring(L, 2);
 	message = luaL_checkstring(L, 3);
 
@@ -336,10 +338,10 @@ static int topic(lua_State *L)
 	if (lua_gettop(L) != 3)
 		return luaL_error(L, "server:topic needs 2 arguments");
 
-	Server *s;
+	shared_ptr<Server> s;
 	string channel, topic;
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 	channel = luaL_checkstring(L, 2);
 	topic = luaL_checkstring(L, 3);
 
@@ -353,10 +355,10 @@ static int umode(lua_State *L)
 	if (lua_gettop(L) != 2)
 		return luaL_error(L, "server:umode needs 1 argument");
 
-	Server *s;
+	shared_ptr<Server> s;
 	string mode;
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 	mode = luaL_checkstring(L, 2);
 
 	s->umode(mode);
@@ -415,11 +417,19 @@ static int equals(lua_State *L)
 	return 1;
 }
 
+static int gc(lua_State *L)
+{
+	(static_cast<shared_ptr<Server> *>(luaL_checkudata(L, 1, SERVER_TYPE)))->~shared_ptr<Server>();
+
+	return 0;
+}
+
 } // !mt
 
 static const luaL_Reg serverMt[] = {
 	{ "__tostring",		mt::tostring			},
 	{ "__eq",		mt::equals			},
+	{ "__gc",		mt::gc				},
 	{ nullptr,		nullptr				}
 };
 
@@ -428,10 +438,8 @@ int irccd::luaopen_server(lua_State *L)
 	// Create the metatable for Server
 	luaL_newmetatable(L, SERVER_TYPE);
 	luaL_setfuncs(L, serverMt, 0);
-
 	luaL_newlib(L, serverMethods);
 	lua_setfield(L, -2, "__index");
-
 	lua_pop(L, 1);
 
 	return 0;

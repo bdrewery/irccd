@@ -57,11 +57,13 @@ public:
 	}
 };
 
+typedef std::unique_ptr<irc_session_t, IrcDeleter> IrcSession;
+
 /**
  * Server class, each class define a server that irccd
  * can connect to
  */
-class Server {
+class Server : public std::enable_shared_from_this<Server> {
 public:
 	struct Channel {
 		std::string m_name;		/*! channel name */
@@ -84,9 +86,9 @@ private:
 
 	// IRC thread
 	irc_callbacks_t m_callbacks;		//! callbacks for libircclient
-	std::thread m_thread;			/*! server's thread */
-	std::unique_ptr<irc_session_t, IrcDeleter> m_session;
-	bool m_threadStarted;			/*! thread's status */
+	std::thread m_thread;			//! server's thread
+	IrcSession m_session;			//! libircclient session
+	bool m_threadStarted;			//! thread's status
 
 public:
 	Server();

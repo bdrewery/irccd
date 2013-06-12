@@ -19,7 +19,6 @@
 #ifndef _IRCCD_H_
 #define _IRCCD_H_
 
-#include <condition_variable>
 #include <exception>
 #include <map>
 #include <mutex>
@@ -44,7 +43,19 @@ namespace irccd {
  * -------------------------------------------------------- */
 
 enum class IrcEventType {
-	Connection
+	Connection,					//! when connection
+	ChannelNotice,					//! channel notices
+	Invite,						//! invitation
+	Join,						//! on joins
+	Kick,						//! on kick
+	Message,					//! on channel messages
+	Mode,						//! channel mode
+	Nick,						//! nick change
+	Notice,						//! channel notice
+	Part,						//! channel parts
+	Query,						//! private query
+	Topic,						//! topic change
+	UserMode,					//! user mode change
 };
 
 typedef std::vector<std::string> IrcEventParams;
@@ -60,10 +71,6 @@ struct IrcEvent {
 
 	~IrcEvent();
 };
-
-/* --------------------------------------------------------
- * User Events, used by Listener
- * -------------------------------------------------------- */
 
 /* --------------------------------------------------------
  * Irccd main class
@@ -86,12 +93,6 @@ private:
 	std::vector<Plugin> m_plugins;			//! list of plugins loaded
 	std::mutex m_pluginLock;			//! lock to add plugin
 #endif
-
-	// Irc & User event queues
-	std::vector<IrcEvent> m_ircEvents;		//! IRC events
-
-	std::mutex m_queueLock;				//! event queue lock
-	std::condition_variable m_queueCond;		//! queue waiting condition
 
 	ServerList m_servers;				//! list of servers
 
@@ -262,8 +263,36 @@ public:
 	 */
 	int run();
 
-	/* --- EXPERIMENTAL --- */
-	void pushIrcEvent(IrcEvent &event);
+	/* ------------------------------------------------
+	 * IRC Handlers
+	 * ------------------------------------------------ */
+
+	/**
+	 * Global IRC event handler, process the event type and call
+	 * every Lua plugin if Lua is compiled in.
+	 *
+	 * For some event, also call handleConnection
+	 * and handleInvite to do specific things.
+	 *
+	 * @param event the event
+	 */
+	void handleIrcEvent(const IrcEvent &event);
+
+	/**
+	 * The handleConnection will auto join servers
+	 * defined in the server of that event.
+	 *
+	 * @param event the event
+	 */
+	void handleConnection(const IrcEvent &event);
+
+	/**
+	 * the handleInvite will auto join the server if the
+	 * user want it.
+	 *
+	 * @param event the event
+	 */
+	void handleInvite(const IrcEvent &event);
 };
 
 } // !irccd

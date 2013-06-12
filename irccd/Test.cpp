@@ -262,6 +262,7 @@ static map<string, HelpFunction> helpCommands = createHelpCommands();
 // }}}
 
 // {{{ Test functions
+#if 0
 
 static void testConnect(Plugin *p, Server *s, int argc, char **argv)
 {
@@ -393,11 +394,12 @@ static void testUserMode(Plugin *p, Server *s, int argc, char **argv)
 		p->onUserMode(s, argv[0], argv[1]);
 	}
 }
+#endif
 
 static map<string, TestFunction> createCommands(void)
 {
 	map<string, TestFunction> commands;
-
+#if 0
 	commands["onConnect"]		= testConnect;
 	commands["onChannelNotice"]	= testChannelNotice;
 	commands["onInvite"]		= testInvite;
@@ -411,6 +413,7 @@ static map<string, TestFunction> createCommands(void)
 	commands["onQuery"]		= testQuery;
 	commands["onTopic"]		= testTopic;
 	commands["onUserMode"]		= testUserMode;
+#endif
 
 	return commands;
 }

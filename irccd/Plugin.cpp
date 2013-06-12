@@ -76,7 +76,7 @@ DeferredCall::DeferredCall()
 {
 }
 
-DeferredCall::DeferredCall(DeferredType type, Server *server, int ref)
+DeferredCall::DeferredCall(DeferredType type, shared_ptr<Server> server, int ref)
 	: m_type(type)
 	, m_server(server)
 	, m_ref(ref)
@@ -88,7 +88,7 @@ DeferredType DeferredCall::type() const
 	return m_type;
 }
 
-const Server * DeferredCall::server() const
+std::shared_ptr<Server> DeferredCall::server() const
 {
 	return m_server;
 }
@@ -100,6 +100,8 @@ void DeferredCall::addParam(const vector<string> & list)
 
 void DeferredCall::execute(Plugin &plugin)
 {
+	(void)plugin;
+#if 0
 	lua_rawgeti(plugin.getState(), LUA_REGISTRYINDEX, m_ref);
 	int nparams = 0;
 
@@ -125,6 +127,7 @@ void DeferredCall::execute(Plugin &plugin)
 	}
 
 	luaL_unref(plugin.getState(), LUA_REGISTRYINDEX, m_ref);
+#endif
 }
 
 bool DeferredCall::operator==(const DeferredCall &c1)
@@ -139,63 +142,21 @@ bool DeferredCall::operator==(const DeferredCall &c1)
  * private methods and members
  * -------------------------------------------------------- */
 
-void Plugin::callLua(const string &name, int nret, string fmt, ...)
-{
-	va_list ap;
-	int count = 0;
-
-	va_start(ap, fmt);
-	lua_getglobal(m_state.get(), name.c_str());
-	if (lua_type(m_state.get(), -1) != LUA_TFUNCTION)
-		return;
-
-	for (size_t i = 0; i < fmt.length(); ++i) {
-		switch (fmt[i]) {
-		case 'S':
-			LuaServer::pushObject(m_state.get(), va_arg(ap, Server *));
-			++ count;
-			break;
-		case 'i':
-			lua_pushinteger(m_state.get(), va_arg(ap, int));
-			++ count;
-			break;
-		case 's':
-			lua_pushstring(m_state.get(), va_arg(ap, const char *));
-			++ count;
-			break;
-		default:
-			break;
-		}
-	}
-
-	if (lua_pcall(m_state.get(), count, nret, 0) != LUA_OK) {
-		Logger::warn("plugin %s: %s", m_name.c_str(), lua_tostring(m_state.get(), -1));
-		lua_pop(m_state.get(), 1);
-	}
-}
-
 bool Plugin::loadLua(const string &path)
 {
-	m_state = unique_ptr<lua_State, LuaDeleter>(luaL_newstate());
+	m_state.openState();
 
 	// Load default library as it was done by require.
 	for (const Library &l : libLua)
-		(void)luaL_requiref(m_state.get(), l.m_name, l.m_func, 1);
+		m_state.require(l.m_name, l.m_func, true);
 
 	// Put external modules in package.preload so user
 	// will need require (modname)
-	lua_getglobal(m_state.get(), "package");
-	lua_getfield(m_state.get(), -1, "preload");
-	for (const Library &l : libIrccd) {
-		lua_pushcfunction(m_state.get(), l.m_func);
-		lua_setfield(m_state.get(), -2, l.m_name);
-	}
-	lua_pop(m_state.get(), 2);
+	for (const Library &l : libIrccd)
+		m_state.preload(l.m_name, l.m_func);
 
-	if (luaL_dofile(m_state.get(), path.c_str())) {
-		if (lua_type(m_state.get(), -1) == LUA_TSTRING)
-			m_error = lua_tostring(m_state.get(), -1);
-		lua_pop(m_state.get(), 1);
+	if (!m_state.dofile(path)) {
+		m_error = m_state.getError();
 		return false;
 	}
 
@@ -248,9 +209,9 @@ const string & Plugin::getHome() const
 	return m_home;
 }
 
-lua_State * Plugin::getState() const
+LuaState & Plugin::getState()
 {
-	return m_state.get();
+	return m_state;
 }
 
 const string & Plugin::getError() const
@@ -271,16 +232,19 @@ bool Plugin::open(const string &path)
 	return loadLua(path);
 }
 
+#if 0
 void Plugin::addDeferred(DeferredCall call)
 {
 	m_defcalls.push_back(call);
 }
 
-bool Plugin::hasDeferred(DeferredType type, const Server *sv)
+bool Plugin::hasDeferred(DeferredType type, shared_ptr<)
 {
 	for (const DeferredCall &c : m_defcalls)
 		if (c.type() == type && c.server() == sv)
 			return true;
+
+	return false;
 
 	return false;
 }
@@ -293,6 +257,7 @@ DeferredCall & Plugin::getDeferred(DeferredType type, const Server *sv)
 
 	throw out_of_range("not found");
 }
+#endif
 
 void Plugin::removeDeferred(DeferredCall &dc)
 {
@@ -300,77 +265,201 @@ void Plugin::removeDeferred(DeferredCall &dc)
 	    m_defcalls.end());
 }
 
-void Plugin::onCommand(Server *server, const string &channel, const string &who, const string &message)
+void Plugin::onCommand(shared_ptr<Server> server, const string &channel, const string &who, const string &message)
 {
-	callLua("onCommand", 0, "S s s s", server, channel.c_str(), who.c_str(), message.c_str());
+	if (m_state.getglobal("onCommand") != LUA_TFUNCTION)
+		return;
+
+	LuaServer::pushObject(m_state, server);
+	m_state.push(channel);
+	m_state.push(who);
+	m_state.push(message);
+
+	if (!m_state.pcall(4, 0))
+		throw ErrorException(m_state.getError());
 }
 
-void Plugin::onConnect(Server *server)
+void Plugin::onConnect(shared_ptr<Server> server)
 {
-	callLua("onConnect", 0, "S", server);
+	if (m_state.getglobal("onConnect") != LUA_TFUNCTION)
+		return;
+
+	LuaServer::pushObject(m_state, server);
+	
+	if (!m_state.pcall(1, 0))
+		throw ErrorException(m_state.getError());
 }
 
-void Plugin::onChannelNotice(Server *server, const string &nick, const string &target, const string &notice)
+void Plugin::onChannelNotice(shared_ptr<Server> server, const string &nick, const string &target, const string &notice)
 {
-	callLua("onChannelNotice", 0, "S s s s", server, nick.c_str(), target.c_str(), notice.c_str());
+	if (m_state.getglobal("onChannelNotice") != LUA_TFUNCTION)
+		return;
+
+	LuaServer::pushObject(m_state, server);
+	m_state.push(nick);
+	m_state.push(target);
+	m_state.push(notice);
+
+	if (!m_state.pcall(4, 0))
+		throw ErrorException(m_state.getError());
 }
 
-void Plugin::onInvite(Server *server, const string &channel, const string &who)
+void Plugin::onInvite(shared_ptr<Server> server, const string &channel, const string &who)
 {
-	callLua("onInvite", 0, "S s s", server, channel.c_str(), who.c_str());
+	if (m_state.getglobal("onInvite") != LUA_TFUNCTION)
+		return;
+
+	LuaServer::pushObject(m_state, server);
+	m_state.push(channel);
+	m_state.push(who);
+
+	if (!m_state.pcall(3, 0))
+		throw ErrorException(m_state.getError());
 }
 
-void Plugin::onJoin(Server *server, const string &channel, const string &nickname)
+void Plugin::onJoin(shared_ptr<Server> server, const string &channel, const string &nickname)
 {
-	callLua("onJoin", 0, "S s s", server, channel.c_str(), nickname.c_str());
+	if (m_state.getglobal("onJoin") != LUA_TFUNCTION)
+		return;
+
+	LuaServer::pushObject(m_state, server);
+	m_state.push(channel);
+	m_state.push(nickname);
+
+	if (!m_state.pcall(3, 0))
+		throw ErrorException(m_state.getError());
 }
 
-void Plugin::onKick(Server *server, const string &channel, const string &who, const string &kicked, const string &reason)
+void Plugin::onKick(shared_ptr<Server> server, const string &channel, const string &who, const string &kicked, const string &reason)
 {
-	callLua("onKick", 0, "S s s s s", server, channel.c_str(), who.c_str(), kicked.c_str(), reason.c_str());
+	if (m_state.getglobal("onKick") != LUA_TFUNCTION)
+		return;
+
+	LuaServer::pushObject(m_state, server);
+	m_state.push(channel);
+	m_state.push(who);
+	m_state.push(kicked);
+	m_state.push(reason);
+
+	if (!m_state.pcall(5, 0))
+		throw ErrorException(m_state.getError());
 }
 
-void Plugin::onMessage(Server *server, const string &channel, const string &who, const string &message)
+void Plugin::onMessage(shared_ptr<Server> server, const string &channel, const string &who, const string &message)
 {
-	callLua("onMessage", 0, "S s s s", server, channel.c_str(), who.c_str(), message.c_str());
+	if (m_state.getglobal("onMessage") != LUA_TFUNCTION)
+		return;
+
+	LuaServer::pushObject(m_state, server);
+	m_state.push(channel);
+	m_state.push(who);
+	m_state.push(message);
+
+	if (!m_state.pcall(4, 0))
+		throw ErrorException(m_state.getError());
 }
 
-void Plugin::onMode(Server *server, const string &channel, const string &who, const string &mode, const string &modeArg)
+void Plugin::onMode(shared_ptr<Server> server, const string &channel, const string &who, const string &mode, const string &modeArg)
 {
-	callLua("onMode", 0, "S s s s s", server, channel.c_str(), who.c_str(), mode.c_str(), modeArg.c_str());
+	if (m_state.getglobal("onMode") != LUA_TFUNCTION)
+		return;
+
+	LuaServer::pushObject(m_state, server);
+	m_state.push(channel);
+	m_state.push(who);
+	m_state.push(mode);
+	m_state.push(modeArg);
+
+	if (!m_state.pcall(5, 0))
+		throw ErrorException(m_state.getError());
 }
 
-void Plugin::onNick(Server *server, const string &oldnick, const string &newnick)
+void Plugin::onNick(shared_ptr<Server> server, const string &oldnick, const string &newnick)
 {
-	callLua("onNick", 0, "S s s", server, oldnick.c_str(), newnick.c_str());
+	if (m_state.getglobal("onNick") != LUA_TFUNCTION)
+		return;
+
+	LuaServer::pushObject(m_state, server);
+	m_state.push(oldnick);
+	m_state.push(newnick);
+
+	if (!m_state.pcall(3, 0))
+		throw ErrorException(m_state.getError());
 }
 
-void Plugin::onNotice(Server *server, const string &nick, const string &target, const string &notice)
+void Plugin::onNotice(shared_ptr<Server> server, const string &nick, const string &target, const string &notice)
 {
-	callLua("onNotice", 0, "S s s s", server, nick.c_str(), target.c_str(), notice.c_str());
+	if (m_state.getglobal("onNotice") != LUA_TFUNCTION)
+		return;
+
+	LuaServer::pushObject(m_state, server);
+	m_state.push(nick);
+	m_state.push(target);
+	m_state.push(notice);
+
+	if (!m_state.pcall(4, 0))
+		Logger::warn("plugin %s: %s", m_name.c_str(), m_state.getError().c_str());
 }
 
-void Plugin::onPart(Server *server, const string &channel, const string &who, const string &reason)
+void Plugin::onPart(shared_ptr<Server> server, const string &channel, const string &who, const string &reason)
 {
-	callLua("onPart", 0, "S s s s", server, channel.c_str(), who.c_str(), reason.c_str());
+	if (m_state.getglobal("onPart") != LUA_TFUNCTION)
+		return;
+
+	LuaServer::pushObject(m_state, server);
+	m_state.push(channel);
+	m_state.push(who);
+	m_state.push(reason);
+
+	if (!m_state.pcall(4, 0))
+		throw ErrorException(m_state.getError());
 }
 
-void Plugin::onQuery(Server *server, const string &who, const string &message)
+void Plugin::onQuery(shared_ptr<Server> server, const string &who, const string &message)
 {
-	callLua("onQuery", 0, "S s s", server, who.c_str(), message.c_str());
+	if (m_state.getglobal("onQuery") != LUA_TFUNCTION)
+		return;
+
+	LuaServer::pushObject(m_state, server);
+	m_state.push(who);
+	m_state.push(message);
+
+	if (!m_state.pcall(3, 0))
+		throw ErrorException(m_state.getError());
 }
 
 void Plugin::onReload()
 {
-	callLua("onReload", 0, "");
+	if (m_state.getglobal("onReload") != LUA_TFUNCTION)
+		return;
+
+	if (!m_state.pcall(0, 0))
+		throw ErrorException(m_state.getError());
 }
 
-void Plugin::onTopic(Server *server, const string &channel, const string &who, const string &topic)
+void Plugin::onTopic(shared_ptr<Server> server, const string &channel, const string &who, const string &topic)
 {
-	callLua("onTopic", 0, "S s s s", server, channel.c_str(), who.c_str(), topic.c_str());
+	if (m_state.getglobal("onTopic") != LUA_TFUNCTION)
+		return;
+
+	LuaServer::pushObject(m_state, server);
+	m_state.push(channel);
+	m_state.push(who);
+	m_state.push(topic);
+
+	if (!m_state.pcall(4, 0))
+		throw ErrorException(m_state.getError());
 }
 
-void Plugin::onUserMode(Server *server, const string &who, const string &mode)
+void Plugin::onUserMode(shared_ptr<Server> server, const string &who, const string &mode)
 {
-	callLua("onUserMode", 0, "S s s", server, who.c_str(), mode.c_str());
+	if (m_state.getglobal("onUserMode") != LUA_TFUNCTION)
+		return;
+
+	LuaServer::pushObject(m_state, server);
+	m_state.push(who);
+	m_state.push(mode);
+
+	if (!m_state.pcall(3, 0))
+		throw ErrorException(m_state.getError());
 }

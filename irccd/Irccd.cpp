@@ -37,7 +37,6 @@ using namespace std;
 
 typedef function<bool(SocketTCP &, const string &params)> Handler;
 
-#if 0
 static bool handleChannelNotice(SocketTCP &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
@@ -49,7 +48,7 @@ static bool handleChannelNotice(SocketTCP &client, const string &cmd)
 		return false;
 	}
 
-	Irccd::getInstance()->findServer(params[0]).cnotice(params[1], params[2]);
+	Irccd::getInstance()->findServer(params[0])->cnotice(params[1], params[2]);
 
 	return true;
 }
@@ -65,7 +64,7 @@ static bool handleInvite(SocketTCP &client, const string &cmd)
 		return false;
 	}
 
-	Irccd::getInstance()->findServer(params[0]).invite(params[1], params[2]);
+	Irccd::getInstance()->findServer(params[0])->invite(params[1], params[2]);
 
 	return true;
 }
@@ -85,7 +84,7 @@ static bool handleJoin(SocketTCP &client, const string &cmd)
 	if (params.size() == 3)
 		password = params[2];
 
-	Irccd::getInstance()->findServer(params[0]).join(params[1], password);
+	Irccd::getInstance()->findServer(params[0])->join(params[1], password);
 
 	return true;
 }
@@ -105,7 +104,7 @@ static bool handleKick(SocketTCP &client, const string &cmd)
 	if (params.size() == 4)
 		reason = params[3];
 
-	Irccd::getInstance()->findServer(params[0]).kick(params[1], params[2], reason);
+	Irccd::getInstance()->findServer(params[0])->kick(params[1], params[2], reason);
 
 	return true;
 }
@@ -137,7 +136,7 @@ static bool handleMe(SocketTCP &client, const string &cmd)
 		return false;
 	}
 
-	Irccd::getInstance()->findServer(params[0]).me(params[1], params[2]);
+	Irccd::getInstance()->findServer(params[0])->me(params[1], params[2]);
 
 	return true;
 }
@@ -153,7 +152,7 @@ static bool handleMessage(SocketTCP &client, const string &cmd)
 		return false;
 	}
 
-	Irccd::getInstance()->findServer(params[0]).say(params[1], params[2]);
+	Irccd::getInstance()->findServer(params[0])->say(params[1], params[2]);
 
 	return true;
 }
@@ -169,7 +168,7 @@ static bool handleMode(SocketTCP &client, const string &cmd)
 		return false;
 	}
 
-	Irccd::getInstance()->findServer(params[0]).mode(params[1], params[2]);
+	Irccd::getInstance()->findServer(params[0])->mode(params[1], params[2]);
 
 	return true;
 }
@@ -185,7 +184,7 @@ static bool handleNick(SocketTCP &client, const string &cmd)
 		return false;
 	}
 
-	Irccd::getInstance()->findServer(params[0]).nick(params[1]);
+	Irccd::getInstance()->findServer(params[0])->nick(params[1]);
 
 	return true;
 }
@@ -201,7 +200,7 @@ static bool handleNotice(SocketTCP &client, const string &cmd)
 		return false;
 	}
 
-	Irccd::getInstance()->findServer(params[0]).notice(params[1], params[2]);
+	Irccd::getInstance()->findServer(params[0])->notice(params[1], params[2]);
 
 	return true;
 }
@@ -217,7 +216,7 @@ static bool handlePart(SocketTCP &client, const string &cmd)
 		return false;
 	}
 
-	Irccd::getInstance()->findServer(params[0]).part(params[1]);
+	Irccd::getInstance()->findServer(params[0])->part(params[1]);
 
 	return true;
 }
@@ -249,7 +248,7 @@ static bool handleTopic(SocketTCP &client, const string &cmd)
 		return false;
 	}
 
-	Irccd::getInstance()->findServer(params[0]).topic(params[1], params[2]);
+	Irccd::getInstance()->findServer(params[0])->topic(params[1], params[2]);
 
 	return true;
 }
@@ -281,16 +280,14 @@ static bool handleUserMode(SocketTCP &client, const string &cmd)
 		return false;
 	}
 
-	Irccd::getInstance()->findServer(params[0]).umode(params[1]);
+	Irccd::getInstance()->findServer(params[0])->umode(params[1]);
 
 	return true;
 }
-#endif
 
 static map<string, Handler> createHandlers()
 {
 	map<string, Handler> handlers;
-#if 0
 
 	handlers["CNOTICE"]	= handleChannelNotice;
 	handlers["INVITE"]	= handleInvite;
@@ -308,7 +305,6 @@ static map<string, Handler> createHandlers()
 	handlers["TOPIC"]	= handleTopic;
 	handlers["UMODE"]	= handleUserMode;
 	handlers["UNLOAD"]	= handleUnload;
-#endif
 
 	return handlers;
 }
@@ -828,7 +824,7 @@ void Irccd::addWantedPlugin(const string &name)
 Plugin & Irccd::findPlugin(lua_State *state)
 {
 	for (Plugin &p : m_plugins)
-		if (p.getState() == state)
+		if (p.getState().getState() == state)
 			return p;
 
 	// This one should not happen
@@ -923,18 +919,10 @@ int Irccd::run()
 	}
 
 	for (;;) {
-		// Wait for any listener or server to push something
-		unique_lock<mutex> ulock(m_queueLock);
-		m_queueCond.wait(ulock);
-
-		// Process IRC events
-		for (IrcEvent &e : m_ircEvents) {
-			for (Plugin &p : m_plugins) {
-				// P here
-			}
+		if (m_socketServers.size() == 0) {
+			Util::usleep(1000);
+			continue;
 		}
-
-#if 0
 
 		try {
 			SocketTCP &s = (SocketTCP &)m_listener.select(0);
@@ -948,24 +936,106 @@ int Irccd::run()
 		} catch (Socket::ErrorException ex) {
 			Logger::warn("listener: client error: %s", ex.what());
 		}
-#endif
 	}
 
 	return 0;
 }
 
-
-
-
-
-
-
-
-
-void Irccd::pushIrcEvent(IrcEvent &event)
+void Irccd::handleIrcEvent(const IrcEvent &ev)
 {
-	lock_guard<mutex> ulock(m_queueLock);
+	if (ev.m_type == IrcEventType::Connection)
+		handleConnection(ev);
+	else if (ev.m_type == IrcEventType::Invite)
+		handleInvite(ev);
 
-	m_ircEvents.push_back(event);
-	m_queueCond.notify_all();
+#if defined(WITH_LUA)
+	lock_guard<mutex> ulock(m_pluginLock);
+
+	for (Plugin &p : m_plugins) {
+		try {
+			switch (ev.m_type) {
+			case IrcEventType::Connection:
+				p.onConnect(ev.m_server);
+
+				break;
+			case IrcEventType::ChannelNotice:
+				p.onNotice(ev.m_server, ev.m_params[0], ev.m_params[1], ev.m_params[2]);
+				break;
+			case IrcEventType::Invite:
+				p.onInvite(ev.m_server, ev.m_params[0], ev.m_params[1]);
+				break;
+			case IrcEventType::Join:
+				p.onJoin(ev.m_server, ev.m_params[0], ev.m_params[1]);
+				break;
+			case IrcEventType::Kick:
+				p.onKick(ev.m_server, ev.m_params[0], ev.m_params[1], ev.m_params[2], ev.m_params[3]);
+				break;
+			case IrcEventType::Message:
+			{
+				string cc = ev.m_server->getCommandChar();
+				string sp = cc + p.getName();
+				string msg = ev.m_params[2];
+
+				// handle special commands "!<plugin> command"
+				if (cc.length() > 0 && msg.compare(0, sp.length(), sp) == 0) {
+					string plugin = msg.substr(cc.length(), sp.length() - cc.length());
+
+					if (plugin == p.getName()) {
+						p.onCommand(ev.m_server,
+							    ev.m_params[0],
+							    ev.m_params[1],
+							    msg.substr(sp.length())
+						);
+					}
+				} else
+					p.onMessage(ev.m_server, ev.m_params[0], ev.m_params[1], ev.m_params[2]);
+			}
+				break;
+			case IrcEventType::Mode:
+				p.onMode(ev.m_server, ev.m_params[0], ev.m_params[1], ev.m_params[2], ev.m_params[3]);
+				break;
+			case IrcEventType::Nick:
+				p.onNick(ev.m_server, ev.m_params[0], ev.m_params[1]);
+				break;
+			case IrcEventType::Notice:
+				p.onNotice(ev.m_server, ev.m_params[0], ev.m_params[1], ev.m_params[2]);
+				break;
+			case IrcEventType::Part:
+				p.onPart(ev.m_server, ev.m_params[0], ev.m_params[1], ev.m_params[2]);
+				break;
+			case IrcEventType::Query:
+				p.onQuery(ev.m_server, ev.m_params[0], ev.m_params[1]);
+				break;
+			default:
+				break;
+			}
+		} catch (Plugin::ErrorException ex) {
+			Logger::warn("plugin %s: %s", p.getName().c_str(), ex.what());
+		}
+	}
+#endif
+}
+
+void Irccd::handleConnection(const IrcEvent& event)
+{
+	shared_ptr<Server> server = event.m_server;
+
+	// Auto join channels
+	for (Server::Channel c : server->getChannels()) {
+		Logger::log("server %s: autojoining channel %s",
+		    server->getName().c_str(), c.m_name.c_str());
+
+		server->join(c.m_name, c.m_password);
+	}
+
+	Logger::log("server %s: successfully connected", server->getName().c_str());
+}
+
+void Irccd::handleInvite(const IrcEvent& event)
+{
+	shared_ptr<Server> server = event.m_server;
+
+	// if join-invite is set to true goes in
+	if (server->autoJoinInvite())
+		server->join(event.m_params[1], "");
 }

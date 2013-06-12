@@ -32,77 +32,63 @@ using namespace std;
 
 /* {{{ IRC handlers */
 
-static void handleChannel(irc_session_t *s, const char *ev, const char *orig,
-			  const char **params, unsigned int count)
+#define TO_SSERVER(s) \
+	*reinterpret_cast<shared_ptr<Server> *>(irc_get_ctx((s)));
+
+static void handleChannel(irc_session_t *s,
+			  const char *ev,
+			  const char *orig,
+			  const char **params,
+			  unsigned int count)
 {
-#if defined(WITH_LUA)
-	Server *server = (Server *)irc_get_ctx(s);
+	shared_ptr<Server> server = TO_SSERVER(s);
 	IrcEventParams evparams;
-	string channel, message = "";
-	const string &cmdToken = server->getCommandChar();
 
-	channel = params[0];
-	if (params[1] != nullptr)
-		message = params[1];
+	evparams.push_back(params[0]);
+	evparams.push_back(orig);
+	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
+	Irccd::getInstance()->handleIrcEvent(
+	    IrcEvent(IrcEventType::Message, evparams, server)
+	);
 
-#if 0
-
-
-	for (Plugin &p : Irccd::getInstance()->getPlugins()) {
-		/*
-		 * Get the context for that plugin and try to concatenate
-		 * the command token with the plugin name so we can call the good command
-		 *
-		 * like !ask will call onCommand for plugin ask
-		 */
-		string spCmd = cmdToken + p.getName();
-
-		// handle special commands
-		if (cmdToken.length() > 0 && message.compare(0, spCmd.length(), spCmd) == 0) {
-			string module = message.substr(cmdToken.length(), spCmd.length() - cmdToken.length());
-
-			if (module == p.getName())
-				p.onCommand(server, channel, orig, message.substr(spCmd.length()));
-		} else
-			p.onMessage(server, channel, orig, message);
-	}
-#endif
-#else
-	(void)s;
-	(void)orig;
-	(void)params;
-#endif
 	(void)ev;
 	(void)count;
 }
 
-static void handleConnect(irc_session_t *s, const char *ev, const char *orig,
-			  const char **params, unsigned int count)
+static void handleChannelNotice(irc_session_t *s,
+				const char *ev,
+				const char *orig,
+				const char **params,
+				unsigned int count)
 {
-	Server *server = (Server *)irc_get_ctx(s);
+	shared_ptr<Server> server = TO_SSERVER(s);
 	IrcEventParams evparams;
 
-	// Autojoin requested channels.
-	for (Server::Channel c : server->getChannels()) {
-		Logger::log("server %s: autojoining channel %s",
-		    server->getName().c_str(), c.m_name.c_str());
+	evparams.push_back(orig);
+	evparams.push_back(params[0]);
+	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-		server->join(c.m_name, c.m_password);
-	}
+	Irccd::getInstance()->handleIrcEvent(
+	    IrcEvent(IrcEventType::ChannelNotice, evparams, server)
+	);
 
-	//params.push_back();
+	(void)ev;
+	(void)count;
+}
 
-#if 0
-#if defined(WITH_LUA)
-	Irccd::getInstance()->getPluginLock().lock();
-	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onConnect(server);
-	Irccd::getInstance()->getPluginLock().unlock();
-#endif
+static void handleConnect(irc_session_t *s,
+			  const char *ev,
+			  const char *orig,
+			  const char **params,
+			  unsigned int count)
+{
+	shared_ptr<Server> server = TO_SSERVER(s);
+	IrcEventParams evparams;
 
-	Logger::log("server %s: successfully connected", server->getName().c_str());
-#endif
+	Irccd::getInstance()->handleIrcEvent(
+	    IrcEvent(IrcEventType::Connection, evparams, server)
+	);
 
 	(void)ev;
 	(void)orig;
@@ -124,153 +110,127 @@ static void handleCtcpRequest(irc_session_t *s, const char *ev, const char *orig
 	(void)count;
 }
 
-static void handleChannelNotice(irc_session_t *s, const char *ev, const char *orig,
-				const char **params, unsigned int count)
+static void handleInvite(irc_session_t *s,
+			 const char *ev,
+			 const char *orig,
+			 const char **params,
+			 unsigned int count)
 {
-#if defined(WITH_LUA)
-	Server *server = (Server *)irc_get_ctx(s);
-	string notice;;
+	shared_ptr<Server> server = TO_SSERVER(s);
+	IrcEventParams evparams;
 
-	if (params[1] != nullptr)
-		notice = params[1];
+	evparams.push_back(params[1]);
+	evparams.push_back(orig);
 
-	Irccd::getInstance()->getPluginLock().lock();
-	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onChannelNotice(server, orig, params[0], notice);
-	Irccd::getInstance()->getPluginLock().unlock();	
-#else
-	(void)s;
-	(void)orig;
-	(void)params;
-#endif
+	Irccd::getInstance()->handleIrcEvent(
+	    IrcEvent(IrcEventType::Invite, evparams, server)
+	);
+
 	(void)ev;
 	(void)count;
 }
 
-static void handleInvite(irc_session_t *s, const char *ev, const char *orig,
-			 const char **params, unsigned int count)
+static void handleJoin(irc_session_t *s,
+		       const char *ev,
+		       const char *orig,
+		       const char **params,
+		       unsigned int count)
 {
-	Server *server = (Server *)irc_get_ctx(s);
+	shared_ptr<Server> server = TO_SSERVER(s);
+	IrcEventParams evparams;
 
-	// if join-invite is set to true goes in
-	if (server->autoJoinInvite())
-		server->join(params[1], "");
+	evparams.push_back(params[0]);
+	evparams.push_back(orig);
 
-#if defined(WITH_LUA)
-	Irccd::getInstance()->getPluginLock().lock();
-	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onInvite(server, params[1], orig);
-	Irccd::getInstance()->getPluginLock().unlock();
-#endif
+	Irccd::getInstance()->handleIrcEvent(
+	    IrcEvent(IrcEventType::Join, evparams, server)
+	);
+
 	(void)ev;
 	(void)count;
 }
 
-static void handleJoin(irc_session_t *s, const char *ev, const char *orig,
-		       const char **params, unsigned int count)
+static void handleKick(irc_session_t *s,
+		       const char *ev,
+		       const char *orig,
+		       const char **params,
+		       unsigned int count)
 {
-#if defined(WITH_LUA)
-	Server *server = (Server *)irc_get_ctx(s);
+	shared_ptr<Server> server = TO_SSERVER(s);
+	IrcEventParams evparams;
 
-	Irccd::getInstance()->getPluginLock().lock();
-	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onJoin(server, params[0], orig);
-	Irccd::getInstance()->getPluginLock().unlock();
-#else
-	(void)s;
-	(void)orig;
-	(void)params;
-#endif
+	evparams.push_back(params[0]);
+	evparams.push_back(orig);
+	evparams.push_back(params[1]);
+	evparams.push_back((params[2] == nullptr) ? "" : params[2]);
+
+	Irccd::getInstance()->handleIrcEvent(
+	    IrcEvent(IrcEventType::Kick, evparams, server)
+	);
+
 	(void)ev;
 	(void)count;
 }
 
-static void handleKick(irc_session_t *s, const char *ev, const char *orig,
-		       const char **params, unsigned int count)
+static void handleMode(irc_session_t *s,
+		       const char *ev,
+		       const char *orig,
+		       const char **params,
+		       unsigned int count)
 {
-	Server *server = (Server *)irc_get_ctx(s);
-	string reason = "";
+	shared_ptr<Server> server = TO_SSERVER(s);
+	IrcEventParams evparams;
 
-	// params[2] is an optional kick text
-	if (params[2] != nullptr)
-		reason = params[2];
+	evparams.push_back(params[0]);
+	evparams.push_back(orig);
+	evparams.push_back(params[1]);
+	evparams.push_back((params[2] == nullptr) ? "" : params[2]);
 
-	// If I've been kicked, I need to remove my own channel
-	if (server->getIdentity().m_nickname == orig)
-		server->removeChannel(params[0]);
+	Irccd::getInstance()->handleIrcEvent(
+	    IrcEvent(IrcEventType::Mode, evparams, server)
+	);
 
-#if defined(WITH_LUA)
-	Irccd::getInstance()->getPluginLock().lock();
-	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onKick(server, params[0], orig, params[1], reason);
-	Irccd::getInstance()->getPluginLock().unlock();
-#endif
 	(void)ev;
 	(void)count;
 }
 
-static void handleMode(irc_session_t *s, const char *ev, const char *orig,
-		       const char **params, unsigned int count)
+static void handleNick(irc_session_t *s,
+		       const char *ev,
+		       const char *orig,
+		       const char **params,
+		       unsigned int count)
 {
-#if defined(WITH_LUA)
-	Server *server = (Server *)irc_get_ctx(s);
-	string modeValue;
+	shared_ptr<Server> server = TO_SSERVER(s);
+	IrcEventParams evparams;
 
-	// params[2] is optional mode argument
-	if (params[2] != nullptr)
-		modeValue = params[2];
+	evparams.push_back(orig);
+	evparams.push_back(params[0]);
 
-	Irccd::getInstance()->getPluginLock().lock();
-	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onMode(server, params[0], orig, params[1], modeValue);
-	Irccd::getInstance()->getPluginLock().unlock();
-#else
-	(void)s;
-	(void)orig;
-	(void)params;
-#endif
+	Irccd::getInstance()->handleIrcEvent(
+	    IrcEvent(IrcEventType::Nick, evparams, server)
+	);
+
 	(void)ev;
 	(void)count;
 }
 
-static void handleNick(irc_session_t *s, const char *ev, const char *orig,
-		       const char **params, unsigned int count)
+static void handleNotice(irc_session_t *s,
+			 const char *ev,
+			 const char *orig,
+			 const char **params,
+			 unsigned int count)
 {
-	Server *server = (Server *)irc_get_ctx(s);
+	shared_ptr<Server> server = TO_SSERVER(s);
+	IrcEventParams evparams;
 
-	// Don't forget to update our own nickname
-	if (orig == server->getIdentity().m_nickname)
-		server->getIdentity().m_nickname = params[0];
+	evparams.push_back(orig);
+	evparams.push_back(params[0]);
+	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-#if defined(WITH_LUA)
-	Irccd::getInstance()->getPluginLock().lock();
-	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onNick(server, orig, params[0]);
-	Irccd::getInstance()->getPluginLock().unlock();
-#endif
-	(void)ev;
-	(void)count;
-}
+	Irccd::getInstance()->handleIrcEvent(
+	    IrcEvent(IrcEventType::Notice, evparams, server)
+	);
 
-static void handleNotice(irc_session_t *s, const char *ev, const char *orig,
-			 const char **params, unsigned int count)
-{
-#if defined(WITH_LUA)
-	Server *server = (Server *)irc_get_ctx(s);
-	string notice;
-
-	if (params[1] != nullptr)
-		notice = params[1];
-
-	Irccd::getInstance()->getPluginLock().lock();
-	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onNotice(server, orig, params[0], notice);
-	Irccd::getInstance()->getPluginLock().unlock();
-#else
-	(void)s;
-	(void)orig;
-	(void)params;
-#endif
 	(void)ev;
 	(void)count;
 }
@@ -281,6 +241,7 @@ static void handleNumeric(irc_session_t *session,
 			  const char **params,
 			  unsigned int count)
 {
+#if 0
 #if defined(WITH_LUA)
 	Server *server = (Server *)irc_get_ctx(session);
 
@@ -322,102 +283,98 @@ static void handleNumeric(irc_session_t *session,
 	}
 	Irccd::getInstance()->getPluginLock().unlock();
 #else
+
+#endif
+
+#endif
+
 	(void)session;
 	(void)event;
 	(void)params;
-#endif
 	(void)count;
 	(void)origin;
 }
 
-static void handlePart(irc_session_t *s, const char *ev, const char *orig,
-		       const char **params, unsigned int count)
+static void handlePart(irc_session_t *s,
+		       const char *ev,
+		       const char *orig,
+		       const char **params,
+		       unsigned int count)
 {
-#if defined(WITH_LUA)
-	Server *server = (Server *)irc_get_ctx(s);
-	string reason = "";
+	shared_ptr<Server> server = TO_SSERVER(s);
+	IrcEventParams evparams;
 
-	// params[1] is an optional reason
-	if (params[1] != nullptr)
-		reason = params[1];
+	evparams.push_back(params[0]);
+	evparams.push_back(orig);
+	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance()->getPluginLock().lock();
-	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onPart(server, params[0], orig, reason);
-	Irccd::getInstance()->getPluginLock().unlock();
-#else
-	(void)s;
-	(void)orig;
-	(void)params;
-#endif
+	Irccd::getInstance()->handleIrcEvent(
+	    IrcEvent(IrcEventType::Part, evparams, server)
+	);
+
 	(void)ev;
 	(void)count;
 }
 
-static void handleQuery(irc_session_t *s, const char *ev, const char *orig,
-			const char **params, unsigned int count)
+static void handleQuery(irc_session_t *s,
+			const char *ev,
+			const char *orig,
+			const char **params,
+			unsigned int count)
 {
-#if defined(WITH_LUA)
-	Server *server = (Server *)irc_get_ctx(s);
-	string message = "";
+	shared_ptr<Server> server = TO_SSERVER(s);
+	IrcEventParams evparams;
 
-	if (params[1] != nullptr)
-		message = params[1];
+	evparams.push_back(orig);
+	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance()->getPluginLock().lock();
-	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onQuery(server, orig, message);
-	Irccd::getInstance()->getPluginLock().unlock();
-#else
-	(void)s;
-	(void)orig;
-	(void)params;
-#endif
+	Irccd::getInstance()->handleIrcEvent(
+	    IrcEvent(IrcEventType::Query, evparams, server)
+	);
+
 	(void)ev;
 	(void)count;
 }
 
-static void handleTopic(irc_session_t *s, const char *ev, const char *orig,
-			const char **params, unsigned int count)
+static void handleTopic(irc_session_t *s,
+			const char *ev,
+			const char *orig,
+			const char **params,
+			unsigned int count)
 {
-#if defined(WITH_LUA)
-	Server *server = (Server *)irc_get_ctx(s);
-	string topic = "";
+	shared_ptr<Server> server = TO_SSERVER(s);
+	IrcEventParams evparams;
 
-	// params[1] is the optional new topic
-	if (params[1] != nullptr)
-		topic = params[1];
+	evparams.push_back(params[0]);
+	evparams.push_back(orig);
+	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance()->getPluginLock().lock();
-	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onTopic(server, params[0], orig, topic);
-	Irccd::getInstance()->getPluginLock().unlock();
-#else
-	(void)s;
-	(void)orig;
-	(void)params;
-#endif
+	Irccd::getInstance()->handleIrcEvent(
+	    IrcEvent(IrcEventType::Topic, evparams, server)
+	);
+
 	(void)ev;
 	(void)count;
 }
 
-static void handleUserMode(irc_session_t *s, const char *ev, const char *orig,
-			   const char **params, unsigned int count)
+static void handleUserMode(irc_session_t *s,
+			   const char *ev,
+			   const char *orig,
+			   const char **params,
+			   unsigned int count)
 {
-#if defined(WITH_LUA)
-	Server *server = (Server *)irc_get_ctx(s);
+	shared_ptr<Server> server = TO_SSERVER(s);
+	IrcEventParams evparams;
 
-	Irccd::getInstance()->getPluginLock().lock();
-	for (Plugin &p : Irccd::getInstance()->getPlugins())
-		p.onUserMode(server, orig, params[0]);
-	Irccd::getInstance()->getPluginLock().unlock();
-#else
-	(void)s;
-	(void)orig;
-	(void)params;
-#endif
+	evparams.push_back(orig);
+	evparams.push_back(params[0]);
+
+	Irccd::getInstance()->handleIrcEvent(
+	    IrcEvent(IrcEventType::UserMode, evparams, server)
+	);
+
 	(void)ev;
-	(void)count;
+	(void)count;	
 }
 
 /* }}} */
@@ -430,12 +387,9 @@ Server::Server()
 {
 	memset(&m_callbacks, 0, sizeof (irc_callbacks_t));
 
-#if 0
 	m_callbacks.event_channel		= handleChannel;
 	m_callbacks.event_channel_notice	= handleChannelNotice;
-#endif
 	m_callbacks.event_connect		= handleConnect;
-#if 0
 	m_callbacks.event_ctcp_req		= handleCtcpRequest;
 	m_callbacks.event_invite		= handleInvite;
 	m_callbacks.event_join			= handleJoin;
@@ -448,7 +402,6 @@ Server::Server()
 	m_callbacks.event_privmsg		= handleQuery;
 	m_callbacks.event_topic			= handleTopic;
 	m_callbacks.event_umode			= handleUserMode;
-#endif
 }
 
 Server::Server(Server &&src)
@@ -595,7 +548,9 @@ void Server::startConnection()
 			if (m_password.length() > 0)
 				password = m_password.c_str();
 
-			irc_set_ctx(m_session.get(), this);
+			irc_set_ctx(m_session.get(),
+			    new shared_ptr<Server>(shared_from_this()));
+			
 			error = irc_connect(
 			    m_session.get(),
 			    m_host.c_str(),

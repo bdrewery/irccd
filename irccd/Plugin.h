@@ -23,7 +23,7 @@
 #include <memory>
 #include <string>
 
-#include <lua.hpp>
+#include "LuaState.h"
 
 namespace irccd {
 
@@ -50,10 +50,10 @@ typedef std::vector<std::vector<std::string>> Params;
  */
 class DeferredCall {
 private:
-	DeferredType m_type;		//! type of call
-	Server * m_server;		//! for which server
-	Params m_params;		//! list of list of string
-	int m_ref;			//! function reference
+	DeferredType m_type;			//! type of call
+	std::shared_ptr<Server> m_server;		//! for which server
+	Params m_params;			//! list of list of string
+	int m_ref;				//! function reference
 
 public:
 	/**
@@ -68,7 +68,7 @@ public:
 	 * @param server  for which server
 	 * @param ref the function reference
 	 */
-	DeferredCall(DeferredType type, Server *server, int ref);
+	DeferredCall(DeferredType type, std::shared_ptr<Server> server, int ref);
 
 	/**
 	 * Get the type.
@@ -82,7 +82,7 @@ public:
 	 *
 	 * @return the server
 	 */
-	const Server * server() const;
+	std::shared_ptr<Server> server() const;
 
 	/**
 	 * Add a list of parameters.
@@ -108,21 +108,38 @@ public:
 	bool operator==(const DeferredCall &c1);
 };
 
-class LuaDeleter {
-public:
-	void operator()(lua_State *L) {
-		lua_close(L);
-	}
-};
-
 class Plugin {
+public:
+	class ErrorException : public std::exception {
+	private:
+		std::string m_error;
+
+	public:
+		ErrorException()
+		{
+		}
+
+		ErrorException(const std::string &error)
+		{
+			m_error = error;
+		}
+
+		~ErrorException()
+		{
+		}
+
+		virtual const char * what() const throw()
+		{
+			return m_error.c_str();
+		}
+	};
 private:
 	// Plugin identity
 	std::string m_name;		//! name like "foo"
 	std::string m_home;		//! home, usuall ~/.config/<name>/
 	std::string m_error;		//! error message if needed
 
-	std::unique_ptr<lua_State, LuaDeleter> m_state;
+	LuaState m_state;
 
 	// Deferred calls
 	std::vector<DeferredCall> m_defcalls;	//! list of deferred call
@@ -171,7 +188,7 @@ public:
 	 *
 	 * @return the Lua state
 	 */
-	lua_State * getState() const;
+	LuaState & getState();
 
 	/**
 	 * Get the error message if something failed.
@@ -242,7 +259,9 @@ public:
 	 * @param who who spoke
 	 * @param message the message sent without the command and plugin
 	 */
-	void onCommand(Server *server, const std::string &channel, const std::string &who,
+	void onCommand(std::shared_ptr<Server> server,
+		       const std::string &channel,
+		       const std::string &who,
 		       const std::string &message);
 
 	/**
@@ -251,7 +270,7 @@ public:
 	 *
 	 * @param server the current server
 	 */
-	void onConnect(Server *server);
+	void onConnect(std::shared_ptr<Server> server);
 
 	/**
 	 * A Lua function triggered on a channel notice
@@ -261,7 +280,9 @@ public:
 	 * @param target the target channel
 	 * @param notice the optional notice
 	 */
-	void onChannelNotice(Server *server, const std::string &nick, const std::string &target,
+	void onChannelNotice(std::shared_ptr<Server> server,
+			     const std::string &nick,
+			     const std::string &target,
 			     const std::string &notice);
 
 	/**
@@ -271,7 +292,9 @@ public:
 	 * @param channel on which channel
 	 * @param who who invited you
 	 */
-	void onInvite(Server *server, const std::string &channel, const std::string &who);
+	void onInvite(std::shared_ptr<Server> server,
+		      const std::string &channel,
+		      const std::string &who);
 
 	/**
 	 * A Lua function triggered on a join event.
@@ -280,7 +303,9 @@ public:
 	 * @param channel on which channel
 	 * @param nickname the nickname
 	 */
-	void onJoin(Server *server, const std::string &channel, const std::string &nickname);
+	void onJoin(std::shared_ptr<Server> server,
+		    const std::string &channel,
+		    const std::string &nickname);
 
 	/**
 	 * A Lua function triggered on a kick event.
@@ -291,8 +316,11 @@ public:
 	 * @param kicked the person kicked
 	 * @param reason an optional reason
 	 */
-	void onKick(Server *server, const std::string &channel, const std::string &who,
-		    const std::string &kicked, const std::string &reason);
+	void onKick(std::shared_ptr<Server> server,
+		    const std::string &channel,
+		    const std::string &who,
+		    const std::string &kicked,
+		    const std::string &reason);
 
 	/**
 	 * A Lua function triggered on a message event.
@@ -302,7 +330,9 @@ public:
 	 * @param who who spoke
 	 * @param message the message sent
 	 */
-	void onMessage(Server *server, const std::string &channel, const std::string &who,
+	void onMessage(std::shared_ptr<Server> server,
+		       const std::string &channel,
+		       const std::string &who,
 		       const std::string &message);
 
 	/**
@@ -314,8 +344,11 @@ public:
 	 * @param mode the mode
 	 * @param modeArg an optional mode argument
 	 */
-	void onMode(Server *server, const std::string &channel, const std::string &who,
-		    const std::string &mode, const std::string &modeArg);
+	void onMode(std::shared_ptr<Server> server,
+		    const std::string &channel,
+		    const std::string &who,
+		    const std::string &mode,
+		    const std::string &modeArg);
 
 	/**
 	 * A Lua function triggered on a nick event.
@@ -324,7 +357,9 @@ public:
 	 * @param oldnick the old nickname
 	 * @param newnick the new nickname
 	 */
-	void onNick(Server *server, const std::string &oldnick, const std::string &newnick);
+	void onNick(std::shared_ptr<Server> server,
+		    const std::string &oldnick,
+		    const std::string &newnick);
 
 	/**
 	 * A Lua function triggered on a private notice.
@@ -334,7 +369,9 @@ public:
 	 * @param target the target nickname
 	 * @param notice the optional notice
 	 */
-	void onNotice(Server *server, const std::string &nick, const std::string &target,
+	void onNotice(std::shared_ptr<Server> server,
+		      const std::string &nick,
+		      const std::string &target,
 		      const std::string &notice);
 
 	/**
@@ -345,7 +382,9 @@ public:
 	 * @param who who left
 	 * @param reason an optional reason
 	 */
-	void onPart(Server *server, const std::string &channel, const std::string &who,
+	void onPart(std::shared_ptr<Server> server,
+		    const std::string &channel,
+		    const std::string &who,
 		    const std::string &reason);
 
 	/**
@@ -355,7 +394,9 @@ public:
 	 * @param who who sent
 	 * @param message the message
 	 */
-	void onQuery(Server *server, const std::string &who, const std::string &message);
+	void onQuery(std::shared_ptr<Server> server,
+		     const std::string &who,
+		     const std::string &message);
 
 	/**
 	 * A Lua function triggered when user want's to reload the plugin.
@@ -370,7 +411,9 @@ public:
 	 * @param who who changed the topic
 	 * @param topic the new topic
 	 */
-	void onTopic(Server *server, const std::string &channel, const std::string &who,
+	void onTopic(std::shared_ptr<Server> server,
+		     const std::string &channel,
+		     const std::string &who,
 		     const std::string &topic);
 
 	/**
@@ -380,7 +423,9 @@ public:
 	 * @param who who changed *your* mode
 	 * @param mode the mode
 	 */
-	void onUserMode(Server *server, const std::string &who, const std::string &mode);
+	void onUserMode(std::shared_ptr<Server> server,
+			const std::string &who,
+			const std::string &mode);
 };
 
 } // !irccd
