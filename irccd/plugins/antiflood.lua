@@ -74,6 +74,9 @@ local function loadConfig()
 		loadGeneral(parser:getSection("general"))
 	end
 
+	-- Empty the list
+	ignored = { }
+
 	if parser:hasSection("ignore") then
 		loadIgnore(parser:getSection("ignore"))
 	end
@@ -91,6 +94,16 @@ local function manage(server, channel, nickname)
 	end
 end
 
+local function isIgnored(server, channel, nickname)
+	for _, v in ipairs(ignored) do
+		if v == nickname then
+			return true
+		end
+	end
+
+	return false
+end
+
 function onConnect(server)
 	local ident = server:getIdentity()
 
@@ -99,6 +112,11 @@ end
 
 function onMessage(server, channel, who, message)
 	who = util.splitUser(who)
+
+	if isIgnored(server, channel, who) then
+		return
+	end
+
 	if nicknames[who] == nil then
 		nicknames[who] = {
 			current		= util.getTicks(),
