@@ -139,6 +139,28 @@ bool DeferredCall::operator==(const DeferredCall &c1)
 }
 
 /* --------------------------------------------------------
+ * Plugin exception
+ * -------------------------------------------------------- */
+
+Plugin::ErrorException::ErrorException()
+{
+}
+
+Plugin::ErrorException::ErrorException(const string& error)
+{
+	m_error = error;
+}
+
+Plugin::ErrorException::~ErrorException()
+{
+}
+
+const char * Plugin::ErrorException::what() const throw()
+{
+	return m_error.c_str();
+}
+
+/* --------------------------------------------------------
  * private methods and members
  * -------------------------------------------------------- */
 

@@ -956,7 +956,6 @@ void Irccd::handleIrcEvent(const IrcEvent &ev)
 			switch (ev.m_type) {
 			case IrcEventType::Connection:
 				p.onConnect(ev.m_server);
-
 				break;
 			case IrcEventType::ChannelNotice:
 				p.onNotice(ev.m_server, ev.m_params[0], ev.m_params[1], ev.m_params[2]);

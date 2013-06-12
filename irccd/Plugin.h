@@ -115,23 +115,13 @@ public:
 		std::string m_error;
 
 	public:
-		ErrorException()
-		{
-		}
+		ErrorException();
 
-		ErrorException(const std::string &error)
-		{
-			m_error = error;
-		}
+		ErrorException(const std::string &error);
 
-		~ErrorException()
-		{
-		}
+		~ErrorException();
 
-		virtual const char * what() const throw()
-		{
-			return m_error.c_str();
-		}
+		virtual const char * what() const throw();
 	};
 private:
 	// Plugin identity
@@ -145,18 +135,11 @@ private:
 	std::vector<DeferredCall> m_defcalls;	//! list of deferred call
 
 	/**
-	 * Call a Lua function and pass parameters to it. Format is one of them:
+	 * Load the Lua script file.
 	 *
-	 * 'S' => Server *
-	 * 's' => const char *
-	 * 'i' => int
-	 *
-	 * @param name the function name
-	 * @param nret the number of param the function should returns
-	 * @param fmt the format, see description
+	 * @param path the path file
+	 * @return true on success
 	 */
-	void callLua(const std::string &name, int nret, std::string fmt, ...);
-
 	bool loadLua(const std::string &path);
 public:
 	Plugin();
