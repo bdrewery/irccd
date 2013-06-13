@@ -235,63 +235,27 @@ static void handleNotice(irc_session_t *s,
 	(void)count;
 }
 
-static void handleNumeric(irc_session_t *session,
+static void handleNumeric(irc_session_t *s,
 			  unsigned int event,
 			  const char *origin,
 			  const char **params,
 			  unsigned int count)
 {
-#if 0
-#if defined(WITH_LUA)
-	Server *server = (Server *)irc_get_ctx(session);
+	shared_ptr<Server> server = TO_SSERVER(s);
+	IrcEventParams evparams;
 
-	Irccd::getInstance()->getPluginLock().lock();
-	for (Plugin &p : Irccd::getInstance()->getPlugins()) {
-		switch (event) {
-		case LIBIRC_RFC_RPL_NAMREPLY:
-			if (p.hasDeferred(DeferredType::Names, server)) {
-				DeferredCall &c = p.getDeferred(DeferredType::Names, server);
+	if (event == LIBIRC_RFC_RPL_NAMREPLY)
+		evparams.push_back("names");
+	else if (event == LIBIRC_RFC_RPL_ENDOFNAMES)
+		evparams.push_back("end-names");
 
-				// params[3] contain the list of nicknames separeted by spaces	
-				if (params[3] != nullptr) {
-					vector<string> names = Util::split(params[3], " \t");
+	for (unsigned int i = 0; i < count; ++i)
+		evparams.push_back((params[i] != nullptr) ? "" : params[i]);
 
-					for (string s : names) {
-						vector<string> list;
+	Irccd::getInstance()->handleIrcEvent(
+		IrcEvent(IrcEventType::Numeric, evparams, server)
+	);
 
-						// Add the list of nicknames
-						list.push_back(s);
-						c.addParam(list);
-					}
-				}
-			}
-
-			break;
-		case LIBIRC_RFC_RPL_ENDOFNAMES:
-			if (p.hasDeferred(DeferredType::Names, server)) {
-				DeferredCall &c = p.getDeferred(DeferredType::Names, server);
-
-
-				c.execute(p);
-				p.removeDeferred(c);
-			}
-
-			break;
-		default:
-			break;
-		}
-	}
-	Irccd::getInstance()->getPluginLock().unlock();
-#else
-
-#endif
-
-#endif
-
-	(void)session;
-	(void)event;
-	(void)params;
-	(void)count;
 	(void)origin;
 }
 

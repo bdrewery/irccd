@@ -222,15 +222,14 @@ static int names(lua_State *L)
 {
 	(void)L;
 
-#if 0
 	if (lua_gettop(L) != 3)
 		return luaL_error(L, "server:names needs 2 arguments");
 
-	Server *s;
+	shared_ptr<Server> s;
 	string channel;
 	int ref;
 
-	s = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	s = TO_SSERVER(L, 1);
 	channel = luaL_checkstring(L, 2);
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 
@@ -245,7 +244,7 @@ static int names(lua_State *L)
 		s->names(channel);
 	} catch (out_of_range) {
 	}
-#endif
+
 	// Deferred call
 	return 0;
 }

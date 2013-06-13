@@ -1015,6 +1015,8 @@ void Irccd::handleIrcEvent(const IrcEvent &ev)
 #endif
 }
 
+
+
 void Irccd::handleConnection(const IrcEvent& event)
 {
 	shared_ptr<Server> server = event.m_server;

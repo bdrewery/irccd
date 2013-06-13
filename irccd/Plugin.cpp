@@ -98,20 +98,18 @@ void DeferredCall::addParam(const vector<string> & list)
 	m_params.push_back(list);
 }
 
-void DeferredCall::execute(Plugin &plugin)
+void DeferredCall::execute(Plugin &p)
 {
-	(void)plugin;
-#if 0
-	lua_rawgeti(plugin.getState(), LUA_REGISTRYINDEX, m_ref);
+	p.m_state.rawget(LUA_REGISTRYINDEX, m_ref);
 	int nparams = 0;
 
 	switch (m_type) {
 	case DeferredType::Names:
-		lua_createtable(plugin.getState(), m_params.size(), m_params.size());
+		p.m_state.createtable(m_params.size(), m_params.size());
 
 		for (size_t i = 0; i < m_params.size(); ++i) {
-			lua_pushstring(plugin.getState(), m_params[i][0].c_str());
-			lua_rawseti(plugin.getState(), -2, i + 1);
+			p.m_state.push(m_params[i][0].c_str());
+			p.m_state.rawset(-2, i + 1);
 		}
 
 		nparams = 1;
@@ -120,14 +118,10 @@ void DeferredCall::execute(Plugin &plugin)
 		break;
 	}
 
-	if (lua_pcall(plugin.getState(), nparams, 0, 0) != LUA_OK) {
-		Logger::warn("plugin %s: %s",
-		    plugin.getName().c_str(),
-		    lua_tostring(plugin.getState(), -1));
-	}
+	if (!p.m_state.pcall(nparams, 0, 0) != LUA_OK)
+		Logger::warn("plugin %s: %s", p.m_name.c_str(), p.m_state.getError().c_str());
 
-	luaL_unref(plugin.getState(), LUA_REGISTRYINDEX, m_ref);
-#endif
+	p.m_state.unref(LUA_REGISTRYINDEX, m_ref);
 }
 
 bool DeferredCall::operator==(const DeferredCall &c1)
@@ -254,19 +248,16 @@ bool Plugin::open(const string &path)
 	return loadLua(path);
 }
 
-#if 0
 void Plugin::addDeferred(DeferredCall call)
 {
 	m_defcalls.push_back(call);
 }
 
-bool Plugin::hasDeferred(DeferredType type, shared_ptr<)
+bool Plugin::hasDeferred(DeferredType type, shared_ptr<Server> sv)
 {
 	for (const DeferredCall &c : m_defcalls)
 		if (c.type() == type && c.server() == sv)
 			return true;
-
-	return false;
 
 	return false;
 }
@@ -279,7 +270,6 @@ DeferredCall & Plugin::getDeferred(DeferredType type, const Server *sv)
 
 	throw out_of_range("not found");
 }
-#endif
 
 void Plugin::removeDeferred(DeferredCall &dc)
 {

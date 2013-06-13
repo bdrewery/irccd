@@ -123,6 +123,8 @@ public:
 
 		virtual const char * what() const throw();
 	};
+
+	friend class DeferredCall;
 private:
 	// Plugin identity
 	std::string m_name;		//! name like "foo"
@@ -207,7 +209,7 @@ public:
 	 * @param sv for which server
 	 * @return true if has
 	 */
-	bool hasDeferred(DeferredType type, const Server *sv);
+	bool hasDeferred(DeferredType type, std::shared_ptr<Server> sv);
 
 	/**
 	 * Get a specified deferred call.
@@ -216,7 +218,7 @@ public:
 	 * @param sv for which server
 	 * @return the deferred call
 	 */
-	DeferredCall & getDeferred(DeferredType type, const Server *sv);
+	DeferredCall & getDeferred(DeferredType type, std::shared_ptr<Server> sv);
 
 	/**
 	 * Remove a deferred call.

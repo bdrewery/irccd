@@ -51,6 +51,7 @@ enum class IrcEventType {
 	Message,					//! on channel messages
 	Mode,						//! channel mode
 	Nick,						//! nick change
+	Numeric,					//! general event
 	Notice,						//! channel notice
 	Part,						//! channel parts
 	Query,						//! private query
@@ -293,6 +294,10 @@ public:
 	 * @param event the event
 	 */
 	void handleInvite(const IrcEvent &event);
+
+	/**
+	 * Handle general numeric events
+	void handleNumeric(const IrcEvent &event);
 };
 
 } // !irccd

@@ -67,6 +67,11 @@ bool LuaState::dofile(const string& path)
 	return true;
 }
 
+void LuaState::createtable(int narr, int nrec)
+{
+	lua_createtable(getState(), narr, nrec);
+}
+
 void LuaState::push()
 {
 	lua_pushnil(getState());
@@ -106,10 +111,32 @@ bool LuaState::pcall(int np, int nr, int errorh)
 	bool success;
 
 	success = lua_pcall(getState(), np, nr, errorh) == LUA_OK;
-	if (!success && errorh == 0)
+	if (!success && errorh == 0) {
 		m_error = lua_tostring(getState(), -1);
+		lua_pop(getState(), 1);
+	}
 
 	return success;
+}
+
+int LuaState::ref(int t)
+{
+	return luaL_ref(getState(), t);
+}
+
+void LuaState::unref(int t, int ref)
+{
+	return luaL_unref(getState(), t, ref);
+}
+
+void LuaState::rawget(int t, int n)
+{
+	lua_rawgeti(getState(), t, n);
+}
+
+void LuaState::rawset(int t, int n)
+{
+	lua_rawseti(getState(), t, n);
 }
 
 LuaState & LuaState::operator=(LuaState &&src)

@@ -30,7 +30,6 @@ class LuaDeleter {
 public:
 	void operator()(lua_State *L) {
 		lua_close(L);
-		puts("LUA DELETED");
 	}
 };
 
@@ -82,6 +81,14 @@ public:
 	 * @return true on success
 	 */
 	bool dofile(const std::string& path);
+
+	/**
+	 * Create a new table and push it onto the stack.
+	 *
+	 * @param narr optional elements hint
+	 * @param nrec optional elements hint
+	 */
+	void createtable(int narr = 0, int nrec = 0);
 
 	/**
 	 * Push nil.
@@ -137,6 +144,38 @@ public:
 	 * @param errorh an optional index of error function handler
 	 */
 	bool pcall(int np, int nr, int errorh = 0);
+
+	/**
+	 * Creates a reference of object on the top of the stack into the
+	 * table t.
+	 *
+	 * @param t the table to save to
+	 * @return the new reference
+	 */
+	int ref(int t);
+
+	/**
+	 * Remove the reference ref from the table t.
+	 *
+	 * @param t the table
+	 * @param ref the reference
+	 */
+	void unref(int t, int ref);
+
+	/**
+	 * Get the element n from table at index t.
+	 *
+	 * @param t the table index
+	 * @param n the t[n] value
+	 */
+	void rawget(int t, int n);
+
+	/**
+	 * Set the table field where the value is at the top.
+	 *
+	 * @param t the table index
+	 */
+	void rawset(int t, int n);
 
 	/**
 	 * Move assignment operator.
