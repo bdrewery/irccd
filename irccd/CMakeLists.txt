@@ -57,6 +57,8 @@ if (WITH_LUA)
 			Lua/LuaServer.h
 			Lua/LuaUtil.cpp
 			Lua/LuaUtil.h
+			DefCall.cpp
+			DefCall.h
 			LuaState.cpp
 			LuaState.h
 			Plugin.cpp

@@ -57,6 +57,11 @@ int LuaState::getglobal(const string& name)
 	return lua_type(getState(), -1);
 }
 
+int LuaState::gettop()
+{
+	return lua_gettop(getState());
+}
+
 bool LuaState::dofile(const string& path)
 {
 	if (luaL_dofile(getState(), path.c_str()) != LUA_OK) {
@@ -122,6 +127,16 @@ bool LuaState::pcall(int np, int nr, int errorh)
 int LuaState::ref(int t)
 {
 	return luaL_ref(getState(), t);
+}
+
+int LuaState::type(int idx)
+{
+	return lua_type(getState(), idx);
+}
+
+string LuaState::typeName(int type)
+{
+	return lua_typename(getState(), type);
 }
 
 void LuaState::unref(int t, int ref)

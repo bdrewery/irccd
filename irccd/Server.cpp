@@ -25,7 +25,6 @@
 #include <Util.h>
 
 #include "Irccd.h"
-#include "Server.h"
 
 using namespace irccd;
 using namespace std;
@@ -244,19 +243,26 @@ static void handleNumeric(irc_session_t *s,
 	shared_ptr<Server> server = TO_SSERVER(s);
 	IrcEventParams evparams;
 
-	if (event == LIBIRC_RFC_RPL_NAMREPLY)
-		evparams.push_back("names");
-	else if (event == LIBIRC_RFC_RPL_ENDOFNAMES)
-		evparams.push_back("end-names");
+	if (event == LIBIRC_RFC_RPL_NAMREPLY) {
+		Server::NameList & list = server->getNameLists();
 
-	for (unsigned int i = 0; i < count; ++i)
-		evparams.push_back((params[i] != nullptr) ? "" : params[i]);
+		if (params[3] != nullptr && params[2] != nullptr) {
+			std::vector<string> users = Util::split(params[3], " \t");
+			for (string u : users)
+				list[params[2]].push_back(u);
+		}
+	} else if (event == LIBIRC_RFC_RPL_ENDOFNAMES) {
+		Server::NameList & list = server->getNameLists();
 
-	Irccd::getInstance()->handleIrcEvent(
-		IrcEvent(IrcEventType::Numeric, evparams, server)
-	);
+		if (params[1] != nullptr) {
+			Irccd::getInstance()->handleIrcEvent(
+				IrcEvent(IrcEventType::Names, list[params[1]], server)
+			);
+		}
+	}
 
 	(void)origin;
+	(void)count;
 }
 
 static void handlePart(irc_session_t *s,
@@ -343,6 +349,25 @@ static void handleUserMode(irc_session_t *s,
 
 /* }}} */
 
+/* --------------------------------------------------------
+ * IRC Events, used by Server
+ * -------------------------------------------------------- */
+
+IrcEvent::IrcEvent(IrcEventType type, IrcEventParams params, std::shared_ptr<Server> server)
+	: m_type(type)
+	, m_params(params)
+	, m_server(server)
+{
+}
+
+IrcEvent::~IrcEvent()
+{
+}
+
+/* --------------------------------------------------------
+ * Server
+ * -------------------------------------------------------- */
+
 Server::Server()
 	: m_commandChar("!")
 	, m_joinInvite(false)
@@ -423,6 +448,11 @@ bool Server::autoCtcpReply() const
 const vector<Server::Channel> & Server::getChannels(void)
 {
 	return m_channels;
+}
+
+Server::NameList& Server::getNameLists()
+{
+	return m_nameLists;
 }
 
 Identity & Server::getIdentity()

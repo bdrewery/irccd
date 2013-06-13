@@ -75,6 +75,13 @@ public:
 	int getglobal(const std::string& name);
 
 	/**
+	 * Get the stack size.
+	 *
+	 * @return the current stack size
+	 */
+	int gettop();
+
+	/**
 	 * Load a file.
 	 *
 	 * @param path the file path
@@ -153,6 +160,22 @@ public:
 	 * @return the new reference
 	 */
 	int ref(int t);
+
+	/**
+	 * Returns the Lua object type.
+	 *
+	 * @param idx the index
+	 * @return the type
+	 */
+	int type(int idx);
+
+	/**
+	 * Returns the Lua object type name.
+	 *
+	 * @param type the Lua type
+	 * @return the name
+	 */
+	std::string typeName(int type);
 
 	/**
 	 * Remove the reference ref from the table t.

@@ -220,8 +220,6 @@ static int mode(lua_State *L)
 
 static int names(lua_State *L)
 {
-	(void)L;
-
 	if (lua_gettop(L) != 3)
 		return luaL_error(L, "server:names needs 2 arguments");
 
@@ -234,13 +232,17 @@ static int names(lua_State *L)
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 
 	try {
-		Plugin &p = Irccd::getInstance()->findPlugin(L);
+		shared_ptr<Plugin> p = Irccd::getInstance()->findPlugin(L);
 
 		// Get the function reference.
 		lua_pushvalue(L, 3);
 		ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-		p.addDeferred(DeferredCall(DeferredType::Names, s, ref));
+		Irccd::getInstance()->addDeferred(
+		    s, DefCall(IrcEventType::Names, p, ref)
+		);
+
+		//p.addDeferred(DeferredCall(IrcNumericType::Names, s, ref));
 		s->names(channel);
 	} catch (out_of_range) {
 	}

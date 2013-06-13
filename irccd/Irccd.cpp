@@ -29,6 +29,7 @@
 #include <Util.h>
 
 #include "Irccd.h"
+#include "Plugin.h"
 
 using namespace irccd;
 using namespace std;
@@ -314,21 +315,6 @@ static map<string, Handler> handlers = createHandlers();
 /* }}} */
 
 /* --------------------------------------------------------
- * IRC Events, used by Server
- * -------------------------------------------------------- */
-
-IrcEvent::IrcEvent(IrcEventType type, IrcEventParams params, std::shared_ptr<Server> server)
-	: m_type(type)
-	, m_params(params)
-	, m_server(server)
-{
-}
-
-IrcEvent::~IrcEvent()
-{
-}
-
-/* --------------------------------------------------------
  * private methods
  * -------------------------------------------------------- */
 
@@ -527,14 +513,15 @@ void Irccd::loadPlugin(const string &name)
 		 */
 		
 		m_pluginLock.lock();
-		m_plugins.push_back(Plugin(name));		// don't remove that
 
-		Plugin & plugin = m_plugins.back();
+		Plugin *p = new Plugin(name);
+		m_plugins.push_back(shared_ptr<Plugin>(p));		// don't remove that
+
 		m_pluginLock.unlock();
 
-		if (!plugin.open(finalPath)) {
+		if (!p->open(finalPath)) {
 			Logger::warn("irccd: failed to load module %s: %s",
-			    name.c_str(), plugin.getError().c_str());
+			    name.c_str(), p->getError().c_str());
 
 			m_pluginLock.lock();
 			m_plugins.pop_back();
@@ -549,11 +536,11 @@ void Irccd::loadPlugin(const string &name)
 void Irccd::unloadPlugin(const string &name)
 {
 #if defined(WITH_LUA)
-	vector<Plugin>::iterator i;	
+	vector<shared_ptr<Plugin>>::iterator i;	
 
 	m_pluginLock.lock();
-	i = find_if(m_plugins.begin(), m_plugins.end(), [&] (Plugin &p) -> bool {
-		return p.getName() == name;
+	i = find_if(m_plugins.begin(), m_plugins.end(), [&] (shared_ptr<Plugin> &p) -> bool {
+		return p->getName() == name;
 	});
 
 	if (i == m_plugins.end())
@@ -571,7 +558,7 @@ void Irccd::reloadPlugin(const string &name)
 {
 #if defined(WITH_LUA)
 	try {
-		findPlugin(name).onReload();
+		findPlugin(name)->onReload();
 	} catch (out_of_range ex) {
 		Logger::warn("irccd: %s", ex.what());
 	}
@@ -821,22 +808,22 @@ void Irccd::addWantedPlugin(const string &name)
 
 #if defined(WITH_LUA)
 
-Plugin & Irccd::findPlugin(lua_State *state)
+shared_ptr<Plugin> Irccd::findPlugin(lua_State *state)
 {
-	for (Plugin &p : m_plugins)
-		if (p.getState().getState() == state)
+	for (shared_ptr<Plugin> p : m_plugins)
+		if (p->getState().getState() == state)
 			return p;
 
 	// This one should not happen
 	throw out_of_range("plugin not found");
 }
 
-Plugin & Irccd::findPlugin(const string &name)
+shared_ptr<Plugin> Irccd::findPlugin(const string &name)
 {
 	ostringstream oss;
 
-	for (Plugin &p : m_plugins)
-		if (p.getName() == name)
+	for (shared_ptr<Plugin> p : m_plugins)
+		if (p->getName() == name)
 			return p;
 
 	oss << "plugin " << name << " not found";
@@ -844,7 +831,7 @@ Plugin & Irccd::findPlugin(const string &name)
 	throw out_of_range(oss.str());
 }
 
-vector<Plugin> & Irccd::getPlugins()
+PluginList & Irccd::getPlugins()
 {
 	return m_plugins;
 }
@@ -852,6 +839,11 @@ vector<Plugin> & Irccd::getPlugins()
 std::mutex & Irccd::getPluginLock()
 {
 	return m_pluginLock;
+}
+
+void Irccd::addDeferred(shared_ptr<Server> server, DefCall call)
+{
+	m_deferred[server].push_back(call);
 }
 
 #endif
@@ -951,73 +943,25 @@ void Irccd::handleIrcEvent(const IrcEvent &ev)
 #if defined(WITH_LUA)
 	lock_guard<mutex> ulock(m_pluginLock);
 
-	for (Plugin &p : m_plugins) {
+	try {
+		if (ev.m_type == IrcEventType::Names) {
+			callDeferred(ev);
+		}
+	} catch (Plugin::ErrorException ex) {
+		Logger::warn("plugin: %s", ex.what());
+	}
+
+	for (shared_ptr<Plugin> p : m_plugins) {
 		try {
-			switch (ev.m_type) {
-			case IrcEventType::Connection:
-				p.onConnect(ev.m_server);
-				break;
-			case IrcEventType::ChannelNotice:
-				p.onNotice(ev.m_server, ev.m_params[0], ev.m_params[1], ev.m_params[2]);
-				break;
-			case IrcEventType::Invite:
-				p.onInvite(ev.m_server, ev.m_params[0], ev.m_params[1]);
-				break;
-			case IrcEventType::Join:
-				p.onJoin(ev.m_server, ev.m_params[0], ev.m_params[1]);
-				break;
-			case IrcEventType::Kick:
-				p.onKick(ev.m_server, ev.m_params[0], ev.m_params[1], ev.m_params[2], ev.m_params[3]);
-				break;
-			case IrcEventType::Message:
-			{
-				string cc = ev.m_server->getCommandChar();
-				string sp = cc + p.getName();
-				string msg = ev.m_params[2];
-
-				// handle special commands "!<plugin> command"
-				if (cc.length() > 0 && msg.compare(0, sp.length(), sp) == 0) {
-					string plugin = msg.substr(cc.length(), sp.length() - cc.length());
-
-					if (plugin == p.getName()) {
-						p.onCommand(ev.m_server,
-							    ev.m_params[0],
-							    ev.m_params[1],
-							    msg.substr(sp.length())
-						);
-					}
-				} else
-					p.onMessage(ev.m_server, ev.m_params[0], ev.m_params[1], ev.m_params[2]);
-			}
-				break;
-			case IrcEventType::Mode:
-				p.onMode(ev.m_server, ev.m_params[0], ev.m_params[1], ev.m_params[2], ev.m_params[3]);
-				break;
-			case IrcEventType::Nick:
-				p.onNick(ev.m_server, ev.m_params[0], ev.m_params[1]);
-				break;
-			case IrcEventType::Notice:
-				p.onNotice(ev.m_server, ev.m_params[0], ev.m_params[1], ev.m_params[2]);
-				break;
-			case IrcEventType::Part:
-				p.onPart(ev.m_server, ev.m_params[0], ev.m_params[1], ev.m_params[2]);
-				break;
-			case IrcEventType::Query:
-				p.onQuery(ev.m_server, ev.m_params[0], ev.m_params[1]);
-				break;
-			default:
-				break;
-			}
+			callPlugin(p, ev);
 		} catch (Plugin::ErrorException ex) {
-			Logger::warn("plugin %s: %s", p.getName().c_str(), ex.what());
+			Logger::warn("plugin %s: %s", p->getName().c_str(), ex.what());
 		}
 	}
 #endif
 }
 
-
-
-void Irccd::handleConnection(const IrcEvent& event)
+void Irccd::handleConnection(const IrcEvent &event)
 {
 	shared_ptr<Server> server = event.m_server;
 
@@ -1032,11 +976,104 @@ void Irccd::handleConnection(const IrcEvent& event)
 	Logger::log("server %s: successfully connected", server->getName().c_str());
 }
 
-void Irccd::handleInvite(const IrcEvent& event)
+void Irccd::handleInvite(const IrcEvent &event)
 {
 	shared_ptr<Server> server = event.m_server;
 
 	// if join-invite is set to true goes in
 	if (server->autoJoinInvite())
 		server->join(event.m_params[1], "");
+}
+
+void Irccd::callPlugin(shared_ptr<Plugin> p, const IrcEvent &ev)
+{
+	switch (ev.m_type) {
+	case IrcEventType::Connection:
+		p->onConnect(ev.m_server);
+		break;
+	case IrcEventType::ChannelNotice:
+		p->onNotice(ev.m_server, ev.m_params[0], ev.m_params[1],
+			   ev.m_params[2]);
+		break;
+	case IrcEventType::Invite:
+		p->onInvite(ev.m_server, ev.m_params[0], ev.m_params[1]);
+		break;
+	case IrcEventType::Join:
+		p->onJoin(ev.m_server, ev.m_params[0], ev.m_params[1]);
+		break;
+	case IrcEventType::Kick:
+		p->onKick(ev.m_server, ev.m_params[0], ev.m_params[1],
+			 ev.m_params[2], ev.m_params[3]);
+		break;
+	case IrcEventType::Message:
+	{
+		string cc = ev.m_server->getCommandChar();
+		string sp = cc + p->getName();
+		string msg = ev.m_params[2];
+
+		// handle special commands "!<plugin> command"
+		if (cc.length() > 0 && msg.compare(0, sp.length(), sp) == 0) {
+			string plugin = msg.substr(
+			    cc.length(), sp.length() - cc.length());
+
+			if (plugin == p->getName()) {
+				p->onCommand(ev.m_server,
+						ev.m_params[0],
+						ev.m_params[1],
+						msg.substr(sp.length())
+				);
+			}
+		} else
+			p->onMessage(ev.m_server, ev.m_params[0], ev.m_params[1],
+				    ev.m_params[2]);
+	}
+		break;
+	case IrcEventType::Mode:
+		p->onMode(ev.m_server, ev.m_params[0], ev.m_params[1],
+			 ev.m_params[2], ev.m_params[3]);
+		break;
+	case IrcEventType::Nick:
+		p->onNick(ev.m_server, ev.m_params[0], ev.m_params[1]);
+		break;
+	case IrcEventType::Notice:
+		p->onNotice(ev.m_server, ev.m_params[0], ev.m_params[1],
+			   ev.m_params[2]);
+		break;
+	case IrcEventType::Part:
+		p->onPart(ev.m_server, ev.m_params[0], ev.m_params[1],
+			 ev.m_params[2]);
+		break;
+	case IrcEventType::Query:
+		p->onQuery(ev.m_server, ev.m_params[0], ev.m_params[1]);
+		break;
+	default:
+		break;
+	}
+}
+
+void Irccd::callDeferred(const IrcEvent &ev)
+{
+	if (m_deferred.find(ev.m_server) == m_deferred.end())
+		return;
+
+	vector<DefCall>::iterator it = m_deferred[ev.m_server].begin();
+
+	for (; it != m_deferred[ev.m_server].end(); ) {
+		bool deleteIt = true;
+
+		switch (it->type()) {
+		case IrcEventType::Names:
+			it->onNames(ev.m_params);
+			break;
+		default:
+			deleteIt = false;
+			break;
+		}
+
+		if (deleteIt) {
+			it = m_deferred[ev.m_server].erase(it);
+		} else {
+			++it;
+		}
+	}
 }

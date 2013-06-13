@@ -28,85 +28,6 @@
 namespace irccd {
 
 class Server;
-class Plugin;
-
-/**
- * @enum DeferredType
- * @brief Type for deferred calls.
- *
- * This type is used to do specific action on a deferred call.
- */
-enum class DeferredType {
-	Names,
-};
-
-typedef std::vector<std::vector<std::string>> Params;
-
-/**
- * @class DeferredCall
- * @brief Deferred call class.
- *
- * This class is used to call deferred functions.
- */
-class DeferredCall {
-private:
-	DeferredType m_type;			//! type of call
-	std::shared_ptr<Server> m_server;		//! for which server
-	Params m_params;			//! list of list of string
-	int m_ref;				//! function reference
-
-public:
-	/**
-	 * Default constructor.
-	 */
-	DeferredCall();
-
-	/**
-	 * Constructor with specific parameters.
-	 *
-	 * @param type the type of deferred call
-	 * @param server  for which server
-	 * @param ref the function reference
-	 */
-	DeferredCall(DeferredType type, std::shared_ptr<Server> server, int ref);
-
-	/**
-	 * Get the type.
-	 *
-	 * @return the deferred call type
-	 */
-	DeferredType type() const;
-
-	/**
-	 * Get which server we are working on.
-	 *
-	 * @return the server
-	 */
-	std::shared_ptr<Server> server() const;
-
-	/**
-	 * Add a list of parameters.
-	 *
-	 * @param list the list of parameters
-	 */
-	void addParam(const std::vector<std::string> & list);
-	
-	/**
-	 * Execute the function call and dereference the function
-	 * reference.
-	 *
-	 * @param plugin which plugin
-	 */
-	void execute(Plugin &plugin);
-
-	/**
-	 * Test the DeferredCall equality.
-	 *
-	 * @param c1 the object to test
-	 * @return true on equality
-	 */
-	bool operator==(const DeferredCall &c1);
-};
 
 class Plugin {
 public:
@@ -124,7 +45,7 @@ public:
 		virtual const char * what() const throw();
 	};
 
-	friend class DeferredCall;
+	//friend class DeferredCall;
 private:
 	// Plugin identity
 	std::string m_name;		//! name like "foo"
@@ -134,7 +55,7 @@ private:
 	LuaState m_state;
 
 	// Deferred calls
-	std::vector<DeferredCall> m_defcalls;	//! list of deferred call
+	//std::vector<DeferredCall> m_defcalls;	//! list of deferred call
 
 	/**
 	 * Load the Lua script file.
@@ -189,43 +110,6 @@ public:
 	 * @return true on success
 	 */
 	bool open(const std::string &path);
-
-	/* ------------------------------------------------
-	 * Deffered calls commands
-	 * ------------------------------------------------ */
-
-	/**
-	 * Add a new deferred call to be ran by the server
-	 * when the operation has complete.
-	 *
-	 * @param call the deferred call
-	 */
-	void addDeferred(DeferredCall call);
-
-	/**
-	 * Tell if the server has a deferred call to execute.
-	 *
-	 * @param type the type
-	 * @param sv for which server
-	 * @return true if has
-	 */
-	bool hasDeferred(DeferredType type, std::shared_ptr<Server> sv);
-
-	/**
-	 * Get a specified deferred call.
-	 *
-	 * @param type the type
-	 * @param sv for which server
-	 * @return the deferred call
-	 */
-	DeferredCall & getDeferred(DeferredType type, std::shared_ptr<Server> sv);
-
-	/**
-	 * Remove a deferred call.
-	 *
-	 * @param dc the deferred call
-	 */
-	void removeDeferred(DeferredCall &dc);
 
 	/* ------------------------------------------------
 	 * IRC commands

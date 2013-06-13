@@ -450,14 +450,15 @@ static void testPlugin(const char *file, int argc, char **argv)
 	if (epos != string::npos)
 		name = name.erase(epos);
 
-	Irccd::getInstance()->getPlugins().push_back(Plugin(name));
+	Irccd::getInstance()->getPlugins().push_back(shared_ptr<Plugin>(new Plugin(name)));
 
-	Plugin &plugin = Irccd::getInstance()->getPlugins().back();
-	if (!plugin.open(file)) {
-		Logger::warn("Failed to open plugin: %s", plugin.getError().c_str());
+	shared_ptr<Plugin> plugin = Irccd::getInstance()->getPlugins().back();
+	if (!plugin->open(file)) {
+		Logger::warn("Failed to open plugin: %s", plugin->getError().c_str());
 	}
 
 	// Simulate handler is optional
+#if 0
 	if (argc > 1) {
 		try {
 			testCommands.at(argv[1])(&plugin, &server, argc - 2, argv + 2);
@@ -465,6 +466,7 @@ static void testPlugin(const char *file, int argc, char **argv)
 			Logger::warn("Unknown test command named %s", argv[1]);
 		}
 	}
+#endif
 }
 
 void irccd::test(int argc, char **argv)

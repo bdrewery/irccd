@@ -68,69 +68,7 @@ static const Library libIrccd[] = {
 	{ "irccd.util",		luaopen_util	}
 };
 
-/* --------------------------------------------------------
- * Deffered calls commands
- * -------------------------------------------------------- */
 
-DeferredCall::DeferredCall()
-{
-}
-
-DeferredCall::DeferredCall(DeferredType type, shared_ptr<Server> server, int ref)
-	: m_type(type)
-	, m_server(server)
-	, m_ref(ref)
-{
-}
-
-DeferredType DeferredCall::type() const
-{
-	return m_type;
-}
-
-std::shared_ptr<Server> DeferredCall::server() const
-{
-	return m_server;
-}
-
-void DeferredCall::addParam(const vector<string> & list)
-{
-	m_params.push_back(list);
-}
-
-void DeferredCall::execute(Plugin &p)
-{
-	p.m_state.rawget(LUA_REGISTRYINDEX, m_ref);
-	int nparams = 0;
-
-	switch (m_type) {
-	case DeferredType::Names:
-		p.m_state.createtable(m_params.size(), m_params.size());
-
-		for (size_t i = 0; i < m_params.size(); ++i) {
-			p.m_state.push(m_params[i][0].c_str());
-			p.m_state.rawset(-2, i + 1);
-		}
-
-		nparams = 1;
-		break;
-	default:
-		break;
-	}
-
-	if (!p.m_state.pcall(nparams, 0, 0) != LUA_OK)
-		Logger::warn("plugin %s: %s", p.m_name.c_str(), p.m_state.getError().c_str());
-
-	p.m_state.unref(LUA_REGISTRYINDEX, m_ref);
-}
-
-bool DeferredCall::operator==(const DeferredCall &c1)
-{
-	return m_type == c1.m_type &&
-	    m_server == c1.m_server &&
-	    m_params == c1.m_params &&
-	    m_ref == c1.m_ref;
-}
 
 /* --------------------------------------------------------
  * Plugin exception
@@ -198,7 +136,7 @@ Plugin::Plugin(Plugin &&src)
 	m_home = std::move(src.m_home);
 	m_error = std::move(src.m_error);
 	m_state = std::move(src.m_state);
-	m_defcalls = std::move(src.m_defcalls);
+	//m_defcalls = std::move(src.m_defcalls);
 }
 
 Plugin & Plugin::operator=(Plugin &&src)
@@ -207,7 +145,7 @@ Plugin & Plugin::operator=(Plugin &&src)
 	m_home = std::move(src.m_home);
 	m_error = std::move(src.m_error);
 	m_state = std::move(src.m_state);
-	m_defcalls = std::move(src.m_defcalls);
+	//m_defcalls = std::move(src.m_defcalls);
 
 	return *this;
 }
@@ -246,35 +184,6 @@ bool Plugin::open(const string &path)
 	m_home = oss.str();
 
 	return loadLua(path);
-}
-
-void Plugin::addDeferred(DeferredCall call)
-{
-	m_defcalls.push_back(call);
-}
-
-bool Plugin::hasDeferred(DeferredType type, shared_ptr<Server> sv)
-{
-	for (const DeferredCall &c : m_defcalls)
-		if (c.type() == type && c.server() == sv)
-			return true;
-
-	return false;
-}
-
-DeferredCall & Plugin::getDeferred(DeferredType type, const Server *sv)
-{
-	for (DeferredCall &c : m_defcalls)
-		if (c.type() == type && c.server() == sv)
-			return c;
-
-	throw out_of_range("not found");
-}
-
-void Plugin::removeDeferred(DeferredCall &dc)
-{
-	m_defcalls.erase(std::remove(m_defcalls.begin(), m_defcalls.end(), dc),
-	    m_defcalls.end());
 }
 
 void Plugin::onCommand(shared_ptr<Server> server, const string &channel, const string &who, const string &message)

@@ -19,6 +19,7 @@
 #ifndef _SERVER_H_
 #define _SERVER_H_
 
+#include <map>
 #include <memory>
 #include <string>
 #include <thread>
@@ -27,6 +28,43 @@
 #include <libircclient.h>
 
 namespace irccd {
+
+class Server;
+
+/* --------------------------------------------------------
+ * IRC Events, used by Server
+ * -------------------------------------------------------- */
+
+enum class IrcEventType {
+	Connection,					//! when connection
+	ChannelNotice,					//! channel notices
+	Invite,						//! invitation
+	Join,						//! on joins
+	Kick,						//! on kick
+	Message,					//! on channel messages
+	Mode,						//! channel mode
+	Nick,						//! nick change
+	Names,						//! (def) names listing
+	Notice,						//! channel notice
+	Part,						//! channel parts
+	Query,						//! private query
+	Topic,						//! topic change
+	UserMode,					//! user mode change
+};
+
+typedef std::vector<std::string> IrcEventParams;
+
+struct IrcEvent {
+	IrcEventType m_type;				//! event type
+	IrcEventParams m_params;			//! parameters
+
+	std::shared_ptr<Server> m_server;		//! on which server
+
+	IrcEvent(IrcEventType type, IrcEventParams params,
+		 std::shared_ptr<Server> server);
+
+	~IrcEvent();
+};
 
 struct Identity {
 	std::string m_name;		/*! identity name */
@@ -66,9 +104,11 @@ typedef std::unique_ptr<irc_session_t, IrcDeleter> IrcSession;
 class Server : public std::enable_shared_from_this<Server> {
 public:
 	struct Channel {
-		std::string m_name;		/*! channel name */
-		std::string m_password;		/*! channel optional password */
+		std::string m_name;			//! channel name
+		std::string m_password;			//! channel optional password
 	};
+
+	typedef std::map<std::string, std::vector<std::string>> NameList;
 
 private:
 	// Some options
@@ -90,7 +130,10 @@ private:
 	IrcSession m_session;			//! libircclient session
 	bool m_threadStarted;			//! thread's status
 
-public:
+	// For deferred events
+	NameList m_nameLists;			//! channels names to receive
+
+public:	
 	Server();
 
 	Server(Server &&src);
@@ -145,6 +188,14 @@ public:
 	 * @return the list of channels
 	 */
 	const std::vector<Channel> & getChannels();
+
+	/**
+	 * Get the name list being build for /names
+	 * reporting.
+	 *
+	 * @return the current list
+	 */
+	NameList & getNameLists();
 
 	/**
 	 * Get the identity used for that server

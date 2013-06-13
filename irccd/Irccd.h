@@ -33,51 +33,19 @@
 #include "Server.h"
 
 #if defined(WITH_LUA)
+#  include "DefCall.h"
 #  include "Plugin.h"
 #endif
 
 namespace irccd {
 
 /* --------------------------------------------------------
- * IRC Events, used by Server
- * -------------------------------------------------------- */
-
-enum class IrcEventType {
-	Connection,					//! when connection
-	ChannelNotice,					//! channel notices
-	Invite,						//! invitation
-	Join,						//! on joins
-	Kick,						//! on kick
-	Message,					//! on channel messages
-	Mode,						//! channel mode
-	Nick,						//! nick change
-	Numeric,					//! general event
-	Notice,						//! channel notice
-	Part,						//! channel parts
-	Query,						//! private query
-	Topic,						//! topic change
-	UserMode,					//! user mode change
-};
-
-typedef std::vector<std::string> IrcEventParams;
-
-struct IrcEvent {
-	IrcEventType m_type;				//! event type
-	IrcEventParams m_params;			//! parameters
-
-	std::shared_ptr<Server> m_server;		//! on which server
-
-	IrcEvent(IrcEventType type, IrcEventParams params,
-		 std::shared_ptr<Server> server);
-
-	~IrcEvent();
-};
-
-/* --------------------------------------------------------
  * Irccd main class
  * -------------------------------------------------------- */
 
 typedef std::vector<std::shared_ptr<Server>> ServerList;
+typedef std::vector<std::shared_ptr<Plugin>> PluginList;
+typedef std::map<std::shared_ptr<Server>, std::vector<DefCall>> DefCallList;
 
 class Irccd {
 private:
@@ -86,13 +54,14 @@ private:
 	// Config
 	std::string m_configPath;			//! config file path
 
+#if defined(WITH_LUA)
 	// Plugins
 	std::vector<std::string> m_pluginDirs;		//! list of plugin directories
 	std::vector<std::string> m_pluginWanted;	//! list of wanted modules
-
-#if defined(WITH_LUA)
-	std::vector<Plugin> m_plugins;			//! list of plugins loaded
 	std::mutex m_pluginLock;			//! lock to add plugin
+
+	PluginList m_plugins;				//! list of plugins loaded
+	DefCallList m_deferred;				//! list of deferred call
 #endif
 
 	ServerList m_servers;				//! list of servers
@@ -193,7 +162,7 @@ public:
 	 * @return the plugin
 	 * @throw out_of_range when not found
 	 */
-	Plugin & findPlugin(lua_State *state);
+	std::shared_ptr<Plugin> findPlugin(lua_State *state);
 
 	/**
 	 * Find a plugin by it's name. It is used by irccdctl
@@ -203,14 +172,14 @@ public:
 	 * @return the plugin
 	 * @throw out_of_range when not found
 	 */
-	Plugin & findPlugin(const std::string &name);
+	std::shared_ptr<Plugin> findPlugin(const std::string &name);
 
 	/**
 	 * Get plugins.
 	 *
 	 * @return a list of plugins
 	 */
-	std::vector<Plugin> & getPlugins();
+	PluginList & getPlugins();
 
 	/**
 	 * Get the plugin lock, used to load / unload module.
@@ -218,6 +187,14 @@ public:
 	 * @return the mutex lock
 	 */
 	std::mutex & getPluginLock();
+
+	/**
+	 * Add a deferred call for a specific server.
+	 *
+	 * @param sever the server that request it
+	 * @param call the plugin to call
+	 */
+	void addDeferred(std::shared_ptr<Server> server, DefCall call);
 #endif
 
 	/**
@@ -296,8 +273,17 @@ public:
 	void handleInvite(const IrcEvent &event);
 
 	/**
-	 * Handle general numeric events
-	void handleNumeric(const IrcEvent &event);
+	 * Call the plugin function depending on the event.
+	 *
+	 * @param p the current plugin
+	 * @param ev the event
+	 */
+	void callPlugin(std::shared_ptr<Plugin> p, const IrcEvent &ev);
+
+	/**
+	 *
+	 */
+	void callDeferred(const IrcEvent &ev);
 };
 
 } // !irccd
