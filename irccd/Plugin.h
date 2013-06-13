@@ -44,8 +44,6 @@ public:
 
 		virtual const char * what() const throw();
 	};
-
-	//friend class DeferredCall;
 private:
 	// Plugin identity
 	std::string m_name;		//! name like "foo"
@@ -53,9 +51,6 @@ private:
 	std::string m_error;		//! error message if needed
 
 	LuaState m_state;
-
-	// Deferred calls
-	//std::vector<DeferredCall> m_defcalls;	//! list of deferred call
 
 	/**
 	 * Load the Lua script file.

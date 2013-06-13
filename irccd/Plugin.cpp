@@ -136,7 +136,6 @@ Plugin::Plugin(Plugin &&src)
 	m_home = std::move(src.m_home);
 	m_error = std::move(src.m_error);
 	m_state = std::move(src.m_state);
-	//m_defcalls = std::move(src.m_defcalls);
 }
 
 Plugin & Plugin::operator=(Plugin &&src)
@@ -145,7 +144,6 @@ Plugin & Plugin::operator=(Plugin &&src)
 	m_home = std::move(src.m_home);
 	m_error = std::move(src.m_error);
 	m_state = std::move(src.m_state);
-	//m_defcalls = std::move(src.m_defcalls);
 
 	return *this;
 }
