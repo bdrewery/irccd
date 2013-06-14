@@ -151,8 +151,6 @@ private:
 	NameList m_nameLists;			//! channels names to receive
 
 public:	
-	static void init();
-
 	Server();
 
 	virtual ~Server();

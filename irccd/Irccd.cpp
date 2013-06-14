@@ -727,10 +727,12 @@ void Irccd::openServers(const Parser &config)
 			if (s.hasOption("identity"))
 				server->setIdentity(findIdentity(s.getOption<string>("identity")));
 
+#if 0
 			if (s.hasOption("ssl"))
 				ssl = s.getOption<bool>("ssl");
 			if (s.hasOption("ssl-verify"))
 				sslVerify = s.getOption<bool>("ssl-verify");
+#endif
 
 			// Get connection parameters
 			name = s.requireOption<string>("name");
@@ -786,7 +788,6 @@ void Irccd::extractChannels(const Section &section, shared_ptr<Server> server)
 Irccd::Irccd()
 {
 	Socket::init();
-	Server::init();
 
 	Logger::setVerbose(false);
 }
