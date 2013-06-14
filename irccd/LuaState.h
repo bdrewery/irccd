@@ -215,4 +215,13 @@ void * operator new(size_t size, lua_State *L);
 
 void * operator new(size_t size, lua_State *L, const char *metaname);
 
+/*
+ * Delete operators are just present to avoid some warnings, Lua does garbage
+ * collection so these functions just do nothing.
+ */
+
+void operator delete(void *ptr, lua_State *L);
+
+void operator delete(void *ptr, lua_State *L, const char *metaname);
+
 #endif // !_LUA_STATE_H_

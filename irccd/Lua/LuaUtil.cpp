@@ -29,6 +29,12 @@
 using namespace irccd;
 using namespace std;
 
+template<class T>
+static T toType(lua_State *L, int idx, const char *tname)
+{
+	return reinterpret_cast<T>(luaL_checkudata(L, idx, tname));
+}
+
 namespace util {
 
 static int basename(lua_State *L)
@@ -43,21 +49,12 @@ static int basename(lua_State *L)
 
 static int date(lua_State *L)
 {
-	Date **ptr;
-	Date *d;
-
 	if (lua_gettop(L) >= 1) {
 		int tm = luaL_checkinteger(L, 1);
-		d = new Date(tm);
+		new (L, DATE_TYPE) Date(tm);
 	} else {
-		d = new Date();
+		new (L, DATE_TYPE) Date();
 	}
-
-
-	ptr = (Date **)lua_newuserdata(L, sizeof (Date *));
-	luaL_setmetatable(L, DATE_TYPE);
-
-	*ptr = d;
 
 	return 1;
 }
@@ -121,7 +118,6 @@ static int mkdir(lua_State *L)
 
 static int opendir(lua_State *L)
 {
-	Directory **ptr, *d;
 	string path;
 	bool skipParents = false;
 
@@ -133,18 +129,15 @@ static int opendir(lua_State *L)
 		skipParents = lua_toboolean(L, 2);
 	}
 
-	d = new Directory(path);
-	if (!d->open(skipParents)) {
+	Directory d(path);
+	if (!d.open(skipParents)) {
 		lua_pushnil(L);
-		lua_pushstring(L, d->getError().c_str());
+		lua_pushstring(L, d.getError().c_str());
 
-		delete d;
 		return 2;
 	}
 
-	ptr = (Directory **)lua_newuserdata(L, sizeof (Directory *));
-	luaL_setmetatable(L, DIR_TYPE);
-	*ptr = d;
+	new (L, DIR_TYPE) Directory(d);
 
 	return 1;
 }
@@ -205,7 +198,7 @@ static int calendar(lua_State *L)
 	time_t stamp;
 	struct tm tm;
 
-	date = *(Date **)luaL_checkudata(L, 1, DATE_TYPE);
+	date = toType<Date *>(L, 1, DATE_TYPE);
 	stamp = date->getTimestamp();
 	tm = *localtime(&stamp);
 
@@ -236,7 +229,7 @@ static int format(lua_State *L)
 	string fmt, result;
 
 	// Extract parameters
-	d = *(Date **)luaL_checkudata(L, 1, DATE_TYPE);
+	d = toType<Date *>(L, 1, DATE_TYPE);
 	fmt = luaL_checkstring(L, 2);
 
 	result = d->format(fmt);
@@ -249,7 +242,7 @@ static int timestamp(lua_State *L)
 {
 	Date *date;
 
-	date = *(Date **)luaL_checkudata(L, 1, DATE_TYPE);
+	date = toType<Date *>(L, 1, DATE_TYPE);
 	lua_pushinteger(L, (lua_Integer)date->getTimestamp());
 
 	return 1;
@@ -267,20 +260,27 @@ static int equals(lua_State *L)
 {
 	Date *d1, *d2;
 
-	d1 = *(Date **)luaL_checkudata(L, 1, DATE_TYPE);
-	d2 = *(Date **)luaL_checkudata(L, 2, DATE_TYPE);
+	d1 = toType<Date *>(L, 1, DATE_TYPE);
+	d2 = toType<Date *>(L, 2, DATE_TYPE);
 
 	lua_pushboolean(L, *d1 == *d2);
 
 	return 1;
 }
 
+static int gc(lua_State *L)
+{
+	toType<Date *>(L, 1, DATE_TYPE)->~Date();
+
+	return 0;
+}
+
 static int le(lua_State *L)
 {
 	Date *d1, *d2;
 
-	d1 = *(Date **)luaL_checkudata(L, 1, DATE_TYPE);
-	d2 = *(Date **)luaL_checkudata(L, 2, DATE_TYPE);
+	d1 = toType<Date *>(L, 1, DATE_TYPE);
+	d2 = toType<Date *>(L, 2, DATE_TYPE);
 
 	lua_pushboolean(L, *d1 <= *d2);
 
@@ -291,7 +291,7 @@ static int tostring(lua_State *L)
 {
 	Date *date;
 
-	date = *(Date **)luaL_checkudata(L, 1, DATE_TYPE);
+	date = toType<Date *>(L, 1, DATE_TYPE);
 	lua_pushfstring(L, "%d", date->getTimestamp());
 
 	return 1;
@@ -307,17 +307,15 @@ namespace dir {
 
 static int iter(lua_State *L)
 {
-	Directory *d;
+	const Directory *d;
 	int idx;
 
-	d = (Directory *)lua_topointer(L, lua_upvalueindex(1));
+	d = reinterpret_cast<const Directory *>(lua_topointer(L, lua_upvalueindex(1)));
 	idx = lua_tointeger(L, lua_upvalueindex(2));
 
 	// End
-	if ((size_t)idx >= d->getEntries().size()) {
-		delete d;
+	if ((size_t)idx >= d->getEntries().size())
 		return 0;
-	}
 
 	// Push name + isDirectory
 	lua_pushstring(L, d->getEntries()[idx].m_name.c_str());
@@ -333,7 +331,7 @@ static int count(lua_State *L)
 {
 	Directory *d;
 
-	d = *(Directory **)luaL_checkudata(L, 1, DIR_TYPE);
+	d = toType<Directory *>(L, 1, DIR_TYPE);
 	lua_pushinteger(L, d->getEntries().size());
 
 	return 1;
@@ -341,12 +339,12 @@ static int count(lua_State *L)
 
 static int read(lua_State *L)
 {
-	Directory *d, *copy;
+	Directory *d;
 
-	d = *(Directory **)luaL_checkudata(L, 1, DIR_TYPE);
+	d = toType<Directory *>(L, 1, DIR_TYPE);
 
-	copy = new Directory(*d);
-	lua_pushlightuserdata(L, copy);
+	//copy = new Directory(*d);
+	lua_pushlightuserdata(L, d);
 	lua_pushinteger(L, 0);
 	lua_pushcclosure(L, iter, 2);
 
@@ -365,8 +363,8 @@ static int eq(lua_State *L)
 {
 	Directory *d1, *d2;
 
-	d1 = *(Directory **)luaL_checkudata(L, 1, DIR_TYPE);
-	d2 = *(Directory **)luaL_checkudata(L, 2, DIR_TYPE);
+	d1 = toType<Directory *>(L, 1, DIR_TYPE);
+	d2 = toType<Directory *>(L, 2, DIR_TYPE);
 
 	lua_pushboolean(L, *d1 == *d2);
 
@@ -375,10 +373,7 @@ static int eq(lua_State *L)
 
 static int gc(lua_State *L)
 {
-	Directory *d;
-
-	d = *(Directory **)luaL_checkudata(L, 1, DIR_TYPE);
-	delete d;
+	toType<Directory *>(L, 1, DIR_TYPE)->~Directory();
 
 	return 0;
 }
@@ -387,7 +382,7 @@ static int tostring(lua_State *L)
 {
 	Directory *d;
 
-	d = *(Directory **)luaL_checkudata(L, 1, DIR_TYPE);
+	d = toType<Directory *>(L, 1, DIR_TYPE);
 	lua_pushfstring(L, "Directory %s has %d entries", d->getPath().c_str(),
 	    d->getEntries().size());
 
@@ -405,6 +400,7 @@ static const luaL_Reg dateMethodsList[] = {
 
 static const luaL_Reg dateMtList[] = {
 	{ "__eq",		dateMt::equals		},
+	{ "__gc",		dateMt::gc		},
 	{ "__le",		dateMt::le		},
 	{ "__tostring",		dateMt::tostring	},
 	{ nullptr,		nullptr			}

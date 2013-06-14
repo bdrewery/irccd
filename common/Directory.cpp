@@ -35,7 +35,7 @@ Directory::Directory(const std::string &path)
 	m_path = path;
 }
 
-Directory::~Directory(void)
+Directory::~Directory()
 {
 }
 
@@ -65,6 +65,7 @@ bool Directory::open(bool skipParents)
 		entry.m_isDirectory = (fdata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? true : false;
 		entry.m_name = fdata.cFileName;
 
+		m_entries.push_back(entry);
 	} while (FindNextFile(hd, &fdata) != 0);
 
 	return true;
