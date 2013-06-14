@@ -68,8 +68,6 @@ static const Library libIrccd[] = {
 	{ "irccd.util",		luaopen_util	}
 };
 
-
-
 /* --------------------------------------------------------
  * Plugin exception
  * -------------------------------------------------------- */
@@ -79,8 +77,8 @@ Plugin::ErrorException::ErrorException()
 }
 
 Plugin::ErrorException::ErrorException(const string &which, const string &error)
-	: m_which(which)
-	, m_error(error)
+	: m_error(error)
+	, m_which(which)
 {
 }
 

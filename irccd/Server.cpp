@@ -372,6 +372,29 @@ IrcEvent::~IrcEvent()
  * Server
  * -------------------------------------------------------- */
 
+void Server::init()
+{
+	/*
+	 * This a temporarly work around for SSL connections, libircclient
+	 * calls a static ssl_init() in the irc_connect() function, so when
+	 * starting thread, a race condition occurs.
+	 */
+	irc_callbacks_t tmp;
+
+	memset(&tmp, 0, sizeof (irc_callbacks_t));
+	irc_session_t *s = irc_create_session(&tmp);
+
+	if (s == nullptr) {
+		Logger::warn("server: failed to init %s", ENOMEM);
+		exit(1);
+	}
+
+	irc_connect(s, "#127.0.0.1", 6667, nullptr, "_tmp_", "_tmp_", "_tmp_");
+
+	// And destroy it immediatly
+	irc_destroy_session(s);
+}
+
 Server::Server()
 	: m_commandChar("!")
 	, m_joinInvite(false)

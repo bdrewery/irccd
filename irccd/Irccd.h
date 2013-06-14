@@ -102,7 +102,7 @@ private:
 
 	// [server]
 	void openServers(const Parser &config);
-	void extractChannels(const Section &section, Server &server);
+	void extractChannels(const Section &section, std::shared_ptr<Server> server);
 
 	Irccd();
 public:

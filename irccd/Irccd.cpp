@@ -715,9 +715,7 @@ void Irccd::openServers(const Parser &config)
 		try {
 			string name, host, commandToken, password, ident;
 			int port;
-#if 0
 			bool ssl = false, sslVerify = true;
-#endif
 
 			// General parameters
 			if (s.hasOption("command-char"))
@@ -728,12 +726,11 @@ void Irccd::openServers(const Parser &config)
 				server->setAutoCtcpReply(s.getOption<bool>("ctcp-autoreply"));
 			if (s.hasOption("identity"))
 				server->setIdentity(findIdentity(s.getOption<string>("identity")));
-#if 0
+
 			if (s.hasOption("ssl"))
 				ssl = s.getOption<bool>("ssl");
 			if (s.hasOption("ssl-verify"))
-				ssl = s.getOption<bool>("ssl-verify");
-#endif
+				sslVerify = s.getOption<bool>("ssl-verify");
 
 			// Get connection parameters
 			name = s.requireOption<string>("name");
@@ -744,12 +741,10 @@ void Irccd::openServers(const Parser &config)
 				password = s.getOption<string>("password");
 
 			server->setConnection(name, host, port, password);
-#if 0
 			server->setSSL(ssl, sslVerify);
-#endif
 
 			// Extract channels to auto join
-			extractChannels(s, *server);
+			extractChannels(s, server);
 
 			m_servers.push_back(std::move(server));
 		} catch (NotFoundException ex) {
@@ -758,7 +753,7 @@ void Irccd::openServers(const Parser &config)
 	}
 }
 
-void Irccd::extractChannels(const Section &section, Server &server)
+void Irccd::extractChannels(const Section &section, shared_ptr<Server> server)
 {
 	vector<string> channels;
 	string list, name, password;
@@ -779,7 +774,7 @@ void Irccd::extractChannels(const Section &section, Server &server)
 				password = "";
 			}
 
-			server.addChannel(name, password);
+			server->addChannel(name, password);
 		}
 	}
 }
@@ -791,6 +786,7 @@ void Irccd::extractChannels(const Section &section, Server &server)
 Irccd::Irccd()
 {
 	Socket::init();
+	Server::init();
 
 	Logger::setVerbose(false);
 }
