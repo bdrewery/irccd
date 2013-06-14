@@ -353,6 +353,10 @@ static void handleUserMode(irc_session_t *s,
  * IRC Events, used by Server
  * -------------------------------------------------------- */
 
+IrcEvent::IrcEvent()
+{
+}
+
 IrcEvent::IrcEvent(IrcEventType type, IrcEventParams params, std::shared_ptr<Server> server)
 	: m_type(type)
 	, m_params(params)
@@ -391,23 +395,6 @@ Server::Server()
 	m_callbacks.event_privmsg		= handleQuery;
 	m_callbacks.event_topic			= handleTopic;
 	m_callbacks.event_umode			= handleUserMode;
-}
-
-Server::Server(Server &&src)
-{
-	m_commandChar = std::move(src.m_commandChar);
-	m_joinInvite = src.m_joinInvite;
-	m_ctcpReply = src.m_ctcpReply;
-	m_channels = std::move(src.m_channels);
-	m_identity = std::move(src.m_identity);
-	m_name = std::move(src.m_name);
-	m_host = std::move(src.m_host);
-	m_port = src.m_port;
-	m_password = std::move(src.m_password);
-	m_callbacks = std::move(src.m_callbacks);
-	m_thread = std::move(src.m_thread);
-	m_session = std::move(src.m_session);
-	m_threadStarted = src.m_threadStarted;
 }
 
 Server::~Server()
@@ -480,16 +467,21 @@ unsigned Server::getPort() const
 	return m_port;
 }
 
-void Server::setConnection(const string &name, const string &host,
-			   unsigned port, bool ssl, const string &password)
+void Server::setConnection(const string &name,
+			   const string &host,
+			   unsigned port,
+			   const string &password)
 {
 	m_name = name;
 	m_host = host;
 	m_port = port;
 	m_password = password;
+}
 
-	if (ssl)
-		m_host.insert(0, 1, '#');
+void Server::setSSL(bool ssl, bool sslVerify)
+{
+	m_ssl = ssl;
+	m_sslVerify = sslVerify;
 }
 
 void Server::addChannel(const string &name, const string &password)
@@ -542,8 +534,14 @@ void Server::startConnection()
 			if (m_password.length() > 0)
 				password = m_password.c_str();
 
-			irc_set_ctx(m_session.get(),
-			    new shared_ptr<Server>(shared_from_this()));
+			irc_set_ctx(m_session.get(), new shared_ptr<Server>(shared_from_this()));
+
+			// SSL needs to add # front of host
+			if (m_ssl)
+				m_host.insert(0, 1, '#');
+			if (!m_sslVerify)
+				irc_option_set(m_session.get(),
+				    LIBIRC_OPTION_SSL_NO_VERIFY);
 			
 			error = irc_connect(
 			    m_session.get(),
@@ -562,6 +560,9 @@ void Server::startConnection()
 			}
 
 			irc_run(m_session.get());
+
+			// End of thread, destroy the context.
+
 		}
 	});
 

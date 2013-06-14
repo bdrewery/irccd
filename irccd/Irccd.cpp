@@ -715,6 +715,7 @@ void Irccd::openServers(const Parser &config)
 		try {
 			string name, host, commandToken, password, ident;
 			int port;
+			bool ssl = false, sslVerify = true;
 
 			// General parameters
 			if (s.hasOption("command-char"))
@@ -725,6 +726,10 @@ void Irccd::openServers(const Parser &config)
 				server->setAutoCtcpReply(s.getOption<bool>("ctcp-autoreply"));
 			if (s.hasOption("identity"))
 				server->setIdentity(findIdentity(s.getOption<string>("identity")));
+			if (s.hasOption("ssl"))
+				ssl = s.getOption<bool>("ssl");
+			if (s.hasOption("ssl-verify"))
+				ssl = s.getOption<bool>("ssl-verify");
 
 			// Get connection parameters
 			name = s.requireOption<string>("name");
@@ -734,7 +739,8 @@ void Irccd::openServers(const Parser &config)
 			if (s.hasOption("password"))
 				password = s.getOption<string>("password");
 
-			server->setConnection(name, host, port, false, password);
+			server->setConnection(name, host, port, password);
+			server->setSSL(ssl, sslVerify);
 
 			// Extract channels to auto join
 			extractChannels(s, *server);
@@ -944,11 +950,10 @@ void Irccd::handleIrcEvent(const IrcEvent &ev)
 	lock_guard<mutex> ulock(m_pluginLock);
 
 	try {
-		if (ev.m_type == IrcEventType::Names) {
+		if (ev.m_type == IrcEventType::Names)
 			callDeferred(ev);
-		}
 	} catch (Plugin::ErrorException ex) {
-		Logger::warn("plugin: %s", ex.what());
+		Logger::warn("plugin %s: %s", ex.which().c_str(), ex.what());
 	}
 
 	for (shared_ptr<Plugin> p : m_plugins) {

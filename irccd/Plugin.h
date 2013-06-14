@@ -34,13 +34,21 @@ public:
 	class ErrorException : public std::exception {
 	private:
 		std::string m_error;
+		std::string m_which;
 
 	public:
 		ErrorException();
 
-		ErrorException(const std::string &error);
+		ErrorException(const std::string &which, const std::string &error);
 
 		~ErrorException();
+
+		/**
+		 * Tells which plugin name has failed.
+		 *
+		 * @return the plugin name
+		 */
+		std::string which() const;
 
 		virtual const char * what() const throw();
 	};

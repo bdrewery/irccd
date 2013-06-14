@@ -60,9 +60,24 @@ struct IrcEvent {
 
 	std::shared_ptr<Server> m_server;		//! on which server
 
+	/**
+	 * Default constructor.
+	 */
+	IrcEvent();
+
+	/**
+	 * Better constructor.
+	 *
+	 * @param type the event type
+	 * @param params eventual parameters
+	 * @param server which server
+	 */
 	IrcEvent(IrcEventType type, IrcEventParams params,
 		 std::shared_ptr<Server> server);
 
+	/**
+	 * Default destructor.
+	 */
 	~IrcEvent();
 };
 
@@ -73,7 +88,7 @@ struct Identity {
 	std::string m_realname;		/*! user real name */
 	std::string m_ctcpversion;	/*! CTCP version */
 
-	Identity(void)
+	Identity()
 	{
 		m_name = "__irccd__";
 		m_nickname = "irccd";
@@ -82,7 +97,7 @@ struct Identity {
 		m_ctcpversion = "IRC Client Daemon (dev)";
 	}
 
-	~Identity(void)
+	~Identity()
 	{
 	}
 };
@@ -123,6 +138,8 @@ private:
 	std::string m_host;			/*! hostname */
 	unsigned m_port;			/*! server's port */
 	std::string m_password;			/*! optional server password */
+	bool m_ssl;				//! SSL usage
+	bool m_sslVerify;			//! SSL verification
 
 	// IRC thread
 	irc_callbacks_t m_callbacks;		//! callbacks for libircclient
@@ -135,8 +152,6 @@ private:
 
 public:	
 	Server();
-
-	Server(Server &&src);
 
 	virtual ~Server();
 
@@ -232,11 +247,20 @@ public:
 	 * @param name the server resource name
 	 * @param host the hostname
 	 * @param port the port
-	 * @param ssl true if SSL is required
 	 * @param password an optional password
 	 */
-	void setConnection(const std::string &name, const std::string &host,
-			   unsigned port, bool ssl = false, const std::string &password = "");
+	void setConnection(const std::string &name,
+			   const std::string &host,
+			   unsigned port,
+			   const std::string &password = "");
+
+	/**
+	 * Set the SSL parameters.
+	 *
+	 * @param ssl enable / disable ssl
+	 * @param sslVerify enable / disable certificate verification
+	 */
+	void setSSL(bool ssl, bool sslVerify);
 
 	/**
 	 * Set the user identity.

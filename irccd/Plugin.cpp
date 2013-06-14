@@ -78,13 +78,19 @@ Plugin::ErrorException::ErrorException()
 {
 }
 
-Plugin::ErrorException::ErrorException(const string& error)
+Plugin::ErrorException::ErrorException(const string &which, const string &error)
+	: m_which(which)
+	, m_error(error)
 {
-	m_error = error;
 }
 
 Plugin::ErrorException::~ErrorException()
 {
+}
+
+string Plugin::ErrorException::which() const
+{
+	return m_which;
 }
 
 const char * Plugin::ErrorException::what() const throw()
@@ -195,7 +201,7 @@ void Plugin::onCommand(shared_ptr<Server> server, const string &channel, const s
 	m_state.push(message);
 
 	if (!m_state.pcall(4, 0))
-		throw ErrorException(m_state.getError());
+		throw ErrorException(m_name, m_state.getError());
 }
 
 void Plugin::onConnect(shared_ptr<Server> server)
@@ -206,7 +212,7 @@ void Plugin::onConnect(shared_ptr<Server> server)
 	LuaServer::pushObject(m_state, server);
 	
 	if (!m_state.pcall(1, 0))
-		throw ErrorException(m_state.getError());
+		throw ErrorException(m_name, m_state.getError());
 }
 
 void Plugin::onChannelNotice(shared_ptr<Server> server, const string &nick, const string &target, const string &notice)
@@ -220,7 +226,7 @@ void Plugin::onChannelNotice(shared_ptr<Server> server, const string &nick, cons
 	m_state.push(notice);
 
 	if (!m_state.pcall(4, 0))
-		throw ErrorException(m_state.getError());
+		throw ErrorException(m_name, m_state.getError());
 }
 
 void Plugin::onInvite(shared_ptr<Server> server, const string &channel, const string &who)
@@ -233,7 +239,7 @@ void Plugin::onInvite(shared_ptr<Server> server, const string &channel, const st
 	m_state.push(who);
 
 	if (!m_state.pcall(3, 0))
-		throw ErrorException(m_state.getError());
+		throw ErrorException(m_name, m_state.getError());
 }
 
 void Plugin::onJoin(shared_ptr<Server> server, const string &channel, const string &nickname)
@@ -246,7 +252,7 @@ void Plugin::onJoin(shared_ptr<Server> server, const string &channel, const stri
 	m_state.push(nickname);
 
 	if (!m_state.pcall(3, 0))
-		throw ErrorException(m_state.getError());
+		throw ErrorException(m_name, m_state.getError());
 }
 
 void Plugin::onKick(shared_ptr<Server> server, const string &channel, const string &who, const string &kicked, const string &reason)
@@ -261,7 +267,7 @@ void Plugin::onKick(shared_ptr<Server> server, const string &channel, const stri
 	m_state.push(reason);
 
 	if (!m_state.pcall(5, 0))
-		throw ErrorException(m_state.getError());
+		throw ErrorException(m_name, m_state.getError());
 }
 
 void Plugin::onMessage(shared_ptr<Server> server, const string &channel, const string &who, const string &message)
@@ -275,7 +281,7 @@ void Plugin::onMessage(shared_ptr<Server> server, const string &channel, const s
 	m_state.push(message);
 
 	if (!m_state.pcall(4, 0))
-		throw ErrorException(m_state.getError());
+		throw ErrorException(m_name, m_state.getError());
 }
 
 void Plugin::onMode(shared_ptr<Server> server, const string &channel, const string &who, const string &mode, const string &modeArg)
@@ -290,7 +296,7 @@ void Plugin::onMode(shared_ptr<Server> server, const string &channel, const stri
 	m_state.push(modeArg);
 
 	if (!m_state.pcall(5, 0))
-		throw ErrorException(m_state.getError());
+		throw ErrorException(m_name, m_state.getError());
 }
 
 void Plugin::onNick(shared_ptr<Server> server, const string &oldnick, const string &newnick)
@@ -303,7 +309,7 @@ void Plugin::onNick(shared_ptr<Server> server, const string &oldnick, const stri
 	m_state.push(newnick);
 
 	if (!m_state.pcall(3, 0))
-		throw ErrorException(m_state.getError());
+		throw ErrorException(m_name, m_state.getError());
 }
 
 void Plugin::onNotice(shared_ptr<Server> server, const string &nick, const string &target, const string &notice)
@@ -317,7 +323,7 @@ void Plugin::onNotice(shared_ptr<Server> server, const string &nick, const strin
 	m_state.push(notice);
 
 	if (!m_state.pcall(4, 0))
-		Logger::warn("plugin %s: %s", m_name.c_str(), m_state.getError().c_str());
+		throw ErrorException(m_name, m_state.getError());
 }
 
 void Plugin::onPart(shared_ptr<Server> server, const string &channel, const string &who, const string &reason)
@@ -331,7 +337,7 @@ void Plugin::onPart(shared_ptr<Server> server, const string &channel, const stri
 	m_state.push(reason);
 
 	if (!m_state.pcall(4, 0))
-		throw ErrorException(m_state.getError());
+		throw ErrorException(m_name, m_state.getError());
 }
 
 void Plugin::onQuery(shared_ptr<Server> server, const string &who, const string &message)
@@ -344,7 +350,7 @@ void Plugin::onQuery(shared_ptr<Server> server, const string &who, const string 
 	m_state.push(message);
 
 	if (!m_state.pcall(3, 0))
-		throw ErrorException(m_state.getError());
+		throw ErrorException(m_name, m_state.getError());
 }
 
 void Plugin::onReload()
@@ -353,7 +359,7 @@ void Plugin::onReload()
 		return;
 
 	if (!m_state.pcall(0, 0))
-		throw ErrorException(m_state.getError());
+		throw ErrorException(m_name, m_state.getError());
 }
 
 void Plugin::onTopic(shared_ptr<Server> server, const string &channel, const string &who, const string &topic)
@@ -367,7 +373,7 @@ void Plugin::onTopic(shared_ptr<Server> server, const string &channel, const str
 	m_state.push(topic);
 
 	if (!m_state.pcall(4, 0))
-		throw ErrorException(m_state.getError());
+		throw ErrorException(m_name, m_state.getError());
 }
 
 void Plugin::onUserMode(shared_ptr<Server> server, const string &who, const string &mode)
@@ -380,5 +386,5 @@ void Plugin::onUserMode(shared_ptr<Server> server, const string &who, const stri
 	m_state.push(mode);
 
 	if (!m_state.pcall(3, 0))
-		throw ErrorException(m_state.getError());
+		throw ErrorException(m_name, m_state.getError());
 }

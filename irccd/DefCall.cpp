@@ -51,7 +51,7 @@ void DefCall::onNames(const vector<string> users)
 	m_plugin->getState().unref(LUA_REGISTRYINDEX, m_ref);
 	
 	if (!result)
-		throw Plugin::ErrorException(m_plugin->getState().getError());
+		throw Plugin::ErrorException(m_plugin->getName(), m_plugin->getState().getError());
 }
 
 bool DefCall::operator==(const DefCall &c1)
