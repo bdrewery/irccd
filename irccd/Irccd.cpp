@@ -715,7 +715,9 @@ void Irccd::openServers(const Parser &config)
 		try {
 			string name, host, commandToken, password, ident;
 			int port;
+#if 0
 			bool ssl = false, sslVerify = true;
+#endif
 
 			// General parameters
 			if (s.hasOption("command-char"))
@@ -726,10 +728,12 @@ void Irccd::openServers(const Parser &config)
 				server->setAutoCtcpReply(s.getOption<bool>("ctcp-autoreply"));
 			if (s.hasOption("identity"))
 				server->setIdentity(findIdentity(s.getOption<string>("identity")));
+#if 0
 			if (s.hasOption("ssl"))
 				ssl = s.getOption<bool>("ssl");
 			if (s.hasOption("ssl-verify"))
 				ssl = s.getOption<bool>("ssl-verify");
+#endif
 
 			// Get connection parameters
 			name = s.requireOption<string>("name");
@@ -740,7 +744,9 @@ void Irccd::openServers(const Parser &config)
 				password = s.getOption<string>("password");
 
 			server->setConnection(name, host, port, password);
+#if 0
 			server->setSSL(ssl, sslVerify);
+#endif
 
 			// Extract channels to auto join
 			extractChannels(s, *server);

@@ -539,6 +539,7 @@ void Server::startConnection()
 			// SSL needs to add # front of host
 			if (m_ssl)
 				m_host.insert(0, 1, '#');
+
 			if (!m_sslVerify)
 				irc_option_set(m_session.get(),
 				    LIBIRC_OPTION_SSL_NO_VERIFY);
@@ -553,6 +554,8 @@ void Server::startConnection()
 			    m_identity.m_realname.c_str());
 
 			if (error) {
+				m_threadStarted = false;
+
 				Logger::warn("server %s: failed to connect to %s: %s",
 				    m_name.c_str(),
 				    m_host.c_str(),
@@ -560,8 +563,6 @@ void Server::startConnection()
 			}
 
 			irc_run(m_session.get());
-
-			// End of thread, destroy the context.
 		}
 	});
 
