@@ -562,7 +562,6 @@ void Server::startConnection()
 			irc_run(m_session.get());
 
 			// End of thread, destroy the context.
-
 		}
 	});
 
