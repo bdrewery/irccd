@@ -29,12 +29,6 @@
 using namespace irccd;
 using namespace std;
 
-template<class T>
-static T toType(lua_State *L, int idx, const char *tname)
-{
-	return reinterpret_cast<T>(luaL_checkudata(L, idx, tname));
-}
-
 namespace util {
 
 static int basename(lua_State *L)

@@ -54,12 +54,12 @@ public:
 	/**
 	 * Default constructor.
 	 */
-	LuaParser(void);
+	LuaParser();
 
 	/**
 	 * Default destructor.
 	 */
-	~LuaParser(void);
+	~LuaParser();
 
 	/**
 	 * Set the Lua state, used for logging.
@@ -73,7 +73,7 @@ public:
 	 *
 	 * @return the integer reference
 	 */
-	int getLogRef(void) const;
+	int getLogRef() const;
 
 	/**
 	 * Set the Lua function to call for logging.

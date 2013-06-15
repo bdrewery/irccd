@@ -395,10 +395,10 @@ namespace mt {
 
 static int tostring(lua_State *L)
 {
-	Server *server;
+	shared_ptr<Server> server;
 	ostringstream oss;
 
-	server = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
+	server = TO_SSERVER(L, 1);
 	oss << "Server " << server->getName() << " at " << server->getHost();
 
 	lua_pushstring(L, oss.str().c_str());
@@ -408,10 +408,10 @@ static int tostring(lua_State *L)
 
 static int equals(lua_State *L)
 {
-	Server *s1, *s2;
+	shared_ptr<Server> s1, s2;
 
-	s1 = *(Server **)luaL_checkudata(L, 1, SERVER_TYPE);
-	s2 = *(Server **)luaL_checkudata(L, 2, SERVER_TYPE);
+	s1 = TO_SSERVER(L, 1);
+	s2 = TO_SSERVER(L, 2);
 
 	lua_pushboolean(L, s1 == s2);
 
