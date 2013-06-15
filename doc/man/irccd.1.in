@@ -138,7 +138,7 @@ The current server.
 .Ss Channel notice
 This event is triggered when someone sent a notice to a channel.
 .Bd -literal -offset indent
-function onNotice(server, who, channel, notice)
+function onChannelNotice(server, who, channel, notice)
 .Ed
 .Pp
 Parameters:

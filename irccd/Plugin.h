@@ -52,10 +52,11 @@ public:
 
 		virtual const char * what() const throw();
 	};
+
 private:
 	// Plugin identity
 	std::string m_name;		//! name like "foo"
-	std::string m_home;		//! home, usuall ~/.config/<name>/
+	std::string m_home;		//! home, usually ~/.config/<name>/
 	std::string m_error;		//! error message if needed
 
 	LuaState m_state;
@@ -67,6 +68,7 @@ private:
 	 * @return true on success
 	 */
 	bool loadLua(const std::string &path);
+
 public:
 	Plugin();
 

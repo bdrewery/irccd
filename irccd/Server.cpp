@@ -31,16 +31,13 @@ using namespace std;
 
 /* {{{ IRC handlers */
 
-#define TO_SSERVER(s) \
-	*reinterpret_cast<shared_ptr<Server> *>(irc_get_ctx((s)));
-
 static void handleChannel(irc_session_t *s,
 			  const char *ev,
 			  const char *orig,
 			  const char **params,
 			  unsigned int count)
 {
-	shared_ptr<Server> server = TO_SSERVER(s);
+	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -61,7 +58,7 @@ static void handleChannelNotice(irc_session_t *s,
 				const char **params,
 				unsigned int count)
 {
-	shared_ptr<Server> server = TO_SSERVER(s);
+	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(orig);
@@ -82,7 +79,7 @@ static void handleConnect(irc_session_t *s,
 			  const char **params,
 			  unsigned int count)
 {
-	shared_ptr<Server> server = TO_SSERVER(s);
+	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	Irccd::getInstance()->handleIrcEvent(
@@ -95,8 +92,11 @@ static void handleConnect(irc_session_t *s,
 	(void)count;
 }
 
-static void handleCtcpRequest(irc_session_t *s, const char *ev, const char *orig,
-			      const char **params, unsigned int count)
+static void handleCtcpRequest(irc_session_t *s,
+			      const char *ev,
+			      const char *orig,
+			      const char **params,
+			      unsigned int count)
 {
 	Server *server = (Server *)irc_get_ctx(s);
 
@@ -115,7 +115,7 @@ static void handleInvite(irc_session_t *s,
 			 const char **params,
 			 unsigned int count)
 {
-	shared_ptr<Server> server = TO_SSERVER(s);
+	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[1]);
@@ -135,7 +135,7 @@ static void handleJoin(irc_session_t *s,
 		       const char **params,
 		       unsigned int count)
 {
-	shared_ptr<Server> server = TO_SSERVER(s);
+	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -155,7 +155,7 @@ static void handleKick(irc_session_t *s,
 		       const char **params,
 		       unsigned int count)
 {
-	shared_ptr<Server> server = TO_SSERVER(s);
+	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -177,7 +177,7 @@ static void handleMode(irc_session_t *s,
 		       const char **params,
 		       unsigned int count)
 {
-	shared_ptr<Server> server = TO_SSERVER(s);
+	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -199,7 +199,7 @@ static void handleNick(irc_session_t *s,
 		       const char **params,
 		       unsigned int count)
 {
-	shared_ptr<Server> server = TO_SSERVER(s);
+	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(orig);
@@ -219,7 +219,7 @@ static void handleNotice(irc_session_t *s,
 			 const char **params,
 			 unsigned int count)
 {
-	shared_ptr<Server> server = TO_SSERVER(s);
+	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(orig);
@@ -240,7 +240,7 @@ static void handleNumeric(irc_session_t *s,
 			  const char **params,
 			  unsigned int count)
 {
-	shared_ptr<Server> server = TO_SSERVER(s);
+	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	if (event == LIBIRC_RFC_RPL_NAMREPLY) {
@@ -271,7 +271,7 @@ static void handlePart(irc_session_t *s,
 		       const char **params,
 		       unsigned int count)
 {
-	shared_ptr<Server> server = TO_SSERVER(s);
+	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -292,7 +292,7 @@ static void handleQuery(irc_session_t *s,
 			const char **params,
 			unsigned int count)
 {
-	shared_ptr<Server> server = TO_SSERVER(s);
+	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(orig);
@@ -312,7 +312,7 @@ static void handleTopic(irc_session_t *s,
 			const char **params,
 			unsigned int count)
 {
-	shared_ptr<Server> server = TO_SSERVER(s);
+	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -333,7 +333,7 @@ static void handleUserMode(irc_session_t *s,
 			   const char **params,
 			   unsigned int count)
 {
-	shared_ptr<Server> server = TO_SSERVER(s);
+	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(orig);
@@ -371,6 +371,11 @@ IrcEvent::~IrcEvent()
 /* --------------------------------------------------------
  * Server
  * -------------------------------------------------------- */
+
+shared_ptr<Server> Server::Server::toServer(irc_session_t *s)
+{
+	return *reinterpret_cast<shared_ptr<Server> *>(irc_get_ctx(s));
+}
 
 Server::Server()
 	: m_commandChar("!")

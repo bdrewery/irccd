@@ -107,6 +107,8 @@ public:
 	void operator()(irc_session_t *s)
 	{
 		irc_destroy_session(s);
+
+		delete reinterpret_cast<std::shared_ptr<Server> *>(irc_get_ctx(s));
 	}
 };
 
@@ -151,8 +153,22 @@ private:
 	NameList m_nameLists;			//! channels names to receive
 
 public:	
+	/**
+	 * Convert the s context to a shared_ptr<Server>.
+	 *
+	 * @param s the session
+	 * @return the shared_ptr.
+	 */
+	static std::shared_ptr<Server> toServer(irc_session_t *s);
+
+	/**
+	 * Default constructor.
+	 */
 	Server();
 
+	/**
+	 * Default destructor.
+	 */
 	virtual ~Server();
 
 	/**
