@@ -66,6 +66,8 @@ bool LuaState::dofile(const string& path)
 {
 	if (luaL_dofile(getState(), path.c_str()) != LUA_OK) {
 		m_error = lua_tostring(getState(), -1);
+		lua_pop(getState(), 1);
+
 		return false;
 	}
 

@@ -29,7 +29,10 @@
 #include <Util.h>
 
 #include "Irccd.h"
-#include "Plugin.h"
+
+#if defined(WITH_LUA)
+#  include "Plugin.h"
+#endif
 
 using namespace irccd;
 using namespace std;
@@ -591,7 +594,8 @@ void Irccd::openIdentities(const Parser &config)
 			if (s.hasOption("version"))
 				identity.m_ctcpversion = s.getOption<string>("version");
 
-			Logger::log("identity: found identity %s (%s, %s, \"%s\")", identity.m_name.c_str(),
+			Logger::log("identity: found identity %s (%s, %s, \"%s\")",
+			    identity.m_name.c_str(),
 			    identity.m_nickname.c_str(), identity.m_username.c_str(),
 			    identity.m_realname.c_str());
 
@@ -993,6 +997,8 @@ void Irccd::handleInvite(const IrcEvent &event)
 		server->join(event.m_params[1], "");
 }
 
+#if defined(WITH_LUA)
+
 void Irccd::callPlugin(shared_ptr<Plugin> p, const IrcEvent &ev)
 {
 	switch (ev.m_type) {
@@ -1085,3 +1091,5 @@ void Irccd::callDeferred(const IrcEvent &ev)
 		}
 	}
 }
+
+#endif

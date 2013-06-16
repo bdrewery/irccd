@@ -44,8 +44,11 @@ namespace irccd {
  * -------------------------------------------------------- */
 
 typedef std::vector<std::shared_ptr<Server>> ServerList;
-typedef std::vector<std::shared_ptr<Plugin>> PluginList;
-typedef std::map<std::shared_ptr<Server>, std::vector<DefCall>> DefCallList;
+
+#if defined(WITH_LUA)
+  typedef std::vector<std::shared_ptr<Plugin>> PluginList;
+  typedef std::map<std::shared_ptr<Server>, std::vector<DefCall>> DefCallList;
+#endif
 
 class Irccd {
 private:
@@ -54,10 +57,11 @@ private:
 	// Config
 	std::string m_configPath;			//! config file path
 
-#if defined(WITH_LUA)
 	// Plugins
 	std::vector<std::string> m_pluginDirs;		//! list of plugin directories
 	std::vector<std::string> m_pluginWanted;	//! list of wanted modules
+
+#if defined(WITH_LUA)
 	std::mutex m_pluginLock;			//! lock to add plugin
 
 	PluginList m_plugins;				//! list of plugins loaded
@@ -272,6 +276,7 @@ public:
 	 */
 	void handleInvite(const IrcEvent &event);
 
+#if defined(WITH_LUA)
 	/**
 	 * Call the plugin function depending on the event.
 	 *
@@ -281,9 +286,12 @@ public:
 	void callPlugin(std::shared_ptr<Plugin> p, const IrcEvent &ev);
 
 	/**
+	 * Call a deferred function.
 	 *
+	 * @param ev the event
 	 */
 	void callDeferred(const IrcEvent &ev);
+#endif
 };
 
 #if defined(WITH_LUA)
