@@ -49,11 +49,6 @@ int LuaParser::readTuning(lua_State *L, int idx)
 	return tuning;
 }
 
-void LuaParser::pushSection(lua_State *L, const Section &s)
-{
-	new (L, SECTION_TYPE) Section(s);
-}
-
 LuaParser::LuaParser(const std::string &path, int tuning, char commentToken)
 	: Parser(path, tuning, commentToken)
 	, m_state(nullptr)
@@ -149,7 +144,7 @@ static int sectionIterator(lua_State *L)
 		return 0;
 
 	// Push the current section.
-	LuaParser::pushSection(L, (*array)[idx]);
+	new (L, SECTION_TYPE) Section((*array)[idx]);
 
 	// Update the index for the next call
 	lua_pushinteger(L, ++idx);

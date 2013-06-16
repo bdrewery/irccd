@@ -31,15 +31,13 @@ private:
 	int m_logRef;		//! reference for log()
 
 public:
-	static int readTuning(lua_State *L, int idx);
-
 	/**
-	 * Add a section as a userdata at the top of the stack.
+	 * Read the table of parser flags binding and return
+	 * the bitfields.
 	 *
-	 * @param L the Lua state
-	 * @param s the section to push
+	 * @return a enum Parser::Tuning bitfields
 	 */
-	static void pushSection(lua_State *L, const Section &s);
+	static int readTuning(lua_State *L, int idx);
 
 	/**
 	 * Wrapper for super constructor.
