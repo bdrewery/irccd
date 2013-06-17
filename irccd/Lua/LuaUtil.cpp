@@ -337,7 +337,6 @@ static int read(lua_State *L)
 
 	d = toType<Directory *>(L, 1, DIR_TYPE);
 
-	//copy = new Directory(*d);
 	lua_pushlightuserdata(L, d);
 	lua_pushinteger(L, 0);
 	lua_pushcclosure(L, iter, 2);

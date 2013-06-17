@@ -372,7 +372,7 @@ IrcEvent::~IrcEvent()
  * Server
  * -------------------------------------------------------- */
 
-shared_ptr<Server> Server::Server::toServer(irc_session_t *s)
+shared_ptr<Server> Server::toServer(irc_session_t *s)
 {
 	return *reinterpret_cast<shared_ptr<Server> *>(irc_get_ctx(s));
 }

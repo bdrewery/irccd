@@ -49,7 +49,7 @@ bool Directory::open(bool skipParents)
 	oss << m_path;
 	oss << "\\*";
 
-	hd = FindFirstFile(m_path.c_str(), &fdata);
+	hd = FindFirstFile(oss.str().c_str(), &fdata);
 	if (hd == INVALID_HANDLE_VALUE) {
 		m_error = "Could not open directory " + m_path;
 		return false;
@@ -67,6 +67,8 @@ bool Directory::open(bool skipParents)
 
 		m_entries.push_back(entry);
 	} while (FindNextFile(hd, &fdata) != 0);
+
+	FindClose(hd);
 
 	return true;
 	
