@@ -28,16 +28,16 @@ namespace irccd {
 struct Date {
 	time_t m_timestamp;		//! time epoch
 
-	Date(void);
+	Date();
 	Date(time_t timestamp);
-	~Date(void);
+	~Date();
 
 	/**
 	 * Get the timestamp.
 	 *
 	 * @return the timestamp
 	 */
-	time_t getTimestamp(void) const;
+	time_t getTimestamp() const;
 
 	/**
 	 * Format the current that in the specified format,

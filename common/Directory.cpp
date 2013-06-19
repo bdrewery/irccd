@@ -100,17 +100,17 @@ bool Directory::open(bool skipParents)
 #endif
 }
 
-const string & Directory::getPath(void) const
+const string & Directory::getPath() const
 {
 	return m_path;
 }
 
-const std::string & Directory::getError(void) const
+const std::string & Directory::getError() const
 {
 	return m_error;
 }
 
-const std::vector<Entry> & Directory::getEntries(void) const
+const std::vector<Entry> & Directory::getEntries() const
 {
 	return m_entries;
 }

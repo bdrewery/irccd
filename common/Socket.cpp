@@ -159,34 +159,30 @@ void Socket::init()
 
 #if defined(_WIN32)
 
-string Socket::getLastSysError(void)
+string Socket::getLastSysError()
 {
-	LPTSTR pMsgBuf;
-	string errmsg;
+	LPSTR str;
+	string errmsg = nullptr;
 
-	FormatMessage(
+	FormatMessageA(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
 		NULL,
 		WSAGetLastError(),
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR)&pMsgBuf, 0, NULL);
+		(LPSTR)&str, 0, NULL);
 
-#if defined(UNICODE)
-	do {
-		wstring tmp = (pMsgBuf);
-		errmsg = string(tmp.begin(), tmp.end());
-	} while (/* CONSTCOND */ 0);
-#else
-	errmsg = string(pMsgBuf);
-#endif
-	LocalFree(pMsgBuf);
+
+	if (str) {
+		errmsg = string(str);
+		LocalFree(str);
+	}
 
 	return errmsg;
 }
 
 #else
 
-string Socket::getLastSysError(void)
+string Socket::getLastSysError()
 {
 	return strerror(errno);
 }

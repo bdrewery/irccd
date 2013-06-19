@@ -28,7 +28,7 @@ public:
 	/**
 	 * Default constructor
 	 */
-	SocketTCP(void);
+	SocketTCP();
 
 	/**
 	 * Constructor used for accept().
@@ -41,7 +41,7 @@ public:
 	/**
 	 * Default destructor.
 	 */
-	virtual ~SocketTCP(void);
+	virtual ~SocketTCP();
 
 	/**
 	 * Create a socket with TCP type.
@@ -73,7 +73,7 @@ public:
 	 * @return a client ready to use
 	 * @throw Socket::ErrorException on error
 	 */
-	SocketTCP accept(void);
+	SocketTCP accept();
 
 	/**
 	 * Receive some data.

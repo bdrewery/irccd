@@ -157,7 +157,7 @@ public:
 	public:
 		ErrorException(const std::string &error);
 
-		virtual const char * what(void) const throw();
+		virtual const char * what() const throw();
 	};
 
 protected:

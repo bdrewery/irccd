@@ -37,7 +37,7 @@ private:
 
 public:
 	Directory(const std::string &path);
-	~Directory(void);
+	~Directory();
 
 	/**
 	 * Open the directory.
@@ -52,21 +52,21 @@ public:
 	 *
 	 * @return the path
 	 */
-	const std::string & getPath(void) const;
+	const std::string & getPath() const;
 
 	/**
 	 * Get the error
 	 *
 	 * @return the error
 	 */
-	const std::string & getError(void) const;
+	const std::string & getError() const;
 
 	/**
 	 * Get the list of entries found.
 	 *
 	 * @return the list
 	 */
-	const std::vector<Entry> & getEntries(void) const;
+	const std::vector<Entry> & getEntries() const;
 };
 
 bool operator==(const Entry &e1, const Entry &e2);

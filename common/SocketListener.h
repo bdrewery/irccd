@@ -29,7 +29,7 @@ class SocketListener : public Socket {
 public:
 	class TimeoutException : public std::exception {
 	public:
-		virtual const char * what(void) const throw();
+		virtual const char * what() const throw();
 	};
 
 private:

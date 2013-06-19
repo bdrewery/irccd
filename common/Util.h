@@ -95,7 +95,7 @@ public:
 	 *
 	 * @return the home directory
 	 */
-	static std::string getHome(void);
+	static std::string getHome();
 
 	/**
 	 * Get the milliseconds elapsed since the application

@@ -38,12 +38,12 @@ bool irccd::operator==(const Option &o1, const Option &o2)
  * Section public members
  * -------------------------------------------------------- */
 
-Section::Section(void)
+Section::Section()
 	:m_allowed(true)
 {
 }
 
-Section::~Section(void)
+Section::~Section()
 {
 }
 
@@ -104,12 +104,12 @@ template <> std::string Section::getOption(const std::string &name) const
 	return result;
 }
 
-const string & Section::getName(void) const
+const string & Section::getName() const
 {
 	return m_name;
 }
 
-const vector<Option> & Section::getOptions(void) const
+const vector<Option> & Section::getOptions() const
 {
 	return m_options;
 }
@@ -292,15 +292,15 @@ Parser::Parser(const string &path, int tuning, char commentToken)
 	m_sections.push_back(root);
 }
 
-Parser::Parser(void)
+Parser::Parser()
 {
 }
 
-Parser::~Parser(void)
+Parser::~Parser()
 {
 }
 
-bool Parser::open(void)
+bool Parser::open()
 {
 	ifstream file;
 	string line;
@@ -322,12 +322,12 @@ bool Parser::open(void)
 	return true;
 }
 
-const std::string & Parser::getError(void) const
+const std::string & Parser::getError() const
 {
 	return m_error;
 }
 
-const vector<Section> & Parser::getSections(void) const
+const vector<Section> & Parser::getSections() const
 {
 	return m_sections;
 }
@@ -374,15 +374,12 @@ Section Parser::requireSection(const string &name) const
 	return getSection(name);
 }
 
-void Parser::log(int number, const string &section, const string &message)
+void Parser::log(int number, const string &, const string &message)
 {
 	cout << "line " << number << ": " << message << endl;
-
-	// section is not used in that function
-	(void)section;
 }
 
-void Parser::dump(void)
+void Parser::dump()
 {
 	for (auto s : m_sections) {
 		dumpSection(s);

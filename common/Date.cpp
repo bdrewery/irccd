@@ -21,7 +21,7 @@
 using namespace irccd;
 using namespace std;
 
-Date::Date(void)
+Date::Date()
 {
 	m_timestamp = time(NULL);
 }
@@ -31,11 +31,11 @@ Date::Date(time_t timestamp)
 	m_timestamp = timestamp;
 }
 
-Date::~Date(void)
+Date::~Date()
 {
 }
 
-time_t Date::getTimestamp(void) const
+time_t Date::getTimestamp() const
 {
 	return m_timestamp;
 }

@@ -40,11 +40,11 @@ public:
 	{
 	}
 
-	const std::string & which(void) const {
+	const std::string & which() const {
 		return m_key;
 	}
 
-	virtual const char *what(void) const throw() {
+	virtual const char *what() const throw() {
 		return "Property not found";
 	}
 };
@@ -69,8 +69,8 @@ struct Section {
 	std::vector<Option> m_options;	/*! list of options inside */
 	bool m_allowed;			/*! is authorized to push */
 
-	Section(void);
-	~Section(void);
+	Section();
+	~Section();
 
 	/**
 	 * Copy constructor
@@ -82,7 +82,7 @@ struct Section {
 	 *
 	 * @return the section name
 	 */
-	const std::string & getName(void) const;
+	const std::string & getName() const;
 
 	const std::string findOption(const std::string &name) const;
 
@@ -91,7 +91,7 @@ struct Section {
 	 *
 	 * @return the list of options
 	 */
-	const std::vector<Option> & getOptions(void) const;
+	const std::vector<Option> & getOptions() const;
 
 	/**
 	 * Tells if that section has the specified option name.
@@ -184,33 +184,33 @@ public:
 	/**
 	 * Default constructor.
 	 */
-	Parser(void);
+	Parser();
 
 	/**
 	 * Default destructor.
 	 */
-	virtual ~Parser(void);
+	virtual ~Parser();
 
 	/**
 	 * Open the config file.
 	 *
 	 * @return true on success
 	 */
-	bool open(void);
+	bool open();
 
 	/**
 	 * Get the error message if any
 	 *
 	 * @return the error message
 	 */
-	const std::string & getError(void) const;
+	const std::string & getError() const;
 
 	/**
 	 * Get all sections found
 	 *
 	 * @return all sections
 	 */
-	const std::vector<Section> & getSections(void) const;
+	const std::vector<Section> & getSections() const;
 
 	/**
 	 * Get a list of sections for config which multiple
@@ -262,7 +262,7 @@ public:
 	/**
 	 * Dump all sections and options.
 	 */
-	void dump(void);
+	void dump();
 
 	/**
 	 * Dump function used in the dump() method. This default method
