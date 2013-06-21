@@ -89,7 +89,7 @@ void LuaState::push(int i)
 	lua_pushinteger(getState(), i);
 }
 
-void LuaState::push(const string& str)
+void LuaState::push(const string &str)
 {
 	lua_pushlstring(getState(), str.c_str(), str.length());
 }
@@ -99,22 +99,38 @@ void LuaState::push(double d)
 	lua_pushnumber(getState(), d);
 }
 
+void LuaState::pop(int count)
+{
+	lua_pop(getState(), count);
+}
+
 void LuaState::require(const string& name, lua_CFunction func, bool global)
 {
+	LUA_STACK_CHECKBEGIN(getState());
+
 	luaL_requiref(getState(), name.c_str(), func, global);
+	lua_pop(getState(), 1);
+
+	LUA_STACK_CHECKEND(getState(), 0);
 }
 
 void LuaState::preload(const string& name, lua_CFunction func)
 {
+	LUA_STACK_CHECKBEGIN(getState());
+
 	lua_getglobal(getState(), "package");
 	lua_getfield(getState(), -1, "preload");
 	lua_pushcfunction(getState(), func);
 	lua_setfield(getState(), -2, name.c_str());
 	lua_pop(getState(), 2);
+
+	LUA_STACK_CHECKEND(getState(), 0);
 }
 
 bool LuaState::pcall(int np, int nr, int errorh)
 {
+	LUA_STACK_CHECKBEGIN(getState());
+
 	bool success;
 
 	success = lua_pcall(getState(), np, nr, errorh) == LUA_OK;
@@ -122,6 +138,8 @@ bool LuaState::pcall(int np, int nr, int errorh)
 		m_error = lua_tostring(getState(), -1);
 		lua_pop(getState(), 1);
 	}
+
+	LUA_STACK_CHECKEND(getState(), -np - nr - 1);
 
 	return success;
 }

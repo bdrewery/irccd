@@ -19,6 +19,7 @@
 #ifndef _LUA_STATE_H_
 #define _LUA_STATE_H_
 
+#include <cassert>
 #include <memory>
 #include <string>
 
@@ -124,6 +125,13 @@ public:
 	void push(double d);
 
 	/**
+	 * Pop some values.
+	 *
+	 * @param count the number to pop
+	 */
+	void pop(int count);
+
+	/**
 	 * Load a library just like it was loaded with require.
 	 *
 	 * @param name the module name
@@ -208,6 +216,17 @@ public:
 	 */
 	LuaState & operator=(LuaState &&src);
 };
+
+#define LUA_STACK_CHECKBEGIN(L)						\
+	int __topstack = lua_gettop((L))
+
+#define LUA_STACK_CHECKEND(L, offset) do {				\
+	if ((lua_gettop((L)) - (offset)) != __topstack) {		\
+		fprintf(stderr, "expected = %d, got = %d\n",		\
+		    (lua_gettop((L)) - (offset)), __topstack);		\
+	}								\
+	assert(lua_gettop((L)) - (offset) == __topstack);		\
+} while (/* CONSTCOND */ 0)
 
 } // !irccd
 

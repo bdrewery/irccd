@@ -29,6 +29,7 @@ set(VERSION "${MAJOR}.${MINOR}-rc1")
 # General settings
 if (UNIX)
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11 -stdlib=libc++")	# c++11
+	set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -D_DEBUG -O0")
 endif ()
 
 if (WIN32)

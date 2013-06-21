@@ -193,8 +193,10 @@ void Plugin::onCommand(shared_ptr<Server> server,
 		       const string &who,
 		       const string &message)
 {
-	if (m_state.getglobal("onCommand") != LUA_TFUNCTION)
+	if (m_state.getglobal("onCommand") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	LuaServer::pushObject(m_state, server);
 	m_state.push(channel);
@@ -207,8 +209,10 @@ void Plugin::onCommand(shared_ptr<Server> server,
 
 void Plugin::onConnect(shared_ptr<Server> server)
 {
-	if (m_state.getglobal("onConnect") != LUA_TFUNCTION)
+	if (m_state.getglobal("onConnect") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	LuaServer::pushObject(m_state, server);
 	
@@ -221,8 +225,10 @@ void Plugin::onChannelNotice(shared_ptr<Server> server,
 			     const string &target,
 			     const string &notice)
 {
-	if (m_state.getglobal("onChannelNotice") != LUA_TFUNCTION)
+	if (m_state.getglobal("onChannelNotice") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	LuaServer::pushObject(m_state, server);
 	m_state.push(nick);
@@ -237,8 +243,10 @@ void Plugin::onInvite(shared_ptr<Server> server,
 		      const string &channel,
 		      const string &who)
 {
-	if (m_state.getglobal("onInvite") != LUA_TFUNCTION)
+	if (m_state.getglobal("onInvite") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	LuaServer::pushObject(m_state, server);
 	m_state.push(channel);
@@ -252,8 +260,10 @@ void Plugin::onJoin(shared_ptr<Server> server,
 		    const string &channel,
 		    const string &nickname)
 {
-	if (m_state.getglobal("onJoin") != LUA_TFUNCTION)
+	if (m_state.getglobal("onJoin") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	LuaServer::pushObject(m_state, server);
 	m_state.push(channel);
@@ -269,8 +279,10 @@ void Plugin::onKick(shared_ptr<Server> server,
 		    const string &kicked,
 		    const string &reason)
 {
-	if (m_state.getglobal("onKick") != LUA_TFUNCTION)
+	if (m_state.getglobal("onKick") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	LuaServer::pushObject(m_state, server);
 	m_state.push(channel);
@@ -287,8 +299,10 @@ void Plugin::onMessage(shared_ptr<Server> server,
 		       const string &who,
 		       const string &message)
 {
-	if (m_state.getglobal("onMessage") != LUA_TFUNCTION)
+	if (m_state.getglobal("onMessage") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	LuaServer::pushObject(m_state, server);
 	m_state.push(channel);
@@ -305,8 +319,10 @@ void Plugin::onMode(shared_ptr<Server> server,
 		    const string &mode,
 		    const string &modeArg)
 {
-	if (m_state.getglobal("onMode") != LUA_TFUNCTION)
+	if (m_state.getglobal("onMode") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	LuaServer::pushObject(m_state, server);
 	m_state.push(channel);
@@ -322,8 +338,10 @@ void Plugin::onNick(shared_ptr<Server> server,
 		    const string &oldnick,
 		    const string &newnick)
 {
-	if (m_state.getglobal("onNick") != LUA_TFUNCTION)
+	if (m_state.getglobal("onNick") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	LuaServer::pushObject(m_state, server);
 	m_state.push(oldnick);
@@ -338,8 +356,10 @@ void Plugin::onNotice(shared_ptr<Server> server,
 		      const string &target,
 		      const string &notice)
 {
-	if (m_state.getglobal("onNotice") != LUA_TFUNCTION)
+	if (m_state.getglobal("onNotice") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	LuaServer::pushObject(m_state, server);
 	m_state.push(nick);
@@ -355,8 +375,10 @@ void Plugin::onPart(shared_ptr<Server> server,
 		    const string &who,
 		    const string &reason)
 {
-	if (m_state.getglobal("onPart") != LUA_TFUNCTION)
+	if (m_state.getglobal("onPart") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	LuaServer::pushObject(m_state, server);
 	m_state.push(channel);
@@ -371,8 +393,10 @@ void Plugin::onQuery(shared_ptr<Server> server,
 		     const string &who,
 		     const string &message)
 {
-	if (m_state.getglobal("onQuery") != LUA_TFUNCTION)
+	if (m_state.getglobal("onQuery") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	LuaServer::pushObject(m_state, server);
 	m_state.push(who);
@@ -384,8 +408,10 @@ void Plugin::onQuery(shared_ptr<Server> server,
 
 void Plugin::onReload()
 {
-	if (m_state.getglobal("onReload") != LUA_TFUNCTION)
+	if (m_state.getglobal("onReload") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	if (!m_state.pcall(0, 0))
 		throw ErrorException(m_name, m_state.getError());
@@ -396,8 +422,10 @@ void Plugin::onTopic(shared_ptr<Server> server,
 		     const string &who,
 		     const string &topic)
 {
-	if (m_state.getglobal("onTopic") != LUA_TFUNCTION)
+	if (m_state.getglobal("onTopic") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	LuaServer::pushObject(m_state, server);
 	m_state.push(channel);
@@ -412,8 +440,10 @@ void Plugin::onUserMode(shared_ptr<Server> server,
 			const string &who,
 			const string &mode)
 {
-	if (m_state.getglobal("onUserMode") != LUA_TFUNCTION)
+	if (m_state.getglobal("onUserMode") != LUA_TFUNCTION) {
+		m_state.pop(1);
 		return;
+	}
 
 	LuaServer::pushObject(m_state, server);
 	m_state.push(who);

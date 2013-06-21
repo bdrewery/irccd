@@ -81,7 +81,7 @@ static void handleConnect(irc_session_t *s,
 	);
 }
 
-static void handleCtcpRequest(irc_session_t *s,
+static void handleCtcpRequest(irc_session_t *,
 			      const char *,
 			      const char *,
 			      const char **,
