@@ -217,16 +217,24 @@ public:
 	LuaState & operator=(LuaState &&src);
 };
 
+#if !defined(NDEBUG)
+
 #define LUA_STACK_CHECKBEGIN(L)						\
 	int __topstack = lua_gettop((L))
 
-#define LUA_STACK_CHECKEND(L, offset) do {				\
-	if ((lua_gettop((L)) - (offset)) != __topstack) {		\
-		fprintf(stderr, "expected = %d, got = %d\n",		\
-		    (lua_gettop((L)) - (offset)), __topstack);		\
-	}								\
-	assert(lua_gettop((L)) - (offset) == __topstack);		\
-} while (/* CONSTCOND */ 0)
+#define LUA_STACK_CHECKEQUALS(L)					\
+	assert(lua_gettop((L)) == __topstack)
+
+#define LUA_STACK_CHECKEND(L, cond)					\
+	assert(lua_gettop((L)) cond == __topstack)
+
+#else
+
+#define LUA_STACK_CHECKBEGIN(L)
+#define LUA_STACK_CHECKEQUALS(L)
+#define LUA_STACK_CHECKEND(L, cond)
+
+#endif
 
 } // !irccd
 
