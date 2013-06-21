@@ -1011,6 +1011,10 @@ void Irccd::callPlugin(shared_ptr<Plugin> p, const IrcEvent &ev)
 		break;
 	case IrcEventType::Invite:
 		p->onInvite(ev.m_server, ev.m_params[0], ev.m_params[1]);
+
+		// Also auto join it
+		if (ev.m_server->autoJoinInvite())
+			ev.m_server->join(ev.m_params[0]);
 		break;
 	case IrcEventType::Join:
 		p->onJoin(ev.m_server, ev.m_params[0], ev.m_params[1]);
