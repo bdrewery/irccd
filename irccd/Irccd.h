@@ -54,6 +54,9 @@ class Irccd {
 private:
 	static Irccd *m_instance;			//! unique instance
 
+	// Ignition
+	bool m_running;					//! forever loop
+
 	// Config
 	std::string m_configPath;			//! config file path
 
@@ -108,7 +111,9 @@ private:
 	void openServers(const Parser &config);
 	void extractChannels(const Section &section, std::shared_ptr<Server> server);
 
+	// Avoid constructor.
 	Irccd();
+
 public:
 	~Irccd();
 
@@ -244,6 +249,11 @@ public:
 	 * @return the error code
 	 */
 	int run();
+
+	/**
+	 * Stop all threads and everything else.
+	 */
+	void stop();
 
 	/* ------------------------------------------------
 	 * IRC Handlers

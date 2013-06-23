@@ -784,6 +784,7 @@ void Irccd::extractChannels(const Section &section, shared_ptr<Server> server)
  * -------------------------------------------------------- */
 
 Irccd::Irccd()
+	: m_running(true)
 {
 	Socket::init();
 
@@ -917,7 +918,7 @@ int Irccd::run()
 		s->startConnection();
 	}
 
-	for (;;) {
+	while (m_running) {
 		if (m_socketServers.size() == 0) {
 			Util::usleep(1000);
 			continue;
@@ -932,12 +933,22 @@ int Irccd::run()
 			} else {
 				clientRead(s);
 			}
-		} catch (Socket::ErrorException ex) {
-			Logger::warn("listener: client error: %s", ex.what());
+		} catch (Socket::ErrorException) {
 		}
 	}
 
 	return 0;
+}
+
+void Irccd::stop()
+{
+	m_running = false;
+
+	for (shared_ptr<Server> &s : m_servers)
+		s->stopConnection();
+
+	for (Socket &s : m_socketServers)
+		s.close();
 }
 
 void Irccd::handleIrcEvent(const IrcEvent &ev)

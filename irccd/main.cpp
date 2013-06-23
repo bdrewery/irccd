@@ -18,6 +18,8 @@
 
 #include <cstdlib>
 
+#include <signal.h>
+
 #include <Logger.h>
 
 #include "Irccd.h"
@@ -26,8 +28,9 @@
 using namespace irccd;
 using namespace std;
 
-static void quit()
+static void quit(int)
 {
+	Irccd::getInstance()->stop();
 }
 
 static void usage()
@@ -77,8 +80,10 @@ int main(int argc, char **argv)
 		exit(1);
 #endif
 	}
-	
-	atexit(quit);
+
+	signal(SIGINT, quit);
+	signal(SIGTERM, quit);
+	signal(SIGQUIT, quit);
 
 	return irccd->run();
 }

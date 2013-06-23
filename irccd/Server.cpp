@@ -488,6 +488,7 @@ void Server::startConnection()
 void Server::stopConnection()
 {
 	if (m_threadStarted) {
+		Logger::log("server %s: disconnecting...", m_info.m_name.c_str());
 		m_threadStarted = false;
 		m_thread.detach();
 	}
