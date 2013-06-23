@@ -32,7 +32,7 @@ using namespace std;
 
 /* {{{ help messages */
 
-typedef function<void(void)> HelpHandler;
+typedef function<void()> HelpHandler;
 
 static void helpChannelNotice()
 {
@@ -209,10 +209,8 @@ static map<string, HelpHandler> helpHandlers = createHelpHandlers();
 
 typedef function<void(Irccdctl *, int, char **)> Handler;
 
-static void handleHelp(Irccdctl *ctl, int argc, char **argv)
+static void handleHelp(Irccdctl *, int argc, char **argv)
 {
-	(void)ctl;
-
 	if (argc < 1) {
 		Logger::warn("help requires 1 argument");
 		exit(1);
@@ -423,7 +421,7 @@ static void handleUserMode(Irccdctl *ctl, int argc, char **argv)
 	}
 }
 
-static map<string, Handler> createHandlers(void)
+static map<string, Handler> createHandlers()
 {
 	map<string, Handler> handlers;
 
@@ -451,14 +449,14 @@ static map<string, Handler> handlers = createHandlers();
 
 /* }}} */
 
-Irccdctl::Irccdctl(void)
+Irccdctl::Irccdctl()
 {
 	Socket::init();
 
 	Logger::setVerbose(false);
 }
 
-Irccdctl::~Irccdctl(void)
+Irccdctl::~Irccdctl()
 {
 	Socket::finish();
 }
@@ -507,7 +505,7 @@ void Irccdctl::connectInet(const Section &section)
 	}
 }
 
-void Irccdctl::readConfig(void)
+void Irccdctl::readConfig()
 {
 	Parser config(m_configPath);
 
@@ -540,7 +538,7 @@ void Irccdctl::readConfig(void)
 	}
 }
 
-void Irccdctl::openConfig(void)
+void Irccdctl::openConfig()
 {
 	if (m_configPath.length() == 0) {
 		m_configPath = Util::configFilePath("irccdctl.conf");
@@ -602,9 +600,7 @@ int Irccdctl::getResponse()
 	} catch (Socket::ErrorException ex) {
 		Logger::warn("Error: %s", ex.what());
 		ret = 1;
-	} catch (SocketListener::TimeoutException ex) {
-		(void)ex;
-
+	} catch (SocketListener::TimeoutException) {
 		Logger::warn("Didn't get a response from irccd");
 		ret = 1;
 	}
@@ -612,7 +608,7 @@ int Irccdctl::getResponse()
 	return ret;
 }
 
-void Irccdctl::usage(void)
+void Irccdctl::usage()
 {
 	Logger::warn("usage: %s [-cv] <commands> [<args>]\n", getprogname());
 

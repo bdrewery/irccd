@@ -31,11 +31,17 @@
 using namespace irccd;
 using namespace std;
 
-typedef function<void(void)>							HelpFunction;
+typedef function<void()>							HelpFunction;
 typedef function<void(shared_ptr<Plugin>, shared_ptr<Server>, int, char **)>	TestFunction;
 
 class FakeServer : public Server {
 public:
+	FakeServer(const Info &info, const Identity &identity)
+	{
+		m_info = info;
+		m_identity = identity;
+	}
+
 	void cnotice(const string &channel, const string &message)
 	{
 		Logger::log("test: notice: (%s) %s", channel.c_str(), message.c_str());
@@ -120,7 +126,7 @@ static void helpCommand()
 	Logger::warn("\t%s test file onCommand #staff markand will I be rich?", getprogname());
 }
 
-static void helpConnect(void)
+static void helpConnect()
 {
 	Logger::warn("usage: %s test file onConnect\n", getprogname());
 	Logger::warn("Do a fake successful connection.\n");
@@ -129,7 +135,7 @@ static void helpConnect(void)
 	Logger::warn("\t%s test file onConnect");
 }
 
-static void helpChannelNotice(void)
+static void helpChannelNotice()
 {
 	Logger::warn("usage: %s test file onChannelNotice nick target notice\n", getprogname());
 	Logger::warn("Send a private notice to the specified target. Nick parameter");
@@ -139,7 +145,7 @@ static void helpChannelNotice(void)
 	Logger::warn("\t%s test file onNotice mick #staff \"#staff is not #offtopic\"", getprogname());
 }
 
-static void helpInvite(void)
+static void helpInvite()
 {
 	Logger::warn("usage: %s test file onInvite channel who\n", getprogname());
 	Logger::warn("Do a fake inviation from who to a specific channel.\n");
@@ -148,7 +154,7 @@ static void helpInvite(void)
 	Logger::warn("\t%s test file onInvite #staff john", getprogname());
 }
 
-static void helpJoin(void)
+static void helpJoin()
 {
 	Logger::warn("usage: %s test file onJoin channel who\n", getprogname());
 	Logger::warn("Join the channel. The parameter who is the person");
@@ -158,7 +164,7 @@ static void helpJoin(void)
 	Logger::warn("\t%s test file onJoin #staff francis", getprogname());
 }
 
-static void helpKick(void)
+static void helpKick()
 {
 	Logger::warn("usage: %s test file onKick channel who kicked reason\n", getprogname());
 	Logger::warn("Fake a kick from a specific channel, the reason may be empty.\n");
@@ -168,7 +174,7 @@ static void helpKick(void)
 	Logger::warn("\t%s test file onKick #staff francis markand \"You're not nice with her\"");
 }
 
-static void helpMessage(void)
+static void helpMessage()
 {
 	Logger::warn("usage: %s test file onMessage channel who message\n", getprogname());
 	Logger::warn("Send a message to the specific channel.\n");
@@ -177,7 +183,7 @@ static void helpMessage(void)
 	Logger::warn("\t%s test file onMessage #staff francis \"Hello All\"", getprogname());
 }
 
-static void helpMode(void)
+static void helpMode()
 {
 	Logger::warn("usage: %s test file onMode channel who mode [modeArg]\n", getprogname());
 	Logger::warn("Do a fake channel mode change. The who parameter is the one who");
@@ -188,7 +194,7 @@ static void helpMode(void)
 	Logger::warn("\t%s test file onMode #staff john +k #overflow", getprogname());
 }
 
-static void helpNick(void)
+static void helpNick()
 {
 	Logger::warn("usage: %s test file onNick oldnick newnick\n", getprogname());
 	Logger::warn("Do a fake nick change.\n");
@@ -197,7 +203,7 @@ static void helpNick(void)
 	Logger::warn("\t%s test file onNick john_ john");
 }
 
-static void helpNotice(void)
+static void helpNotice()
 {
 	Logger::warn("usage: %s test file onNotice who target notice\n", getprogname());
 	Logger::warn("Send a private notice to the target nickname.\n");
@@ -206,7 +212,7 @@ static void helpNotice(void)
 	Logger::warn("\t%s test file onNotice john mick \"Please stop flooding\"", getprogname());
 }
 
-static void helpPart(void)
+static void helpPart()
 {
 	Logger::warn("usage: %s test file onPart channel who reason\n", getprogname());
 	Logger::warn("Simulate a target departure specified by foo on the channel. The");
@@ -216,7 +222,7 @@ static void helpPart(void)
 	Logger::warn("\t%s test file onPart #staff john \"Do not like that channel\"", getprogname());
 }
 
-static void helpQuery(void)
+static void helpQuery()
 {
 	Logger::warn("usage: %s test file onQuery who message\n", getprogname());
 	Logger::warn("Simulate a private query, who is the sender.\n");
@@ -225,7 +231,7 @@ static void helpQuery(void)
 	Logger::warn("\t%s test file onQuery john \"Do you want some?\"", getprogname());
 }
 
-static void helpTopic(void)
+static void helpTopic()
 {
 	Logger::warn("usage: %s test file onTopic channel who topic\n", getprogname());
 	Logger::warn("Change the topic on a fake server. Topic may be empty so that");
@@ -235,7 +241,7 @@ static void helpTopic(void)
 	Logger::warn("\t%s test file onTopic #staff markand \"I'm your new god little girls\"", getprogname());
 }
 
-static void helpUserMode(void)
+static void helpUserMode()
 {
 	Logger::warn("usage: %s test file onUserMode who mode\n", getprogname());
 	Logger::warn("Fake a user mode change, remember that who is the one that changed");
@@ -246,7 +252,7 @@ static void helpUserMode(void)
 	Logger::warn("\t%s test file onUserMode john +i");
 }
 
-static map<string, HelpFunction> createHelpCommands(void)
+static map<string, HelpFunction> createHelpCommands()
 {
 	map<string, HelpFunction> commands;
 
@@ -283,12 +289,9 @@ static void testCommand(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, ch
 	}
 }
 
-static void testConnect(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
+static void testConnect(shared_ptr<Plugin> p, shared_ptr<Server> s, int, char **)
 {
 	p->onConnect(s);
-
-	(void)argc;
-	(void)argv;
 }
 
 static void testChannelNotice(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
@@ -414,7 +417,7 @@ static void testUserMode(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, c
 	}
 }
 
-static map<string, TestFunction> createCommands(void)
+static map<string, TestFunction> createCommands()
 {
 	map<string, TestFunction> commands;
 
@@ -442,8 +445,13 @@ static map<string, TestFunction> testCommands = createCommands();
 
 static void testPlugin(const char *file, int argc, char **argv)
 {
-	shared_ptr<FakeServer> server = make_shared<FakeServer>();
-	Identity ident;
+	Server::Info info;
+	Server::Identity ident;
+
+	info.m_name = "local";
+	info.m_host = "local";
+	info.m_port = 6667;
+	shared_ptr<FakeServer> server = make_shared<FakeServer>(info, ident);
 
 	if (strcmp(argv[0], "help") == 0) {
 		if (argc > 1) {
@@ -459,9 +467,6 @@ static void testPlugin(const char *file, int argc, char **argv)
 			exit(1);
 		}
 	}
-
-	server->setConnection("local", "local", 6667);
-	server->setSSL(false, false);
 
 	// Always push before calling it
 	string name = Util::basename(string(file));

@@ -26,11 +26,11 @@
 using namespace irccd;
 using namespace std;
 
-static void quit(void)
+static void quit()
 {
 }
 
-static void usage(void)
+static void usage()
 {
 	Logger::warn("usage: %s [-v] [-c config] [-p pluginpath] [-P plugin]", getprogname());
 	Logger::warn("       %s test plugin.lua [command] [parameters...]", getprogname());

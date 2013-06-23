@@ -81,27 +81,6 @@ struct IrcEvent {
 	~IrcEvent();
 };
 
-struct Identity {
-	std::string m_name;		/*! identity name */
-	std::string m_nickname;		/*! user nickname */
-	std::string m_username;		/*! IRC client user */
-	std::string m_realname;		/*! user real name */
-	std::string m_ctcpversion;	/*! CTCP version */
-
-	Identity()
-	{
-		m_name = "__irccd__";
-		m_nickname = "irccd";
-		m_username = "irccd";
-		m_realname = "IRC Client Daemon";
-		m_ctcpversion = "IRC Client Daemon (dev)";
-	}
-
-	~Identity()
-	{
-	}
-};
-
 class IrcDeleter {
 public:
 	void operator()(irc_session_t *s)
@@ -125,24 +104,55 @@ public:
 		std::string m_password;			//! channel optional password
 	};
 
+	struct Options {
+		std::string m_commandChar;		//! command token
+		bool m_joinInvite;			//! auto join on invites
+		bool m_ctcpReply;			//! auto reply CTCP
+
+		Options()
+			: m_commandChar("!")
+			, m_joinInvite(false)
+			, m_ctcpReply(true)
+		{
+		}
+	};
+
+	struct Info {
+		std::string m_name;			//! server's name
+		std::string m_host;			//! hostname
+		unsigned m_port;			//! server's port
+		std::string m_password;			//! optional server password
+		bool m_ssl;				//! SSL usage
+		bool m_sslVerify;			//! SSL verification
+		std::vector<Channel> m_channels;	//! list of channels
+
+		Info()
+			: m_ssl(false)
+			, m_sslVerify(true)
+		{
+		}
+	};
+
+	struct Identity {
+		std::string m_name;			//! identity name
+		std::string m_nickname;			//! user nickname
+		std::string m_username;			//! IRC client user
+		std::string m_realname;			//! user real name
+		std::string m_ctcpversion;		//! CTCP version
+
+		Identity()
+		{
+			m_name = "__irccd__";
+			m_nickname = "irccd";
+			m_username = "irccd";
+			m_realname = "IRC Client Daemon";
+			m_ctcpversion = "IRC Client Daemon (dev)";
+		}
+	};
+
 	typedef std::map<std::string, std::vector<std::string>> NameList;
 
 private:
-	// Some options
-	std::string m_commandChar;		/*! command token */
-	bool m_joinInvite;			/*! auto join on invites */
-	bool m_ctcpReply;			//! auto reply CTCP
-	std::vector<Channel> m_channels;	/*! list of channels */
-
-	// Connection settings
-	Identity m_identity;			/*! identity to use */
-	std::string m_name;			/*! server's name */
-	std::string m_host;			/*! hostname */
-	unsigned m_port;			/*! server's port */
-	std::string m_password;			/*! optional server password */
-	bool m_ssl;				//! SSL usage
-	bool m_sslVerify;			//! SSL verification
-
 	// IRC thread
 	irc_callbacks_t m_callbacks;		//! callbacks for libircclient
 	std::thread m_thread;			//! server's thread
@@ -151,6 +161,21 @@ private:
 
 	// For deferred events
 	NameList m_nameLists;			//! channels names to receive
+
+	/**
+	 * Initialize callbacks.
+	 */
+	void init();
+
+protected:
+	Info m_info;				//! server info
+	Identity m_identity;			//! identity to use
+	Options m_options;			//! some options
+
+	/**
+	 * Default constructor. Should not be used.
+	 */
+	Server();
 
 public:	
 	/**
@@ -162,63 +187,18 @@ public:
 	static std::shared_ptr<Server> toServer(irc_session_t *s);
 
 	/**
-	 * Default constructor.
+	 * Better constructor with information and options.
+	 *
+	 * @param info the host info
+	 * @param identity the identity
+	 * @param options some options
 	 */
-	Server();
+	Server(const Info &info, const Identity &identity, const Options &options);
 
 	/**
 	 * Default destructor.
 	 */
 	virtual ~Server();
-
-	/**
-	 * Get the command character.
-	 *
-	 * @return the command character
-	 */
-	const std::string & getCommandChar() const;
-
-	/**
-	 * Set the command character.
-	 *
-	 * @param commandChar the command character
-	 */
-	void setCommandChar(const std::string &commandChar);
-
-	/**
-	 * Tell if we should join channel on /invite commands
-	 *
-	 * @return true if we should
-	 */
-	bool autoJoinInvite() const;
-
-	/**
-	 * Set the join invite mode
-	 *
-	 * @param joinInvite the mode
-	 */
-	void setJoinInvite(bool joinInvite);
-
-	/**
-	 * Set if we should auto reply to ctcp request.
-	 *
-	 * @param autoCtcpReply true if we should
-	 */
-	void setAutoCtcpReply(bool autoCtcpReply);
-
-	/**
-	 * Tell if we should auto reply to ctcp request.
-	 *
-	 * @return true if we should
-	 */
-	bool autoCtcpReply() const;
-
-	/**
-	 * Get all channels that will be auto joined
-	 *
-	 * @return the list of channels
-	 */
-	const std::vector<Channel> & getChannels();
 
 	/**
 	 * Get the name list being build for /names
@@ -229,61 +209,32 @@ public:
 	NameList & getNameLists();
 
 	/**
+	 * Get the server information.
+	 *
+	 * @return the server information
+	 */
+	const Info & getInfo() const;
+
+	/**
 	 * Get the identity used for that server
 	 *
 	 * @return the identity
 	 */
-	Identity & getIdentity();
+	const Identity & getIdentity() const;
 
 	/**
-	 * Get the server instance name. This is only used
-	 * to reference a server from irccd controllers.
+	 * Get the server options.
 	 *
-	 * @return the name
+	 * @return the options
 	 */
-	const std::string & getName() const;
+	const Options & getOptions() const;
 
 	/**
-	 * Get the server host name.
+	 * Get all channels that will be auto joined
 	 *
-	 * @return the hostname
+	 * @return the list of channels
 	 */
-	const std::string & getHost() const;
-
-	/**
-	 * Get the port connection.
-	 *
-	 * @return the port used
-	 */
-	unsigned getPort() const;
-
-	/**
-	 * Set connections settings.
-	 *
-	 * @param name the server resource name
-	 * @param host the hostname
-	 * @param port the port
-	 * @param password an optional password
-	 */
-	void setConnection(const std::string &name,
-			   const std::string &host,
-			   unsigned port,
-			   const std::string &password = "");
-
-	/**
-	 * Set the SSL parameters.
-	 *
-	 * @param ssl enable / disable ssl
-	 * @param sslVerify enable / disable certificate verification
-	 */
-	void setSSL(bool ssl, bool sslVerify);
-
-	/**
-	 * Set the user identity.
-	 *
-	 * @param identity the identity to use
-	 */
-	void setIdentity(const Identity &identity);
+	const std::vector<Channel> & getChannels() const;
 
 	/**
 	 * Add a channel that the server will connect to when the

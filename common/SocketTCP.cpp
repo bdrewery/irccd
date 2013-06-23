@@ -20,7 +20,7 @@
 
 using namespace irccd;
 
-SocketTCP::SocketTCP(void)
+SocketTCP::SocketTCP()
 {
 }
 
@@ -55,7 +55,7 @@ void SocketTCP::listen(int max)
 		throw ErrorException(getLastSysError());
 }
 
-SocketTCP SocketTCP::accept(void)
+SocketTCP SocketTCP::accept()
 {
 	Socket::socket_t sock;
 	sockaddr_storage addr;	

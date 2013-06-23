@@ -22,7 +22,7 @@
 
 using namespace irccd;
 
-const char * SocketListener::TimeoutException::what(void) const throw()
+const char * SocketListener::TimeoutException::what() const throw()
 {
 	return "Timeout occured";
 }

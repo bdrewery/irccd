@@ -59,7 +59,7 @@ static int getChannels(lua_State *L)
 static int getIdentity(lua_State *L)
 {
 	shared_ptr<Server> s = TO_SSERVER(L, 1);
-	const Identity &ident = s->getIdentity();
+	const Server::Identity &ident = s->getIdentity();
 
 	// Create the identity table result
 	lua_createtable(L, 5, 5);
@@ -88,13 +88,13 @@ static int getInfo(lua_State *L)
 
 	lua_createtable(L, 3, 3);
 
-	lua_pushstring(L, s->getName().c_str());
+	lua_pushstring(L, s->getInfo().m_name.c_str());
 	lua_setfield(L, -2, "name");
 
-	lua_pushstring(L, s->getHost().c_str());
+	lua_pushstring(L, s->getInfo().m_host.c_str());
 	lua_setfield(L, -2, "hostname");
 
-	lua_pushinteger(L, s->getPort());
+	lua_pushinteger(L, s->getInfo().m_port);
 	lua_setfield(L, -2, "port");
 
 	return 1;
@@ -104,7 +104,7 @@ static int getName(lua_State *L)
 {
 	shared_ptr<Server> s = TO_SSERVER(L, 1);
 
-	lua_pushstring(L, s->getName().c_str());
+	lua_pushstring(L, s->getInfo().m_name.c_str());
 
 	return 1;
 }
@@ -399,7 +399,8 @@ static int tostring(lua_State *L)
 	ostringstream oss;
 
 	server = TO_SSERVER(L, 1);
-	oss << "Server " << server->getName() << " at " << server->getHost();
+	oss << "Server " << server->getInfo().m_name;
+	oss << " at " << server->getInfo().m_host;
 
 	lua_pushstring(L, oss.str().c_str());
 

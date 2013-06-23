@@ -39,13 +39,13 @@ private:
 
 	void connectInet(const Section &section);
 
-	void readConfig(void);
-	void openConfig(void);
+	void readConfig();
+	void openConfig();
 
-	void usage(void);
+	void usage();
 public:
-	Irccdctl(void);
-	~Irccdctl(void);
+	Irccdctl();
+	~Irccdctl();
 
 	/**
 	 * Set the config path to open.

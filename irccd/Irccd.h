@@ -76,8 +76,8 @@ private:
 	SocketListener m_listener;			//! socket listener
 
 	// Identities
-	std::vector<Identity> m_identities;		//! user identities
-	Identity m_defaultIdentity;			//! default identity
+	std::vector<Server::Identity> m_identities;	//! user identities
+	Server::Identity m_defaultIdentity;		//! default identity
 
 	void clientAdd(SocketTCP &client);
 	void clientRead(SocketTCP &client);
@@ -117,7 +117,7 @@ public:
 	 *
 	 * @return the irccd instance
 	 */
-	static Irccd * getInstance(void);
+	static Irccd * getInstance();
 
 	/**
 	 * Add a plugin path to find other plugins.
@@ -236,7 +236,7 @@ public:
 	 * @param name the identity's resource name.
 	 * @return an identity or the default one
 	 */
-	const Identity & findIdentity(const std::string &name);
+	const Server::Identity & findIdentity(const std::string &name);
 
 	/**
 	 * Run the application.

@@ -193,15 +193,10 @@ void * operator new(size_t size, lua_State *L, const char *metaname)
 	return object;
 }
 
-void operator delete(void *ptr, lua_State *L)
+void operator delete(void *, lua_State *)
 {
-	(void)ptr;
-	(void)L;
 }
 
-void operator delete(void *ptr, lua_State *L, const char *metaname)
+void operator delete(void *, lua_State *, const char *)
 {
-	(void)ptr;
-	(void)L;
-	(void)metaname;
 }

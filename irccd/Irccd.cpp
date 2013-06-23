@@ -580,7 +580,7 @@ void Irccd::openPlugins()
 void Irccd::openIdentities(const Parser &config)
 {
 	for (Section &s: config.findSections("identity")) {
-		Identity identity;
+		Server::Identity identity;
 
 		try {
 			identity.m_name = s.requireOption<string>("name");
@@ -714,42 +714,38 @@ void Irccd::extractUnix(const Section &s)
 void Irccd::openServers(const Parser &config)
 {
 	for (Section &s: config.findSections("server")) {
-		shared_ptr<Server> server =  make_shared<Server>();
-
 		try {
-			string name, host, commandToken, password, ident;
-			int port;
-			bool ssl = false, sslVerify = true;
+			Server::Info info;
+			Server::Options options;
+			Server::Identity identity;
 
-			// General parameters
-			if (s.hasOption("command-char"))
-				server->setCommandChar(s.getOption<string>("command-char"));
-			if (s.hasOption("join-invite"))
-				server->setJoinInvite(s.getOption<bool>("join-invite"));
-			if (s.hasOption("ctcp-autoreply"))
-				server->setAutoCtcpReply(s.getOption<bool>("ctcp-autoreply"));
-			if (s.hasOption("identity"))
-				server->setIdentity(findIdentity(s.getOption<string>("identity")));
-
+			// Server information
+			info.m_name = s.requireOption<string>("name");
+			info.m_host = s.requireOption<string>("host");
+			info.m_port = s.requireOption<int>("port");
 			if (s.hasOption("ssl"))
-				ssl = s.getOption<bool>("ssl");
+				info.m_ssl = s.getOption<bool>("ssl");
 			if (s.hasOption("ssl-verify"))
-				sslVerify = s.getOption<bool>("ssl-verify");
-
-			// Get connection parameters
-			name = s.requireOption<string>("name");
-			host = s.requireOption<string>("host");
-			port = s.requireOption<int>("port");
-
+				info.m_sslVerify = s.getOption<bool>("ssl-verify");
 			if (s.hasOption("password"))
-				password = s.getOption<string>("password");
+				info.m_password = s.getOption<string>("password");
 
-			server->setConnection(name, host, port, password);
-			server->setSSL(ssl, sslVerify);
+			// Identity
+			if (s.hasOption("identity"))
+				identity = findIdentity(s.getOption<string>("identity"));
+
+			// Some options
+			if (s.hasOption("command-char"))
+				options.m_commandChar = s.getOption<string>("command-char");
+			if (s.hasOption("join-invite"))
+				options.m_joinInvite = s.getOption<bool>("join-invite");
+			if (s.hasOption("ctcp-autoreply"))
+				options.m_ctcpReply = s.getOption<bool>("ctcp-autoreply");
+
+			shared_ptr<Server> server = make_shared<Server>(info, identity, options);
 
 			// Extract channels to auto join
 			extractChannels(s, server);
-
 			m_servers.push_back(std::move(server));
 		} catch (NotFoundException ex) {
 			Logger::warn("server: missing parameter %s", ex.which().c_str());
@@ -877,13 +873,13 @@ void Irccd::setVerbosity(bool verbose)
 shared_ptr<Server> & Irccd::findServer(const string &name)
 {
 	for (shared_ptr<Server> &s : m_servers)
-		if (s->getName() == name)
+		if (s->getInfo().m_name == name)
 			return s;
 
 	throw out_of_range("could not find server with resource " + name);
 }
 
-const Identity & Irccd::findIdentity(const string &name)
+const Server::Identity & Irccd::findIdentity(const string &name)
 {
 	/*
 	 * When name is length 0 that mean user hasn't defined an identity
@@ -893,7 +889,7 @@ const Identity & Irccd::findIdentity(const string &name)
 	if (name.length() == 0)
 		return m_defaultIdentity;
 
-	for (const Identity &i : m_identities)
+	for (const Server::Identity &i : m_identities)
 		if (i.m_name == name)
 			return i;
 
@@ -917,7 +913,7 @@ int Irccd::run()
 	// Start all servers
 	for (shared_ptr<Server> &s : m_servers) {
 		Logger::log("server %s: trying to connect to %s...",
-		    s->getName().c_str(), s->getHost().c_str());
+		    s->getInfo().m_name.c_str(), s->getInfo().m_host.c_str());
 		s->startConnection();
 	}
 
@@ -981,12 +977,12 @@ void Irccd::handleConnection(const IrcEvent &event)
 {
 	shared_ptr<Server> server = event.m_server;
 
-	Logger::log("server %s: successfully connected", server->getName().c_str());
+	Logger::log("server %s: successfully connected", server->getInfo().m_name.c_str());
 
 	// Auto join channels
 	for (Server::Channel c : server->getChannels()) {
 		Logger::log("server %s: autojoining channel %s",
-		    server->getName().c_str(), c.m_name.c_str());
+		    server->getInfo().m_name.c_str(), c.m_name.c_str());
 
 		server->join(c.m_name, c.m_password);
 	}
@@ -997,7 +993,7 @@ void Irccd::handleInvite(const IrcEvent &event)
 	shared_ptr<Server> server = event.m_server;
 
 	// if join-invite is set to true join it
-	if (server->autoJoinInvite())
+	if (server->getOptions().m_joinInvite)
 		server->join(event.m_params[0], "");
 }
 
@@ -1034,7 +1030,7 @@ void Irccd::callPlugin(shared_ptr<Plugin> p, const IrcEvent &ev)
 		break;
 	case IrcEventType::Message:
 	{
-		string cc = ev.m_server->getCommandChar();
+		string cc = ev.m_server->getOptions().m_commandChar;
 		string sp = cc + p->getName();
 		string msg = ev.m_params[2];
 

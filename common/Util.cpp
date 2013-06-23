@@ -166,7 +166,7 @@ bool Util::exist(const string &path)
 	return (stat(path.c_str(), &st) != -1);
 }
 
-string Util::getHome(void)
+string Util::getHome()
 {
 #if defined(_WIN32)
 	char path[MAX_PATH];
@@ -180,7 +180,7 @@ string Util::getHome(void)
 #endif
 }
 
-uint64_t Util::getTicks(void)
+uint64_t Util::getTicks()
 {
 #if defined(_WIN32) || defined(_MSC_VER)
 	_timeb tp;

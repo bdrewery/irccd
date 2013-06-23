@@ -326,10 +326,24 @@ shared_ptr<Server> Server::toServer(irc_session_t *s)
 }
 
 Server::Server()
-	: m_commandChar("!")
-	, m_joinInvite(false)
-	, m_ctcpReply(true)
-	, m_threadStarted(false)
+{
+	init();
+}
+
+Server::Server(const Info &info, const Identity &identity, const Options &options)
+	: m_info(info)
+	, m_identity(identity)
+	, m_options(options)
+{
+	init();
+}
+
+Server::~Server()
+{
+	stopConnection();
+}
+
+void Server::init()
 {
 	memset(&m_callbacks, 0, sizeof (irc_callbacks_t));
 
@@ -350,91 +364,29 @@ Server::Server()
 	m_callbacks.event_umode			= handleUserMode;
 }
 
-Server::~Server()
-{
-	stopConnection();
-}
-
-const string & Server::getCommandChar() const
-{
-	return m_commandChar;
-}
-
-void Server::setCommandChar(const string &commandChar)
-{
-	m_commandChar = commandChar;
-}
-
-bool Server::autoJoinInvite() const
-{
-	return m_joinInvite;
-}
-
-void Server::setJoinInvite(bool joinInvite)
-{
-	m_joinInvite = joinInvite;
-}
-
-void Server::setAutoCtcpReply(bool autoCtcpReply)
-{
-	m_ctcpReply = autoCtcpReply;
-}
-
-bool Server::autoCtcpReply() const
-{
-	return m_ctcpReply;
-}
-
-const vector<Server::Channel> & Server::getChannels()
-{
-	return m_channels;
-}
-
-Server::NameList& Server::getNameLists()
+Server::NameList & Server::getNameLists()
 {
 	return m_nameLists;
 }
 
-Identity & Server::getIdentity()
+const Server::Info & Server::getInfo() const
+{
+	return m_info;
+}
+
+const Server::Identity & Server::getIdentity() const
 {
 	return m_identity;
 }
 
-void Server::setIdentity(const Identity &identity)
+const Server::Options & Server::getOptions() const
 {
-	m_identity = identity;
+	return m_options;
 }
 
-const string & Server::getName() const
+const vector<Server::Channel> & Server::getChannels() const
 {
-	return m_name;
-}
-
-const string & Server::getHost() const
-{
-	return m_host;
-}
-
-unsigned Server::getPort() const
-{
-	return m_port;
-}
-
-void Server::setConnection(const string &name,
-			   const string &host,
-			   unsigned port,
-			   const string &password)
-{
-	m_name = name;
-	m_host = host;
-	m_port = port;
-	m_password = password;
-}
-
-void Server::setSSL(bool ssl, bool sslVerify)
-{
-	m_ssl = ssl;
-	m_sslVerify = sslVerify;
+	return m_info.m_channels;
 }
 
 void Server::addChannel(const string &name, const string &password)
@@ -445,13 +397,13 @@ void Server::addChannel(const string &name, const string &password)
 		channel.m_name = name;
 		channel.m_password = password;
 
-		m_channels.push_back(channel);
+		m_info.m_channels.push_back(channel);
 	}
 }
 
 bool Server::hasChannel(const string &name)
 {
-	for (const Channel &c : m_channels)
+	for (const Channel &c : m_info.m_channels)
 		if (c.m_name == name)
 			return true;
 
@@ -463,7 +415,7 @@ void Server::removeChannel(const string &name)
 	vector<Channel>::const_iterator iter;
 	bool found = false;
 
-	for (iter = m_channels.begin(); iter != m_channels.end(); ++iter) {
+	for (iter = m_info.m_channels.begin(); iter != m_info.m_channels.end(); ++iter) {
 		if ((*iter).m_name == name) {
 			found = true;
 			break;
@@ -471,7 +423,7 @@ void Server::removeChannel(const string &name)
 	}
 
 	if (found)
-		m_channels.erase(iter);
+		m_info.m_channels.erase(iter);
 }
 
 void Server::startConnection()
@@ -485,8 +437,8 @@ void Server::startConnection()
 
 			// Copy the unique pointer.
 			m_session = unique_ptr<irc_session_t, IrcDeleter>(s);
-			if (m_password.length() > 0)
-				password = m_password.c_str();
+			if (m_info.m_password.length() > 0)
+				password = m_info.m_password.c_str();
 
 			irc_set_ctx(m_session.get(), new shared_ptr<Server>(shared_from_this()));
 			irc_get_version(&major, &minor);
@@ -497,22 +449,22 @@ void Server::startConnection()
 			 */
 			if (major >= 1 && minor > 6) {
 				// SSL needs to add # front of host
-				if (m_ssl)
-					m_host.insert(0, 1, '#');
+				if (m_info.m_ssl)
+					m_info.m_host.insert(0, 1, '#');
 
-				if (!m_sslVerify)
+				if (!m_info.m_sslVerify)
 					irc_option_set(m_session.get(),
 					    LIBIRC_OPTION_SSL_NO_VERIFY);
 			} else {
-				if (m_ssl)
+				if (m_info.m_ssl)
 					Logger::log("server %s: SSL is only supported with libircclient > 1.6",
-					    m_name.c_str());
+					    m_info.m_name.c_str());
 			}
 			
 			error = irc_connect(
 			    m_session.get(),
-			    m_host.c_str(),
-			    m_port,
+			    m_info.m_host.c_str(),
+			    m_info.m_port,
 			    password,
 			    m_identity.m_nickname.c_str(),
 			    m_identity.m_username.c_str(),
@@ -522,8 +474,8 @@ void Server::startConnection()
 				m_threadStarted = false;
 
 				Logger::warn("server %s: failed to connect to %s: %s",
-				    m_name.c_str(),
-				    m_host.c_str(),
+				    m_info.m_name.c_str(),
+				    m_info.m_host.c_str(),
 				    irc_strerror(irc_errno(m_session.get())));
 			} else {
 				m_threadStarted = true;
