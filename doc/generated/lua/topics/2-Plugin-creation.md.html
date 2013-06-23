@@ -88,7 +88,7 @@ are not supported.</p>
 <p>We will create our new plugin under the home user plugin path. If you're running
 on Unix systems it is usually <em>${XDG_CONFIG_HOME}/.irccd/plugins</em>.</p>
 
-<p>So let start by creating a plugin named <strong>repeater.lua</strong>. So, on my system the
+<p>So let start by creating a plugin named <strong>repeater.lua</strong>. On my system the
 file will live as <em>/home/markand/.config/irccd/plugins/repeater.lua</em>.</p>
 
 <p><a name="Register_the_callback"></a></p>
@@ -120,14 +120,16 @@ following signature:</p>
 <p>Now that we have the message, the channel and the server, we can send the
 copy of the message. For this, you must take care of the <strong>server</strong> parameter.</p>
 
-<p>Server is one of defined in the <em>irccd.conf</em> file, there are several methods
+<p>The Server is one of defined in the <em>irccd.conf</em> file, there are several methods
 available for the object, they are defined in the <a href="../modules/irccd.server.html#">irccd.server</a> documentation.</p>
 
-<p>The one we are interested in is <a href="../modules/irccd.server.html#Server:say">irccd.server.Server:say</a>. This function takes
+<p><br />
+The one we are interested in is <a href="../modules/irccd.server.html#Server:say">irccd.server.Server:say</a>. This function takes
 two parameters, the target which can be a nickname or a channel, and the
 message.</p>
 
-<p>So the only thing to do is the following:</p>
+<p><br />
+So the only thing to do is the following:</p>
 
 
 <pre>
@@ -142,10 +144,12 @@ API provided you will be able to create a bunch of plugins that can fits
 your needs, such as a content provider, a moderator, a calculator and
 so on.</p>
 
-<p>To see all server functions, see <a href="../modules/irccd.server.html#">irccd.server</a>.
+<p><br />
+To see all server functions, see <a href="../modules/irccd.server.html#">irccd.server</a>.
 To get a list of all IRC events, see <a href="../topics/3-Events.md.html#">3-Events.md</a></p>
 
-<p>Previous <a href="../topics/1-Introduction.md.html#">1-Introduction.md</a> | Next <a href="../topics/2.1-Using-irccd-test.md.html#">2.1-Using-irccd-test.md</a></p>
+<p><br />
+Previous <a href="../topics/1-Introduction.md.html#">1-Introduction.md</a> | Next <a href="../topics/2.1-Using-irccd-test.md.html#">2.1-Using-irccd-test.md</a></p>
 
 
 <!--- vim: set syntax=mkd: -->

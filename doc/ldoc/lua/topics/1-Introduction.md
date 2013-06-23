@@ -24,6 +24,8 @@ directory and edit it.
 Lua plugins are searched by default in user local directory and if not
 found, in the standard irccd plugins path said above.
 
+<br />
+
 Next @{2-Plugin-creation.md}
 
 <!--- vim: set syntax=mkd: -->
