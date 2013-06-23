@@ -41,15 +41,13 @@ endif ()
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")		# own modules
 
 # Installation paths
-set(PREFIX "${CMAKE_INSTALL_PREFIX}"
-    CACHE STRING "Installation prefix")
-set(MODDIR "share/irccd/plugins"
+set(MODDIR "${CMAKE_INSTALL_PREFIX}/share/irccd/plugins"
     CACHE STRING "Module prefix where to install")
-set(DOCDIR "share/doc/irccd"
+set(DOCDIR "${CMAKE_INSTALL_PREFIX}/share/doc/irccd"
     CACHE STRING "Documentation directory")
-set(MANDIR "share/man"
+set(MANDIR "${CMAKE_INSTALL_PREFIX}/share/man"
     CACHE STRING "Man directory")
-set(ETCDIR "etc"
+set(ETCDIR "${CMAKE_INSTALL_PREFIX}/etc"
     CACHE STRING "Configuration directory")
 
 # Include path to common
@@ -107,16 +105,16 @@ add_subdirectory(irccdctl)
 add_subdirectory(tests)
 
 message("Installation directories:")
-message("\tPREFIX\t\t${CMAKE_INSTALL_PREFIX}")
-message("\tMANDIR\t\t${CMAKE_INSTALL_PREFIX}/${MANDIR}")
-message("\tDOCDIR\t\t${CMAKE_INSTALL_PREFIX}/${DOCDIR}")
-message("\tMODDIR\t\t${CMAKE_INSTALL_PREFIX}/${MODDIR}")
+message("\tMANDIR\t\t\t${MANDIR}")
+message("\tDOCDIR\t\t\t${DOCDIR}")
+message("\tMODDIR\t\t\t${MODDIR}")
 message("")
 
 message("Compiling irccd with following options:")
-message("\tLua support:\t${LUA_SUPPORT}")
-message("\tUnit tests:\t${UNIT_TESTS}")
-message("\tDefault config:\t${DEFAULT_IRCCD_CONFIG}")
+message("\tLua support:\t\t${LUA_SUPPORT}")
+message("\tUnit tests:\t\t${UNIT_TESTS}")
+message("\tirccd config:\t\t${DEFAULT_IRCCD_CONFIG}")
+message("\tirccdctl config:\t${DEFAULT_IRCCDCTL_CONFIG}")
 message("")
 
 # Configure the file after so every project can set more variables
@@ -134,7 +132,7 @@ if (WIN32)
 		set(WINARCH "x86")
 	endif ()
 
-	set(CPACK_GENERATOR "ZIP;NSIS")
+	set(CPACK_GENERATOR "NSIS")
 	set(CPACK_MONOLITHIC_INSTALL FALSE)
 
 	set(CPACK_NSIS_DISPLAY_NAME "IRC Client daemon")

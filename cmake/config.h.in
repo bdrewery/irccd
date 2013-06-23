@@ -16,8 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#cmakedefine PREFIX			"@CMAKE_INSTALL_PREFIX@"
-#cmakedefine MODDIR			"@PREFIX@/@MODDIR@"
+#cmakedefine MODDIR			"@MODDIR@"
 
 #cmakedefine01 MAJOR
 #cmakedefine01 MINOR

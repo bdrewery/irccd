@@ -97,6 +97,12 @@ static int getInfo(lua_State *L)
 	lua_pushinteger(L, s->getInfo().m_port);
 	lua_setfield(L, -2, "port");
 
+	lua_pushboolean(L, s->getInfo().m_ssl);
+	lua_setfield(L, -2, "ssl");
+
+	lua_pushboolean(L, s->getInfo().m_sslVerify);
+	lua_setfield(L, -2, "sslVerify");
+
 	return 1;
 }
 
@@ -401,6 +407,9 @@ static int tostring(lua_State *L)
 	server = TO_SSERVER(L, 1);
 	oss << "Server " << server->getInfo().m_name;
 	oss << " at " << server->getInfo().m_host;
+
+	if (server->getInfo().m_ssl)
+		oss << " (using SSL)" << endl;
 
 	lua_pushstring(L, oss.str().c_str());
 

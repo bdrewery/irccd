@@ -33,6 +33,8 @@ end
 -- <li><strong>name (string)</strong>: the server ident</li>
 -- <li><strong>hostname (string)</strong>: the hostname</li>
 -- <li><strong>port (int)</strong>: the port</li>
+-- <li><strong>ssl (bool)</strong>: true if using SSL</li>
+-- <li><strong>sslVerify (bool)</strong>: true if using SSL verification</strong>
 -- </ul>
 -- @return the information table
 function Server:getInfo()
