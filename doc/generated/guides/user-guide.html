@@ -926,22 +926,27 @@ section is also redefinable.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-<code>name</code>: (string) Required. A unique id, default: empty.
+<code>name</code>: (string) Required. A unique id.
 </p>
 </li>
 <li>
 <p>
-<code>host</code>: (string) Required. The server address, default: empty.
+<code>host</code>: (string) Required. The server address.
 </p>
 </li>
 <li>
 <p>
-<code>port</code>: (int) Required, The server port, default: empty.
+<code>port</code>: (int) Required, The server port.
 </p>
 </li>
 <li>
 <p>
 <code>identity</code>: (string) An identity to use.
+</p>
+</li>
+<li>
+<p>
+<code>join-invite</code>: (bool) Join channels upon invitation, default: false.
 </p>
 </li>
 <li>
@@ -952,6 +957,16 @@ section is also redefinable.</p></div>
 <li>
 <p>
 <code>command-char</code>: (string) The prefix for invoking special commands, default: !.
+</p>
+</li>
+<li>
+<p>
+<code>ssl</code>: (bool) Enable or disable SSL, default: false.
+</p>
+</li>
+<li>
+<p>
+<code>ssl-verify</code>: (bool) Verify the SSL certificates, default: true.
 </p>
 </li>
 </ul></div>
@@ -1701,7 +1716,7 @@ quotes.</p></div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-06-10 20:53:03 CEST
+Last updated 2013-06-23 14:51:59 CEST
 </div>
 </div>
 </body>

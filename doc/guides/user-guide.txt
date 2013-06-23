@@ -227,12 +227,15 @@ You need at least one server in your configuration file.
 
 The options available:
 
-* `name`: (string) Required. A unique id, default: empty.
-* `host`: (string) Required. The server address, default: empty.
-* `port`: (int) Required, The server port, default: empty.
+* `name`: (string) Required. A unique id.
+* `host`: (string) Required. The server address.
+* `port`: (int) Required, The server port.
 * `identity`: (string) An identity to use.
+* `join-invite`: (bool) Join channels upon invitation, default: false.
 * `channels`: (string list) List of channel to auto join, default: empty.
 * `command-char`: (string) The prefix for invoking special commands, default: !.
+* `ssl`: (bool) Enable or disable SSL, default: false.
+* `ssl-verify`: (bool) Verify the SSL certificates, default: true.
 
 .Example
 [source, ini]

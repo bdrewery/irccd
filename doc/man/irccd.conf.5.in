@@ -112,17 +112,23 @@ in the file.
 .Pp
 .Bl -tag -width PARAMETERXXX -compact
 .It name
-(string) Required. A unique id, default: empty.
+(string) Required. A unique id.
 .It host
-(string) Required. The server address, default: empty.
+(string) Required. The server address.
 .It port
-(int) Required, The server port, default: empty.
+(int) Required, The server port.
 .It identity
 (string) An identity to use.
+.It join-invite
+(bool) Join channels upon invitation, default: false.
 .It channels
 (string list) List of channel to auto join, default: empty.
 .It command-char
 (string) The prefix for invoking special commands, default: !.
+.It ssl
+(bool) Enable or disable SSL, default: false.
+.It ssl-verify
+(bool) Verify the SSL certificates, default: true.
 .El
 .\" EXAMPLES
 .Sh EXAMPLES
