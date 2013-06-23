@@ -138,7 +138,7 @@ namespace parserMethod {
 static int sectionIterator(lua_State *L)
 {
 	vector<Section> *array = toType<vector<Section> *>(L, lua_upvalueindex(1));
-	int idx = lua_tonumber(L, lua_upvalueindex(2));
+	int idx = lua_tointeger(L, lua_upvalueindex(2));
 
 	if ((size_t)idx >= array->size())
 		return 0;

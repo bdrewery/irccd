@@ -731,12 +731,10 @@ void Irccd::openServers(const Parser &config)
 			if (s.hasOption("identity"))
 				server->setIdentity(findIdentity(s.getOption<string>("identity")));
 
-#if 0
 			if (s.hasOption("ssl"))
 				ssl = s.getOption<bool>("ssl");
 			if (s.hasOption("ssl-verify"))
 				sslVerify = s.getOption<bool>("ssl-verify");
-#endif
 
 			// Get connection parameters
 			name = s.requireOption<string>("name");
@@ -948,10 +946,16 @@ int Irccd::run()
 
 void Irccd::handleIrcEvent(const IrcEvent &ev)
 {
+	/*
+	 * The following function does not call plugin at all, they just do some
+	 * specific action like joining, managing channels, etc.
+	 */
 	if (ev.m_type == IrcEventType::Connection)
 		handleConnection(ev);
 	else if (ev.m_type == IrcEventType::Invite)
 		handleInvite(ev);
+	else if (ev.m_type == IrcEventType::Kick)
+		handleKick(ev);
 
 #if defined(WITH_LUA)
 	lock_guard<mutex> ulock(m_pluginLock);
@@ -977,6 +981,8 @@ void Irccd::handleConnection(const IrcEvent &event)
 {
 	shared_ptr<Server> server = event.m_server;
 
+	Logger::log("server %s: successfully connected", server->getName().c_str());
+
 	// Auto join channels
 	for (Server::Channel c : server->getChannels()) {
 		Logger::log("server %s: autojoining channel %s",
@@ -984,17 +990,24 @@ void Irccd::handleConnection(const IrcEvent &event)
 
 		server->join(c.m_name, c.m_password);
 	}
-
-	Logger::log("server %s: successfully connected", server->getName().c_str());
 }
 
 void Irccd::handleInvite(const IrcEvent &event)
 {
 	shared_ptr<Server> server = event.m_server;
 
-	// if join-invite is set to true goes in
+	// if join-invite is set to true join it
 	if (server->autoJoinInvite())
-		server->join(event.m_params[1], "");
+		server->join(event.m_params[0], "");
+}
+
+void Irccd::handleKick(const IrcEvent &event)
+{
+	shared_ptr<Server> server = event.m_server;
+
+	// If I was kicked, I need to remove the channel list
+	if (server->getIdentity().m_nickname == event.m_params[2])
+		server->removeChannel(event.m_params[0]);
 }
 
 #if defined(WITH_LUA)
@@ -1011,10 +1024,6 @@ void Irccd::callPlugin(shared_ptr<Plugin> p, const IrcEvent &ev)
 		break;
 	case IrcEventType::Invite:
 		p->onInvite(ev.m_server, ev.m_params[0], ev.m_params[1]);
-
-		// Also auto join it
-		if (ev.m_server->autoJoinInvite())
-			ev.m_server->join(ev.m_params[0]);
 		break;
 	case IrcEventType::Join:
 		p->onJoin(ev.m_server, ev.m_params[0], ev.m_params[1]);

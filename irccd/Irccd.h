@@ -269,12 +269,20 @@ public:
 	void handleConnection(const IrcEvent &event);
 
 	/**
-	 * the handleInvite will auto join the server if the
+	 * The handleInvite will auto join the server if the
 	 * user want it.
 	 *
 	 * @param event the event
 	 */
 	void handleInvite(const IrcEvent &event);
+
+	/**
+	 * The kick function just remove the channel if I'm the one who was
+	 * kicked.
+	 *
+	 * @param event the event
+	 */
+	void handleKick(const IrcEvent &event);
 
 #if defined(WITH_LUA)
 	/**

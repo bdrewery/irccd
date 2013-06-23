@@ -481,6 +481,7 @@ void Server::startConnection()
 		if (s != nullptr) {
 			const char *password = nullptr;	
 			int error;
+			unsigned major, minor;
 
 			// Copy the unique pointer.
 			m_session = unique_ptr<irc_session_t, IrcDeleter>(s);
@@ -488,14 +489,25 @@ void Server::startConnection()
 				password = m_password.c_str();
 
 			irc_set_ctx(m_session.get(), new shared_ptr<Server>(shared_from_this()));
+			irc_get_version(&major, &minor);
 
-			// SSL needs to add # front of host
-			if (m_ssl)
-				m_host.insert(0, 1, '#');
+			/*
+			 * After some discuss with George, SSL has been fixed in older version
+			 * of libircclient. > 1.6 is needed for SSL.
+			 */
+			if (major >= 1 && minor > 6) {
+				// SSL needs to add # front of host
+				if (m_ssl)
+					m_host.insert(0, 1, '#');
 
-			if (!m_sslVerify)
-				irc_option_set(m_session.get(),
-				    LIBIRC_OPTION_SSL_NO_VERIFY);
+				if (!m_sslVerify)
+					irc_option_set(m_session.get(),
+					    LIBIRC_OPTION_SSL_NO_VERIFY);
+			} else {
+				if (m_ssl)
+					Logger::log("server %s: SSL is only supported with libircclient > 1.6",
+					    m_name.c_str());
+			}
 			
 			error = irc_connect(
 			    m_session.get(),
@@ -513,13 +525,12 @@ void Server::startConnection()
 				    m_name.c_str(),
 				    m_host.c_str(),
 				    irc_strerror(irc_errno(m_session.get())));
+			} else {
+				m_threadStarted = true;
+				irc_run(m_session.get());
 			}
-
-			irc_run(m_session.get());
 		}
 	});
-
-	m_threadStarted = true;
 }
 
 void Server::stopConnection()

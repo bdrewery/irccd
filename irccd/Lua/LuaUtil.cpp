@@ -82,7 +82,7 @@ static int getHome(lua_State *L)
 
 static int getTicks(lua_State *L)
 {
-	lua_pushinteger(L, Util::getTicks());
+	lua_pushinteger(L, static_cast<int>(Util::getTicks()));
 
 	return 1;
 }
@@ -120,7 +120,7 @@ static int opendir(lua_State *L)
 	// Optional boolean
 	if (lua_gettop(L) >= 2) {
 	       	luaL_checktype(L, 2, LUA_TBOOLEAN);
-		skipParents = lua_toboolean(L, 2);
+		skipParents = (lua_toboolean(L, 2) != 0);
 	}
 
 	Directory d(path);
