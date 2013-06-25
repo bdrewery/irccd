@@ -35,7 +35,6 @@ endif ()
 if (WIN32)
 	add_definitions("-D_CRT_SECURE_NO_WARNINGS")
 	set(CMAKE_EXE_LINKER_FLAGS "/SAFESEH:NO")
-	set(CMAKE_CXX_FLAGS_DEBUG "/MDd /EHsc")
 endif ()
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")		# own modules

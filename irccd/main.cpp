@@ -83,7 +83,10 @@ int main(int argc, char **argv)
 
 	signal(SIGINT, quit);
 	signal(SIGTERM, quit);
+
+#if defined(SIGQUIT)
 	signal(SIGQUIT, quit);
+#endif
 
 	return irccd->run();
 }
