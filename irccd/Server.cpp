@@ -221,7 +221,11 @@ static void handleNumeric(irc_session_t *s,
 			Irccd::getInstance()->handleIrcEvent(
 				IrcEvent(IrcEventType::Names, list[params[1]], server)
 			);
+
 		}
+
+		// Don't forget to remove the list
+		list.clear();
 	}
 }
 

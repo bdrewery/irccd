@@ -248,7 +248,6 @@ static int names(lua_State *L)
 		    s, DefCall(IrcEventType::Names, p, ref)
 		);
 
-		//p.addDeferred(DeferredCall(IrcNumericType::Names, s, ref));
 		s->names(channel);
 	} catch (out_of_range) {
 	}

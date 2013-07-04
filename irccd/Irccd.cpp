@@ -1108,11 +1108,10 @@ void Irccd::callDeferred(const IrcEvent &ev)
 			break;
 		}
 
-		if (deleteIt) {
+		if (deleteIt)
 			it = m_deferred[ev.m_server].erase(it);
-		} else {
+		else
 			++it;
-		}
 	}
 }
 

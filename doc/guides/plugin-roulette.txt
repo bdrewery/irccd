@@ -1,0 +1,69 @@
+Plugin history 1.0
+==================
+:Author: Demelier David
+:Email: demelier.david@gmail.com
+:Date: July, 4 2013
+:toc:
+:icons:
+:iconsdir: icons
+
+== Introduction
+
+The plugin `roulette` is a funny script that let you do a russian roulette game
+but without any injuries.
+
+== Installation
+
+The plugin `roulette` is distributed with `irccd`. To enable it add the following
+to your `roulette` parameter:
+
+----
+plugins = "roulette"
+----
+
+== Usage
+
+The plugin `roulette` simply reacts to the special command.
+
+.Example
+----
+markand: !roulette
+irccd: markand, you're lucky this time [1/6]
+markand: !roulette
+irccd: markand, you're lucky this time [2/6]
+markand was kicked by irccd [markand HEADSHOT]
+----
+
+== Configuration
+
+The plugin `roulette` can be configured in the file `roulette.conf`. You can
+change the answers from irccd.
+
+The `roulette.conf` uses link:user-guide.html#irccdsyntax[irccd syntax].
+
+=== Section `formats`
+
+[NOTE]
+The keyword *#i* is the current cylinder count.
+
+.Option `lucky`
+
+This format is used when you have been lucky.
+
+link:user-guide.html#irccdpatterns[Keywords supported: #i, #U, #u]
+
+.Option `shot`
+
+This format is used when you get shot.
+
+link:user-guide.html#irccdpatterns[Keywords supported: #i, #U, #u]
+
+.Example
+[source, ini]
+----
+[formats]
+lucky = "#U you're gonna get shot"
+shot = "BIM"
+----
+
+// vim: set syntax=asciidoc:

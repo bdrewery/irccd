@@ -106,6 +106,7 @@ if (WITH_DOC)
 		DEFINE_GUIDE(plugin-badwords.txt)	# badwords.lua
 		DEFINE_GUIDE(plugin-history.txt)	# history.lua
 		DEFINE_GUIDE(plugin-logger.txt)		# logger.lua
+		DEFINE_GUIDE(plugin-roulette.txt)	# roulette.lua
 
 		add_custom_target(
 			generate-doc
