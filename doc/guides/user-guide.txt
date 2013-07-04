@@ -183,6 +183,9 @@ The options available:
 * `syslog`: (bool) if enabled, use syslog instead of standard output, default: false.
 * `verbose`: (bool) enable verbose message, default: false.
 
+[NOTE]
+The option syslog is only available on Unix systems.
+
 .Example
 [source, ini]
 ----
