@@ -35,7 +35,7 @@ static void quit(int)
 
 static void usage()
 {
-	Logger::warn("usage: %s [-v] [-c config] [-p pluginpath] [-P plugin]", getprogname());
+	Logger::warn("usage: %s [-fv] [-c config] [-p pluginpath] [-P plugin]", getprogname());
 	Logger::warn("       %s test plugin.lua [command] [parameters...]", getprogname());
 
 	exit(1);
@@ -45,13 +45,17 @@ int main(int argc, char **argv)
 {
 	Irccd *irccd = Irccd::getInstance();
 	int ch;
+	bool foreground = false;
 
 	setprogname(argv[0]);
 	
-	while ((ch = getopt(argc, argv, "c:p:P:v")) != -1) {
+	while ((ch = getopt(argc, argv, "fc:p:P:v")) != -1) {
 		switch (ch) {
 		case 'c':
 			irccd->setConfigPath(string(optarg));
+			break;
+		case 'f':
+			foreground = true;
 			break;
 		case 'p':
 			irccd->addPluginPath(string(optarg));
@@ -86,6 +90,11 @@ int main(int argc, char **argv)
 
 #if defined(SIGQUIT)
 	signal(SIGQUIT, quit);
+#endif
+
+#if !defined(_WIN32)
+	if (!foreground)
+		daemon(0, 0);
 #endif
 
 	return irccd->run();

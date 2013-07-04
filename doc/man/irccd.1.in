@@ -21,6 +21,7 @@
 .Nd an IRC client daemon
 .Sh SYNOPSIS
 .Nm
+.Op Fl f
 .Op Fl v
 .Op Fl c Ar config
 .Op Fl p Ar directory
@@ -60,6 +61,8 @@ is it possible with one command.
 .Pp
 The following options are available:
 .Bl -tag -width indent
+.It Fl f
+Do not run as a daemon.
 .It Fl c Ar config
 A path to a config file.
 .It Fl p Ar directory
