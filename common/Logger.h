@@ -29,6 +29,11 @@ class Logger {
 private:
 	static bool m_verbose;
 
+#if !defined(_WIN32)
+	static bool m_syslog;
+	static bool m_syslogLoaded;
+#endif
+
 	static void printFile(FILE *fp, std::string fmt, va_list ap);
 
 public:
@@ -40,6 +45,15 @@ public:
 	 * @param verbose enable or disable
 	 */
 	static void setVerbose(bool verbose);
+
+#if !defined(_WIN32)
+	/**
+	 * Tells to use syslog. Only on Unix.
+	 *
+	 * @param syslog enable or disable
+	 */
+	static void setSyslog(bool syslog);
+#endif
 
 	/**
 	 * Log an additional verbose message.

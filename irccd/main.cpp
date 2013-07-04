@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 	int ch;
 
 	setprogname(argv[0]);
-
+	
 	while ((ch = getopt(argc, argv, "c:p:P:v")) != -1) {
 		switch (ch) {
 		case 'c':
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 			irccd->addWantedPlugin(string(optarg));
 			break;
 		case 'v':
-			irccd->setVerbosity(true);
+			Logger::setVerbose(true);
 			break;
 		case '?':
 		default:

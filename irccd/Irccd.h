@@ -221,13 +221,6 @@ public:
 	void setConfigPath(const std::string &path);
 
 	/**
-	 * Set the verbosity.
-	 *
-	 * @param verbose true means more verbose
-	 */
-	void setVerbosity(bool verbose);
-
-	/**
 	 * Find a server by its resource name.
 	 *
 	 * @param name the server's resource name

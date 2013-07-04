@@ -58,6 +58,8 @@ This section covers general options.
 (string list) a list of plugins to load, default: empty.
 .It plugin-path
 (string) a path to local modules, default: empty.
+.It syslog
+(bool) if enabled, use syslog instead of standard output, default: false.
 .It verbose
 (bool) enable verbose message, default: false.
 .El

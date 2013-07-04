@@ -472,6 +472,15 @@ void Irccd::openConfig()
 			addWantedPlugin(s);
 	}
 
+#if !defined(_WIN32)
+	if (general.hasOption("syslog"))
+		Logger::setSyslog(general.getOption<bool>("syslog"));
+#endif
+
+	if (general.hasOption("verbose"))
+		Logger::setVerbose(general.getOption<bool>("verbose"));
+
+
 	// Modules should be opened first.
 	openPlugins();
 
@@ -864,11 +873,6 @@ ServerList & Irccd::getServers()
 void Irccd::setConfigPath(const string &path)
 {
 	m_configPath = path;
-}
-
-void Irccd::setVerbosity(bool verbose)
-{
-	Logger::setVerbose(verbose);
 }
 
 shared_ptr<Server> & Irccd::findServer(const string &name)

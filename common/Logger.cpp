@@ -16,6 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#if !defined(_WIN32)
+#  include <syslog.h>
+#endif
+
 #include "Logger.h"
 
 using namespace irccd;
@@ -23,16 +27,47 @@ using namespace std;
 
 bool Logger::m_verbose = true;
 
+#if !defined(_WIN32)
+
+bool Logger::m_syslog = false;
+bool Logger::m_syslogLoaded = false;
+
+#endif
+
 void Logger::printFile(FILE *fp, string fmt, va_list ap)
 {
-	vfprintf(fp, fmt.c_str(), ap);
-	fputc('\n', fp);
+	if (!m_syslog) {
+		vfprintf(fp, fmt.c_str(), ap);
+		fputc('\n', fp);
+	} else {
+#if !defined(_WIN32)
+		int priority = (fp == stdin) ? LOG_INFO : LOG_WARNING;
+		vsyslog(priority, fmt.c_str(), ap);
+#endif
+	}
 }
 
 void Logger::setVerbose(bool verbose)
 {
 	Logger::m_verbose = verbose;
 }
+
+#if !defined(_WIN32)
+
+void Logger::setSyslog(bool syslog)
+{
+	if (!syslog && Logger::m_syslogLoaded) {
+		closelog();
+		Logger::m_syslogLoaded = false;
+	} else if (syslog && !Logger::m_syslogLoaded) {
+		openlog("irccd", LOG_PID, 0);
+		Logger::m_syslogLoaded = true;
+	}
+		
+	Logger::m_syslog = syslog;
+}
+
+#endif
 
 void Logger::log(string fmt, ...)
 {
