@@ -39,20 +39,25 @@ IrcEventType DefCall::type() const
 
 void DefCall::onNames(const vector<string> users)
 {
-	m_plugin->getState().rawget(LUA_REGISTRYINDEX, m_ref);
-	m_plugin->getState().createtable(users.size(), users.size());
+	lua_State *L = m_plugin->getState().get();
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, m_ref);
+	lua_createtable(L, users.size(), users.size());
 
 	for (size_t i = 0; i < users.size(); ++i) {
-		m_plugin->getState().push(users[i]);
-		m_plugin->getState().rawset(-2, i + 1);
+		lua_pushstring(L, users[i].c_str());
+		lua_rawseti(L, -2, i + 1);
 	}
 	
-	bool result = m_plugin->getState().pcall(1, 0, 0);
-	m_plugin->getState().unref(LUA_REGISTRYINDEX, m_ref);
+	bool result = lua_pcall(L, 1, 0, 0) == LUA_OK;
+	luaL_unref(L, LUA_REGISTRYINDEX, m_ref);
 	
-	if (!result)
-		throw Plugin::ErrorException(m_plugin->getName(),
-		    m_plugin->getState().getError());
+	if (!result) {
+		string error = lua_tostring(L, -1);
+		lua_pop(L, 1);
+
+		throw Plugin::ErrorException(m_plugin->getName(), error);
+	}
 }
 
 bool DefCall::operator==(const DefCall &c1)

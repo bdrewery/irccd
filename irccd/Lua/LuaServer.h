@@ -34,7 +34,7 @@ public:
 	 * @param L the Lua state
 	 * @param server the server
 	 */
-	static void pushObject(LuaState &L, std::shared_ptr<Server> server);
+	static void pushObject(lua_State *L, std::shared_ptr<Server> server);
 };
 
 int luaopen_server(lua_State *L);

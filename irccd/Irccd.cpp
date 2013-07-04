@@ -819,7 +819,7 @@ void Irccd::addWantedPlugin(const string &name)
 shared_ptr<Plugin> Irccd::findPlugin(lua_State *state)
 {
 	for (shared_ptr<Plugin> p : m_plugins)
-		if (p->getState().getState() == state)
+		if (p->getState().get() == state)
 			return p;
 
 	// This one should not happen

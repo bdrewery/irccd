@@ -22,14 +22,14 @@
 
 #include "Irccd.h"
 #include "LuaServer.h"
-#include "LuaState.h"
+#include "Lua.h"
 
 using namespace irccd;
 using namespace std;
 
-void LuaServer::pushObject(LuaState &L, shared_ptr<Server> server)
+void LuaServer::pushObject(lua_State *L, shared_ptr<Server> server)
 {
-	new (L.getState(), SERVER_TYPE) shared_ptr<Server>(server);
+	new (L, SERVER_TYPE) shared_ptr<Server>(server);
 }
 
 #define TO_SSERVER(L, idx) \

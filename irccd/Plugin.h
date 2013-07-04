@@ -23,7 +23,7 @@
 #include <memory>
 #include <string>
 
-#include "LuaState.h"
+#include "Lua.h"
 
 namespace irccd {
 
@@ -68,6 +68,15 @@ private:
 	 * @return true on success
 	 */
 	bool loadLua(const std::string &path);
+
+	/**
+	 * Call the function plugin with optional parameters.
+	 * 
+	 * @throw ErrorException on failure
+	 */
+	void call(const std::string & func,
+		  std::shared_ptr<Server> server = std::shared_ptr<Server>(),
+		  std::vector<std::string> params = std::vector<std::string>());
 
 public:
 	Plugin();
