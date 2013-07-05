@@ -15,7 +15,7 @@ but without any injuries.
 == Installation
 
 The plugin `roulette` is distributed with `irccd`. To enable it add the following
-to your `roulette` parameter:
+to your `plugins` parameter:
 
 ----
 plugins = "roulette"
