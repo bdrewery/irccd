@@ -23,6 +23,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <unordered_map>
 #include <vector>
 
 #include <libircclient.h>
@@ -52,7 +53,16 @@ enum class IrcEventType {
 	UserMode,					//! user mode change
 };
 
+enum class IrcChanNickMode {
+	Creator		= 'O',				//! channel creator
+	HalfOperator	= 'h',				//! half operator
+	Operator	= 'o',				//! channel operator
+	Protection	= 'a',				//! unkillable
+	Voiced		= 'v'				//! voice power
+};
+
 typedef std::vector<std::string> IrcEventParams;
+typedef std::map<IrcChanNickMode, char> IrcPrefixes;
 
 struct IrcEvent {
 	IrcEventType m_type;				//! event type
@@ -125,12 +135,22 @@ public:
 		bool m_ssl;				//! SSL usage
 		bool m_sslVerify;			//! SSL verification
 		std::vector<Channel> m_channels;	//! list of channels
+		IrcPrefixes m_prefixes;			//! comes with event 5
 
 		Info()
 			: m_ssl(false)
 			, m_sslVerify(true)
 		{
 		}
+	};
+
+	struct WhoisInfo {
+		std::string nick;			//! user's nickname
+		std::string user;			//! user's user
+		std::string host;			//! hostname
+		std::string realname;			//! realname
+		std::vector<std::string> channels;	//! channels
+		
 	};
 
 	struct Identity {
@@ -150,7 +170,7 @@ public:
 		}
 	};
 
-	typedef std::map<std::string, std::vector<std::string>> NameList;
+	typedef std::unordered_map<std::string, std::vector<std::string>> NameList;
 
 private:
 	// IRC thread
@@ -199,6 +219,13 @@ public:
 	 * Default destructor.
 	 */
 	virtual ~Server();
+
+	/**
+	 * Extract the prefixes from the server.
+	 *
+	 * @param line the line like PREFIX=(ovh)@+&
+	 */
+	void extractPrefixes(const std::string & line);
 
 	/**
 	 * Get the name list being build for /names
@@ -252,6 +279,14 @@ public:
 	 * @return true if has
 	 */
 	bool hasChannel(const std::string &name);
+
+	/**
+	 * Check if the nick has a prefix or not according to this server.
+	 *
+	 * @param nick the nickname
+	 * @return true if has
+	 */
+	bool hasPrefix(const std::string & nick);
 
 	/**
 	 * Remove a channel from the server list.

@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <map>
+#include <utility>
 
 #include <libirc_rfcnumeric.h>
 
@@ -201,7 +202,7 @@ static void handleNumeric(irc_session_t *s,
 			  unsigned int event,
 			  const char *,
 			  const char **params,
-			  unsigned int)
+			  unsigned int c)
 {
 	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
@@ -211,8 +212,14 @@ static void handleNumeric(irc_session_t *s,
 
 		if (params[3] != nullptr && params[2] != nullptr) {
 			std::vector<string> users = Util::split(params[3], " \t");
-			for (string u : users)
+
+			// The listing may add some prefixes, remove them if needed
+			for (string u : users) {
+				if (server->hasPrefix(u))
+					u.erase(0, 1);
+
 				list[params[2]].push_back(u);
+			}
 		}
 	} else if (event == LIBIRC_RFC_RPL_ENDOFNAMES) {
 		Server::NameList & list = server->getNameLists();
@@ -226,6 +233,20 @@ static void handleNumeric(irc_session_t *s,
 
 		// Don't forget to remove the list
 		list.clear();
+	}
+
+	/*
+	 * The event 5 is usually RPL_BOUNCE, but it does not match what I'm
+	 * seeing here, if someone could give me an explanation. I've also read
+	 * somewhere that the event 5 is ISUPPORT. So?
+	 */
+	if (event == 5) {
+		for (unsigned int i = 0; i < c; ++i) {
+			if (strncmp(params[i], "PREFIX", 6) == 0) {
+				server->extractPrefixes(params[i]);
+				break;
+			}
+		}
 	}
 }
 
@@ -368,6 +389,40 @@ void Server::init()
 	m_callbacks.event_umode			= handleUserMode;
 }
 
+void Server::extractPrefixes(const std::string & line)
+{
+	pair<char, char> table[16];
+	string buf = line.substr(7);
+
+	for (int i = 0; i < 16; ++i)
+		table[i] = make_pair(-1, -1);
+
+	int j = 0;
+	bool readModes = true;
+	for (size_t i = 0; i < buf.size(); ++i) {
+		if (buf[i] == '(')
+			continue;
+		if (buf[i] == ')') {
+			j = 0;
+			readModes = false;
+			continue;
+		}
+
+		if (readModes)
+			table[j++].first = buf[i];
+		else
+			table[j++].second = buf[i];
+	}
+
+	// Put these as a map of mode to prefix
+	for (int i = 0; i < 16; ++i) {
+		IrcChanNickMode key = static_cast<IrcChanNickMode>(table[i].first);
+		char value = table[i].second;
+
+		m_info.m_prefixes[key] = value;
+	}
+}
+
 Server::NameList & Server::getNameLists()
 {
 	return m_nameLists;
@@ -410,6 +465,19 @@ bool Server::hasChannel(const string &name)
 	for (const Channel &c : m_info.m_channels)
 		if (c.m_name == name)
 			return true;
+
+	return false;
+}
+
+bool Server::hasPrefix(const std::string & nickname)
+{
+	if (nickname.length() == 0)
+		return false;
+
+	for (auto p : m_info.m_prefixes) {
+		if (nickname[0] == p.second)
+			return true;
+	}
 
 	return false;
 }
