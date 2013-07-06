@@ -36,15 +36,19 @@ bool Logger::m_syslogLoaded = false;
 
 void Logger::printFile(FILE *fp, string fmt, va_list ap)
 {
-	if (!m_syslog) {
-		vfprintf(fp, fmt.c_str(), ap);
-		fputc('\n', fp);
-	} else {
 #if !defined(_WIN32)
+	if (m_syslog) {
 		int priority = (fp == stdin) ? LOG_INFO : LOG_WARNING;
 		vsyslog(priority, fmt.c_str(), ap);
+	} else {
+#else
+		vfprintf(fp, fmt.c_str(), ap);
+		fputc('\n', fp);
 #endif
+
+#if !defined(_WIN32)
 	}
+#endif
 }
 
 void Logger::setVerbose(bool verbose)

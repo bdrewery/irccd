@@ -163,7 +163,7 @@ void Socket::init()
 string Socket::getLastSysError()
 {
 	LPSTR str;
-	string errmsg = nullptr;
+	string errmsg = "";
 
 	FormatMessageA(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
