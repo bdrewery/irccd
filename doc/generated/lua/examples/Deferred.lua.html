@@ -18,8 +18,8 @@
 
 <h2 class="kind">Examples</h2>
 <ul>
-  <li><a href="../examples/Deferred.lua.html">Deferred.lua</a></li>
-  <li><strong>Welcome.lua</strong></li>
+  <li><strong>Deferred.lua</strong></li>
+  <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
 </ul>
 <h2 class="kind">Modules</h2>
 <ul>
@@ -58,16 +58,49 @@
 
 <div id="content">
 
-  <h2>Example <code>Welcome.lua</code></h2>
+  <h2>Example <code>Deferred.lua</code></h2>
 
     <pre>
-<span class="comment">-- Welcome.lua
-</span><span class="comment">-- This little script wait for someone to come on a channel and
-</span><span class="comment">-- welcome it
+<span class="comment">-- Deferred.lua
+</span><span class="comment">-- This script shows how to get deferred informations.
 </span>
-<span class="comment">-- Welcome someone on a channel
-</span><span class="keyword">function</span> onJoin(server, channel, nickname)
-	server:say(channel, <span class="string">"Welcome "</span> .. nickname .. <span class="string">"!"</span>)
+<span class="keyword">local</span> util = <span class="global">require</span> <span class="string">"irccd.util"</span>
+
+<span class="comment">-- In that example, I would like to get information from "markand" when
+</span><span class="comment">-- I successfully connect to a server
+</span><span class="keyword">function</span> onConnect(server)
+	server:whois(
+		<span class="string">"markand"</span>,
+		<span class="keyword">function</span> (info)
+			<span class="global">print</span>(<span class="string">"nickname:"</span> .. info.nickname)
+			<span class="global">print</span>(<span class="string">"user:"</span> .. info.user)
+			<span class="global">print</span>(<span class="string">"host:"</span> .. info.host)
+			<span class="global">print</span>(<span class="string">"realname:"</span> .. info.realname)
+
+			<span class="global">print</span>(<span class="string">"markand is on the following channels:"</span>)
+			<span class="keyword">for</span> _, v <span class="keyword">in</span> <span class="global">ipairs</span>(info.channels) <span class="keyword">do</span>
+				<span class="global">print</span>(v)
+			<span class="keyword">end</span>
+		<span class="keyword">end</span>
+	)
+<span class="keyword">end</span>
+
+<span class="comment">-- On this, I would like to get all nicks from the channel I've just joined.
+</span><span class="keyword">function</span> onJoin(server, channel, who)
+	<span class="keyword">local</span> myNick = util.splitUser(who)
+
+	<span class="comment">-- Call names only if I've joined
+</span>	<span class="keyword">if</span> server:getIdentity().nickname == myNick <span class="keyword">then</span>
+		server:names(
+			channel,
+			<span class="keyword">function</span> (list)
+				<span class="global">print</span>(<span class="string">"List of users on "</span> .. channel .. <span class="string">":"</span>)
+				<span class="keyword">for</span> _, v <span class="keyword">in</span> <span class="global">ipairs</span>(list) <span class="keyword">do</span>
+					<span class="global">print</span>(v)
+				<span class="keyword">end</span>
+			<span class="keyword">end</span>
+		)
+	<span class="keyword">end</span>
 <span class="keyword">end</span></pre>
 
 

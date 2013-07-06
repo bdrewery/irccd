@@ -18,6 +18,7 @@
 <h2 class="kind">Contents</h2>
 <ul>
 <li><a href="#Class_Server">Class Server </a></li>
+<li><a href="#Server_metamethods">Server metamethods </a></li>
 </ul>
 
 <h2 class="kind">Modules</h2>
@@ -54,6 +55,7 @@
 </ul>
 <h2 class="kind">Examples</h2>
 <ul>
+  <li><a href="../examples/Deferred.lua.html">Deferred.lua</a></li>
   <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
 </ul>
 
@@ -134,6 +136,21 @@
 	<td class="name" nowrap><a href="#Server:umode">Server:umode&nbsp;(mode)</a></td>
 	<td class="summary">Change your user mode.</td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:whois">Server:whois&nbsp;(target, func)</a></td>
+	<td class="summary">Get whois information.</td>
+	</tr>
+</table>
+<h2 class="kind"><a href="#Server_metamethods">Server metamethods </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Server:__eq">Server:__eq&nbsp;(other)</a></td>
+	<td class="summary">Test equality.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:__tostring">Server:__tostring&nbsp;()</a></td>
+	<td class="summary">Convert object to string.</td>
+	</tr>
 </table>
 
 <br/>
@@ -197,11 +214,11 @@
  Returns a table with the server connection information with
  the following fields:
  <ul>
- <li><strong>name (string)</strong>: the server ident</li>
- <li><strong>hostname (string)</strong>: the hostname</li>
- <li><strong>port (int)</strong>: the port</li>
- <li><strong>ssl (bool)</strong>: true if using SSL</li>
- <li><strong>sslVerify (bool)</strong>: true if using SSL verification</strong>
+   <li><strong>name (string)</strong>: the server ident</li>
+   <li><strong>hostname (string)</strong>: the hostname</li>
+   <li><strong>port (int)</strong>: the port</li>
+   <li><strong>ssl (bool)</strong>: true if using SSL</li>
+   <li><strong>sslVerify (bool)</strong>: true if using SSL verification</strong>
  </ul>
 
 
@@ -334,8 +351,10 @@
     Get the list of names.
  Get all nicknames on the channel, this is a deferred call,
  the function <strong>func</strong> must have the following signature</p>
+
 <pre><code>function callback(list)
 </code></pre>
+
 <p> where <strong>list</strong> is a sequence table with all nicknames.
 
     <h3>Parameters:</h3>
@@ -348,7 +367,20 @@
 
 
 
+    <h3>See also:</h3>
+    <ul>
+         <a href="../examples/Deferred.lua.html#">Deferred.lua</a>
+    </ul>
 
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"> server:names(
+	<span class="string">"#test"</span>,
+	<span class="keyword">function</span> (list)
+		<span class="comment">-- Play with list sequence
+</span>	<span class="keyword">end</span>
+ )</pre>
+    </ul>
 
 </dd>
     <dt>
@@ -489,6 +521,99 @@
          the new mode</li>
     </ul>
 
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:whois"></a>
+    <strong>Server:whois&nbsp;(target, func)</strong>
+    </dt>
+    <dd>
+    Get whois information.
+ Get information from a user. This is a deferred call.
+ the function <strong>func</strong> must have the following signature</p>
+
+<pre><code>function callback(info)
+</code></pre>
+
+<p> where <strong>info</strong> is a table with the following fields:
+ <ul>
+   <li><strong>nickname (string)</strong>: the nickname</li>
+   <li><strong>user (string)</strong>: the username</li>
+   <li><strong>host (string)</strong>: user's hostname</li>
+   <li><strong>realname (string)</strong>: the realname</li>
+   <li><strong>channels (table)</strong>: a sequence table of all channels</li>
+ </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">target</span>
+         the nickname target</li>
+        <li><span class="parameter">func</span>
+         the function</li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../examples/Deferred.lua.html#">Deferred.lua</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"> server:whois(
+	<span class="string">"test"</span>,
+	<span class="keyword">function</span> (info)
+		<span class="comment">-- Play with info
+</span>	<span class="keyword">end</span>
+ )</pre>
+    </ul>
+
+</dd>
+</dl>
+    <h2 class="kind"><a name="Server_metamethods"></a>Server metamethods </h2>
+        Server metamethods.
+ The metamethods available for object Server.
+    <dl class="function">
+    <dt>
+    <a name = "Server:__eq"></a>
+    <strong>Server:__eq&nbsp;(other)</strong>
+    </dt>
+    <dd>
+    Test equality.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other date</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if they equals
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:__tostring"></a>
+    <strong>Server:__tostring&nbsp;()</strong>
+    </dt>
+    <dd>
+    Convert object to string.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string
+    </ol>
 
 
 

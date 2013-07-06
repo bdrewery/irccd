@@ -30,11 +30,11 @@ end
 -- Returns a table with the server connection information with
 -- the following fields:
 -- <ul>
--- <li><strong>name (string)</strong>: the server ident</li>
--- <li><strong>hostname (string)</strong>: the hostname</li>
--- <li><strong>port (int)</strong>: the port</li>
--- <li><strong>ssl (bool)</strong>: true if using SSL</li>
--- <li><strong>sslVerify (bool)</strong>: true if using SSL verification</strong>
+--   <li><strong>name (string)</strong>: the server ident</li>
+--   <li><strong>hostname (string)</strong>: the hostname</li>
+--   <li><strong>port (int)</strong>: the port</li>
+--   <li><strong>ssl (bool)</strong>: true if using SSL</li>
+--   <li><strong>sslVerify (bool)</strong>: true if using SSL verification</strong>
 -- </ul>
 -- @return the information table
 function Server:getInfo()
@@ -83,10 +83,19 @@ end
 --- Get the list of names.
 -- Get all nicknames on the channel, this is a deferred call,
 -- the function <strong>func</strong> must have the following signature
+--
 --	function callback(list)
+--
 -- where <strong>list</strong> is a sequence table with all nicknames.
 -- @param channel the channel to check
 -- @param func the function
+-- @see Deferred.lua
+-- @usage server:names(
+--	"#test",
+--	function (list)
+--		-- Play with list sequence
+--	end
+-- )
 function Server:names(channel, func)
 end
 
@@ -136,6 +145,47 @@ end
 -- Change your own user mode.
 -- @param mode the new mode
 function Server:umode(mode)
+end
+
+--- Get whois information.
+-- Get information from a user. This is a deferred call.
+-- the function <strong>func</strong> must have the following signature
+--
+--	function callback(info)
+--
+-- where <strong>info</strong> is a table with the following fields:
+-- <ul>
+--   <li><strong>nickname (string)</strong>: the nickname</li>
+--   <li><strong>user (string)</strong>: the username</li>
+--   <li><strong>host (string)</strong>: user's hostname</li>
+--   <li><strong>realname (string)</strong>: the realname</li>
+--   <li><strong>channels (table)</strong>: a sequence table of all channels</li>
+-- </ul>
+-- @param target the nickname target
+-- @param func the function
+-- @usage server:whois(
+--	"test",
+--	function (info)
+--		-- Play with info
+--	end
+-- )
+-- @see Deferred.lua
+function Server:whois(target, func)
+end
+
+--- Server metamethods.
+-- The metamethods available for object Server.
+-- @section
+
+--- Test equality.
+-- @param other the other date
+-- @return true if they equals
+function Server:__eq(other)
+end
+
+--- Convert object to string.
+-- @return a string
+function Server:__tostring()
 end
 
 -- vim: set syntax=lua:
