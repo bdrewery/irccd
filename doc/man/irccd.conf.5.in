@@ -1,0 +1,186 @@
+.\"
+.\" Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @MONTH@ @DAY@, @YEAR@
+.Dt IRCCD.CONF 5
+.Os
+.Sh NAME
+.Nm irccd.conf
+.Nd irccd configuration file
+.Sh DESCRIPTION
+The file
+.Nm irccd.conf
+contains all parameters for the application
+.Nm irccd .
+.Pp
+The irccd.conf file is .ini based syntax, it supports sections enclosed
+between brackets where one or more options lives.
+.\" SYNTAX
+.Sh SYNTAX
+The usual syntax is:
+.Bd -literal -offset indent
+[foo]
+option = value
+
+[bar]
+name = "long string enclosed between quotes"
+.Pp
+.Ed
+Comments starts by # or can be written at an end of a line.
+.Pp
+Note that quotes are needed if the value has more that one word, if not the
+value will be truncated at the first space found.
+.Pp
+Multiple options on the same line are
+.Em not
+supported.
+.\" CONFIGURATION
+.Sh CONFIGURATION
+This section shows all available sections with the options allowed for them.
+.\" GENERAL
+.Ss general
+This section covers general options.
+.Pp
+.Bl -tag -width PARAMETERXXX -compact
+.It plugins
+(string list) a list of plugins to load, default: empty.
+.It plugin-path
+(string) a path to local modules, default: empty.
+.It syslog
+(bool) if enabled, use syslog instead of standard output, default: false.
+.It verbose
+(bool) enable verbose message, default: false.
+.El
+.\" IDENTITY
+.Ss identity
+This section defines an identity, you may add any as you want. A default entity
+if provided by the
+.Nm irccd
+binary and will use it if none is specified.
+.Pp
+.Bl -tag -width PARAMETERXXX -compact
+.It name
+(string) Required. the identity unique id.
+.It nickname
+(string) The nickname, default: irccd.
+.It realname
+(string) The realname, default: IRC Client daemon.
+.It username
+(string) The username, default: irccd.
+.El
+.\" LISTENER
+.Ss listener
+A listener is a socket that waits for any input from clients. You may add
+as many as you want. They are completely optional.
+.Pp
+.Bl -tag -width PARAMETERXXX -compact
+.It type
+(string) Required. type of listener "internet" or "unix"
+.El
+.Pp
+The following parameters are available for type "internet":
+.Pp
+.Bl -tag -width PARAMETERXXX -compact -offset indent
+.It address
+(string) Address to bind or "*" for any, default: *.
+.It family
+(string list) Internet family: ipv6, ipv4. Both are accepted, default: ipv4
+.It port
+(int) Required: port number.
+.El
+.Pp
+The following parameters are available for type "unix":
+.Pp
+.Bl -tag -width PARAMETERXXX -compact -offset indent
+.It path
+(string) Required. The file path to the socket.
+.El
+.\" SERVER
+.Ss server
+This define a server, you may add any as you want, at least one must be defined
+in the file.
+.Pp
+.Bl -tag -width PARAMETERXXX -compact
+.It name
+(string) Required. A unique id.
+.It host
+(string) Required. The server address.
+.It port
+(int) Required, The server port.
+.It identity
+(string) An identity to use.
+.It join-invite
+(bool) Join channels upon invitation, default: false.
+.It channels
+(string list) List of channel to auto join, default: empty.
+.It command-char
+(string) The prefix for invoking special commands, default: !.
+.It ssl
+(bool) Enable or disable SSL, default: false.
+.It ssl-verify
+(bool) Verify the SSL certificates, default: true.
+.El
+.\" EXAMPLES
+.Sh EXAMPLES
+.Bd -literal
+# This line is ignored
+[general]
+verbose = true
+
+# Add a listener that bind only to IPv6
+[listener]
+address = "*"
+family = "ipv6"
+port = "12000"
+
+# A listener that bind to both IPv4 and IPv6
+[listener]
+address = "*"
+family = "ipv4 ipv6"
+port = "15000"
+
+# Identity reused by many servers
+[identity]
+name = "myIdentity"
+nickname = "superbot"
+realname = "SuperBot v1.0"
+username = "sp"
+
+# A server
+[server]
+host = "irc.foo.org"
+port = "6667"
+identity = "myIdentity"
+
+# An other server
+[server]
+host = "chat.wanadoo.fr"
+port = "6667"
+identity = "myIdentity"
+.Ed
+.\" FILES
+.Sh FILES
+The default config file is located at
+.Em @PREFIX@/etc/irccd.conf
+.Pp
+The user defined file follow the XDG standard and is usually
+.Em $HOME/.config/irccd/irccd.conf .
+If the XDG variable is not set, we use that path.
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1
+.\" AUTHORS
+.Sh AUTHORS
+irccd was written by David Demelier <markand@malikania.fr>
