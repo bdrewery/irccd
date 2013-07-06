@@ -971,15 +971,21 @@ void Irccd::handleIrcEvent(const IrcEvent &ev)
 #if defined(WITH_LUA)
 	lock_guard<mutex> ulock(m_pluginLock);
 
+	/**
+	 * This is the handle of deferred calls, they are not handled in the
+	 * next callPlugin block.
+	 */
 	try {
-		if (ev.m_type == IrcEventType::Names)
-			callDeferred(ev);
-		if (ev.m_type == IrcEventType::Whois)
+		if (ev.m_type == IrcEventType::Names ||
+		    ev.m_type == IrcEventType::Whois)
 			callDeferred(ev);
 	} catch (Plugin::ErrorException ex) {
 		Logger::warn("plugin %s: %s", ex.which().c_str(), ex.what());
 	}
 
+	/**
+	 * And this is the block of normal events.
+	 */
 	for (shared_ptr<Plugin> p : m_plugins) {
 		try {
 			callPlugin(p, ev);
@@ -1093,6 +1099,7 @@ void Irccd::callPlugin(shared_ptr<Plugin> p, const IrcEvent &ev)
 
 void Irccd::callDeferred(const IrcEvent &ev)
 {
+	// Check if we have deferred call for this server
 	if (m_deferred.find(ev.m_server) == m_deferred.end())
 		return;
 
@@ -1116,14 +1123,15 @@ void Irccd::callDeferred(const IrcEvent &ev)
 		} else
 			deleteIt = false;
 
-		printf("before = %zd\n", m_deferred[ev.m_server].size());
-
-		if (deleteIt)
+		/*
+		 * If found and executed, break the loop if not, we will
+		 * call multiple times for the same event.
+		 */
+		if (deleteIt) {
 			it = m_deferred[ev.m_server].erase(it);
-		else
+			break;
+		} else
 			++it;
-
-		printf("after = %zd\n", m_deferred[ev.m_server].size());
 	}
 }
 

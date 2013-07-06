@@ -90,7 +90,6 @@ void DefCall::onWhois(const vector<string> & params)
 		lua_setfield(L, -2, "channels");
 	}
 
-	puts("===> CALLING");
 	bool result = lua_pcall(L, 1, 0, 0) == LUA_OK;
 	luaL_unref(L, LUA_REGISTRYINDEX, m_ref);
 	

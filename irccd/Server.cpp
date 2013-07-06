@@ -245,7 +245,6 @@ static void handleNumeric(irc_session_t *s,
 		info.realname = params[5];
 
 		server->getWhoisLists()[info.nick] = info;
-		puts("-- START OF WHOIS");
 	} else if (event == LIBIRC_RFC_RPL_WHOISCHANNELS) {
 		Server::WhoisInfo & info = server->getWhoisLists()[params[1]];
 
@@ -253,7 +252,6 @@ static void handleNumeric(irc_session_t *s,
 		for (unsigned int i = 2; i < c; ++i)
 			info.channels.push_back(params[i]);
 	} else if (event == LIBIRC_RFC_RPL_ENDOFWHOIS) {
-		
 		const Server::WhoisInfo & info = server->getWhoisLists()[params[1]];
 		vector<string> params;
 
@@ -262,9 +260,6 @@ static void handleNumeric(irc_session_t *s,
 		params.push_back(info.user);
 		params.push_back(info.host);
 		params.push_back(info.realname);
-
-		printf("nick = %s, user = %s, host = %s, realname = %s\n",
-		    info.nick.c_str(), info.user.c_str(), info.host.c_str(), info.realname.c_str());
 
 		for (size_t i = 0; i < info.channels.size(); ++i)
 			params.push_back(info.channels[i]);
