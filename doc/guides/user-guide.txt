@@ -258,7 +258,7 @@ This section defines listeners, you may use sockets to do a basic IPC system
 in irccd. This let you controlling irccd with TCP sockets.
 
 For instance, with listeners, you may ask `irccd` to send a message, a notice or
-even kicking someone from a channel. This is done with the <<irccdctl,irccdctl>
+even kicking someone from a channel. This is done with the <<irccdctl,irccdctl>>
 utility.
 
 There are two type of listeners availables:
