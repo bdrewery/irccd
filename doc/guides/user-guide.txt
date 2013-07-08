@@ -65,7 +65,7 @@ markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_LUA=Off
 ----
 
 When disabling Lua, the IRC bot can still be used as a message relayer, so you
-can still use <<irccdctl,irccdctl> to manage irccd.
+can still use <<irccdctl,irccdctl>> to manage irccd.
 
 [NOTE]
 If Lua is not found on your system, Lua support is automatically disabled, if
