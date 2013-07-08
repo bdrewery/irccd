@@ -381,7 +381,7 @@ On Unix, the paths are searched in the following order:
 . Specified by -p on command line
 . '$\{XDG_CONFIG_HOME\}/irccd/plugins'
 . '$\{HOME\}/.config/irccd/plugins'
-. /usr/local/share/irccd/plugins
+. '/usr/local/share/irccd/plugins'
 
 On Windows, the paths are searched in the following order:
 
