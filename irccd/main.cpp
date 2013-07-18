@@ -45,7 +45,6 @@ int main(int argc, char **argv)
 {
 	Irccd *irccd = Irccd::getInstance();
 	int ch;
-	bool foreground = false;
 
 	setprogname(argv[0]);
 	
@@ -53,9 +52,11 @@ int main(int argc, char **argv)
 		switch (ch) {
 		case 'c':
 			irccd->setConfigPath(string(optarg));
+			irccd->override(options::Config);
 			break;
 		case 'f':
-			foreground = true;
+			irccd->setForeground(true);
+			irccd->override(options::Foreground);
 			break;
 		case 'p':
 			irccd->addPluginPath(string(optarg));
@@ -65,6 +66,7 @@ int main(int argc, char **argv)
 			break;
 		case 'v':
 			Logger::setVerbose(true);
+			irccd->override(options::Verbose);
 			break;
 		case '?':
 		default:
@@ -90,11 +92,6 @@ int main(int argc, char **argv)
 
 #if defined(SIGQUIT)
 	signal(SIGQUIT, quit);
-#endif
-
-#if !defined(_WIN32)
-	if (!foreground)
-		daemon(0, 0);
 #endif
 
 	return irccd->run();

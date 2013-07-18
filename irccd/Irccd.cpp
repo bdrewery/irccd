@@ -425,6 +425,11 @@ bool Irccd::isPluginLoaded(const string &name)
 #endif
 }
 
+bool Irccd::isOverriden(char c)
+{
+	return m_overriden.find(c) != m_overriden.end();
+}
+
 /* --------------------------------------------------------
  * Open functions, read config and servers
  * -------------------------------------------------------- */
@@ -441,8 +446,8 @@ void Irccd::openConfig()
 	addPluginPath(Util::configDirectory() + "plugins");		// own directory
 	addPluginPath(MODDIR);						// see config.h.in
 
-	// Length empty means use user or default
-	if (m_configPath.length() == 0) {
+	// Open requested file by command line or default
+	if (!isOverriden(options::Config)) {
 		// 2. User defined
 		m_configPath = Util::configFilePath("irccd.conf");
 
@@ -475,9 +480,11 @@ void Irccd::openConfig()
 #if !defined(_WIN32)
 	if (general.hasOption("syslog"))
 		Logger::setSyslog(general.getOption<bool>("syslog"));
+	if (general.hasOption("foreground") && !isOverriden(options::Foreground))
+		m_foreground = general.getOption<bool>("foreground");
 #endif
 
-	if (general.hasOption("verbose"))
+	if (general.hasOption("verbose") && !isOverriden(options::Verbose))
 		Logger::setVerbose(general.getOption<bool>("verbose"));
 
 
@@ -794,6 +801,7 @@ void Irccd::extractChannels(const Section &section, shared_ptr<Server> server)
 
 Irccd::Irccd()
 	: m_running(true)
+	, m_foreground(false)
 {
 	Socket::init();
 
@@ -811,6 +819,11 @@ Irccd * Irccd::getInstance()
 		m_instance = new Irccd();
 
 	return m_instance;
+}
+
+void Irccd::override(char c)
+{
+	m_overriden[c] = true;
 }
 
 void Irccd::addPluginPath(const string &path)
@@ -875,6 +888,11 @@ void Irccd::setConfigPath(const string &path)
 	m_configPath = path;
 }
 
+void Irccd::setForeground(bool mode)
+{
+	m_foreground = mode;
+}
+
 shared_ptr<Server> & Irccd::findServer(const string &name)
 {
 	for (shared_ptr<Server> &s : m_servers)
@@ -905,6 +923,11 @@ const Server::Identity & Irccd::findIdentity(const string &name)
 
 int Irccd::run()
 {
+#if !defined(_WIN32)
+	if (!m_foreground)
+		daemon(0, 0);
+#endif
+
 	Logger::log("irccd: user config path %s", Util::configDirectory().c_str());
 	Logger::log("irccd: user default plugin path %s", Util::pluginDirectory().c_str());
 

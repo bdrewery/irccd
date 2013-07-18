@@ -178,13 +178,14 @@ application.
 
 The options available:
 
+* `foreground`: (bool) keep irccd to foreground, default: false.
 * `plugins`: (string list) a list of plugins to load, default: empty.
 * `plugin-path`: (string) a path to local modules, default: empty.
 * `syslog`: (bool) if enabled, use syslog instead of standard output, default: false.
 * `verbose`: (bool) enable verbose message, default: false.
 
 [NOTE]
-The option syslog is only available on Unix systems.
+The options foreground and syslog are only available on Unix systems.
 
 .Example
 [source, ini]

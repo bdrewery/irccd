@@ -41,11 +41,9 @@ void Logger::printFile(FILE *fp, string fmt, va_list ap)
 		int priority = (fp == stdin) ? LOG_INFO : LOG_WARNING;
 		vsyslog(priority, fmt.c_str(), ap);
 	} else {
-#else
+#endif
 		vfprintf(fp, fmt.c_str(), ap);
 		fputc('\n', fp);
-#endif
-
 #if !defined(_WIN32)
 	}
 #endif

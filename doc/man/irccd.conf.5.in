@@ -54,6 +54,8 @@ This section shows all available sections with the options allowed for them.
 This section covers general options.
 .Pp
 .Bl -tag -width PARAMETERXXX -compact
+.It foreground
+(bool) keep irccd to foreground, default: false.
 .It plugins
 (string list) a list of plugins to load, default: empty.
 .It plugin-path

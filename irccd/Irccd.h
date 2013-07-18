@@ -50,15 +50,29 @@ typedef std::vector<std::shared_ptr<Server>> ServerList;
   typedef std::map<std::shared_ptr<Server>, std::vector<DefCall>> DefCallList;
 #endif
 
+namespace options {
+
+enum {
+	Config		= 'c',
+	Foreground	= 'f',
+	Verbose		= 'v',
+	PluginPath	= 'p',
+	PluginWanted	= 'P'
+};
+
+} // !options
+
 class Irccd {
 private:
 	static Irccd *m_instance;			//! unique instance
 
 	// Ignition
 	bool m_running;					//! forever loop
+	bool m_foreground;				//! run to foreground
 
 	// Config
 	std::string m_configPath;			//! config file path
+	std::unordered_map<char, bool> m_overriden;	//! overriden parameters
 
 	// Plugins
 	std::vector<std::string> m_pluginDirs;		//! list of plugin directories
@@ -86,6 +100,7 @@ private:
 	void clientRead(SocketTCP &client);
 	void execute(SocketTCP &client, const std::string &cmd);
 	bool isPluginLoaded(const std::string &name);
+	bool isOverriden(char c);
 
 	/**
 	 * Open will call the below function in the same order they are
@@ -123,6 +138,13 @@ public:
 	 * @return the irccd instance
 	 */
 	static Irccd * getInstance();
+
+	/**
+	 * Tells irccd that a parameter from command line has been set.
+	 *
+	 * @param c the option
+	 */
+	void override(char c);
 
 	/**
 	 * Add a plugin path to find other plugins.
@@ -219,6 +241,13 @@ public:
 	 * @param path the config file path
 	 */
 	void setConfigPath(const std::string &path);
+
+	/**
+	 * Tells if we should run to foreground or not.
+	 *
+	 * @param mode the mode
+	 */
+	void setForeground(bool mode);
 
 	/**
 	 * Find a server by its resource name.
