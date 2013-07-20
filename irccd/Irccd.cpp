@@ -298,7 +298,6 @@ static map<string, Handler> createHandlers()
 	handlers["JOIN"]	= handleJoin;
 	handlers["KICK"]	= handleKick;
 	handlers["LOAD"]	= handleLoad;
-	handlers["MODE"]	= handleMode;
 	handlers["ME"]		= handleMe;
 	handlers["MODE"]	= handleMode;
 	handlers["MSG"]		= handleMessage;

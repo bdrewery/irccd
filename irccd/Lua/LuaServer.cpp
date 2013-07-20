@@ -22,7 +22,7 @@
 
 #include "Irccd.h"
 #include "LuaServer.h"
-#include "Lua.h"
+#include "Luae.h"
 
 using namespace irccd;
 using namespace std;

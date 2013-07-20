@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "Lua.h"
+#include "Luae.h"
 
 using namespace irccd;
 using namespace std;

@@ -59,8 +59,8 @@ if (WITH_LUA)
 			Lua/LuaUtil.h
 			DefCall.cpp
 			DefCall.h
-			Lua.cpp
-			Lua.h
+			Luae.cpp
+			Luae.h
 			Plugin.cpp
 			Plugin.h
 			Test.cpp

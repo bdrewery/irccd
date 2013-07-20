@@ -23,7 +23,7 @@
 #include <memory>
 #include <string>
 
-#include "Lua.h"
+#include "Luae.h"
 
 namespace irccd {
 
