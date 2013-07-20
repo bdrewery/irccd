@@ -21,6 +21,21 @@
 using namespace irccd;
 using namespace std;
 
+void DefCall::call(int nparams)
+{
+	lua_State *L = m_plugin->getState().get();
+
+	bool result = lua_pcall(L, nparams, 0, 0) == LUA_OK;
+	luaL_unref(L, LUA_REGISTRYINDEX, m_ref);
+	
+	if (!result) {
+		string error = lua_tostring(L, -1);
+		lua_pop(L, 1);
+
+		throw Plugin::ErrorException(m_plugin->getName(), error);
+	}
+}
+
 DefCall::DefCall()
 {
 }
@@ -49,15 +64,7 @@ void DefCall::onNames(const vector<string> & users)
 		lua_rawseti(L, -2, i + 1);
 	}
 	
-	bool result = lua_pcall(L, 1, 0, 0) == LUA_OK;
-	luaL_unref(L, LUA_REGISTRYINDEX, m_ref);
-	
-	if (!result) {
-		string error = lua_tostring(L, -1);
-		lua_pop(L, 1);
-
-		throw Plugin::ErrorException(m_plugin->getName(), error);
-	}
+	call(1);
 }
 
 void DefCall::onWhois(const vector<string> & params)
@@ -90,15 +97,7 @@ void DefCall::onWhois(const vector<string> & params)
 		lua_setfield(L, -2, "channels");
 	}
 
-	bool result = lua_pcall(L, 1, 0, 0) == LUA_OK;
-	luaL_unref(L, LUA_REGISTRYINDEX, m_ref);
-	
-	if (!result) {
-		string error = lua_tostring(L, -1);
-		lua_pop(L, 1);
-
-		throw Plugin::ErrorException(m_plugin->getName(), error);
-	}
+	call(1);
 }
 
 bool DefCall::operator==(const DefCall &c1)

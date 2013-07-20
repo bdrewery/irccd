@@ -36,6 +36,14 @@ private:
 	std::shared_ptr<Plugin> m_plugin;	//! for which plugin
 	int m_ref;				//! function reference
 
+	/**
+	 * Call the function that is pushed on the stack, also remove it from
+	 * the registry.
+	 *
+	 * @param nparams the number of parameters passed
+	 * @throw Plugin::ErrorException on error
+	 */
+	void call(int nparams = 0);
 public:
 	/**
 	 * Default constructor.
