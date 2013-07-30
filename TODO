@@ -1,5 +1,4 @@
 IRC Client Daemon TODO:
 
-	o Add an option to do not call plugin if the origin is the bot itself.
-	o Update logger to add [].
-	o Implements umode, privmsg, notive, ctcp.
+	o Include C++11 redistributable if needed (hard)
+	o add a correct README
