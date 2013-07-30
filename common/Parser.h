@@ -84,6 +84,12 @@ struct Section {
 	 */
 	const std::string & getName() const;
 
+	/**
+	 * Search an option value.
+	 *
+	 * @param name the option name
+	 * @return the value or "" if not found
+	 */
 	const std::string findOption(const std::string &name) const;
 
 	/**

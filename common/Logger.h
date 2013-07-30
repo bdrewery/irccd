@@ -16,12 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef _LOGGER_H_
+#define _LOGGER_H_
+
 #include <cstdio>
 #include <cstdarg>
 #include <string>
-
-#ifndef _LOGGER_H_
-#define _LOGGER_H_
 
 namespace irccd {
 

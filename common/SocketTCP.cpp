@@ -25,7 +25,7 @@ SocketTCP::SocketTCP()
 }
 
 SocketTCP::SocketTCP(socket_t sock, EndPoint endPoint)
-	:Socket(sock, endPoint)
+	: Socket(sock, endPoint)
 {
 }
 

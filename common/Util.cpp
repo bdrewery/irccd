@@ -50,7 +50,7 @@ Util::ErrorException::ErrorException()
 {
 }
 
-Util::ErrorException::ErrorException(const std::string &error)
+Util::ErrorException::ErrorException(const string &error)
 	:m_error(error)
 {
 }
@@ -197,7 +197,7 @@ uint64_t Util::getTicks()
 #endif
 }
 
-void Util::mkdir(const std::string &dir, int mode)
+void Util::mkdir(const string &dir, int mode)
 {
 	ostringstream oss;
 

@@ -67,12 +67,12 @@ const string Section::findOption(const string &name) const
 	return ret;
 }
 
-template <> bool Section::getOption(const std::string &name) const
+template <> bool Section::getOption(const string &name) const
 {
 	bool result = false;
 
 	if (hasOption(name)) {
-		std::string value = findOption(name);
+		string value = findOption(name);
 
 		if (value == "yes" || value == "true"|| value == "1")
 			result = true;
@@ -83,7 +83,7 @@ template <> bool Section::getOption(const std::string &name) const
 	return result;
 }
 
-template <> int Section::getOption(const std::string &name) const
+template <> int Section::getOption(const string &name) const
 {
 	int result = -1;
 
@@ -94,9 +94,9 @@ template <> int Section::getOption(const std::string &name) const
 	return result;
 }
 
-template <> std::string Section::getOption(const std::string &name) const
+template <> string Section::getOption(const string &name) const
 {
-	std::string result;
+	string result;
 
 	if (hasOption(name))
 		result = findOption(name);
@@ -114,7 +114,7 @@ const vector<Option> & Section::getOptions() const
 	return m_options;
 }
 
-bool Section::hasOption(const std::string &name) const
+bool Section::hasOption(const string &name) const
 {
 	for (const Option &o : m_options)
 		if (o.m_key == name)
@@ -322,7 +322,7 @@ bool Parser::open()
 	return true;
 }
 
-const std::string & Parser::getError() const
+const string & Parser::getError() const
 {
 	return m_error;
 }
@@ -332,7 +332,7 @@ const vector<Section> & Parser::getSections() const
 	return m_sections;
 }
 
-vector<Section> Parser::findSections(const std::string &name) const
+vector<Section> Parser::findSections(const string &name) const
 {
 	vector<Section> list;
 
