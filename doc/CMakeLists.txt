@@ -16,9 +16,17 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-option(WITH_MAN "Install man pages" On)
 option(WITH_LDOC "Install Lua API documentation" On)
 option(WITH_DOC "Install user guides" On)
+
+# Manual pages on Windows are pretty useless
+if (WIN32)
+	set(USE_MAN "No")
+else ()
+	set(USE_MAN "Yes")
+endif ()
+
+option(WITH_MAN "Install man pages" ${USE_MAN})
 
 # Update man pages date
 set(MONTH "May")
