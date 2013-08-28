@@ -131,6 +131,24 @@ if (WIN32)
 		set(WINARCH "x86")
 	endif ()
 
+	# Embed Visual C++ 2012 redistributable
+	if (${WINARCHES} MATCHES "amd64")
+		set(REDIST_FILE "vcredist_x64.exe")
+	else ()
+		set(REDIST_FILE "vcredist_x86.exe")
+	endif ()
+
+	install(
+		PROGRAMS
+		"${irccd_SOURCE_DIR}/win32/${REDIST_FILE}"
+	        DESTINATION tmp
+	)
+
+	list(
+		APPEND CPACK_NSIS_EXTRA_INSTALL_COMMANDS
+		"ExecWait '$INSTDIR\\\\tmp\\\\${REDIST_FILE} /passive'"
+	)
+
 	set(CPACK_GENERATOR "NSIS")
 	set(CPACK_MONOLITHIC_INSTALL FALSE)
 
