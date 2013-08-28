@@ -1,4 +1,4 @@
-IRC Client Daemon TODO:
+IRC Client Daemon TODO
+======================
 
-	o Include C++11 redistributable if needed (hard)
-	o add a correct README
+	o Test Visual C++ redistributable installation
