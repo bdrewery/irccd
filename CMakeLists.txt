@@ -24,11 +24,11 @@ project(irccd)
 
 set(MAJOR "1")
 set(MINOR "0")
-set(VERSION "${MAJOR}.${MINOR}-rc1")
+set(VERSION "${MAJOR}.${MINOR}")
 
 # General settings
 if (UNIX)
-	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11 -stdlib=libc++")	# c++11
+	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11")			# c++11
 	set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -D_DEBUG -O0 -g")
 endif ()
 
@@ -37,16 +37,16 @@ if (WIN32)
 	set(CMAKE_EXE_LINKER_FLAGS "/SAFESEH:NO")
 endif ()
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")		# own modules
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")			# own modules
 
 # Installation paths
-set(MODDIR "${CMAKE_INSTALL_PREFIX}/share/irccd/plugins"
+set(MODDIR "share/irccd/plugins"
     CACHE STRING "Module prefix where to install")
-set(DOCDIR "${CMAKE_INSTALL_PREFIX}/share/doc/irccd"
+set(DOCDIR "share/doc/irccd"
     CACHE STRING "Documentation directory")
-set(MANDIR "${CMAKE_INSTALL_PREFIX}/share/man"
+set(MANDIR "share/man"
     CACHE STRING "Man directory")
-set(ETCDIR "${CMAKE_INSTALL_PREFIX}/etc"
+set(ETCDIR "etc"
     CACHE STRING "Configuration directory")
 
 # Include path to common
@@ -100,13 +100,10 @@ add_subdirectory(irccd)
 # irccd controller
 add_subdirectory(irccdctl)
 
-# Unit tests
-add_subdirectory(tests)
-
 message("Installation directories:")
-message("\tMANDIR\t\t\t${MANDIR}")
-message("\tDOCDIR\t\t\t${DOCDIR}")
-message("\tMODDIR\t\t\t${MODDIR}")
+message("\tMANDIR\t\t\t${CMAKE_INSTALL_PREFIX}/${MANDIR}")
+message("\tDOCDIR\t\t\t${CMAKE_INSTALL_PREFIX}/${DOCDIR}")
+message("\tMODDIR\t\t\t${CMAKE_INSTALL_PREFIX}/${MODDIR}")
 message("")
 
 message("Compiling irccd with following options:")
@@ -125,6 +122,7 @@ configure_file(
 
 # CPack
 if (WIN32)
+	# This determine the *target* architecture
 	if (CMAKE_SIZEOF_VOID_P MATCHES "8")
 		set(WINARCH "amd64")
 	else ()
@@ -140,7 +138,7 @@ if (WIN32)
 
 	install(
 		PROGRAMS
-		"${irccd_SOURCE_DIR}/win32/${REDIST_FILE}"
+		"${CMAKE_CURRENT_SOURCE_DIR}/win32/${REDIST_FILE}"
 	        DESTINATION tmp
 	)
 
@@ -152,6 +150,9 @@ if (WIN32)
 	set(CPACK_GENERATOR "NSIS")
 	set(CPACK_MONOLITHIC_INSTALL FALSE)
 
+	set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+	set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README")
+
 	set(CPACK_NSIS_DISPLAY_NAME "IRC Client daemon")
 	set(CPACK_NSIS_EXECUTABLES_DIRECTORY "bin")
 	set(CPACK_NSIS_CONTACT "demelier.david@gmail.com")
@@ -161,6 +162,7 @@ if (WIN32)
 	set(CPACK_PACKAGE_VERSION_MAJOR ${MAJOR})
 	set(CPACK_PACKAGE_VERSION_MINOR ${MINOR})
 	set(CPACK_PACKAGE_FILE_NAME "irccd-${VERSION}-${CMAKE_SYSTEM_NAME}-${WINARCH}")
+	set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
 	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "IRC Client Daemon")
 else ()
 	set(CPACK_GENERATOR "TGZ")

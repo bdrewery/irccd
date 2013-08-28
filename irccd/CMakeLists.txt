@@ -109,6 +109,7 @@ target_link_libraries(
 )
 
 install(TARGETS irccd RUNTIME DESTINATION bin)
+
 install(
 	FILES "${CMAKE_SOURCE_DIR}/doc/examples/irccd.conf"
 	DESTINATION "${ETCDIR}"

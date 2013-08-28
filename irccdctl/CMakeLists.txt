@@ -37,4 +37,10 @@ target_link_libraries(
 
 install(TARGETS irccdctl RUNTIME DESTINATION bin)
 
+install(
+	FILES "${CMAKE_SOURCE_DIR}/doc/examples/irccdctl.conf"
+	DESTINATION "${ETCDIR}"
+	RENAME "irccdctl.conf.sample"
+)
+
 # vim: set syntax=cmake:
