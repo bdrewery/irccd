@@ -23,6 +23,29 @@ Optional:
 * Lua 5.2 or higher (http://lua.org). This library is needed in order to use
   irccd plugins.
 
+Developer requirements
+======================
+
+If you plan to develop irccd to add new feature or to fix something, some of
+there tools and libraries may help you.
+
+* asciidoc (http://www.methods.co.nz/asciidoc/). This is used as the user
+  guide generator.
+
+  When found, CMake automatically generate a new target `generate-doc' that
+  automatically update user guides directly in the doc/guides.
+
+* LDoc (https://github.com/stevedonovan/LDoc). This tool is used to create the
+  Lua API.
+
+  When found, CMake automatically generate a new target `generate-ldoc' that
+  automatically update Lua API HTML file in doc/ldoc/lua.
+
+* cppunit (http://sourceforge.net/apps/mediawiki/cppunit/). This tool is used
+  for unit tests in tests/ directory.
+
+  Note: currently there are no tests for this release. It will be added in 1.1.
+
 Basic installation
 ==================
 
