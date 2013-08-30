@@ -61,6 +61,30 @@ $ make
 
 Do not forget to adapt x.y with the current version.
 
+FreeBSD note
+------------
+
+On FreeBSD, the C++11 support is not available by default prior to
+version 10.0.
+
+You need to enable the LLVM libc++ in order to build irccd, you can use
+this guide to enable C++11 entirely:
+
+	https://wiki.freebsd.org/NewC%2B%2BStack
+
+Or the quickest way is to do the following:
+
+# make -C /usr/src/lib/libcxxrt all install
+# make CXX=clang -C /usr/src/lib/libc++ all install
+
+Then use the following cmake invokation :
+
+$ CXX=clang++ CC=clang cmake .. \ 
+	-DCMAKE_CXX_FLAGS_RELEASE="-std=c++11 -stdlib=libc++"
+	-DMANDIR=man
+
+And you can continue the installation as above.
+
 Tweaking installation
 =====================
 

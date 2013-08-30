@@ -922,11 +922,6 @@ const Server::Identity & Irccd::findIdentity(const string &name)
 
 int Irccd::run()
 {
-#if !defined(_WIN32)
-	if (!m_foreground)
-		daemon(0, 0);
-#endif
-
 	Logger::log("irccd: user config path %s", Util::configDirectory().c_str());
 	Logger::log("irccd: user default plugin path %s", Util::pluginDirectory().c_str());
 
@@ -943,6 +938,11 @@ int Irccd::run()
 		    s->getInfo().m_name.c_str(), s->getInfo().m_host.c_str());
 		s->startConnection();
 	}
+
+#if !defined(_WIN32)
+	if (!m_foreground)
+		daemon(0, 0);
+#endif
 
 	while (m_running) {
 		if (m_socketServers.size() == 0) {

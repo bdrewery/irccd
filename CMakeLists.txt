@@ -108,7 +108,6 @@ message("")
 
 message("Compiling irccd with following options:")
 message("\tLua support:\t\t${LUA_SUPPORT}")
-message("\tUnit tests:\t\t${UNIT_TESTS}")
 message("\tirccd config:\t\t${DEFAULT_IRCCD_CONFIG}")
 message("\tirccdctl config:\t${DEFAULT_IRCCDCTL_CONFIG}")
 message("")
