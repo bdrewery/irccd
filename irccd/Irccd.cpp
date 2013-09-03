@@ -463,6 +463,13 @@ void Irccd::openConfig()
 		exit(1);
 	}
 
+#if !defined(_WIN32)
+	if (!m_foreground) {
+		Logger::log("irccd: forking to background...");
+		daemon(0, 0);
+	}
+#endif
+
 	Logger::log("irccd: using configuration %s", m_configPath.c_str());
 
 	Section general = config.getSection("general");
@@ -938,11 +945,6 @@ int Irccd::run()
 		    s->getInfo().m_name.c_str(), s->getInfo().m_host.c_str());
 		s->startConnection();
 	}
-
-#if !defined(_WIN32)
-	if (!m_foreground)
-		daemon(0, 0);
-#endif
 
 	while (m_running) {
 		if (m_socketServers.size() == 0) {
