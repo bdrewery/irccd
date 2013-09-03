@@ -74,7 +74,7 @@ private:
 	 * 
 	 * @throw ErrorException on failure
 	 */
-	void call(const std::string & func,
+	void call(const std::string &func,
 		  std::shared_ptr<Server> server = std::shared_ptr<Server>(),
 		  std::vector<std::string> params = std::vector<std::string>());
 

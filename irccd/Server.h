@@ -228,7 +228,7 @@ public:
 	 *
 	 * @param line the line like PREFIX=(ovh)@+&
 	 */
-	void extractPrefixes(const std::string & line);
+	void extractPrefixes(const std::string &line);
 
 	/**
 	 * Get the name list being build for /names

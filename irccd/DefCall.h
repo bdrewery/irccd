@@ -66,14 +66,14 @@ public:
 	 *
 	 * @param users the user list
 	 */
-	void onNames(const std::vector<std::string> & users);
+	void onNames(const std::vector<std::string> &users);
 
 	/**
 	 * Whois information.
 	 *
 	 * @param params the parameters
 	 */
-	void onWhois(const std::vector<std::string> & params);
+	void onWhois(const std::vector<std::string> &params);
 
 	/**
 	 * Test the DeferredCall equality.

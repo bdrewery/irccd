@@ -210,7 +210,7 @@ static void handleNumeric(irc_session_t *s,
 	IrcEventParams evparams;
 
 	if (event == LIBIRC_RFC_RPL_NAMREPLY) {
-		Server::NameList & list = server->getNameLists();
+		Server::NameList &list = server->getNameLists();
 
 		if (params[3] != nullptr && params[2] != nullptr) {
 			std::vector<string> users = Util::split(params[3], " \t");
@@ -224,7 +224,7 @@ static void handleNumeric(irc_session_t *s,
 			}
 		}
 	} else if (event == LIBIRC_RFC_RPL_ENDOFNAMES) {
-		Server::NameList & list = server->getNameLists();
+		Server::NameList &list = server->getNameLists();
 
 		if (params[1] != nullptr) {
 			Irccd::getInstance()->handleIrcEvent(
@@ -246,13 +246,13 @@ static void handleNumeric(irc_session_t *s,
 
 		server->getWhoisLists()[info.nick] = info;
 	} else if (event == LIBIRC_RFC_RPL_WHOISCHANNELS) {
-		Server::WhoisInfo & info = server->getWhoisLists()[params[1]];
+		Server::WhoisInfo &info = server->getWhoisLists()[params[1]];
 
 		// Add all channels
 		for (unsigned int i = 2; i < c; ++i)
 			info.channels.push_back(params[i]);
 	} else if (event == LIBIRC_RFC_RPL_ENDOFWHOIS) {
-		const Server::WhoisInfo & info = server->getWhoisLists()[params[1]];
+		const Server::WhoisInfo &info = server->getWhoisLists()[params[1]];
 		vector<string> params;
 
 		// Convert as nick, user, host, realname, chan1, chan2, ... chanN
@@ -423,7 +423,7 @@ void Server::init()
 	m_callbacks.event_umode			= handleUserMode;
 }
 
-void Server::extractPrefixes(const std::string & line)
+void Server::extractPrefixes(const string &line)
 {
 	pair<char, char> table[16];
 	string buf = line.substr(7);

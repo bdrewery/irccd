@@ -52,7 +52,7 @@ IrcEventType DefCall::type() const
 	return m_type;
 }
 
-void DefCall::onNames(const vector<string> & users)
+void DefCall::onNames(const vector<string> &users)
 {
 	lua_State *L = m_plugin->getState().get();
 
@@ -67,7 +67,7 @@ void DefCall::onNames(const vector<string> & users)
 	call(1);
 }
 
-void DefCall::onWhois(const vector<string> & params)
+void DefCall::onWhois(const vector<string> &params)
 {
 	lua_State *L = m_plugin->getState().get();
 

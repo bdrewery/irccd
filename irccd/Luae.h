@@ -51,7 +51,7 @@ public:
 	 * @return the converted type.
 	 */
 	template <typename T>
-	static T getField(lua_State *L, int idx, const std::string & name);
+	static T getField(lua_State *L, int idx, const std::string &name);
 
 	/**
 	 * Read a table, the function func is called for each element in the
@@ -78,7 +78,7 @@ public:
 	 * @see require
 	 */
 	static void preload(lua_State *L,
-			    const std::string & name,
+			    const std::string &name,
 			    lua_CFunction func);
 
 	/**
@@ -94,7 +94,7 @@ public:
 	static int referenceField(lua_State *L,
 				  int idx,
 				  int type,
-				  const std::string & name);
+				  const std::string &name);
 
 	/**
 	 * Load a library just like it was loaded with require.
@@ -105,7 +105,7 @@ public:
 	 * @param global store as global
 	 */
 	static void require(lua_State *L,
-			    const std::string & name,
+			    const std::string &name,
 			    lua_CFunction func,
 			    bool global);
 

@@ -123,7 +123,7 @@ bool Plugin::loadLua(const string &path)
 	return true;
 }
 
-void Plugin::call(const string & func,
+void Plugin::call(const string &func,
 		  shared_ptr<Server> server,
 		  vector<string> params)
 {
@@ -140,7 +140,7 @@ void Plugin::call(const string & func,
 			++ np;
 		}
 
-		for (const string & a : params) {
+		for (const string &a : params) {
 			lua_pushstring(L, a.c_str());
 			++ np;
 		}

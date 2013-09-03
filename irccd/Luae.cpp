@@ -22,7 +22,7 @@ using namespace irccd;
 using namespace std;
 
 template <>
-bool Luae::getField(lua_State *L, int idx, const string & name)
+bool Luae::getField(lua_State *L, int idx, const string &name)
 {
 	bool value = false;
 
@@ -35,7 +35,7 @@ bool Luae::getField(lua_State *L, int idx, const string & name)
 }
 
 template <>
-double Luae::getField(lua_State *L, int idx, const string & name)
+double Luae::getField(lua_State *L, int idx, const string &name)
 {
 	double value = 0;
 
@@ -48,7 +48,7 @@ double Luae::getField(lua_State *L, int idx, const string & name)
 }
 
 template <>
-int Luae::getField(lua_State *L, int idx, const string & name)
+int Luae::getField(lua_State *L, int idx, const string &name)
 {
 	int value = 0;
 
@@ -61,7 +61,7 @@ int Luae::getField(lua_State *L, int idx, const string & name)
 }
 
 template <>
-string Luae::getField(lua_State *L, int idx, const string & name)
+string Luae::getField(lua_State *L, int idx, const string &name)
 {
 	string value;
 
@@ -73,7 +73,7 @@ string Luae::getField(lua_State *L, int idx, const string & name)
 	return value;
 }
 
-void Luae::preload(lua_State *L, const string & name, lua_CFunction func)
+void Luae::preload(lua_State *L, const string &name, lua_CFunction func)
 {
 	LUA_STACK_CHECKBEGIN(L);
 
@@ -101,7 +101,7 @@ void Luae::readTable(lua_State *L, int idx, ReadFunction func)
 	lua_pop(L, 1);
 }
 
-int Luae::referenceField(lua_State *L, int idx, int type, const string & name)
+int Luae::referenceField(lua_State *L, int idx, int type, const string &name)
 {
 	int ref = LUA_REFNIL;
 
@@ -117,7 +117,7 @@ int Luae::referenceField(lua_State *L, int idx, int type, const string & name)
 	return ref;
 }
 
-void Luae::require(lua_State *L, const string & name, lua_CFunction func, bool global)
+void Luae::require(lua_State *L, const string &name, lua_CFunction func, bool global)
 {
 	LUA_STACK_CHECKBEGIN(L);
 
