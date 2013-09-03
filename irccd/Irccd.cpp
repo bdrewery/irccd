@@ -299,8 +299,8 @@ static map<string, Handler> createHandlers()
 	handlers["KICK"]	= handleKick;
 	handlers["LOAD"]	= handleLoad;
 	handlers["ME"]		= handleMe;
-	handlers["MODE"]	= handleMode;
 	handlers["MSG"]		= handleMessage;
+	handlers["MODE"]	= handleMode;
 	handlers["NOTICE"]	= handleNotice;
 	handlers["NICK"]	= handleNick;
 	handlers["PART"]	= handlePart;

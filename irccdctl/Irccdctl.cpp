@@ -229,9 +229,10 @@ static void handleChannelNotice(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 3)
+	if (argc < 3) {
 		Logger::warn("cnotice requires 3 arguments");
-	else {
+		exit(1);
+	} else {
 		oss << "CNOTICE " << argv[0] << " " << argv[1];
 		oss << " " << argv[2] << "\n";
 		ctl->sendRaw(oss.str());
@@ -242,9 +243,10 @@ static void handleInvite(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 3)
+	if (argc < 3) {
 		Logger::warn("invite requires 3 arguments");
-	else {
+		exit(1);
+	} else {
 		oss << "INVITE " << argv[0] << " " << argv[1];
 		oss << " " << argv[2] << "\n";
 
@@ -256,9 +258,10 @@ static void handleJoin(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 2)
+	if (argc < 2) {
 		Logger::warn("join requires at least 2 arguments");
-	else {
+		exit(1);
+	} else {
 		oss << "JOIN " << argv[0] << " " << argv[1];
 
 		// optional password
@@ -273,9 +276,10 @@ static void handleKick(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 3)
+	if (argc < 3) {
 		Logger::warn("kick requires at least 3 arguments ");
-	else {
+		exit(1);
+	} else {
 		oss << "KICK " << argv[0] << " " << argv[1] << " " << argv[2];
 
 		// optional reason
@@ -290,9 +294,10 @@ static void handleLoad(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 1)
+	if (argc < 1) {
 		Logger::warn("load requires 1 argument");
-	else {
+		exit(1);
+	} else {
 		oss << "LOAD " << argv[0] << "\n";
 		ctl->sendRaw(oss.str());
 	}
@@ -302,9 +307,10 @@ static void handleMe(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 3)
+	if (argc < 3) {
 		Logger::warn("me requires 3 arguments");
-	else {
+		exit(1);
+	} else {
 		oss << "ME " << argv[0] << " " << argv[1] << " " << argv[2] << "\n";
 		ctl->sendRaw(oss.str());
 	}
@@ -314,9 +320,10 @@ static void handleMessage(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 3)
+	if (argc < 3) {
 		Logger::warn("message requires 3 arguments");
-	else {
+		exit(1);
+	} else {
 		oss << "MSG " << argv[0] << " " << argv[1] << " " << argv[2] << "\n";
 		ctl->sendRaw(oss.str());
 	}
@@ -326,9 +333,10 @@ static void handleMode(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 3)
+	if (argc < 3) {
 		Logger::warn("mode requires 3 arguments");
-	else {
+		exit(1);
+	} else {
 		oss << "MODE " << argv[0] << " " << argv[1];
 		oss << " " << argv[2] << "\n";
 		ctl->sendRaw(oss.str());
@@ -339,9 +347,10 @@ static void handleNick(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 2)
+	if (argc < 2) {
 		Logger::warn("nick requires 2 arguments");
-	else {
+		exit(1);
+	} else {
 		oss << "NICK " << argv[0] << " " << argv[1] << "\n";
 		ctl->sendRaw(oss.str());
 	}
@@ -351,9 +360,10 @@ static void handleNotice(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 3)
+	if (argc < 3) {
 		Logger::warn("notice requires 3 arguments");
-	else {
+		exit(1);
+	} else {
 		oss << "NOTICE " << argv[0] << " " << argv[1];
 		oss << " " << argv[2] << "\n";
 		ctl->sendRaw(oss.str());
@@ -364,9 +374,10 @@ static void handlePart(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 2)
+	if (argc < 2) {
 		Logger::warn("part requires 2 arguments");
-	else {
+		exit(1);
+	} else {
 		oss << "PART " << argv[0] << " " << argv[1] << "\n";
 		ctl->sendRaw(oss.str());
 	}
@@ -376,9 +387,10 @@ static void handleReload(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 1)
+	if (argc < 1) {
 		Logger::warn("reload requires 1 argument");
-	else {
+		exit(1);
+	} else {
 		oss << "RELOAD " << argv[0] << "\n";
 		ctl->sendRaw(oss.str());
 	}
@@ -388,9 +400,10 @@ static void handleTopic(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 3)
+	if (argc < 3) {
 		Logger::warn("topic requires 3 arguments");
-	else {
+		exit(1);
+	} else {
 		oss << "TOPIC " << argv[0] << " " << argv[1] << " ";
 		oss << argv[2] << "\n";
 		ctl->sendRaw(oss.str());
@@ -401,9 +414,10 @@ static void handleUnload(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 1)
+	if (argc < 1) {
 		Logger::warn("unload requires 1 argument");
-	else {
+		exit(1);
+	} else {
 		oss << "UNLOAD " << argv[0] << "\n";
 		ctl->sendRaw(oss.str());
 	}
@@ -413,9 +427,10 @@ static void handleUserMode(Irccdctl *ctl, int argc, char **argv)
 {
 	ostringstream oss;
 
-	if (argc < 2)
+	if (argc < 2) {
 		Logger::warn("umode requires 2 arguments");
-	else {
+		exit(1);
+	} else {
 		oss << "UMODE " << argv[0] << " " << argv[1] << "\n";
 		ctl->sendRaw(oss.str());
 	}

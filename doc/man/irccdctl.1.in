@@ -140,4 +140,4 @@ Be more verbose.
 .Xr irccdctl.conf 5
 .\" AUTHORS
 .Sh AUTHORS
-irccd was written by David Demelier <markand@malikania.fr>
+irccdctl was written by David Demelier <markand@malikania.fr>

@@ -29,8 +29,8 @@ endif ()
 option(WITH_MAN "Install man pages" ${USE_MAN})
 
 # Update man pages date
-set(MONTH "May")
-set(DAY 30)
+set(MONTH "September")
+set(DAY 3)
 set(YEAR 2013)
 
 function(DEFINE_MAN file man)
