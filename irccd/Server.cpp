@@ -501,14 +501,14 @@ void Server::addChannel(const string &name, const string &password)
 
 bool Server::hasChannel(const string &name)
 {
-	for (const Channel &c : m_info.m_channels)
+	for (auto c : m_info.m_channels)
 		if (c.m_name == name)
 			return true;
 
 	return false;
 }
 
-bool Server::hasPrefix(const std::string & nickname)
+bool Server::hasPrefix(const string &nickname)
 {
 	if (nickname.length() == 0)
 		return false;

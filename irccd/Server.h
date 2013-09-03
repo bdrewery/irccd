@@ -296,7 +296,7 @@ public:
 	 * @param nick the nickname
 	 * @return true if has
 	 */
-	bool hasPrefix(const std::string & nick);
+	bool hasPrefix(const std::string &nick);
 
 	/**
 	 * Remove a channel from the server list.
