@@ -1,9 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
-    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.6.8" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="AsciiDoc 8.6.8">
 <title>Plugin history 1.0</title>
 <style type="text/css">
 /*
@@ -626,8 +625,8 @@ asciidoc.install(2);
 <body class="article">
 <div id="header">
 <h1>Plugin history 1.0</h1>
-<span id="author">Demelier David</span><br />
-<span id="email"><code>&lt;<a href="mailto:demelier.david@gmail.com">demelier.david@gmail.com</a>&gt;</code></span><br />
+<span id="author">Demelier David</span><br>
+<span id="email" class="monospaced">&lt;<a href="mailto:demelier.david@gmail.com">demelier.david@gmail.com</a>&gt;</span><br>
 <span id="revdate">June, 8 2013</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
@@ -638,7 +637,7 @@ asciidoc.install(2);
 <div class="sect1">
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>history</code> is used to check when someone has been seen for the last
+<div class="paragraph"><p>The plugin <span class="monospaced">history</span> is used to check when someone has been seen for the last
 time on a channel. For that purpose, irccd needs to be on that channel forever
 if possible.</p></div>
 </div>
@@ -646,28 +645,28 @@ if possible.</p></div>
 <div class="sect1">
 <h2 id="_installation">Installation</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>history</code> is distributed with <code>irccd</code>. To enable it add the following
-to your <code>plugins</code> parameter:</p></div>
+<div class="paragraph"><p>The plugin <span class="monospaced">history</span> is distributed with <span class="monospaced">irccd</span>. To enable it add the following
+to your <span class="monospaced">plugins</span> parameter:</p></div>
 <div class="listingblock">
-<div class="content">
-<pre><code>plugins = "history"</code></pre>
+<div class="content monospaced">
+<pre>plugins = "history"</pre>
 </div></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_usage">Usage</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>history</code> only reacts to the special command. It understands <code>seen</code>
-and <code>said</code> sub commands.</p></div>
+<div class="paragraph"><p>The plugin <span class="monospaced">history</span> only reacts to the special command. It understands <span class="monospaced">seen</span>
+and <span class="monospaced">said</span> sub commands.</p></div>
 <div class="paragraph"><p>The sub command seen tells you when the user has been seen for the last time.</p></div>
 <div class="paragraph"><p>The sub command said tells you what the user has said for the last time.</p></div>
 <div class="listingblock">
 <div class="title">Example</div>
-<div class="content">
-<pre><code>markand: !history seen jean
+<div class="content monospaced">
+<pre>markand: !history seen jean
 irccd: markand, the last time I've seen jean was on 18/01/1989 at 20:55
 markand: !history said jean
-irccd: markand, the last thing that jean said was: hello world</code></pre>
+irccd: markand, the last thing that jean said was: hello world</pre>
 </div></div>
 <div class="paragraph"><p>See <a href="user-guide.html#irccdplugnote">irccd plugin notes</a>.</p></div>
 </div>
@@ -675,19 +674,19 @@ irccd: markand, the last thing that jean said was: hello world</code></pre>
 <div class="sect1">
 <h2 id="_configuration">Configuration</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>history</code> can be configured in the file <code>history.conf</code>. You can change
+<div class="paragraph"><p>The plugin <span class="monospaced">history</span> can be configured in the file <span class="monospaced">history.conf</span>. You can change
 the answers from irccd.</p></div>
-<div class="paragraph"><p>The <code>history.conf</code> uses <a href="user-guide.html#irccdsyntax">irccd syntax</a>.</p></div>
+<div class="paragraph"><p>The <span class="monospaced">history.conf</span> uses <a href="user-guide.html#irccdsyntax">irccd syntax</a>.</p></div>
 <div class="sect2">
-<h3 id="_section_code_formats_code">Section <code>formats</code></h3>
+<h3 id="_section_span_class_monospaced_formats_span">Section <span class="monospaced">formats</span></h3>
 <div class="paragraph"><p>This section configures the answers that irccd will uses to answers requests.</p></div>
-<div class="paragraph"><div class="title">Option <code>error</code></div><p>When the plugin history could not open the database files, it uses this option
+<div class="paragraph"><div class="title">Option <span class="monospaced">error</span></div><p>When the plugin history could not open the database files, it uses this option
 to respond an error.</p></div>
-<div class="paragraph"><div class="title">Option <code>seen</code></div><p>This option is used for the command <code>!history seen</code>.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">seen</span></div><p>This option is used for the command <span class="monospaced">!history seen</span>.</p></div>
 <div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #U</a></p></div>
-<div class="paragraph"><div class="title">Option <code>said</code></div><p>This option is used for the command <code>!history said</code>.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">said</span></div><p>This option is used for the command <span class="monospaced">!history said</span>.</p></div>
 <div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #U</a></p></div>
-<div class="paragraph"><div class="title">Option <code>unknown</code></div><p>This option is used when irccd has never seen the requested nickname.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">unknown</span></div><p>This option is used when irccd has never seen the requested nickname.</p></div>
 <div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #U</a></p></div>
 <div class="listingblock">
 <div class="title">Example</div>
@@ -704,10 +703,10 @@ http://www.gnu.org/software/src-highlite -->
 </div>
 </div>
 </div>
-<div id="footnotes"><hr /></div>
+<div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-07-18 16:40:20 CEST
+Last updated 2013-08-28 13:41:15 CEST
 </div>
 </div>
 </body>

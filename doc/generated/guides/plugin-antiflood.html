@@ -1,9 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
-    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.6.8" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="AsciiDoc 8.6.8">
 <title>Plugin antiflood 1.0</title>
 <style type="text/css">
 /*
@@ -626,8 +625,8 @@ asciidoc.install(2);
 <body class="article">
 <div id="header">
 <h1>Plugin antiflood 1.0</h1>
-<span id="author">Demelier David</span><br />
-<span id="email"><code>&lt;<a href="mailto:demelier.david@gmail.com">demelier.david@gmail.com</a>&gt;</code></span><br />
+<span id="author">Demelier David</span><br>
+<span id="email" class="monospaced">&lt;<a href="mailto:demelier.david@gmail.com">demelier.david@gmail.com</a>&gt;</span><br>
 <span id="revdate">June, 8 2013</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
@@ -638,18 +637,18 @@ asciidoc.install(2);
 <div class="sect1">
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>antiflood</code> can avoid people flooding channels. It supports
+<div class="paragraph"><p>The plugin <span class="monospaced">antiflood</span> can avoid people flooding channels. It supports
 banning and kicking.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_installation">Installation</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>antiflood</code> is distributed with <code>irccd</code>. To enable it add the
-following to your <code>plugins</code> parameter:</p></div>
+<div class="paragraph"><p>The plugin <span class="monospaced">antiflood</span> is distributed with <span class="monospaced">irccd</span>. To enable it add the
+following to your <span class="monospaced">plugins</span> parameter:</p></div>
 <div class="listingblock">
-<div class="content">
-<pre><code>plugins = "antiflood"</code></pre>
+<div class="content monospaced">
+<pre>plugins = "antiflood"</pre>
 </div></div>
 </div>
 </div>
@@ -663,42 +662,42 @@ following to your <code>plugins</code> parameter:</p></div>
 <div class="sect1">
 <h2 id="_configuration">Configuration</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>antiflood</code> can be configured in the file <code>antiflood.conf</code>. It allows
+<div class="paragraph"><p>The plugin <span class="monospaced">antiflood</span> can be configured in the file <span class="monospaced">antiflood.conf</span>. It allows
 changing the messages rate, the action to execute and an optional ignore list.</p></div>
-<div class="paragraph"><p>The <code>antiflood.conf</code> uses <a href="user-guide.html#irccdsyntax">irccd syntax</a>.</p></div>
+<div class="paragraph"><p>The <span class="monospaced">antiflood.conf</span> uses <a href="user-guide.html#irccdsyntax">irccd syntax</a>.</p></div>
 <div class="sect2">
-<h3 id="_section_code_general_code">Section <code>general</code></h3>
+<h3 id="_section_span_class_monospaced_general_span">Section <span class="monospaced">general</span></h3>
 <div class="paragraph"><p>This section configures the general parameters. You may need fine tweaking to
 make it working better on some servers.</p></div>
-<div class="paragraph"><div class="title">Option <code>max-messages</code></div><p>Number of max messages that can be sent in a certain amount of time. Default: 5.</p></div>
-<div class="paragraph"><div class="title">Option <code>max-delay</code></div><p>Number of milliseconds between each messages. Default: 5000.</p></div>
-<div class="paragraph"><div class="title">Option <code>action</code></div><p>The action to execute, can be <code>kick</code> or <code>ban</code>. Default: kick.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">max-messages</span></div><p>Number of max messages that can be sent in a certain amount of time. Default: 5.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">max-delay</span></div><p>Number of milliseconds between each messages. Default: 5000.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">action</span></div><p>The action to execute, can be <span class="monospaced">kick</span> or <span class="monospaced">ban</span>. Default: kick.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
-<img src="icons/note.png" alt="Note" />
+<img src="icons/note.png" alt="Note">
 </td>
 <td class="content">Unfortunately, it&#8217;s not possible to modify the ban mask, only nick bans are
 supported yet.</td>
 </tr></table>
 </div>
-<div class="paragraph"><div class="title">Option <code>reason</code></div><p>An optional reason, it is used only as <code>kick</code> action. Default: "please not
+<div class="paragraph"><div class="title">Option <span class="monospaced">reason</span></div><p>An optional reason, it is used only as <span class="monospaced">kick</span> action. Default: "please not
 flood".</p></div>
 </div>
 <div class="sect2">
-<h3 id="_section_code_ignore_code">Section <code>ignore</code></h3>
+<h3 id="_section_span_class_monospaced_ignore_span">Section <span class="monospaced">ignore</span></h3>
 <div class="paragraph"><p>This section let you ignoring nicknames so these users are not tracked as
 possible flooders.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
-<img src="icons/note.png" alt="Note" />
+<img src="icons/note.png" alt="Note">
 </td>
 <td class="content">Irccd automatically adds itself to the ignore list, there is no need to add the
 bot.</td>
 </tr></table>
 </div>
-<div class="paragraph"><div class="title">Option <code>list</code></div><p>A space separeted list of nicknames to ignore. Default: empty.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">list</span></div><p>A space separeted list of nicknames to ignore. Default: empty.</p></div>
 <div class="listingblock">
 <div class="title">Example</div>
 <div class="content"><!-- Generator: GNU source-highlight 3.1.6
@@ -714,10 +713,10 @@ http://www.gnu.org/software/src-highlite -->
 </div>
 </div>
 </div>
-<div id="footnotes"><hr /></div>
+<div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-07-18 16:40:20 CEST
+Last updated 2013-08-28 13:41:15 CEST
 </div>
 </div>
 </body>

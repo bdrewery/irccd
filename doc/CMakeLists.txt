@@ -30,7 +30,7 @@ option(WITH_MAN "Install man pages" ${USE_MAN})
 
 # Update man pages date
 set(MONTH "September")
-set(DAY 3)
+set(DAY 5)
 set(YEAR 2013)
 
 function(DEFINE_MAN file man)
@@ -101,6 +101,7 @@ if (WITH_DOC)
 				APPEND
 				COMMANDS
 				    COMMAND ${ASCIIDOC}
+				    -b html5
 				    -a themedir="${CMAKE_CURRENT_SOURCE_DIR}/guides/themes/irccd"
 				    -a theme=irccd
 				    -o "${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/${output}.html"

@@ -1,9 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
-    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.6.8" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="AsciiDoc 8.6.8">
 <title>Plugin logger 1.0</title>
 <style type="text/css">
 /*
@@ -626,8 +625,8 @@ asciidoc.install(2);
 <body class="article">
 <div id="header">
 <h1>Plugin logger 1.0</h1>
-<span id="author">Demelier David</span><br />
-<span id="email"><code>&lt;<a href="mailto:demelier.david@gmail.com">demelier.david@gmail.com</a>&gt;</code></span><br />
+<span id="author">Demelier David</span><br>
+<span id="email" class="monospaced">&lt;<a href="mailto:demelier.david@gmail.com">demelier.david@gmail.com</a>&gt;</span><br>
 <span id="revdate">June, 8 2013</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
@@ -638,7 +637,7 @@ asciidoc.install(2);
 <div class="sect1">
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>logger</code> may be used to log everything you want. It supports the
+<div class="paragraph"><p>The plugin <span class="monospaced">logger</span> may be used to log everything you want. It supports the
 following events:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -692,11 +691,11 @@ User mode
 <div class="sect1">
 <h2 id="_installation">Installation</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>logger</code> is distributed with <code>irccd</code>. To enable it add the following
-to your <code>plugins</code> parameter:</p></div>
+<div class="paragraph"><p>The plugin <span class="monospaced">logger</span> is distributed with <span class="monospaced">irccd</span>. To enable it add the following
+to your <span class="monospaced">plugins</span> parameter:</p></div>
 <div class="listingblock">
-<div class="content">
-<pre><code>plugins = "logger"</code></pre>
+<div class="content monospaced">
+<pre>plugins = "logger"</pre>
 </div></div>
 </div>
 </div>
@@ -710,61 +709,61 @@ to your <code>plugins</code> parameter:</p></div>
 <div class="sect1">
 <h2 id="_configuration">Configuration</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>logger</code> can be configured to format logs.</p></div>
-<div class="paragraph"><p>The <code>logger.conf</code> uses <a href="user-guide.html#irccdsyntax">irccd syntax</a>.</p></div>
+<div class="paragraph"><p>The plugin <span class="monospaced">logger</span> can be configured to format logs.</p></div>
+<div class="paragraph"><p>The <span class="monospaced">logger.conf</span> uses <a href="user-guide.html#irccdsyntax">irccd syntax</a>.</p></div>
 <div class="sect2">
-<h3 id="_section_code_general_code">Section <code>general</code></h3>
+<h3 id="_section_span_class_monospaced_general_span">Section <span class="monospaced">general</span></h3>
 <div class="paragraph"><p>This section configures global options.</p></div>
-<div class="paragraph"><div class="title">Option <code>directory</code> (required)</div><p>The directory where to store logs.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">directory</span> (required)</div><p>The directory where to store logs.</p></div>
 <div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: ~, #s, #c, time</a></p></div>
 </div>
 <div class="sect2">
-<h3 id="_section_code_formats_code">Section <code>formats</code></h3>
+<h3 id="_section_span_class_monospaced_formats_span">Section <span class="monospaced">formats</span></h3>
 <div class="paragraph"><p>Event log formats. By default all events are logged, if you
 want to disable any of them, set the desired option to "".</p></div>
-<div class="paragraph"><div class="title">Option <code>cnotice</code></div><p>Format for channel notices.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">cnotice</span></div><p>Format for channel notices.</p></div>
 <div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #u, #s, #U, time</a></p></div>
-<div class="paragraph"><div class="title">Option <code>join</code></div><p>Format for channel joins.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">join</span></div><p>Format for channel joins.</p></div>
 <div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #u, #s, #U, time</a></p></div>
-<div class="paragraph"><div class="title">Option <code>me</code> (CTCP Action)</div><p>Format for /me.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">me</span> (CTCP Action)</div><p>Format for /me.</p></div>
 <div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #u, #U, time</a></p></div>
-<div class="paragraph"><div class="title">Option <code>message</code></div><p>Format for messages.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">message</span></div><p>Format for messages.</p></div>
 <div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #u, #U, time</a></p></div>
-<div class="paragraph"><div class="title">Option <code>mode</code></div><p>Format for channel mode changes.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">mode</span></div><p>Format for channel mode changes.</p></div>
 <div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #M, #s, #u, #U, time</a></p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
-<img src="icons/note.png" alt="Note" />
+<img src="icons/note.png" alt="Note">
 </td>
 <td class="content">Keyword <strong>#m</strong> is the mode name such as <strong>+b</strong> and <strong>#M</strong> an optional argument.</td>
 </tr></table>
 </div>
-<div class="paragraph"><div class="title">Option <code>notice</code></div><p>Format for private notices</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">notice</span></div><p>Format for private notices</p></div>
 <div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #T #u, #U, time</a></p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
-<img src="icons/note.png" alt="Note" />
+<img src="icons/note.png" alt="Note">
 </td>
 <td class="content">Keyword <strong>#T</strong> is the targeted nicknamed for the notice, <strong>#u</strong> and <strong>#U</strong> are the
 sender nickname.</td>
 </tr></table>
 </div>
-<div class="paragraph"><div class="title">Option <code>part</code></div><p>Format for parts.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">part</span></div><p>Format for parts.</p></div>
 <div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #u, #U, time</a></p></div>
-<div class="paragraph"><div class="title">Option <code>topic</code></div><p>Format for topic changes.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">topic</span></div><p>Format for topic changes.</p></div>
 <div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #s, #t, #u, #U, time</a></p></div>
-<div class="paragraph"><div class="title">Option <code>umode</code></div><p>Format for user mode change. This only affects you.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">umode</span></div><p>Format for user mode change. This only affects you.</p></div>
 <div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #m, #s, #T, time</a></p></div>
 </div>
 </div>
 </div>
 </div>
-<div id="footnotes"><hr /></div>
+<div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-07-18 16:40:20 CEST
+Last updated 2013-08-28 13:41:15 CEST
 </div>
 </div>
 </body>

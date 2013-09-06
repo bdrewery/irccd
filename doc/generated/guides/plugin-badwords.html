@@ -1,9 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
-    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.6.8" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="AsciiDoc 8.6.8">
 <title>Plugin badwords 1.0</title>
 <style type="text/css">
 /*
@@ -626,8 +625,8 @@ asciidoc.install(2);
 <body class="article">
 <div id="header">
 <h1>Plugin badwords 1.0</h1>
-<span id="author">Demelier David</span><br />
-<span id="email"><code>&lt;<a href="mailto:demelier.david@gmail.com">demelier.david@gmail.com</a>&gt;</code></span><br />
+<span id="author">Demelier David</span><br>
+<span id="email" class="monospaced">&lt;<a href="mailto:demelier.david@gmail.com">demelier.david@gmail.com</a>&gt;</span><br>
 <span id="revdate">June, 8 2013</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
@@ -638,17 +637,17 @@ asciidoc.install(2);
 <div class="sect1">
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>badwords</code> can avoid people saying bad words.</p></div>
+<div class="paragraph"><p>The plugin <span class="monospaced">badwords</span> can avoid people saying bad words.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_installation">Installation</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The plugin <code>badwords</code> is distributed with <code>irccd</code>. To enable it add the
-following to your <code>plugins</code> parameter:</p></div>
+<div class="paragraph"><p>The plugin <span class="monospaced">badwords</span> is distributed with <span class="monospaced">irccd</span>. To enable it add the
+following to your <span class="monospaced">plugins</span> parameter:</p></div>
 <div class="listingblock">
-<div class="content">
-<pre><code>plugins = "badwords"</code></pre>
+<div class="content monospaced">
+<pre>plugins = "badwords"</pre>
 </div></div>
 </div>
 </div>
@@ -667,41 +666,41 @@ badwords.</p></div>
 <div class="sect2">
 <h3 id="_listing_words">Listing words</h3>
 <div class="paragraph"><p>First, you need a lot of words to be processed. This is done within the
-<code>answers.txt</code> file. Just add one bad word per line.</p></div>
+<span class="monospaced">answers.txt</span> file. Just add one bad word per line.</p></div>
 <div class="listingblock">
 <div class="title">Example</div>
-<div class="content">
-<pre><code>Apple
+<div class="content monospaced">
+<pre>Apple
 Microsoft
-Justin Bieber</code></pre>
+Justin Bieber</pre>
 </div></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
-<img src="icons/note.png" alt="Note" />
+<img src="icons/note.png" alt="Note">
 </td>
 <td class="content">Currently, only ASCII strings are supported, this is due to a use of the Lua
-<code>string.lower</code> function.</td>
+<span class="monospaced">string.lower</span> function.</td>
 </tr></table>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_configuring_the_plugin">Configuring the plugin</h3>
-<div class="paragraph"><p>The plugin <code>badwords</code> can be configured in the file <code>badwords.conf</code>.</p></div>
-<div class="paragraph"><p>The <code>antiflood.conf</code> uses <a href="user-guide.html#irccdsyntax">irccd syntax</a>.</p></div>
+<div class="paragraph"><p>The plugin <span class="monospaced">badwords</span> can be configured in the file <span class="monospaced">badwords.conf</span>.</p></div>
+<div class="paragraph"><p>The <span class="monospaced">antiflood.conf</span> uses <a href="user-guide.html#irccdsyntax">irccd syntax</a>.</p></div>
 <div class="sect3">
-<h4 id="_section_code_general_code">Section <code>general</code></h4>
+<h4 id="_section_span_class_monospaced_general_span">Section <span class="monospaced">general</span></h4>
 <div class="paragraph"><p>This section configure the general parameters. They are completely optional.</p></div>
-<div class="paragraph"><div class="title">Option <code>response</code></div><p>The answer to say to the nickname that said bad words.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">response</span></div><p>The answer to say to the nickname that said bad words.</p></div>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div id="footnotes"><hr /></div>
+<div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-07-18 16:40:20 CEST
+Last updated 2013-08-28 13:41:15 CEST
 </div>
 </div>
 </body>
