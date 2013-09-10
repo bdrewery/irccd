@@ -3,15 +3,13 @@
 --
 -- @module irccd
 
---- Fields defined.
--- @class table
--- @field VERSION the string version such as "1.0"
--- @field VERSION_MAJOR the major number, i.e 1
--- @field VERSION_MINOR the major number, i.e 0
-irccd = {
-	VERSION,
-	VERSION_MAJOR,
-	VERSION_MINOR,
-}
+--- The string version such as "1.0"
+VERSION = 1.0,
+
+--- The major number, i.e 1
+VERSION_MAJOR = 1,
+
+--- The major number, i.e 0
+VERSION_MINOR = 0,
 
 -- vim: set syntax=lua nu:

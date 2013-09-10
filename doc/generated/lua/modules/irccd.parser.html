@@ -18,7 +18,7 @@
 <h2 class="kind">Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
-<li><a href="#Tables">Tables</a></li>
+<li><a href="#Tuning">Tuning </a></li>
 <li><a href="#Class_Parser">Class Parser </a></li>
 <li><a href="#Parser_metamethods">Parser metamethods </a></li>
 <li><a href="#Class_Section">Class Section </a></li>
@@ -83,11 +83,19 @@
 	<td class="summary">Create a new Parser object.</td>
 	</tr>
 </table>
-<h2 class="kind"><a href="#Tables">Tables</a></h2>
+<h2 class="kind"><a href="#Tuning">Tuning </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#parser">parser</a></td>
-	<td class="summary">Tuning options</td>
+	<td class="name" nowrap><a href="#DisableVerbosity">DisableVerbosity</a></td>
+	<td class="summary">Disable the verbosity.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#DisableRootSection">DisableRootSection</a></td>
+	<td class="summary">Forbid options on root.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#DisableRedefinition">DisableRedefinition</a></td>
+	<td class="summary">Disable multiple sections.</td>
 	</tr>
 </table>
 <h2 class="kind"><a href="#Class_Parser">Class Parser </a></h2>
@@ -190,32 +198,46 @@
     </ol>
 
 
-    <h3>See also:</h3>
-    <ul>
-         <a href="../modules/irccd.parser.html#Class_Parser">Parser</a>
-    </ul>
 
 
 </dd>
 </dl>
-    <h2 class="kind"><a name="Tables"></a>Tables</h2>
+    <h2 class="kind"><a name="Tuning"></a>Tuning </h2>
+        Tuning
     <dl class="function">
     <dt>
-    <a name = "parser"></a>
-    <strong>parser</strong>
+    <a name = "DisableVerbosity"></a>
+    <strong>DisableVerbosity</strong>
     </dt>
     <dd>
-    Tuning options
+    Disable the verbosity.
 
-    <h3>Fields:</h3>
-    <ul>
-        <li><span class="parameter">DisableVerbosity</span>
-         disable the verbosity</li>
-        <li><span class="parameter">DisableRootSection</span>
-         forbid options on root</li>
-        <li><span class="parameter">DisableRedefinition</span>
-         disable multiple sections</li>
-    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "DisableRootSection"></a>
+    <strong>DisableRootSection</strong>
+    </dt>
+    <dd>
+    Forbid options on root.
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "DisableRedefinition"></a>
+    <strong>DisableRedefinition</strong>
+    </dt>
+    <dd>
+    Disable multiple sections.
+
 
 
 

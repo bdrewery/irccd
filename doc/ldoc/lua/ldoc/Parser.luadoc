@@ -6,20 +6,22 @@
 --
 -- @module irccd.parser
 
---- Tuning options
--- @class table
--- @field DisableVerbosity disable the verbosity
--- @field DisableRootSection forbid options on root
--- @field DisableRedefinition disable multiple sections
-parser = {
-	DisableVerbosity = 1,
-	DisableRootSection = 2,
-	DisableRedefinition = 3
-}
+--- Tuning
+-- @section Tuning
+
+--- Disable the verbosity.
+DisableVerbosity = 1,
+
+--- Forbid options on root.
+DisableRootSection = 2,
+
+--- Disable multiple sections.
+DisableRedefinition = 3
+
+--- @section end
 
 --- Create a new Parser object.
 -- This function does not open any file, you need to call open.
--- @see Parser
 -- @param path the path
 -- @param tuning optional table of tuning options
 -- @param commentChar optional comment delimiter
