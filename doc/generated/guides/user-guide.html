@@ -426,40 +426,6 @@ th.tableblock.valign-bottom, td.tableblock.valign-bottom {
 
 
 
-@media screen {
-  body {
-    max-width: 50em; /* approximately 80 characters wide */
-    margin-left: 16em;
-  }
-
-  #toc {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 13em;
-    padding: 0.5em;
-    padding-bottom: 1.5em;
-    margin: 0;
-    overflow: auto;
-    border-right: 3px solid #f8f8f8;
-    background-color: white;
-  }
-
-  #toc .toclevel1 {
-    margin-top: 0.5em;
-  }
-
-  #toc .toclevel2 {
-    margin-top: 0.25em;
-    display: list-item;
-    color: #aaaaaa;
-  }
-
-  #toctitle {
-    margin-top: 0.5em;
-  }
-}
 </style>
 <script type="text/javascript">
 /*<![CDATA[*/
@@ -686,8 +652,9 @@ otherwise, choose 64bit version.</p></div>
 <div class="paragraph"><p>On Unix systems, there is probably prebuild binaries provided by your
 distribution. If not you will need to build from sources, don&#8217;t worry it&#8217;s
 not very hard.</p></div>
-<div class="sect3">
-<h4 id="_requirements">Requirements</h4>
+</div>
+<div class="sect2">
+<h3 id="_requirements">Requirements</h3>
 <div class="paragraph"><p>To build from sources, you need the following installed on your system:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -726,8 +693,8 @@ or something similar.</td>
 </tr></table>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_running_the_build">Running the build</h4>
+<div class="sect2">
+<h3 id="_running_the_build">Running the build</h3>
 <div class="paragraph"><p>When you&#8217;re ready, extract the <span class="monospaced">irccd-x.y-sources.tar.xz</span> where <span class="monospaced">x.y</span> is
 replaced with the current version. Go to that directory, then type the
 following commands:</p></div>
@@ -787,7 +754,6 @@ different one.</p></div>
 <div class="content monospaced">
 <pre>markand@localhost [irccd-1.0/_build_] $ cmake .. -DMANDIR=/usr/local/man</pre>
 </div></div>
-</div>
 </div>
 </div>
 </div>
@@ -1066,8 +1032,9 @@ Unix sockets, based on files (not available on Windows)
 </li>
 </ul></div>
 <div class="paragraph"><p>Both of the listener has an option <span class="monospaced">type</span> which is set to <span class="monospaced">internet</span> or <span class="monospaced">unix</span>.</p></div>
-<div class="sect3">
-<h4 id="_using_internet_sockets">Using internet sockets</h4>
+</div>
+<div class="sect2">
+<h3 id="_using_internet_sockets">Using internet sockets</h3>
 <div class="paragraph"><p>The options available:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -1099,8 +1066,8 @@ http://www.gnu.org/software/src-highlite -->
 <span style="color: #009900">port </span><span style="color: #990000">=</span> <span style="color: #993399">9999</span></tt></pre></div></div>
 <div class="paragraph"><p>This will let you controlling irccd on port 9999 with both IPv4 and IPv6 families.</p></div>
 </div>
-<div class="sect3">
-<h4 id="_using_unix_sockets">Using unix sockets</h4>
+<div class="sect2">
+<h3 id="_using_unix_sockets">Using unix sockets</h3>
 <div class="paragraph"><p>The options available:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -1130,7 +1097,6 @@ bot on a server with multiple users. If your bot has operator rights and you
 bind on any address, almost every users can do a kick or a ban. If this is a
 concern switch to a Unix socket if possible.</td>
 </tr></table>
-</div>
 </div>
 </div>
 <div class="sect2">
@@ -1383,8 +1349,9 @@ http://www.gnu.org/software/src-highlite -->
 only one may be defined.</p></div>
 <div class="paragraph"><p>Just like <a href="#listeners">listeners</a> you can connect to Unix or internet sockets.</p></div>
 <div class="paragraph"><p>Both of the listener has an option <span class="monospaced">type</span> which is set to <span class="monospaced">internet</span> or <span class="monospaced">unix</span>.</p></div>
-<div class="sect3">
-<h4 id="_using_internet_sockets_2">Using internet sockets</h4>
+</div>
+<div class="sect2">
+<h3 id="_using_internet_sockets_2">Using internet sockets</h3>
 <div class="paragraph"><p>The options available:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -1415,8 +1382,8 @@ http://www.gnu.org/software/src-highlite -->
 <span style="color: #009900">port </span><span style="color: #990000">=</span> <span style="color: #FF0000">"9999"</span>
 <span style="color: #009900">family </span><span style="color: #990000">=</span> <span style="color: #FF0000">"ipv6"</span></tt></pre></div></div>
 </div>
-<div class="sect3">
-<h4 id="_using_unix_sockets_2">Using unix sockets</h4>
+<div class="sect2">
+<h3 id="_using_unix_sockets_2">Using unix sockets</h3>
 <div class="paragraph"><p>The options available:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -1436,8 +1403,10 @@ http://www.gnu.org/software/src-highlite -->
 <span style="color: #009900">path </span><span style="color: #990000">=</span> <span style="color: #FF0000">"/tmp/irccd.sock"</span></tt></pre></div></div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_available_commands">Available commands</h3>
+</div>
+<div class="sect1">
+<h2 id="_available_commands">Available commands</h2>
+<div class="sectionbody">
 <div class="paragraph"><p>Almost of all these commands takes a server as parameter. It is one defined in
 the <a href="#irccdserver">server section</a> with the parameter <span class="monospaced">name</span>.</p></div>
 <div class="paragraph"><p>Only <span class="monospaced">load</span>, <span class="monospaced">reload</span> and <span class="monospaced">unload</span> do not need it.</p></div>
@@ -1520,8 +1489,8 @@ the <a href="#irccdserver">server section</a> with the parameter <span class="mo
 </li>
 </ul></div>
 <div class="paragraph"><p><a id="irccdctlcnotice"></a></p></div>
-<div class="sect3">
-<h4 id="_channel_notice">Channel notice</h4>
+<div class="sect2">
+<h3 id="_channel_notice">Channel notice</h3>
 <div class="paragraph"><p>Send a notice to a public channel. This is a notice that everyone
 will be notified by.</p></div>
 <div class="listingblock">
@@ -1536,8 +1505,8 @@ will be notified by.</p></div>
 </div></div>
 <div class="paragraph"><p><a id="irccdctlhelp"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_help">Help</h4>
+<div class="sect2">
+<h3 id="_help">Help</h3>
 <div class="paragraph"><p>Get the help.</p></div>
 <div class="listingblock">
 <div class="title">Usage</div>
@@ -1551,8 +1520,8 @@ will be notified by.</p></div>
 </div></div>
 <div class="paragraph"><p><a id="irccdctlinvite"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_invite">Invite</h4>
+<div class="sect2">
+<h3 id="_invite">Invite</h3>
 <div class="paragraph"><p>Invite someone to a channel, needed for channel with mode +i</p></div>
 <div class="listingblock">
 <div class="title">Usage</div>
@@ -1566,8 +1535,8 @@ will be notified by.</p></div>
 </div></div>
 <div class="paragraph"><p><a id="irccdctljoin"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_join">Join</h4>
+<div class="sect2">
+<h3 id="_join">Join</h3>
 <div class="paragraph"><p>Join a channel on a specific server registered in irccd. The server
 is referenced by the parameter server. Parameter channel is the channel
 to join. An optional password may be set as password parameter.</p></div>
@@ -1583,8 +1552,8 @@ to join. An optional password may be set as password parameter.</p></div>
 </div></div>
 <div class="paragraph"><p><a id="irccdctlkick"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_kick">Kick</h4>
+<div class="sect2">
+<h3 id="_kick">Kick</h3>
 <div class="paragraph"><p>Kick someone from a channel. The parameter reason is optional and
 may be ommited but when specified it must be unclosed between quotes.</p></div>
 <div class="listingblock">
@@ -1599,8 +1568,8 @@ may be ommited but when specified it must be unclosed between quotes.</p></div>
 </div></div>
 <div class="paragraph"><p><a id="irccdctlload"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_load">Load</h4>
+<div class="sect2">
+<h3 id="_load">Load</h3>
 <div class="paragraph"><p>Load a plugin into the irccd instance.</p></div>
 <div class="listingblock">
 <div class="title">Usage</div>
@@ -1614,8 +1583,8 @@ may be ommited but when specified it must be unclosed between quotes.</p></div>
 </div></div>
 <div class="paragraph"><p><a id="irccdctlme"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_me">Me</h4>
+<div class="sect2">
+<h3 id="_me">Me</h3>
 <div class="paragraph"><p>Send a CTCP ACTION message. It is exactly the same syntax as  message.</p></div>
 <div class="listingblock">
 <div class="title">Usage</div>
@@ -1629,8 +1598,8 @@ may be ommited but when specified it must be unclosed between quotes.</p></div>
 </div></div>
 <div class="paragraph"><p><a id="irccdctlmessage"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_message">Message</h4>
+<div class="sect2">
+<h3 id="_message">Message</h3>
 <div class="paragraph"><p>end a message to someone or a channel. The target may be a channel or a real
 person
 If the message contains more than one word it must be enclosed between quotes.</p></div>
@@ -1646,8 +1615,8 @@ If the message contains more than one word it must be enclosed between quotes.</
 </div></div>
 <div class="paragraph"><p><a id="irccdctlmode"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_channel_mode">Channel mode</h4>
+<div class="sect2">
+<h3 id="_channel_mode">Channel mode</h3>
 <div class="paragraph"><p>Change the mode of the specified channel. The mode contains full parameters
 like "+b" or "+k secret".</p></div>
 <div class="listingblock">
@@ -1662,8 +1631,8 @@ like "+b" or "+k secret".</p></div>
 </div></div>
 <div class="paragraph"><p><a id="irccdctlnotice"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_private_notice">Private notice</h4>
+<div class="sect2">
+<h3 id="_private_notice">Private notice</h3>
 <div class="paragraph"><p>Send a private notice to a target user.</p></div>
 <div class="listingblock">
 <div class="title">Usage</div>
@@ -1677,8 +1646,8 @@ like "+b" or "+k secret".</p></div>
 </div></div>
 <div class="paragraph"><p><a id="irccdctlnick"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_change_nickname">Change nickname</h4>
+<div class="sect2">
+<h3 id="_change_nickname">Change nickname</h3>
 <div class="paragraph"><p>Change your nickname. The parameter nickname is the new nickname</p></div>
 <div class="listingblock">
 <div class="title">Usage</div>
@@ -1692,8 +1661,8 @@ like "+b" or "+k secret".</p></div>
 </div></div>
 <div class="paragraph"><p><a id="irccdctlpart"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_part_from_a_channel">Part from a channel</h4>
+<div class="sect2">
+<h3 id="_part_from_a_channel">Part from a channel</h3>
 <div class="paragraph"><p>Leave a channel. Parameter server is one registered in irccd config.
 Parameter channel is the channel to leave.</p></div>
 <div class="listingblock">
@@ -1716,8 +1685,8 @@ Parameter channel is the channel to leave.</p></div>
 </div>
 <div class="paragraph"><p><a id="irccdctlreload"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_reload_a_plugin">Reload a plugin</h4>
+<div class="sect2">
+<h3 id="_reload_a_plugin">Reload a plugin</h3>
 <div class="paragraph"><p>Reload a plugin, parameter name is the plugin to reload.
 The plugin needs to be loaded.</p></div>
 <div class="listingblock">
@@ -1732,8 +1701,8 @@ The plugin needs to be loaded.</p></div>
 </div></div>
 <div class="paragraph"><p><a id="irccdctltopic"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_change_topic">Change topic</h4>
+<div class="sect2">
+<h3 id="_change_topic">Change topic</h3>
 <div class="paragraph"><p>Set the new topic of a channel. Topic must be enclosed between
 quotes.</p></div>
 <div class="listingblock">
@@ -1748,8 +1717,8 @@ quotes.</p></div>
 </div></div>
 <div class="paragraph"><p><a id="irccdctlumode"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_change_your_user_mode">Change your user mode</h4>
+<div class="sect2">
+<h3 id="_change_your_user_mode">Change your user mode</h3>
 <div class="paragraph"><p>Change your own user mode.</p></div>
 <div class="listingblock">
 <div class="title">Usage</div>
@@ -1763,8 +1732,8 @@ quotes.</p></div>
 </div></div>
 <div class="paragraph"><p><a id="irccdctlunload"></a></p></div>
 </div>
-<div class="sect3">
-<h4 id="_unload_a_plugin">Unload a plugin</h4>
+<div class="sect2">
+<h3 id="_unload_a_plugin">Unload a plugin</h3>
 <div class="paragraph"><p>Unload a loaded plugin from the irccd instance.</p></div>
 <div class="listingblock">
 <div class="title">Usage</div>
@@ -1780,11 +1749,10 @@ quotes.</p></div>
 </div>
 </div>
 </div>
-</div>
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-09-10 19:28:50 CEST
+Last updated 2013-09-10 19:43:49 CEST
 </div>
 </div>
 </body>

@@ -3,6 +3,7 @@ Irccd 1.0 user guide
 :Author: Demelier David
 :Email: demelier.david@gmail.com
 :Date: June, 8 2013
+:toc:
 :icons:
 :iconsdir: icons
 
@@ -26,7 +27,7 @@ On Unix systems, there is probably prebuild binaries provided by your
 distribution. If not you will need to build from sources, don't worry it's
 not very hard.
 
-==== Requirements
+=== Requirements
 
 To build from sources, you need the following installed on your system:
 
@@ -40,7 +41,7 @@ To build from sources, you need the following installed on your system:
 On some systems, libircclient development packages may be named libircclient-dev
 or something similar.
 
-==== Running the build
+=== Running the build
 
 When you're ready, extract the `irccd-x.y-sources.tar.xz` where `x.y` is
 replaced with the current version. Go to that directory, then type the
@@ -279,7 +280,7 @@ There are two type of listeners availables:
 
 Both of the listener has an option `type` which is set to `internet` or `unix`.
 
-==== Using internet sockets
+=== Using internet sockets
 
 The options available:
 
@@ -299,7 +300,7 @@ port = 9999
 
 This will let you controlling irccd on port 9999 with both IPv4 and IPv6 families.
 
-==== Using unix sockets
+=== Using unix sockets
 
 The options available:
 
@@ -513,7 +514,7 @@ Just like <<listeners,listeners>> you can connect to Unix or internet sockets.
 
 Both of the listener has an option `type` which is set to `internet` or `unix`.
 
-==== Using internet sockets
+=== Using internet sockets
 
 The options available:
 
@@ -531,7 +532,7 @@ port = "9999"
 family = "ipv6"
 ----
 
-==== Using unix sockets
+=== Using unix sockets
 
 The options available:
 
@@ -545,7 +546,7 @@ type = "unix"
 path = "/tmp/irccd.sock"
 ----
 
-=== Available commands
+== Available commands
 
 Almost of all these commands takes a server as parameter. It is one defined in
 the <<irccdserver,server section>> with the parameter `name`.
@@ -572,7 +573,7 @@ The following commands are available for irccdctl:
 
 anchor:irccdctlcnotice[]
 
-==== Channel notice
+=== Channel notice
 
 Send a notice to a public channel. This is a notice that everyone
 will be notified by.
@@ -589,7 +590,7 @@ $ irccdctl cnotice freenode #staff "Don't flood"
 
 anchor:irccdctlhelp[]
 
-==== Help
+=== Help
 
 Get the help.
 
@@ -605,7 +606,7 @@ $ irccdctl help message
 
 anchor:irccdctlinvite[]
 
-==== Invite
+=== Invite
 
 Invite someone to a channel, needed for channel with mode +i
 
@@ -621,7 +622,7 @@ $ irccdctl invite freenode xorg62 #staff
 
 anchor:irccdctljoin[]
 
-==== Join
+=== Join
 
 Join a channel on a specific server registered in irccd. The server
 is referenced by the parameter server. Parameter channel is the channel
@@ -639,7 +640,7 @@ $ irccdctl join freenode #staff
 
 anchor:irccdctlkick[]
 
-==== Kick
+=== Kick
 
 Kick someone from a channel. The parameter reason is optional and
 may be ommited but when specified it must be unclosed between quotes.
@@ -656,7 +657,7 @@ $ irccdctl kick freenode jean #staff "Stop flooding"
 
 anchor:irccdctlload[]
 
-==== Load
+=== Load
 
 Load a plugin into the irccd instance.
 
@@ -672,7 +673,7 @@ $ irccdctl load ask
 
 anchor:irccdctlme[]
 
-==== Me
+=== Me
 
 Send a CTCP ACTION message. It is exactly the same syntax as  message.
 
@@ -688,7 +689,7 @@ $ irccdctl me freenode #staff "going back soon"
 
 anchor:irccdctlmessage[]
 
-==== Message
+=== Message
 
 end a message to someone or a channel. The target may be a channel or a real
 person
@@ -706,7 +707,7 @@ $ irccdctl message freenode #staff "Hello from irccd"
 
 anchor:irccdctlmode[]
 
-==== Channel mode
+=== Channel mode
 
 Change the mode of the specified channel. The mode contains full parameters
 like "+b" or "+k secret".
@@ -723,7 +724,7 @@ $ irccdctl mode freenode #staff +t
 
 anchor:irccdctlnotice[]
 
-==== Private notice
+=== Private notice
 
 Send a private notice to a target user.
 
@@ -739,7 +740,7 @@ $ irccdctl notice freenode jean "Private notice"
 
 anchor:irccdctlnick[]
 
-==== Change nickname
+=== Change nickname
 
 Change your nickname. The parameter nickname is the new nickname
 
@@ -755,7 +756,7 @@ $ irccdctl nick freenode david
 
 anchor:irccdctlpart[]
 
-==== Part from a channel
+=== Part from a channel
 
 Leave a channel. Parameter server is one registered in irccd config.
 Parameter channel is the channel to leave.
@@ -775,7 +776,7 @@ Currently, there is no option to provide a part message.
 
 anchor:irccdctlreload[]
 
-==== Reload a plugin
+=== Reload a plugin
 
 Reload a plugin, parameter name is the plugin to reload.
 The plugin needs to be loaded.
@@ -792,7 +793,7 @@ $ irccdctl reload logger
 
 anchor:irccdctltopic[]
 
-==== Change topic
+=== Change topic
 
 Set the new topic of a channel. Topic must be enclosed between
 quotes.
@@ -809,7 +810,7 @@ $ irccdctl topic freenode #wmfs "This is the best channel"
 
 anchor:irccdctlumode[]
 
-==== Change your user mode
+=== Change your user mode
 
 Change your own user mode.
 
@@ -825,7 +826,7 @@ $ irccdctl umode +i
 
 anchor:irccdctlunload[]
 
-==== Unload a plugin
+=== Unload a plugin
 
 Unload a loaded plugin from the irccd instance.
 

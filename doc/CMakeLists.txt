@@ -104,7 +104,6 @@ if (WITH_DOC)
 				    -b html5
 				    -a themedir="${CMAKE_CURRENT_SOURCE_DIR}/guides/themes/irccd"
 				    -a theme=irccd
-				    -a toc2
 				    -o "${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/${output}.html"
 				       "${CMAKE_CURRENT_SOURCE_DIR}/guides/${file}"
 				)

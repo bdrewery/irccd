@@ -3,6 +3,7 @@ Plugin antiflood 1.0
 :Author: Demelier David
 :Email: demelier.david@gmail.com
 :Date: June, 8 2013
+:toc:
 :icons:
 :iconsdir: icons
 
