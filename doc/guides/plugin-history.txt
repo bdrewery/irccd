@@ -61,13 +61,13 @@ to respond an error.
 
 This option is used for the command `!history seen`.
 
-link:user-guide.html#irccdpatterns[Keywords supported: #c, #U]
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #U, time]
 
 .Option `said`
 
 This option is used for the command `!history said`.
 
-link:user-guide.html#irccdpatterns[Keywords supported: #c, #m, #U]
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #m, #U, time]
 
 .Option `unknown`
 

@@ -162,6 +162,15 @@ if (WITH_DOC)
 		unset(smprefix)
 	endmacro ()
 
+	DEFINE_GUIDE(user-guide.txt "User guide" false)
+	DEFINE_GUIDE(socket-guide.txt "Socket guide" false)
+	DEFINE_GUIDE(plugin-antiflood.txt "Antiflood" true)		# antiflood.lua
+	DEFINE_GUIDE(plugin-ask.txt "Ask" true)				# ask.lua
+	DEFINE_GUIDE(plugin-badwords.txt "Badwords" true)		# badwords.lua
+	DEFINE_GUIDE(plugin-history.txt "History" true)			# history.lua
+	DEFINE_GUIDE(plugin-logger.txt "Logger" true)			# logger.lua
+	DEFINE_GUIDE(plugin-roulette.txt "Roulette" true)		# roulette.lua
+
 	#
 	# Regenerate the documentation inside using make generate-doc
 	#
@@ -179,14 +188,6 @@ if (WITH_DOC)
 		)
 	endif ()
 
-	DEFINE_GUIDE(user-guide.txt "User guide" false)
-	DEFINE_GUIDE(socket-guide.txt "Socket guide" false)
-	DEFINE_GUIDE(plugin-antiflood.txt "Antiflood" true)		# antiflood.lua
-	DEFINE_GUIDE(plugin-ask.txt "Ask" true)				# ask.lua
-	DEFINE_GUIDE(plugin-badwords.txt "Badwords" true)		# badwords.lua
-	DEFINE_GUIDE(plugin-history.txt "History" true)			# history.lua
-	DEFINE_GUIDE(plugin-logger.txt "Logger" true)			# logger.lua
-	DEFINE_GUIDE(plugin-roulette.txt "Roulette" true)		# roulette.lua
 
 	install(
 		DIRECTORY "generated/guides"
