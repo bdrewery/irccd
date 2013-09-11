@@ -1007,6 +1007,8 @@ void Irccd::stop()
 
 void Irccd::handleIrcEvent(const IrcEvent &ev)
 {
+	lock_guard<mutex> ulock(m_pluginLock);
+
 	/*
 	 * The following function does not call plugin at all, they just do some
 	 * specific action like joining, managing channels, etc.
@@ -1019,8 +1021,6 @@ void Irccd::handleIrcEvent(const IrcEvent &ev)
 		handleKick(ev);
 
 #if defined(WITH_LUA)
-	lock_guard<mutex> ulock(m_pluginLock);
-
 	/**
 	 * This is the handle of deferred calls, they are not handled in the
 	 * next callPlugin block.
