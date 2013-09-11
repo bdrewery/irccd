@@ -82,10 +82,6 @@ Plugin::ErrorException::ErrorException(const string &which, const string &error)
 {
 }
 
-Plugin::ErrorException::~ErrorException()
-{
-}
-
 string Plugin::ErrorException::which() const
 {
 	return m_which;

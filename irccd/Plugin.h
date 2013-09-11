@@ -41,8 +41,6 @@ public:
 
 		ErrorException(const std::string &which, const std::string &error);
 
-		~ErrorException();
-
 		/**
 		 * Tells which plugin name has failed.
 		 *
