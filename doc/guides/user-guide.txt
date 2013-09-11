@@ -131,13 +131,12 @@ the default configurations paths.
 On Unix, the files are loaded in the following order:
 
 . '$\{XDG_CONFIG_HOME\}/irccd/irccd.conf' +
-. '$\{HOME\}/.config/irccd/irccd.conf' +
 . '/usr/local/etc/irccd.conf'.
 
 On Windows, the files are loaded in the following order:
 
 . 'C:\Users\YourUser\irccd\irccd.conf'
-. 'C:\Program Files\irccd\irccd.conf'
+. '<irccd.exe location>\..\etc\irccd.conf'
 
 .Specify at the command line
 [NOTE]

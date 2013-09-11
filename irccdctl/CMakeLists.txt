@@ -19,9 +19,6 @@
 # Project
 project(irccdctl)
 
-set(DEFAULT_IRCCDCTL_CONFIG "${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccdctl.conf"
-    CACHE STRING "Default irccdctl config file path")
-
 set(SOURCES
 	main.cpp
 	Irccdctl.cpp

@@ -62,14 +62,6 @@ private:
 	LuaState m_state;
 
 	/**
-	 * Load the Lua script file.
-	 *
-	 * @param path the path file
-	 * @return true on success
-	 */
-	bool loadLua(const std::string &path);
-
-	/**
 	 * Call the function plugin with optional parameters.
 	 * 
 	 * @throw ErrorException on failure

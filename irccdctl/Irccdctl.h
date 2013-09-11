@@ -39,7 +39,7 @@ private:
 
 	void connectInet(const Section &section);
 
-	void readConfig();
+	void readConfig(Parser &parser);
 	void openConfig();
 
 	void usage();

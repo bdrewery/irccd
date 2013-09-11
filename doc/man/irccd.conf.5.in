@@ -175,7 +175,7 @@ identity = "myIdentity"
 .\" FILES
 .Sh FILES
 The default config file is located at
-.Em @PREFIX@/etc/irccd.conf
+.Em @CMAKE_INSTALL_PREFIX@/@ETCDIR@/irccd.conf
 .Pp
 The user defined file follow the XDG standard and is usually
 .Em $HOME/.config/irccd/irccd.conf .

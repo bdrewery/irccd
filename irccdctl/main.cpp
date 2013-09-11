@@ -28,6 +28,8 @@ int main(int argc, char **argv)
 	Irccdctl ctl;
 	int ch;
 
+	setprogname(argv[0]);
+
 	while ((ch = getopt(argc, argv, "c:v")) != -1) {
 		switch (ch) {
 		case 'c':

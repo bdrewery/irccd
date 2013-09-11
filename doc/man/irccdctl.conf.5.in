@@ -106,7 +106,7 @@ port = 10000
 .\" FILES
 .Sh FILES
 The default config file is located at
-.Em @PREFIX@/etc/irccdctl.conf
+.Em @CMAKE_INSTALL_PREFIX@/@ETCDIR@/irccdctl.conf
 .Pp
 The user defined file follow the XDG standard and is usually
 .Em $HOME/.config/irccd/irccdctl.conf .

@@ -39,15 +39,30 @@ endif ()
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")			# own modules
 
-# Installation paths
-set(MODDIR "share/irccd/plugins"
-    CACHE STRING "Module prefix where to install")
-set(DOCDIR "share/doc/irccd"
-    CACHE STRING "Documentation directory")
-set(MANDIR "share/man"
-    CACHE STRING "Man directory")
-set(ETCDIR "etc"
-    CACHE STRING "Configuration directory")
+#
+# Installation paths. On Windows, we just use the suffix relative
+# to the installation path.
+#
+if (WIN32)
+	set(MODDIR "plugins"
+	    CACHE STRING "Module prefix where to install")
+	set(DOCDIR "doc"
+	    CACHE STRING "Documentation directory")
+	set(MANDIR "man"
+	    CACHE STRING "Man directory")
+	set(ETCDIR "etc"
+	    CACHE STRING "Configuration directory")
+else ()
+	set(MODDIR "share/irccd/plugins"
+	    CACHE STRING "Module prefix where to install")
+	set(DOCDIR "share/doc/irccd"
+	    CACHE STRING "Documentation directory")
+	set(MANDIR "share/man"
+	    CACHE STRING "Man directory")
+	set(ETCDIR "etc"
+	    CACHE STRING "Configuration directory")
+endif ()
+
 
 # Include path to common
 include_directories(
@@ -108,8 +123,8 @@ message("")
 
 message("Compiling irccd with following options:")
 message("\tLua support:\t\t${LUA_SUPPORT}")
-message("\tirccd config:\t\t${DEFAULT_IRCCD_CONFIG}")
-message("\tirccdctl config:\t${DEFAULT_IRCCDCTL_CONFIG}")
+message("\tirccd config:\t\t${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccd.conf")
+message("\tirccdctl config:\t${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccdctl.conf")
 message("")
 
 # Configure the file after so every project can set more variables
@@ -152,7 +167,7 @@ if (WIN32)
 	set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 	set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README")
 
-	set(CPACK_NSIS_DISPLAY_NAME "IRC Client daemon")
+	set(CPACK_NSIS_DISPLAY_NAME "Irccd")
 	set(CPACK_NSIS_EXECUTABLES_DIRECTORY "bin")
 	set(CPACK_NSIS_CONTACT "demelier.david@gmail.com")
 
@@ -163,6 +178,14 @@ if (WIN32)
 	set(CPACK_PACKAGE_FILE_NAME "irccd-${VERSION}-${CMAKE_SYSTEM_NAME}-${WINARCH}")
 	set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
 	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "IRC Client Daemon")
+
+	# Startup menu for documentation
+	set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS ${EXTRA_INSTALL_COMMANDS})
+	set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS ${EXTRA_UNINSTALL_COMMANDS})
+
+	# Wizards images (currently not working)
+	set(CPACK_NSIS_WELCOME_BITMAP "${CMAKE_CURRENT_SOURCE_DIR}/win32/left.bmp")
+	set(CPACK_NSIS_HEADER_BITMAP "${CMAKE_CURRENT_SOURCE_DIR}/win32/top.bmp")
 else ()
 	set(CPACK_GENERATOR "TGZ")
 endif ()

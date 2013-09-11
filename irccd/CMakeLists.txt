@@ -19,9 +19,6 @@
 # Project
 project(irccd)
 
-set(DEFAULT_IRCCD_CONFIG "${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccd.conf"
-    CACHE STRING "Default irccd config file path")
-
 # Optional Lua support
 option(WITH_LUA "Build with Lua plugin support" On)
 

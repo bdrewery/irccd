@@ -100,29 +100,6 @@ const char * Plugin::ErrorException::what() const throw()
  * private methods and members
  * -------------------------------------------------------- */
 
-bool Plugin::loadLua(const string &path)
-{
-	m_state = LuaState(luaL_newstate());
-
-	// Load default library as it was done by require.
-	for (const Library &l : libLua)
-		Luae::require(m_state.get(), l.m_name, l.m_func, true);
-
-	// Put external modules in package.preload so user
-	// will need require (modname)
-	for (const Library &l : libIrccd)
-		Luae::preload(m_state.get(), l.m_name, l.m_func);
-
-	if (luaL_dofile(m_state.get(), path.c_str()) != LUA_OK) {
-		m_error = lua_tostring(m_state.get(), -1);
-		lua_pop(m_state.get(), 1);
-
-		return false;
-	}
-
-	return true;
-}
-
 void Plugin::call(const string &func,
 		  shared_ptr<Server> server,
 		  vector<string> params)
@@ -212,13 +189,31 @@ bool Plugin::open(const string &path)
 {
 	ostringstream oss;
 
-	// Get the plugin directory, XDG config irccd + plugin name
-	oss << Util::configDirectory();
+	m_state = LuaState(luaL_newstate());
+
+	// Load default library as it was done by require.
+	for (const Library &l : libLua)
+		Luae::require(m_state.get(), l.m_name, l.m_func, true);
+
+	// Put external modules in package.preload so user
+	// will need require (modname)
+	for (const Library &l : libIrccd)
+		Luae::preload(m_state.get(), l.m_name, l.m_func);
+
+	// Set the plugin home
+	oss << Util::configUser();
 	oss << m_name;
 
 	m_home = oss.str();
 
-	return loadLua(path);
+	if (luaL_dofile(m_state.get(), path.c_str()) != LUA_OK) {
+		m_error = lua_tostring(m_state.get(), -1);
+		lua_pop(m_state.get(), 1);
+
+		return false;
+	}
+
+	return true;
 }
 
 void Plugin::onCommand(shared_ptr<Server> server,

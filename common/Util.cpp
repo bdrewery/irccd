@@ -65,7 +65,78 @@ const char * Util::ErrorException::what() const throw()
 }
 
 /* --------------------------------------------------------
- * Util class
+ * Util class (private functions)
+ * -------------------------------------------------------- */
+
+string Util::pathBase(const string &append)
+{
+	ostringstream oss;
+
+#if defined(_WIN32)
+	char exepath[512];
+	string base;
+	size_t pos;
+
+	/*
+	 * Window is more complicated case as we don't know in advance
+	 * where irccd is installed, so we get the current process path
+	 * and removes its bin/ suffix.
+	 */
+	GetModuleFileNameA(NULL, exepath, sizeof (exepath));
+	base = Util::dirname(exepath);
+	pos = base.find("bin");
+	if (pos != string::npos)
+		base.erase(pos);
+	
+	oss << base << "\\";
+#else
+	oss << PREFIX << "/";
+#endif
+
+	oss << append;
+
+	return oss.str();
+}
+
+string Util::pathUser(const string &append)
+{
+	ostringstream oss;
+
+#if defined(_WIN32)
+	char path[MAX_PATH];
+
+	if (SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, 0, path) != S_OK)
+		oss << "";
+	else {
+		oss << path;
+		oss << "\\irccd";
+	}
+#else
+	xdgHandle handle;
+
+	if ((xdgInitHandle(&handle)) == nullptr) {
+		const char *home = getenv("HOME");
+
+		if (home != nullptr)
+			oss << home;
+
+		// append default path.
+		oss << "/.config/irccd";
+	} else {
+		oss << xdgConfigHome(&handle);
+		oss << "/irccd";
+	}
+
+	xdgWipeHandle(&handle);
+#endif
+
+	oss << append;
+
+	return oss.str();
+}
+
+/* --------------------------------------------------------
+ * Util class (public functions)
  * -------------------------------------------------------- */
 
 #if defined(_WIN32)
@@ -93,51 +164,29 @@ string Util::basename(const string &path)
 #endif
 }
 
-string Util::configDirectory()
-{
-#if defined(_WIN32)
-	char path[MAX_PATH];
-	ostringstream oss;
-
-	if (SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, 0, path) != S_OK)
-		oss << "";
-	else {
-		oss << path;
-		oss << "\\irccd\\";
-	}
-
-	return oss.str();
-#else
-	xdgHandle handle;
-	ostringstream oss;
-
-	if ((xdgInitHandle(&handle)) == nullptr) {
-		const char *home = getenv("HOME");
-
-		if (home != nullptr)
-			oss << home;
-
-		// append default path.
-		oss << "/.config/irccd/";
-	} else {
-		oss << xdgConfigHome(&handle);
-		oss << "/irccd/";
-	}
-
-	xdgWipeHandle(&handle);
-
-	return oss.str();
-#endif
-}
-
-string Util::configFilePath(const string &filename)
+bool Util::findConfig(const string &name, ConfigFinder func)
 {
 	ostringstream oss;
+	string path;
 
-	oss << Util::configDirectory();
-	oss << filename;
+	// 1. Always user first
+	oss << configUser();
+	oss << name;
+	path = oss.str();
 
-	return oss.str();
+	if (func(path))
+		return true;
+
+	// 2. System config
+	oss.str("");
+	oss << configSystem();
+	oss << name;
+	path = oss.str();
+
+	if (func(path))
+		return true;
+
+	return false;
 }
 
 string Util::dirname(const string &file)
@@ -171,7 +220,7 @@ string Util::getHome()
 #if defined(_WIN32)
 	char path[MAX_PATH];
 
-	if (SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path ) != S_OK)
+	if (SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path) != S_OK)
 		return "";
 
 	return string(path);
@@ -237,7 +286,7 @@ string Util::pluginDirectory()
 	 */
 	ostringstream oss;
 
-	oss << configDirectory();
+	oss << configUser();
 
 #if defined(_WIN32)
 	oss << "plugins\\";

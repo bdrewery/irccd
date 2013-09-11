@@ -487,7 +487,7 @@ void Irccdctl::connectUnix(const Section &section)
 		m_socket.create(AF_UNIX);
 		m_socket.connect(UnixPoint(path));
 	} catch (Socket::ErrorException error) {
-		Logger::warn("Failed to connect to %s: %s", path.c_str(), error.what());
+		Logger::warn("irccd: failed to connect to %s: %s", path.c_str(), error.what());
 		exit(1);
 	}
 }
@@ -507,7 +507,7 @@ void Irccdctl::connectInet(const Section &section)
 	else if (inet == "ipv6")
 		family = AF_INET6;
 	else {
-		Logger::warn("parameter family is one of them: ipv4, ipv6");
+		Logger::warn("socket: parameter family is one of them: ipv4, ipv6");
 		exit(1);
 	}
 
@@ -515,20 +515,13 @@ void Irccdctl::connectInet(const Section &section)
 		m_socket.create(family);
 		m_socket.connect(ConnectPointIP(host, port, family));
 	} catch (Socket::ErrorException error) {
-		Logger::warn("Failed to connect: %s", error.what());
+		Logger::warn("irccdctl: failed to connect: %s", error.what());
 		exit(1);
 	}
 }
 
-void Irccdctl::readConfig()
+void Irccdctl::readConfig(Parser &config)
 {
-	Parser config(m_configPath);
-
-	if (!config.open()) {
-		Logger::warn("Failed to open %s", m_configPath.c_str());
-		exit(1);
-	}
-
 	try {
 		const Section &sectionSocket = config.getSection("socket");
 		string type;
@@ -539,31 +532,60 @@ void Irccdctl::readConfig()
 #if !defined(_WIN32)
 			connectUnix(sectionSocket);
 #else
-			Logger::warn("Unix sockets are not supported on Windows");
+			Logger::warn("socket: unix sockets are not supported on Windows");
 #endif
 		} else if (type == "internet") {
 			connectInet(sectionSocket);
 		} else {
-			Logger::warn("Invalid socket type %s", type.c_str());
+			Logger::warn("socket: invalid socket type %s", type.c_str());
 			exit(1);
 		}
 	} catch (NotFoundException ex) {
-		Logger::warn("Config misses %s", ex.which().c_str());
+		Logger::warn("socket: missing parameter %s", ex.which().c_str());
 		exit(1);
 	}
 }
 
 void Irccdctl::openConfig()
 {
-	if (m_configPath.length() == 0) {
-		m_configPath = Util::configFilePath("irccdctl.conf");
+	Parser config;
+	vector<string> tried;
 
-		// 3. Not found, fallback to default path
-		if (!Util::exist(m_configPath))
-			m_configPath = DEFAULT_IRCCDCTL_CONFIG;
-		readConfig();
-	} else
-		readConfig();
+	if (m_configPath.length() == 0) {
+		bool found;
+
+		found = Util::findConfig("irccdctl.conf", [&] (const string &path) -> bool {
+			config = Parser(path);
+
+			// Keep track of loaded files
+			if (!config.open()) {
+				tried.push_back(path);
+				return false;
+			}
+
+			m_configPath = path;
+
+			return (found = true);
+		});
+
+		if (!found) {
+			Logger::warn("irccdctl: no configuration could be found, exiting");
+
+			for (auto p : tried)
+				Logger::warn("irccdctl: tried %s", p.c_str());
+
+			exit(1);
+		}
+	} else {
+		config = Parser(m_configPath);
+
+		if (!config.open()) {
+			Logger::warn("irccdctl: could not open %s, exiting", m_configPath.c_str());
+			exit(1);
+		}
+	}
+
+	readConfig(config);
 }
 
 void Irccdctl::sendRaw(const std::string &message)
@@ -571,7 +593,7 @@ void Irccdctl::sendRaw(const std::string &message)
 	try {
 		m_socket.send(message.c_str(), message.length());
 	} catch (Socket::ErrorException ex) {
-		Logger::warn("Failed to send message: %s", ex.what());
+		Logger::warn("irccdctl: failed to send message: %s", ex.what());
 	}
 }
 
@@ -605,7 +627,7 @@ int Irccdctl::getResponse()
 
 				result = oss.str().substr(0, pos);
 				if (result != "OK") {
-					Logger::warn("Error, server said: %s", result.c_str());
+					Logger::warn("irccdctl: error, server said: %s", result.c_str());
 					ret = 1;
 				}
 
@@ -613,10 +635,10 @@ int Irccdctl::getResponse()
 			}
 		}
 	} catch (Socket::ErrorException ex) {
-		Logger::warn("Error: %s", ex.what());
+		Logger::warn("irccdctl: error: %s", ex.what());
 		ret = 1;
 	} catch (SocketListener::TimeoutException) {
-		Logger::warn("Didn't get a response from irccd");
+		Logger::warn("irccdctl: didn't get a response from irccd");
 		ret = 1;
 	}
 
@@ -678,7 +700,7 @@ int Irccdctl::run(int argc, char **argv)
 		handlers.at(cmd)(this, --argc, ++argv);
 		ret = getResponse();
 	} catch (out_of_range ex) {
-		Logger::warn("Unknown command %s", argv[0]);
+		Logger::warn("irccdctl: unknown command %s", argv[0]);
 		return 1;
 	}
 
