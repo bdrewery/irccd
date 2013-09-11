@@ -187,6 +187,8 @@ const string & Plugin::getError() const
 
 bool Plugin::open(const string &path)
 {
+	ostringstream oss;
+
 	m_state = LuaState(luaL_newstate());
 
 	// Load default library as it was done by require.
@@ -197,6 +199,12 @@ bool Plugin::open(const string &path)
 	// will need require (modname)
 	for (const Library &l : libIrccd)
 		Luae::preload(m_state.get(), l.m_name, l.m_func);
+
+	// Set the plugin home
+	oss << Util::configUser();
+	oss << m_name;
+
+	m_home = oss.str();
 
 	if (luaL_dofile(m_state.get(), path.c_str()) != LUA_OK) {
 		m_error = lua_tostring(m_state.get(), -1);

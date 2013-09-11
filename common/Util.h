@@ -57,7 +57,7 @@ public:
 	public:
 		ErrorException();
 		ErrorException(const std::string &error);
-		~ErrorException();
+		~ErrorException() throw();
 
 		virtual const char * what() const throw();
 	};
@@ -95,11 +95,7 @@ public:
 	 */
 	static inline std::string configUser()
 	{
-#if defined(_WIN32)
 		return pathUser("") + DIR_SEP;
-#else
-		return pathUser("config") + DIR_SEP;
-#endif
 	}
 
 	/**

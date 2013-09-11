@@ -121,10 +121,10 @@ string Util::pathUser(const string &append)
 			oss << home;
 
 		// append default path.
-		oss << "/.config/irccd/";
+		oss << "/.config/irccd";
 	} else {
 		oss << xdgConfigHome(&handle);
-		oss << "/irccd/";
+		oss << "/irccd";
 	}
 
 	xdgWipeHandle(&handle);
