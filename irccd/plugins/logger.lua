@@ -208,6 +208,10 @@ function onPart(server, channel, nickname, reason)
 	write(format.part, keywords)
 end
 
+function onReload()
+	loadConfig()
+end
+
 -- Log topic
 function onTopic(server, channel, who, topic)
 	local keywords = {
