@@ -647,7 +647,7 @@ int Irccdctl::getResponse()
 
 void Irccdctl::usage()
 {
-	Logger::warn("usage: %s [-cv] <commands> [<args>]\n", getprogname());
+	Logger::warn("usage: %s [-cv] <command> [<args>]\n", getprogname());
 
 	Logger::warn("Commands supported:");
 	Logger::warn("\tcnotice\t\tSend a channel notice");
