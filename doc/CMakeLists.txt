@@ -61,6 +61,22 @@ find_file(
 	NAMES asciidoc asciidoc.py
 )
 
+
+#
+# Create the following installation hierarchy
+#
+# StartupMenu\Irccd\Documentation
+# StartupMenu\Irccd\Documentation\Plugins
+#
+list(
+	APPEND
+	EXTRA_INSTALL_COMMANDS
+	"
+	  CreateDirectory \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\"
+	  CreateDirectory \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\\Plugins\\\"
+	"
+)
+
 #
 # Install Lua API
 #
@@ -79,24 +95,40 @@ if (WITH_LDOC)
 			    "${CMAKE_CURRENT_SOURCE_DIR}/ldoc/style/robot.png"
 			    "${CMAKE_CURRENT_SOURCE_DIR}/generated/lua/"
 		)
-
 	endif ()
 
 	install(
 		DIRECTORY "generated/lua"
 		DESTINATION "${DOCDIR}"
 	)
+
+	#
+	# Add documentation to installation
+	#
+	if (WIN32)
+		list(
+			APPEND
+			EXTRA_INSTALL_COMMANDS
+			"CreateShortCut \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\\Lua API.lnk\\\" \\\"$INSTDIR\\\\doc\\\\lua\\\\index.html\\\""
+		)
+
+		list(
+			APPEND
+			EXTRA_UNINSTALL_COMMANDS
+			"Delete \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\\Lua API.lnk\\\""
+		)
+	endif ()
 endif ()
 
 #
 # User and developer guides.
 #
 if (WITH_DOC)
-	if (ASCIIDOC)
-		# Macro to define new guides to be processed.
-		macro(DEFINE_GUIDE file)
-			string(REGEX REPLACE "(.*)\\.txt$" "\\1" output ${file})
+	# Macro to define new guides to be processed.
+	macro(DEFINE_GUIDE file name isplugin)
+		string(REGEX REPLACE "(.*)\\.txt$" "\\1" output ${file})
 
+		if (ASCIIDOC)
 			list(
 				APPEND
 				COMMANDS
@@ -106,18 +138,34 @@ if (WITH_DOC)
 				    -a theme=irccd
 				    -o "${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/${output}.html"
 				       "${CMAKE_CURRENT_SOURCE_DIR}/guides/${file}"
-				)
-		endmacro ()
+			)
+		endif ()
 
-		DEFINE_GUIDE(user-guide.txt)
-		DEFINE_GUIDE(socket-guide.txt)
-		DEFINE_GUIDE(plugin-antiflood.txt)	# antiflood.lua
-		DEFINE_GUIDE(plugin-ask.txt)		# ask.lua
-		DEFINE_GUIDE(plugin-badwords.txt)	# badwords.lua
-		DEFINE_GUIDE(plugin-history.txt)	# history.lua
-		DEFINE_GUIDE(plugin-logger.txt)		# logger.lua
-		DEFINE_GUIDE(plugin-roulette.txt)	# roulette.lua
+		# Install the documentations
+		if (${isplugin})
+			set(smprefix "Plugins\\\\")
+		endif ()
 
+		list(
+			APPEND
+			EXTRA_INSTALL_COMMANDS
+			"CreateShortCut \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\\${smprefix}${name}.lnk\\\" \\\"$INSTDIR\\\\doc\\\\guides\\\\${output}.html\\\""
+		)
+
+		list(
+			APPEND
+			EXTRA_UNINSTALL_COMMANDS
+			"Delete \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\\${smprefix}${name}.lnk\\\""
+		)
+
+		unset(output)
+		unset(smprefix)
+	endmacro ()
+
+	#
+	# Regenerate the documentation inside using make generate-doc
+	#
+	if (ASCIIDOC)
 		add_custom_target(
 			generate-doc
 			COMMAND cmake -E make_directory
@@ -131,10 +179,38 @@ if (WITH_DOC)
 		)
 	endif ()
 
+	DEFINE_GUIDE(user-guide.txt "User guide" false)
+	DEFINE_GUIDE(socket-guide.txt "Socket guide" false)
+	DEFINE_GUIDE(plugin-antiflood.txt "Antiflood" true)		# antiflood.lua
+	DEFINE_GUIDE(plugin-ask.txt "Ask" true)				# ask.lua
+	DEFINE_GUIDE(plugin-badwords.txt "Badwords" true)		# badwords.lua
+	DEFINE_GUIDE(plugin-history.txt "History" true)			# history.lua
+	DEFINE_GUIDE(plugin-logger.txt "Logger" true)			# logger.lua
+	DEFINE_GUIDE(plugin-roulette.txt "Roulette" true)		# roulette.lua
+
 	install(
 		DIRECTORY "generated/guides"
 		DESTINATION "${DOCDIR}"
 	)
 endif ()
+
+#
+# Delete the documentation from startup menu after the objects
+#
+list(
+	APPEND
+	EXTRA_UNINSTALL_COMMANDS
+	"
+	  RMDir \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\\Plugins\\\"
+	  RMDir \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\"
+	"
+)
+
+# Set them to parent scope so NSIS can generate well
+string(REPLACE ";" "\n" EXTRA_INSTALL_COMMANDS "${EXTRA_INSTALL_COMMANDS}")
+string(REPLACE ";" "\n" EXTRA_UNINSTALL_COMMANDS "${EXTRA_UNINSTALL_COMMANDS}")
+
+set(EXTRA_INSTALL_COMMANDS ${EXTRA_INSTALL_COMMANDS} PARENT_SCOPE)
+set(EXTRA_UNINSTALL_COMMANDS ${EXTRA_UNINSTALL_COMMANDS} PARENT_SCOPE)
 
 # vim: set syntax=cmake:

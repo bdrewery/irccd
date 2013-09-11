@@ -441,26 +441,55 @@ bool Irccd::isOverriden(char c)
  */
 void Irccd::openConfig()
 {
+	Parser config;
+	vector<string> tried;
+
 	// Set some defaults
-	addPluginPath(Util::configDirectory() + "plugins");		// own directory
-	addPluginPath(MODDIR);						// see config.h.in
+	addPluginPath(Util::configUser() + "plugins");
+
+	/*
+	 * Prefix make more sense on Unix, these variables are defined
+	 * from config.h
+	 */
+#if !defined(_WIN32)
+	addPluginPath(PREFIX "/" MODDIR);
+#else
+
+#endif
 
 	// Open requested file by command line or default
 	if (!isOverriden(options::Config)) {
-		// 2. User defined
-		m_configPath = Util::configFilePath("irccd.conf");
+		bool found;
 
-		// 3. Not found, fallback to default path
-		if (!Util::exist(m_configPath))
-			m_configPath = DEFAULT_IRCCD_CONFIG;
-	}
+		found = Util::findConfig("irccd.conf", [&] (const string &path) -> bool {
+			config = Parser(path);
 
-	Parser config(m_configPath);
+			// Keep track of loaded files
+			if (!config.open()) {
+				tried.push_back(path);
+				return false;
+			}
 
-	if (!config.open()) {
-		Logger::warn("irccd: failed to open: %s", m_configPath.c_str());
-		Logger::warn("irccd: no configuration could be found, exiting");
-		exit(1);
+			m_configPath = path;
+
+			return (found = true);
+		});
+
+		if (!found) {
+			Logger::warn("irccd: no configuration could be found, exiting");
+
+			for (auto p : tried)
+				Logger::warn("irccd: tried %s", p.c_str());
+
+			exit(1);
+		}
+	} else {
+		config = Parser(m_configPath);
+
+		if (!config.open()) {
+			Logger::warn("irccd: could not open %s, exiting", m_configPath.c_str());
+			exit(1);
+		}
 	}
 
 #if !defined(_WIN32)
@@ -515,7 +544,7 @@ void Irccd::loadPlugin(const string &name)
 	// Seek the plugin in the directories.
 	for (const string &path : m_pluginDirs) {
 		oss.str("");
-		oss << path << "/" << name << ".lua";
+		oss << path << Util::DIR_SEP << name << ".lua";
 
 		finalPath = oss.str();
 		Logger::log("irccd: checking for plugin %s", finalPath.c_str());
@@ -929,9 +958,6 @@ const Server::Identity & Irccd::findIdentity(const string &name)
 
 int Irccd::run()
 {
-	Logger::log("irccd: user config path %s", Util::configDirectory().c_str());
-	Logger::log("irccd: user default plugin path %s", Util::pluginDirectory().c_str());
-
 	openConfig();
 
 	if (m_servers.size() <= 0) {

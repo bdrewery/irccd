@@ -16,14 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#cmakedefine MODDIR			"@MODDIR@"
-
 #cmakedefine01 MAJOR
 #cmakedefine01 MINOR
 
-// Default config paths
-#cmakedefine DEFAULT_IRCCD_CONFIG	"@DEFAULT_IRCCD_CONFIG@"
-#cmakedefine DEFAULT_IRCCDCTL_CONFIG	"@DEFAULT_IRCCDCTL_CONFIG@"
+#define ETCDIR			"@ETCDIR@"
+#define MODDIR			"@MODDIR@"
+#define PREFIX			"@CMAKE_INSTALL_PREFIX@"
 
 // Optional Lua support
 #cmakedefine USE_LUA

@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <exception>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -29,14 +30,34 @@
 namespace irccd {
 
 class Util {
+private:
+	/**
+	 * Get the installation prefix or installation directory. Also append
+	 * the path to it.
+	 *
+	 * @param path what to append
+	 * @return the final path
+	 */
+	static std::string pathBase(const std::string &path);
+
+	/**
+	 * Get the local path to the user append the path at the end.
+	 *
+	 * @param path what to append
+	 * @return the final path
+	 */
+	static std::string pathUser(const std::string &path);
+
 public:
+	typedef std::function<bool (const std::string &)> ConfigFinder;
+
 	class ErrorException : public std::exception {
 		std::string m_error;
 
 	public:
 		ErrorException();
 		ErrorException(const std::string &error);
-		~ErrorException() throw();
+		~ErrorException();
 
 		virtual const char * what() const throw();
 	};
@@ -56,22 +77,51 @@ public:
 	static std::string basename(const std::string &path);
 
 	/**
-	 * Get the XDG config directory that is usually
-	 * ~/.config/irccd. On Windows, it is C:\Users\Foo\irccd.
-	 * This add a trailing slash.
+	 * Get the system config path, usually /usr/local/etc on Unix
+	 * and the install path for Windows.
 	 *
-	 * @return a string to the directory
+	 * @return the path
 	 */
-	static std::string configDirectory();
+	static inline std::string configSystem()
+	{
+		return pathBase(ETCDIR) + DIR_SEP;
+	}
 
 	/**
-	 * Return the path at the config path or default
-	 * if not found.
+	 * Get the user config directory, on Unix it will be
+	 * XDG_CONFIG_HOME or ~/.config/home
 	 *
-	 * @param filename the config filename
-	 * @return the final string ready for use
+	 * @return the path
 	 */
-	static std::string configFilePath(const std::string &filename);
+	static inline std::string configUser()
+	{
+#if defined(_WIN32)
+		return pathUser("") + DIR_SEP;
+#else
+		return pathUser("config") + DIR_SEP;
+#endif
+	}
+
+	/**
+	 * Return the plugin system path, usually /usr/local/share/irccd/plugins
+	 * on Unix and the installation path + plugins on Windows.
+	 *
+	 * @return the path
+	 */
+	static inline std::string pluginPathSystem()
+	{
+		return pathBase(MODDIR) + DIR_SEP;
+	}
+
+	/**
+	 * Return the default user plugin path.
+	 *
+	 * @return the path
+	 */
+	static inline std::string pluginPathUser()
+	{
+		return pathUser("plugins") + DIR_SEP;
+	}
 
 	/**
 	 * Wrapper around dirname(3) for portability. Returns the parent
@@ -104,6 +154,20 @@ public:
 	 * @return the milliseconds
 	 */
 	static uint64_t getTicks();
+
+	/**
+	 * Get the prefix of installation. This is mostly used on Windows as
+	 * the installer let the user install the software where he wants. Also
+	 * this let the application being distributed just as a simple ZIP file.
+	 *
+	 * The function called must return true if it has successfully opened the
+	 * file.
+	 *
+	 * @param name the file name
+	 * @param func the function to call
+	 * @return true if a file has been opened false otherwise
+	 */
+	static bool findConfig(const std::string &name, ConfigFinder func);
 
 	/**
 	 * Create a directory.
