@@ -123,8 +123,8 @@ message("")
 
 message("Compiling irccd with following options:")
 message("\tLua support:\t\t${LUA_SUPPORT}")
-message("\tirccd config:\t\t${DEFAULT_IRCCD_CONFIG}")
-message("\tirccdctl config:\t${DEFAULT_IRCCDCTL_CONFIG}")
+message("\tirccd config:\t\t${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccd.conf")
+message("\tirccdctl config:\t${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccdctl.conf")
 message("")
 
 # Configure the file after so every project can set more variables
