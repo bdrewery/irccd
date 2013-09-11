@@ -487,6 +487,8 @@ static void testPlugin(const char *file, int argc, char **argv)
 			testCommands.at(argv[1])(plugin, server, argc - 2, argv + 2);
 		} catch (out_of_range ex) {
 			Logger::warn("Unknown test command named %s", argv[1]);
+		} catch (Plugin::ErrorException ex) {
+			Logger::warn("Error in script %s", ex.what());
 		}
 	}
 }
@@ -497,6 +499,7 @@ void irccd::test(int argc, char **argv)
 
 	if (argc < 2) {
 		Logger::warn("usage: %s test plugin.lua [command] [parameters...]", getprogname());
+		Logger::warn("       %s test help <command>", getprogname());
 
 		Logger::warn("Commands supported:");
 		Logger::warn("\tonCommand\t\tDo a fake special command");
