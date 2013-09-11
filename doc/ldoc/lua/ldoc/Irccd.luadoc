@@ -1,0 +1,15 @@
+--- Main module
+-- Main irccd module.
+--
+-- @module irccd
+
+--- The string version such as "1.0"
+VERSION = 1.0,
+
+--- The major number, i.e 1
+VERSION_MAJOR = 1,
+
+--- The major number, i.e 0
+VERSION_MINOR = 0,
+
+-- vim: set syntax=lua nu:
