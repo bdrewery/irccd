@@ -1,0 +1,843 @@
+Irccd 1.0 user guide
+====================
+:Author: Demelier David
+:Email: demelier.david@gmail.com
+:Date: June, 8 2013
+:toc:
+:icons:
+:iconsdir: icons
+
+== Introduction
+This guide will help you installing irccd on your system and running it.
+
+=== Installing irccd
+
+Irccd is provided as prebuild binaries for Windows, the installer is quite easy
+to use. If you have and old computer, you should take the 32bits version,
+otherwise, choose 64bit version.
+
+Grab the irccd package that fits your system at
+http://projects.malikania.fr/irccd/download.php
+
+anchor:bfs[]
+
+=== Building from sources
+
+On Unix systems, there is probably prebuild binaries provided by your
+distribution. If not you will need to build from sources, don't worry it's
+not very hard.
+
+=== Requirements
+
+To build from sources, you need the following installed on your system:
+
+* cmake, http://www.cmake.org
+* libircclient, http://www.ulduzsoft.com/linux/libircclient/
+* libxdg-basedir, https://github.com/devnev/libxdg-basedir. On Unix only.
+* Lua 5.2, http://lua.org (optional)
+* C++11 support
+
+[NOTE]
+On some systems, libircclient development packages may be named libircclient-dev
+or something similar.
+
+=== Running the build
+
+When you're ready, extract the `irccd-x.y-sources.tar.xz` where `x.y` is
+replaced with the current version. Go to that directory, then type the
+following commands:
+
+----
+markand@localhost [irccd-1.0] $ mkdir _build_
+markand@localhost [irccd-1.0] $ cd _build_
+markand@localhost [irccd-1.0/_build_] $ cmake ..
+markand@localhost [irccd-1.0/_build_] $ make
+markand@localhost [irccd-1.0/_build_] $ sudo make install
+----
+
+This is the quick way of compiling and installing. It's also possible to set
+some options to customize the build.
+
+.Disabling Lua
+You can disable Lua support.
+
+----
+markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_LUA=Off
+----
+
+When disabling Lua, the IRC bot can still be used as a message relayer, so you
+can still use <<irccdctl,irccdctl>> to manage irccd.
+
+[NOTE]
+If Lua is not found on your system, Lua support is automatically disabled, if
+you plan to use Lua, do the above command and switch Off to On.
+
+.Disable Lua documentation
+If you don't want to install Lua API documentation, use the following command.
+
+----
+markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_LDOC=Off
+----
+
+.Disable user guides
+You can disable installation of user guides.
+
+----
+markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_DOC=Off
+----
+
+.Disable manual pages
+On Windows, man pages are not really useful, you can also disable them
+
+----
+markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_MAN=Off
+----
+
+.Changing the default installation path
+Sometimes, you may need to install irccd over other place, for that, you can
+specify the prefix where to install files. On unix systems, it's usually
+'/usr/local/' and 'C:/Program Files/' on Windows.
+
+To change this, use the following:
+
+----
+markand@localhost [irccd-1.0/_build_] $ cmake .. -DCMAKE_INSTALL_PREFIX=/opt/some/directory
+----
+
+.Changing the man paths
+By default, irccd use $\{PREFIX\}/share/man for manual pages. Some systems use
+different one.
+
+For example, on FreeBSD the typical use would be:
+
+----
+markand@localhost [irccd-1.0/_build_] $ cmake .. -DMANDIR=/usr/local/man
+----
+
+== Configuring irccd
+
+Now that you've successfully installed irccd, let's add a configuration file so
+we can run it.
+
+anchor:irccdpaths[]
+
+=== Paths
+
+The irccd configuration file is usually named 'irccd.conf' and it's location
+may vary on operating systems. On every operating systems, irccd will try
+to open user defined config file at first, then if not found, it fallbacks to
+the default configurations paths.
+
+On Unix, the files are loaded in the following order:
+
+. '$\{XDG_CONFIG_HOME\}/irccd/irccd.conf' +
+. '$\{HOME\}/.config/irccd/irccd.conf' +
+. '/usr/local/etc/irccd.conf'.
+
+On Windows, the files are loaded in the following order:
+
+. 'C:\Users\YourUser\irccd\irccd.conf'
+. 'C:\Program Files\irccd\irccd.conf'
+
+.Specify at the command line
+[NOTE]
+On every operating systems, it's possible to pass a specific configuration file
+at the command line, this will only try to open that file and exit if irccd
+failed to open it. Example: `irccd -c myconfig.conf`.
+
+.Changing prefix
+[CAUTION]
+The default config paths are using the default prefixes, check the
+<<bfs,Building from sources>> section.
+
+anchor:irccdsyntax[]
+
+=== Syntax
+
+The 'irccd.conf' follow a very basic *.ini* syntax. Every options are stored in
+sections and some of these sections may be redefined one or more times.
+
+Each option takes one line, it's not possible to write more than one option on
+the same line.
+
+The comment character is *#* and can live at the beginning or the end of a line.
+
+.Correct config
+[source, ini]
+----
+# This is a comment
+[general]
+verbose = false
+
+[server]
+host = "localhost"		# this is a comment too
+----
+
+.Bad config
+[source, ini]
+----
+verbose = true				# no section!
+
+[server]
+host = "localhost" port = "8520"	# not allowed!
+----
+
+=== The section `general`
+
+This section contains global options that are used in the whole irccd
+application.
+
+The options available:
+
+* `foreground`: (bool) keep irccd to foreground, default: false.
+* `plugins`: (string list) a list of plugins to load, default: empty.
+* `plugin-path`: (string) a path to local modules, default: empty.
+* `syslog`: (bool) if enabled, use syslog instead of standard output, default: false.
+* `verbose`: (bool) enable verbose message, default: false.
+
+[NOTE]
+The options foreground and syslog are only available on Unix systems.
+
+.Example
+[source, ini]
+----
+[general]
+plugins = "history logger"
+----
+
+=== The section `identity`
+
+This section is completely optional, if you don't provide one, irccd will use a
+default identity with `irccd` as nickname and username.
+
+This section is redefinable, you can create one or more.
+
+The options available:
+
+* `name`: (string) Required. the identity unique id.
+* `nickname`: (string) The nickname, default: irccd.
+* `realname`: (string) The realname, default: IRC Client daemon.
+* `username`: (string) The username name, default: irccd
+
+.Example
+[source, ini]
+----
+[identity]
+name = "default"
+nickname = "jean"
+
+[identity]
+name = "development"
+nickname = "unstable"
+username = "un"
+----
+
+anchor:irccdserver[]
+
+=== The section `server`
+
+The section `server` is used to connect to one or more server. Thus, this
+section is also redefinable.
+
+You need at least one server in your configuration file.
+
+The options available:
+
+* `name`: (string) Required. A unique id.
+* `host`: (string) Required. The server address.
+* `port`: (int) Required, The server port.
+* `identity`: (string) An identity to use.
+* `join-invite`: (bool) Join channels upon invitation, default: false.
+* `channels`: (string list) List of channel to auto join, default: empty.
+* `command-char`: (string) The prefix for invoking special commands, default: !.
+* `ssl`: (bool) Enable or disable SSL, default: false.
+* `ssl-verify`: (bool) Verify the SSL certificates, default: true.
+
+.Example
+[source, ini]
+----
+[server]
+name = "local"
+host = "localhost"
+port = 6667
+----
+
+anchor:listeners[]
+
+=== The section `listener`
+
+This section defines listeners, you may use sockets to do a basic IPC system
+in irccd. This let you controlling irccd with TCP sockets.
+
+For instance, with listeners, you may ask `irccd` to send a message, a notice or
+even kicking someone from a channel. This is done with the <<irccdctl,irccdctl>>
+utility.
+
+There are two type of listeners availables:
+
+* Internet sockets, IPv4 and IPv6
+* Unix sockets, based on files (not available on Windows)
+
+Both of the listener has an option `type` which is set to `internet` or `unix`.
+
+=== Using internet sockets
+
+The options available:
+
+* `address`: (string) Address to bind or "*" for any, default: *.
+* `family`: (string list) Internet family: ipv6, ipv4. Both are accepted, default: ipv4
+* `port`: (int) Required: port number.
+
+.Example
+[source, ini]
+----
+[listener]
+type = "internet"
+address = "*"
+family = "ipv4 ipv6"
+port = 9999
+----
+
+This will let you controlling irccd on port 9999 with both IPv4 and IPv6 families.
+
+=== Using unix sockets
+
+The options available:
+
+* `path`: (string) Required. The file path to the socket.
+
+.Example
+[source, ini]
+----
+[listener]
+type = "unix"
+path = "/tmp/irccd.sock"
+----
+
+This will let you controlling irccd on path `/tmp/irccd.sock`, the file is
+automatically deleted when irccd starts, but not when it stops.
+
+[WARNING]
+Consider using internet sockets with care, especially if you are running your
+bot on a server with multiple users. If your bot has operator rights and you
+bind on any address, almost every users can do a kick or a ban. If this is a
+concern switch to a Unix socket if possible.
+
+=== Full example
+
+There is an example of file that can be used, be sure to define real servers as
+the one defined here does not exist for real.
+
+.Example of `irccd.conf` file
+[source, ini]
+----
+# This line is ignored
+[general]
+verbose = true
+
+# Add a listener that bind only to IPv6
+[listener]
+address = "*"
+family = "ipv6"
+port = "12000"
+
+# A listener that bind to both IPv4 and IPv6
+[listener]
+address = "*"
+family = "ipv4 ipv6"
+port = "15000"
+
+# Identity reused by many servers
+[identity]
+name = "myIdentity"
+nickname = "superbot"
+realname = "SuperBot v1.0"
+username = "sp"
+
+# A server
+[server]
+host = "irc.foo.org"
+port = "6667"
+identity = "myIdentity"
+
+# An other server
+[server]
+host = "chat.wanadoo.fr"
+port = "6667"
+identity = "myIdentity"
+----
+
+== Running irccd
+
+Now that you have a configured file, you can start irccd by typing its name.
+
+----
+markand@localhost [~] $ irccd
+----
+
+The following options are available:
+
+* `-f`, do not run as a daemon, keep irccd to the foreground
+* `-c config.conf`, load a specific config file, exit if not found
+* `-p pluginpath`, add a directory to find plugins
+* `-P plugin`, load a plugin, can be specified more than one time
+* `-v`, be verbose
+
+=== Using plugins
+
+Lua plugins can be used to manage IRC events, to let you overriding distributed
+plugins, irccd will try to open plugin in your home directory before.
+
+On Unix, the paths are searched in the following order:
+
+. Specified by -p on command line
+. '$\{XDG_CONFIG_HOME\}/irccd/plugins'
+. '$\{HOME\}/.config/irccd/plugins'
+. '/usr/local/share/irccd/plugins'
+
+On Windows, the paths are searched in the following order:
+
+. Specified by -p on command line
+. 'C:\Users\YourUser\irccd\plugins'
+. 'C:\Program Files\irccd\plugins'
+
+anchor:irccdplugnote[]
+
+=== Note about plugins
+
+All plugins have a home directory. This allow configuring or caching some data
+needed for them. The home directory cannot be changed and is relative to the
+irccd <<irccdpaths,config path>> plus the plugin name. For example, the plugin
+`ask.lua` will have the following home:
+
+On Unix: '~/.config/irccd/ask/'
+
+On Windows: 'C:/Users/YourUser/irccd/ask/'
+
+anchor:irccdpatterns[]
+
+=== Common patterns in plugins
+
+Some plugins can be configured, and some of them can use patterns to substitute
+variables.
+
+For instance, using the `logger` plugin, it's possible to customize the pattern
+to use when someone joins a channel like that:
+
+----
+#U joined #c
+----
+
+The keywords *#U*
+will be substituted to the nickname and *#c* to the channel name.
+
+Note, some keywords are obviously not available for all contexts. When plugins
+supports these patterns, they are marked as *Keywords supported: #c, #m*.
+
+.Time
+
+When you can use patterns, the date and time may be used just like `strftime(3)`
+so for the hours and minutes, you can use *%H:%M*.
+
+.Home
+
+To match your user directory, you can use the famous *~*.
+
+.List of keywords supported
+
+Here's the list of keywords that a lot of plugins uses:
+
+* `#c`, the channel name
+* `#m`, a message (depending on context)
+* `#s`, the current server name
+* `#t`, the topic
+* `#T`, a target, i.e a person who gets kicked
+* `#u`, the full user, i.e `markand!~mkd@localhost`
+* `#U`, the nickname
+
+.Example with `logger`
+
+Using the plugin logger, you can use a configuration like this:
+
+[source, ini]
+----
+[general]
+directory = "~/logs/#s/%y/%m/#c-%d.log"
+
+[formats]
+message  = "%H:%M #u: #m"
+----
+
+With this example, *~* will be substituted to the user home directory. With a
+server named `local`, a channel `#staff` everything would be stored like this:
+
+`/home/markand/local/13/07/#staff-08.log`
+
+Also the message would be stored like this:
+
+`20:50 markand: I'm watching TV.`
+
+anchor:irccdctl[]
+
+== The irccdctl utility
+
+The `irccdctl` utility let you controlling a running `irccd` instance. It uses
+TCP sockets to perform any operation.
+
+First, you need to define at least one <<listeners,listener>> before using
+irccdctl.
+
+Second, you need to write a configuration file named `irccdctl.conf`. It takes
+places at exactly the same <<irccdpaths,irccd paths>>.
+
+=== The section `general`
+
+This section defines the global irccdctl parameters.
+
+The options available:
+
+* `verbose`: (bool) enable verbose message, default: false.
+
+.Example
+[source, ini]
+----
+[general]
+verbose = true
+----
+
+=== The section `socket`
+
+The section socket permit irccdctl to connect to a specific irccd listener,
+only one may be defined.
+
+Just like <<listeners,listeners>> you can connect to Unix or internet sockets.
+
+Both of the listener has an option `type` which is set to `internet` or `unix`.
+
+=== Using internet sockets
+
+The options available:
+
+* `host`: (string) Required. Host to connect.
+* `family`: (string) Required. Internet family: ipv6 or ipv4.
+* `port`: (int) Required: port number.
+
+.Example
+[source, ini]
+----
+[socket]
+type = "internet"
+host = "localhost"
+port = "9999"
+family = "ipv6"
+----
+
+=== Using unix sockets
+
+The options available:
+
+* `path`: (string) Required. The file path to the socket.
+
+.Example
+[source, ini]
+----
+[socket]
+type = "unix"
+path = "/tmp/irccd.sock"
+----
+
+== Available commands
+
+Almost of all these commands takes a server as parameter. It is one defined in
+the <<irccdserver,server section>> with the parameter `name`.
+
+Only `load`, `reload` and `unload` do not need it.
+
+The following commands are available for irccdctl:
+
+* <<irccdctlcnotice,cnotice>>
+* <<irccdctlhelp,help>>
+* <<irccdctlinvite,invite>>
+* <<irccdctljoin,join>>
+* <<irccdctlkick,kick>>
+* <<irccdctlload,load>>
+* <<irccdctlme,me>>
+* <<irccdctlmessage,message>>
+* <<irccdctlmode,mode>>
+* <<irccdctlnotice,notice>>
+* <<irccdctlnick,nick>>
+* <<irccdctlpart,part>>
+* <<irccdctlreload,reload>>
+* <<irccdctlumode,umode>>
+* <<irccdctlunload,unload>>
+
+anchor:irccdctlcnotice[]
+
+=== Channel notice
+
+Send a notice to a public channel. This is a notice that everyone
+will be notified by.
+
+.Usage
+----
+$ irccdctl cnotice server channel message
+----
+
+.Example
+----
+$ irccdctl cnotice freenode #staff "Don't flood"
+----
+
+anchor:irccdctlhelp[]
+
+=== Help
+
+Get the help.
+
+.Usage
+----
+$ irccdctl help subject
+----
+
+.Example
+----
+$ irccdctl help message
+----
+
+anchor:irccdctlinvite[]
+
+=== Invite
+
+Invite someone to a channel, needed for channel with mode +i
+
+.Usage
+----
+$ irccdctl invite server nickname channel
+----
+
+.Example
+----
+$ irccdctl invite freenode xorg62 #staff
+----
+
+anchor:irccdctljoin[]
+
+=== Join
+
+Join a channel on a specific server registered in irccd. The server
+is referenced by the parameter server. Parameter channel is the channel
+to join. An optional password may be set as password parameter.
+
+.Usage
+----
+$ irccdctl join server channel [password]
+----
+
+.Example
+----
+$ irccdctl join freenode #staff
+----
+
+anchor:irccdctlkick[]
+
+=== Kick
+
+Kick someone from a channel. The parameter reason is optional and
+may be ommited but when specified it must be unclosed between quotes.
+
+.Usage
+----
+$ irccdctl kick server nick channel [reason]
+----
+
+.Example
+----
+$ irccdctl kick freenode jean #staff "Stop flooding"
+----
+
+anchor:irccdctlload[]
+
+=== Load
+
+Load a plugin into the irccd instance.
+
+.Usage
+----
+$ irccdctl load plugin
+----
+
+.Example
+----
+$ irccdctl load ask
+----
+
+anchor:irccdctlme[]
+
+=== Me
+
+Send a CTCP ACTION message. It is exactly the same syntax as  message.
+
+.Usage
+----
+$ irccdctl me server target message
+----
+
+.Example
+----
+$ irccdctl me freenode #staff "going back soon"
+----
+
+anchor:irccdctlmessage[]
+
+=== Message
+
+end a message to someone or a channel. The target may be a channel or a real
+person
+If the message contains more than one word it must be enclosed between quotes.
+
+.Usage
+----
+$ irccdctl message server target message
+----
+
+.Example
+----
+$ irccdctl message freenode #staff "Hello from irccd"
+----
+
+anchor:irccdctlmode[]
+
+=== Channel mode
+
+Change the mode of the specified channel. The mode contains full parameters
+like "+b" or "+k secret".
+
+.Usage
+----
+$ irccdctl mode server channel mode
+----
+
+.Example
+----
+$ irccdctl mode freenode #staff +t
+----
+
+anchor:irccdctlnotice[]
+
+=== Private notice
+
+Send a private notice to a target user.
+
+.Usage
+----
+$ irccdctl notice server target message
+----
+
+.Example
+----
+$ irccdctl notice freenode jean "Private notice"
+----
+
+anchor:irccdctlnick[]
+
+=== Change nickname
+
+Change your nickname. The parameter nickname is the new nickname
+
+.Usage
+----
+$ irccdctl nick server nickname
+----
+
+.Example
+----
+$ irccdctl nick freenode david
+----
+
+anchor:irccdctlpart[]
+
+=== Part from a channel
+
+Leave a channel. Parameter server is one registered in irccd config.
+Parameter channel is the channel to leave.
+
+.Usage
+----
+$ irccdctl part server channel
+----
+
+.Example
+----
+$ irccdctl part freenode #staff
+----
+
+[NOTE]
+Currently, there is no option to provide a part message.
+
+anchor:irccdctlreload[]
+
+=== Reload a plugin
+
+Reload a plugin, parameter name is the plugin to reload.
+The plugin needs to be loaded.
+
+.Usage
+----
+$ irccdctl reload name
+----
+
+.Example
+----
+$ irccdctl reload logger
+----
+
+anchor:irccdctltopic[]
+
+=== Change topic
+
+Set the new topic of a channel. Topic must be enclosed between
+quotes.
+
+.Usage
+----
+$ irccdctl topic server channel topic
+----
+
+.Example
+----
+$ irccdctl topic freenode #wmfs "This is the best channel"
+----
+
+anchor:irccdctlumode[]
+
+=== Change your user mode
+
+Change your own user mode.
+
+.Usage
+----
+$ irccdctl umode server mode
+----
+
+.Example
+----
+$ irccdctl umode +i
+----
+
+anchor:irccdctlunload[]
+
+=== Unload a plugin
+
+Unload a loaded plugin from the irccd instance.
+
+.Usage
+----
+$ irccdctl unload name
+----
+
+.Example
+----
+$ irccdctl unload logger
+----
+
+// vim: set syntax=asciidoc:
