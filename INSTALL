@@ -14,12 +14,14 @@ Requirements
   superior also work.
 
 * libircclient (http://www.ulduzsoft.com/linux/libircclient). This library
-  is mandatory. You need version 1.7 or superior to get SSL support.
+  is mandatory. You need version 1.6 or higher and 1.7 or higher for SSL
+  support.
 
 * libxdg-basedir (https://github.com/devnev/libxdg-basedir). This library
   is needed on Unix only.
 
-* cmake (http://www.cmake.org). This tool is needed to build irccd.
+* cmake (http://www.cmake.org). Version 2.8.11 recommended. This tool is
+  required to build irccd.
 
 Optional:
 

@@ -31,11 +31,12 @@ not very hard.
 
 To build from sources, you need the following installed on your system:
 
-* cmake, http://www.cmake.org
-* libircclient, http://www.ulduzsoft.com/linux/libircclient/
+* cmake, http://www.cmake.org.
+* libircclient, http://www.ulduzsoft.com/linux/libircclient/, 1.6 or higher and
+  1.7 or higher for SSL support.
 * libxdg-basedir, https://github.com/devnev/libxdg-basedir. On Unix only.
-* Lua 5.2, http://lua.org (optional)
-* C++11 support
+* Lua 5.2, http://lua.org (optional).
+* C++11 support.
 
 [NOTE]
 On some systems, libircclient development packages may be named libircclient-dev
