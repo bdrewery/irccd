@@ -24,13 +24,13 @@
 #include <config.h>
 
 #include <Parser.h>
-#include <SocketTCP.h>
+#include <SocketAddress.h>
 
 namespace irccd {
 
 class Irccdctl {
 private:
-	SocketTCP m_socket;
+	Socket m_socket;
 	std::string m_configPath;
 
 #if !defined(_WIN32)

@@ -1,7 +1,7 @@
 /*
- * Socket.cpp -- abstract base socket class
+ * Socket.cpp -- portable C++ socket wrappers
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,127 +17,23 @@
  */
 
 #include <cerrno>
-#include <cstring>
 
 #include "Socket.h"
+#include "SocketAddress.h"
 
-using namespace irccd;
-using namespace std;
+namespace irccd
+{
 
 /* --------------------------------------------------------
- * BindPointIP implementation
+ * SocketError implementation
  * -------------------------------------------------------- */
 
-BindPointIP::BindPointIP(const string &iface, unsigned port, int family)
-	:m_host(iface), m_family(family), m_port(port)
-{
-	if (m_family == AF_INET6) {
-		sockaddr_in6 *ptr = (sockaddr_in6 *)&m_addr;
-
-		memset(ptr, 0, sizeof (sockaddr_in6));
-		ptr->sin6_family = AF_INET6;
-		ptr->sin6_port = htons(m_port);
-
-		if (m_host == "*")
-			ptr->sin6_addr = in6addr_any;
-		else if (inet_pton(AF_INET6, m_host.c_str(), &ptr->sin6_addr) <= 0) {
-			throw Socket::ErrorException(Socket::getLastSysError());
-		}
-
-		m_addrlen = sizeof (sockaddr_in6);
-	} else {
-		sockaddr_in *ptr = (sockaddr_in *)&m_addr;
-
-		memset(ptr, 0, sizeof (sockaddr_in));
-		ptr->sin_family = AF_INET;
-		ptr->sin_port = htons(m_port);
-
-		if (m_host == "*")
-			ptr->sin_addr.s_addr = INADDR_ANY;
-		else if (inet_pton(AF_INET, m_host.c_str(), &ptr->sin_addr) <= 0) {
-			throw Socket::ErrorException(Socket::getLastSysError());
-		}
-
-		m_addrlen = sizeof (sockaddr_in);
-	}
-}
-
-/* --------------------------------------------------------
- * ConnectPointIP implementation
- * -------------------------------------------------------- */
-
-ConnectPointIP::ConnectPointIP(const string &host, unsigned port, int family)
-{
-	addrinfo hints, *res;
-	int error;
-
-	memset(&hints, 0, sizeof (hints));
-	hints.ai_family = family;
-	hints.ai_socktype = SOCK_STREAM;
-
-	error = getaddrinfo(host.c_str(), to_string(port).c_str(), &hints, &res);
-	if (error)
-		throw Socket::ErrorException(gai_strerrorA(error));
-
-	memcpy(&m_addr, res->ai_addr, res->ai_addrlen);
-	m_addrlen = res->ai_addrlen;
-
-	freeaddrinfo(res);
-}
-
-/* --------------------------------------------------------
- * UnixPoint implementation
- * -------------------------------------------------------- */
-
-#if !defined(_WIN32)
-UnixPoint::UnixPoint(const string &path)
-{
-	sockaddr_un *sun = (sockaddr_un *)&m_addr;		
-
-	memset(sun, 0, sizeof (sockaddr_un));
-	memset(sun->sun_path, 0, sizeof (sun->sun_path));
-	strncpy(sun->sun_path, path.c_str(), sizeof (sun->sun_path) - 1);
-
-	sun->sun_family = AF_UNIX;
-	m_addrlen = SUN_LEN(sun);
-}
-#endif
-
-/* --------------------------------------------------------
- * EndPoint implementation
- * -------------------------------------------------------- */
-
-EndPoint::EndPoint()
-{
-	memset(&m_addr, 0, sizeof (m_addr));
-}
-
-EndPoint::EndPoint(const sockaddr_storage & addr, unsigned addrlen)
-{
-	m_addr = addr;
-	m_addrlen = addrlen;
-}
-
-const sockaddr_storage & EndPoint::getAddr() const
-{
-	return m_addr;
-}
-
-unsigned EndPoint::getAddrlen()
-{
-	return m_addrlen;
-}
-
-/* --------------------------------------------------------
- * Socket::ErrorExecption implementation
- * -------------------------------------------------------- */
-
-Socket::ErrorException::ErrorException(const string &error)
+SocketError::SocketError(const std::string &error)
 {
 	m_error = error;
 }
 
-const char * Socket::ErrorException::what() const throw()
+const char *SocketError::what() const throw()
 {
 	return m_error.c_str();
 }
@@ -162,8 +58,8 @@ void Socket::init()
 
 string Socket::getLastSysError()
 {
-	LPSTR str;
-	string errmsg = "";
+	LPSTR str = nullptr;
+	string errmsg = "Unknown error";
 
 	FormatMessageA(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -173,7 +69,8 @@ string Socket::getLastSysError()
 		(LPSTR)&str, 0, NULL);
 
 
-	if (str) {
+	if (str)
+	{
 		errmsg = string(str);
 		LocalFree(str);
 	}
@@ -183,7 +80,7 @@ string Socket::getLastSysError()
 
 #else
 
-string Socket::getLastSysError()
+std::string Socket::getLastSysError()
 {
 	return strerror(errno);
 }
@@ -201,8 +98,16 @@ Socket::Socket()
 {
 }
 
-Socket::Socket(socket_t sock, EndPoint endPoint)
-	:m_socket(sock), m_endPoint(endPoint)
+Socket::Socket(int domain, int type, int protocol)
+{
+	m_socket = socket(domain, type, protocol);
+
+	if (m_socket == INVALID_SOCKET)
+		throw SocketError(getLastSysError());
+}
+
+Socket::Socket(Socket::Type sock)
+	: m_socket(sock)
 {
 }
 
@@ -210,24 +115,147 @@ Socket::~Socket()
 {
 }
 
-Socket::socket_t Socket::getSocket() const
+Socket::Type Socket::getSocket() const
 {
 	return m_socket;
 }
 
 void Socket::set(int level, int name, const void *arg, unsigned argLen)
 {
-	if (setsockopt(m_socket, level, name, (carg_t)arg, argLen) == SOCKET_ERROR)
-		throw ErrorException(getLastSysError());
+	if (setsockopt(m_socket, level, name, (Socket::ConstArg)arg, argLen) == SOCKET_ERROR)
+		throw SocketError(getLastSysError());
 }
 
-void Socket::bind(EndPoint location)
+void Socket::blockMode(bool block)
 {
-	const sockaddr_storage & addr = location.getAddr();
-	unsigned addrlen = location.getAddrlen();
+#if defined(O_NONBLOCK) && !defined(_WIN32)
+	int flags;
 
-	if (::bind(m_socket, (sockaddr *)&addr, addrlen) == SOCKET_ERROR)
-		throw ErrorException(getLastSysError());
+	if ((flags = fcntl(m_socket, F_GETFL, 0)) == -1)
+		flags = 0;
+
+	if (!block)
+		flags &= ~(O_NONBLOCK);
+	else
+		flags |= O_NONBLOCK;
+
+	if (fcntl(m_socket, F_SETFL, flags) == -1)
+		throw SocketError(getLastSysError());
+#else
+	unsigned long flags = (block) ? 0 : 1;
+
+	if (ioctlsocket(m_socket, FIONBIO, &flags) == SOCKET_ERROR)
+		throw SocketError(getLastSysError());
+#endif
+}
+
+void Socket::bind(const SocketAddress &addr)
+{
+	const sockaddr_storage &sa = addr.address();
+	size_t addrlen = addr.length();
+
+	if (::bind(m_socket, (sockaddr *)&sa, addrlen) == SOCKET_ERROR)
+		throw SocketError(getLastSysError());
+}
+
+void Socket::connect(const SocketAddress &addr)
+{
+	const sockaddr_storage &sa = addr.address();
+	size_t addrlen = addr.length();
+
+	if (::connect(m_socket, (sockaddr *)&sa, addrlen) == SOCKET_ERROR)
+		throw SocketError(getLastSysError());
+}
+
+Socket Socket::accept()
+{
+	SocketAddress dummy;
+
+	return accept(dummy);
+}
+
+Socket Socket::accept(SocketAddress &info)
+{
+	Socket::Type sock;
+
+	info.m_addrlen = sizeof (sockaddr_storage);
+	sock = ::accept(m_socket, (sockaddr *)&info.m_addr, &info.m_addrlen);
+
+	if (sock == INVALID_SOCKET)
+		throw SocketError(getLastSysError());
+
+	return Socket(sock);
+}
+
+void Socket::listen(int max)
+{
+	if (::listen(m_socket, max) == SOCKET_ERROR)
+		throw SocketError(getLastSysError());
+}
+
+unsigned Socket::recv(void *data, unsigned dataLen)
+{
+	int nbread;
+
+	nbread = ::recv(m_socket, (Socket::Arg)data, dataLen, 0);
+	if (nbread == SOCKET_ERROR)
+		throw SocketError(getLastSysError());
+
+	return (unsigned)nbread;
+}
+
+unsigned Socket::send(const void *data, unsigned dataLen)
+{
+	int nbsent;
+
+	nbsent = ::send(m_socket, (Socket::ConstArg)data, dataLen, 0);
+	if (nbsent == SOCKET_ERROR)
+		throw SocketError(getLastSysError());
+
+	return (unsigned)nbsent;
+}
+
+unsigned Socket::send(const std::string &message)
+{
+	return Socket::send(message.c_str(), message.length());
+}
+
+unsigned Socket::recvfrom(void *data, unsigned dataLen)
+{
+	SocketAddress dummy;
+
+	return recvfrom(data, dataLen, dummy);
+}
+
+unsigned Socket::recvfrom(void *data, unsigned dataLen, SocketAddress &info)
+{
+	int nbread;
+
+	info.m_addrlen = sizeof (struct sockaddr_storage);
+	nbread = ::recvfrom(m_socket, (Socket::Arg)data, dataLen, 0,
+	    (sockaddr *)&info.m_addr, &info.m_addrlen);
+
+	if (nbread == SOCKET_ERROR)
+		throw SocketError(getLastSysError());
+
+	return (unsigned)nbread;
+}
+
+unsigned Socket::sendto(const void *data, unsigned dataLen, const SocketAddress &info)
+{
+	int nbsent;
+
+	nbsent = ::sendto(m_socket, (Socket::ConstArg)data, dataLen, 0,
+	    (const sockaddr *)&info.m_addr, info.m_addrlen);
+	if (nbsent == SOCKET_ERROR)
+		throw SocketError(getLastSysError());
+
+	return (unsigned)nbsent;
+}
+
+unsigned Socket::sendto(const std::string &message, const SocketAddress &info)
+{
+	return sendto(message.c_str(), message.length(), info);
 }
 
 void Socket::close()
@@ -235,7 +263,14 @@ void Socket::close()
 	(void)closesocket(m_socket);
 }
 
-bool irccd::operator==(const Socket &s1, const Socket &s2)
+bool operator==(const Socket &s1, const Socket &s2)
 {
 	return s1.getSocket() == s2.getSocket();
 }
+
+bool operator<(const Socket &s1, const Socket &s2)
+{
+	return s1.getSocket() < s2.getSocket();
+}
+
+} // !irccd

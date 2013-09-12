@@ -29,10 +29,10 @@ set(SOURCES
 	Parser.h
 	Socket.cpp
 	Socket.h
+	SocketAddress.cpp
+	SocketAddress.h
 	SocketListener.cpp
 	SocketListener.h
-	SocketTCP.cpp
-	SocketTCP.h
 	Util.cpp
 	Util.h
 	${EXTSOURCES}

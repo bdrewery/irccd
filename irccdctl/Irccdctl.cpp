@@ -22,6 +22,7 @@
 
 #include <Logger.h>
 #include <Parser.h>
+#include <SocketAddress.h>
 #include <SocketListener.h>
 #include <Util.h>
 
@@ -484,9 +485,9 @@ void Irccdctl::connectUnix(const Section &section)
 	path = section.requireOption<string>("path");
 
 	try {
-		m_socket.create(AF_UNIX);
-		m_socket.connect(UnixPoint(path));
-	} catch (Socket::ErrorException error) {
+		m_socket = Socket(AF_UNIX, SOCK_STREAM, 0);
+		m_socket.connect(AddressUnix(path));
+	} catch (SocketError error) {
 		Logger::warn("irccd: failed to connect to %s: %s", path.c_str(), error.what());
 		exit(1);
 	}
@@ -512,9 +513,9 @@ void Irccdctl::connectInet(const Section &section)
 	}
 
 	try {
-		m_socket.create(family);
-		m_socket.connect(ConnectPointIP(host, port, family));
-	} catch (Socket::ErrorException error) {
+		m_socket = Socket(family, SOCK_STREAM, 0);
+		m_socket.connect(ConnectAddressIP(host, port, family));
+	} catch (SocketError error) {
 		Logger::warn("irccdctl: failed to connect: %s", error.what());
 		exit(1);
 	}
@@ -592,7 +593,7 @@ void Irccdctl::sendRaw(const std::string &message)
 {
 	try {
 		m_socket.send(message.c_str(), message.length());
-	} catch (Socket::ErrorException ex) {
+	} catch (SocketError ex) {
 		Logger::warn("irccdctl: failed to send message: %s", ex.what());
 	}
 }
@@ -634,10 +635,10 @@ int Irccdctl::getResponse()
 				finished = true;
 			}
 		}
-	} catch (Socket::ErrorException ex) {
+	} catch (SocketError ex) {
 		Logger::warn("irccdctl: error: %s", ex.what());
 		ret = 1;
-	} catch (SocketListener::TimeoutException) {
+	} catch (SocketTimeout) {
 		Logger::warn("irccdctl: didn't get a response from irccd");
 		ret = 1;
 	}

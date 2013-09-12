@@ -25,8 +25,8 @@
 #include <sstream>
 
 #include <Parser.h>
+#include <Socket.h>
 #include <SocketListener.h>
-#include <SocketTCP.h>
 
 #include <config.h>
 
@@ -88,17 +88,17 @@ private:
 	ServerList m_servers;				//! list of servers
 
 	// Socket clients and listeners
-	std::vector<SocketTCP> m_socketServers;		//! socket servers
-	std::map<SocketTCP, std::string> m_clients;	//! socket clients
+	std::vector<Socket> m_socketServers;		//! socket servers
+	std::map<Socket, std::string> m_clients;	//! socket clients
 	SocketListener m_listener;			//! socket listener
 
 	// Identities
 	std::vector<Server::Identity> m_identities;	//! user identities
 	Server::Identity m_defaultIdentity;		//! default identity
 
-	void clientAdd(SocketTCP &client);
-	void clientRead(SocketTCP &client);
-	void execute(SocketTCP &client, const std::string &cmd);
+	void clientAdd(Socket &client);
+	void clientRead(Socket &client);
+	void execute(Socket &client, const std::string &cmd);
 	bool isPluginLoaded(const std::string &name);
 	bool isOverriden(char c);
 

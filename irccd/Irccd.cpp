@@ -25,7 +25,7 @@
 
 #include <Logger.h>
 #include <Parser.h>
-#include <SocketTCP.h>
+#include <SocketAddress.h>
 #include <Util.h>
 
 #include "Irccd.h"
@@ -39,9 +39,9 @@ using namespace std;
 
 /* {{{ Client handlers */
 
-typedef function<bool(SocketTCP &, const string &params)> Handler;
+typedef function<bool(Socket &, const string &params)> Handler;
 
-static bool handleChannelNotice(SocketTCP &client, const string &cmd)
+static bool handleChannelNotice(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
@@ -57,7 +57,7 @@ static bool handleChannelNotice(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static bool handleInvite(SocketTCP &client, const string &cmd)
+static bool handleInvite(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
@@ -73,7 +73,7 @@ static bool handleInvite(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static bool handleJoin(SocketTCP &client, const string &cmd)
+static bool handleJoin(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
@@ -93,7 +93,7 @@ static bool handleJoin(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static bool handleKick(SocketTCP &client, const string &cmd)
+static bool handleKick(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 4);
 
@@ -113,7 +113,7 @@ static bool handleKick(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static bool handleLoad(SocketTCP &client, const string &cmd)
+static bool handleLoad(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 1);
 
@@ -129,7 +129,7 @@ static bool handleLoad(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static bool handleMe(SocketTCP &client, const string &cmd)
+static bool handleMe(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
@@ -145,7 +145,7 @@ static bool handleMe(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static bool handleMessage(SocketTCP &client, const string &cmd)
+static bool handleMessage(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
@@ -161,7 +161,7 @@ static bool handleMessage(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static bool handleMode(SocketTCP &client, const string &cmd)
+static bool handleMode(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
@@ -177,7 +177,7 @@ static bool handleMode(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static bool handleNick(SocketTCP &client, const string &cmd)
+static bool handleNick(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 2);
 
@@ -193,7 +193,7 @@ static bool handleNick(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static bool handleNotice(SocketTCP &client, const string &cmd)
+static bool handleNotice(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
@@ -209,7 +209,7 @@ static bool handleNotice(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static bool handlePart(SocketTCP &client, const string &cmd)
+static bool handlePart(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 2);
 
@@ -225,7 +225,7 @@ static bool handlePart(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static bool handleReload(SocketTCP &client, const string &cmd)
+static bool handleReload(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 1);
 
@@ -241,7 +241,7 @@ static bool handleReload(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static bool handleTopic(SocketTCP &client, const string &cmd)
+static bool handleTopic(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 3);
 
@@ -257,7 +257,7 @@ static bool handleTopic(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static bool handleUnload(SocketTCP &client, const string &cmd)
+static bool handleUnload(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 1);
 
@@ -273,7 +273,7 @@ static bool handleUnload(SocketTCP &client, const string &cmd)
 	return true;
 }
 
-static bool handleUserMode(SocketTCP &client, const string &cmd)
+static bool handleUserMode(Socket &client, const string &cmd)
 {
 	vector<string> params = Util::split(cmd, " \t", 2);
 
@@ -322,22 +322,22 @@ static map<string, Handler> handlers = createHandlers();
 
 Irccd * Irccd::m_instance = nullptr;
 
-void Irccd::clientAdd(SocketTCP &server)
+void Irccd::clientAdd(Socket &server)
 {
-	SocketTCP client;
+	Socket client;
 
 	try {
-		SocketTCP client = server.accept();
+		Socket client = server.accept();
 
 		// Add to clients to read data
 		m_clients[client] = "";
 		m_listener.add(client);
-	} catch (Socket::ErrorException ex) {
+	} catch (SocketError ex) {
 		Logger::warn("listener: could not accept client: %s", ex.what());
 	}
 }
 
-void Irccd::clientRead(SocketTCP &client)
+void Irccd::clientRead(Socket &client)
 {
 	char data[128 + 1];
 	int length;
@@ -364,7 +364,7 @@ void Irccd::clientRead(SocketTCP &client)
 			if (position != string::npos)
 				execute(client, cmd.substr(0, position));
 		}
-	} catch (Socket::ErrorException ex) {
+	} catch (SocketError ex) {
 		Logger::log("listener: Could not read from client %s", ex.what());
 		removeIt = true;
 	}
@@ -375,7 +375,7 @@ void Irccd::clientRead(SocketTCP &client)
 	}
 }
 
-void Irccd::execute(SocketTCP &client, const string &cmd)
+void Irccd::execute(Socket &client, const string &cmd)
 {
 	string cmdName;
 	size_t cmdDelim;
@@ -398,7 +398,7 @@ void Irccd::execute(SocketTCP &client, const string &cmd)
 				error = oss.str();
 
 				client.send(error.c_str(), error.length());
-			} catch (Socket::ErrorException ex) {
+			} catch (SocketError ex) {
 				Logger::warn("listener: failed to send: %s", ex.what());
 			}
 		}
@@ -683,7 +683,6 @@ void Irccd::openListeners(const Parser &config)
 
 void Irccd::extractInternet(const Section &s)
 {
-	SocketTCP inet;
 	vector<string> protocols;
 	string address, family;
 	int port;
@@ -713,14 +712,15 @@ void Irccd::extractInternet(const Section &s)
 	try {
 		int reuse = 1;
 
-		inet.create((ipv6) ? AF_INET6 : AF_INET);
+		Socket inet((ipv6) ? AF_INET6 : AF_INET, SOCK_STREAM, 0);
+
 		inet.set(SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof (reuse));
 		if (ipv6) {
 			int mode = !ipv4;
 			inet.set(IPPROTO_IPV6, IPV6_V6ONLY, &mode, sizeof (mode));
 		}
 
-		inet.bind(BindPointIP(address, port, (ipv6) ? AF_INET6 : AF_INET));
+		inet.bind(BindAddressIP(address, port, (ipv6) ? AF_INET6 : AF_INET));
 		inet.listen(64);
 
 		// On success add to listener and servers
@@ -728,7 +728,7 @@ void Irccd::extractInternet(const Section &s)
 		m_listener.add(inet);
 
 		Logger::log("listener: listening for clients on port %d...", port);
-	} catch (Socket::ErrorException ex) {
+	} catch (SocketError ex) {
 		Logger::warn("listener: internet socket error: %s", ex.what());
 	}
 }
@@ -737,7 +737,6 @@ void Irccd::extractInternet(const Section &s)
 void Irccd::extractUnix(const Section &s)
 {
 	string path;
-	SocketTCP unix;
 
 	path = s.requireOption<string>("path");
 
@@ -746,8 +745,9 @@ void Irccd::extractUnix(const Section &s)
 		Logger::warn("listener: error removing %s: %s", path.c_str(), strerror(errno));
 	} else {
 		try {
-			unix.create(AF_UNIX);
-			unix.bind(UnixPoint(path));
+			Socket unix(AF_UNIX, SOCK_STREAM, 0);
+
+			unix.bind(AddressUnix(path, true));
 			unix.listen(64);
 
 			// On success add to listener and servers
@@ -755,7 +755,7 @@ void Irccd::extractUnix(const Section &s)
 			m_listener.add(unix);
 
 			Logger::log("listener: listening for clients on %s...", path.c_str());
-		} catch (Socket::ErrorException ex) {
+		} catch (SocketError ex) {
 			Logger::warn("listener: unix socket error: %s", ex.what());
 		}
 	}
@@ -979,7 +979,7 @@ int Irccd::run()
 		}
 
 		try {
-			SocketTCP &s = (SocketTCP &)m_listener.select(0);
+			Socket &s = (Socket &)m_listener.select(0);
 
 			// Check if this is on a listening socket
 			if (find(m_socketServers.begin(), m_socketServers.end(), s) != m_socketServers.end()) {
@@ -987,7 +987,7 @@ int Irccd::run()
 			} else {
 				clientRead(s);
 			}
-		} catch (Socket::ErrorException) {
+		} catch (SocketError) {
 		}
 	}
 

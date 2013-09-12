@@ -1,7 +1,7 @@
 /*
- * Socket.h -- abstract base socket class
+ * Socket.h -- portable C++ socket wrappers
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -27,18 +27,19 @@
 #  include <WinSock2.h>
 #  include <WS2tcpip.h>
 #else
-#  include <sys/types.h>
+#  include <sys/ioctl.h>
 #  include <sys/socket.h>
-#  include <sys/un.h>
+#  include <sys/types.h>
 
 #  include <arpa/inet.h>
 
 #  include <netinet/in.h>
 
+#  include <fcntl.h>
 #  include <netdb.h>
 #  include <unistd.h>
 
-#  define ioctlsocket(s)	::ioctl(s)
+#  define ioctlsocket(s, p, a)	::ioctl(s, p, a)
 #  define closesocket(s)	::close(s)
 
 #  define gai_strerrorA		gai_strerror
@@ -47,89 +48,27 @@
 #  define SOCKET_ERROR		-1
 #endif
 
-namespace irccd {
+namespace irccd
+{
+
+class SocketAddress;
 
 /**
- * @class EndPoint
- * @brief class for generic bind() or connect() calls
- */
-class EndPoint {
-protected:
-	sockaddr_storage m_addr;
-	unsigned m_addrlen;
-
-public:
-	EndPoint();
-
-	EndPoint(const sockaddr_storage & addr, unsigned addrlen);
-
-	const sockaddr_storage & getAddr() const;
-
-	unsigned getAddrlen();
-};
-
-/**
- * @class BindPointIP
- * @brief internet protocol bind class
+ * @class SocketError
+ * @brief socket error reporting
  *
- * Create a bind address for internet protocol,
- * IPv4 or IPv6.
+ * This class is mainly used in all socket operations that may fail.
  */
-class BindPointIP : public EndPoint {
+class SocketError : public std::exception
+{
 private:
-	std::string m_host;
-	int m_family;
-	unsigned m_port;
+	std::string m_error;
 
 public:
-	/**
-	 * Create a bind end point.
-	 *
-	 * @param addr the interface to bind
-	 * @param port the port
-	 * @param family AF_INET or AF_INET6
-	 * @throw Socket::ErrorException on error
-	 */
-	BindPointIP(const std::string &addr, unsigned port, int family);
-};
+	SocketError(const std::string &error);
 
-/**
- * @class ConnectPointIP
- * @brief internet protocol connect class
- *
- * Create a connect address for internet protocol,
- * using getaddrinfo(3).
- */
-class ConnectPointIP : public EndPoint {
-public:
-	/**
-	 * Create a connect end point.
-	 *
-	 * @param host the hostname
-	 * @param port the port
-	 * @param family AF_INET or AF_INET6
-	 * @throw Socket::ErrorException on error
-	 */
-	ConnectPointIP(const std::string &host, unsigned port, int family);
+	virtual const char * what(void) const throw();
 };
-
-#if !defined(_WIN32)
-/**
- * @class UnixPoint
- * @brief unix domain end point
- *
- * Can be used for both bind() and connect().
- */
-class UnixPoint : public EndPoint {
-public:
-	/**
-	 * Create a UnixPoint.
-	 *
-	 * @param path the socket file path
-	 */
-	UnixPoint(const std::string &path);
-};
-#endif
 
 /**
  * @class Socket
@@ -138,31 +77,21 @@ public:
  * This class is a big wrapper around sockets functions but portable,
  * there is some functions that helps for getting error reporting.
  */
-class Socket {
+class Socket
+{
 public:
 #if defined(_WIN32)
-	typedef SOCKET		socket_t;
-	typedef const char *	carg_t;
-	typedef char *		arg_t;
+	typedef SOCKET		Type;
+	typedef const char *	ConstArg;
+	typedef char *		Arg;
 #else
-	typedef int		socket_t;
-	typedef const void *	carg_t;
-	typedef void *		arg_t;
+	typedef int		Type;
+	typedef const void *	ConstArg;
+	typedef void *		Arg;
 #endif
 
-	class ErrorException : public std::exception {
-	private:
-		std::string m_error;
-
-	public:
-		ErrorException(const std::string &error);
-
-		virtual const char * what() const throw();
-	};
-
 protected:
-	socket_t m_socket;
-	EndPoint m_endPoint;
+	Socket::Type m_socket;
 
 public:
 	/**
@@ -188,12 +117,21 @@ public:
 	Socket();
 
 	/**
-	 * Create a socket with a specified sock and location.
+	 * Constructor to create a new socket.
+	 *
+	 * @param domain the domain
+	 * @param type the type
+	 * @param protocol the protocol
+	 * @throw SocketError on error
+	 */
+	Socket(int domain, int type, int protocol);
+
+	/**
+	 * Constructor with a socket already opened.
 	 *
 	 * @param sock the socket
-	 * @param endPoint the endPoint
 	 */
-	Socket(socket_t sock, EndPoint endPoint);
+	Socket(Socket::Type sock);
 
 	/**
 	 * Default destructor.
@@ -205,7 +143,7 @@ public:
 	 *
 	 * @return the socket
 	 */
-	socket_t getSocket() const;
+	Type getSocket() const;
 
 	/**
 	 * Set an option for the socket.
@@ -214,17 +152,130 @@ public:
 	 * @param name the name
 	 * @param arg the value
 	 * @param argLen the argument length
-	 * @throw Socket::ErrorException on error
+	 * @throw SocketError on error
 	 */
 	void set(int level, int name, const void *arg, unsigned argLen);
+
+	/**
+	 * Enable or disable blocking mode.
+	 *
+	 * @param block the mode
+	 */
+	void blockMode(bool block = true);
 
 	/**
 	 * Bind the socket.
 	 *
 	 * @param location a IP or Unix location
-	 * @throw Socket::ErrorException on error
+	 * @throw SocketError error
 	 */
-	void bind(EndPoint location);
+	void bind(const SocketAddress &address);
+
+	/**
+	 * Try to connect to the specific address
+	 *
+	 * @param addr the address
+	 * @throw SocketError on error
+	 */
+	void connect(const SocketAddress &address);
+
+	/**
+	 * Accept a client without getting its info.
+	 *
+	 * @return a client ready to use
+	 * @throw SocketError on error
+	 */
+	Socket accept();
+
+	/**
+	 * Accept a client.
+	 *
+	 * @param info the optional client info
+	 * @return a client ready to use
+	 * @throw SocketError on error
+	 */
+	Socket accept(SocketAddress &info);
+
+	/**
+	 * Listen to a specific number of pending connections.
+	 *
+	 * @param max the max number of clients
+	 * @throw SocketError on error
+	 */
+	void listen(int max);
+
+	/**
+	 * Receive some data.
+	 *
+	 * @param data the destination pointer
+	 * @param dataLen max length to receive
+	 * @return the number of bytes received
+	 * @throw SocketError on error
+	 */
+	unsigned recv(void *data, unsigned dataLen);
+
+	/**
+	 * Send some data.
+	 *
+	 * @param data the data to send
+	 * @param dataLen the data length
+	 * @return the number of bytes sent
+	 * @throw SocketError on error
+	 */
+	unsigned send(const void *data, unsigned dataLen);
+
+	/**
+	 * Send a message as a string.
+	 *
+	 * @param message the message
+	 * @return the number of bytes sent
+	 * @throw SocketError on error
+	 */
+	unsigned send(const std::string &message);
+
+	/**
+	 * Receive from a connection-less socket without getting
+	 * client information.
+	 *
+	 * @param data the destination pointer
+	 * @param dataLen max length to receive
+	 * @return the number of bytes received
+	 * @throw SocketError on error
+	 */
+	unsigned recvfrom(void *data, unsigned dataLen);
+
+	/**
+	 * Receive from a connection-less socket and get the client
+	 * information.
+	 *
+	 * @param data the destination pointer
+	 * @param dataLen max length to receive
+	 * @param info the client info
+	 * @return the number of bytes received
+	 * @throw SocketError on error
+	 */
+	unsigned recvfrom(void *data, unsigned dataLen, SocketAddress &info);
+
+	/**
+	 * Send some data to a connection-less socket.
+	 *
+	 * @param data the data to send
+	 * @param dataLen the data length
+	 * @param address the address
+	 * @return the number of bytes sent
+	 * @throw SocketError on error
+	 */
+	unsigned sendto(const void *data, unsigned dataLen, const SocketAddress &info);
+
+	/**
+	 * Send a message to a connection-less socket.
+	 *
+	 * @param message the message
+	 * @param address the address
+	 * @return the number of bytes sent
+	 * @throw SocketError on error
+	 */
+	unsigned sendto(const std::string &message, const SocketAddress &info);
 
 	/**
 	 * Close the socket.
@@ -233,6 +284,8 @@ public:
 };
 
 bool operator==(const Socket &s1, const Socket &s2);
+
+bool operator<(const Socket &s, const Socket &s2);
 
 } // !irccd
 
