@@ -145,4 +145,15 @@ socklen_t SocketAddress::length() const
 	return m_addrlen;
 }
 
+bool operator==(const SocketAddress &sa1, const SocketAddress &sa2)
+{
+	return sa1.length() == sa2.length() &&
+	    memcmp(&sa1.address(), &sa2.address(), sizeof (sockaddr_storage)) == 0;
+}
+
+bool operator<(const SocketAddress &sa1, const SocketAddress &sa2)
+{
+	return sa1.length() < sa2.length();
+}
+
 } // !irccd

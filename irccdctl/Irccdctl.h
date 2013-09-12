@@ -31,13 +31,21 @@ namespace irccd {
 class Irccdctl {
 private:
 	Socket m_socket;
+	SocketAddress m_addr;
 	std::string m_configPath;
+	bool m_needResponse;
 
 #if !defined(_WIN32)
-	void connectUnix(const Section &section);
+	bool m_removeFiles;
+	std::string m_tmpDir;
+	std::string m_tmpPath;
+
+	void connectUnix(const Section &section, int type);
+
+	void removeUnixFiles();
 #endif
 
-	void connectInet(const Section &section);
+	void connectInet(const Section &section, int type);
 
 	void readConfig(Parser &parser);
 	void openConfig();

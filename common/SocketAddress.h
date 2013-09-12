@@ -148,6 +148,10 @@ public:
 
 #endif // ! !_WIN32
 
+bool operator==(const irccd::SocketAddress &sa1, const irccd::SocketAddress &sa2);
+
+bool operator<(const irccd::SocketAddress &sa1, const irccd::SocketAddress &sa2);
+
 } // !irccd
 
 #endif // !_SOCKET_ADDRESS_H_

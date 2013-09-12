@@ -26,6 +26,7 @@
 
 #include <Parser.h>
 #include <Socket.h>
+#include <SocketAddress.h>
 #include <SocketListener.h>
 
 #include <config.h>
@@ -43,13 +44,6 @@ namespace irccd {
  * Irccd main class
  * -------------------------------------------------------- */
 
-typedef std::vector<std::shared_ptr<Server>> ServerList;
-
-#if defined(WITH_LUA)
-  typedef std::vector<std::shared_ptr<Plugin>> PluginList;
-  typedef std::map<std::shared_ptr<Server>, std::vector<DefCall>> DefCallList;
-#endif
-
 namespace options {
 
 enum {
@@ -61,6 +55,31 @@ enum {
 };
 
 } // !options
+
+class Message {
+private:
+	std::ostringstream m_data;
+
+public:
+	/**
+	 * Tell if the client message has finished. A client message
+	 * ends with '\n'.
+	 *
+	 * @param msg the received data
+	 * @param command the final command (if finished)
+	 * @return true if finished
+	 */
+	bool isFinished(const std::string &msg, std::string &command);
+};
+
+typedef std::vector<std::shared_ptr<Server>> ServerList;
+typedef std::map<Socket, Message> StreamClients;
+typedef std::map<SocketAddress, Message> DatagramClients;
+
+#if defined(WITH_LUA)
+  typedef std::vector<std::shared_ptr<Plugin>> PluginList;
+  typedef std::map<std::shared_ptr<Server>, std::vector<DefCall>> DefCallList;
+#endif
 
 class Irccd {
 private:
@@ -89,16 +108,49 @@ private:
 
 	// Socket clients and listeners
 	std::vector<Socket> m_socketServers;		//! socket servers
-	std::map<Socket, std::string> m_clients;	//! socket clients
 	SocketListener m_listener;			//! socket listener
+
+	StreamClients m_streamClients;			//! tcp based clients
+	DatagramClients m_dgramClients;			//! udp based "clients"
 
 	// Identities
 	std::vector<Server::Identity> m_identities;	//! user identities
 	Server::Identity m_defaultIdentity;		//! default identity
 
+	/*
+	 * These functions are used for TCP clients.
+	 */
 	void clientAdd(Socket &client);
 	void clientRead(Socket &client);
-	void execute(Socket &client, const std::string &cmd);
+
+	/*
+	 * This function is used for UDP "clients".
+	 */
+	void peerRead(Socket &s);
+
+	/**
+	 * Execute a command from a client, if the client
+	 * is a UDP, the info is discarded.
+	 *
+	 * @param cmd the command
+	 * @param s the socket to read
+	 * @param info the info (UDP only)
+	 */
+	void execute(const std::string &cmd,
+		     Socket &s,
+		     const SocketAddress &info = SocketAddress());
+
+	/**
+	 * Send a response to the client.
+	 *
+	 * @param message the message to send
+	 * @param s the socket
+	 * @param info the address
+	 */
+	void notifySocket(const std::string &message,
+			  Socket &s,
+			  const SocketAddress &info);
+
 	bool isPluginLoaded(const std::string &name);
 	bool isOverriden(char c);
 
@@ -116,10 +168,10 @@ private:
 
 	// [listener]
 	void openListeners(const Parser &config);
-	void extractInternet(const Section &s);
+	void extractInternet(const Section &s, int type);
 
 #if !defined(_WIN32)
-	void extractUnix(const Section &s);
+	void extractUnix(const Section &s, int type);
 #endif
 
 	// [server]

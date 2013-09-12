@@ -90,8 +90,11 @@ public:
 	typedef void *		Arg;
 #endif
 
-protected:
+private:
 	Socket::Type m_socket;
+	int m_domain;
+	int m_type;
+	int m_protocol;
 
 public:
 	/**
@@ -127,23 +130,32 @@ public:
 	Socket(int domain, int type, int protocol);
 
 	/**
-	 * Constructor with a socket already opened.
-	 *
-	 * @param sock the socket
-	 */
-	Socket(Socket::Type sock);
-
-	/**
-	 * Default destructor.
-	 */
-	virtual ~Socket();
-
-	/**
 	 * Get the socket.
 	 *
 	 * @return the socket
 	 */
 	Type getSocket() const;
+
+	/**
+	 * Get the domain.
+	 *
+	 * @return the domain
+	 */
+	int getDomain() const;
+
+	/**
+	 * Get the type of socket.
+	 *
+	 * @return the type
+	 */
+	int getType() const;
+
+	/**
+	 * Get the protocol.
+	 *
+	 * @return the protocol
+	 */
+	int getProtocol() const;
 
 	/**
 	 * Set an option for the socket.

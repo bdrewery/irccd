@@ -466,6 +466,8 @@ static map<string, Handler> handlers = createHandlers();
 /* }}} */
 
 Irccdctl::Irccdctl()
+	: m_needResponse(true)
+	, m_removeFiles(false)
 {
 	Socket::init();
 
@@ -475,26 +477,68 @@ Irccdctl::Irccdctl()
 Irccdctl::~Irccdctl()
 {
 	Socket::finish();
+
+#if !defined(_WIN32)
+	if (m_socket.getDomain() == AF_LOCAL)
+		removeUnixFiles();
+#endif
 }
 
 #if !defined(_WIN32)
-void Irccdctl::connectUnix(const Section &section)
+
+void Irccdctl::connectUnix(const Section &section, int type)
 {
 	string path;
 
 	path = section.requireOption<string>("path");
 
 	try {
-		m_socket = Socket(AF_UNIX, SOCK_STREAM, 0);
-		m_socket.connect(AddressUnix(path));
+		char *p;
+		char dir[FILENAME_MAX] = "/tmp/irccdctl-XXXXXXXXX";
+
+		m_socket = Socket(AF_LOCAL, type, 0);
+
+		if (type == SOCK_STREAM)
+			m_socket.connect(AddressUnix(path));
+		else
+			m_addr = AddressUnix(path);
+
+		/*
+		 * Unix domain socket needs a temporarly file for getting a
+		 * response.
+		 *
+		 * If we can't create a directory we don't wait for a response
+		 * silently.
+		 */
+		if ((p = mkdtemp(dir)) != NULL)
+		{
+			m_tmpDir = dir;
+			m_tmpPath = string(dir) + string("/response.sock");
+
+			m_socket.bind(AddressUnix(m_tmpPath));
+			m_removeFiles = true;
+		}
+		else
+			m_needResponse = false;
 	} catch (SocketError error) {
-		Logger::warn("irccd: failed to connect to %s: %s", path.c_str(), error.what());
+		removeUnixFiles();
+		Logger::warn("irccdctl: failed to connect to %s: %s", path.c_str(), error.what());
 		exit(1);
 	}
 }
+
+void Irccdctl::removeUnixFiles()
+{
+	if (m_removeFiles)
+	{
+		::remove(m_tmpPath.c_str());
+		::remove(m_tmpDir.c_str());
+	}
+}
+
 #endif
 
-void Irccdctl::connectInet(const Section &section)
+void Irccdctl::connectInet(const Section &section, int type)
 {
 	string host, inet;
 	int port, family = 0;
@@ -507,15 +551,23 @@ void Irccdctl::connectInet(const Section &section)
 		family = AF_INET;
 	else if (inet == "ipv6")
 		family = AF_INET6;
-	else {
+	else
+	{
 		Logger::warn("socket: parameter family is one of them: ipv4, ipv6");
 		exit(1);
 	}
 
-	try {
-		m_socket = Socket(family, SOCK_STREAM, 0);
-		m_socket.connect(ConnectAddressIP(host, port, family));
-	} catch (SocketError error) {
+	try
+	{
+		m_socket = Socket(family, type, 0);
+
+		if (type == SOCK_STREAM)
+			m_socket.connect(ConnectAddressIP(host, port, family));
+		else
+			m_addr = ConnectAddressIP(host, port, family, SOCK_DGRAM);
+	}
+	catch (SocketError error)
+	{
 		Logger::warn("irccdctl: failed to connect: %s", error.what());
 		exit(1);
 	}
@@ -526,17 +578,25 @@ void Irccdctl::readConfig(Parser &config)
 	try {
 		const Section &sectionSocket = config.getSection("socket");
 		string type;
+		string proto = "tcp";
 
 		type = sectionSocket.requireOption<string>("type");
 
+		proto = sectionSocket.requireOption<string>("protocol");
+		if (proto != "tcp" && proto != "udp")
+		{
+			Logger::warn("listener: protocol not valid, must be tcp or udp");
+			exit(1);
+		}
+
 		if (type == "unix") {
 #if !defined(_WIN32)
-			connectUnix(sectionSocket);
+			connectUnix(sectionSocket, (proto == "tcp") ? SOCK_STREAM : SOCK_DGRAM);
 #else
 			Logger::warn("socket: unix sockets are not supported on Windows");
 #endif
 		} else if (type == "internet") {
-			connectInet(sectionSocket);
+			connectInet(sectionSocket, (proto == "tcp") ? SOCK_STREAM : SOCK_DGRAM);
 		} else {
 			Logger::warn("socket: invalid socket type %s", type.c_str());
 			exit(1);
@@ -592,7 +652,10 @@ void Irccdctl::openConfig()
 void Irccdctl::sendRaw(const std::string &message)
 {
 	try {
-		m_socket.send(message.c_str(), message.length());
+		if (m_socket.getType() == SOCK_STREAM)
+			m_socket.send(message.c_str(), message.length());
+		else
+			m_socket.sendto(message.c_str(), message.length(), m_addr);
 	} catch (SocketError ex) {
 		Logger::warn("irccdctl: failed to send message: %s", ex.what());
 	}
@@ -613,10 +676,16 @@ int Irccdctl::getResponse()
 			size_t pos;
 
 			listener.select(30);
-			nbread = m_socket.recv(data, sizeof (data) - 1);
-			if (nbread == 0) {
+
+			if (m_socket.getType() == SOCK_DGRAM)
+				nbread = m_socket.recvfrom(data, sizeof (data) - 1);
+			else
+				nbread = m_socket.recv(data, sizeof (data) - 1);
+
+			if (nbread == 0)
 				finished = true;
-			} else {
+			else
+			{
 				string result;
 
 				data[nbread] = '\0';
@@ -685,7 +754,7 @@ void Irccdctl::setVerbosity(bool verbose)
 
 int Irccdctl::run(int argc, char **argv)
 {
-	int ret;
+	int ret = 0;
 
 	if (argc < 1)
 		usage();
@@ -699,7 +768,9 @@ int Irccdctl::run(int argc, char **argv)
 		string cmd = argv[0];
 
 		handlers.at(cmd)(this, --argc, ++argv);
-		ret = getResponse();
+
+		if (m_needResponse)
+			ret = getResponse();
 	} catch (out_of_range ex) {
 		Logger::warn("irccdctl: unknown command %s", argv[0]);
 		return 1;

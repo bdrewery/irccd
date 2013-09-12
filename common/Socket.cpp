@@ -95,10 +95,16 @@ void Socket::finish()
 }
 
 Socket::Socket()
+	: m_domain(0)
+	, m_type(0)
+	, m_protocol(0)
 {
 }
 
 Socket::Socket(int domain, int type, int protocol)
+	: m_domain(domain)
+	, m_type(type)
+	, m_protocol(protocol)
 {
 	m_socket = socket(domain, type, protocol);
 
@@ -106,18 +112,24 @@ Socket::Socket(int domain, int type, int protocol)
 		throw SocketError(getLastSysError());
 }
 
-Socket::Socket(Socket::Type sock)
-	: m_socket(sock)
-{
-}
-
-Socket::~Socket()
-{
-}
-
 Socket::Type Socket::getSocket() const
 {
 	return m_socket;
+}
+
+int Socket::getDomain() const
+{
+	return m_domain;
+}
+
+int Socket::getType() const
+{
+	return m_type;
+}
+
+int Socket::getProtocol() const
+{
+	return m_protocol;
 }
 
 void Socket::set(int level, int name, const void *arg, unsigned argLen)
@@ -176,15 +188,19 @@ Socket Socket::accept()
 
 Socket Socket::accept(SocketAddress &info)
 {
-	Socket::Type sock;
+	Socket s;
 
 	info.m_addrlen = sizeof (sockaddr_storage);
-	sock = ::accept(m_socket, (sockaddr *)&info.m_addr, &info.m_addrlen);
+	s.m_socket = ::accept(m_socket, (sockaddr *)&info.m_addr, &info.m_addrlen);
 
-	if (sock == INVALID_SOCKET)
+	// Usually accept works only with SOCK_STREAM
+	s.m_domain	= info.m_addr.ss_family;
+	s.m_type	= SOCK_STREAM;
+
+	if (s.m_socket == INVALID_SOCKET)
 		throw SocketError(getLastSysError());
 
-	return Socket(sock);
+	return s;
 }
 
 void Socket::listen(int max)
@@ -226,6 +242,8 @@ unsigned Socket::recvfrom(void *data, unsigned dataLen)
 
 	return recvfrom(data, dataLen, dummy);
 }
+
+#include <sys/un.h>
 
 unsigned Socket::recvfrom(void *data, unsigned dataLen, SocketAddress &info)
 {
