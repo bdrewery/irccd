@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cerrno>
-#include <cstring>
-#include <sstream>
-
 #if defined(_WIN32)
 #  include <sys/timeb.h>
 #  include <direct.h>
@@ -30,19 +26,33 @@
 
 #else
 #  include <sys/time.h>
+
 #  include <libgen.h>
+
+#if defined(__linux__)
+/*
+ * Linux is defining basename to __xpg_basename which break
+ * our stuff.
+ */
+#  undef basename
+
+#endif
 
 #  include <basedir.h>
 
 #  define _MKDIR(p, x)	::mkdir(p, x)
 #endif
 
+#include <cerrno>
+#include <cstring>
+#include <sstream>
+
 #include <sys/stat.h>
 
 #include "Util.h"
 
-using namespace irccd;
-using namespace std;
+namespace irccd
+{
 
 /* --------------------------------------------------------
  * ErrorException class
@@ -52,8 +62,8 @@ Util::ErrorException::ErrorException()
 {
 }
 
-Util::ErrorException::ErrorException(const string &error)
-	:m_error(error)
+Util::ErrorException::ErrorException(const std::string &error)
+	: m_error(error)
 {
 }
 
@@ -70,13 +80,13 @@ const char * Util::ErrorException::what() const throw()
  * Util class (private functions)
  * -------------------------------------------------------- */
 
-string Util::pathBase(const string &append)
+std::string Util::pathBase(const std::string &append)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
 #if defined(_WIN32)
 	char exepath[512];
-	string base;
+	std::string base;
 	size_t pos;
 
 	/*
@@ -87,7 +97,7 @@ string Util::pathBase(const string &append)
 	GetModuleFileNameA(NULL, exepath, sizeof (exepath));
 	base = Util::dirname(exepath);
 	pos = base.find("bin");
-	if (pos != string::npos)
+	if (pos != std::string::npos)
 		base.erase(pos);
 	
 	oss << base << "\\";
@@ -100,9 +110,9 @@ string Util::pathBase(const string &append)
 	return oss.str();
 }
 
-string Util::pathUser(const string &append)
+std::string Util::pathUser(const std::string &append)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
 #if defined(_WIN32)
 	char path[MAX_PATH];
@@ -147,38 +157,38 @@ string Util::pathUser(const string &append)
 	const char Util::DIR_SEP = '/';
 #endif
 
-string Util::basename(const string &path)
+std::string Util::basename(const std::string &path)
 {
 #if defined(_WIN32) || defined(_MSC_VER)
-	string copy = path;
+	std::string copy = path;
 	size_t pos;
 
 	pos = copy.find_last_of('\\');
-	if (pos == string::npos)
+	if (pos == std::string::npos)
 		pos = copy.find_last_of('/');
 
-	if (pos == string::npos)
+	if (pos == std::string::npos)
 		return copy;
 
 	return copy.substr(pos + 1);
 #else
 	char *copy = strdup(path.c_str());
-	string ret;
+	std::string ret;
 
 	if (copy == NULL)
 		return "";
 
-	ret = string(::basename(copy));
+	ret = std::string(::basename(copy));
 	free(copy);
 
 	return ret;
 #endif
 }
 
-bool Util::findConfig(const string &name, ConfigFinder func)
+bool Util::findConfig(const std::string &name, ConfigFinder func)
 {
-	ostringstream oss;
-	string path;
+	std::ostringstream oss;
+	std::string path;
 
 	// 1. Always user first
 	oss << configUser();
@@ -200,42 +210,42 @@ bool Util::findConfig(const string &name, ConfigFinder func)
 	return false;
 }
 
-string Util::dirname(const string &file)
+std::string Util::dirname(const std::string &file)
 {
 #if defined(_WIN32) || defined(_MSC_VER)
-	string copy = file;
-	size_t pos;
+	std::string copy = file;
+	std::size_t pos;
 
 	pos = copy.find_last_of('\\');
-	if (pos == string::npos)
+	if (pos == std::string::npos)
 		pos = copy.find_last_of('/');
 
-	if (pos == string::npos)
+	if (pos == std::string::npos)
 		return copy;
 
 	return copy.substr(0, pos);
 #else
 	char *copy = strdup(file.c_str());
-	string ret;
+	std::string ret;
 
 	if (copy == NULL)
 		return "";
 
-	ret = string(::dirname(copy));
+	ret = std::string(::dirname(copy));
 	free(copy);
 
 	return ret;
 #endif
 }
 
-bool Util::exist(const string &path)
+bool Util::exist(const std::string &path)
 {
 	struct stat st;
 
 	return (stat(path.c_str(), &st) != -1);
 }
 
-string Util::getHome()
+std::string Util::getHome()
 {
 #if defined(_WIN32)
 	char path[MAX_PATH];
@@ -243,9 +253,9 @@ string Util::getHome()
 	if (SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path) != S_OK)
 		return "";
 
-	return string(path);
+	return std::string(path);
 #else
-	return string(getenv("HOME"));
+	return std::string(getenv("HOME"));
 #endif
 }
 
@@ -266,9 +276,9 @@ uint64_t Util::getTicks()
 #endif
 }
 
-void Util::mkdir(const string &dir, int mode)
+void Util::mkdir(const std::string &dir, int mode)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
 	oss << "mkdir: ";
 
@@ -276,7 +286,7 @@ void Util::mkdir(const string &dir, int mode)
 		if (dir[i] != '/')
 			continue;
 
-		string part = dir.substr(0, i);
+		std::string part = dir.substr(0, i);
 		if (part.length() <= 0 || exist(part))
 			continue;
 
@@ -293,7 +303,7 @@ void Util::mkdir(const string &dir, int mode)
 	}
 }
 
-string Util::pluginDirectory()
+std::string Util::pluginDirectory()
 {
 	/*
 	 * Under unix, we store local plugins under the same directory
@@ -304,7 +314,7 @@ string Util::pluginDirectory()
 	 * On windows, it reside inside the user home like :
 	 * C:\Users\Simone\irccd\plugins
 	 */
-	ostringstream oss;
+	std::ostringstream oss;
 
 	oss << configUser();
 
@@ -317,26 +327,28 @@ string Util::pluginDirectory()
 	return oss.str();
 }
 
-vector<string> Util::split(const string &list, const string &delimiter, int max)
+std::vector<std::string> Util::split(const std::string &list,
+				     const std::string &delimiter,
+				     int max)
 {
-	vector<string> result;
+	std::vector<std::string> result;
 	size_t next = -1, current;
 	int count = 1;
 	bool finished = false;
 
 	do {
-		string val;
+		std::string val;
 
 		current = next + 1;
 		next = list.find_first_of(delimiter, current);
 
 		// split max, get until the end
 		if (max >= 0 && count++ >= max) {
-			val = list.substr(current, string::npos);
+			val = list.substr(current, std::string::npos);
 			finished = true;
 		} else {
 			val = list.substr(current, next - current);
-			finished = next == string::npos;
+			finished = next == std::string::npos;
 		}
 
 		result.push_back(val);
@@ -353,3 +365,5 @@ void Util::usleep(int msec)
 	::usleep(msec * 1000);
 #endif
 }
+
+} // !irccd

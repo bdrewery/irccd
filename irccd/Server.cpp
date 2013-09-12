@@ -523,7 +523,7 @@ bool Server::hasPrefix(const string &nickname)
 
 void Server::removeChannel(const string &name)
 {
-	vector<Channel>::const_iterator iter;
+	vector<Channel>::iterator iter;
 	bool found = false;
 
 	for (iter = m_info.m_channels.begin(); iter != m_info.m_channels.end(); ++iter) {

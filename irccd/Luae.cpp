@@ -21,6 +21,9 @@
 using namespace irccd;
 using namespace std;
 
+namespace irccd
+{
+
 template <>
 bool Luae::getField(lua_State *L, int idx, const string &name)
 {
@@ -72,6 +75,8 @@ string Luae::getField(lua_State *L, int idx, const string &name)
 
 	return value;
 }
+
+} // !irccd
 
 void Luae::preload(lua_State *L, const string &name, lua_CFunction func)
 {
