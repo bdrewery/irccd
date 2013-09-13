@@ -538,7 +538,8 @@ void Irccd::openConfig()
 #endif
 
 	// Open requested file by command line or default
-	if (!isOverriden(options::Config)) {
+	if (!isOverriden(options::Config))
+	{
 		bool found;
 
 		found = Util::findConfig("irccd.conf", [&] (const string &path) -> bool {
@@ -555,7 +556,8 @@ void Irccd::openConfig()
 			return (found = true);
 		});
 
-		if (!found) {
+		if (!found)
+		{
 			Logger::warn("irccd: no configuration could be found, exiting");
 
 			for (auto p : tried)
@@ -563,13 +565,13 @@ void Irccd::openConfig()
 
 			exit(1);
 		}
-	} else {
+	}
+	else
+	{
 		config = Parser(m_configPath);
 
-		if (!config.open()) {
-			Logger::warn("irccd: could not open %s, exiting", m_configPath.c_str());
-			exit(1);
-		}
+		if (!config.open())
+			Logger::fatal(1, "irccd: could not open %s, exiting", m_configPath.c_str());
 	}
 
 #if !defined(_WIN32)
