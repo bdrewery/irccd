@@ -28,12 +28,12 @@
 
 #include "Irccdctl.h"
 
-using namespace irccd;
-using namespace std;
+namespace irccd
+{
 
 /* {{{ help messages */
 
-typedef function<void()> HelpHandler;
+typedef std::function<void()> HelpHandler;
 
 static void helpChannelNotice()
 {
@@ -179,9 +179,9 @@ static void helpUserMode()
 	Logger::warn("\t%s umode +i", getprogname());
 }
 
-static map<string, HelpHandler> createHelpHandlers()
+static std::map<std::string, HelpHandler> createHelpHandlers()
 {
-	map<string, HelpHandler> helpHandlers;
+	std::map<std::string, HelpHandler> helpHandlers;
 
 	helpHandlers["cnotice"]	= helpChannelNotice;
 	helpHandlers["invite"]	= helpInvite;
@@ -202,244 +202,215 @@ static map<string, HelpHandler> createHelpHandlers()
 	return helpHandlers;
 }
 
-static map<string, HelpHandler> helpHandlers = createHelpHandlers();
+static std::map<std::string, HelpHandler> helpHandlers = createHelpHandlers();
 
 /* }}} */
 
 /* {{{ handlers */
 
-typedef function<void(Irccdctl *, int, char **)> Handler;
+typedef std::function<void(Irccdctl *, int, char **)> Handler;
 
 static void handleHelp(Irccdctl *, int argc, char **argv)
 {
-	if (argc < 1) {
-		Logger::warn("help requires 1 argument");
-		exit(1);
-	}
+	if (argc < 1)
+		Logger::fatal(1, "help requires 1 argument");
 
-	try {
+	try
+	{
 		helpHandlers.at(argv[0])();
-	} catch (out_of_range ex) {
+	}
+	catch (std::out_of_range ex)
+	{
 		Logger::warn("There is no subject named %s", argv[0]);
 	}
 
-	exit(1);
+	std::exit(1);
 }
 
 static void handleChannelNotice(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 3) {
-		Logger::warn("cnotice requires 3 arguments");
-		exit(1);
-	} else {
-		oss << "CNOTICE " << argv[0] << " " << argv[1];
-		oss << " " << argv[2] << "\n";
-		ctl->sendRaw(oss.str());
-	}
+	if (argc < 3)
+		Logger::fatal(1, "cnotice requires 3 arguments");
+
+	oss << "CNOTICE " << argv[0] << " " << argv[1];
+	oss << " " << argv[2] << "\n";
+	ctl->sendRaw(oss.str());
 }
 
 static void handleInvite(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 3) {
-		Logger::warn("invite requires 3 arguments");
-		exit(1);
-	} else {
-		oss << "INVITE " << argv[0] << " " << argv[1];
-		oss << " " << argv[2] << "\n";
+	if (argc < 3)
+		Logger::fatal(1, "invite requires 3 arguments");
 
-		ctl->sendRaw(oss.str());
-	}
+	oss << "INVITE " << argv[0] << " " << argv[1];
+	oss << " " << argv[2] << "\n";
+
+	ctl->sendRaw(oss.str());
 }
 
 static void handleJoin(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 2) {
-		Logger::warn("join requires at least 2 arguments");
-		exit(1);
-	} else {
-		oss << "JOIN " << argv[0] << " " << argv[1];
+	if (argc < 2)
+		Logger::fatal(1, "join requires at least 2 arguments");
 
-		// optional password
-		if (argc >= 3)
-			oss << " " << argv[2];
-		oss << "\n";
-		ctl->sendRaw(oss.str());
-	}
+	oss << "JOIN " << argv[0] << " " << argv[1];
+
+	// optional password
+	if (argc >= 3)
+		oss << " " << argv[2];
+	oss << "\n";
+	ctl->sendRaw(oss.str());
 }
 
 static void handleKick(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 3) {
-		Logger::warn("kick requires at least 3 arguments ");
-		exit(1);
-	} else {
-		oss << "KICK " << argv[0] << " " << argv[1] << " " << argv[2];
+	if (argc < 3)
+		Logger::fatal(1, "kick requires at least 3 arguments ");
 
-		// optional reason
-		if (argc >= 4)
-			oss << " " << argv[3];
-		oss << "\n";
-		ctl->sendRaw(oss.str());
-	}
+	oss << "KICK " << argv[0] << " " << argv[1] << " " << argv[2];
+
+	// optional reason
+	if (argc >= 4)
+		oss << " " << argv[3];
+	oss << "\n";
+	ctl->sendRaw(oss.str());
 }
 
 static void handleLoad(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 1) {
-		Logger::warn("load requires 1 argument");
-		exit(1);
-	} else {
-		oss << "LOAD " << argv[0] << "\n";
-		ctl->sendRaw(oss.str());
-	}
+	if (argc < 1)
+		Logger::fatal(1, "load requires 1 argument");
+
+	oss << "LOAD " << argv[0] << "\n";
+	ctl->sendRaw(oss.str());
 }
 
 static void handleMe(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 3) {
-		Logger::warn("me requires 3 arguments");
-		exit(1);
-	} else {
-		oss << "ME " << argv[0] << " " << argv[1] << " " << argv[2] << "\n";
-		ctl->sendRaw(oss.str());
-	}
+	if (argc < 3)
+		Logger::fatal(1, "me requires 3 arguments");
+
+	oss << "ME " << argv[0] << " " << argv[1] << " " << argv[2] << "\n";
+	ctl->sendRaw(oss.str());
 }
 
 static void handleMessage(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 3) {
-		Logger::warn("message requires 3 arguments");
-		exit(1);
-	} else {
-		oss << "MSG " << argv[0] << " " << argv[1] << " " << argv[2] << "\n";
-		ctl->sendRaw(oss.str());
-	}
+	if (argc < 3)
+		Logger::fatal(1, "message requires 3 arguments");
+
+	oss << "MSG " << argv[0] << " " << argv[1] << " " << argv[2] << "\n";
+	ctl->sendRaw(oss.str());
 }
 
 static void handleMode(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 3) {
-		Logger::warn("mode requires 3 arguments");
-		exit(1);
-	} else {
-		oss << "MODE " << argv[0] << " " << argv[1];
-		oss << " " << argv[2] << "\n";
-		ctl->sendRaw(oss.str());
-	}
+	if (argc < 3)
+		Logger::fatal(1, "mode requires 3 arguments");
+
+	oss << "MODE " << argv[0] << " " << argv[1];
+	oss << " " << argv[2] << "\n";
+	ctl->sendRaw(oss.str());
 }
 
 static void handleNick(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 2) {
-		Logger::warn("nick requires 2 arguments");
-		exit(1);
-	} else {
-		oss << "NICK " << argv[0] << " " << argv[1] << "\n";
-		ctl->sendRaw(oss.str());
-	}
+	if (argc < 2)
+		Logger::fatal(1, "nick requires 2 arguments");
+
+	oss << "NICK " << argv[0] << " " << argv[1] << "\n";
+	ctl->sendRaw(oss.str());
 }
 
 static void handleNotice(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 3) {
-		Logger::warn("notice requires 3 arguments");
-		exit(1);
-	} else {
-		oss << "NOTICE " << argv[0] << " " << argv[1];
-		oss << " " << argv[2] << "\n";
-		ctl->sendRaw(oss.str());
-	}
+	if (argc < 3)
+		Logger::fatal(1, "notice requires 3 arguments");
+
+	oss << "NOTICE " << argv[0] << " " << argv[1];
+	oss << " " << argv[2] << "\n";
+	ctl->sendRaw(oss.str());
 }
 
 static void handlePart(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 2) {
-		Logger::warn("part requires 2 arguments");
-		exit(1);
-	} else {
-		oss << "PART " << argv[0] << " " << argv[1] << "\n";
-		ctl->sendRaw(oss.str());
-	}
+	if (argc < 2)
+		Logger::fatal(1, "part requires 2 arguments");
+
+	oss << "PART " << argv[0] << " " << argv[1] << "\n";
+	ctl->sendRaw(oss.str());
 }
 
 static void handleReload(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 1) {
-		Logger::warn("reload requires 1 argument");
-		exit(1);
-	} else {
-		oss << "RELOAD " << argv[0] << "\n";
-		ctl->sendRaw(oss.str());
-	}
+	if (argc < 1)
+		Logger::fatal(1, "reload requires 1 argument");
+
+	oss << "RELOAD " << argv[0] << "\n";
+	ctl->sendRaw(oss.str());
 }
 
 static void handleTopic(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 3) {
-		Logger::warn("topic requires 3 arguments");
-		exit(1);
-	} else {
-		oss << "TOPIC " << argv[0] << " " << argv[1] << " ";
-		oss << argv[2] << "\n";
-		ctl->sendRaw(oss.str());
-	}
+	if (argc < 3)
+		Logger::fatal(1, "topic requires 3 arguments");
+
+	oss << "TOPIC " << argv[0] << " " << argv[1] << " ";
+	oss << argv[2] << "\n";
+	ctl->sendRaw(oss.str());
 }
 
 static void handleUnload(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 1) {
-		Logger::warn("unload requires 1 argument");
-		exit(1);
-	} else {
-		oss << "UNLOAD " << argv[0] << "\n";
-		ctl->sendRaw(oss.str());
-	}
+	if (argc < 1)
+		Logger::fatal(1, "unload requires 1 argument");
+
+	oss << "UNLOAD " << argv[0] << "\n";
+	ctl->sendRaw(oss.str());
 }
 
 static void handleUserMode(Irccdctl *ctl, int argc, char **argv)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
-	if (argc < 2) {
-		Logger::warn("umode requires 2 arguments");
-		exit(1);
-	} else {
-		oss << "UMODE " << argv[0] << " " << argv[1] << "\n";
-		ctl->sendRaw(oss.str());
-	}
+	if (argc < 2)
+		Logger::fatal(1, "umode requires 2 arguments");
+
+	oss << "UMODE " << argv[0] << " " << argv[1] << "\n";
+	ctl->sendRaw(oss.str());
 }
 
-static map<string, Handler> createHandlers()
+static std::map<std::string, Handler> createHandlers()
 {
-	map<string, Handler> handlers;
+	std::map<std::string, Handler> handlers;
 
 	handlers["cnotice"]	= handleChannelNotice;
 	handlers["help"]	= handleHelp;
@@ -461,7 +432,7 @@ static map<string, Handler> createHandlers()
 	return handlers;
 }
 
-static map<string, Handler> handlers = createHandlers();
+static std::map<std::string, Handler> handlers = createHandlers();
 
 /* }}} */
 
@@ -488,11 +459,14 @@ Irccdctl::~Irccdctl()
 
 void Irccdctl::connectUnix(const Section &section, int type)
 {
+	using std::string;
+
 	string path;
 
 	path = section.requireOption<string>("path");
 
-	try {
+	try
+	{
 		char *p;
 		char dir[FILENAME_MAX] = "/tmp/irccdctl-XXXXXXXXX";
 
@@ -520,10 +494,11 @@ void Irccdctl::connectUnix(const Section &section, int type)
 		}
 		else
 			m_needResponse = false;
-	} catch (SocketError error) {
+	}
+	catch (SocketError error)
+	{
 		removeUnixFiles();
-		Logger::warn("irccdctl: failed to connect to %s: %s", path.c_str(), error.what());
-		exit(1);
+		Logger::fatal(1, "irccdctl: failed to connect to %s: %s", path.c_str(), error.what());
 	}
 }
 
@@ -540,6 +515,8 @@ void Irccdctl::removeUnixFiles()
 
 void Irccdctl::connectInet(const Section &section, int type)
 {
+	using std::string;
+
 	string host, inet;
 	int port, family = 0;
 
@@ -552,10 +529,7 @@ void Irccdctl::connectInet(const Section &section, int type)
 	else if (inet == "ipv6")
 		family = AF_INET6;
 	else
-	{
-		Logger::warn("socket: parameter family is one of them: ipv4, ipv6");
-		exit(1);
-	}
+		Logger::fatal(1, "socket: parameter family is one of them: ipv4, ipv6");
 
 	try
 	{
@@ -568,14 +542,16 @@ void Irccdctl::connectInet(const Section &section, int type)
 	}
 	catch (SocketError error)
 	{
-		Logger::warn("irccdctl: failed to connect: %s", error.what());
-		exit(1);
+		Logger::fatal(1, "irccdctl: failed to connect: %s", error.what());
 	}
 }
 
 void Irccdctl::readConfig(Parser &config)
 {
-	try {
+	using std::string;
+
+	try
+	{
 		const Section &sectionSocket = config.getSection("socket");
 		string type;
 		string proto = "tcp";
@@ -584,42 +560,52 @@ void Irccdctl::readConfig(Parser &config)
 
 		proto = sectionSocket.requireOption<string>("protocol");
 		if (proto != "tcp" && proto != "udp")
-		{
-			Logger::warn("listener: protocol not valid, must be tcp or udp");
-			exit(1);
-		}
+			Logger::fatal(1, "listener: protocol not valid, must be tcp or udp");
 
-		if (type == "unix") {
+		/*
+		 * Connect to the socket, every of these function may exits if
+		 * they can't connect.
+		 */
+		if (type == "unix")
+		{
 #if !defined(_WIN32)
 			connectUnix(sectionSocket, (proto == "tcp") ? SOCK_STREAM : SOCK_DGRAM);
 #else
-			Logger::warn("socket: unix sockets are not supported on Windows");
+			Logger::fatal(1, "socket: unix sockets are not supported on Windows");
 #endif
-		} else if (type == "internet") {
-			connectInet(sectionSocket, (proto == "tcp") ? SOCK_STREAM : SOCK_DGRAM);
-		} else {
-			Logger::warn("socket: invalid socket type %s", type.c_str());
-			exit(1);
 		}
-	} catch (NotFoundException ex) {
-		Logger::warn("socket: missing parameter %s", ex.which().c_str());
-		exit(1);
+		else if (type == "internet")
+			connectInet(sectionSocket, (proto == "tcp") ? SOCK_STREAM : SOCK_DGRAM);
+		else
+			Logger::fatal(1, "socket: invalid socket type %s", type.c_str());
+	}
+	catch (NotFoundException ex)
+	{
+		Logger::fatal(1, "socket: missing parameter %s", ex.which().c_str());
 	}
 }
 
 void Irccdctl::openConfig()
 {
 	Parser config;
-	vector<string> tried;
+	std::vector<std::string> tried;
 
-	if (m_configPath.length() == 0) {
+	/*
+	 * If m_configPath.length() is 0 we have not specified
+	 * a config file by hand.
+	 *
+	 * Otherwise, we open the default files.
+	 */
+	if (m_configPath.length() == 0)
+	{
 		bool found;
 
-		found = Util::findConfig("irccdctl.conf", [&] (const string &path) -> bool {
+		found = Util::findConfig("irccdctl.conf", [&] (const std::string &path) -> bool {
 			config = Parser(path);
 
 			// Keep track of loaded files
-			if (!config.open()) {
+			if (!config.open())
+			{
 				tried.push_back(path);
 				return false;
 			}
@@ -629,7 +615,8 @@ void Irccdctl::openConfig()
 			return (found = true);
 		});
 
-		if (!found) {
+		if (!found)
+		{
 			Logger::warn("irccdctl: no configuration could be found, exiting");
 
 			for (auto p : tried)
@@ -637,13 +624,13 @@ void Irccdctl::openConfig()
 
 			exit(1);
 		}
-	} else {
+	}
+	else
+	{
 		config = Parser(m_configPath);
 
-		if (!config.open()) {
-			Logger::warn("irccdctl: could not open %s, exiting", m_configPath.c_str());
-			exit(1);
-		}
+		if (!config.open())
+			Logger::fatal(1, "irccdctl: could not open %s, exiting", m_configPath.c_str());
 	}
 
 	readConfig(config);
@@ -651,26 +638,31 @@ void Irccdctl::openConfig()
 
 void Irccdctl::sendRaw(const std::string &message)
 {
-	try {
+	try
+	{
 		if (m_socket.getType() == SOCK_STREAM)
 			m_socket.send(message.c_str(), message.length());
 		else
 			m_socket.sendto(message.c_str(), message.length(), m_addr);
-	} catch (SocketError ex) {
-		Logger::warn("irccdctl: failed to send message: %s", ex.what());
+	}
+	catch (SocketError ex)
+	{
+		Logger::fatal(1, "irccdctl: failed to send message: %s", ex.what());
 	}
 }
 
 int Irccdctl::getResponse()
 {
 	SocketListener listener;
-	ostringstream oss;
+	std::ostringstream oss;
 	bool finished = false;
 	int ret = 0;
 
 	listener.add(m_socket);
-	try {
-		while (!finished) {
+	try
+	{
+		while (!finished)
+		{
 			char data[128];
 			unsigned nbread;
 			size_t pos;
@@ -686,17 +678,18 @@ int Irccdctl::getResponse()
 				finished = true;
 			else
 			{
-				string result;
+				std::string result;
 
 				data[nbread] = '\0';
 				oss << data;
 
 				pos = oss.str().find_first_of('\n');
-				if (pos == string::npos)
+				if (pos == std::string::npos)
 					continue;
 
 				result = oss.str().substr(0, pos);
-				if (result != "OK") {
+				if (result != "OK")
+				{
 					Logger::warn("irccdctl: error, server said: %s", result.c_str());
 					ret = 1;
 				}
@@ -704,11 +697,15 @@ int Irccdctl::getResponse()
 				finished = true;
 			}
 		}
-	} catch (SocketError ex) {
+	}
+	catch (SocketError ex)
+	{
 		Logger::warn("irccdctl: error: %s", ex.what());
 		ret = 1;
-	} catch (SocketTimeout) {
-		Logger::warn("irccdctl: didn't get a response from irccd");
+	}
+	catch (SocketTimeout)
+	{
+		Logger::warn("irccdctl: did not get a response from irccd");
 		ret = 1;
 	}
 
@@ -737,9 +734,7 @@ void Irccdctl::usage()
 	Logger::warn("\tumode\t\tChange a user mode");
 	Logger::warn("\tunload\t\tUnload a Lua plugin");
 
-	Logger::warn("\nFor more information on a command, type %s help <command>", getprogname());
-
-	exit(1);
+	Logger::fatal(1, "\nFor more information on a command, type %s help <command>", getprogname());
 }
 
 void Irccdctl::setConfigPath(const std::string &path)
@@ -764,14 +759,17 @@ int Irccdctl::run(int argc, char **argv)
 	if (strcmp(argv[0], "help") != 0)
 		openConfig();
 
-	try {
-		string cmd = argv[0];
+	try
+	{
+		std::string cmd = argv[0];
 
 		handlers.at(cmd)(this, --argc, ++argv);
 
 		if (m_needResponse)
 			ret = getResponse();
-	} catch (out_of_range ex) {
+	}
+	catch (std::out_of_range ex)
+	{
 		Logger::warn("irccdctl: unknown command %s", argv[0]);
 		return 1;
 	}
@@ -780,3 +778,5 @@ int Irccdctl::run(int argc, char **argv)
 	
 	return ret;
 }
+
+} // !irccd
