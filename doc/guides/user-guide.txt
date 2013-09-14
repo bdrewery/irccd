@@ -12,7 +12,7 @@ This guide will help you installing irccd on your system and running it.
 
 === Installing irccd
 
-Irccd is provided as prebuild binaries for Windows, the installer is quite easy
+Irccd is provided as prebuilt binaries for Windows, the installer is quite easy
 to use. If you have and old computer, you should take the 32bits version,
 otherwise, choose 64bit version.
 
@@ -23,7 +23,7 @@ anchor:bfs[]
 
 === Building from sources
 
-On Unix systems, there is probably prebuild binaries provided by your
+On Unix systems, there is probably prebuilt binaries provided by your
 distribution. If not you will need to build from sources, don't worry it's
 not very hard.
 
@@ -191,7 +191,7 @@ The options available:
 
 * `foreground`: (bool) keep irccd to foreground, default: false.
 * `plugins`: (string list) a list of plugins to load, default: empty.
-* `plugin-path`: (string) a path to local modules, default: empty.
+* `plugin-path`: (string) a path to local plugins, default: empty.
 * `syslog`: (bool) if enabled, use syslog instead of standard output, default: false.
 * `verbose`: (bool) enable verbose message, default: false.
 
@@ -267,7 +267,10 @@ anchor:listeners[]
 === The section `listener`
 
 This section defines listeners, you may use sockets to do a basic IPC system
-in irccd. This let you controlling irccd with TCP sockets.
+in irccd. This let you controlling irccd with sockets.
+
+[NOTE]
+Currently only TCP are supported.
 
 For instance, with listeners, you may ask `irccd` to send a message, a notice or
 even kicking someone from a channel. This is done with the <<irccdctl,irccdctl>>

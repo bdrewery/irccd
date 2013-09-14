@@ -640,7 +640,7 @@ asciidoc.install(2);
 <div class="paragraph"><p>This guide will help you installing irccd on your system and running it.</p></div>
 <div class="sect2">
 <h3 id="_installing_irccd">Installing irccd</h3>
-<div class="paragraph"><p>Irccd is provided as prebuild binaries for Windows, the installer is quite easy
+<div class="paragraph"><p>Irccd is provided as prebuilt binaries for Windows, the installer is quite easy
 to use. If you have and old computer, you should take the 32bits version,
 otherwise, choose 64bit version.</p></div>
 <div class="paragraph"><p>Grab the irccd package that fits your system at
@@ -649,7 +649,7 @@ otherwise, choose 64bit version.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_building_from_sources">Building from sources</h3>
-<div class="paragraph"><p>On Unix systems, there is probably prebuild binaries provided by your
+<div class="paragraph"><p>On Unix systems, there is probably prebuilt binaries provided by your
 distribution. If not you will need to build from sources, don&#8217;t worry it&#8217;s
 not very hard.</p></div>
 </div>
@@ -867,7 +867,7 @@ application.</p></div>
 </li>
 <li>
 <p>
-<span class="monospaced">plugin-path</span>: (string) a path to local modules, default: empty.
+<span class="monospaced">plugin-path</span>: (string) a path to local plugins, default: empty.
 </p>
 </li>
 <li>
@@ -1010,7 +1010,15 @@ http://www.gnu.org/software/src-highlite -->
 <div class="sect2">
 <h3 id="_the_section_span_class_monospaced_listener_span">The section <span class="monospaced">listener</span></h3>
 <div class="paragraph"><p>This section defines listeners, you may use sockets to do a basic IPC system
-in irccd. This let you controlling irccd with TCP sockets.</p></div>
+in irccd. This let you controlling irccd with sockets.</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img src="icons/note.png" alt="Note">
+</td>
+<td class="content">Currently only TCP are supported.</td>
+</tr></table>
+</div>
 <div class="paragraph"><p>For instance, with listeners, you may ask <span class="monospaced">irccd</span> to send a message, a notice or
 even kicking someone from a channel. This is done with the <a href="#irccdctl">irccdctl</a>
 utility.</p></div>
@@ -1596,7 +1604,7 @@ may be ommited but when specified it must be unclosed between quotes.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_message">Message</h3>
-<div class="paragraph"><p>end a message to someone or a channel. The target may be a channel or a real
+<div class="paragraph"><p>Send a message to someone or a channel. The target may be a channel or a real
 person
 If the message contains more than one word it must be enclosed between quotes.</p></div>
 <div class="listingblock">
@@ -1748,7 +1756,7 @@ quotes.</p></div>
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-09-12 09:04:24 CEST
+Last updated 2013-09-14 15:39:38 CEST
 </div>
 </div>
 </body>

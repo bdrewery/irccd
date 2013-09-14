@@ -21,7 +21,7 @@ See the user guide to configure listeners.
 Irccd use a simple text protocol.
 
 The syntax of each message is a simple ASCII string that ends with a
-trailing '\\n'.  Optional parameters are enclosed betweens brackets.
+trailing '\n'.  Optional parameters are enclosed betweens brackets.
 
 == Commands
 
