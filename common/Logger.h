@@ -20,6 +20,7 @@
 #define _LOGGER_H_
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstdarg>
 #include <string>
 
@@ -71,6 +72,15 @@ public:
 	 * @param ... arguments
 	 */
 	static void warn(std::string fmt, ...);
+
+	/**
+	 * Write a message and then exits with a specific error code.
+	 *
+	 * @param code the code to exit
+	 * @param fmt the format
+	 * @param ... arguments
+	 */
+	static void fatal(int code, std::string fmt, ...);
 
 	/**
 	 * Write a message used as debugging, messages will
