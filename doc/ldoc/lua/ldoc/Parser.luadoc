@@ -6,6 +6,16 @@
 --
 -- @module irccd.parser
 
+--- Create a new Parser object.
+-- This function does not open any file, you need to call open.
+-- @param path the path
+-- @param tuning optional table of tuning options
+-- @param commentChar optional comment delimiter
+-- @return a Parser object
+-- @see Parser:open
+function parser.new(path, tuning, commentChar)
+end
+
 --- Tuning
 -- @section Tuning
 
@@ -20,15 +30,6 @@ DisableRedefinition = 3
 
 --- @section end
 
---- Create a new Parser object.
--- This function does not open any file, you need to call open.
--- @param path the path
--- @param tuning optional table of tuning options
--- @param commentChar optional comment delimiter
--- @return a Parser object
-function parser.new(path, tuning, commentChar)
-end
-
 --- Parser
 -- @type Parser
 
@@ -40,9 +41,18 @@ function Parser:open()
 end
 
 --- Iterator over all sections that matches name. Note that this function
--- will be relevant only if DisableRedefinition is not set.
+-- will be relevant only if DisableRedefinition is not set. The iterator returns
+-- a Section object.
 -- @param name the sections name
 -- @return an iterator
+-- @usage
+-- -- Find all sections named "socket"
+-- for s in p:findSections("socket") do
+-- 	-- Play with s as a Section object
+-- 	if s:hasOption("type") then
+-- 		print("Type = " .. tostring(s:getOption("type")))
+-- 	end
+-- end
 function Parser:findSections(name)
 end
 
@@ -75,7 +85,9 @@ end
 -- This add a logging function for verbosity warnings. The function must have
 -- the following signature:
 --
--- <code>function log(lineno, section, warning)</code>
+--	function log(lineno, section, warning)
+--
+-- <br/>
 --
 -- The parameters are:
 -- <ul>

@@ -1,4 +1,4 @@
---- Logguer functions
+--- Logguer functions.
 -- Log, emit a warning within a plugin.
 --
 -- @module irccd.logger

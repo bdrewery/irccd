@@ -1,4 +1,4 @@
---- Plugin modules
+--- Plugin modules.
 -- This API provides function for the current plugin. Each plugin runs on its
 -- own Lua state so every of these functions knows which plugin is currently
 -- calling one of these

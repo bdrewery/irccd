@@ -691,7 +691,7 @@ anchor:irccdctlmessage[]
 
 === Message
 
-end a message to someone or a channel. The target may be a channel or a real
+Send a message to someone or a channel. The target may be a channel or a real
 person
 If the message contains more than one word it must be enclosed between quotes.
 

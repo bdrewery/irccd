@@ -49,9 +49,8 @@ end
 function util.getTicks()
 end
 
---- Create a directory.
--- Create recursively a directory, like <code>mkdir -p</code>. This function
--- will return two values on error.
+--- Create a directory recursively.
+-- This function acts like <code>mkdir -p</code>.
 -- @param path the path
 -- @return true on success or false plus an error
 -- @return the error message
@@ -59,8 +58,8 @@ function util.mkdir(path)
 end
 
 --- Open a directory.
--- This function will open the directory specified by path. Optional boolean
--- skipSpecial may be passed to avoid ".", ".." for being treated.
+-- Optional boolean skipSpecial may be passed to avoid ".", ".." for being
+-- included.
 -- @param path the path
 -- @param skipSpecial forget "." and "..", default: false
 -- @see Directory
@@ -100,8 +99,8 @@ end
 function Date:calendar()
 end
 
---- Format a date.
--- Format the date with a specific format, see strftime(3) for keywords.
+--- Format a date with a format.
+-- See the manual strftime(3) for keywords.
 -- @param format the format
 -- @return the date formatted
 function Date:format(format)
@@ -137,19 +136,30 @@ end
 --- Directory
 -- @type Directory
 
---- Count the number of elements.
--- Return the number of elements found in the directory. Note that
--- if you didn't passed true to util.openDir() you will have
--- "." and ".." counted int.
+--- Count the number of entries in the directory.
+-- Note that if you didn't passed true to util.opendir() you will have
+-- "." and ".." included.
 -- @return the number of entries in the directory
+-- @see util.opendir
 function Directory:count()
 end
 
 --- Iterate over the entries.
--- Iterate over the entries, this function returns 2 arguments
+-- This function returns 2 arguments
 -- the entry and a boolean telling if is a directory.
 -- @return the entry name
 -- @return true if it is a directory
+-- @usage
+-- local d = util.opendir("/")
+--
+-- -- Read the directory "/"
+-- for e, isdir in d:read() do
+--         if isdir then
+--                 print(e .. " is a directory")
+--         else
+--                 print("=>" .. e)
+--         end
+-- end
 function Directory:read()
 end
 

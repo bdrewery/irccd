@@ -21,8 +21,7 @@ function Server:getIdentity()
 end
 
 --- Get the server name id.
--- Returns the server id.
--- @return the name id
+-- @treturn the name id
 function Server:getName()
 end
 
@@ -40,24 +39,20 @@ end
 function Server:getInfo()
 end
 
---- Send a channel notice.
--- Send a public notice on a channel.
+--- Send a public notice on a channel.
 -- @param channel the target channel
 -- @param message the message
 function Server:cnotice(channel, message)
 end
 
 --- Join a channel.
--- Join a specific IRC channel, the channel must starts with a
--- hash '#'.
+-- Note: the channel must starts with a hash '#'.
 -- @param channel the channel to join
 -- @param password an optional password
 function Server:join(channel, password)
 end
 
---- Kick someone.
--- Kick someone from a channel. Note that you obviously need rights
--- on the channel.
+--- Kick someone from a channel.
 -- @param nickname the person to kick
 -- @param channel from which channel
 -- @param reason an optional reason
@@ -73,7 +68,7 @@ function Server:me(target, message)
 end
 
 --- Change the channel mode.
--- Change the channel mode. Mode can contains additional parameters
+-- Mode can contains additional parameters
 -- if supported, such as: "+k secret".
 -- @param channel the channel target
 -- @param mode the mode
@@ -81,8 +76,8 @@ function Server:mode(channel, mode)
 end
 
 --- Get the list of names.
--- Get all nicknames on the channel, this is a deferred call,
--- the function <strong>func</strong> must have the following signature
+-- This is a deferred call, the function <strong>func</strong> must have the
+-- following signature and will be called when irccd get the results.
 --
 --	function callback(list)
 --
@@ -99,57 +94,49 @@ end
 function Server:names(channel, func)
 end
 
---- Change nickname.
--- Change your nickname.
+--- Change your nickname.
 -- @param nickname the new nickname
 function Server:nick(nickname)
 end
 
---- Send a private notice.
--- Send a private notice to a user.
+--- Send a private notice to a user.
 -- @param nickname the target nickname
 -- @param message the notice message
 function Server:notice(nickname, message)
 end
 
 --- Leave a channel.
--- Leave a specific channel. At the moment, is it not possible
--- to leave a channel with a quit message.
+-- At the moment, is it not possible to leave a channel with a quit message.
 -- @param channel the channel to leave
 function Server:part(channel)
 end
 
---- Send a private message.
--- Send a private message to the specified target.
+--- Send a private message to the specified target.
 -- @param nickname the target
 -- @param message the message
 function Server:query(nickname, message)
 end
 
---- Send a message.
--- Send a message to a channel or a nickname.
+--- Send a message to a channel or a nickname.
 -- @param target a nick or a channel
 -- @param message the message to send
 function Server:say(target, message)
 end
 
---- Change the channel topic.
--- Change the topic on the specified channel, you obviously
--- need rights to do that.
+--- Change the topic on the specified channel.
 -- @param channel the channel
 -- @param topic the new topic
 function Server:topic(channel, topic)
 end
 
---- Change your user mode.
--- Change your own user mode.
+--- Change your own user mode.
 -- @param mode the new mode
 function Server:umode(mode)
 end
 
---- Get whois information.
--- Get information from a user. This is a deferred call.
--- the function <strong>func</strong> must have the following signature
+--- Get whois information from a user.
+-- This is a deferred call, the function <strong>func</strong> must have the
+-- following signature
 --
 --	function callback(info)
 --

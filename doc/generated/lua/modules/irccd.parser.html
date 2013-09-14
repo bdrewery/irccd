@@ -198,6 +198,10 @@
     </ol>
 
 
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.parser.html#Parser:open">Parser:open</a>
+    </ul>
 
 
 </dd>
@@ -275,7 +279,8 @@
     </dt>
     <dd>
     Iterator over all sections that matches name.  Note that this function
- will be relevant only if DisableRedefinition is not set.
+ will be relevant only if DisableRedefinition is not set. The iterator returns
+ a Section object.
 
     <h3>Parameters:</h3>
     <ul>
@@ -291,6 +296,17 @@
 
 
 
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">
+ <span class="comment">-- Find all sections named "socket"
+</span> <span class="keyword">for</span> s <span class="keyword">in</span> p:findSections(<span class="string">"socket"</span>) <span class="keyword">do</span>
+ 	<span class="comment">-- Play with s as a Section object
+</span> 	<span class="keyword">if</span> s:hasOption(<span class="string">"type"</span>) <span class="keyword">then</span>
+ 		<span class="global">print</span>(<span class="string">"Type = "</span> .. <span class="global">tostring</span>(s:getOption(<span class="string">"type"</span>)))
+ 	<span class="keyword">end</span>
+ <span class="keyword">end</span></pre>
+    </ul>
 
 </dd>
     <dt>
@@ -384,7 +400,10 @@
  This add a logging function for verbosity warnings. The function must have
  the following signature:</p>
 
-<p> <code>function log(lineno, section, warning)</code></p>
+<pre><code>function log(lineno, section, warning)
+</code></pre>
+
+<p> <br/></p>
 
 <p> The parameters are:
  <ul>

@@ -86,7 +86,7 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Server:cnotice">Server:cnotice&nbsp;(channel, message)</a></td>
-	<td class="summary">Send a channel notice.</td>
+	<td class="summary">Send a public notice on a channel.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Server:join">Server:join&nbsp;(channel, password)</a></td>
@@ -94,7 +94,7 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Server:kick">Server:kick&nbsp;(nickname, channel, reason)</a></td>
-	<td class="summary">Kick someone.</td>
+	<td class="summary">Kick someone from a channel.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Server:me">Server:me&nbsp;(target, message)</a></td>
@@ -110,11 +110,11 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Server:nick">Server:nick&nbsp;(nickname)</a></td>
-	<td class="summary">Change nickname.</td>
+	<td class="summary">Change your nickname.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Server:notice">Server:notice&nbsp;(nickname, message)</a></td>
-	<td class="summary">Send a private notice.</td>
+	<td class="summary">Send a private notice to a user.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Server:part">Server:part&nbsp;(channel)</a></td>
@@ -122,23 +122,23 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Server:query">Server:query&nbsp;(nickname, message)</a></td>
-	<td class="summary">Send a private message.</td>
+	<td class="summary">Send a private message to the specified target.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Server:say">Server:say&nbsp;(target, message)</a></td>
-	<td class="summary">Send a message.</td>
+	<td class="summary">Send a message to a channel or a nickname.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Server:topic">Server:topic&nbsp;(channel, topic)</a></td>
-	<td class="summary">Change the channel topic.</td>
+	<td class="summary">Change the topic on the specified channel.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Server:umode">Server:umode&nbsp;(mode)</a></td>
-	<td class="summary">Change your user mode.</td>
+	<td class="summary">Change your own user mode.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Server:whois">Server:whois&nbsp;(target, func)</a></td>
-	<td class="summary">Get whois information.</td>
+	<td class="summary">Get whois information from a user.</td>
 	</tr>
 </table>
 <h2 class="kind"><a href="#Server_metamethods">Server metamethods </a></h2>
@@ -192,13 +192,13 @@
     </dt>
     <dd>
     Get the server name id.
- Returns the server id.
 
 
     <h3>Returns:</h3>
     <ol>
 
-        the name id
+          <span class="types"><span class="type">the</span></span>
+        name id
     </ol>
 
 
@@ -237,8 +237,7 @@
     <strong>Server:cnotice&nbsp;(channel, message)</strong>
     </dt>
     <dd>
-    Send a channel notice.
- Send a public notice on a channel.
+    Send a public notice on a channel.
 
     <h3>Parameters:</h3>
     <ul>
@@ -259,8 +258,7 @@
     </dt>
     <dd>
     Join a channel.
- Join a specific IRC channel, the channel must starts with a
- hash '#'.
+ Note: the channel must starts with a hash '#'.
 
     <h3>Parameters:</h3>
     <ul>
@@ -280,9 +278,7 @@
     <strong>Server:kick&nbsp;(nickname, channel, reason)</strong>
     </dt>
     <dd>
-    Kick someone.
- Kick someone from a channel. Note that you obviously need rights
- on the channel.
+    Kick someone from a channel.
 
     <h3>Parameters:</h3>
     <ul>
@@ -327,7 +323,7 @@
     </dt>
     <dd>
     Change the channel mode.
- Change the channel mode. Mode can contains additional parameters
+ Mode can contains additional parameters
  if supported, such as: "+k secret".
 
     <h3>Parameters:</h3>
@@ -349,8 +345,8 @@
     </dt>
     <dd>
     Get the list of names.
- Get all nicknames on the channel, this is a deferred call,
- the function <strong>func</strong> must have the following signature</p>
+ This is a deferred call, the function <strong>func</strong> must have the
+ following signature and will be called when irccd get the results.</p>
 
 <pre><code>function callback(list)
 </code></pre>
@@ -388,8 +384,7 @@
     <strong>Server:nick&nbsp;(nickname)</strong>
     </dt>
     <dd>
-    Change nickname.
- Change your nickname.
+    Change your nickname.
 
     <h3>Parameters:</h3>
     <ul>
@@ -407,8 +402,7 @@
     <strong>Server:notice&nbsp;(nickname, message)</strong>
     </dt>
     <dd>
-    Send a private notice.
- Send a private notice to a user.
+    Send a private notice to a user.
 
     <h3>Parameters:</h3>
     <ul>
@@ -429,8 +423,7 @@
     </dt>
     <dd>
     Leave a channel.
- Leave a specific channel. At the moment, is it not possible
- to leave a channel with a quit message.
+ At the moment, is it not possible to leave a channel with a quit message.
 
     <h3>Parameters:</h3>
     <ul>
@@ -448,8 +441,7 @@
     <strong>Server:query&nbsp;(nickname, message)</strong>
     </dt>
     <dd>
-    Send a private message.
- Send a private message to the specified target.
+    Send a private message to the specified target.
 
     <h3>Parameters:</h3>
     <ul>
@@ -469,8 +461,7 @@
     <strong>Server:say&nbsp;(target, message)</strong>
     </dt>
     <dd>
-    Send a message.
- Send a message to a channel or a nickname.
+    Send a message to a channel or a nickname.
 
     <h3>Parameters:</h3>
     <ul>
@@ -490,9 +481,7 @@
     <strong>Server:topic&nbsp;(channel, topic)</strong>
     </dt>
     <dd>
-    Change the channel topic.
- Change the topic on the specified channel, you obviously
- need rights to do that.
+    Change the topic on the specified channel.
 
     <h3>Parameters:</h3>
     <ul>
@@ -512,8 +501,7 @@
     <strong>Server:umode&nbsp;(mode)</strong>
     </dt>
     <dd>
-    Change your user mode.
- Change your own user mode.
+    Change your own user mode.
 
     <h3>Parameters:</h3>
     <ul>
@@ -531,9 +519,9 @@
     <strong>Server:whois&nbsp;(target, func)</strong>
     </dt>
     <dd>
-    Get whois information.
- Get information from a user. This is a deferred call.
- the function <strong>func</strong> must have the following signature</p>
+    Get whois information from a user.
+ This is a deferred call, the function <strong>func</strong> must have the
+ following signature</p>
 
 <pre><code>function callback(info)
 </code></pre>
