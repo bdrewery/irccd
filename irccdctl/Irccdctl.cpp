@@ -19,6 +19,7 @@
 #include <functional>
 #include <map>
 #include <sstream>
+#include <stdexcept>
 
 #include <Logger.h>
 #include <Parser.h>
