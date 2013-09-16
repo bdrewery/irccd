@@ -43,7 +43,7 @@ static void handleChannel(irc_session_t *s,
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
-	evparams.push_back(orig);
+	evparams.push_back((orig == nullptr) ? "" : orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
 	Irccd::getInstance()->handleIrcEvent(
@@ -60,7 +60,7 @@ static void handleChannelNotice(irc_session_t *s,
 	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
-	evparams.push_back(orig);
+	evparams.push_back((orig == nullptr) ? "" : orig);
 	evparams.push_back(params[0]);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
