@@ -339,6 +339,19 @@ static int say(lua_State *L)
 	return 0;
 }
 
+static int send(lua_State *L)
+{
+	if (lua_gettop(L) != 2)
+		return luaL_error(L, "server:send needs 1 argument");
+
+	std::shared_ptr<Server> s	= TO_SSERVER(L, 1);
+	std::string message		= luaL_checkstring(L, 2);
+
+	s->sendRaw(message);
+
+	return 0;
+}
+
 static int topic(lua_State *L)
 {
 	if (lua_gettop(L) != 3)
@@ -423,6 +436,7 @@ static const luaL_Reg serverMethods[] = {
 	{ "part",		methods::part			},
 	{ "query",		methods::query			},
 	{ "say",		methods::say			},
+	{ "send",		methods::send			},
 	{ "topic",		methods::topic			},
 	{ "umode",		methods::umode			},
 	{ "whois",		methods::whois			},

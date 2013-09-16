@@ -691,6 +691,12 @@ void Server::say(const string &target, const string &message)
 		irc_cmd_msg(m_session.get(), target.c_str(), message.c_str());
 }
 
+void Server::sendRaw(const std::string &msg)
+{
+	if (m_threadStarted)
+		irc_send_raw(m_session.get(), "%s", msg.c_str());
+}
+
 void Server::topic(const string &channel, const string &topic)
 {
 	if (m_threadStarted)
