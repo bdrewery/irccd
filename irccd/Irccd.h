@@ -62,6 +62,18 @@ private:
 
 public:
 	/**
+	 * Default constructor.
+	 */
+	Message();
+
+	/**
+	 * Copy constructor.
+	 *
+	 * @param m the old message
+	 */
+	Message(const Message &m);
+
+	/**
 	 * Tell if the client message has finished. A client message
 	 * ends with '\n'.
 	 *
@@ -70,6 +82,14 @@ public:
 	 * @return true if finished
 	 */
 	bool isFinished(const std::string &msg, std::string &command);
+
+	/**
+	 * Copy assignment.
+	 *
+	 * @param m the message
+	 * @return the message
+	 */
+	Message &operator=(const Message &m);
 };
 
 typedef std::vector<std::shared_ptr<Server>> ServerList;

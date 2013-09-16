@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstring>
 #include <functional>
 #include <map>
 #include <iostream>
@@ -320,6 +321,15 @@ static map<string, Handler> handlers = createHandlers();
  * Message helper
  * -------------------------------------------------------- */
 
+Message::Message()
+{
+}
+
+Message::Message(const Message &m)
+{
+	m_data.str(m.m_data.str());
+}
+
 bool Message::isFinished(const std::string &data, std::string &ret)
 {
 	std::size_t pos;
@@ -336,6 +346,13 @@ bool Message::isFinished(const std::string &data, std::string &ret)
 	ret = tmp;
 
 	return true;
+}
+
+Message &Message::operator=(const Message &m)
+{
+	m_data.str(m.m_data.str());
+
+	return *this;
 }
 
 /* --------------------------------------------------------
