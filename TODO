@@ -2,3 +2,5 @@ IRC Client Daemon TODO
 ======================
 
 * Document UDP in docs
+* Document the new Server:send() method
+* Document, add auth.lua

@@ -419,6 +419,13 @@ public:
 	virtual void say(const std::string &target, const std::string &message);
 
 	/**
+	 * Send a raw message to the server.
+	 *
+	 * @param message the message
+	 */
+	virtual void sendRaw(const std::string &msg);
+
+	/**
 	 * Change a channel topic.
 	 *
 	 * @param channel the channel target
