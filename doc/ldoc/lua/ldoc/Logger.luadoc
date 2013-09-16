@@ -1,0 +1,19 @@
+--- Logguer functions.
+-- Log, emit a warning within a plugin.
+--
+-- @module irccd.logger
+
+--- Log something.
+-- This will append a message into stdout only if irccd
+-- runs in verbose mode.
+-- @param message the message write
+function logger.log(message)
+end
+
+--- Emit a warning.
+-- Write a message to stderr even if verbosity is disabled
+-- @param message the message to write
+function logger.warn(message)
+end
+
+-- vim: set syntax=lua:
