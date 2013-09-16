@@ -109,7 +109,6 @@ AddressUnix::AddressUnix(const std::string &path, bool rm)
 
 	// Set the parameters
 	sun->sun_family = AF_UNIX;
-	sun->sun_len = SUN_LEN(sun);
 	m_addrlen = SUN_LEN(sun);
 }
 
