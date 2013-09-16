@@ -971,6 +971,11 @@ section is also redefinable.</p></div>
 </li>
 <li>
 <p>
+<span class="monospaced">password</span>: (string) An optional password.
+</p>
+</li>
+<li>
+<p>
 <span class="monospaced">join-invite</span>: (bool) Join channels upon invitation, default: false.
 </p>
 </li>
@@ -1493,6 +1498,27 @@ the <a href="#irccdserver">server section</a> with the parameter <span class="mo
 </li>
 </ul></div>
 <div class="paragraph"><p><a id="irccdctlcnotice"></a></p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img src="icons/important.png" alt="Important">
+</td>
+<td class="content">
+<div class="title">Shell parsing warning</div>
+<div class="paragraph"><p>Some shells may discard arguments if they begins with a hash. For instance, bash
+will not understand the following command:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ irccdctl join localhost #staff</pre>
+</div></div>
+<div class="paragraph"><p>Instead, enclose the arguments with quotes</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ irccdctl join localhost "#staff"</pre>
+</div></div>
+</td>
+</tr></table>
+</div>
 <div class="sect2">
 <h3 id="_channel_notice">Channel notice</h3>
 <div class="paragraph"><p>Send a notice to a public channel. This is a notice that everyone
@@ -1756,7 +1782,7 @@ quotes.</p></div>
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-09-14 15:39:38 CEST
+Last updated 2013-09-16 20:30:10 CEST
 </div>
 </div>
 </body>

@@ -247,6 +247,7 @@ The options available:
 * `host`: (string) Required. The server address.
 * `port`: (int) Required, The server port.
 * `identity`: (string) An identity to use.
+* `password`: (string) An optional password.
 * `join-invite`: (bool) Join channels upon invitation, default: false.
 * `channels`: (string list) List of channel to auto join, default: empty.
 * `command-char`: (string) The prefix for invoking special commands, default: !.
@@ -575,6 +576,23 @@ The following commands are available for irccdctl:
 * <<irccdctlunload,unload>>
 
 anchor:irccdctlcnotice[]
+
+[IMPORTANT]
+.Shell parsing warning
+==========================
+Some shells may discard arguments if they begins with a hash. For instance, bash
+will not understand the following command:
+
+----
+$ irccdctl join localhost #staff
+----
+
+Instead, enclose the arguments with quotes
+
+----
+$ irccdctl join localhost "#staff"
+----
+==========================
 
 === Channel notice
 

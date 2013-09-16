@@ -123,6 +123,8 @@ in the file.
 (int) Required, The server port.
 .It identity
 (string) An identity to use.
+.It password
+(string) An optional password.
 .It join-invite
 (bool) Join channels upon invitation, default: false.
 .It channels
