@@ -1,0 +1,12 @@
+IRC Client Daemon CHANGES
+=========================
+
+1.0.1 September 17, 2013
+---------------------------------------
+  * Fixed build without Lua,
+  * Improved documentation a lot,
+  * Fixed basename() issue.
+
+1.0 September 13, 2013
+---------------------------------------
+  * Initial release.
