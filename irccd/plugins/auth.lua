@@ -84,9 +84,9 @@ local function onConnectQuakenet(server)
 	logger.log("authenticating to Q")
 
 	local a = auth[server:getName()]
+	local cmd = string.format("AUTH %s %s", a.username, a.password)
 
-	local cmd = string.format("Q@CServe.quakenet.org AUTH %s %s\r\n", a.username, a.password)
-	server:send(cmd)
+	server:say("Q@CServe.quakenet.org", cmd)
 end
 
 function onConnect(server)
