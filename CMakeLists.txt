@@ -28,8 +28,12 @@ set(VERSION "${MAJOR}.${MINOR}")
 
 # General settings
 if (UNIX)
+	set(CMAKE_C_FLAGS "-Wall -Wextra")
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11")			# c++11
-	set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -D_DEBUG -O0 -g")
+endif ()
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_definitions("-DDEBUG -D_DEBUG")
 endif ()
 
 if (WIN32)
