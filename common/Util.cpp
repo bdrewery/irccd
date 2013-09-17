@@ -85,7 +85,7 @@ std::string Util::pathBase(const std::string &append)
 	 * and removes its bin/ suffix.
 	 */
 	GetModuleFileNameA(NULL, exepath, sizeof (exepath));
-	base = Util::dirname(exepath);
+	base = Util::dirName(exepath);
 	pos = base.find("bin");
 	if (pos != std::string::npos)
 		base.erase(pos);
