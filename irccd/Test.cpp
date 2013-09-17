@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cstring>
 #include <functional>
 #include <map>
 #include <string>
@@ -455,17 +456,18 @@ static void testPlugin(const char *file, int argc, char **argv)
 
 	if (strcmp(argv[0], "help") == 0) {
 		if (argc > 1) {
-			try {
+			try
+			{
 				helpCommands.at(argv[1])();
 				exit(0);
-			} catch (out_of_range ex) {
-				Logger::warn("There is no subject named %s", argv[1]);
-				exit(1);
 			}
-		} else {
-			Logger::warn("test: help requires 1 argument");
-			exit(1);
+			catch (out_of_range ex)
+			{
+				Logger::fatal(1, "There is no subject named %s", argv[1]);
+			}
 		}
+		else
+			Logger::fatal(1, "test: help requires 1 argument");
 	}
 
 	// Always push before calling it
@@ -514,10 +516,8 @@ void irccd::test(int argc, char **argv)
 		Logger::warn("\tonNick\t\t\tChange your nickname");
 		Logger::warn("\tonPart\t\t\tLeave a channel");
 		Logger::warn("\tonTopic\t\t\tTest a topic channel change");
-		Logger::warn("\tonUserMode\t\tTest a user mode change");
-	} else {
-		testPlugin(argv[1], argc - 1, argv + 1);
+		Logger::fatal(1, "\tonUserMode\t\tTest a user mode change");
 	}
 
-	exit(1);
+	testPlugin(argv[1], argc - 1, argv + 1);
 }

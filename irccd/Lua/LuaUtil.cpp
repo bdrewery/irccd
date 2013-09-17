@@ -19,6 +19,8 @@
 #define DATE_TYPE	"DateType"
 #define DIR_TYPE	"DirectoryType"
 
+#include <cstring>
+
 #include <Date.h>
 #include <Directory.h>
 #include <Util.h>

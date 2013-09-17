@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cstring>
 #include <iostream>
 #include <map>
 #include <utility>
@@ -42,7 +43,7 @@ static void handleChannel(irc_session_t *s,
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
-	evparams.push_back(orig);
+	evparams.push_back((orig == nullptr) ? "" : orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
 	Irccd::getInstance()->handleIrcEvent(
@@ -59,7 +60,7 @@ static void handleChannelNotice(irc_session_t *s,
 	shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
-	evparams.push_back(orig);
+	evparams.push_back((orig == nullptr) ? "" : orig);
 	evparams.push_back(params[0]);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
@@ -689,6 +690,12 @@ void Server::say(const string &target, const string &message)
 {
 	if (m_threadStarted)
 		irc_cmd_msg(m_session.get(), target.c_str(), message.c_str());
+}
+
+void Server::sendRaw(const std::string &msg)
+{
+	if (m_threadStarted)
+		irc_send_raw(m_session.get(), "%s", msg.c_str());
 }
 
 void Server::topic(const string &channel, const string &topic)

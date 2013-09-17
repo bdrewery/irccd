@@ -34,7 +34,7 @@ bool Logger::m_syslogLoaded = false;
 
 #endif
 
-void Logger::printFile(FILE *fp, string fmt, va_list ap)
+void Logger::printFile(FILE *fp, std::string fmt, va_list ap)
 {
 #if !defined(_WIN32)
 	if (m_syslog) {
@@ -71,7 +71,7 @@ void Logger::setSyslog(bool syslog)
 
 #endif
 
-void Logger::log(string fmt, ...)
+void Logger::log(std::string fmt, ...)
 {
 	va_list ap;
 
@@ -81,7 +81,7 @@ void Logger::log(string fmt, ...)
 	va_end(ap);
 }
 
-void Logger::warn(string fmt, ...)
+void Logger::warn(std::string fmt, ...)
 {
 	va_list ap;
 
@@ -90,7 +90,18 @@ void Logger::warn(string fmt, ...)
 	va_end(ap);
 }
 
-void Logger::debug(string fmt, ...)
+void Logger::fatal(int code, std::string fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	Logger::printFile(stderr, fmt, ap);
+	va_end(ap);
+
+	std::exit(code);
+}
+
+void Logger::debug(std::string fmt, ...)
 {
 #if defined(DEBUG)
 	va_list ap;
