@@ -1,0 +1,10 @@
+IRC Client Daemon CHANGES
+=========================
+
+CURRENT
+-------
+  * Added support for UDP sockets.
+
+1.0 DATE HERE
+-------------
+  * Initial release
