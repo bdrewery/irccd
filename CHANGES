@@ -5,6 +5,7 @@ IRC Client Daemon CHANGES
 ---------------------------------------
   * Fixed build without Lua,
   * Improved documentation a lot,
+  * Improved NSIS installer,
   * Fixed basename() issue.
 
 1.0 September 13, 2013
