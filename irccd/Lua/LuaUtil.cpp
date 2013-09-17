@@ -34,7 +34,7 @@ namespace util {
 static int basename(lua_State *L)
 {
 	string path = luaL_checkstring(L, 1);
-	string ret = Util::basename(path);
+	string ret = Util::baseName(path);
 
 	lua_pushstring(L, ret.c_str());
 
@@ -56,7 +56,7 @@ static int date(lua_State *L)
 static int dirname(lua_State *L)
 {
 	string path = luaL_checkstring(L, 1);
-	string ret = Util::dirname(path);
+	string ret = Util::dirName(path);
 
 	lua_pushstring(L, ret.c_str());
 

@@ -469,7 +469,7 @@ static void testPlugin(const char *file, int argc, char **argv)
 	}
 
 	// Always push before calling it
-	string name = Util::basename(string(file));
+	string name = Util::baseName(string(file));
 	size_t epos = name.find(".lua");
 	if (epos != string::npos)
 		name = name.erase(epos);

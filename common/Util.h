@@ -74,7 +74,7 @@ public:
 	 * @param path the full file path
 	 * @return the file name
 	 */
-	static std::string basename(const std::string &path);
+	static std::string baseName(const std::string &path);
 
 	/**
 	 * Get the system config path, usually /usr/local/etc on Unix
@@ -126,7 +126,7 @@ public:
 	 * @param file the filename to check
 	 * @return the parent directory
 	 */
-	static std::string dirname(const std::string &file);
+	static std::string dirName(const std::string &file);
 
 	/**
 	 * Tell if a specified file or directory exists
