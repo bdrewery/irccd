@@ -26,13 +26,10 @@ set(MAJOR "1")
 set(MINOR "0")
 set(VERSION "${MAJOR}.${MINOR}")
 
-# General settings
 if (UNIX)
-	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11")			# c++11
-	set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -D_DEBUG -O0 -g")
-endif ()
-
-if (WIN32)
+	set(CMAKE_C_FLAGS "-Wall -Wextra")
+	set(CMAME_CXX_FLAGS "-Wall -Wextra -std=c++11")
+elseif (WIN32)
 	add_definitions("-D_CRT_SECURE_NO_WARNINGS")
 	set(CMAKE_EXE_LINKER_FLAGS "/SAFESEH:NO")
 endif ()
