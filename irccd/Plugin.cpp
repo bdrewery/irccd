@@ -103,22 +103,26 @@ void Plugin::call(const string &func,
 	lua_State *L = m_state.get();
 
 	lua_getglobal(L, func.c_str());
-	if (lua_type(L, -1) != LUA_TFUNCTION) {
+	if (lua_type(L, -1) != LUA_TFUNCTION)
 		lua_pop(L, 1);
-	} else {
+	else
+	{
 		int np = 0;
 
-		if (server) {
+		if (server)
+		{
 			LuaServer::pushObject(L, server);
 			++ np;
 		}
 
-		for (const string &a : params) {
+		for (const string &a : params)
+		{
 			lua_pushstring(L, a.c_str());
 			++ np;
 		}
 
-		if (lua_pcall(L, np, 0, 0) != LUA_OK) {
+		if (lua_pcall(L, np, 0, 0) != LUA_OK)
+		{
 			string error = lua_tostring(L, -1);
 			lua_pop(L, 1);
 
@@ -136,7 +140,7 @@ Plugin::Plugin()
 }
 
 Plugin::Plugin(const string &name)
-	:m_name(name)
+	: m_name(name)
 {
 }
 
@@ -206,6 +210,17 @@ bool Plugin::open(const string &path)
 		m_error = lua_tostring(m_state.get(), -1);
 		lua_pop(m_state.get(), 1);
 
+		return false;
+	}
+
+	// Do a initial load
+	try
+	{
+		onLoad();
+	}
+	catch (ErrorException ex)
+	{
+		m_error = ex.what();
 		return false;
 	}
 
@@ -283,6 +298,11 @@ void Plugin::onKick(shared_ptr<Server> server,
 	params.push_back(reason);
 
 	call("onKick", server, params);
+}
+
+void Plugin::onLoad()
+{
+	call("onLoad");
 }
 
 void Plugin::onMessage(shared_ptr<Server> server,
@@ -396,4 +416,9 @@ void Plugin::onUserMode(shared_ptr<Server> server,
 	params.push_back(mode);
 
 	call("onUserMode", server, params);
+}
+
+void Plugin::onUnload()
+{
+	call("onUnload");
 }

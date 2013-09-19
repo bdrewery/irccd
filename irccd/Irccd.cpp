@@ -699,7 +699,19 @@ void Irccd::unloadPlugin(const string &name)
 	if (i == m_plugins.end())
 		Logger::warn("irccd: there is no module %s loaded", name.c_str());
 	else
+	{
+		try
+		{
+			(*i)->onUnload();
+		}
+		catch (Plugin::ErrorException ex)
+		{
+			Logger::warn("irccd: error while unloading %s: %s",
+			    name.c_str(), ex.what());
+		}
+
 		m_plugins.erase(i);
+	}
 
 	m_pluginLock.unlock();
 #else
