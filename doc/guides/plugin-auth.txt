@@ -1,0 +1,90 @@
+Plugin auth 1.1
+===============
+:Author: Demelier David
+:Email: demelier.david@gmail.com
+:Date: September, 17 2013
+:toc:
+:icons:
+:iconsdir: icons
+
+== Introduction
+
+The plugin `auth` provides generic authentication to the most popular services.
+
+For the moment, `auth` supports the following backends:
+
+* `nickserv`: the NickServ service, /msg NickServ identify user pass
+* `quakenet`: the quakenet.org service, /msg Q@CServe.quakenet.org AUTH user pass
+
+== Installation
+
+The plugin `auth` is distributed with `irccd`. To enable it add the
+following to your `plugins` parameter:
+
+----
+plugins = "auth"
+----
+
+== Usage
+
+You must configure the file to enable authentication.
+
+See link:user-guide.html#irccdplugnote[irccd plugin notes].
+
+== Configuration
+
+The `auth.conf` allow you to enable authentication to one or more servers.
+
+The `auth.conf` uses link:user-guide.html#irccdsyntax[irccd syntax].
+
+=== Section `auth`
+
+This section describe an authentication method for one server. You can write
+this section as many as you have servers.
+
+.Option `backend`
+
+Required, must be "nickserv" or "quakenet". The following sections depends
+on this parameter.
+
+.Option `server`
+
+Required, must match the name of one server defined in the irccd.conf file.
+
+==== Using backend "nickserv"
+
+These are the options available for this backend.
+
+.Option `username`
+
+Optional, this option let you use a different username, otherwise it uses
+the current nickname in use.
+
+.Option `password`
+
+Required, the password.
+
+==== Using backend "quakenet"
+
+These are the options available for this backend.
+
+.Option `username`
+
+Required, the quakenet username.
+
+.Option `password`
+
+Required, the password.
+
+.Example
+[source, ini]
+----
+# A server like freenode
+[auth]
+server = "freenode"		# defined in irccd.conf
+backend	= "nickserv"
+username = "christophe"		# optional, uses nick instead
+password = "qwertyuiop"
+----
+
+// vim: set syntax=asciidoc:
