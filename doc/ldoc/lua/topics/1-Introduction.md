@@ -26,6 +26,6 @@ found, in the standard irccd plugins path said above.
 
 <br />
 
-Next @{2-Plugin-creation.md}
+Next @{2-Plugin_creation.md}
 
 <!--- vim: set syntax=mkd: -->

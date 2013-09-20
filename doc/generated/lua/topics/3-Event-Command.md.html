@@ -17,18 +17,10 @@
 
 <h2 class="kind">Contents</h2>
 <ul>
-<li><a href="#Functions">Functions</a></li>
+<li><a href="#Function">Function </a></li>
+<li><a href="#Parameters">Parameters </a></li>
 </ul>
 
-<h2 class="kind">Modules</h2>
-<ul>
-  <li><a href="../modules/irccd.html">irccd</a></li>
-  <li><strong>irccd.logger</strong></li>
-  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
-  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
-  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
-  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
-</ul>
 <h2 class="kind">Topics</h2>
 <ul>
   <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
@@ -37,7 +29,7 @@
   <li><a href="../topics/2.2-List_of_Events.md.html">2.2-List_of_Events.md</a></li>
   <li><a href="../topics/3-Event-Action.md.html">3-Event-Action.md</a></li>
   <li><a href="../topics/3-Event-Channel-notice.md.html">3-Event-Channel-notice.md</a></li>
-  <li><a href="../topics/3-Event-Command.md.html">3-Event-Command.md</a></li>
+  <li><strong>3-Event-Command.md</strong></li>
   <li><a href="../topics/3-Event-Connect.md.html">3-Event-Connect.md</a></li>
   <li><a href="../topics/3-Event-Invite.md.html">3-Event-Invite.md</a></li>
   <li><a href="../topics/3-Event-Join.md.html">3-Event-Join.md</a></li>
@@ -54,6 +46,15 @@
   <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
   <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
 </ul>
+<h2 class="kind">Modules</h2>
+<ul>
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
+</ul>
 <h2 class="kind">Examples</h2>
 <ul>
   <li><a href="../examples/Deferred.lua.html">Deferred.lua</a></li>
@@ -64,70 +65,43 @@
 
 <div id="content">
 
-  <h2>Module <code>irccd.logger</code></h2>
-
-<p>Logguer functions.</p>
-<p> Log, emit a warning within a plugin.</p>
+  <h2>Topic <code>3-Event-Command.md</code></h2>
 
 
-<h2 class="kind"><a href="#Functions">Functions</a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#log">log&nbsp;(message)</a></td>
-	<td class="summary">Log something.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#warn">warn&nbsp;(message)</a></td>
-	<td class="summary">Emit a warning.</td>
-	</tr>
-</table>
+<h2>Command</h2>
 
-<br/>
-<br/>
+<p>Special commands are not real IRC events. They are called from channel messages
+with a specific syntax using a delimiter and the plugin name.</p>
 
+<p>For instance, with default <em>irccd</em> parameters, saying on a channel <strong>!ask foo</strong>
+will call the special command of the plugin named ask, so from the file
+<em>ask.lua</em>.</p>
 
-    <h2 class="kind"><a name="Functions"></a>Functions</h2>
-    <dl class="function">
-    <dt>
-    <a name = "log"></a>
-    <strong>log&nbsp;(message)</strong>
-    </dt>
-    <dd>
-    Log something.
- This will append a message into stdout only if irccd
- runs in verbose mode.
+<p>Note that the command character is not fixed to '!', it's just the default and
+can be set by the parameter <strong>command-char</strong> in a <strong>[server]</strong> section, but
+for more information see the <em>irccd.conf</em> manual.</p>
 
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">message</span>
-         the message write</li>
-    </ul>
+<p><a name="Function"></a></p>
+<h3>Function</h3>
 
 
+<pre>
+ <span class="keyword">function</span> onCommand(server, channel, who, message)
+</pre>
+
+<p><a name="Parameters"></a></p>
+<h3>Parameters</h3>
+
+<ul>
+    <li>server, the current server.</li>
+    <li>channel, the channel where the message comes from.</li>
+    <li>who, who invoked the command.</li>
+    <li>message, the real message, without the "!<name>" part.</li>
+</ul>
 
 
+<!--- vim: set syntax=mkd: -->
 
-</dd>
-    <dt>
-    <a name = "warn"></a>
-    <strong>warn&nbsp;(message)</strong>
-    </dt>
-    <dd>
-    Emit a warning.
- Write a message to stderr even if verbosity is disabled
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">message</span>
-         the message to write</li>
-    </ul>
-
-
-
-
-
-</dd>
-</dl>
 
 
 </div> <!-- id="content" -->

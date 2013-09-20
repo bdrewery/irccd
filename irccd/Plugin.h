@@ -199,6 +199,11 @@ public:
 		    const std::string &reason);
 
 	/**
+	 * Load the plugin.
+	 */
+	void onLoad();
+
+	/**
 	 * A Lua function triggered on a message event.
 	 *
 	 * @param server the server
@@ -291,6 +296,11 @@ public:
 		     const std::string &channel,
 		     const std::string &who,
 		     const std::string &topic);
+
+	/**
+	 * Unload the plugin.
+	 */
+	void onUnload();
 
 	/**
 	 * A Lua function triggered on a user mode change event.

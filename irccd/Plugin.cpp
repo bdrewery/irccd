@@ -141,7 +141,7 @@ Plugin::Plugin()
 }
 
 Plugin::Plugin(const std::string &name)
-	:m_name(name)
+	: m_name(name)
 {
 }
 
@@ -212,6 +212,17 @@ bool Plugin::open(const std::string &path)
 		m_error = lua_tostring(m_state.get(), -1);
 		lua_pop(m_state.get(), 1);
 
+		return false;
+	}
+
+	// Do a initial load
+	try
+	{
+		onLoad();
+	}
+	catch (ErrorException ex)
+	{
+		m_error = ex.what();
 		return false;
 	}
 
@@ -291,10 +302,16 @@ void Plugin::onKick(std::shared_ptr<Server> server,
 	call("onKick", server, params);
 }
 
+void Plugin::onLoad()
+{
+	call("onLoad");
+}
+
 void Plugin::onMessage(std::shared_ptr<Server> server,
 		       const std::string &channel,
 		       const std::string &who,
 		       const std::string &message)
+
 {
 	std::vector<std::string> params;
 
@@ -402,6 +419,11 @@ void Plugin::onUserMode(std::shared_ptr<Server> server,
 	params.push_back(mode);
 
 	call("onUserMode", server, params);
+}
+
+void Plugin::onUnload()
+{
+	call("onUnload");
 }
 
 } // !irccd

@@ -15,6 +15,11 @@
   <li><a href="../index.html">Index</a></li>
 </ul>
 
+<h2 class="kind">Contents</h2>
+<ul>
+<li><a href="#Function">Function </a></li>
+<li><a href="#Parameters">Parameters </a></li>
+</ul>
 
 <h2 class="kind">Topics</h2>
 <ul>
@@ -23,9 +28,9 @@
   <li><a href="../topics/2.1-Using-irccd-test.md.html">2.1-Using-irccd-test.md</a></li>
   <li><a href="../topics/3-Action.md.html">3-Action.md</a></li>
   <li><a href="../topics/3-Channel-notice.md.html">3-Channel-notice.md</a></li>
-  <li><a href="../topics/3-Command.md.html">3-Command.md</a></li>
+  <li><strong>3-Command.md</strong></li>
   <li><a href="../topics/3-Connect.md.html">3-Connect.md</a></li>
-  <li><strong>3-Events.md</strong></li>
+  <li><a href="../topics/3-Events.md.html">3-Events.md</a></li>
   <li><a href="../topics/3-Invite.md.html">3-Invite.md</a></li>
   <li><a href="../topics/3-Join.md.html">3-Join.md</a></li>
   <li><a href="../topics/3-Kick.md.html">3-Kick.md</a></li>
@@ -58,57 +63,38 @@
 
 <div id="content">
 
-  <h2>Topic <code>3-Events.md</code></h2>
+  <h2>Topic <code>3-Command.md</code></h2>
 
 
-<h2>Synopsis</h2>
+<h2>Command</h2>
 
-<p>The <em>irccd</em> daemon works like a waiting operator. It waits until someone
-connects, speak or something else happen. It's event based.</p>
+<p>Special commands are not real IRC events. They are called from channel messages
+with a specific syntax using a delimiter and the plugin name.</p>
 
-<p>There are a lot of events that you can catch withing your plugin, of course
-there are no prerequisite of implementing all IRC events, you may want to
-catch only connections or messages.</p>
+<p>For instance, with default <em>irccd</em> parameters, saying on a channel <strong>!ask foo</strong>
+will call the special command of the plugin named ask, so from the file
+<em>ask.lua</em>.</p>
 
-<h2>The server object</h2>
+<p>Note that the command character is not fixed to '!', it's just the default and
+can be set by the parameter <strong>command-char</strong> in a <strong>[server]</strong> section, but
+for more information see the <em>irccd.conf</em> manual.</p>
 
-<p>Almost all of the callbacks have a server object, you may guess what it is.
-In fact, <em>irccd</em> as you may already know, is multiple server based so each
-plugins are called for each server defined because currently plugins are
-loaded globally and not per a server basis.</p>
+<p><a name="Function"></a></p>
+<h3>Function</h3>
 
-<p>So if you want to answer to someone who asked you to compute a very complicated
-calculus, you need this server to send back a response and that's why server
-is passed almost all of these events.</p>
 
-<h2>Note about yourself</h2>
+<pre>
+ <span class="keyword">function</span> onCommand(server, channel, who, message)
+</pre>
 
-<p>By default, almost every callback will also be called if <strong>you</strong> made an
-action, like joining, saying something, got kicked and so on.</p>
-
-<h2>The list of supported events</h2>
-
-<p>Currently, the following callback are supported:</p>
+<p><a name="Parameters"></a></p>
+<h3>Parameters</h3>
 
 <ul>
-    <li><a href="../topics/3-Action.md.html#">3-Action.md</a></li>
-    <li><a href="../topics/3-Command.md.html#">3-Command.md</a></li>
-    <li><a href="../topics/3-Connect.md.html#">3-Connect.md</a></li>
-    <li><a href="../topics/3-Channel-notice.md.html#">3-Channel-notice.md</a></li>
-    <li><a href="../topics/3-Invite.md.html#">3-Invite.md</a></li>
-    <li><a href="../topics/3-Join.md.html#">3-Join.md</a></li>
-    <li><a href="../topics/3-Kick.md.html#">3-Kick.md</a></li>
-    <li>???</li>
-    <li><a href="../topics/3-Message.md.html#">3-Message.md</a></li>
-    <li><a href="../topics/3-Mode.md.html#">3-Mode.md</a></li>
-    <li><a href="../topics/3-Nick.md.html#">3-Nick.md</a></li>
-    <li><a href="../topics/3-Notice.md.html#">3-Notice.md</a></li>
-    <li><a href="../topics/3-Part.md.html#">3-Part.md</a></li>
-    <li><a href="../topics/3-Query.md.html#">3-Query.md</a></li>
-    <li><a href="../topics/3-Reload.md.html#">3-Reload.md</a></li>
-    <li><a href="../topics/3-Topic.md.html#">3-Topic.md</a></li>
-    <li>???</li>
-    <li><a href="../topics/3-User-mode.md.html#">3-User-mode.md</a></li>
+    <li>server, the current server.</li>
+    <li>channel, the channel where the message comes from.</li>
+    <li>who, who invoked the command.</li>
+    <li>message, the real message, without the "!<name>" part.</li>
 </ul>
 
 
