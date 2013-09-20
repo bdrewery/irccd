@@ -107,6 +107,7 @@ void Plugin::call(const std::string &func,
 	if (lua_type(L, -1) != LUA_TFUNCTION)
 		lua_pop(L, 1);
 	else
+	{
 		int np = 0;
 
 		if (server)
