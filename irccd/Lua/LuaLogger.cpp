@@ -23,15 +23,13 @@
 #include "Irccd.h"
 #include "LuaLogger.h"
 
-using namespace irccd;
-using namespace std;
-
-namespace logger {
-
-static string makeMessage(lua_State *L, const string &message)
+namespace irccd
 {
-	ostringstream oss;
-	shared_ptr<Plugin> p = Irccd::getInstance()->findPlugin(L);
+
+static std::string makeMessage(lua_State *L, const std::string &message)
+{
+	std::ostringstream oss;
+	std::shared_ptr<Plugin> p = Irccd::getInstance()->findPlugin(L);
 
 	oss << "plugin " << p->getName() << ": " << message;
 
@@ -52,17 +50,17 @@ static int warn(lua_State *L)
 	return 0;
 }
 
-} // !logger
-
 const luaL_Reg functions[] = {
-	{ "log",	logger::log		},
-	{ "warn",	logger::warn		},
+	{ "log",	log			},
+	{ "warn",	warn			},
 	{ nullptr,	nullptr			}
 };
 
-int irccd::luaopen_logger(lua_State *L)
+int luaopen_logger(lua_State *L)
 {
 	luaL_newlib(L, functions);
 
 	return 1;
 }
+
+} // !irccd

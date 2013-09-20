@@ -22,8 +22,8 @@
 
 #include "Logger.h"
 
-using namespace irccd;
-using namespace std;
+namespace irccd
+{
 
 bool Logger::m_verbose = true;
 
@@ -113,3 +113,5 @@ void Logger::debug(std::string fmt, ...)
 	(void)fmt;
 #endif
 }
+
+} // !irccd

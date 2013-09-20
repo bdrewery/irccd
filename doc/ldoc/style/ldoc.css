@@ -33,7 +33,7 @@ a:hover {
 
 #menu {
 	float: left;
-	width: 13em;
+	width: 16em;
 	background-color: #f0f0f0;
 	padding: 10px 10px 10px 10px;
 	border: 1px solid #cccccc;
@@ -54,7 +54,7 @@ a:hover {
 
 #content {
         color: #2B2B2B;
-        margin-left: 18em;
+        margin-left: 22em;
 	margin-right: 10px;
         font-size: 11px;
 }

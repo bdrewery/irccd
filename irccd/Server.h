@@ -28,7 +28,8 @@
 
 #include <libircclient.h>
 
-namespace irccd {
+namespace irccd
+{
 
 class Server;
 
@@ -36,7 +37,8 @@ class Server;
  * IRC Events, used by Server
  * -------------------------------------------------------- */
 
-enum class IrcEventType {
+enum class IrcEventType
+{
 	Connection,					//! when connection
 	ChannelNotice,					//! channel notices
 	Invite,						//! invitation
@@ -54,7 +56,8 @@ enum class IrcEventType {
 	Whois						//! (def) whois response
 };
 
-enum class IrcChanNickMode {
+enum class IrcChanNickMode
+{
 	Creator		= 'O',				//! channel creator
 	HalfOperator	= 'h',				//! half operator
 	Operator	= 'o',				//! channel operator
@@ -65,7 +68,8 @@ enum class IrcChanNickMode {
 typedef std::vector<std::string> IrcEventParams;
 typedef std::map<IrcChanNickMode, char> IrcPrefixes;
 
-struct IrcEvent {
+struct IrcEvent
+{
 	IrcEventType m_type;				//! event type
 	IrcEventParams m_params;			//! parameters
 
@@ -92,7 +96,8 @@ struct IrcEvent {
 	~IrcEvent();
 };
 
-class IrcDeleter {
+class IrcDeleter
+{
 public:
 	void operator()(irc_session_t *s)
 	{
@@ -108,14 +113,17 @@ typedef std::unique_ptr<irc_session_t, IrcDeleter> IrcSession;
  * Server class, each class define a server that irccd
  * can connect to
  */
-class Server : public std::enable_shared_from_this<Server> {
+class Server : public std::enable_shared_from_this<Server>
+{
 public:
-	struct Channel {
+	struct Channel
+	{
 		std::string m_name;			//! channel name
 		std::string m_password;			//! channel optional password
 	};
 
-	struct Options {
+	struct Options
+	{
 		std::string m_commandChar;		//! command token
 		bool m_joinInvite;			//! auto join on invites
 
@@ -126,7 +134,8 @@ public:
 		}
 	};
 
-	struct Info {
+	struct Info
+	{
 		std::string m_name;			//! server's name
 		std::string m_host;			//! hostname
 		unsigned m_port;			//! server's port
@@ -143,7 +152,8 @@ public:
 		}
 	};
 
-	struct WhoisInfo {
+	struct WhoisInfo
+	{
 		bool found;				//! if no such nick
 		std::string nick;			//! user's nickname
 		std::string user;			//! user's user
@@ -166,7 +176,8 @@ public:
 			m_nickname = "irccd";
 			m_username = "irccd";
 			m_realname = "IRC Client Daemon";
-			m_ctcpReply = false;
+			m_ctcpVersion = "IRC Client Daemon";
+			m_ctcpReply = true;
 		}
 	};
 

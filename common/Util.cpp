@@ -272,7 +272,8 @@ void Util::mkdir(const std::string &dir, int mode)
 
 	oss << "mkdir: ";
 
-	for (size_t i = 0; i < dir.length(); ++i) {
+	for (size_t i = 0; i < dir.length(); ++i)
+	{
 		if (dir[i] != '/')
 			continue;
 
@@ -287,7 +288,8 @@ void Util::mkdir(const std::string &dir, int mode)
 	}
 
 	// Last part
-	if (_MKDIR(dir.c_str(), mode) == -1) {
+	if (_MKDIR(dir.c_str(), mode) == -1)
+	{
 		oss << dir << ": " << strerror(errno);
 		throw Util::ErrorException(oss.str());
 	}
@@ -326,23 +328,28 @@ std::vector<std::string> Util::split(const std::string &list,
 	int count = 1;
 	bool finished = false;
 
-	do {
+	do
+	{
 		std::string val;
 
 		current = next + 1;
 		next = list.find_first_of(delimiter, current);
 
 		// split max, get until the end
-		if (max >= 0 && count++ >= max) {
+		if (max >= 0 && count++ >= max)
+		{
 			val = list.substr(current, std::string::npos);
 			finished = true;
-		} else {
+		}
+		else
+		{
 			val = list.substr(current, next - current);
 			finished = next == std::string::npos;
 		}
 
 		result.push_back(val);
-	} while (!finished);
+	}
+	while (!finished);
 
 	return result;
 }

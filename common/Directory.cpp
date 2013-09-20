@@ -28,8 +28,8 @@
 
 #include "Directory.h"
 
-using namespace irccd;
-using namespace std;
+namespace irccd
+{
 
 Directory::Directory(const std::string &path)
 {
@@ -43,7 +43,7 @@ Directory::~Directory()
 bool Directory::open(bool skipParents)
 {
 #if defined(_WIN32)
-	ostringstream oss;
+	std::ostringstream oss;
 	WIN32_FIND_DATA fdata;
 	HANDLE hd;
 
@@ -101,7 +101,7 @@ bool Directory::open(bool skipParents)
 #endif
 }
 
-const string & Directory::getPath() const
+const std::string & Directory::getPath() const
 {
 	return m_path;
 }
@@ -116,14 +116,16 @@ const std::vector<Entry> & Directory::getEntries() const
 	return m_entries;
 }
 
-bool irccd::operator==(const Entry &e1, const Entry &e2)
+bool operator==(const Entry &e1, const Entry &e2)
 {
 	return e1.m_name == e2.m_name &&
 	    e1.m_isDirectory == e2.m_isDirectory;
 }
 
-bool irccd::operator==(const Directory &d1, const Directory &d2)
+bool operator==(const Directory &d1, const Directory &d2)
 {
 	return d1.getPath() == d2.getPath() &&
 	    d1.getEntries() == d2.getEntries();
 }
+
+} // !irccd

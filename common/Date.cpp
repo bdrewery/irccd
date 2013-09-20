@@ -18,8 +18,8 @@
 
 #include "Date.h"
 
-using namespace irccd;
-using namespace std;
+namespace irccd
+{
 
 Date::Date()
 {
@@ -40,7 +40,7 @@ time_t Date::getTimestamp() const
 	return m_timestamp;
 }
 
-string Date::format(const string &format)
+std::string Date::format(const std::string &format)
 {
 	char buffer[512];
 	struct tm *tm;
@@ -48,15 +48,17 @@ string Date::format(const string &format)
 	tm = localtime(&m_timestamp);
 	strftime(buffer, sizeof (buffer), format.c_str(), tm);
 
-	return string(buffer);
+	return std::string(buffer);
 }
 
-bool irccd::operator==(const Date &d1, const Date &d2)
+bool operator==(const Date &d1, const Date &d2)
 {
 	return d1.getTimestamp() == d2.getTimestamp();
 }
 
-bool irccd::operator<=(const Date &d1, const Date &d2)
+bool operator<=(const Date &d1, const Date &d2)
 {
 	return d1.getTimestamp() <= d2.getTimestamp();
 }
+
+} // !irccd

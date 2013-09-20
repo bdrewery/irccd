@@ -189,11 +189,11 @@ application.
 
 The options available:
 
-* `foreground`: (bool) keep irccd to foreground, default: false.
-* `plugins`: (string list) a list of plugins to load, default: empty.
-* `plugin-path`: (string) a path to local plugins, default: empty.
-* `syslog`: (bool) if enabled, use syslog instead of standard output, default: false.
-* `verbose`: (bool) enable verbose message, default: false.
+* `foreground`: (bool) Keep irccd to foreground, default: false.
+* `plugins`: (string list) A list of plugins to load, default: empty.
+* `plugin-path`: (string) A path to local plugins, default: empty.
+* `syslog`: (bool) If enabled, use syslog instead of standard output, default: false.
+* `verbose`: (bool) Enable verbose message, default: false.
 
 [NOTE]
 The options foreground and syslog are only available on Unix systems.
@@ -217,7 +217,9 @@ The options available:
 * `name`: (string) Required. the identity unique id.
 * `nickname`: (string) The nickname, default: irccd.
 * `realname`: (string) The realname, default: IRC Client daemon.
-* `username`: (string) The username name, default: irccd
+* `username`: (string) The username name, default: irccd.
+* `ctcp-version`: (string) What version to respond to CTCP VERSION, default: IRC Client Daemon.
+* `ctcp-autoreply`: (bool) Enable auto CTCP VERSION reply, default: true.
 
 .Example
 [source, ini]

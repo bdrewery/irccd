@@ -65,9 +65,9 @@ so on.
 
 <br />
 To see all server functions, see @{irccd.server}.
-To get a list of all IRC events, see @{3-Events.md}
+To get a list of all IRC events, see @{2.2-List_of_Events.md}
 
 <br />
-Previous @{1-Introduction.md} | Next @{2.1-Using-irccd-test.md}
+Previous @{1-Introduction.md} | Next @{2.1-Using_irccd_test.md}
 
 <!--- vim: set syntax=mkd: -->

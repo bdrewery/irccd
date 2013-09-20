@@ -24,21 +24,23 @@
 #include "Irccd.h"
 #include "LuaParser.h"
 
-using namespace irccd;
-using namespace std;
+namespace irccd
+{
 
 int LuaParser::readTuning(lua_State *L, int idx)
 {
 	int tuning = 0;
 	int rel = idx;
 
-	if (lua_type(L, rel) == LUA_TTABLE) {
+	if (lua_type(L, rel) == LUA_TTABLE)
+	{
 		lua_pushnil(L);
 
 		if (rel < 0)
 			--rel;
 
-		while (lua_next(L, rel)) {
+		while (lua_next(L, rel))
+		{
 			if (lua_isnumber(L, -1))
 				tuning |= lua_tointeger(L, -1);
 
@@ -79,11 +81,12 @@ void LuaParser::setLogRef(int logRef)
 	m_logRef = logRef;
 }
 
-void LuaParser::log(int number, const string &section, const string &message)
+void LuaParser::log(int number, const std::string &section, const std::string &message)
 {
-	if (m_logRef == LUA_NOREF) {
+	if (m_logRef == LUA_NOREF)
 		Parser::log(number, section, message);
-	} else if (m_state != nullptr) {
+	else if (m_state != nullptr)
+	{
 		// Call the Lua ref function
 		lua_rawgeti(m_state, LUA_REGISTRYINDEX, m_logRef);
 		lua_pushinteger(m_state, number);
@@ -94,14 +97,10 @@ void LuaParser::log(int number, const string &section, const string &message)
 	}
 }
 
-// {{{ "Static" functions
-
-namespace functions {
-
 static int create(lua_State *L)
 {
 	LuaParser *p;
-	string path;
+	std::string path;
 	int tuning = 0, ch = LuaParser::DEFAULT_COMMENT_CHAR;
 
 	if (lua_gettop(L) < 1)
@@ -109,7 +108,8 @@ static int create(lua_State *L)
 
 	// Get the flags
 	path = luaL_checkstring(L, 1);
-	if (lua_gettop(L) >= 2) {
+	if (lua_gettop(L) >= 2)
+	{
 		luaL_checktype(L, 2, LUA_TTABLE);
 		tuning = LuaParser::readTuning(L, 2);
 	}
@@ -124,20 +124,14 @@ static int create(lua_State *L)
 	return 1;
 }
 
-} // }}} !functions
-
 const luaL_Reg functionList[] = {
-	{ "new",		functions::create	},
+	{ "new",		create			},
 	{ nullptr,		nullptr			}
 };
 
-// "Parser" methods {{{
-
-namespace parserMethod {
-
 static int sectionIterator(lua_State *L)
 {
-	vector<Section> *array = toType<vector<Section> *>(L, lua_upvalueindex(1));
+	std::vector<Section> *array = toType<std::vector<Section> *>(L, lua_upvalueindex(1));
 	int idx = lua_tointeger(L, lua_upvalueindex(2));
 
 	if ((size_t)idx >= array->size())
@@ -153,11 +147,12 @@ static int sectionIterator(lua_State *L)
 	return 1;
 }
 
-static int open(lua_State *L)
+static int parserOpen(lua_State *L)
 {
 	LuaParser *p = toType<LuaParser *>(L, 1, PARSER_TYPE);
 
-	if (!p->open()) {
+	if (!p->open())
+	{
 		lua_pushboolean(L, false);
 		lua_pushstring(L, p->getError().c_str());
 
@@ -169,27 +164,27 @@ static int open(lua_State *L)
 	return 1;
 }
 
-static int findSections(lua_State *L)
+static int parserFindSections(lua_State *L)
 {
 	LuaParser *p;
-	string name;
+	std::string name;
 
 	// Get the parameters for that functions
 	p = toType<LuaParser *>(L, 1, PARSER_TYPE);
 	name = luaL_checkstring(L, 2);
 
 	// Push the list of array and the current index to iterate one
-	new (L) vector<Section>(p->findSections(name));
+	new (L) std::vector<Section>(p->findSections(name));
 	lua_pushinteger(L, 0);
 	lua_pushcclosure(L, sectionIterator, 2);
 
 	return 1;
 }
 
-static int hasSection(lua_State *L)
+static int parserHasSection(lua_State *L)
 {
 	LuaParser *p;
-	string name;
+	std::string name;
 
 	p = toType<LuaParser *>(L, 1, PARSER_TYPE);
 	name = luaL_checkstring(L, 2);
@@ -199,17 +194,20 @@ static int hasSection(lua_State *L)
 	return 1;
 }
 
-static int getSection(lua_State *L)
+static int parserGetSection(lua_State *L)
 {
 	LuaParser *p = toType<LuaParser *>(L, 1, PARSER_TYPE);
-	string name = luaL_checkstring(L, 2);
+	std::string name = luaL_checkstring(L, 2);
 	int ret = 0;
 
-	try {
+	try
+	{
 		new (L, SECTION_TYPE) Section(p->getSection(name));
 
 		ret = 1;
-	} catch (NotFoundException ex) {
+	}
+	catch (NotFoundException ex)
+	{
 		lua_pushnil(L);
 		lua_pushfstring(L, "section %s not found", name.c_str());
 
@@ -219,10 +217,10 @@ static int getSection(lua_State *L)
 	return ret;
 }
 
-static int requireSection(lua_State *L)
+static int parserRequireSection(lua_State *L)
 {
 	LuaParser *p;
-	string name;
+	std::string name;
 
 	p = toType<LuaParser *>(L, 1, PARSER_TYPE);
 	name = luaL_checkstring(L, 2);
@@ -236,7 +234,7 @@ static int requireSection(lua_State *L)
 	return 1;
 }
 
-static int onLog(lua_State *L)
+static int parserOnLog(lua_State *L)
 {
 	LuaParser *p = toType<LuaParser *>(L, 1, PARSER_TYPE);
 
@@ -250,21 +248,15 @@ static int onLog(lua_State *L)
 	return 0;
 }
 
-} // }}} !parserMethods
-
 static const luaL_Reg parserMethodList[] = {
-	{ "open",		parserMethod::open		},
-	{ "findSections",	parserMethod::findSections	},
-	{ "hasSection",		parserMethod::hasSection	},
-	{ "getSection",		parserMethod::getSection	},
-	{ "requireSection",	parserMethod::requireSection	},
-	{ "onLog",		parserMethod::onLog		},
+	{ "open",		parserOpen			},
+	{ "findSections",	parserFindSections		},
+	{ "hasSection",		parserHasSection		},
+	{ "getSection",		parserGetSection		},
+	{ "requireSection",	parserRequireSection		},
+	{ "onLog",		parserOnLog			},
 	{ nullptr,		nullptr				}
 };
-
-// {{{ "Parser" metamethods
-
-namespace parserMt {
 
 static int gc(lua_State *L)
 {
@@ -280,7 +272,7 @@ static int gc(lua_State *L)
 static int tostring(lua_State *L)
 {
 	LuaParser *p = toType<LuaParser *>(L, 1, PARSER_TYPE);
-	ostringstream oss;
+	std::ostringstream oss;
 
 	oss << *p;
 
@@ -289,66 +281,65 @@ static int tostring(lua_State *L)
 	return 1;
 }
 
-} // }}} !parserMt
-
 static const luaL_Reg parserMtList[] = {
-	{ "__gc",		parserMt::gc			},
-	{ "__tostring",		parserMt::tostring		},
+	{ "__gc",		gc				},
+	{ "__tostring",		tostring			},
 	{ nullptr,		nullptr				}
 };
 
-// "Section" methods {{{
-
-namespace sectionMethod {
-
-static int hasOption(lua_State *L)
+static int sectionHasOption(lua_State *L)
 {
 	Section *s = toType<Section *>(L, 1, SECTION_TYPE);
-	string name = luaL_checkstring(L, 2);
+	std::string name = luaL_checkstring(L, 2);
 
 	lua_pushboolean(L, s->hasOption(name));
 
 	return 1;
 }
 
-static int getOption(lua_State *L)
+static int sectionGetOption(lua_State *L)
 {
 	Section *s = toType<Section *>(L, 1, SECTION_TYPE);
-	string name = luaL_checkstring(L, 2);
+	std::string name = luaL_checkstring(L, 2);
 
-	if (!s->hasOption(name)) {
+	if (!s->hasOption(name))
+	{
 		lua_pushnil(L);
 		lua_pushfstring(L, "option %s not found", name.c_str());
 
 		return 2;
 	}
 
-	lua_pushstring(L, s->getOption<string>(name).c_str());
+	lua_pushstring(L, s->getOption<std::string>(name).c_str());
 
 	return 1;
 }
 
-static int requireOption(lua_State *L)
+static int sectionRequireOption(lua_State *L)
 {
 	Section *s = toType<Section *>(L, 1, SECTION_TYPE);
-	string name = luaL_checkstring(L, 2);
-	string value;
+	std::string name = luaL_checkstring(L, 2);
+	std::string value;
 
-	try {
-		lua_pushstring(L, s->requireOption<string>(name).c_str());
-	} catch (NotFoundException ex) {
+	try
+	{
+		lua_pushstring(L, s->requireOption<std::string>(name).c_str());
+	}
+	catch (NotFoundException ex)
+	{
 		return luaL_error(L, "required option %s not found", ex.which().c_str());
 	}
 
 	return 1;
 }
 
-static int getOptions(lua_State *L)
+static int sectionGetOptions(lua_State *L)
 {
 	Section *s = toType<Section *>(L, 1, SECTION_TYPE);
 
 	lua_createtable(L, s->getOptions().size(), s->getOptions().size());
-	for (const Option &o : s->getOptions()) {
+	for (const Option &o : s->getOptions())
+	{
 		lua_pushstring(L, o.m_key.c_str());
 		lua_setfield(L, -2, o.m_value.c_str());
 	}
@@ -356,21 +347,15 @@ static int getOptions(lua_State *L)
 	return 1;
 }
 
-} // }}} !section
-
 static const luaL_Reg sectionMethodList[] = {
-	{ "hasOption",		sectionMethod::hasOption	},
-	{ "getOption",		sectionMethod::getOption	},
-	{ "requireOption",	sectionMethod::requireOption	},
-	{ "getOptions",		sectionMethod::getOptions	},
+	{ "hasOption",		sectionHasOption		},
+	{ "getOption",		sectionGetOption		},
+	{ "requireOption",	sectionRequireOption		},
+	{ "getOptions",		sectionGetOptions		},
 	{ nullptr,		nullptr				}
 };
 
-// {{{ "Section" metamethods
-
-namespace sectionMt {
-
-static int eq(lua_State *L)
+static int sectionEq(lua_State *L)
 {
 	Section *s1, *s2;
 
@@ -382,17 +367,17 @@ static int eq(lua_State *L)
 	return 1;
 }
 
-static int gc(lua_State *L)
+static int sectionGc(lua_State *L)
 {
 	toType<Section *>(L, 1, SECTION_TYPE)->~Section();
 
 	return 0;
 }
 
-static int tostring(lua_State *L)
+static int sectionTostring(lua_State *L)
 {
 	Section *s = toType<Section *>(L, 1, SECTION_TYPE);
-	ostringstream oss;
+	std::ostringstream oss;
 
 	oss << *s;
 
@@ -401,16 +386,14 @@ static int tostring(lua_State *L)
 	return 1;
 }
 
-} // }}} !sectionMt
-
 static const luaL_Reg sectionMtList[] = {
-	{ "__eq",		sectionMt::eq			},
-	{ "__gc",		sectionMt::gc			},
-	{ "__tostring",		sectionMt::tostring		},
+	{ "__eq",		sectionEq			},
+	{ "__gc",		sectionGc			},
+	{ "__tostring",		sectionTostring			},
 	{ nullptr,		nullptr				}
 };
 
-int irccd::luaopen_parser(lua_State *L)
+int luaopen_parser(lua_State *L)
 {
 	luaL_newlib(L, functionList);
 
@@ -440,3 +423,5 @@ int irccd::luaopen_parser(lua_State *L)
 
 	return 1;
 }
+
+} // !irccd

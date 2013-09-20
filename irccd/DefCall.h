@@ -22,7 +22,8 @@
 #include "Server.h"
 #include "Plugin.h"
 
-namespace irccd {
+namespace irccd
+{
 
 /**
  * @class DefCall
@@ -30,7 +31,8 @@ namespace irccd {
  *
  * This class is used to call deferred functions.
  */
-class DefCall {
+class DefCall
+{
 private:
 	IrcEventType m_type;			//! which type of event
 	std::shared_ptr<Plugin> m_plugin;	//! for which plugin
@@ -44,6 +46,7 @@ private:
 	 * @throw Plugin::ErrorException on error
 	 */
 	void call(int nparams = 0);
+
 public:
 	/**
 	 * Default constructor.

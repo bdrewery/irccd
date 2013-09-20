@@ -51,11 +51,11 @@ int main(int argc, char **argv)
 		switch (ch) {
 		case 'c':
 			irccd->setConfigPath(string(optarg));
-			irccd->override(options::Config);
+			irccd->override(Options::Config);
 			break;
 		case 'f':
 			irccd->setForeground(true);
-			irccd->override(options::Foreground);
+			irccd->override(Options::Foreground);
 			break;
 		case 'p':
 			irccd->addPluginPath(string(optarg));
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 			break;
 		case 'v':
 			Logger::setVerbose(true);
-			irccd->override(options::Verbose);
+			irccd->override(Options::Verbose);
 			break;
 		case '?':
 		default:

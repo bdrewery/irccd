@@ -33,14 +33,15 @@
 #include "Lua/LuaServer.h"
 #include "Lua/LuaUtil.h"
 
-using namespace irccd;
-using namespace std;
+namespace irccd
+{
 
 /* --------------------------------------------------------
  * list of libraries to load
  * -------------------------------------------------------- */
 
-struct Library {
+struct Library
+{
 	const char *		m_name;		//! name of library to load
 	lua_CFunction		m_func;		//! C function for it
 };
@@ -76,13 +77,13 @@ Plugin::ErrorException::ErrorException()
 {
 }
 
-Plugin::ErrorException::ErrorException(const string &which, const string &error)
+Plugin::ErrorException::ErrorException(const std::string &which, const std::string &error)
 	: m_error(error)
 	, m_which(which)
 {
 }
 
-string Plugin::ErrorException::which() const
+std::string Plugin::ErrorException::which() const
 {
 	return m_which;
 }
@@ -96,30 +97,34 @@ const char * Plugin::ErrorException::what() const throw()
  * private methods and members
  * -------------------------------------------------------- */
 
-void Plugin::call(const string &func,
-		  shared_ptr<Server> server,
-		  vector<string> params)
+void Plugin::call(const std::string &func,
+		  std::shared_ptr<Server> server,
+		  std::vector<std::string> params)
 {
 	lua_State *L = m_state.get();
 
 	lua_getglobal(L, func.c_str());
-	if (lua_type(L, -1) != LUA_TFUNCTION) {
+	if (lua_type(L, -1) != LUA_TFUNCTION)
 		lua_pop(L, 1);
-	} else {
+	else
+	{
 		int np = 0;
 
-		if (server) {
+		if (server)
+		{
 			LuaServer::pushObject(L, server);
 			++ np;
 		}
 
-		for (const string &a : params) {
+		for (const std::string &a : params)
+		{
 			lua_pushstring(L, a.c_str());
 			++ np;
 		}
 
-		if (lua_pcall(L, np, 0, 0) != LUA_OK) {
-			string error = lua_tostring(L, -1);
+		if (lua_pcall(L, np, 0, 0) != LUA_OK)
+		{
+			std::string error = lua_tostring(L, -1);
 			lua_pop(L, 1);
 
 			throw ErrorException(m_name, error);
@@ -135,8 +140,8 @@ Plugin::Plugin()
 {
 }
 
-Plugin::Plugin(const string &name)
-	:m_name(name)
+Plugin::Plugin(const std::string &name)
+	: m_name(name)
 {
 }
 
@@ -162,11 +167,11 @@ Plugin::~Plugin()
 {
 }
 
-const string & Plugin::getName() const
+const std::string & Plugin::getName() const
 {
 	return m_name;
 }
-const string & Plugin::getHome() const
+const std::string & Plugin::getHome() const
 {
 	return m_home;
 }
@@ -176,14 +181,14 @@ LuaState & Plugin::getState()
 	return m_state;
 }
 
-const string & Plugin::getError() const
+const std::string & Plugin::getError() const
 {
 	return m_error;
 }
 
-bool Plugin::open(const string &path)
+bool Plugin::open(const std::string &path)
 {
-	ostringstream oss;
+	std::ostringstream oss;
 
 	m_state = LuaState(luaL_newstate());
 
@@ -202,22 +207,34 @@ bool Plugin::open(const string &path)
 
 	m_home = oss.str();
 
-	if (luaL_dofile(m_state.get(), path.c_str()) != LUA_OK) {
+	if (luaL_dofile(m_state.get(), path.c_str()) != LUA_OK)
+	{
 		m_error = lua_tostring(m_state.get(), -1);
 		lua_pop(m_state.get(), 1);
 
 		return false;
 	}
 
+	// Do a initial load
+	try
+	{
+		onLoad();
+	}
+	catch (ErrorException ex)
+	{
+		m_error = ex.what();
+		return false;
+	}
+
 	return true;
 }
 
-void Plugin::onCommand(shared_ptr<Server> server,
-		       const string &channel,
-		       const string &who,
-		       const string &message)
+void Plugin::onCommand(std::shared_ptr<Server> server,
+		       const std::string &channel,
+		       const std::string &who,
+		       const std::string &message)
 {
-	vector<string> params;
+	std::vector<std::string> params;
 
 	params.push_back(channel);
 	params.push_back(who);
@@ -226,17 +243,17 @@ void Plugin::onCommand(shared_ptr<Server> server,
 	call("onCommand", server, params);
 }
 
-void Plugin::onConnect(shared_ptr<Server> server)
+void Plugin::onConnect(std::shared_ptr<Server> server)
 {
 	call("onConnect", server);
 }
 
-void Plugin::onChannelNotice(shared_ptr<Server> server,
-			     const string &nick,
-			     const string &target,
-			     const string &notice)
+void Plugin::onChannelNotice(std::shared_ptr<Server> server,
+			     const std::string &nick,
+			     const std::string &target,
+			     const std::string &notice)
 {
-	vector<string> params;
+	std::vector<std::string> params;
 
 	params.push_back(nick);
 	params.push_back(target);
@@ -245,11 +262,11 @@ void Plugin::onChannelNotice(shared_ptr<Server> server,
 	call("onChannelNotice", server, params);
 }
 
-void Plugin::onInvite(shared_ptr<Server> server,
-		      const string &channel,
-		      const string &who)
+void Plugin::onInvite(std::shared_ptr<Server> server,
+		      const std::string &channel,
+		      const std::string &who)
 {
-	vector<string> params;
+	std::vector<std::string> params;
 
 	params.push_back(channel);
 	params.push_back(who);
@@ -257,11 +274,11 @@ void Plugin::onInvite(shared_ptr<Server> server,
 	call("onInvite", server, params);
 }
 
-void Plugin::onJoin(shared_ptr<Server> server,
-		    const string &channel,
-		    const string &nickname)
+void Plugin::onJoin(std::shared_ptr<Server> server,
+		    const std::string &channel,
+		    const std::string &nickname)
 {
-	vector<string> params;
+	std::vector<std::string> params;
 
 	params.push_back(channel);
 	params.push_back(nickname);
@@ -269,13 +286,13 @@ void Plugin::onJoin(shared_ptr<Server> server,
 	call("onJoin", server, params);
 }
 
-void Plugin::onKick(shared_ptr<Server> server,
-		    const string &channel,
-		    const string &who,
-		    const string &kicked,
-		    const string &reason)
+void Plugin::onKick(std::shared_ptr<Server> server,
+		    const std::string &channel,
+		    const std::string &who,
+		    const std::string &kicked,
+		    const std::string &reason)
 {
-	vector<string> params;
+	std::vector<std::string> params;
 
 	params.push_back(channel);
 	params.push_back(who);
@@ -285,12 +302,18 @@ void Plugin::onKick(shared_ptr<Server> server,
 	call("onKick", server, params);
 }
 
-void Plugin::onMessage(shared_ptr<Server> server,
-		       const string &channel,
-		       const string &who,
-		       const string &message)
+void Plugin::onLoad()
 {
-	vector<string> params;
+	call("onLoad");
+}
+
+void Plugin::onMessage(std::shared_ptr<Server> server,
+		       const std::string &channel,
+		       const std::string &who,
+		       const std::string &message)
+
+{
+	std::vector<std::string> params;
 
 	params.push_back(channel);
 	params.push_back(who);
@@ -299,13 +322,13 @@ void Plugin::onMessage(shared_ptr<Server> server,
 	call("onMessage", server, params);
 }
 
-void Plugin::onMode(shared_ptr<Server> server,
-		    const string &channel,
-		    const string &who,
-		    const string &mode,
-		    const string &modeArg)
+void Plugin::onMode(std::shared_ptr<Server> server,
+		    const std::string &channel,
+		    const std::string &who,
+		    const std::string &mode,
+		    const std::string &modeArg)
 {
-	vector<string> params;
+	std::vector<std::string> params;
 
 	params.push_back(channel);
 	params.push_back(who);
@@ -315,11 +338,11 @@ void Plugin::onMode(shared_ptr<Server> server,
 	call("onMode", server, params);
 }
 
-void Plugin::onNick(shared_ptr<Server> server,
-		    const string &oldnick,
-		    const string &newnick)
+void Plugin::onNick(std::shared_ptr<Server> server,
+		    const std::string &oldnick,
+		    const std::string &newnick)
 {
-	vector<string> params;
+	std::vector<std::string> params;
 
 	params.push_back(oldnick);
 	params.push_back(newnick);
@@ -327,12 +350,12 @@ void Plugin::onNick(shared_ptr<Server> server,
 	call("onNick", server, params);
 }
 
-void Plugin::onNotice(shared_ptr<Server> server,
-		      const string &nick,
-		      const string &target,
-		      const string &notice)
+void Plugin::onNotice(std::shared_ptr<Server> server,
+		      const std::string &nick,
+		      const std::string &target,
+		      const std::string &notice)
 {
-	vector<string> params;
+	std::vector<std::string> params;
 
 	params.push_back(nick);
 	params.push_back(target);
@@ -341,12 +364,12 @@ void Plugin::onNotice(shared_ptr<Server> server,
 	call("onNotice", server, params);
 }
 
-void Plugin::onPart(shared_ptr<Server> server,
-		    const string &channel,
-		    const string &who,
-		    const string &reason)
+void Plugin::onPart(std::shared_ptr<Server> server,
+		    const std::string &channel,
+		    const std::string &who,
+		    const std::string &reason)
 {
-	vector<string> params;
+	std::vector<std::string> params;
 	
 	params.push_back(channel);
 	params.push_back(who);
@@ -355,11 +378,11 @@ void Plugin::onPart(shared_ptr<Server> server,
 	call("onPart", server, params);
 }
 
-void Plugin::onQuery(shared_ptr<Server> server,
-		     const string &who,
-		     const string &message)
+void Plugin::onQuery(std::shared_ptr<Server> server,
+		     const std::string &who,
+		     const std::string &message)
 {
-	vector<string> params;
+	std::vector<std::string> params;
 
 	params.push_back(who);
 	params.push_back(message);
@@ -372,12 +395,12 @@ void Plugin::onReload()
 	call("onReload");
 }
 
-void Plugin::onTopic(shared_ptr<Server> server,
-		     const string &channel,
-		     const string &who,
-		     const string &topic)
+void Plugin::onTopic(std::shared_ptr<Server> server,
+		     const std::string &channel,
+		     const std::string &who,
+		     const std::string &topic)
 {
-	vector<string> params;
+	std::vector<std::string> params;
 
 	params.push_back(channel);
 	params.push_back(who);
@@ -386,14 +409,21 @@ void Plugin::onTopic(shared_ptr<Server> server,
 	call("onTopic", server, params);
 }
 
-void Plugin::onUserMode(shared_ptr<Server> server,
-			const string &who,
-			const string &mode)
+void Plugin::onUserMode(std::shared_ptr<Server> server,
+			const std::string &who,
+			const std::string &mode)
 {
-	vector<string> params;
+	std::vector<std::string> params;
 
 	params.push_back(who);
 	params.push_back(mode);
 
 	call("onUserMode", server, params);
 }
+
+void Plugin::onUnload()
+{
+	call("onUnload");
+}
+
+} // !irccd

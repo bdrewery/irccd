@@ -26,18 +26,22 @@
 
 #include <lua.hpp>
 
-namespace irccd {
+namespace irccd
+{
 
-class LuaDeleter {
+class LuaDeleter
+{
 public:
-	void operator()(lua_State *L) {
+	void operator()(lua_State *L)
+	{
 		lua_close(L);
 	}
 };
 
 typedef std::unique_ptr<lua_State, LuaDeleter> LuaState;
 
-class Luae {
+class Luae
+{
 public:
 	typedef std::function<void(lua_State *L, int tkey, int tvalue)> ReadFunction;
 

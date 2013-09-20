@@ -55,15 +55,15 @@ This section covers general options.
 .Pp
 .Bl -tag -width PARAMETERXXX -compact
 .It foreground
-(bool) keep irccd to foreground, default: false.
+(bool) Keep irccd to foreground, default: false.
 .It plugins
-(string list) a list of plugins to load, default: empty.
+(string list) A list of plugins to load, default: empty.
 .It plugin-path
-(string) a path to local modules, default: empty.
+(string) A path to local modules, default: empty.
 .It syslog
-(bool) if enabled, use syslog instead of standard output, default: false.
+(bool) If enabled, use syslog instead of standard output, default: false.
 .It verbose
-(bool) enable verbose message, default: false.
+(bool) Enable verbose message, default: false.
 .El
 .\" IDENTITY
 .Ss identity
@@ -81,6 +81,10 @@ binary and will use it if none is specified.
 (string) The realname, default: IRC Client daemon.
 .It username
 (string) The username, default: irccd.
+.It ctcp-version
+(string) What version to respond to CTCP VERSION, default: IRC Client Daemon.
+.It ctcp-autoreply
+(bool) Enable auto CTCP VERSION reply, default: true.
 .El
 .\" LISTENER
 .Ss listener

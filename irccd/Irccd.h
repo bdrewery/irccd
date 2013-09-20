@@ -38,15 +38,15 @@
 #  include "Plugin.h"
 #endif
 
-namespace irccd {
+namespace irccd
+{
 
 /* --------------------------------------------------------
  * Irccd main class
  * -------------------------------------------------------- */
 
-namespace options {
-
-enum {
+enum Options
+{
 	Config		= 'c',
 	Foreground	= 'f',
 	Verbose		= 'v',
@@ -54,9 +54,8 @@ enum {
 	PluginWanted	= 'P'
 };
 
-} // !options
-
-class Message {
+class Message
+{
 private:
 	std::ostringstream m_data;
 
@@ -101,7 +100,8 @@ typedef std::map<SocketAddress, Message> DatagramClients;
   typedef std::map<std::shared_ptr<Server>, std::vector<DefCall>> DefCallList;
 #endif
 
-class Irccd {
+class Irccd
+{
 private:
 	static Irccd *m_instance;			//! unique instance
 
