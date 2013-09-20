@@ -27,9 +27,11 @@
 
 #include <config.h>
 
-namespace irccd {
+namespace irccd
+{
 
-class Util {
+class Util
+{
 private:
 	/**
 	 * Get the installation prefix or installation directory. Also append
@@ -51,7 +53,9 @@ private:
 public:
 	typedef std::function<bool (const std::string &)> ConfigFinder;
 
-	class ErrorException : public std::exception {
+	class ErrorException : public std::exception
+	{
+	private:
 		std::string m_error;
 
 	public:

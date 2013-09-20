@@ -25,12 +25,14 @@
 #include <string>
 #include <vector>
 
-namespace irccd {
+namespace irccd
+{
 
 /**
  * Thrown when a section or an option is not found.
  */
-class NotFoundException : public std::exception {
+class NotFoundException : public std::exception
+{
 private:
 	std::string m_key;
 
@@ -40,11 +42,13 @@ public:
 	{
 	}
 
-	const std::string & which() const {
+	const std::string & which() const
+	{
 		return m_key;
 	}
 
-	virtual const char *what() const throw() {
+	virtual const char *what() const throw()
+	{
 		return "Property not found";
 	}
 };
@@ -52,7 +56,8 @@ public:
 /**
  * An option referenced by a key and a value.
  */
-struct Option {
+struct Option
+{
 	std::string m_key;		/*! option name */
 	std::string m_value;		/*! option value */
 };
@@ -64,7 +69,8 @@ bool operator==(const Option &o1, const Option &o2);
  * options are allowed (default behavior), the root
  * section is "".
  */
-struct Section {
+struct Section
+{
 	std::string m_name;		/*! name of section */
 	std::vector<Option> m_options;	/*! list of options inside */
 	bool m_allowed;			/*! is authorized to push */
@@ -147,12 +153,14 @@ struct Section {
 
 bool operator==(const Section &s1, const Section &s2);
 
-class Parser {
+class Parser
+{
 public:
 	/**
 	 * Options available for the parser.
 	 */
-	enum Tuning {
+	enum Tuning
+	{
 		DisableRootSection	= 1,	/*! disable options on root */
 		DisableRedefinition	= 2,	/*! disable multiple redefinition */
 		DisableVerbosity	= 4	/*! be verbose by method */
