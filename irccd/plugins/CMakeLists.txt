@@ -17,7 +17,7 @@
 #
 
 # Shortcut for installing modules
-function(DEFINE_MODULE name file description default)
+function(define_plugin name file description default)
 	option(${name} ${description} ${default})
 
 	if (${name})
@@ -25,11 +25,12 @@ function(DEFINE_MODULE name file description default)
 	endif()
 endfunction()
 
-DEFINE_MODULE(MOD_ANTIFLOOD antiflood.lua "Avoid flood on channel" On)
-DEFINE_MODULE(MOD_ASK ask.lua "Ask sage irccd about something" On)
-DEFINE_MODULE(MOD_BADWORDS badwords.lua "Anti bad words modules" On)
-DEFINE_MODULE(MOD_HISTORY history.lua "Check for nickname history" On)
-DEFINE_MODULE(MOD_LOGGER logger.lua "A simple server logger" On)
-DEFINE_MODULE(MOD_ROULETTE roulette.lua "A harmless russian roulette" On)
+define_plugin(MOD_ANTIFLOOD antiflood.lua "Avoid flood on channel" On)
+define_plugin(MOD_ASK ask.lua "Ask sage irccd about something" On)
+define_plugin(MOD_AUTH auth.lua "Generic authentication plugin" On)
+define_plugin(MOD_BADWORDS badwords.lua "Anti bad words modules" On)
+define_plugin(MOD_HISTORY history.lua "Check for nickname history" On)
+define_plugin(MOD_LOGGER logger.lua "A simple server logger" On)
+define_plugin(MOD_ROULETTE roulette.lua "A harmless russian roulette" On)
 
 # vim: set syntax=cmake:
