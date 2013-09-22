@@ -24,14 +24,21 @@ project(irccd)
 
 set(MAJOR "1")
 set(MINOR "0")
-set(VERSION "${MAJOR}.${MINOR}")
+set(VERSION "${MAJOR}.${MINOR}.1")
 
+# General settings
 if (UNIX)
 	set(CMAKE_C_FLAGS "-Wall -Wextra")
-	set(CMAME_CXX_FLAGS "-Wall -Wextra -std=c++11")
-elseif (WIN32)
+	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11")
+endif ()
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_definitions("-DDEBUG -D_DEBUG")
+endif ()
+
+if (WIN32)
 	add_definitions("-D_CRT_SECURE_NO_WARNINGS")
-	set(CMAKE_EXE_LINKER_FLAGS "/SAFESEH:NO")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
 endif ()
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")			# own modules
@@ -100,6 +107,19 @@ endif ()
 # unistd.h has some useful routines.
 check_include_file(unistd.h HAVE_UNISTD_H)
 
+# These settings are needed through doc/ and CPack.
+if (WIN32)
+	if (CMAKE_CL_64)
+		SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
+		SET(CPACK_NSIS_PACKAGE_NAME "Irccd (x64)")
+		SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION} (x64)")
+	else ()
+		SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES")
+		SET(CPACK_NSIS_PACKAGE_NAME "Irccd")
+		SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}")
+	endif ()
+endif ()
+
 # For documentation and man pages
 add_subdirectory(doc)
 
@@ -141,7 +161,7 @@ if (WIN32)
 	endif ()
 
 	# Embed Visual C++ 2012 redistributable
-	if (${WINARCHES} MATCHES "amd64")
+	if (${WINARCH} MATCHES "amd64")
 		set(REDIST_FILE "vcredist_x64.exe")
 	else ()
 		set(REDIST_FILE "vcredist_x86.exe")
@@ -174,15 +194,18 @@ if (WIN32)
 	set(CPACK_PACKAGE_VERSION_MINOR ${MINOR})
 	set(CPACK_PACKAGE_FILE_NAME "irccd-${VERSION}-${CMAKE_SYSTEM_NAME}-${WINARCH}")
 	set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
-	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "IRC Client Daemon")
+	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Irccd")
 
 	# Startup menu for documentation
 	set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS ${EXTRA_INSTALL_COMMANDS})
 	set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS ${EXTRA_UNINSTALL_COMMANDS})
 
 	# Wizards images (currently not working)
+	set(CPACK_PACKAGE_NAME "Irccd")
 	set(CPACK_NSIS_WELCOME_BITMAP "${CMAKE_CURRENT_SOURCE_DIR}/win32/left.bmp")
 	set(CPACK_NSIS_HEADER_BITMAP "${CMAKE_CURRENT_SOURCE_DIR}/win32/top.bmp")
+
+
 else ()
 	set(CPACK_GENERATOR "TGZ")
 endif ()

@@ -16,6 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cerrno>
+#include <cstring>
+#include <sstream>
+
 #if defined(_WIN32)
 #  include <sys/timeb.h>
 #  include <direct.h>
@@ -23,29 +27,15 @@
 #  include <shlobj.h>
 
 #  define _MKDIR(p, x)	::_mkdir(p)
-
 #else
 #  include <sys/time.h>
-
 #  include <libgen.h>
 
-#if defined(__linux__)
-/*
- * Linux is defining basename to __xpg_basename which break
- * our stuff.
- */
-#  undef basename
-
-#endif
-
+// This is libxdg-basedir
 #  include <basedir.h>
 
 #  define _MKDIR(p, x)	::mkdir(p, x)
 #endif
-
-#include <cerrno>
-#include <cstring>
-#include <sstream>
 
 #include <sys/stat.h>
 
@@ -95,7 +85,7 @@ std::string Util::pathBase(const std::string &append)
 	 * and removes its bin/ suffix.
 	 */
 	GetModuleFileNameA(NULL, exepath, sizeof (exepath));
-	base = Util::dirname(exepath);
+	base = Util::dirName(exepath);
 	pos = base.find("bin");
 	if (pos != std::string::npos)
 		base.erase(pos);
@@ -134,12 +124,13 @@ std::string Util::pathUser(const std::string &append)
 
 		// append default path.
 		oss << "/.config/irccd";
+
+		xdgWipeHandle(&handle);
 	} else {
 		oss << xdgConfigHome(&handle);
 		oss << "/irccd";
 	}
 
-	xdgWipeHandle(&handle);
 #endif
 
 	oss << append;
@@ -157,7 +148,7 @@ std::string Util::pathUser(const std::string &append)
 	const char Util::DIR_SEP = '/';
 #endif
 
-std::string Util::basename(const std::string &path)
+std::string Util::baseName(const std::string &path)
 {
 #if defined(_WIN32) || defined(_MSC_VER)
 	std::string copy = path;
@@ -210,7 +201,7 @@ bool Util::findConfig(const std::string &name, ConfigFinder func)
 	return false;
 }
 
-std::string Util::dirname(const std::string &file)
+std::string Util::dirName(const std::string &file)
 {
 #if defined(_WIN32) || defined(_MSC_VER)
 	std::string copy = file;

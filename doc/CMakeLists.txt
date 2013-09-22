@@ -72,8 +72,8 @@ list(
 	APPEND
 	EXTRA_INSTALL_COMMANDS
 	"
-	  CreateDirectory \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\"
-	  CreateDirectory \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\\Plugins\\\"
+	  CreateDirectory \\\"$SMPROGRAMS\\\\${CPACK_NSIS_PACKAGE_NAME}\\\\Documentation\\\"
+	  CreateDirectory \\\"$SMPROGRAMS\\\\${CPACK_NSIS_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\"
 	"
 )
 
@@ -109,13 +109,13 @@ if (WITH_LDOC)
 		list(
 			APPEND
 			EXTRA_INSTALL_COMMANDS
-			"CreateShortCut \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\\Lua API.lnk\\\" \\\"$INSTDIR\\\\doc\\\\lua\\\\index.html\\\""
+			"CreateShortCut \\\"$SMPROGRAMS\\\\${CPACK_NSIS_PACKAGE_NAME}\\\\Documentation\\\\Lua API.lnk\\\" \\\"$INSTDIR\\\\doc\\\\lua\\\\index.html\\\""
 		)
 
 		list(
 			APPEND
 			EXTRA_UNINSTALL_COMMANDS
-			"Delete \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\\Lua API.lnk\\\""
+			"Delete \\\"$SMPROGRAMS\\\\${CPACK_NSIS_PACKAGE_NAME}\\\\Documentation\\\\Lua API.lnk\\\""
 		)
 	endif ()
 endif ()
@@ -149,13 +149,13 @@ if (WITH_DOC)
 		list(
 			APPEND
 			EXTRA_INSTALL_COMMANDS
-			"CreateShortCut \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\\${smprefix}${name}.lnk\\\" \\\"$INSTDIR\\\\doc\\\\guides\\\\${output}.html\\\""
+			"CreateShortCut \\\"$SMPROGRAMS\\\\${CPACK_NSIS_PACKAGE_NAME}\\\\Documentation\\\\${smprefix}${name}.lnk\\\" \\\"$INSTDIR\\\\doc\\\\guides\\\\${output}.html\\\""
 		)
 
 		list(
 			APPEND
 			EXTRA_UNINSTALL_COMMANDS
-			"Delete \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\\${smprefix}${name}.lnk\\\""
+			"Delete \\\"$SMPROGRAMS\\\\${CPACK_NSIS_PACKAGE_NAME}\\\\Documentation\\\\${smprefix}${name}.lnk\\\""
 		)
 
 		unset(output)
@@ -202,8 +202,8 @@ list(
 	APPEND
 	EXTRA_UNINSTALL_COMMANDS
 	"
-	  RMDir \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\\Plugins\\\"
-	  RMDir \\\"$SMPROGRAMS\\\\Irccd\\\\Documentation\\\"
+	  RMDir \\\"$SMPROGRAMS\\\\${CPACK_NSIS_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\"
+	  RMDir \\\"$SMPROGRAMS\\\\${CPACK_NSIS_PACKAGE_NAME}\\\\Documentation\\\"
 	"
 )
 
