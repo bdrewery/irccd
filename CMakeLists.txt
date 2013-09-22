@@ -29,7 +29,7 @@ set(VERSION "${MAJOR}.${MINOR}.1")
 # General settings
 if (UNIX)
 	set(CMAKE_C_FLAGS "-Wall -Wextra")
-	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11")			# c++11
+	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11")
 endif ()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
