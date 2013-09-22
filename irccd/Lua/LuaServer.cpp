@@ -22,7 +22,6 @@
 
 #include "Irccd.h"
 #include "LuaServer.h"
-#include "Luae.h"
 
 namespace irccd
 {
