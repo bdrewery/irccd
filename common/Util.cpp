@@ -124,12 +124,13 @@ std::string Util::pathUser(const std::string &append)
 
 		// append default path.
 		oss << "/.config/irccd";
+
+		xdgWipeHandle(&handle);
 	} else {
 		oss << xdgConfigHome(&handle);
 		oss << "/irccd";
 	}
 
-	xdgWipeHandle(&handle);
 #endif
 
 	oss << append;
