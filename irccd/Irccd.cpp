@@ -560,7 +560,6 @@ bool Irccd::isOverriden(char c)
 void Irccd::openConfig()
 {
 	Parser config;
-	std::vector<std::string> tried;
 
 	// Set some defaults
 	addPluginPath(Util::configUser() + "plugins");
@@ -571,38 +570,25 @@ void Irccd::openConfig()
 	 */
 #if !defined(_WIN32)
 	addPluginPath(PREFIX "/" MODDIR);
-#else
-
+	// TODO: XXX: WINDOWS
 #endif
 
 	// Open requested file by command line or default
 	if (!isOverriden(Options::Config))
 	{
-		bool found;
-
-		found = Util::findConfig("irccd.conf", [&] (const std::string &path) -> bool {
+		Util::findConfig("irccd.conf", Util::HintAll,
+		    [&] (const std::string &path) -> bool {
 			config = Parser(path);
 
 			// Keep track of loaded files
-			if (!config.open()) {
-				tried.push_back(path);
+			if (!config.open())
 				return false;
-			}
 
 			m_configPath = path;
 
-			return (found = true);
-		});
-
-		if (!found)
-		{
-			Logger::warn("irccd: no configuration could be found, exiting");
-
-			for (auto p : tried)
-				Logger::warn("irccd: tried %s", p.c_str());
-
-			exit(1);
-		}
+			return true;
+		    }
+		);
 	}
 	else
 	{
