@@ -68,13 +68,17 @@ end
 local function onConnectNickServer(server)
 	logger.log("authenticating to NickServ")
 
-	--
-	-- If the username is nil, we need to get it from server
-	--
 	local a = auth[server:getName()]
+	local cmd = "identify "
 
-	local nickname	= a.username or server:getIdentity().nickname
-	local cmd = "identify " .. nickname .. " " .. a.password
+	-- The username is optional
+	if a.username then
+		cmd = cmd .. a.username .. " "
+	end
+
+	cmd = cmd .. a.password
+
+	logger.log("==> " .. cmd)
 
 	server:say("NickServ", cmd)
 
@@ -97,10 +101,6 @@ function onConnect(server)
 			onConnectQuakenet(server)
 		end
 	end
-end
-
-function onNotice(server, who, target, notice)
-	logger.log("NOTICE: " .. notice)
 end
 
 function onReload()
