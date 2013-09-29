@@ -1,0 +1,64 @@
+Plugin badwords 1.0
+===================
+:Author: Demelier David
+:Email: demelier.david@gmail.com
+:Date: June, 8 2013
+:toc:
+:icons:
+:iconsdir: icons
+
+== Introduction
+
+The plugin `badwords` can avoid people saying bad words.
+
+== Installation
+
+The plugin `badwords` is distributed with `irccd`. To enable it add the
+following to your `plugins` parameter:
+
+----
+plugins = "badwords"
+----
+
+== Usage
+
+There is nothing to do, except configuring it.
+
+See link:user-guide.html#irccdplugnote[irccd plugin notes].
+
+== Configuration
+
+You can add words to be processed and an optional message to be sent on
+badwords.
+
+=== Listing words
+
+First, you need a lot of words to be processed. This is done within the
+`answers.txt` file. Just add one bad word per line.
+
+.Example
+----
+Apple
+Microsoft
+Justin Bieber
+----
+
+[NOTE]
+Currently, only ASCII strings are supported, this is due to a use of the Lua
+`string.lower` function.
+
+=== Configuring the plugin
+
+The plugin `badwords` can be configured in the file `badwords.conf`.
+
+The `antiflood.conf` uses link:user-guide.html#irccdsyntax[irccd syntax].
+
+==== Section `general`
+
+This section configure the general parameters. They are completely optional.
+
+.Option `response`
+
+The answer to say to the nickname that said bad words.
+
+// vim: set syntax=asciidoc:

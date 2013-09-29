@@ -1,0 +1,143 @@
+.\"
+.\" Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @MONTH@ @DAY@, @YEAR@
+.Dt IRCCDCTL 1
+.Os
+.Sh NAME
+.Nm irccdctl
+.Nd irccd controller utility
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Nm irccdctl
+.Op Fl v
+.Op Fl c Ar config
+.Ar command
+.Ar parameters
+.Pp
+This is the list of commands supported by
+.Ns Nm
+utility:
+.Pp
+.\" CNOTICE
+.Nm
+.Cm cnotice
+.Ar server
+.Ar channel
+.Ar message
+.\" HELP
+.Nm
+.Cm help
+.Ar subject
+.\" INVITE
+.Nm
+.Cm invite
+.Ar server
+.Ar target
+.Ar channel
+.\" JOIN
+.Nm
+.Cm join
+.Ar server
+.Ar channel
+.Op Ar password
+.\" KICK
+.Nm
+.Cm kick
+.Ar server
+.Ar nickname
+.Ar channel
+.Op Ar reason
+.\" LOAD
+.Nm
+.Cm load
+.Ar name
+.\" ME
+.Nm
+.Cm me
+.Ar server
+.Ar target
+.Ar message
+.\" MESSAGE
+.Nm
+.Cm message
+.Ar server
+.Ar target
+.Ar message
+.\" MODE
+.Nm
+.Cm mode
+.Ar server
+.Ar channel
+.Ar mode
+.\" NICK
+.Nm
+.Cm nick
+.Ar server
+.Ar newnickname
+.\" NOTICE
+.Nm
+.Cm notice
+.Ar server
+.Ar nickname
+.Ar message
+.\" PART
+.Nm
+.Cm part
+.Ar server
+.Ar channel
+.\" RELOAD
+.Nm
+.Cm reload
+.Ar name
+.\" TOPIC
+.Nm
+.Cm topic
+.Ar server
+.Ar channel
+.Ar topic
+.\" UMODE
+.Nm
+.Cm umode
+.Ar server
+.Ar mode
+.\" UNLOAD
+.Nm
+.Cm unload
+.Ar name
+.\" DESCRIPTION
+.Sh DESCRIPTION
+The
+.Nm irccdctl
+utility provides serveral options to manipulate a running
+irccd instance.
+.Pp
+It uses sockets to do a basic IPC messaging with irccd, you can use unix
+or internet domain sockets.
+.Pp
+The following options are available:
+.Bl -tag -width indent
+.It Fl c Ar config
+A path to a config file.
+.It Fl v
+Be more verbose.
+.El
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1 ,
+.Xr irccdctl.conf 5
+.\" AUTHORS
+.Sh AUTHORS
+irccdctl was written by David Demelier <markand@malikania.fr>

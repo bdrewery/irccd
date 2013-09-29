@@ -1,0 +1,223 @@
+/* --------------------------------------------------------
+ * General
+ * -------------------------------------------------------- */
+
+* {
+	font-family: "DejaVu Sans", "Sans", verdana;
+	font-size: 11px;
+	margin: 0;
+}
+
+body {
+	margin-top: 10px;
+}
+
+a {
+	font-weight: bold;
+	color: #214954;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+	color: #38788A;
+}
+
+.kind {
+	margin: 5px 0 5px 0;
+}
+
+/* --------------------------------------------------------
+ * Left navigation menu
+ * -------------------------------------------------------- */
+
+#menu {
+	float: left;
+	width: 16em;
+	background-color: #f0f0f0;
+	padding: 10px 10px 10px 10px;
+	border: 1px solid #cccccc;
+	font-size: 11px;
+	margin: 0 10px 0 10px;
+        color: #2B2B2B;
+}
+
+#menu ul li {
+	list-style-type: none;
+	margin: 2px 0 2px -30px;
+}
+
+
+/* --------------------------------------------------------
+ * Main content
+ * -------------------------------------------------------- */
+
+#content {
+        color: #2B2B2B;
+        margin-left: 22em;
+	margin-right: 10px;
+        font-size: 11px;
+}
+
+#content h2 {
+	border-bottom: 1px solid #cccccc;
+        margin-top: 20px;
+        margin-bottom: 20px;
+}
+
+#content h3 {
+        margin-top: 10px;
+        margin-bottom: 10px;
+}
+
+/* --------------------------------------------------------
+ * Listing
+ * -------------------------------------------------------- */
+
+table.module_list {
+	border-width: 1px;
+	border-style: solid;
+	border-color: #cccccc;
+	border-collapse: collapse;
+}
+
+table.module_list td {
+	border-width: 1px;
+	padding: 3px;
+	border-style: solid;
+	border-color: #cccccc;
+}
+
+table.module_list td.name {
+	background-color: #f0f0f0;
+	min-width: 200px;
+}
+
+table.module_list td.summary {
+	width: 100%;
+}
+
+table.function_list {
+	border-width: 1px;
+	border-style: solid;
+	border-color: #cccccc;
+	border-collapse: collapse;
+}
+
+table.function_list td {
+	border-width: 1px;
+	padding: 3px;
+	border-style: solid;
+	border-color: #cccccc;
+}
+
+table.function_list td.name {
+	background-color: #f0f0f0;
+	min-width: 200px;
+}
+
+table.function_list td.summary {
+	width: 100%;
+}
+
+dl.table dt, dl.function dt {
+	padding-top: 1em;
+}
+
+dl.table dd, dl.function dd {
+	padding-bottom: 1em;
+	margin: 10px 0 0 20px;
+}
+
+dl.table h3, dl.function h3 {
+	font-size: .95em;
+}
+
+/* --------------------------------------------------------
+ * Examples
+ * -------------------------------------------------------- */
+
+pre.example {
+	background-color: rgb(245, 245, 245);
+	border: 1px solid silver;
+	padding: 10px;
+	margin: 10px 0 10px 0;
+	font-family: "Andale Mono", monospace;
+}
+
+pre {
+	background-color: rgb(245, 245, 245);
+	border: 1px solid silver;
+	padding: 10px;
+	margin: 10px 0 10px 0;
+	overflow: auto;
+	font-family: "Andale Mono", monospace;
+}
+
+pre .comment {
+	color: #558817;
+}
+
+pre .constant {
+	color: #a8660d;
+}
+
+pre .escape {
+	color: #844631;
+}
+
+pre .keyword {
+	color: #2239a8;
+	font-weight: bold;
+}
+
+pre .library {
+	color: #0e7c6b;
+}
+
+pre .marker {
+	color: #512b1e;
+	background: #fedc56;
+	font-weight: bold;
+}
+
+pre .string {
+	color: #a8660d;
+}
+
+pre .number {
+	color: #f8660d;
+}
+
+pre .operator {
+	color: #2239a8;
+	font-weight: bold;
+}
+
+pre .preprocessor, pre .prepro {
+	color: #a33243;
+}
+
+pre .global {
+	color: #800080;
+}
+
+pre .prompt {
+	color: #558817;
+}
+
+pre .url {
+	color: #272fc2;
+	text-decoration: underline;
+}
+
+/* --------------------------------------------------------
+ * Footer
+ * -------------------------------------------------------- */
+
+#about {
+	font-size: 0.7em;
+	padding: 5px;
+	background-color: #ffffff;
+	text-align: right;
+}
