@@ -39,7 +39,9 @@
 
 #include <sys/stat.h>
 
+#include "config.h"
 #include "Util.h"
+#include "Logger.h"
 
 namespace irccd
 {
@@ -75,8 +77,8 @@ std::string Util::pathBase(const std::string &append)
 	std::ostringstream oss;
 
 #if defined(_WIN32)
-	char exepath[512];
 	std::string base;
+	char exepath[512];
 	size_t pos;
 
 	/*
@@ -176,29 +178,58 @@ std::string Util::baseName(const std::string &path)
 #endif
 }
 
-bool Util::findConfig(const std::string &name, ConfigFinder func)
+void Util::findConfig(const std::string &name,
+		      Hints hints,
+		      ConfigFinder func)
 {
+	std::vector<std::string> tried;
 	std::ostringstream oss;
 	std::string path;
+	bool done = false;
 
-	// 1. Always user first
-	oss << configUser();
-	oss << name;
-	path = oss.str();
+	// 1. User ~/.config/irccd
+	if (hints & Util::HintUser)
+	{
+		oss << configUser();
+		oss << name;
+		path = oss.str();
 
-	if (func(path))
-		return true;
+		if (!(done = func(path)))
+			tried.push_back(path);
+	}
 
-	// 2. System config
-	oss.str("");
-	oss << configSystem();
-	oss << name;
-	path = oss.str();
+	// 2. Local ./
+	if (!done && (hints & Util::HintLocal))
+	{
+		oss.str("");
+		oss << name;
+		path = oss.str();
 
-	if (func(path))
-		return true;
+		if (!(done = func(path)))
+			tried.push_back(path);
+	}
 
-	return false;
+	// 3. System config
+	if (!done && (hints & Util::HintSystem))
+	{
+		oss.str("");
+		oss << configSystem();
+		oss << name;
+		path = oss.str();
+
+		if (!(done = func(path)))
+			tried.push_back(path);
+	}
+
+	if (!done)
+	{
+		Logger::warn("%s: unable to find %s", getprogname(), name.c_str());
+
+		for (auto p : tried)
+			Logger::warn("%s: have tried %s", getprogname(), p.c_str());
+
+		std::exit(1);
+	}
 }
 
 std::string Util::dirName(const std::string &file)
@@ -282,7 +313,8 @@ void Util::mkdir(const std::string &dir, int mode)
 		if (part.length() <= 0 || exist(part))
 			continue;
 
-		if (_MKDIR(part.c_str(), mode) == -1) {
+		if (_MKDIR(part.c_str(), mode) == -1)
+		{
 			oss << part << ": " << strerror(errno);
 			throw Util::ErrorException(oss.str());
 		}

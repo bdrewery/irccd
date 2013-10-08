@@ -32,6 +32,32 @@ namespace irccd
 
 class Util
 {
+public:
+	class ErrorException : public std::exception
+	{
+	private:
+		std::string m_error;
+
+	public:
+		ErrorException();
+		ErrorException(const std::string &error);
+		~ErrorException() throw();
+
+		virtual const char * what() const throw();
+	};
+
+	enum Hints
+	{
+		HintLocal	= (1 << 0),	//! ./
+		HintSystem	= (1 << 1),	//! $PREFIX/etc/irccd
+		HintUser	= (1 << 2),	//! ~/.config/irccd
+		HintAll		= HintLocal |
+				  HintSystem |
+				  HintUser
+	};
+
+	typedef std::function<bool (const std::string &)> ConfigFinder;
+
 private:
 	/**
 	 * Get the installation prefix or installation directory. Also append
@@ -51,21 +77,6 @@ private:
 	static std::string pathUser(const std::string &path);
 
 public:
-	typedef std::function<bool (const std::string &)> ConfigFinder;
-
-	class ErrorException : public std::exception
-	{
-	private:
-		std::string m_error;
-
-	public:
-		ErrorException();
-		ErrorException(const std::string &error);
-		~ErrorException() throw();
-
-		virtual const char * what() const throw();
-	};
-
 	/**
 	 * Directory separator, / on unix, \ on Windows.
 	 */
@@ -156,18 +167,27 @@ public:
 	static uint64_t getTicks();
 
 	/**
-	 * Get the prefix of installation. This is mostly used on Windows as
-	 * the installer let the user install the software where he wants. Also
-	 * this let the application being distributed just as a simple ZIP file.
+	 * This function will try to open the file specified by name
+	 * prepended by hints paths.
 	 *
 	 * The function called must return true if it has successfully opened the
 	 * file.
 	 *
+	 * This function may exits if no file was found.
+	 *
+	 * The order is (if hints enabled):
+	 *
+	 * 1. HintUser
+	 * 2. HintLocal
+	 * 3. HintSystem
+	 *
 	 * @param name the file name
+	 * @param hints which paths to seek
 	 * @param func the function to call
-	 * @return true if a file has been opened false otherwise
 	 */
-	static bool findConfig(const std::string &name, ConfigFinder func);
+	static void findConfig(const std::string &name,
+			       Hints hints,
+			       ConfigFinder func);
 
 	/**
 	 * Create a directory.
@@ -192,7 +212,9 @@ public:
 	 * @param max max number of split
 	 * @return a list of string splitted
 	 */
-	static std::vector<std::string> split(const std::string &list, const std::string &delimiter, int max = -1);
+	static std::vector<std::string> split(const std::string &list,
+					      const std::string &delimiter,
+					      int max = -1);
 
 	/**
 	 * Sleep for milli seconds.

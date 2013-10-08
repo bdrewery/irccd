@@ -590,7 +590,6 @@ void Irccdctl::readConfig(Parser &config)
 void Irccdctl::openConfig()
 {
 	Parser config;
-	std::vector<std::string> tried;
 
 	/*
 	 * If m_configPath.length() is 0 we have not specified
@@ -600,32 +599,19 @@ void Irccdctl::openConfig()
 	 */
 	if (m_configPath.length() == 0)
 	{
-		bool found;
-
-		found = Util::findConfig("irccdctl.conf", [&] (const std::string &path) -> bool {
+		Util::findConfig("irccdctl.conf", Util::HintAll,
+		    [&] (const std::string &path) -> bool {
 			config = Parser(path);
 
 			// Keep track of loaded files
 			if (!config.open())
-			{
-				tried.push_back(path);
 				return false;
-			}
 
 			m_configPath = path;
 
-			return (found = true);
-		});
-
-		if (!found)
-		{
-			Logger::warn("irccdctl: no configuration could be found, exiting");
-
-			for (auto p : tried)
-				Logger::warn("irccdctl: tried %s", p.c_str());
-
-			exit(1);
-		}
+			return true;
+		    }
+		);
 	}
 	else
 	{
