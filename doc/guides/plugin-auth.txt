@@ -57,8 +57,19 @@ These are the options available for this backend.
 
 .Option `username`
 
-Optional, this option let you use a different username, otherwise it uses
-the current nickname in use.
+Optional, some NickServ services support an optional username for
+authentication. If it's your case, adding this option will send the
+following message to NickServ:
+
+----
+identify username password
+----
+
+Otherwise, the following message is sent:
+
+----
+identify password
+----
 
 .Option `password`
 

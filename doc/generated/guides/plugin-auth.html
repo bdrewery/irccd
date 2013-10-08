@@ -686,8 +686,18 @@ on this parameter.</p></div>
 <div class="sect3">
 <h4 id="_using_backend_nickserv">Using backend "nickserv"</h4>
 <div class="paragraph"><p>These are the options available for this backend.</p></div>
-<div class="paragraph"><div class="title">Option <span class="monospaced">username</span></div><p>Optional, this option let you use a different username, otherwise it uses
-the current nickname in use.</p></div>
+<div class="paragraph"><div class="title">Option <span class="monospaced">username</span></div><p>Optional, some NickServ services supports an optional username for
+authentication. If it&#8217;s your case, adding this option will send the
+following message to NickServ:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>identify username password</pre>
+</div></div>
+<div class="paragraph"><p>Otherwise, the following message is sent:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>identify password</pre>
+</div></div>
 <div class="paragraph"><div class="title">Option <span class="monospaced">password</span></div><p>Required, the password.</p></div>
 </div>
 <div class="sect3">
@@ -715,7 +725,7 @@ http://www.gnu.org/software/src-highlite -->
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-09-17 14:42:32 CEST
+Last updated 2013-09-26 21:17:17 CEST
 </div>
 </div>
 </body>
