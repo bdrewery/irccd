@@ -78,10 +78,7 @@ local function onConnectNickServer(server)
 
 	cmd = cmd .. a.password
 
-	logger.log("==> " .. cmd)
-
 	server:say("NickServ", cmd)
-
 end
 
 local function onConnectQuakenet(server)
