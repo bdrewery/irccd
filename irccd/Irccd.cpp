@@ -40,295 +40,145 @@ namespace irccd
 
 /* {{{ Client handlers */
 
-typedef std::function<bool(Socket &, const std::string &params)> Handler;
-
-static bool handleChannelNotice(Socket &client, const std::string &cmd)
+namespace
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 3);
 
-	if (params.size() != 3)
+/*
+ * This is the function used for socket handler message from clients.
+ */
+typedef std::function<void(const std::vector<std::string> &params)> SocketFunction;
+
+/*
+ * This describe a function to be called. It requires a number of arguments,
+ * how many to split and a function to call.
+ */
+struct ClientHandler
+{
+	int		m_noargs;
+	int		m_nosplit;
+	SocketFunction	m_function;	
+
+	ClientHandler()
 	{
-		std::string error = "CNOTICE needs 3 arguments\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
 	}
 
+	ClientHandler(int noargs, int nosplit, SocketFunction function)
+		: m_noargs(noargs)
+		, m_nosplit(nosplit)
+		, m_function(function)
+	{
+	}
+};
+
+void handleChannelNotice(const std::vector<std::string> &params)
+{
 	Irccd::getInstance()->findServer(params[0])->cnotice(params[1], params[2]);
-
-	return true;
 }
 
-static bool handleInvite(Socket &client, const std::string &cmd)
+void handleInvite(const std::vector<std::string> &params)
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 3);
-
-	if (params.size() != 3)
-	{
-		std::string error = "INVITE needs 3 arguments\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
-	}
-
 	Irccd::getInstance()->findServer(params[0])->invite(params[1], params[2]);
-
-	return true;
 }
 
-static bool handleJoin(Socket &client, const std::string &cmd)
+void handleJoin(const std::vector<std::string> &params)
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 3);
-
-	if (params.size() < 2)
-	{
-		std::string error = "JOIN needs at least 2 arguments\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
-	}
-
 	std::string password = "";
 	if (params.size() == 3)
 		password = params[2];
 
 	Irccd::getInstance()->findServer(params[0])->join(params[1], password);
-
-	return true;
 }
 
-static bool handleKick(Socket &client, const std::string &cmd)
+void handleKick(const std::vector<std::string> &params)
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 4);
-
-	if (params.size() < 3)
-	{
-		std::string error = "KICK needs at least 3 arguments\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
-	}
-
 	std::string reason = "";
 	if (params.size() == 4)
 		reason = params[3];
 
 	Irccd::getInstance()->findServer(params[0])->kick(params[1], params[2], reason);
-
-	return true;
 }
 
-static bool handleLoad(Socket &client, const std::string &cmd)
+void handleLoad(const std::vector<std::string> &params)
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 1);
-
-	if (params.size() != 1)
-	{
-		std::string error = "LOAD needs 1 argument\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
-	}
-
 	Irccd::getInstance()->loadPlugin(params[0]);
-
-	return true;
 }
 
-static bool handleMe(Socket &client, const std::string &cmd)
+void handleMe(const std::vector<std::string> &params)
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 3);
-
-	if (params.size() != 3)
-	{
-		std::string error = "ME needs 3 arguments\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
-	}
-
 	Irccd::getInstance()->findServer(params[0])->me(params[1], params[2]);
-
-	return true;
 }
 
-static bool handleMessage(Socket &client, const std::string &cmd)
+void handleMessage(const std::vector<std::string> &params)
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 3);
-
-	if (params.size() != 3)
-	{
-		std::string error = "MSG needs 3 arguments\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
-	}
-
 	Irccd::getInstance()->findServer(params[0])->say(params[1], params[2]);
-
-	return true;
 }
 
-static bool handleMode(Socket &client, const std::string &cmd)
+void handleMode(const std::vector<std::string> &params)
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 3);
-
-	if (params.size() != 3)
-	{
-		std::string error = "MODE needs 3 arguments\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
-	}
-
 	Irccd::getInstance()->findServer(params[0])->mode(params[1], params[2]);
-
-	return true;
 }
 
-static bool handleNick(Socket &client, const std::string &cmd)
+void handleNick(const std::vector<std::string> &params)
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 2);
-
-	if (params.size() != 2)
-	{
-		std::string error = "NICK needs 2 arguments\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
-	}
-
 	Irccd::getInstance()->findServer(params[0])->nick(params[1]);
-
-	return true;
 }
 
-static bool handleNotice(Socket &client, const std::string &cmd)
+void handleNotice(const std::vector<std::string> &params)
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 3);
-
-	if (params.size() != 3)
-	{
-		std::string error = "NOTICE needs 3 arguments\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
-	}
-
 	Irccd::getInstance()->findServer(params[0])->notice(params[1], params[2]);
-
-	return true;
 }
 
-static bool handlePart(Socket &client, const std::string &cmd)
+void handlePart(const std::vector<std::string> &params)
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 2);
-
-	if (params.size() != 2)
-	{
-		std::string error = "PART needs 2 arguments\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
-	}
-
 	Irccd::getInstance()->findServer(params[0])->part(params[1]);
-
-	return true;
 }
 
-static bool handleReload(Socket &client, const std::string &cmd)
+void handleReload(const std::vector<std::string> &params)
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 1);
-
-	if (params.size() != 1)
-	{
-		std::string error = "RELOAD needs 1 argument\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
-	}
-
 	Irccd::getInstance()->reloadPlugin(params[0]);
-
-	return true;
 }
 
-static bool handleTopic(Socket &client, const std::string &cmd)
+void handleTopic(const std::vector<std::string> &params)
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 3);
-
-	if (params.size() != 3)
-	{
-		std::string error = "TOPIC needs 3 arguments\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
-	}
-
 	Irccd::getInstance()->findServer(params[0])->topic(params[1], params[2]);
-
-	return true;
 }
 
-static bool handleUnload(Socket &client, const std::string &cmd)
+void handleUnload(const std::vector<std::string> &params)
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 1);
-
-	if (params.size() != 1)
-	{
-		std::string error = "UNLOAD needs 1 argument\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
-	}
-
 	Irccd::getInstance()->unloadPlugin(params[0]);
-
-	return true;
 }
 
-static bool handleUserMode(Socket &client, const std::string &cmd)
+void handleUserMode(const std::vector<std::string> &params)
 {
-	std::vector<std::string> params = Util::split(cmd, " \t", 2);
-
-	if (params.size() != 2)
-	{
-		std::string error = "UMODE needs 2 arguments\n";
-		client.send(error.c_str(), error.length());
-
-		return false;
-	}
-
 	Irccd::getInstance()->findServer(params[0])->umode(params[1]);
-
-	return true;
 }
 
-static std::map<std::string, Handler> createHandlers()
+std::map<std::string, ClientHandler> createHandlers()
 {
-	std::map<std::string, Handler> handlers;
+	std::map<std::string, ClientHandler> handlers;
 
-	handlers["CNOTICE"]	= handleChannelNotice;
-	handlers["INVITE"]	= handleInvite;
-	handlers["JOIN"]	= handleJoin;
-	handlers["KICK"]	= handleKick;
-	handlers["LOAD"]	= handleLoad;
-	handlers["ME"]		= handleMe;
-	handlers["MSG"]		= handleMessage;
-	handlers["MODE"]	= handleMode;
-	handlers["NOTICE"]	= handleNotice;
-	handlers["NICK"]	= handleNick;
-	handlers["PART"]	= handlePart;
-	handlers["RELOAD"]	= handleReload;
-	handlers["TOPIC"]	= handleTopic;
-	handlers["UMODE"]	= handleUserMode;
-	handlers["UNLOAD"]	= handleUnload;
+	handlers["CNOTICE"]	= ClientHandler(3, 3, handleChannelNotice);
+	handlers["INVITE"]	= ClientHandler(3, 3, handleInvite);
+	handlers["JOIN"]	= ClientHandler(2, 3, handleJoin);
+	handlers["KICK"]	= ClientHandler(3, 4, handleKick);
+	handlers["LOAD"]	= ClientHandler(1, 1, handleLoad);
+	handlers["ME"]		= ClientHandler(3, 3, handleMe);
+	handlers["MSG"]		= ClientHandler(3, 3, handleMessage);
+	handlers["MODE"]	= ClientHandler(3, 3, handleMode);
+	handlers["NICK"]	= ClientHandler(2, 2, handleNick);
+	handlers["NOTICE"]	= ClientHandler(3, 3, handleNotice);
+	handlers["PART"]	= ClientHandler(2, 2, handlePart);
+	handlers["RELOAD"]	= ClientHandler(1, 1, handleReload);
+	handlers["TOPIC"]	= ClientHandler(3, 3, handleTopic);
+	handlers["UMODE"]	= ClientHandler(2, 2, handleUserMode);
+	handlers["UNLOAD"]	= ClientHandler(1, 1, handleUnload);
 
 	return handlers;
 }
 
-static std::map<std::string, Handler> handlers = createHandlers();
+std::map<std::string, ClientHandler> handlers = createHandlers();
+
+}
 
 /* }}} */
 
@@ -480,15 +330,36 @@ void Irccd::execute(const std::string &cmd,
 			Logger::warn("listener: invalid command %s", cmdName.c_str());
 		else
 		{
+			auto h = handlers[cmdName];
+
 			try
 			{
-				bool correct = handlers[cmdName](s, cmd.substr(cmdDelim + 1));
+				std::string lineArgs = cmd.substr(cmdDelim + 1);
+				std::vector<std::string> params = Util::split(lineArgs, " \t", h.m_nosplit);
 
 				/*
-				 * Send a response "OK\n" to notify irccdctl.
+				 * Check the number of args needed.
 				 */
-				if (correct)
+				if (params.size() < static_cast<size_t>(h.m_noargs))
+				{
+					std::ostringstream oss;
+					std::string error;
+
+					oss << cmdName << " requires at least ";
+					oss << handlers[cmdName].m_noargs << "\n";
+					error = oss.str();
+
+					s.send(error);
+				}
+				else
+				{
+					/*
+					 * Send a response "OK\n" to notify irccdctl.
+					 */
+					h.m_function(params);
 					notifySocket("OK\n", s, addr);
+				}
+
 			}
 			catch (std::out_of_range ex)
 			{
