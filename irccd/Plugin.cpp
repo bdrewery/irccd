@@ -177,35 +177,6 @@ const std::string &Plugin::getHome() const
 	return m_home;
 }
 
-void Plugin::setHome()
-{
-	std::ostringstream oss;	
-	std::string path;
-
-	/*
-	 * If the plugin does not find any home for the plugin we use the
-	 * default prefix or installation execution to keep a "correct" path
-	 * for plugin.getHome() calls.
-	 */
-	oss << Util::configUser() << m_name;
-	path = oss.str();
-
-	if (!Util::hasAccess(path))
-	{
-		oss.str("");
-		oss << Util::configSystem() << "irccd" << Util::DIR_SEP << m_name;
-
-		m_home = oss.str();
-		Logger::warn("plugin %s: home %s not available, using %s",
-		    m_name.c_str(), path.c_str(), m_home.c_str());
-	}
-	else
-	{
-		m_home = path;
-		Logger::log("plugin %s: found home: %s", m_name.c_str(), m_home.c_str());
-	}
-}
-
 LuaState & Plugin::getState()
 {
 	return m_state;
@@ -232,7 +203,7 @@ bool Plugin::open(const std::string &path)
 		Luae::preload(m_state.get(), l.m_name, l.m_func);
 
 	// Find the home directory for the plugin
-	setHome();
+	m_home = Util::findPluginHome(m_name);
 
 	if (luaL_dofile(m_state.get(), path.c_str()) != LUA_OK)
 	{

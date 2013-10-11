@@ -46,19 +46,12 @@ public:
 		virtual const char * what() const throw();
 	};
 
-	enum Hints
-	{
-		HintLocal	= (1 << 0),	//! ./
-		HintSystem	= (1 << 1),	//! $PREFIX/etc/irccd
-		HintUser	= (1 << 2),	//! ~/.config/irccd
-		HintAll		= HintLocal |
-				  HintSystem |
-				  HintUser
-	};
+public:
+	/**
+	 * Directory separator, / on unix, \ on Windows.
+	 */
+	static const char DIR_SEP;
 
-	typedef std::function<bool (const std::string &)> ConfigFinder;
-
-private:
 	/**
 	 * Get the installation prefix or installation directory. Also append
 	 * the path to it.
@@ -66,7 +59,7 @@ private:
 	 * @param path what to append
 	 * @return the final path
 	 */
-	static std::string pathBase(const std::string &path);
+	static std::string pathBase(const std::string &path = "");
 
 	/**
 	 * Get the local path to the user append the path at the end.
@@ -74,13 +67,7 @@ private:
 	 * @param path what to append
 	 * @return the final path
 	 */
-	static std::string pathUser(const std::string &path);
-
-public:
-	/**
-	 * Directory separator, / on unix, \ on Windows.
-	 */
-	static const char DIR_SEP;
+	static std::string pathUser(const std::string &path = "");
 
 	/**
 	 * Get the basename of a file path, that is, remove
@@ -92,49 +79,6 @@ public:
 	static std::string baseName(const std::string &path);
 
 	/**
-	 * Get the system config path, usually /usr/local/etc on Unix
-	 * and the install path for Windows.
-	 *
-	 * @return the path
-	 */
-	static inline std::string configSystem()
-	{
-		return pathBase(ETCDIR) + DIR_SEP;
-	}
-
-	/**
-	 * Get the user config directory, on Unix it will be
-	 * XDG_CONFIG_HOME or ~/.config/home
-	 *
-	 * @return the path
-	 */
-	static inline std::string configUser()
-	{
-		return pathUser("") + DIR_SEP;
-	}
-
-	/**
-	 * Return the plugin system path, usually /usr/local/share/irccd/plugins
-	 * on Unix and the installation path + plugins on Windows.
-	 *
-	 * @return the path
-	 */
-	static inline std::string pluginPathSystem()
-	{
-		return pathBase(MODDIR) + DIR_SEP;
-	}
-
-	/**
-	 * Return the default user plugin path.
-	 *
-	 * @return the path
-	 */
-	static inline std::string pluginPathUser()
-	{
-		return pathUser("/plugins") + DIR_SEP;
-	}
-
-	/**
 	 * Wrapper around dirname(3) for portability. Returns the parent
 	 * directory of the file
 	 *
@@ -144,12 +88,52 @@ public:
 	static std::string dirName(const std::string &file);
 
 	/**
+	 * Find a configuration file, only for irccd.conf or
+	 * irccdctl.conf. Order is:
+	 *
+	 * 1. User's config
+	 * 2. System
+	 *
+	 * Example:
+	 * 	~/.config/irccd || C:\Users\jean\irccd
+	 * 	/usr/local/etc/ || Path\To\Irccd\etc
+	 *
+	 * @param filename the filename to append
+	 * @return the found path
+	 * @throw ErrorException if none found
+	 */
+	static std::string findConfiguration(const std::string &filename);
+
+	/**
+	 * Find the plugin home directory. Order is:
+	 *
+	 * 1. User's config
+	 * 2. System
+	 *
+	 * Example:
+	 * 	~/.config/irccd/<name> || C:\Users\jean\irccd\<name>
+	 * 	/usr/local/etc/irccd/<name> || Path\To\Irccd\etc\irccd\<name>
+	 *
+	 * @param name the plugin name
+	 * @return the found path or system one
+	 */
+	static std::string findPluginHome(const std::string &name);
+
+	/**
 	 * Tell if a specified file or directory exists
 	 *
 	 * @param path the file / directory to check
 	 * @return true on success
 	 */
 	static bool exist(const std::string &path);
+
+	/**
+	 * Tells if the path is absolute.
+	 *
+	 * @param path the path
+	 * @return true if it is
+	 */
+	static bool isAbsolute(const std::string &path);
 
 	/**
 	 * Tells if the user has access to a file.
@@ -173,29 +157,6 @@ public:
 	 * @return the milliseconds
 	 */
 	static uint64_t getTicks();
-
-	/**
-	 * This function will try to open the file specified by name
-	 * prepended by hints paths.
-	 *
-	 * The function called must return true if it has successfully opened the
-	 * file.
-	 *
-	 * This function may exits if no file was found.
-	 *
-	 * The order is (if hints enabled):
-	 *
-	 * 1. HintUser
-	 * 2. HintLocal
-	 * 3. HintSystem
-	 *
-	 * @param name the file name
-	 * @param hints which paths to seek
-	 * @param func the function to call
-	 */
-	static void findConfig(const std::string &name,
-			       Hints hints,
-			       ConfigFinder func);
 
 	/**
 	 * Create a directory.

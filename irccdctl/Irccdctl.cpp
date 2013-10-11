@@ -599,27 +599,22 @@ void Irccdctl::openConfig()
 	 */
 	if (m_configPath.length() == 0)
 	{
-		Util::findConfig("irccdctl.conf", Util::HintAll,
-		    [&] (const std::string &path) -> bool {
-			config = Parser(path);
-
-			// Keep track of loaded files
-			if (!config.open())
-				return false;
-
-			m_configPath = path;
-
-			return true;
-		    }
-		);
+		try
+		{
+			m_configPath = Util::findConfiguration("irccdctl.conf");
+			config = Parser(m_configPath);
+		}
+		catch (Util::ErrorException ex)
+		{
+			Logger::fatal(1, "%s: %s", getprogname(), ex.what());
+		}
 	}
 	else
-	{
 		config = Parser(m_configPath);
 
-		if (!config.open())
-			Logger::fatal(1, "irccdctl: could not open %s, exiting", m_configPath.c_str());
-	}
+
+	if (!config.open())
+		Logger::fatal(1, "irccdctl: could not open %s, exiting", m_configPath.c_str());
 
 	readConfig(config);
 }

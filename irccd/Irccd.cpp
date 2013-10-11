@@ -561,34 +561,24 @@ void Irccd::openConfig()
 {
 	Parser config;
 
-	// Set some defaults
-	addPluginPath(Util::pluginPathUser());
-	addPluginPath(Util::pluginPathSystem());
-
 	// Open requested file by command line or default
 	if (!isOverriden(Options::Config))
 	{
-		Util::findConfig("irccd.conf", Util::HintAll,
-		    [&] (const std::string &path) -> bool {
-			config = Parser(path);
-
-			// Keep track of loaded files
-			if (!config.open())
-				return false;
-
-			m_configPath = path;
-
-			return true;
-		    }
-		);
+		try
+		{
+			m_configPath = Util::findConfiguration("irccd.conf");
+			config = Parser(m_configPath);
+		}
+		catch (Util::ErrorException ex)
+		{
+			Logger::fatal(1, "%s: %s", getprogname(), ex.what());
+		}
 	}
 	else
-	{
 		config = Parser(m_configPath);
 
-		if (!config.open())
-			Logger::fatal(1, "irccd: could not open %s, exiting", m_configPath.c_str());
-	}
+	if (!config.open())
+		Logger::fatal(1, "irccd: could not open %s, exiting", m_configPath.c_str());
 
 #if !defined(_WIN32)
 	if (!m_foreground)
@@ -747,6 +737,20 @@ void Irccd::reloadPlugin(const std::string &name)
 
 void Irccd::openPlugins()
 {
+	std::ostringstream oss;
+
+	// Add user's path
+	oss << Util::pathUser() << "plugins/";
+	addPluginPath(oss.str());
+
+	// Add system's path
+	oss.str("");
+	if (!Util::isAbsolute(MODDIR))
+		oss << Util::pathBase();
+
+	oss << MODDIR << Util::DIR_SEP;
+	addPluginPath(oss.str());
+
 	// Get list of modules to load from config
 	for (const std::string &s : m_pluginWanted)
 		loadPlugin(s);

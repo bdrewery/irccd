@@ -112,26 +112,30 @@ std::string Util::pathUser(const std::string &append)
 
 	if (SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, 0, path) != S_OK)
 		oss << "";
-	else {
+	else
+	{
 		oss << path;
-		oss << "\\irccd";
+		oss << "\\irccd\\";
 	}
 #else
 	xdgHandle handle;
 
-	if ((xdgInitHandle(&handle)) == nullptr) {
+	if ((xdgInitHandle(&handle)) == nullptr)
+	{
 		const char *home = getenv("HOME");
 
 		if (home != nullptr)
 			oss << home;
 
 		// append default path.
-		oss << "/.config/irccd";
+		oss << "/.config/irccd/";
 
 		xdgWipeHandle(&handle);
-	} else {
+	}
+	else
+	{
 		oss << xdgConfigHome(&handle);
-		oss << "/irccd";
+		oss << "/irccd/";
 	}
 
 #endif
@@ -179,58 +183,68 @@ std::string Util::baseName(const std::string &path)
 #endif
 }
 
-void Util::findConfig(const std::string &name,
-		      Hints hints,
-		      ConfigFinder func)
+std::string Util::findConfiguration(const std::string &filename)
 {
-	std::vector<std::string> tried;
 	std::ostringstream oss;
-	std::string path;
-	bool done = false;
+	std::string fpath;
 
-	// 1. User ~/.config/irccd
-	if (hints & Util::HintUser)
-	{
-		oss << configUser();
-		oss << name;
-		path = oss.str();
+	// 1. User first
+	oss << pathUser() << filename;
+	fpath = oss.str();
 
-		if (!(done = func(path)))
-			tried.push_back(path);
-	}
+	Logger::log("%s: checking for %s", getprogname(), fpath.c_str());
+	if (hasAccess(fpath))
+		return fpath;
 
-	// 2. Local ./
-	if (!done && (hints & Util::HintLocal))
-	{
-		oss.str("");
-		oss << name;
-		path = oss.str();
+	// 2. Base + ETCDIR + filename
+	oss.str("");
 
-		if (!(done = func(path)))
-			tried.push_back(path);
-	}
+	if (!isAbsolute(ETCDIR))
+		oss << pathBase();
 
-	// 3. System config
-	if (!done && (hints & Util::HintSystem))
-	{
-		oss.str("");
-		oss << configSystem();
-		oss << name;
-		path = oss.str();
+	oss << ETCDIR << Util::DIR_SEP << filename;
+	fpath = oss.str();
 
-		if (!(done = func(path)))
-			tried.push_back(path);
-	}
+	Logger::log("%s: checking for %s", getprogname(), fpath.c_str());
+	if (hasAccess(fpath))
+		return fpath;
 
-	if (!done)
-	{
-		Logger::warn("%s: unable to find %s", getprogname(), name.c_str());
+	// Failure
+	oss.str("");
+	oss << "could not find configuration file for " << filename;
 
-		for (auto p : tried)
-			Logger::warn("%s: have tried %s", getprogname(), p.c_str());
+	throw ErrorException(oss.str());
+}
 
-		std::exit(1);
-	}
+std::string Util::findPluginHome(const std::string &name)
+{
+	std::ostringstream oss;
+	std::string fpath;
+
+	// 1. User first
+	oss << pathUser() << name;
+	fpath = oss.str();
+
+	if (hasAccess(fpath))
+		return fpath;
+
+	// 2. Base + ETCDIR + "irccd" + name
+	oss.str("");
+
+	if (!isAbsolute(ETCDIR))
+		oss << pathBase();
+
+	oss << ETCDIR << Util::DIR_SEP << "irccd" << Util::DIR_SEP;
+	oss << name;
+	fpath = oss.str();
+
+	/*
+	 * We returns the system path so that plugins can just check
+	 * the error code of opening files and such wich a real path
+	 * and not ""
+	 */
+
+	return fpath;
 }
 
 std::string Util::dirName(const std::string &file)
@@ -266,6 +280,11 @@ bool Util::exist(const std::string &path)
 	struct stat st;
 
 	return (stat(path.c_str(), &st) != -1);
+}
+
+bool Util::isAbsolute(const std::string &path)
+{
+	return path.length() > 0 && path[0] == Util::DIR_SEP;
 }
 
 bool Util::hasAccess(const std::string &path)
