@@ -28,12 +28,17 @@ const char *SocketTimeout::what() const throw()
 	return "Timeout occured";
 }
 
-void SocketListener::add(Socket &s)
+void SocketListener::add(Socket s)
 {
 	m_clients.push_back(s);
 }
 
-void SocketListener::remove(Socket &s)
+long SocketListener::size() const
+{
+	return static_cast<long>(m_clients.size());
+}
+
+void SocketListener::remove(Socket s)
 {
 	m_clients.erase(std::remove(m_clients.begin(), m_clients.end(), s), m_clients.end());
 }
@@ -43,7 +48,7 @@ void SocketListener::clear(void)
 	m_clients.clear();
 }
 
-Socket & SocketListener::select(int s, int us)
+Socket SocketListener::select(int s, int us)
 {
 	fd_set fds;
 	timeval maxwait, *towait;

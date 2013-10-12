@@ -31,6 +31,7 @@
 #include "Lua/LuaParser.h"
 #include "Lua/LuaPlugin.h"
 #include "Lua/LuaServer.h"
+#include "Lua/LuaSocket.h"
 #include "Lua/LuaUtil.h"
 
 namespace irccd
@@ -47,26 +48,29 @@ struct Library
 };
 
 static const Library libLua[] = {
-	{ "_G",			luaopen_base	},
-	{ "io",			luaopen_io	},
-	{ "math",		luaopen_math	},
-	{ "package",		luaopen_package	},
-	{ "string",		luaopen_string	},
-	{ "table",		luaopen_table	},
+	{ "_G",				luaopen_base		},
+	{ "io",				luaopen_io		},
+	{ "math",			luaopen_math		},
+	{ "package",			luaopen_package		},
+	{ "string",			luaopen_string		},
+	{ "table",			luaopen_table		},
 
 	/*
 	 * There is no function for this one, but server object is passed
 	 * through almost every function, so we load it for convenience
 	 */
-	{ "irccd.server",	luaopen_server	},
+	{ "irccd.server",		luaopen_server		},
 };
 
 static const Library libIrccd[] = {
-	{ "irccd",		luaopen_irccd	},
-	{ "irccd.logger",	luaopen_logger	},
-	{ "irccd.parser",	luaopen_parser	},
-	{ "irccd.plugin",	luaopen_plugin	},
-	{ "irccd.util",		luaopen_util	}
+	{ "irccd",			luaopen_irccd		},
+	{ "irccd.logger",		luaopen_logger		},
+	{ "irccd.parser",		luaopen_parser		},
+	{ "irccd.plugin",		luaopen_plugin		},
+	{ "irccd.socket",		luaopen_socket		},
+	{ "irccd.socket.address",	luaopen_socket_address	},
+	{ "irccd.socket.listener",	luaopen_socket_listener	},
+	{ "irccd.util",			luaopen_util		}
 };
 
 /* --------------------------------------------------------

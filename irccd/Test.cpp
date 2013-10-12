@@ -515,6 +515,7 @@ void test(int argc, char **argv)
 	}
 
 	testPlugin(argv[1], argc - 1, argv + 1);
+	std::exit(0);
 }
 
 } // !irccd

@@ -58,6 +58,38 @@ public:
 	static T getField(lua_State *L, int idx, const std::string &name);
 
 	/**
+	 * Require a field from a table.
+	 *
+	 * @param L the Lua state
+	 * @param idx the table index
+	 * @param name the field name
+	 * @return the value or call luaL_error
+	 */
+	template <typename T>
+	static T requireField(lua_State *L, int idx, const std::string &name)
+	{
+		lua_getfield(L, idx, name.c_str());
+
+		if (lua_type(L, -1) == LUA_TNIL)
+			luaL_error(L, "missing field `%s'", name.c_str());
+			// NOT REACHED
+
+		lua_pop(L, 1);
+
+		return getField<T>(L, idx, name);
+	}
+
+	/**
+	 * Check a table field.
+	 *
+	 * @param L the Lua state
+	 * @param idx the table index
+	 * @param name the field name
+	 * @return the type
+	 */
+	static int typeField(lua_State *L, int idx, const std::string &name);
+
+	/**
 	 * Read a table, the function func is called for each element in the
 	 * table. Parameter tkey is the Lua type of the key, parameter tvalue is
 	 * the Lua type of the value. The key is available at index -2 and the
@@ -122,11 +154,10 @@ public:
 	 * @return the converted object
 	 */
 	template <typename T>
-	T toType(lua_State *L, int idx, const char *metaname)
+	static T toType(lua_State *L, int idx, const char *metaname)
 	{
 		return reinterpret_cast<T>(luaL_checkudata(L, idx, metaname));
 	}
-
 };
 
 #if !defined(NDEBUG)

@@ -1024,7 +1024,7 @@ int Irccd::run()
 
 		try
 		{
-			Socket &s = (Socket &)m_listener.select(0);
+			Socket s = m_listener.select(0);
 
 			/*
 			 * For stream based server add a client and wait for its data,

@@ -27,7 +27,7 @@ bool Luae::getField(lua_State *L, int idx, const std::string &name)
 	bool value = false;
 
 	lua_getfield(L, idx, name.c_str());
-	if (lua_type(L, idx) == LUA_TBOOLEAN)
+	if (lua_type(L, -1) == LUA_TBOOLEAN)
 		value = lua_toboolean(L, -1) == 1;
 	lua_pop(L, 1);
 
@@ -40,7 +40,7 @@ double Luae::getField(lua_State *L, int idx, const std::string &name)
 	double value = 0;
 
 	lua_getfield(L, idx, name.c_str());
-	if (lua_type(L, idx) == LUA_TNUMBER)
+	if (lua_type(L, -1) == LUA_TNUMBER)
 		value = lua_tonumber(L, -1);
 	lua_pop(L, 1);
 
@@ -53,7 +53,7 @@ int Luae::getField(lua_State *L, int idx, const std::string &name)
 	int value = 0;
 
 	lua_getfield(L, idx, name.c_str());
-	if (lua_type(L, idx) == LUA_TNUMBER)
+	if (lua_type(L, -1) == LUA_TNUMBER)
 		value = lua_tointeger(L, -1);
 	lua_pop(L, 1);
 
@@ -66,11 +66,26 @@ std::string Luae::getField(lua_State *L, int idx, const std::string &name)
 	std::string value;
 
 	lua_getfield(L, idx, name.c_str());
-	if (lua_type(L, idx) == LUA_TSTRING)
+	if (lua_type(L, -1) == LUA_TSTRING)
 		value = lua_tostring(L, -1);
 	lua_pop(L, 1);
 
 	return value;
+}
+
+int Luae::typeField(lua_State *L, int idx, const std::string &name)
+{
+	int type;
+
+	LUA_STACK_CHECKBEGIN(L);
+
+	lua_getfield(L, idx, name.c_str());
+	type = lua_type(L, -1);
+	lua_pop(L, 1);
+
+	LUA_STACK_CHECKEQUALS(L);
+
+	return type;
 }
 
 void Luae::preload(lua_State *L, const std::string &name, lua_CFunction func)
@@ -148,6 +163,8 @@ void operator delete(void *, lua_State *)
 {
 }
 
-void operator delete(void *, lua_State *, const char *)
+void operator delete(void *, lua_State *L, const char *)
 {
+	lua_pushnil(L);
+	lua_setmetatable(L, -2);
 }

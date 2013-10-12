@@ -1,0 +1,196 @@
+--- Sockets.
+-- This API provides support for low level sockets. It currently
+-- suports AF_INET, AF_INET6 and AF_LOCAL (on Unix only).
+--
+-- @module irccd.socket
+
+--- Socket address family
+-- @class table
+local family = {
+	Inet = 1,		--- AF_INET (IPv4) family.
+	Inet6 = 2,		--- AF_INET6 (IPv6) family.
+	Unix = 3		--- AF_LOCAL (Unix) family, only on Unix.
+}
+
+--- Socket type
+-- @class table
+local type = {
+	Stream,			--- SOCK_STREAM sockets
+	Datagram,		--- SOCK_DGRAM sockets
+}
+
+--- Socket protocol
+-- @class table
+local protocol = {
+	Tcp,			--- IPPROTO_TCP
+	Udp,			--- IPPROTO_UDP
+	IPv4,			--- IPPROTO_IPV4
+	IPv6,			--- IPPROTO_IPv6
+}
+
+--- Create a new socket.
+-- @param family one of the irccd.socket.family
+-- @param type one of the irccd.socket.type
+-- @return the created socket or nil
+-- @return the error message
+function socket.new(family, type)
+end
+
+--- Socket
+-- @type Socket
+
+--- Accept a client.
+-- @return the accepted socket (or nil)
+-- @return the socket information (or nil)
+-- @return the error message if any
+function Socket:accept()
+end
+
+--- Bind to an address.
+-- As a convenience, this function may accept nil plus the error
+-- message for chained expression like:
+--	s:bind(address.unix("/tmp/file.sock"))
+-- @param address the address
+-- @return true on success
+-- @return the error message
+-- @see irccd.socket.address
+function Socket:bind(address)
+end
+
+--- Set the blocking mode.
+-- @param mode the mode
+-- @return true on success
+-- @return the error message
+function Socket:blockMode(mode)
+end
+
+--- Close the sockets.
+-- This function is required when you have finished using the socket,
+-- the __gc metamethod will not close the socket.
+function Socket:close()
+end
+
+--- Connect to an end point.
+-- Like Socket:bind, you can pass nil plus an error message as
+-- parameters.
+-- @param address the address
+-- @return true on success
+-- @return the error message
+-- @see Socket:bind
+-- @see irccd.socket.address
+function Socket:connect(address)
+end
+
+--- Listen to a number of pending connections.
+-- @param count an optional count, default: 64.
+-- @return true on success
+-- @return the error message
+function Socket:listen(count)
+end
+
+--- Receive some data.
+-- Get some data as a stream mode.
+-- @param howmany how much to receive
+-- @return the read string or nil
+-- @return the error message
+function Socket:receive(howmany)
+end
+
+--- Receive some data.
+-- Get some data from a peer, typically UDP.
+-- @param howmany how much to receive
+-- @param from the address from
+-- @return the read string or nil
+-- @return the error message
+-- @see irccd.socket.address
+function Socket:receiveFrom(howmany, from)
+end
+
+--- Send some data.
+-- This function sends data to a stream based socket.
+-- @param data the data
+-- @return the number of bytes sent or nil
+-- @return the error message
+function Socket:send(data)
+end
+
+--- Send some data.
+-- This function sends data to a datagram based socket
+-- @param data the data
+-- @param address where to send
+-- @return the number of bytes sent or nil
+-- @return the error message
+-- @see irccd.socket.address
+function Socket:send(data, address)
+end
+
+--- Set an option.
+-- This function is a wrapper around the setsockopt function. Level and
+-- name are string which may refer to the following:
+-- <br /><br />
+--
+-- Levels available:
+-- <ul>
+-- <li><span class="parameter">socket</span>: the SOL_SOCKET level</li>
+-- <li><span class="parameter">tcp</span>: the IPPROTO_TCP level</li>
+-- <li><span class="parameter">ipv6</span>: the IPPROTO_IPV6 level</li>
+-- </ul>
+-- <br />
+--
+-- The following options belong to <span class="parameter">socket</span>
+-- level:
+--
+-- <ul>
+--
+-- <li>
+-- <span class="parameter">reuse-address</span>: bool, reuse the
+-- address.
+-- </li>
+--
+-- <li>
+-- <span class="parameter">broadcast</span>: bool, sending broadcast
+-- data
+-- </li>
+--
+-- <li>
+-- <span class="parameter">debug</span>: bool, print debug
+-- information
+-- </li>
+--
+-- <li>
+-- <span class="parameter">keep-alive</span>: bool, enable sending
+-- keep alive packets
+-- </li>
+-- </ul>
+--
+-- <br />
+--
+-- The following options belong to <span class="parameter">tcp</span>
+-- level:
+--
+-- <ul>
+--
+-- <li>
+-- <span class="parameter">no-delay</span>: bool, Disables the Nagle
+-- algorithm for send coalescing
+-- </li>
+-- </ul>
+--
+-- <br />
+--
+-- The following options belong to <span class="parameter">ipv6</span>
+-- level:
+--
+-- <ul>
+-- <li>
+-- <span class="parameter">v6only</span>: bool, disable or enable the
+-- IPv6 mode only
+-- </li>
+-- </ul>
+-- @param level the level
+-- @param name the name
+-- @param arg the argument (depend on above)
+-- @return true on success or nil
+-- @return the error message
+function Socket:set(level, name, arg)
+end
