@@ -75,7 +75,7 @@ EnumMap createSockProtocols()
 
 	map["Tcp"]	= IPPROTO_TCP;
 	map["Udp"]	= IPPROTO_UDP;
-	map["IPv4"]	= IPPROTO_IPV4;
+	map["IPv4"]	= IPPROTO_IP;
 	map["IPv6"]	= IPPROTO_IPV6;
 
 	return map;
@@ -317,7 +317,6 @@ int socketNew(lua_State *L)
 	int domain;
 	int type = SOCK_STREAM;
 	int protocol = 0;
-	Socket *s;
 
 	// Domain is the only one mandatory
 	domain = luaL_checkinteger(L, 1);
@@ -329,7 +328,7 @@ int socketNew(lua_State *L)
 
 	try
 	{
-		s = new (L, SOCKET_TYPE) Socket(domain, type, protocol);
+		new (L, SOCKET_TYPE) Socket(domain, type, protocol);
 	}
 	catch (SocketError error)
 	{
