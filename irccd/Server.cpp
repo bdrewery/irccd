@@ -573,42 +573,7 @@ void Server::removeChannel(const std::string &name)
 void Server::startConnection()
 {
 	auto command = [&] () {
-		irc_session_t *s = irc_create_session(&m_callbacks);
-		if (s == nullptr)
-			return;
-
-		const char *password = nullptr;	
-		unsigned major, minor;
 		bool shouldConnect;
-
-		// Copy the unique pointer.
-		m_session = std::unique_ptr<irc_session_t, IrcDeleter>(s);
-		if (m_info.m_password.length() > 0)
-			password = m_info.m_password.c_str();
-
-		irc_set_ctx(m_session.get(), new std::shared_ptr<Server>(shared_from_this()));
-		irc_get_version(&major, &minor);
-
-		/*
-		 * After some discuss with George, SSL has been fixed in older version
-		 * of libircclient. > 1.6 is needed for SSL.
-		 */
-		if (major >= 1 && minor > 6)
-		{
-			// SSL needs to add # front of host
-			if (m_info.m_ssl)
-				m_info.m_host.insert(0, 1, '#');
-
-			if (!m_info.m_sslVerify)
-				irc_option_set(m_session.get(),
-				    LIBIRC_OPTION_SSL_NO_VERIFY);
-		}
-		else
-		{
-			if (m_info.m_ssl)
-				Logger::log("server %s: SSL is only supported with libircclient > 1.6",
-				    m_info.m_name.c_str());
-		}
 
 		/*
 		 * Main thread loop
@@ -616,6 +581,42 @@ void Server::startConnection()
 		shouldConnect = true;
 		while (shouldConnect)
 		{
+			irc_session_t *s = irc_create_session(&m_callbacks);
+			if (s == nullptr)
+				return;
+
+			const char *password = nullptr;	
+			unsigned major, minor;
+
+			// Copy the unique pointer.
+			m_session = std::unique_ptr<irc_session_t, IrcDeleter>(s);
+			if (m_info.m_password.length() > 0)
+				password = m_info.m_password.c_str();
+
+			irc_set_ctx(m_session.get(), new std::shared_ptr<Server>(shared_from_this()));
+			irc_get_version(&major, &minor);
+
+			/*
+			 * After some discuss with George, SSL has been fixed in older version
+			 * of libircclient. > 1.6 is needed for SSL.
+			 */
+			if (major >= 1 && minor > 6)
+			{
+				// SSL needs to add # front of host
+				if (m_info.m_ssl)
+					m_info.m_host.insert(0, 1, '#');
+
+				if (!m_info.m_sslVerify)
+					irc_option_set(m_session.get(),
+					    LIBIRC_OPTION_SSL_NO_VERIFY);
+			}
+			else
+			{
+				if (m_info.m_ssl)
+					Logger::log("server %s: SSL is only supported with libircclient > 1.6",
+					    m_info.m_name.c_str());
+			}
+
 			irc_connect(
 			    m_session.get(),
 			    m_info.m_host.c_str(),
