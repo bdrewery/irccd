@@ -101,9 +101,9 @@ class IrcDeleter
 public:
 	void operator()(irc_session_t *s)
 	{
-		irc_destroy_session(s);
-
 		delete reinterpret_cast<std::shared_ptr<Server> *>(irc_get_ctx(s));
+	
+		irc_destroy_session(s);
 	}
 };
 
