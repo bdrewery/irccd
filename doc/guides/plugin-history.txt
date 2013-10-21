@@ -1,0 +1,88 @@
+Plugin history 1.0
+==================
+:Author: Demelier David
+:Email: demelier.david@gmail.com
+:Date: June, 8 2013
+:toc:
+:icons:
+:iconsdir: icons
+
+== Introduction
+
+The plugin `history` is used to check when someone has been seen for the last
+time on a channel. For that purpose, irccd needs to be on that channel forever
+if possible.
+
+== Installation
+
+The plugin `history` is distributed with `irccd`. To enable it add the following
+to your `plugins` parameter:
+
+----
+plugins = "history"
+----
+
+== Usage
+
+The plugin `history` only reacts to the special command. It understands `seen`
+and `said` sub commands.
+
+The sub command seen tells you when the user has been seen for the last time.
+
+The sub command said tells you what the user has said for the last time.
+
+.Example
+----
+markand: !history seen jean
+irccd: markand, the last time I've seen jean was on 18/01/1989 at 20:55
+markand: !history said jean
+irccd: markand, the last thing that jean said was: hello world
+----
+
+See link:user-guide.html#irccdplugnote[irccd plugin notes].
+
+== Configuration
+
+The plugin `history` can be configured in the file `history.conf`. You can change
+the answers from irccd.
+
+The `history.conf` uses link:user-guide.html#irccdsyntax[irccd syntax].
+
+=== Section `formats`
+
+This section configures the answers that irccd will uses to answers requests.
+
+.Option `error`
+
+When the plugin history could not open the database files, it uses this option
+to respond an error.
+
+.Option `seen`
+
+This option is used for the command `!history seen`.
+
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #U, time]
+
+.Option `said`
+
+This option is used for the command `!history said`.
+
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #m, #U, time]
+
+.Option `unknown`
+
+This option is used when irccd has never seen the requested nickname.
+
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #U]
+
+.Example
+[source, ini]
+----
+[formats]
+error = "An error occured"
+seen = "I've seen #U on #c the %m/%d/%y at %H:%M"
+said = "#U on #c said the %m/%d/%y at %H:%M: #m"
+unknown = "who's #U??"
+----
+
+// vim: set syntax=asciidoc:

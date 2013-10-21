@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+  <title>Irccd Lua API Documentation</title>
+  <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+
+<!-- Menu -->
+<div id="menu">
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2 class="kind">Contents</h2>
+<ul>
+<li><a href="#Requirements">Requirements </a></li>
+<li><a href="#Create_your_plugin">Create your plugin </a></li>
+<li><a href="#Register_the_callback">Register the callback </a></li>
+<li><a href="#Send_the_response">Send the response </a></li>
+</ul>
+
+<h2 class="kind">Topics</h2>
+<ul>
+  <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
+  <li><strong>2-Plugin_creation.md</strong></li>
+  <li><a href="../topics/2.1-Using_irccd_test.md.html">2.1-Using_irccd_test.md</a></li>
+  <li><a href="../topics/2.2-List_of_Events.md.html">2.2-List_of_Events.md</a></li>
+  <li><a href="../topics/3-Event-Action.md.html">3-Event-Action.md</a></li>
+  <li><a href="../topics/3-Event-Channel-notice.md.html">3-Event-Channel-notice.md</a></li>
+  <li><a href="../topics/3-Event-Command.md.html">3-Event-Command.md</a></li>
+  <li><a href="../topics/3-Event-Connect.md.html">3-Event-Connect.md</a></li>
+  <li><a href="../topics/3-Event-Invite.md.html">3-Event-Invite.md</a></li>
+  <li><a href="../topics/3-Event-Join.md.html">3-Event-Join.md</a></li>
+  <li><a href="../topics/3-Event-Kick.md.html">3-Event-Kick.md</a></li>
+  <li><a href="../topics/3-Event-Load.md.html">3-Event-Load.md</a></li>
+  <li><a href="../topics/3-Event-Message.md.html">3-Event-Message.md</a></li>
+  <li><a href="../topics/3-Event-Mode.md.html">3-Event-Mode.md</a></li>
+  <li><a href="../topics/3-Event-Nick.md.html">3-Event-Nick.md</a></li>
+  <li><a href="../topics/3-Event-Notice.md.html">3-Event-Notice.md</a></li>
+  <li><a href="../topics/3-Event-Part.md.html">3-Event-Part.md</a></li>
+  <li><a href="../topics/3-Event-Query.md.html">3-Event-Query.md</a></li>
+  <li><a href="../topics/3-Event-Reload.md.html">3-Event-Reload.md</a></li>
+  <li><a href="../topics/3-Event-Topic.md.html">3-Event-Topic.md</a></li>
+  <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
+  <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
+</ul>
+<h2 class="kind">Modules</h2>
+<ul>
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
+</ul>
+<h2 class="kind">Examples</h2>
+<ul>
+  <li><a href="../examples/Deferred.lua.html">Deferred.lua</a></li>
+  <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
+</ul>
+
+</div><!-- !menu -->
+
+<div id="content">
+
+  <h2>Topic <code>2-Plugin_creation.md</code></h2>
+
+
+<h2>First plugin, a repeater</h2>
+
+<p>Now, we will write a simple plugin that repeat every sentences said on a
+channel, it's quite easy but you should not use it on a real channel or
+you'll probably get kicked.</p>
+
+<p><a name="Requirements"></a></p>
+<h3>Requirements</h3>
+
+<p>First of all, you need to be a little familiar with the Lua
+<a href="http://www.lua.org/manual/5.2/" title="syntax">syntax</a>.</p>
+
+<p>Please also note that we are running Lua <em>5.2</em> and older versions
+are not supported.</p>
+
+<p><a name="Create_your_plugin"></a></p>
+<h3>Create your plugin</h3>
+
+<p>We will create our new plugin under the home user plugin path. If you're running
+on Unix systems it is usually <em>${XDG_CONFIG_HOME}/.irccd/plugins</em>.</p>
+
+<p>So let start by creating a plugin named <strong>repeater.lua</strong>. On my system the
+file will live as <em>/home/markand/.config/irccd/plugins/repeater.lua</em>.</p>
+
+<p><a name="Register_the_callback"></a></p>
+<h3>Register the callback</h3>
+
+<p>Remember, plugins are made through the event driven mechanism, so we must
+define a function that will be called when a user said something on the channel.</p>
+
+<p>The function defined on channel message is called <strong>onMessage</strong>. It has the
+following signature:</p>
+
+
+<pre>
+ <span class="keyword">function</span> onMessage(server, channel, nickname, message)
+</pre>
+
+<p>The parameters are defined as follow:</p>
+
+<ul>
+    <li>server, on which server the message happened</li>
+    <li>channel, on which channel</li>
+    <li>nickname, who emit the message</li>
+    <li>message, and the message content</li>
+</ul>
+
+<p><a name="Send_the_response"></a></p>
+<h3>Send the response</h3>
+
+<p>Now that we have the message, the channel and the server, we can send the
+copy of the message. For this, you must take care of the <strong>server</strong> parameter.</p>
+
+<p>The Server is one of defined in the <em>irccd.conf</em> file, there are several methods
+available for the object, they are defined in the <a href="../modules/irccd.server.html#">irccd.server</a> documentation.</p>
+
+<p><br />
+The one we are interested in is <a href="../modules/irccd.server.html#Server:say">irccd.server.Server:say</a>. This function takes
+two parameters, the target which can be a nickname or a channel, and the
+message.</p>
+
+<p><br />
+So the only thing to do is the following:</p>
+
+
+<pre>
+ <span class="keyword">function</span> onMessage(server, channel, nickname, message)
+     server:say(channel, message)
+ <span class="keyword">end</span>
+</pre>
+
+<p>That's it! You've just made a brand new plugin, of course it's not a very
+powerful one but at least you understood the way it works. With the powerful
+API provided you will be able to create a bunch of plugins that can fits
+your needs, such as a content provider, a moderator, a calculator and
+so on.</p>
+
+<p><br />
+To see all server functions, see <a href="../modules/irccd.server.html#">irccd.server</a>.
+To get a list of all IRC events, see <a href="../topics/2.2-List_of_Events.md.html#">2.2-List_of_Events.md</a></p>
+
+<p><br />
+Previous <a href="../topics/1-Introduction.md.html#">1-Introduction.md</a> | Next <a href="../topics/2.1-Using_irccd_test.md.html#">2.1-Using_irccd_test.md</a></p>
+
+
+<!--- vim: set syntax=mkd: -->
+
+
+
+</div> <!-- id="content" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc</a></i>
+</div> <!-- id="about" -->
+</body>
+</html>
