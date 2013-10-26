@@ -245,7 +245,7 @@ Parameters:
 Unload a loaded plugin.
 
 ----
-RELOAD name\n
+UNLOAD name\n
 ----
 
 Parameters:
