@@ -194,3 +194,5 @@ end
 -- @return the error message
 function Socket:set(level, name, arg)
 end
+
+-- vim: set syntax=lua nu:

@@ -34,3 +34,5 @@ end
 -- @return the error message
 function Listener:select(seconds, microseconds)
 end
+
+-- vim: set syntax=lua nu:
