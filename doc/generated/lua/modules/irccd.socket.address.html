@@ -25,10 +25,10 @@
   <li><a href="../modules/irccd.html">irccd</a></li>
   <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
   <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
-  <li><strong>irccd.plugin</strong></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
   <li><a href="../modules/irccd.server.html">irccd.server</a></li>
   <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
-  <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
+  <li><strong>irccd.socket.address</strong></li>
   <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
   <li><a href="../modules/irccd.util.html">irccd.util</a></li>
 </ul>
@@ -67,23 +67,25 @@
 
 <div id="content">
 
-  <h2>Module <code>irccd.plugin</code></h2>
+  <h2>Module <code>irccd.socket.address</code></h2>
 
-<p>Plugin modules.</p>
-<p> This API provides function for the current plugin. Each plugin runs on its
- own Lua state so every of these functions knows which plugin is currently
- calling one of these</p>
+<p>Address for Sockets.</p>
+<p> This API provides addresses for binding, connecting to sockets.</p>
 
 
 <h2 class="kind"><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#getName">getName&nbsp;()</a></td>
-	<td class="summary">Get the plugin name.</td>
+	<td class="name" nowrap><a href="#unix">unix&nbsp;(path, remove)</a></td>
+	<td class="summary">Create a Unix family address.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#getHome">getHome&nbsp;()</a></td>
-	<td class="summary">Get the plugin home.</td>
+	<td class="name" nowrap><a href="#bindInet">bindInet&nbsp;(params)</a></td>
+	<td class="summary">Bind to a IP address.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#connectInet">connectInet&nbsp;(params)</a></td>
+	<td class="summary">Create an address for connecting.</td>
 	</tr>
 </table>
 
@@ -94,17 +96,27 @@
     <h2 class="kind"><a name="Functions"></a>Functions</h2>
     <dl class="function">
     <dt>
-    <a name = "getName"></a>
-    <strong>getName&nbsp;()</strong>
+    <a name = "unix"></a>
+    <strong>unix&nbsp;(path, remove)</strong>
     </dt>
     <dd>
-    Get the plugin name.
+    Create a Unix family address.
+ This function is not available on Windows.
 
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path</li>
+        <li><span class="parameter">remove</span>
+         set to true to remove the file, default: false</li>
+    </ul>
 
     <h3>Returns:</h3>
     <ol>
-
-        the current plugin name
+        <li>
+        a new SocketAddress or nil</li>
+        <li>
+        the error message</li>
     </ol>
 
 
@@ -112,20 +124,61 @@
 
 </dd>
     <dt>
-    <a name = "getHome"></a>
-    <strong>getHome&nbsp;()</strong>
+    <a name = "bindInet"></a>
+    <strong>bindInet&nbsp;(params)</strong>
     </dt>
     <dd>
-    Get the plugin home.
- Returns the home configuration that lives in the user directory. Usually
- ~/.config/irccd/<strong>plugin</strong> where plugin is the plugin's
- name.
+    Bind to a IP address.
+ The parameters are:
+ <ul>
+ <li>port: required, the port</li>
+ <li>family: required, the family</li>
+ <li>address: optional, "*" for any or the address. Default: "*"</li>
+ </ul>
 
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">params</span>
+         the table of parameters</li>
+    </ul>
 
     <h3>Returns:</h3>
     <ol>
+        <li>
+        a new SocketAddress or nil</li>
+        <li>
+        the error message</li>
+    </ol>
 
-        the plugin home
+
+
+
+</dd>
+    <dt>
+    <a name = "connectInet"></a>
+    <strong>connectInet&nbsp;(params)</strong>
+    </dt>
+    <dd>
+    Create an address for connecting.
+ The parameters are:
+ <ul>
+ <li>port: required, the port</li>
+ <li>family: required, the family</li>
+ <li>host: required, the hostname</li>
+ </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">params</span>
+         the table of parameters</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        a new SocketAddress or nil</li>
+        <li>
+        the error message</li>
     </ol>
 
 

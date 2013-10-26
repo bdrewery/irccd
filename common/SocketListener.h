@@ -38,8 +38,6 @@ public:
 
 class SocketListener
 {
-public:
-
 private:
 	std::vector<Socket> m_clients;
 
@@ -49,14 +47,21 @@ public:
 	 *
 	 * @param s the socket
 	 */
-	void add(Socket &s);
+	void add(Socket s);
+
+	/**
+	 * Get the number of client in the listener.
+	 *
+	 * @return the number
+	 */
+	long size() const;
 
 	/**
 	 * Remove a socket from the list.
 	 *
 	 * @param s the socket
 	 */
-	void remove(Socket &s);
+	void remove(Socket s);
 
 	/**
 	 * Remove every sockets in the listener.
@@ -73,7 +78,7 @@ public:
 	 * @throw SocketError on error
 	 * @throw SocketTimeout on timeout
 	 */
-	Socket &select(int s = 0, int us = 0);
+	Socket select(int s = 0, int us = 0);
 };
 
 } // !irccd

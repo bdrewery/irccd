@@ -1,0 +1,36 @@
+--- Listener object.
+-- Wraps the select() calls in a convenient way.
+--
+-- @module irccd.socket.listener
+
+--- Create a listener.
+-- @return a new listener
+function listener.new()
+end
+
+--- Listener
+-- @type Listener
+
+--- Add a socket to the listener.
+-- @param sock the socket
+function Listener:add(sock)
+end
+
+--- Remove the socket from the listener.
+-- @param sock the socket to remove
+function Listener:remove(sock)
+end
+
+--- Remove all sockets from the listener.
+function Listener:clear()
+end
+
+--- Select a socket ready for input.
+-- If both seconds and microseconds are set to 0 (which is the default),
+-- the listener waits indefinitely.
+-- @param seconds optional seconds, default 0
+-- @param microseconds optional microseconds, default 0
+-- @return the selected socket or nil
+-- @return the error message
+function Listener:select(seconds, microseconds)
+end
