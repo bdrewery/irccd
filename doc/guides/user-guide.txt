@@ -569,6 +569,26 @@ type = "unix"
 path = "/tmp/irccd.sock"
 ----
 
+== Available options
+
+The following options are available:
+
+* `-c`, a path to a config file.
+* `-t domain`, the domain to use, specify internet or unix.
+* `-T type`, the type to use, tcp or udp.
+* `-v`, be more verbose.
+
+The following options are available for -t internet :
+
+* `-4`, use IPv4.
+* `-6`, use IPv4.
+* `-h`, the hostname to connect.
+* `-p`, the port to use.
+
+The following options are available for -t unix :
+
+* `-P path`, the path to the unix socket.
+
 == Available commands
 
 Almost of all these commands takes a server as parameter. It is one defined in

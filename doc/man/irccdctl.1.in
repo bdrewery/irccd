@@ -26,6 +26,20 @@
 .Op Fl c Ar config
 .Ar command
 .Ar parameters
+.\" CLI SPECIFIED INTERNET
+.Nm irccdctl
+.Op Fl v
+.Fl t Ar internet
+.Fl h Ar hostname
+.Fl T Ar type
+.Fl p Ar port
+.Brq Fl 4 | Fl 6 
+.\" CLI SPECIFIED UNIX
+.Nm irccdctl
+.Op Fl v
+.Fl t Ar unix
+.Fl T Ar type
+.Fl P Ar path
 .Pp
 This is the list of commands supported by
 .Ns Nm
@@ -131,13 +145,65 @@ The following options are available:
 .Bl -tag -width indent
 .It Fl c Ar config
 A path to a config file.
+.It Fl t Ar domain
+The domain to use, specify internet or unix.
+.It Fl T Ar type
+The type to use, tcp or udp.
 .It Fl v
 Be more verbose.
+.El
+.\" INTERNET OPTIONS
+.Pp
+The following options are available for
+.Fl t Ar internet :
+.Bl -tag -width indent
+.It Fl 4
+Use IPv4.
+.It Fl 6
+Use IPv6.
+.It Fl h
+The hostname to connect.
+.It Fl p
+The port to use.
+.El
+.\" UNIX OPTIONS
+.Pp
+The following options are available for
+.Fl t Ar unix :
+.Bl -tag -width indent
+.It Fl P Ar path
+The path to the unix socket.
+.El
+.\" EXAMPLES
+.Sh EXAMPLES
+.Bl -tag -width 0n
+.It Sy Example 1 Sending a message
+.Pp
+.Bd -literal -offset 2n
+$ irccdctl message localhost #staff "Hello World"
+.Ed
+.It Sy Example 2 Connect to a Unix socket to join a channel
+.Pp
+.Bd -literal -offset 2n
+$ irccdctl -t unix -T tcp -P /tmp/foo.sock join localhost #foo
+.Ed
+.It Sy Example 3 Connect to an internet IPv6 UDP socket to change nickname
+.Pp
+.Bd -literal -offset 2n
+$ irccdctl -t internet -T udp -h localhost -p 6667 -6 nick localhost mynick
+.Ed
 .El
 .\" SEE ALSO
 .Sh SEE ALSO
 .Xr irccd 1 ,
 .Xr irccdctl.conf 5
+.\" BUGS
+.Sh BUGS
+Be careful when using channel names, some shells (i.e bash) ignore the #
+character. In that case, quote the command like this:
+.Bd -literal -offset 2n
+$ irccdctl join localhost "#bar"
+.Ed
 .\" AUTHORS
 .Sh AUTHORS
 irccdctl was written by David Demelier <markand@malikania.fr>

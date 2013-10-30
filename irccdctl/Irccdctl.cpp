@@ -440,11 +440,14 @@ static std::map<std::string, Handler> handlers = createHandlers();
 
 Irccdctl::Irccdctl()
 	: m_needResponse(true)
-	, m_removeFiles(false)
+	, m_readConfig(true)
 {
 	Socket::init();
-
 	Logger::setVerbose(false);
+
+#if !defined(_WIN32)
+	m_removeFiles = false;
+#endif
 }
 
 Irccdctl::~Irccdctl()
@@ -459,25 +462,25 @@ Irccdctl::~Irccdctl()
 
 #if !defined(_WIN32)
 
-void Irccdctl::connectUnix(const Section &section, int type)
+void Irccdctl::loadUnix(const Section &section)
 {
-	using std::string;
+	m_domain = AF_LOCAL;
+	m_unixPath = section.requireOption<std::string>("path");
+}
 
-	string path;
-
-	path = section.requireOption<string>("path");
-
+void Irccdctl::connectUnix()
+{
 	try
 	{
 		char *p;
 		char dir[FILENAME_MAX] = "/tmp/irccdctl-XXXXXXXXX";
 
-		m_socket = Socket(AF_LOCAL, type, 0);
+		m_socket = Socket(AF_LOCAL, m_type, 0);
 
-		if (type == SOCK_STREAM)
-			m_socket.connect(AddressUnix(path));
+		if (m_type == SOCK_STREAM)
+			m_socket.connect(AddressUnix(m_unixPath));
 		else
-			m_addr = AddressUnix(path);
+			m_addr = AddressUnix(m_unixPath);
 
 		/*
 		 * Unix domain socket needs a temporarly file for getting a
@@ -489,7 +492,7 @@ void Irccdctl::connectUnix(const Section &section, int type)
 		if ((p = mkdtemp(dir)) != NULL)
 		{
 			m_tmpDir = dir;
-			m_tmpPath = string(dir) + string("/response.sock");
+			m_tmpPath = std::string(dir) + std::string("/response.sock");
 
 			m_socket.bind(AddressUnix(m_tmpPath));
 			m_removeFiles = true;
@@ -500,7 +503,8 @@ void Irccdctl::connectUnix(const Section &section, int type)
 	catch (SocketError error)
 	{
 		removeUnixFiles();
-		Logger::fatal(1, "irccdctl: failed to connect to %s: %s", path.c_str(), error.what());
+		Logger::fatal(1, "irccdctl: failed to connect to %s: %s",
+		    m_unixPath.c_str(), error.what());
 	}
 }
 
@@ -515,32 +519,32 @@ void Irccdctl::removeUnixFiles()
 
 #endif
 
-void Irccdctl::connectInet(const Section &section, int type)
+void Irccdctl::loadInet(const Section &section)
 {
-	using std::string;
+	std::string host, inet;
 
-	string host, inet;
-	int port, family = 0;
-
-	host = section.requireOption<string>("host");
-	port = section.requireOption<int>("port");
-	inet = section.requireOption<string>("family");
+	host = section.requireOption<std::string>("host");
+	inet = section.requireOption<std::string>("family");
+	m_port = section.requireOption<int>("port");
 
 	if (inet == "ipv4")
-		family = AF_INET;
+		m_domain = AF_INET;
 	else if (inet == "ipv6")
-		family = AF_INET6;
+		m_domain = AF_INET6;
 	else
 		Logger::fatal(1, "socket: parameter family is one of them: ipv4, ipv6");
+}
 
+void Irccdctl::connectInet()
+{
 	try
 	{
-		m_socket = Socket(family, type, 0);
+		m_socket = Socket(m_domain, m_type, 0);
 
-		if (type == SOCK_STREAM)
-			m_socket.connect(ConnectAddressIP(host, port, family));
+		if (m_type == SOCK_STREAM)
+			m_socket.connect(ConnectAddressIP(m_host, m_port, m_domain));
 		else
-			m_addr = ConnectAddressIP(host, port, family, SOCK_DGRAM);
+			m_addr = ConnectAddressIP(m_host, m_port, m_domain, SOCK_DGRAM);
 	}
 	catch (SocketError error)
 	{
@@ -554,30 +558,30 @@ void Irccdctl::readConfig(Parser &config)
 
 	try
 	{
-		const Section &sectionSocket = config.getSection("socket");
+		const Section &section= config.getSection("socket");
 		string type;
 		string proto;
 
-		type = sectionSocket.requireOption<string>("type");
-		proto = sectionSocket.requireOption<string>("protocol");
+		type = section.requireOption<string>("type");
+		proto = section.requireOption<string>("protocol");
 
 		if (proto != "tcp" && proto != "udp")
-			Logger::fatal(1, "listener: protocol not valid, must be tcp or udp");
+			Logger::fatal(1, "socket: invalid protocol `%s'", proto.c_str());
+
+		m_type = (proto == "tcp") ? SOCK_STREAM : SOCK_DGRAM;
 
 		/*
 		 * Connect to the socket, every of these function may exits if
 		 * they can't connect.
 		 */
 		if (type == "unix")
-		{
 #if !defined(_WIN32)
-			connectUnix(sectionSocket, (proto == "tcp") ? SOCK_STREAM : SOCK_DGRAM);
+			loadUnix(section);
 #else
 			Logger::fatal(1, "socket: unix sockets are not supported on Windows");
 #endif
-		}
 		else if (type == "internet")
-			connectInet(sectionSocket, (proto == "tcp") ? SOCK_STREAM : SOCK_DGRAM);
+			loadInet(section);
 		else
 			Logger::fatal(1, "socket: invalid socket type %s", type.c_str());
 	}
@@ -725,6 +729,29 @@ void Irccdctl::setConfigPath(const std::string &path)
 	m_configPath = path;
 }
 
+void Irccdctl::useInternet(const std::string &host,
+			   int port,
+			   int domain,
+			   int type)
+{
+
+	m_readConfig = false;
+
+	m_domain = domain;
+	m_type = type;
+	m_host = host;
+	m_port = port;
+}
+
+void Irccdctl::useUnix(const std::string &path, int type)
+{
+	m_readConfig = false;
+
+	m_domain = AF_LOCAL;
+	m_type = type;
+	m_unixPath = path;
+}
+
 void Irccdctl::setVerbosity(bool verbose)
 {
 	Logger::setVerbose(verbose);
@@ -739,8 +766,16 @@ int Irccdctl::run(int argc, char **argv)
 		/* NOTREACHED */
 
 	// exceptional, do not open for "help" subject
-	if (strcmp(argv[0], "help") != 0)
+	if (strcmp(argv[0], "help") != 0 && m_readConfig)
 		openConfig();
+
+	// Try to connect
+	if (m_domain == AF_INET || m_domain == AF_INET6)
+		connectInet();
+#if !defined(_WIN32)
+	else if (m_domain == AF_LOCAL)
+		connectUnix();
+#endif
 
 	try
 	{
