@@ -21,6 +21,13 @@
 #include <map>
 #include <utility>
 
+#if !defined(_WIN32)
+#  include <sys/types.h>
+#  include <netinet/in.h>
+#  include <arpa/nameser.h>
+#  include <resolv.h>
+#endif
+
 #include <libirc_rfcnumeric.h>
 
 #include <Logger.h>
@@ -581,6 +588,16 @@ void Server::startConnection()
 		shouldConnect = true;
 		while (shouldConnect)
 		{
+			/*
+			 * This is needed if irccd is started before DHCP or if
+			 * DNS cache is outdated.
+			 *
+			 * For more information see #190
+			 */
+#if !defined(_WIN32)
+			(void)res_init();
+#endif
+
 			irc_session_t *s = irc_create_session(&m_callbacks);
 			if (s == nullptr)
 				return;
