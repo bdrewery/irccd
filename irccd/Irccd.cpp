@@ -538,7 +538,7 @@ void Irccd::loadPlugin(const std::string &name)
 		m_pluginLock.lock();
 		Plugin *p = new Plugin(name);
 
-		m_pluginMap[p->getState().get()] = std::shared_ptr<Plugin>(p);
+		m_pluginMap[p->getState()] = std::shared_ptr<Plugin>(p);
 		m_pluginLock.unlock();
 
 		if (!p->open(finalPath))
@@ -547,7 +547,7 @@ void Irccd::loadPlugin(const std::string &name)
 			    name.c_str(), p->getError().c_str());
 
 			m_pluginLock.lock();
-			m_pluginMap.erase(p->getState().get());
+			m_pluginMap.erase(p->getState());
 			m_pluginLock.unlock();
 		}
 	}
@@ -574,7 +574,7 @@ void Irccd::unloadPlugin(const std::string &name)
 			    name.c_str(), ex.what());
 		}
 
-		m_pluginMap.erase(i->getState().get());
+		m_pluginMap.erase(i->getState());
 	} catch (std::out_of_range) {
 		Logger::warn("irccd: there is no plugin %s loaded", name.c_str());
 	}
@@ -963,6 +963,7 @@ void Irccd::registerPluginThread(std::shared_ptr<Plugin> p,
 	std::lock_guard<std::mutex> glock(m_pluginLock);
 
 	m_pluginMap[newState] = p;
+	m_threadMap[newState] = true;
 }
 
 #endif
@@ -1105,11 +1106,15 @@ void Irccd::handleIrcEvent(const IrcEvent &ev)
 		Logger::warn("plugin %s: %s", ex.which().c_str(), ex.what());
 	}
 
-	/**
-	 * And this is the block of normal events.
-	 */
 	for (auto p : m_pluginMap)
 	{
+		/*
+		 * Ignore Lua threads that share the same Plugin
+		 * object.
+		 */
+		if (m_threadMap.find(p.first) != m_threadMap.end())
+			continue;
+
 		try
 		{
 			callPlugin(p.second, ev);

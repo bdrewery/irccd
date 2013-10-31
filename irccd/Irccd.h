@@ -106,6 +106,11 @@ typedef std::map<SocketAddress, Message> DatagramClients;
   > PluginList;
 
   typedef std::unordered_map<
+	lua_State *,
+	bool
+  > ThreadMap;
+
+  typedef std::unordered_map<
 	std::shared_ptr<Server>,
 	std::vector<DefCall>
   > DefCallList;
@@ -131,7 +136,9 @@ private:
 #if defined(WITH_LUA)
 	std::mutex m_pluginLock;			//! lock to add plugin
 
-	PluginMap m_pluginMap;				//! list of plugins loaded
+	PluginMap m_pluginMap;				//! map of plugins loaded
+	ThreadMap m_threadMap;				//! map of threads
+	
 	DefCallList m_deferred;				//! list of deferred call
 #endif
 

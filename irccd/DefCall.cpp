@@ -23,7 +23,7 @@ namespace irccd
 
 void DefCall::call(int nparams)
 {
-	lua_State *L = m_plugin->getState().get();
+	lua_State *L = m_plugin->getState();
 
 	bool result = lua_pcall(L, nparams, 0, 0) == LUA_OK;
 	luaL_unref(L, LUA_REGISTRYINDEX, m_ref);
@@ -55,7 +55,7 @@ IrcEventType DefCall::type() const
 
 void DefCall::onNames(const std::vector<std::string> &users)
 {
-	lua_State *L = m_plugin->getState().get();
+	lua_State *L = m_plugin->getState();
 
 	lua_rawgeti(L, LUA_REGISTRYINDEX, m_ref);
 	lua_createtable(L, users.size(), users.size());
@@ -71,7 +71,7 @@ void DefCall::onNames(const std::vector<std::string> &users)
 
 void DefCall::onWhois(const std::vector<std::string> &params)
 {
-	lua_State *L = m_plugin->getState().get();
+	lua_State *L = m_plugin->getState();
 
 	lua_rawgeti(L, LUA_REGISTRYINDEX, m_ref);
 	lua_createtable(L, 0, 0);

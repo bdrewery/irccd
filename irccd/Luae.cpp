@@ -21,6 +21,21 @@
 namespace irccd
 {
 
+LuaState::LuaState()
+{
+	m_state = Ptr(luaL_newstate());
+}
+
+LuaState::LuaState(lua_State *L)
+{
+	m_state = Ptr(L);
+}
+
+LuaState::operator lua_State*()
+{
+	return m_state.get();
+}
+
 LuaValue LuaValue::copy(lua_State *L, int index)
 {
 	LuaValue v;

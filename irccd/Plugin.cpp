@@ -29,6 +29,7 @@
 #include "Lua/LuaIrccd.h"
 #include "Lua/LuaLogger.h"
 #include "Lua/LuaParser.h"
+#include "Lua/LuaPipe.h"
 #include "Lua/LuaPlugin.h"
 #include "Lua/LuaServer.h"
 #include "Lua/LuaSocket.h"
@@ -66,6 +67,7 @@ const Plugin::Libraries Plugin::irccdLibs = {
 	{ "irccd.socket.address",	luaopen_socket_address	},
 	{ "irccd.socket.listener",	luaopen_socket_listener	},
 	{ "irccd.thread",		luaopen_thread		},
+	{ "irccd.thread.pipe",		luaopen_thread_pipe	},
 	{ "irccd.util",			luaopen_util		}
 };
 
@@ -101,7 +103,7 @@ void Plugin::call(const std::string &func,
 		  std::shared_ptr<Server> server,
 		  std::vector<std::string> params)
 {
-	lua_State *L = m_state.get();
+	lua_State *L = m_state;
 
 	lua_getglobal(L, func.c_str());
 	if (lua_type(L, -1) != LUA_TFUNCTION)
@@ -164,10 +166,6 @@ Plugin & Plugin::operator=(Plugin &&src)
 	return *this;
 }
 
-Plugin::~Plugin()
-{
-}
-
 const std::string &Plugin::getName() const
 {
 	return m_name;
@@ -194,20 +192,20 @@ bool Plugin::open(const std::string &path)
 
 	// Load default library as it was done by require.
 	for (const Library &l : luaLibs)
-		Luae::require(m_state.get(), l.m_name, l.m_func, true);
+		Luae::require(m_state, l.m_name, l.m_func, true);
 
 	// Put external modules in package.preload so user
 	// will need require (modname)
 	for (const Library &l : irccdLibs)
-		Luae::preload(m_state.get(), l.m_name, l.m_func);
+		Luae::preload(m_state, l.m_name, l.m_func);
 
 	// Find the home directory for the plugin
 	m_home = Util::findPluginHome(m_name);
 
-	if (luaL_dofile(m_state.get(), path.c_str()) != LUA_OK)
+	if (luaL_dofile(m_state, path.c_str()) != LUA_OK)
 	{
-		m_error = lua_tostring(m_state.get(), -1);
-		lua_pop(m_state.get(), 1);
+		m_error = lua_tostring(m_state, -1);
+		lua_pop(m_state, 1);
 
 		return false;
 	}

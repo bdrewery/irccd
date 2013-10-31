@@ -466,7 +466,7 @@ static void testPlugin(const char *file, int argc, char **argv)
 		name = name.erase(epos);
 
 	auto plugin = std::make_shared<Plugin>(name);
-	Irccd::getInstance()->registerPluginThread(plugin, plugin->getState().get());
+	Irccd::getInstance()->registerPluginThread(plugin, plugin->getState());
 
 	if (!plugin->open(file))
 		Logger::warn("Failed to open plugin: %s", plugin->getError().c_str());

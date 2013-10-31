@@ -48,6 +48,8 @@ if (WITH_LUA)
 			Lua/LuaLogger.h
 			Lua/LuaParser.cpp
 			Lua/LuaParser.h
+			Lua/LuaPipe.cpp
+			Lua/LuaPipe.h
 			Lua/LuaPlugin.cpp
 			Lua/LuaPlugin.h
 			Lua/LuaServer.cpp
@@ -62,6 +64,8 @@ if (WITH_LUA)
 			DefCall.h
 			Luae.cpp
 			Luae.h
+			Pipe.cpp
+			Pipe.h
 			Plugin.cpp
 			Plugin.h
 			Test.cpp

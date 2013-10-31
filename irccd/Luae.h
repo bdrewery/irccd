@@ -30,17 +30,42 @@
 namespace irccd
 {
 
-class LuaDeleter
-{
-public:
-	void operator()(lua_State *L)
+/**
+ * @class LuaState
+ * @brief Wrapper for lua_State
+ *
+ * This class automatically create a new Lua state and add implicit
+ * cast operator plus RAII destruction.
+ */
+class LuaState {
+private:
+	struct Deleter
 	{
-		lua_close(L);
-	}
+		void operator()(lua_State *L)
+		{
+			lua_close(L);
+		}
+	};
+
+	using Ptr = std::unique_ptr<lua_State, Deleter>;
+
+	Ptr m_state;
+
+public:
+	LuaState();
+
+	LuaState(lua_State *L);
+
+	operator lua_State*();
 };
 
-typedef std::unique_ptr<lua_State, LuaDeleter> LuaState;
-
+/**
+ * @class LuaValue
+ * @brief A fake variant for Lua values
+ *
+ * This class is primarly used for copying Lua values without checking
+ * the types, useful to pass data.
+ */
 class LuaValue
 {
 private:
@@ -78,10 +103,16 @@ public:
 	LuaValue();
 };
 
+/**
+ * @class Luae
+ * @brief Add lot of convenience for Lua
+ *
+ * This class adds lot of functions for Lua and C++.
+ */
 class Luae
 {
 public:
-	typedef std::function<void(lua_State *L, int tkey, int tvalue)> ReadFunction;
+	using ReadFunction = std::function<void(lua_State *L, int tkey, int tvalue)>;
 
 	/**
 	 * Get a field of a specific type from a table. Specialized for the
@@ -219,14 +250,9 @@ public:
 
 } // !irccd
 
-void * operator new(size_t size, lua_State *L);
+void *operator new(size_t size, lua_State *L);
 
-void * operator new(size_t size, lua_State *L, const char *metaname);
-
-/*
- * Delete operators are just present to avoid some warnings, Lua does garbage
- * collection so these functions just do nothing.
- */
+void *operator new(size_t size, lua_State *L, const char *metaname);
 
 void operator delete(void *ptr, lua_State *L);
 

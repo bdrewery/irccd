@@ -89,9 +89,8 @@ public:
 
 	Plugin(Plugin &&src);
 
-	Plugin & operator=(Plugin &&src);
+	Plugin &operator=(Plugin &&src);
 
-	~Plugin();
 
 	/**
 	 * Get the plugin name.
