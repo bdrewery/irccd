@@ -21,7 +21,8 @@
 
 #include <lua.hpp>
 
-namespace irccd {
+namespace irccd
+{
 
 int luaopen_plugin(lua_State *L);
 

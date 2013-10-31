@@ -28,9 +28,11 @@
 namespace irccd
 {
 
-namespace {
+namespace
+{
 
-struct Buffer {
+struct Buffer
+{
 	std::vector<char>	array;
 	bool			given;
 
@@ -50,7 +52,8 @@ int writer(lua_State *, const char *data, size_t size, Buffer *buffer)
 
 const char *loader(lua_State *, Buffer *buffer, size_t *size)
 {
-	if (buffer->given) {
+	if (buffer->given)
+	{
 		*size = 0;
 		return nullptr;
 	}
@@ -88,7 +91,8 @@ int l_threadNew(lua_State *L)
 	lua_load(newL, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
 
 	np = 0;
-	for (int i = 2; i <= lua_gettop(L); ++i) {
+	for (int i = 2; i <= lua_gettop(L); ++i)
+	{
 		LuaValue v = LuaValue::copy(L, i);
 		LuaValue::push(newL, v);
 		++ np;
@@ -100,7 +104,8 @@ int l_threadNew(lua_State *L)
 	Irccd::getInstance()->registerPluginThread(myself, newL);
 
 	std::thread th = std::thread([&] () {
-		if (lua_pcall(newL, np, 0, 0) != LUA_OK) {
+		if (lua_pcall(newL, np, 0, 0) != LUA_OK)
+		{
 			Logger::warn("plugin %s: %s",
 			    Irccd::getInstance()->findPlugin(L)->getName().c_str(),
 			    lua_tostring(newL, -1));

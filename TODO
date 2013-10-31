@@ -1,7 +1,6 @@
 IRC Client Daemon TODO
 ======================
 
-* Document the new Server:send() method
-* Document, add auth.lua
-* Document ctcp usage
-* Map the thread lua_State so we don't need to call the plugin two times.
+* Document the new Server:send() method,
+* Document ctcp usage,
+* Change argument checking in LuaServer.cpp
