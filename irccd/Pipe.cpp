@@ -73,7 +73,7 @@ bool Pipe::wait(unsigned long ms)
 	if (ms == 0)
 		m_cond.wait(lk);
 	else
-		ret = m_cond.wait_for(lk, std::chrono::milliseconds(ms));
+		ret = m_cond.wait_for(lk, std::chrono::milliseconds(ms)) != std::cv_status::timeout;
 
 	return ret;
 }

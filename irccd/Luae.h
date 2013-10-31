@@ -37,7 +37,8 @@ namespace irccd
  * This class automatically create a new Lua state and add implicit
  * cast operator plus RAII destruction.
  */
-class LuaState {
+class LuaState
+{
 private:
 	struct Deleter
 	{
@@ -52,10 +53,23 @@ private:
 	Ptr m_state;
 
 public:
+	/**
+	 * Default constructor. Create a new state.
+	 */
 	LuaState();
 
+	/**
+	 * Use the already created state.
+	 *
+	 * @param L the state to use
+	 */
 	LuaState(lua_State *L);
 
+	/**
+	 * Implicit cast operator for convenient usage to C Lua API.
+	 *
+	 * @return the state as lua_State *
+	 */
 	operator lua_State*();
 };
 
