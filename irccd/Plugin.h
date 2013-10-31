@@ -54,6 +54,14 @@ public:
 		virtual const char * what() const throw();
 	};
 
+	struct Library
+	{
+		const char *		m_name;		//! name of library to load
+		lua_CFunction		m_func;		//! C function for it
+	};
+
+	using Libraries = std::vector<Library>;
+
 private:
 	// Plugin identity
 	std::string m_name;		//! name like "foo"
@@ -72,6 +80,9 @@ private:
 		  std::vector<std::string> params = std::vector<std::string>());
 
 public:
+	static const Libraries luaLibs;
+	static const Libraries irccdLibs;
+
 	Plugin();
 
 	Plugin(const std::string &name);

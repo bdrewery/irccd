@@ -96,8 +96,19 @@ typedef std::map<Socket, Message> StreamClients;
 typedef std::map<SocketAddress, Message> DatagramClients;
 
 #if defined(WITH_LUA)
-  typedef std::vector<std::shared_ptr<Plugin>> PluginList;
-  typedef std::map<std::shared_ptr<Server>, std::vector<DefCall>> DefCallList;
+  typedef std::unordered_map<
+	lua_State *,
+	std::shared_ptr<Plugin>
+  > PluginMap;
+
+  typedef std::vector<
+	std::shared_ptr<Plugin>
+  > PluginList;
+
+  typedef std::unordered_map<
+	std::shared_ptr<Server>,
+	std::vector<DefCall>
+  > DefCallList;
 #endif
 
 class Irccd
@@ -120,7 +131,7 @@ private:
 #if defined(WITH_LUA)
 	std::mutex m_pluginLock;			//! lock to add plugin
 
-	PluginList m_plugins;				//! list of plugins loaded
+	PluginMap m_pluginMap;				//! list of plugins loaded
 	DefCallList m_deferred;				//! list of deferred call
 #endif
 
@@ -278,13 +289,6 @@ public:
 	std::shared_ptr<Plugin> findPlugin(const std::string &name);
 
 	/**
-	 * Get plugins.
-	 *
-	 * @return a list of plugins
-	 */
-	PluginList & getPlugins();
-
-	/**
 	 * Get the plugin lock, used to load / unload module.
 	 *
 	 * @return the mutex lock
@@ -298,6 +302,16 @@ public:
 	 * @param call the plugin to call
 	 */
 	void addDeferred(std::shared_ptr<Server> server, DefCall call);
+
+	/**
+	 * This function is used to register the plugin name for the
+	 * new state of the given plugin.
+	 *
+	 * @param plugin the existing plugin
+	 * @param newState the new state for the thread function
+	 */
+	void registerPluginThread(std::shared_ptr<Plugin> p,
+				  lua_State *newState);
 #endif
 
 	/**

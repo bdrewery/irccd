@@ -536,10 +536,9 @@ void Irccd::loadPlugin(const std::string &name)
 		 */
 		
 		m_pluginLock.lock();
-
 		Plugin *p = new Plugin(name);
-		m_plugins.push_back(std::shared_ptr<Plugin>(p));		// don't remove that
 
+		m_pluginMap[p->getState().get()] = std::shared_ptr<Plugin>(p);
 		m_pluginLock.unlock();
 
 		if (!p->open(finalPath))
@@ -548,7 +547,7 @@ void Irccd::loadPlugin(const std::string &name)
 			    name.c_str(), p->getError().c_str());
 
 			m_pluginLock.lock();
-			m_plugins.pop_back();
+			m_pluginMap.erase(p->getState().get());
 			m_pluginLock.unlock();
 		}
 	}
@@ -560,20 +559,14 @@ void Irccd::loadPlugin(const std::string &name)
 void Irccd::unloadPlugin(const std::string &name)
 {
 #if defined(WITH_LUA)
-	std::vector<std::shared_ptr<Plugin>>::iterator i;	
-
 	m_pluginLock.lock();
-	i = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (std::shared_ptr<Plugin> &p) -> bool {
-		return p->getName() == name;
-	});
 
-	if (i == m_plugins.end())
-		Logger::warn("irccd: there is no module %s loaded", name.c_str());
-	else
-	{
+	try {
+		auto i = findPlugin(name);
+
 		try
 		{
-			(*i)->onUnload();
+			i->onUnload();
 		}
 		catch (Plugin::ErrorException ex)
 		{
@@ -581,7 +574,9 @@ void Irccd::unloadPlugin(const std::string &name)
 			    name.c_str(), ex.what());
 		}
 
-		m_plugins.erase(i);
+		m_pluginMap.erase(i->getState().get());
+	} catch (std::out_of_range) {
+		Logger::warn("irccd: there is no plugin %s loaded", name.c_str());
 	}
 
 	m_pluginLock.unlock();
@@ -923,30 +918,33 @@ void Irccd::addWantedPlugin(const std::string &name)
 
 std::shared_ptr<Plugin> Irccd::findPlugin(lua_State *state)
 {
-	for (std::shared_ptr<Plugin> p : m_plugins)
-		if (p->getState().get() == state)
-			return p;
+	auto p = m_pluginMap.find(state);
 
-	// This one should not happen
-	throw std::out_of_range("plugin not found");
+	if (p == m_pluginMap.end())
+		throw std::out_of_range("plugin not found");
+
+	return (*p).second;
 }
 
 std::shared_ptr<Plugin> Irccd::findPlugin(const std::string &name)
 {
+	using type = std::pair<lua_State *, std::shared_ptr<Plugin>>;
+
 	std::ostringstream oss;
 
-	for (std::shared_ptr<Plugin> p : m_plugins)
-		if (p->getName() == name)
-			return p;
+	auto i = std::find_if(m_pluginMap.begin(), m_pluginMap.end(),
+	    [&] (type p) -> bool {
+		return p.second->getName() == name;
+	    }
+	);
 
-	oss << "plugin " << name << " not found";
+	if (i == m_pluginMap.end()) {
+		oss << "plugin " << name << " not found";
 
-	throw std::out_of_range(oss.str());
-}
+		throw std::out_of_range(oss.str());
+	}
 
-PluginList &Irccd::getPlugins()
-{
-	return m_plugins;
+	return (*i).second;
 }
 
 std::mutex &Irccd::getPluginLock()
@@ -957,6 +955,14 @@ std::mutex &Irccd::getPluginLock()
 void Irccd::addDeferred(std::shared_ptr<Server> server, DefCall call)
 {
 	m_deferred[server].push_back(call);
+}
+
+void Irccd::registerPluginThread(std::shared_ptr<Plugin> p,
+				 lua_State *newState)
+{
+	std::lock_guard<std::mutex> glock(m_pluginLock);
+
+	m_pluginMap[newState] = p;
 }
 
 #endif
@@ -1102,15 +1108,16 @@ void Irccd::handleIrcEvent(const IrcEvent &ev)
 	/**
 	 * And this is the block of normal events.
 	 */
-	for (std::shared_ptr<Plugin> p : m_plugins)
+	for (auto p : m_pluginMap)
 	{
 		try
 		{
-			callPlugin(p, ev);
+			callPlugin(p.second, ev);
 		}
 		catch (Plugin::ErrorException ex)
 		{
-			Logger::warn("plugin %s: %s", p->getName().c_str(), ex.what());
+			Logger::warn("plugin %s: %s",
+			    p.second->getName().c_str(), ex.what());
 		}
 	}
 #endif

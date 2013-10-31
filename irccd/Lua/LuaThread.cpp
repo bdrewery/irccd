@@ -1,77 +1,121 @@
+/*
+ * LuaThread.cpp -- Lua bindings for threads
+ *
+ * Copyright 2013 David Demelier <markand@malikania.fr>
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
 #include <string>
 #include <thread>
-#include <vector>
 
+#include "Irccd.h"
+#include "Logger.h"
 #include "Luae.h"
 #include "LuaThread.h"
+#include "Plugin.h"
 
 namespace irccd
 {
 
-typedef std::vector<char> Buffer;
+namespace {
 
-class LuaThread
-{
-private:
-	LuaState	m_state;
-	int		m_ref;
+struct Buffer {
+	std::vector<char>	array;
+	bool			given;
 
-	LuaThread()
+	Buffer()
+		: given(false)
 	{
-	}
-
-public:
-	LuaThread(const Buffer &buffer)
-	{
-		m_state = new LuaState(luaL_newstate());
-
-		auto loader = [] (lua_State *L, void *data, size_t *size) -> const char *
-		{
-			Buffer *buffer = static_cast<Buffer *>(data);
-
-			
-		}
 	}
 };
 
-namespace
+int writer(lua_State *, const char *data, size_t size, Buffer *buffer)
 {
+	for (size_t i = 0; i < size; ++i)
+		buffer->array.push_back(data[i]);
 
-int l_new(lua_State *L)
+	return 0;
+}
+
+const char *loader(lua_State *, Buffer *buffer, size_t *size)
 {
-	std::thread thread;
-	std::string name;
-	Buffer buffer;
+	if (buffer->given) {
+		*size = 0;
+		return nullptr;
+	}
 
-	// First argument is the name, then the function to call
-	name = luaL_checkstring(L, 1);
-	luaL_checktype(L, 2, LUA_TFUNCTION);
+	buffer->given = true;
+	*size = buffer->array.size();
+
+	return buffer->array.data();
+}
+
+int l_threadNew(lua_State *L)
+{
+	Buffer chunk;
+	lua_State *newL;
+	int np;
+
+	luaL_checktype(L, 1, LUA_TFUNCTION);
+
+	// Dump the function
+	lua_pushvalue(L, 1);
+	lua_dump(L, reinterpret_cast<lua_Writer>(writer), &chunk);
+	lua_pop(L, 1);
+
+	// Create a new state and load the function in it
+	newL = luaL_newstate();
 
 	/*
-	 * Dump the function chunk as binary data and load it to the
-	 * new state
+	 * Load the same libs as a new Plugin.
 	 */
-	auto dumper = [] (lua_State *, const void *ptr, size_t sz, void *data) -> int {
-		Buffer *array = reinterpret_cast<Buffer *>(data);
+	for (const Plugin::Library &l : Plugin::luaLibs)
+		Luae::require(newL, l.m_name, l.m_func, true);
+	for (const Plugin::Library &l : Plugin::irccdLibs)
+		Luae::preload(newL, l.m_name, l.m_func);
 
-		array->reserve(array->capacity() + sz);
-		for (size_t i = 0; i < sz; ++i)
-		{
-			char c = static_cast<const char *>(ptr)[i];
-			array->push_back(c);
+	lua_load(newL, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
+
+	np = 0;
+	for (int i = 2; i <= lua_gettop(L); ++i) {
+		LuaValue v = LuaValue::copy(L, i);
+		LuaValue::push(newL, v);
+		++ np;
+	}
+
+	// Register it so logger can use the name
+	auto myself = Irccd::getInstance()->findPlugin(L);
+
+	Irccd::getInstance()->registerPluginThread(myself, newL);
+
+	std::thread th = std::thread([&] () {
+		if (lua_pcall(newL, np, 0, 0) != LUA_OK) {
+			Logger::warn("plugin %s: %s",
+			    Irccd::getInstance()->findPlugin(L)->getName().c_str(),
+			    lua_tostring(newL, -1));
+			lua_pop(L, 1);
 		}
+	});
 
-		return 0;
-	};
-
-	lua_dump(L, dumper, &buffer);
+	th.detach();
 
 	return 0;
 }
 
 const luaL_Reg functions[] = {
-	{ "new",			l_new		},
-	{ nullptr,			nullptr		}
+	{ "new",	l_threadNew	},
+	{ nullptr,	nullptr		}
 };
 
 }

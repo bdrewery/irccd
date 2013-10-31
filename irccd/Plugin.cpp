@@ -32,6 +32,7 @@
 #include "Lua/LuaPlugin.h"
 #include "Lua/LuaServer.h"
 #include "Lua/LuaSocket.h"
+#include "Lua/LuaThread.h"
 #include "Lua/LuaUtil.h"
 
 namespace irccd
@@ -41,13 +42,7 @@ namespace irccd
  * list of libraries to load
  * -------------------------------------------------------- */
 
-struct Library
-{
-	const char *		m_name;		//! name of library to load
-	lua_CFunction		m_func;		//! C function for it
-};
-
-static const Library libLua[] = {
+const Plugin::Libraries Plugin::luaLibs = {
 	{ "_G",				luaopen_base		},
 	{ "io",				luaopen_io		},
 	{ "math",			luaopen_math		},
@@ -62,7 +57,7 @@ static const Library libLua[] = {
 	{ "irccd.server",		luaopen_server		},
 };
 
-static const Library libIrccd[] = {
+const Plugin::Libraries Plugin::irccdLibs = {
 	{ "irccd",			luaopen_irccd		},
 	{ "irccd.logger",		luaopen_logger		},
 	{ "irccd.parser",		luaopen_parser		},
@@ -70,6 +65,7 @@ static const Library libIrccd[] = {
 	{ "irccd.socket",		luaopen_socket		},
 	{ "irccd.socket.address",	luaopen_socket_address	},
 	{ "irccd.socket.listener",	luaopen_socket_listener	},
+	{ "irccd.thread",		luaopen_thread		},
 	{ "irccd.util",			luaopen_util		}
 };
 
@@ -147,6 +143,7 @@ Plugin::Plugin()
 Plugin::Plugin(const std::string &name)
 	: m_name(name)
 {
+	m_state = LuaState(luaL_newstate());
 }
 
 Plugin::Plugin(Plugin &&src)
@@ -181,7 +178,7 @@ const std::string &Plugin::getHome() const
 	return m_home;
 }
 
-LuaState & Plugin::getState()
+LuaState &Plugin::getState()
 {
 	return m_state;
 }
@@ -195,15 +192,13 @@ bool Plugin::open(const std::string &path)
 {
 	std::ostringstream oss;
 
-	m_state = LuaState(luaL_newstate());
-
 	// Load default library as it was done by require.
-	for (const Library &l : libLua)
+	for (const Library &l : luaLibs)
 		Luae::require(m_state.get(), l.m_name, l.m_func, true);
 
 	// Put external modules in package.preload so user
 	// will need require (modname)
-	for (const Library &l : libIrccd)
+	for (const Library &l : irccdLibs)
 		Luae::preload(m_state.get(), l.m_name, l.m_func);
 
 	// Find the home directory for the plugin

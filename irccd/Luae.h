@@ -23,6 +23,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <lua.hpp>
 
@@ -39,6 +40,43 @@ public:
 };
 
 typedef std::unique_ptr<lua_State, LuaDeleter> LuaState;
+
+class LuaValue
+{
+private:
+	union
+	{
+		lua_Number	 number;
+		bool		 boolean;
+	};
+
+	int type;
+	std::string str;
+	std::vector<std::pair<LuaValue, LuaValue>> table;
+
+public:
+	/**
+	 * Dump a value at the specific index.
+	 *
+	 * @param L the Lua state
+	 * @param index the value
+	 * @return a tree of values
+	 */
+	static LuaValue copy(lua_State *L, int index);
+
+	/**
+	 * Push a value to a state.
+	 *
+	 * @param L the Lua state
+	 * @param value the value to push
+	 */
+	static void push(lua_State *L, const LuaValue &value);
+
+	/**
+	 * Default constructor (type nil)
+	 */
+	LuaValue();
+};
 
 class Luae
 {
