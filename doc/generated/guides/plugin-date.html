@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="AsciiDoc 8.6.8">
-<title>Irccd 1.0 socket guide</title>
+<title>Plugin date 1.1</title>
 <style type="text/css">
 /*
  * AsciiDoc 'volnitsky' theme for xhtml11 and html5 backends.
@@ -624,10 +624,10 @@ asciidoc.install(2);
 </head>
 <body class="article">
 <div id="header">
-<h1>Irccd 1.0 socket guide</h1>
+<h1>Plugin date 1.1</h1>
 <span id="author">Demelier David</span><br>
 <span id="email" class="monospaced">&lt;<a href="mailto:demelier.david@gmail.com">demelier.david@gmail.com</a>&gt;</span><br>
-<span id="revdate">September, 10 2013</span>
+<span id="revdate">October, 26 2013</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -637,407 +637,36 @@ asciidoc.install(2);
 <div class="sect1">
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>This guide will help you controlling irccd via sockets.</p></div>
-<div class="paragraph"><p>Currently, irccd supports internet and unix sockets, at least one of them must
-be defined to send messages to irccd.</p></div>
-<div class="paragraph"><p>See the user guide to configure listeners.</p></div>
-<div class="sect2">
-<h3 id="_syntax">Syntax</h3>
-<div class="paragraph"><p>Irccd use a simple text protocol.</p></div>
-<div class="paragraph"><p>The syntax of each message is a simple ASCII string that ends with a
-trailing <em>\n</em>.  Optional parameters are enclosed betweens brackets.</p></div>
-</div>
+<div class="paragraph"><p>The plugin <span class="monospaced">date</span> shows the current date with a specified format. The date
+is set from the server.</p></div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_commands">Commands</h2>
+<h2 id="_installation">Installation</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The following commands are available. Please note that a lot of commands
-require a server as the first argument, it&#8217;s one of defined in the
-irccd.conf file in sections [server].</p></div>
-<div class="sect2">
-<h3 id="_cnotice">CNOTICE</h3>
-<div class="paragraph"><p>This command is used to send a message a private notice to a user.</p></div>
+<div class="paragraph"><p>The plugin <span class="monospaced">date</span> is distributed with <span class="monospaced">irccd</span>. To enable it add the following to your
+<span class="monospaced">plugins</span> parameter:</p></div>
 <div class="listingblock">
 <div class="content monospaced">
-<pre>CNOTICE server nickname message\n</pre>
+<pre>plugins = "date"</pre>
 </div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-server         The server.
-</p>
-</li>
-<li>
-<p>
-nickname       The user nickname target.
-</p>
-</li>
-<li>
-<p>
-message        The message.
-</p>
-</li>
-</ul></div>
 </div>
-<div class="sect2">
-<h3 id="_invite">INVITE</h3>
-<div class="paragraph"><p>This command is used to invite someone on a channel, needed for channels
-with mode +i.</p></div>
+</div>
+<div class="sect1">
+<h2 id="_usage">Usage</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The plugin <span class="monospaced">date</span> reacts to special command, you just need to write <span class="monospaced">!date</span> and
+if you want a specific format <span class="monospaced">!date format</span> where <strong>format</strong> is same as the C
+strftime(3) function.</p></div>
 <div class="listingblock">
+<div class="title">Example</div>
 <div class="content monospaced">
-<pre>INVITE server target channel\n</pre>
+<pre>markand: !date
+irccd: markand, 10/26/13 10:56
+markand: !date %H:%M
+irccd: markand, 10:57</pre>
 </div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-server         The server.
-</p>
-</li>
-<li>
-<p>
-target         The target nickname to invite.
-</p>
-</li>
-<li>
-<p>
-channel        The channel name prepended by a <em>#</em>
-</p>
-</li>
-</ul></div>
-</div>
-<div class="sect2">
-<h3 id="_join">JOIN</h3>
-<div class="paragraph"><p>This command is used to join a specific channel. Note that a leading <em>#</em>
-is required in the channel name.</p></div>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>JOIN server channel [password]\n</pre>
-</div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-server         The server.
-</p>
-</li>
-<li>
-<p>
-channel        The channel name prepended by a <em>#</em>
-</p>
-</li>
-<li>
-<p>
-password       An optional password
-</p>
-</li>
-</ul></div>
-</div>
-<div class="sect2">
-<h3 id="_kick">KICK</h3>
-<div class="paragraph"><p>Kick someone from a channel. You obviously need to have +o mode on that
-channel.</p></div>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>KICK server nick channel [reason]\n</pre>
-</div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-server         The server.
-</p>
-</li>
-<li>
-<p>
-nick           The nickname to kick.
-</p>
-</li>
-<li>
-<p>
-channel        The channel prepended by a <em>#</em> to kick from
-</p>
-</li>
-<li>
-<p>
-reason         An optional reason.
-</p>
-</li>
-</ul></div>
-</div>
-<div class="sect2">
-<h3 id="_load">LOAD</h3>
-<div class="paragraph"><p>Load a plugin. This load for all servers.</p></div>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>LOAD name\n</pre>
-</div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-name           The plugin name.
-</p>
-</li>
-</ul></div>
-</div>
-<div class="sect2">
-<h3 id="_me">ME</h3>
-<div class="paragraph"><p>This command is used to send a message to a global channel or to a private as
-CTCP ACTION. Usual IRC clients report that like: "* foo is eating a cake."</p></div>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>ME server target message\n</pre>
-</div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-server         The server.
-</p>
-</li>
-<li>
-<p>
-target         A channel or a private query.
-</p>
-</li>
-<li>
-<p>
-message        The message.
-</p>
-</li>
-</ul></div>
-</div>
-<div class="sect2">
-<h3 id="_mode">MODE</h3>
-<div class="paragraph"><p>This command is used to set a channel mode.</p></div>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>MODE server channel mode\n</pre>
-</div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-server         The server.
-</p>
-</li>
-<li>
-<p>
-channel        The target channel.
-</p>
-</li>
-<li>
-<p>
-mode           The new mode.
-</p>
-</li>
-</ul></div>
-</div>
-<div class="sect2">
-<h3 id="_msg">MSG</h3>
-<div class="paragraph"><p>This command is used to send a message to a global channel or to a private query.</p></div>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>MSG server target message\n</pre>
-</div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-server         The server.
-</p>
-</li>
-<li>
-<p>
-target         A channel or a private query.
-</p>
-</li>
-<li>
-<p>
-message        The message.
-</p>
-</li>
-</ul></div>
-</div>
-<div class="sect2">
-<h3 id="_nick">NICK</h3>
-<div class="paragraph"><p>This commands is used to change the nickname of the irccd client but only
-for a specific server. If you want to change your nick you must do it for
-every server defined in irccd.conf(5).</p></div>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>NICK server nickname\n</pre>
-</div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-server         The server.
-</p>
-</li>
-<li>
-<p>
-nickname       The new nickname.
-</p>
-</li>
-</ul></div>
-</div>
-<div class="sect2">
-<h3 id="_notice">NOTICE</h3>
-<div class="paragraph"><p>This command is used to send a message to a global channel notice.</p></div>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>NOTICE server channel message\n</pre>
-</div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-server         The server.
-</p>
-</li>
-<li>
-<p>
-channel        The channel target.
-</p>
-</li>
-<li>
-<p>
-message        The message.
-</p>
-</li>
-</ul></div>
-</div>
-<div class="sect2">
-<h3 id="_part">PART</h3>
-<div class="paragraph"><p>This command is used to leave a channel from a specific server.</p></div>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>PART server channel\n</pre>
-</div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-server         The server.
-</p>
-</li>
-<li>
-<p>
-channel        The channel to leave.
-</p>
-</li>
-</ul></div>
-</div>
-<div class="sect2">
-<h3 id="_query">QUERY</h3>
-<div class="paragraph"><p>This command to send a private message.</p></div>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>QUERY server target message\n</pre>
-</div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-server         The server.
-</p>
-</li>
-<li>
-<p>
-target         The target nickname.
-</p>
-</li>
-<li>
-<p>
-message        The message.
-</p>
-</li>
-</ul></div>
-</div>
-<div class="sect2">
-<h3 id="_reload">RELOAD</h3>
-<div class="paragraph"><p>Reload a plugin, this will call a specific Lua function.</p></div>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>RELOAD name\n</pre>
-</div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-name           The plugin name.
-</p>
-</li>
-</ul></div>
-</div>
-<div class="sect2">
-<h3 id="_topic">TOPIC</h3>
-<div class="paragraph"><p>This command is used to set a channel topic. Note that you obviously need
-the rights to do that.</p></div>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>TOPIC server channel topic\n</pre>
-</div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-server         The server.
-</p>
-</li>
-<li>
-<p>
-channel        The channel.
-</p>
-</li>
-<li>
-<p>
-topic          The new topic.
-</p>
-</li>
-</ul></div>
-</div>
-<div class="sect2">
-<h3 id="_umode">UMODE</h3>
-<div class="paragraph"><p>This command is used to set your user mode.</p></div>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>UMODE server mode\n</pre>
-</div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-server         The server.
-</p>
-</li>
-<li>
-<p>
-mode           The new mode.
-</p>
-</li>
-</ul></div>
-</div>
-<div class="sect2">
-<h3 id="_unload">UNLOAD</h3>
-<div class="paragraph"><p>Unload a loaded plugin.</p></div>
-<div class="listingblock">
-<div class="content monospaced">
-<pre>UNLOAD name\n</pre>
-</div></div>
-<div class="paragraph"><p>Parameters:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-name           The plugin name.
-</p>
-</li>
-</ul></div>
-</div>
+<div class="paragraph"><p>The default format is <span class="monospaced">%m/%d/%y %H:%M</span>.</p></div>
 </div>
 </div>
 </div>

@@ -29,8 +29,8 @@ endif ()
 option(WITH_MAN "Install man pages" ${USE_MAN})
 
 # Update man pages date
-set(MONTH "September")
-set(DAY 10)
+set(MONTH "October")
+set(DAY 30)
 set(YEAR 2013)
 
 function(define_man file man)
@@ -168,6 +168,7 @@ if (WITH_DOC)
 	define_guide(plugin-ask.txt "Ask" true)				# ask.lua
 	define_guide(plugin-auth.txt "Auth" true)			# auth.lua
 	define_guide(plugin-badwords.txt "Badwords" true)		# badwords.lua
+	define_guide(plugin-date.txt "Date" true)
 	define_guide(plugin-history.txt "History" true)			# history.lua
 	define_guide(plugin-logger.txt "Logger" true)			# logger.lua
 	define_guide(plugin-roulette.txt "Roulette" true)		# roulette.lua

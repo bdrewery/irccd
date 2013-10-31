@@ -3,6 +3,42 @@
 --
 -- @module irccd.util
 
+--- Colors
+-- @class table
+
+local color = {
+	White           = 0,		--- White.
+	Black           = 1,		--- Black.
+	Blue            = 2,		--- Blue.
+	Green           = 3,		--- Green.
+	Red             = 4,		--- Red.
+	Brown           = 5,		--- Brown.
+	Purple          = 6,		--- Purple.
+	Orange          = 7,		--- Orange.
+	Yellow          = 8,		--- Yellow.
+	LightGreen      = 9,		--- LightGreen.
+	Cyan            = 10,		--- Cyan.
+	LightCyan       = 11,		--- LightCyan.
+	LightBlue       = 12,		--- LightBlue.
+	Pink            = 13,		--- Pink.
+	Grey            = 14,		--- Grey.
+	LightGrey       = 15		--- LightGrey.
+}
+
+--- Attributes
+-- @class table
+
+local attribute = {
+	Bold            = '\x02',	--- Bold.
+	Color           = '\x03',	--- Color (start a color sequence).
+	Italic          = '\x09',	--- Italic.
+	StrikeThrough   = '\x13',	--- StrikeThrough.
+	Reset           = '\x0f',	--- Reset (remove all formatting).
+	Underline       = '\x15',	--- Underline1.
+	Underline2      = '\x1f',	--- Underline2.
+	Reverse         = '\x16'	--- Reverse (reverse foreground and background).
+}
+
 --- Get the file name of a full path.
 -- Returns the file name only of a full path. For instance, returns
 -- "foo.lua" when calling with "/usr/local/foo.lua"
@@ -33,6 +69,23 @@ end
 -- @param path the path to check
 -- @return true if exists
 function util.exist(path)
+end
+
+--- Format text with colors and attributes.
+-- The table attrs may have the following fields:
+-- <ul>
+-- <li><strong>fg (int)</strong>: the foreground color</li>
+-- <li><strong>bg (int)</strong>: the background color</li>
+-- <li><strong>attrs (table or int)</strong>: may be a sequence or one attribute</li>
+-- </ul>
+-- <br />
+-- <strong>Note: some attributes are not available on all IRC servers and
+-- colours are based on mIRC, nothing standard.</strong>
+-- @param text the text to format
+-- @param attrs the parameters, see above
+-- @return a string ready to be sent
+-- @see Formatting.lua
+function util.format(text, attrs)
 end
 
 --- Get the home directory.

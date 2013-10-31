@@ -37,3 +37,5 @@ end
 -- @return the error message
 function address.connectInet(params)
 end
+
+-- vim: set syntax=lua nu:

@@ -632,7 +632,7 @@ The new mode.
 .Ss UNLOAD
 Unload a loaded plugin.
 .Bd -literal -offset indent
-RELOAD name\\n
+UNLOAD name\\n
 .Ed
 .Pp
 Parameters:

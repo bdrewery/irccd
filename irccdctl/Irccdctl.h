@@ -35,17 +35,31 @@ private:
 	std::string m_configPath;
 	bool m_needResponse;
 
+	// For specifying socket to connect at command line
+	bool m_readConfig;
+	int m_domain;
+	int m_type;
+
+	// If defined at command line (internet)
+	std::string m_host;
+	int m_port;
+
 #if !defined(_WIN32)
 	bool m_removeFiles;
 	std::string m_tmpDir;
 	std::string m_tmpPath;
 
-	void connectUnix(const Section &section, int type);
+	// If defined at command line (unix)
+	std::string m_unixPath;
+
+	void loadUnix(const Section &section);
+	void connectUnix();
 
 	void removeUnixFiles();
 #endif
 
-	void connectInet(const Section &section, int type);
+	void loadInet(const Section &section);
+	void connectInet();
 
 	void readConfig(Parser &parser);
 	void openConfig();
@@ -61,6 +75,29 @@ public:
 	 * @param path the config file path
 	 */
 	void setConfigPath(const std::string &path);
+
+	/**
+	 * Specify a socket by command line for AF_INET[6].
+	 *
+	 * @param host the hostname
+	 * @param port the port number
+	 * @param domain the domain AF_INET or AF_INET6
+	 * @param type the type SOCK_STREAM or SOCK_DGRAM
+	 */
+	void useInternet(const std::string &host,
+			 int port,
+			 int domain,
+			 int type);
+
+#if !defined(_WIN32)
+	/**
+	 * Specify a socket by command line for Unix.
+	 *
+	 * @param path the path
+	 * @param type the type SOCK_STREAM or SOCK_DGRAM
+	 */
+	void useUnix(const std::string &path, int type);
+#endif
 
 	/**
 	 * Set the verbosity.
