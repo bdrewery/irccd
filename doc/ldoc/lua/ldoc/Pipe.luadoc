@@ -1,0 +1,65 @@
+--- Pipes.
+-- <br />
+-- <strong>Note: Pipes are very experimental and not widely tested yet.</strong>
+-- <br /><br />
+--
+-- This API provides functions to communicate between threads and Lua
+-- plugins.
+--
+-- @module irccd.thread.pipe
+
+--- Get (or create) a new pipe.
+-- @param name the name of the pipe
+-- @return the created pipe
+function pipe.get(name)
+end
+
+--- Pipe
+-- @type Pipe
+
+--- Push some data to the pipe.
+-- This function also signal availability to waiting threads.
+--
+-- <br />
+-- <strong>Note: userdata, function are not supported as parameters.</strong>
+--
+-- @param data the data to pass
+function Pipe:push(data)
+end
+
+--- Get the first value.
+-- @return the first value
+function Pipe:first()
+end
+
+--- Get the last value.
+-- @return the last value
+function Pipe:last()
+end
+
+--- Wait for data.
+-- @param timeout an optional timeout in millisecond, default 0.
+-- @return false if the timeout expired.
+function Pipe:wait(timeout)
+end
+
+--- Get all the data.
+-- The iterator returns one value which may be any type, except
+-- function and userdata.
+--
+-- @return an iterator
+-- @usage
+-- -- Get all data
+-- for v in p:list() do
+--	print(tostring(v))
+-- end
+function Pipe:list()
+end
+
+--- Remove all values from the pipe.
+function Pipe:clear()
+end
+
+--- Remove the first value.
+function Pipe:pop()
+end

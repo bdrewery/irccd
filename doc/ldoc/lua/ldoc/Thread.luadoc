@@ -1,0 +1,22 @@
+--- Threads.
+-- <br />
+-- <strong>Note: Threads are very experimental and not widely tested yet.</strong>
+-- <br /><br />
+--
+-- This API provides functions to create individual threads within
+-- plugins.
+--
+-- @module irccd.thread
+
+--- Create a new thread.
+-- Use the function as the thread function. You can pass any parameter
+-- you like to the thread just after the function itself.
+--
+-- <br />
+-- <strong>Note: userdata, function are not supported as parameters.</strong>
+--
+-- @param func the thread function
+-- @param ... the arguments to pass to the thread function
+function thread.new(func, ...)
+end
+

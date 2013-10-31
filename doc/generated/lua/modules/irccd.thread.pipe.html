@@ -18,7 +18,7 @@
 <h2 class="kind">Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
-<li><a href="#Class_Listener">Class Listener </a></li>
+<li><a href="#Class_Pipe">Class Pipe </a></li>
 </ul>
 
 <h2 class="kind">Modules</h2>
@@ -30,9 +30,9 @@
   <li><a href="../modules/irccd.server.html">irccd.server</a></li>
   <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
   <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
-  <li><strong>irccd.socket.listener</strong></li>
+  <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
   <li><a href="../modules/irccd.thread.html">irccd.thread</a></li>
-  <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
+  <li><strong>irccd.thread.pipe</strong></li>
   <li><a href="../modules/irccd.util.html">irccd.util</a></li>
 </ul>
 <h2 class="kind">Topics</h2>
@@ -71,36 +71,53 @@
 
 <div id="content">
 
-  <h2>Module <code>irccd.socket.listener</code></h2>
+  <h2>Module <code>irccd.thread.pipe</code></h2>
 
-<p>Listener object.</p>
-<p> Wraps the select() calls in a convenient way.</p>
+<p>Pipes.</p>
+<p> <br />
+ <strong>Note: Pipes are very experimental and not widely tested yet.</strong>
+ <br /><br /></p>
+
+<p> This API provides functions to communicate between threads and Lua
+ plugins.</p>
 
 
 <h2 class="kind"><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#new">new&nbsp;()</a></td>
-	<td class="summary">Create a listener.</td>
+	<td class="name" nowrap><a href="#get">get&nbsp;(name)</a></td>
+	<td class="summary">Get (or create) a new pipe.</td>
 	</tr>
 </table>
-<h2 class="kind"><a href="#Class_Listener">Class Listener </a></h2>
+<h2 class="kind"><a href="#Class_Pipe">Class Pipe </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#Listener:add">Listener:add&nbsp;(sock)</a></td>
-	<td class="summary">Add a socket to the listener.</td>
+	<td class="name" nowrap><a href="#Pipe:push">Pipe:push&nbsp;(data)</a></td>
+	<td class="summary">Push some data to the pipe.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Listener:remove">Listener:remove&nbsp;(sock)</a></td>
-	<td class="summary">Remove the socket from the listener.</td>
+	<td class="name" nowrap><a href="#Pipe:first">Pipe:first&nbsp;()</a></td>
+	<td class="summary">Get the first value.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Listener:clear">Listener:clear&nbsp;()</a></td>
-	<td class="summary">Remove all sockets from the listener.</td>
+	<td class="name" nowrap><a href="#Pipe:last">Pipe:last&nbsp;()</a></td>
+	<td class="summary">Get the last value.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Listener:select">Listener:select&nbsp;(seconds, microseconds)</a></td>
-	<td class="summary">Select a socket ready for input.</td>
+	<td class="name" nowrap><a href="#Pipe:wait">Pipe:wait&nbsp;(timeout)</a></td>
+	<td class="summary">Wait for data.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Pipe:list">Pipe:list&nbsp;()</a></td>
+	<td class="summary">Get all the data.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Pipe:clear">Pipe:clear&nbsp;()</a></td>
+	<td class="summary">Remove all values from the pipe.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Pipe:pop">Pipe:pop&nbsp;()</a></td>
+	<td class="summary">Remove the first value.</td>
 	</tr>
 </table>
 
@@ -111,17 +128,22 @@
     <h2 class="kind"><a name="Functions"></a>Functions</h2>
     <dl class="function">
     <dt>
-    <a name = "new"></a>
-    <strong>new&nbsp;()</strong>
+    <a name = "get"></a>
+    <strong>get&nbsp;(name)</strong>
     </dt>
     <dd>
-    Create a listener.
+    Get (or create) a new pipe.
 
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the name of the pipe</li>
+    </ul>
 
     <h3>Returns:</h3>
     <ol>
 
-        a new listener
+        the created pipe
     </ol>
 
 
@@ -129,20 +151,24 @@
 
 </dd>
 </dl>
-    <h2 class="kind"><a name="Class_Listener"></a>Class Listener </h2>
-        Listener
+    <h2 class="kind"><a name="Class_Pipe"></a>Class Pipe </h2>
+        Pipe
     <dl class="function">
     <dt>
-    <a name = "Listener:add"></a>
-    <strong>Listener:add&nbsp;(sock)</strong>
+    <a name = "Pipe:push"></a>
+    <strong>Pipe:push&nbsp;(data)</strong>
     </dt>
     <dd>
-    Add a socket to the listener.
+    Push some data to the pipe.
+ This function also signal availability to waiting threads.</p>
+
+<p> <br />
+ <strong>Note: userdata, function are not supported as parameters.</strong>
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">sock</span>
-         the socket</li>
+        <li><span class="parameter">data</span>
+         the data to pass</li>
     </ul>
 
 
@@ -151,60 +177,113 @@
 
 </dd>
     <dt>
-    <a name = "Listener:remove"></a>
-    <strong>Listener:remove&nbsp;(sock)</strong>
+    <a name = "Pipe:first"></a>
+    <strong>Pipe:first&nbsp;()</strong>
     </dt>
     <dd>
-    Remove the socket from the listener.
+    Get the first value.
 
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">sock</span>
-         the socket to remove</li>
-    </ul>
 
+    <h3>Returns:</h3>
+    <ol>
+
+        the first value
+    </ol>
 
 
 
 
 </dd>
     <dt>
-    <a name = "Listener:clear"></a>
-    <strong>Listener:clear&nbsp;()</strong>
+    <a name = "Pipe:last"></a>
+    <strong>Pipe:last&nbsp;()</strong>
     </dt>
     <dd>
-    Remove all sockets from the listener.
+    Get the last value.
 
 
+    <h3>Returns:</h3>
+    <ol>
+
+        the last value
+    </ol>
 
 
 
 
 </dd>
     <dt>
-    <a name = "Listener:select"></a>
-    <strong>Listener:select&nbsp;(seconds, microseconds)</strong>
+    <a name = "Pipe:wait"></a>
+    <strong>Pipe:wait&nbsp;(timeout)</strong>
     </dt>
     <dd>
-    Select a socket ready for input.
- If both seconds and microseconds are set to 0 (which is the default),
- the listener waits indefinitely.
+    Wait for data.
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">seconds</span>
-         optional seconds, default 0</li>
-        <li><span class="parameter">microseconds</span>
-         optional microseconds, default 0</li>
+        <li><span class="parameter">timeout</span>
+         an optional timeout in millisecond, default 0.</li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
-        <li>
-        the selected socket or nil</li>
-        <li>
-        the error message</li>
+
+        false if the timeout expired.
     </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Pipe:list"></a>
+    <strong>Pipe:list&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get all the data.
+ The iterator returns one value which may be any type, except
+ function and userdata.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">
+ <span class="comment">-- Get all data
+</span> <span class="keyword">for</span> v <span class="keyword">in</span> p:list() <span class="keyword">do</span>
+	<span class="global">print</span>(<span class="global">tostring</span>(v))
+ <span class="keyword">end</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Pipe:clear"></a>
+    <strong>Pipe:clear&nbsp;()</strong>
+    </dt>
+    <dd>
+    Remove all values from the pipe.
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Pipe:pop"></a>
+    <strong>Pipe:pop&nbsp;()</strong>
+    </dt>
+    <dd>
+    Remove the first value.
+
+
 
 
 

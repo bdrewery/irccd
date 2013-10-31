@@ -25,12 +25,12 @@
   <li><a href="../modules/irccd.html">irccd</a></li>
   <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
   <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
-  <li><strong>irccd.plugin</strong></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
   <li><a href="../modules/irccd.server.html">irccd.server</a></li>
   <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
   <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
   <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
-  <li><a href="../modules/irccd.thread.html">irccd.thread</a></li>
+  <li><strong>irccd.thread</strong></li>
   <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
   <li><a href="../modules/irccd.util.html">irccd.util</a></li>
 </ul>
@@ -70,23 +70,22 @@
 
 <div id="content">
 
-  <h2>Module <code>irccd.plugin</code></h2>
+  <h2>Module <code>irccd.thread</code></h2>
 
-<p>Plugin modules.</p>
-<p> This API provides function for the current plugin. Each plugin runs on its
- own Lua state so every of these functions knows which plugin is currently
- calling one of these</p>
+<p>Threads.</p>
+<p> <br />
+ <strong>Note: Threads are very experimental and not widely tested yet.</strong>
+ <br /><br /></p>
+
+<p> This API provides functions to create individual threads within
+ plugins.</p>
 
 
 <h2 class="kind"><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#getName">getName&nbsp;()</a></td>
-	<td class="summary">Get the plugin name.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#getHome">getHome&nbsp;()</a></td>
-	<td class="summary">Get the plugin home.</td>
+	<td class="name" nowrap><a href="#new">new&nbsp;(func, ...)</a></td>
+	<td class="summary">Create a new thread.</td>
 	</tr>
 </table>
 
@@ -97,39 +96,25 @@
     <h2 class="kind"><a name="Functions"></a>Functions</h2>
     <dl class="function">
     <dt>
-    <a name = "getName"></a>
-    <strong>getName&nbsp;()</strong>
+    <a name = "new"></a>
+    <strong>new&nbsp;(func, ...)</strong>
     </dt>
     <dd>
-    Get the plugin name.
+    Create a new thread.
+ Use the function as the thread function. You can pass any parameter
+ you like to the thread just after the function itself.</p>
 
+<p> <br />
+ <strong>Note: userdata, function are not supported as parameters.</strong>
 
-    <h3>Returns:</h3>
-    <ol>
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">func</span>
+         the thread function</li>
+        <li><span class="parameter">...</span>
+         the arguments to pass to the thread function</li>
+    </ul>
 
-        the current plugin name
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "getHome"></a>
-    <strong>getHome&nbsp;()</strong>
-    </dt>
-    <dd>
-    Get the plugin home.
- Returns the home configuration that lives in the user directory. Usually
- ~/.config/irccd/<strong>plugin</strong> where plugin is the plugin's
- name.
-
-
-    <h3>Returns:</h3>
-    <ol>
-
-        the plugin home
-    </ol>
 
 
 
