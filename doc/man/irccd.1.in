@@ -85,6 +85,10 @@ information about all irccd Lua API, see
 .Ss Action
 This event is triggered when someone said a message as a CTCP ACTION, most
 known as /me.
+.Pp
+.Bf -symbolic
+Note: this event is not available yet.
+.Ef
 .Bd -literal -offset indent
 function onMe(server, channel, nickname, message)
 .Ed

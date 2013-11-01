@@ -1,6 +1,10 @@
 IRC Client Daemon CHANGES
 =========================
 
+1.0.2 November 1, 2013
+---------------------------------------
+  * Errata, onMe event is not implemented.
+
 1.0.1 September 17, 2013
 ---------------------------------------
   * Fixed build without Lua,
