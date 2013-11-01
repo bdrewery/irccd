@@ -168,6 +168,7 @@ if (WITH_DOC)
 	define_guide(plugin-ask.txt "Ask" true)				# ask.lua
 	define_guide(plugin-auth.txt "Auth" true)			# auth.lua
 	define_guide(plugin-badwords.txt "Badwords" true)		# badwords.lua
+	define_guide(plugin-date.txt "Date" true)
 	define_guide(plugin-history.txt "History" true)			# history.lua
 	define_guide(plugin-logger.txt "Logger" true)			# logger.lua
 	define_guide(plugin-roulette.txt "Roulette" true)		# roulette.lua
