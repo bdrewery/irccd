@@ -233,6 +233,19 @@ public:
 		       const std::string &message);
 
 	/**
+	 * A Lua function called on CTCP Action.
+	 *
+	 * @param server the server
+	 * @param channel on which channel
+	 * @param who who spoke
+	 * @param message the message sent
+	 */
+	void onMe(std::shared_ptr<Server> server,
+		  const std::string &channel,
+		  const std::string &who,
+		  const std::string &message);
+
+	/**
 	 * A Lua function triggered on a channel mode event.
 	 *
 	 * @param server the server

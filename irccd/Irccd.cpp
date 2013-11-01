@@ -1205,6 +1205,9 @@ void Irccd::callPlugin(std::shared_ptr<Plugin> p, const IrcEvent &ev)
 				    ev.m_params[2]);
 	}
 		break;
+	case IrcEventType::Me:
+		p->onMe(ev.m_server, ev.m_params[1], ev.m_params[0], ev.m_params[2]);
+		break;
 	case IrcEventType::Mode:
 		p->onMode(ev.m_server, ev.m_params[0], ev.m_params[1],
 			 ev.m_params[2], ev.m_params[3]);

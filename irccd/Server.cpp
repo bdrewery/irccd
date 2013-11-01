@@ -92,24 +92,22 @@ static void handleConnect(irc_session_t *s,
 	server->resetRetries();
 }
 
-static void handleCtcpRequest(irc_session_t *s,
+static void handleCtcpAction(irc_session_t *s,
 			      const char *,
 			      const char *orig,
 			      const char **params,
 			      unsigned int)
 {
 	std::shared_ptr<Server> server = Server::toServer(s);
-	std::string target = orig;
-	std::ostringstream oss;
+	IrcEventParams evparams;
 
-	if (params[0] != nullptr && strcmp(params[0], "VERSION") == 0)
-	{
-		oss << "VERSION ";
-		oss << server->getIdentity().m_ctcpVersion;
+	evparams.push_back(orig);
+	evparams.push_back(params[0]);
+	evparams.push_back(params[1]);
 
-		if (server->getIdentity().m_ctcpReply)
-			irc_cmd_ctcp_reply(s, orig, oss.str().c_str());
-	}
+	Irccd::getInstance()->handleIrcEvent(
+	    IrcEvent(IrcEventType::Me, evparams, server)
+	);
 }
 
 static void handleInvite(irc_session_t *s,
@@ -442,7 +440,7 @@ void Server::init()
 	m_callbacks.event_channel		= handleChannel;
 	m_callbacks.event_channel_notice	= handleChannelNotice;
 	m_callbacks.event_connect		= handleConnect;
-	m_callbacks.event_ctcp_req		= handleCtcpRequest;
+	m_callbacks.event_ctcp_action		= handleCtcpAction;
 	m_callbacks.event_invite		= handleInvite;
 	m_callbacks.event_join			= handleJoin;
 	m_callbacks.event_kick			= handleKick;

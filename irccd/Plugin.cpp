@@ -317,6 +317,21 @@ void Plugin::onMessage(std::shared_ptr<Server> server,
 	call("onMessage", server, params);
 }
 
+void Plugin::onMe(std::shared_ptr<Server> server,
+		  const std::string &channel,
+		  const std::string &who,
+		  const std::string &message)
+
+{
+	std::vector<std::string> params;
+
+	params.push_back(channel);
+	params.push_back(who);
+	params.push_back(message);
+
+	call("onMe", server, params);
+}
+
 void Plugin::onMode(std::shared_ptr<Server> server,
 		    const std::string &channel,
 		    const std::string &who,

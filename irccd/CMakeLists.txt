@@ -93,11 +93,17 @@ if (WITH_LUA)
 
 endif ()
 
-find_package(Libircclient REQUIRED)
+#
+# Compile libircclient as internal
+#
+add_subdirectory(
+	"${CMAKE_SOURCE_DIR}/extern/libircclient"
+	"${CMAKE_BINARY_DIR}/libircclient"
+)
 
 include_directories(
-	${LIBIRCCLIENT_INCLUDE_DIR}
 	${INCLUDES}
+	"${CMAKE_SOURCE_DIR}/extern/libircclient/include"
 )
 
 add_executable(irccd ${SOURCES})
@@ -109,7 +115,7 @@ endif ()
 target_link_libraries(
 	irccd
 	common
-	${LIBIRCCLIENT_LIBRARIES}
+	ircclient
 	${LIBRARIES}
 )
 
