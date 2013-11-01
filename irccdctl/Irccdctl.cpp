@@ -725,7 +725,6 @@ void Irccdctl::useInternet(const std::string &host,
 			   int domain,
 			   int type)
 {
-
 	m_readConfig = false;
 
 	m_domain = domain;
@@ -733,6 +732,8 @@ void Irccdctl::useInternet(const std::string &host,
 	m_host = host;
 	m_port = port;
 }
+
+#if !defined(_WIN32)
 
 void Irccdctl::useUnix(const std::string &path, int type)
 {
@@ -742,6 +743,8 @@ void Irccdctl::useUnix(const std::string &path, int type)
 	m_type = type;
 	m_unixPath = path;
 }
+
+#endif
 
 void Irccdctl::setVerbosity(bool verbose)
 {
