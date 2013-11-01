@@ -18,8 +18,8 @@
 
 #include <cstring>
 #include <functional>
-#include <map>
 #include <sstream>
+#include <unordered_map>
 #include <stdexcept>
 
 #include <Logger.h>
@@ -33,11 +33,14 @@
 namespace irccd
 {
 
+namespace
+{
+
 /* {{{ help messages */
 
-typedef std::function<void()> HelpHandler;
+using HelpHandler = std::function<void()>;
 
-static void helpChannelNotice()
+void helpChannelNotice()
 {
 	Logger::warn("usage: %s cnotice server channel message\n", getprogname());
 	Logger::warn("Send a notice to a public channel. This is a notice that everyone");
@@ -47,7 +50,7 @@ static void helpChannelNotice()
 	Logger::warn("\t%s cnotice freenode #staff \"Don't flood\"", getprogname());
 }
 
-static void helpInvite()
+void helpInvite()
 {
 	Logger::warn("usage: %s invite server nickname channel\n", getprogname());
 	Logger::warn("Invite someone to a channel, needed for channel with mode +i\n");
@@ -56,7 +59,7 @@ static void helpInvite()
 	Logger::warn("\t%s invite freenode xorg62 #staff", getprogname());
 }
 
-static void helpJoin()
+void helpJoin()
 {
 	Logger::warn("usage: %s join server channel [password]\n", getprogname());
 	Logger::warn("Join a channel on a specific server registered in irccd. The server");
@@ -67,7 +70,7 @@ static void helpJoin()
 	Logger::warn("\t%s join freenode #staff", getprogname());
 }
 
-static void helpKick()
+void helpKick()
 {
 	Logger::warn("usage: %s kick server nick channel [reason]\n", getprogname());
 	Logger::warn("Kick someone from a channel. The parameter reason is optional and");
@@ -77,7 +80,7 @@ static void helpKick()
 	Logger::warn("\t%s kick freenode jean #staff \"Stop flooding\"", getprogname());
 }
 
-static void helpLoad()
+void helpLoad()
 {
 	Logger::warn("usage: %s load name\n", getprogname());
 	Logger::warn("Load a plugin into the irccd instance.\n");
@@ -86,7 +89,7 @@ static void helpLoad()
 	Logger::warn("\t%s load logger", getprogname());
 }
 
-static void helpMe()
+void helpMe()
 {
 	Logger::warn("usage: %s me server target message\n", getprogname());
 	Logger::warn("Send a CTCP ACTION message. It is exactly the same syntax as message.\n");
@@ -95,7 +98,7 @@ static void helpMe()
 	Logger::warn("\t%s me freenode #staff \"going back soon\"", getprogname());
 }
 
-static void helpMessage()
+void helpMessage()
 {
 	Logger::warn("usage: %s message server target message\n", getprogname());
 	Logger::warn("Send a message to someone or a channel. The target may be a channel or a real person");
@@ -105,7 +108,7 @@ static void helpMessage()
 	Logger::warn("\t%s message freenode #staff \"Hello from irccd\"", getprogname());
 }
 
-static void helpMode()
+void helpMode()
 {
 	Logger::warn("usage: %s mode server channel mode\n", getprogname());
 	Logger::warn("Change the mode of the specified channel. The mode contains full parameters");
@@ -115,7 +118,7 @@ static void helpMode()
 	Logger::warn("\t%s mode freenode #staff +t", getprogname());
 }
 
-static void helpNick()
+void helpNick()
 {
 	Logger::warn("usage: %s nick server nickname\n", getprogname());
 	Logger::warn("Change your nickname. The parameter nickname is the new nickname\n");
@@ -124,7 +127,7 @@ static void helpNick()
 	Logger::warn("\t%s nick freenode david", getprogname());
 }
 
-static void helpNotice()
+void helpNotice()
 {
 	Logger::warn("usage: %s notice server target message\n", getprogname());
 	Logger::warn("Send a private notice to a target user.\n");
@@ -133,7 +136,7 @@ static void helpNotice()
 	Logger::warn("\t%s notice freenode jean \"Private notice\"", getprogname());
 }
 
-static void helpPart()
+void helpPart()
 {
 	Logger::warn("usage: %s part server channel\n", getprogname());
 	Logger::warn("Leave a channel. Parameter server is one registered in irccd config.");
@@ -143,7 +146,7 @@ static void helpPart()
 	Logger::warn("\t%s part freenode #staff", getprogname());
 }
 
-static void helpReload()
+void helpReload()
 {
 	Logger::warn("usage: %s reload name\n", getprogname());
 	Logger::warn("Reload a plugin, parameter name is the plugin to reload.");
@@ -153,7 +156,7 @@ static void helpReload()
 	Logger::warn("\t %s reload logger", getprogname());
 }
 
-static void helpTopic()
+void helpTopic()
 {
 	Logger::warn("usage: %s topic server channel topic\n", getprogname());
 	Logger::warn("Set the new topic of a channel. Topic must be enclosed between");
@@ -163,7 +166,7 @@ static void helpTopic()
 	Logger::warn("\t%s topic freenode #wmfs \"This is the best channel\"", getprogname());
 }
 
-static void helpUnload()
+void helpUnload()
 {
 	Logger::warn("usage: %s unload name\n", getprogname());
 	Logger::warn("Unload a loaded plugin from the irccd instance.\n");
@@ -172,7 +175,7 @@ static void helpUnload()
 	Logger::warn("\t%s unload logger", getprogname());
 }
 
-static void helpUserMode()
+void helpUserMode()
 {
 	Logger::warn("usage: %s umode server mode\n", getprogname());
 	Logger::warn("Change your own user mode.\n");
@@ -181,38 +184,31 @@ static void helpUserMode()
 	Logger::warn("\t%s umode +i", getprogname());
 }
 
-static std::map<std::string, HelpHandler> createHelpHandlers()
-{
-	std::map<std::string, HelpHandler> helpHandlers;
-
-	helpHandlers["cnotice"]	= helpChannelNotice;
-	helpHandlers["invite"]	= helpInvite;
-	helpHandlers["join"]	= helpJoin;
-	helpHandlers["kick"]	= helpKick;
-	helpHandlers["load"]	= helpLoad;
-	helpHandlers["me"]	= helpMe;
-	helpHandlers["message"]	= helpMessage;
-	helpHandlers["mode"]	= helpMode;
-	helpHandlers["notice"]	= helpNotice;
-	helpHandlers["nick"]	= helpNick;
-	helpHandlers["part"]	= helpPart;
-	helpHandlers["reload"]	= helpReload;
-	helpHandlers["topic"]	= helpTopic;
-	helpHandlers["umode"]	= helpUserMode;
-	helpHandlers["unload"]	= helpUnload;
-
-	return helpHandlers;
-}
-
-static std::map<std::string, HelpHandler> helpHandlers = createHelpHandlers();
+std::unordered_map<std::string, HelpHandler> helpHandlers {
+	{ "cnotice", 	helpChannelNotice	},
+	{ "invite",	helpInvite		},
+	{ "join",	helpJoin		},
+	{ "kick",	helpKick		},
+	{ "load",	helpLoad		},
+	{ "me",		helpMe			},
+	{ "message",	helpMessage		},
+	{ "mode",	helpMode		},
+	{ "notice",	helpNotice		},
+	{ "nick",	helpNick		},
+	{ "part",	helpPart		},
+	{ "reload",	helpReload		},
+	{ "topic",	helpTopic		},
+	{ "umode",	helpUserMode		},
+	{ "unload",	helpUnload		}
+};
 
 /* }}} */
 
 /* {{{ handlers */
 
-typedef std::function<void(Irccdctl *, int, char **)> Handler;
+using Handler = std::function<void(Irccdctl *, int, char **)>;
 
-static void handleHelp(Irccdctl *, int argc, char **argv)
+void handleHelp(Irccdctl *, int argc, char **argv)
 {
 	if (argc < 1)
 		Logger::fatal(1, "help requires 1 argument");
@@ -229,7 +225,7 @@ static void handleHelp(Irccdctl *, int argc, char **argv)
 	std::exit(1);
 }
 
-static void handleChannelNotice(Irccdctl *ctl, int argc, char **argv)
+void handleChannelNotice(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -241,7 +237,7 @@ static void handleChannelNotice(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static void handleInvite(Irccdctl *ctl, int argc, char **argv)
+void handleInvite(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -254,7 +250,7 @@ static void handleInvite(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static void handleJoin(Irccdctl *ctl, int argc, char **argv)
+void handleJoin(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -270,7 +266,7 @@ static void handleJoin(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static void handleKick(Irccdctl *ctl, int argc, char **argv)
+void handleKick(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -286,7 +282,7 @@ static void handleKick(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static void handleLoad(Irccdctl *ctl, int argc, char **argv)
+void handleLoad(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -297,7 +293,7 @@ static void handleLoad(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static void handleMe(Irccdctl *ctl, int argc, char **argv)
+void handleMe(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -308,7 +304,7 @@ static void handleMe(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static void handleMessage(Irccdctl *ctl, int argc, char **argv)
+void handleMessage(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -319,7 +315,7 @@ static void handleMessage(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static void handleMode(Irccdctl *ctl, int argc, char **argv)
+void handleMode(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -331,7 +327,7 @@ static void handleMode(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static void handleNick(Irccdctl *ctl, int argc, char **argv)
+void handleNick(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -342,7 +338,7 @@ static void handleNick(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static void handleNotice(Irccdctl *ctl, int argc, char **argv)
+void handleNotice(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -354,7 +350,7 @@ static void handleNotice(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static void handlePart(Irccdctl *ctl, int argc, char **argv)
+void handlePart(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -365,7 +361,7 @@ static void handlePart(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static void handleReload(Irccdctl *ctl, int argc, char **argv)
+void handleReload(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -376,7 +372,7 @@ static void handleReload(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static void handleTopic(Irccdctl *ctl, int argc, char **argv)
+void handleTopic(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -388,7 +384,7 @@ static void handleTopic(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static void handleUnload(Irccdctl *ctl, int argc, char **argv)
+void handleUnload(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -399,7 +395,7 @@ static void handleUnload(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static void handleUserMode(Irccdctl *ctl, int argc, char **argv)
+void handleUserMode(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
 
@@ -410,31 +406,26 @@ static void handleUserMode(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
-static std::map<std::string, Handler> createHandlers()
-{
-	std::map<std::string, Handler> handlers;
+std::unordered_map<std::string, Handler> handlers {
+	{ "cnotice",	handleChannelNotice	},
+	{ "help",	handleHelp		},
+	{ "invite",	handleInvite		},
+	{ "join",	handleJoin		},
+	{ "kick",	handleKick		},
+	{ "load",	handleLoad		},
+	{ "me",		handleMe		},
+	{ "message",	handleMessage		},
+	{ "mode",	handleMode		},
+	{ "nick",	handleNick		},
+	{ "notice",	handleNotice		},
+	{ "part",	handlePart		},
+	{ "reload",	handleReload		},
+	{ "topic",	handleTopic		},
+	{ "umode",	handleUserMode		},
+	{ "unload",	handleUnload		}
+};
 
-	handlers["cnotice"]	= handleChannelNotice;
-	handlers["help"]	= handleHelp;
-	handlers["invite"]	= handleInvite;
-	handlers["join"]	= handleJoin;
-	handlers["kick"]	= handleKick;
-	handlers["load"]	= handleLoad;
-	handlers["me"]		= handleMe;
-	handlers["message"]	= handleMessage;
-	handlers["mode"]	= handleMode;
-	handlers["nick"]	= handleNick;
-	handlers["notice"]	= handleNotice;
-	handlers["part"]	= handlePart;
-	handlers["reload"]	= handleReload;
-	handlers["topic"]	= handleTopic;
-	handlers["umode"]	= handleUserMode;
-	handlers["unload"]	= handleUnload;
-
-	return handlers;
 }
-
-static std::map<std::string, Handler> handlers = createHandlers();
 
 /* }}} */
 

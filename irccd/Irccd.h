@@ -91,29 +91,31 @@ public:
 	Message &operator=(const Message &m);
 };
 
-typedef std::vector<std::shared_ptr<Server>> ServerList;
-typedef std::map<Socket, Message> StreamClients;
-typedef std::map<SocketAddress, Message> DatagramClients;
+using ServerList	= std::vector<std::shared_ptr<Server>>;
+using StreamClients	= std::map<Socket, Message>;
+using DatagramClients	= std::map<SocketAddress, Message>;
 
 #if defined(WITH_LUA)
-  typedef std::unordered_map<
-	lua_State *,
-	std::shared_ptr<Plugin>
-  > PluginMap;
 
-  typedef std::vector<
-	std::shared_ptr<Plugin>
-  > PluginList;
+using PluginMap		= std::unordered_map<
+				lua_State *,
+				std::shared_ptr<Plugin>
+			  >;
 
-  typedef std::unordered_map<
-	lua_State *,
-	bool
-  > ThreadMap;
+using PluginList	= std::vector<
+				std::shared_ptr<Plugin>
+			  >;
 
-  typedef std::unordered_map<
-	std::shared_ptr<Server>,
-	std::vector<DefCall>
-  > DefCallList;
+using ThreadMap		= std::unordered_map<
+				lua_State *,
+				bool
+			  >;
+
+using DefCallList	= std::unordered_map<
+				std::shared_ptr<Server>,
+				std::vector<DefCall>
+			  >;
+
 #endif
 
 class Irccd

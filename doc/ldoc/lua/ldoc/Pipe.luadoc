@@ -63,3 +63,5 @@ end
 --- Remove the first value.
 function Pipe:pop()
 end
+
+-- vim: set syntax=lua nu:

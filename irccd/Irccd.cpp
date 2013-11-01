@@ -24,6 +24,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <unordered_map>
 
 #include <Logger.h>
 #include <Parser.h>
@@ -43,12 +44,12 @@ namespace irccd
 namespace
 {
 
-/*
- * This is the function used for socket handler message from clients.
- */
-typedef std::function<void(const std::vector<std::string> &params)> SocketFunction;
+using SocketFunction = std::function<void(const std::vector<std::string> &params)>;
 
-/*
+/**
+ * @struct ClientHandler
+ * @brief Irccdctl function
+ *
  * This describe a function to be called. It requires a number of arguments,
  * how many to split and a function to call.
  */
@@ -82,7 +83,7 @@ void handleInvite(const std::vector<std::string> &params)
 
 void handleJoin(const std::vector<std::string> &params)
 {
-	std::string password = "";
+	std::string password;
 	if (params.size() == 3)
 		password = params[2];
 
@@ -91,7 +92,7 @@ void handleJoin(const std::vector<std::string> &params)
 
 void handleKick(const std::vector<std::string> &params)
 {
-	std::string reason = "";
+	std::string reason;
 	if (params.size() == 4)
 		reason = params[3];
 
@@ -153,30 +154,23 @@ void handleUserMode(const std::vector<std::string> &params)
 	Irccd::getInstance()->findServer(params[0])->umode(params[1]);
 }
 
-std::map<std::string, ClientHandler> createHandlers()
-{
-	std::map<std::string, ClientHandler> handlers;
-
-	handlers["CNOTICE"]	= ClientHandler(3, 3, handleChannelNotice);
-	handlers["INVITE"]	= ClientHandler(3, 3, handleInvite);
-	handlers["JOIN"]	= ClientHandler(2, 3, handleJoin);
-	handlers["KICK"]	= ClientHandler(3, 4, handleKick);
-	handlers["LOAD"]	= ClientHandler(1, 1, handleLoad);
-	handlers["ME"]		= ClientHandler(3, 3, handleMe);
-	handlers["MSG"]		= ClientHandler(3, 3, handleMessage);
-	handlers["MODE"]	= ClientHandler(3, 3, handleMode);
-	handlers["NICK"]	= ClientHandler(2, 2, handleNick);
-	handlers["NOTICE"]	= ClientHandler(3, 3, handleNotice);
-	handlers["PART"]	= ClientHandler(2, 2, handlePart);
-	handlers["RELOAD"]	= ClientHandler(1, 1, handleReload);
-	handlers["TOPIC"]	= ClientHandler(3, 3, handleTopic);
-	handlers["UMODE"]	= ClientHandler(2, 2, handleUserMode);
-	handlers["UNLOAD"]	= ClientHandler(1, 1, handleUnload);
-
-	return handlers;
-}
-
-std::map<std::string, ClientHandler> handlers = createHandlers();
+std::unordered_map<std::string, ClientHandler> handlers {
+	{ "CNOTICE",	ClientHandler(3, 3, handleChannelNotice)	},
+	{ "INVITE",	ClientHandler(3, 3, handleInvite)		},
+	{ "JOIN",	ClientHandler(2, 3, handleJoin)			},
+	{ "KICK",	ClientHandler(3, 4, handleKick)			},
+	{ "LOAD",	ClientHandler(1, 1, handleLoad)			},
+	{ "ME",		ClientHandler(3, 3, handleMe)			},
+	{ "MSG",	ClientHandler(3, 3, handleMessage)		},
+	{ "MODE",	ClientHandler(3, 3, handleMode)			},
+	{ "NICK",	ClientHandler(2, 2, handleNick)			},
+	{ "NOTICE",	ClientHandler(3, 3, handleNotice)		},
+	{ "PART",	ClientHandler(2, 2, handlePart)			},
+	{ "RELOAD",	ClientHandler(1, 1, handleReload)		},
+	{ "TOPIC",	ClientHandler(3, 3, handleTopic)		},
+	{ "UMODE",	ClientHandler(2, 2, handleUserMode)		},
+	{ "UNLOAD",	ClientHandler(1, 1, handleUnload)		}
+};
 
 }
 
@@ -451,14 +445,6 @@ void Irccd::openConfig()
 	if (!config.open())
 		Logger::fatal(1, "irccd: could not open %s, exiting", m_configPath.c_str());
 
-#if !defined(_WIN32)
-	if (!m_foreground)
-	{
-		Logger::log("irccd: forking to background...");
-		daemon(0, 0);
-	}
-#endif
-
 	Logger::log("irccd: using configuration %s", m_configPath.c_str());
 
 	Section general = config.getSection("general");
@@ -480,6 +466,15 @@ void Irccd::openConfig()
 	if (general.hasOption("foreground") && !isOverriden(Options::Foreground))
 		m_foreground = general.getOption<bool>("foreground");
 #endif
+
+#if !defined(_WIN32)
+	if (!m_foreground)
+	{
+		Logger::log("irccd: forking to background...");
+		daemon(0, 0);
+	}
+#endif
+
 
 	if (general.hasOption("verbose") && !isOverriden(Options::Verbose))
 		Logger::setVerbose(general.getOption<bool>("verbose"));
@@ -853,7 +848,7 @@ void Irccd::extractChannels(const Section &section, std::shared_ptr<Server> serv
 		list = section.getOption<std::string>("channels");
 		channels = Util::split(list, " \t");
 
-		for (std::string s : channels)
+		for (const std::string &s : channels)
 		{
 			// detect an optional channel password
 			colon = s.find_first_of(':');

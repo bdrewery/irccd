@@ -90,6 +90,8 @@ void Pipe::list(Reader reader)
 
 void Pipe::pop()
 {
+	Lock lk(m_mutex);
+
 	m_queue.pop();
 }
 

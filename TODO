@@ -3,4 +3,7 @@ IRC Client Daemon TODO
 
 * Document the new Server:send() method,
 * Document ctcp usage,
-* Change argument checking in LuaServer.cpp
+* Switch typedef to using =
+* Add using Ptr for std::shared_ptr<Server> (same for Plugin)
+* Document onLoad and onUnload in irccd(1)
+* Add notice about onReload
