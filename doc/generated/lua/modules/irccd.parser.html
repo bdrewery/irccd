@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+  <title>Irccd Lua API Documentation</title>
+  <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+
+<!-- Menu -->
+<div id="menu">
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2 class="kind">Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tuning">Tuning </a></li>
+<li><a href="#Class_Parser">Class Parser </a></li>
+<li><a href="#Parser_metamethods">Parser metamethods </a></li>
+<li><a href="#Class_Section">Class Section </a></li>
+<li><a href="#Section_metamethods">Section metamethods </a></li>
+</ul>
+
+<h2 class="kind">Modules</h2>
+<ul>
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><strong>irccd.parser</strong></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
+  <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
+  <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
+</ul>
+<h2 class="kind">Topics</h2>
+<ul>
+  <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
+  <li><a href="../topics/2-Plugin_creation.md.html">2-Plugin_creation.md</a></li>
+  <li><a href="../topics/2.1-Using_irccd_test.md.html">2.1-Using_irccd_test.md</a></li>
+  <li><a href="../topics/2.2-List_of_Events.md.html">2.2-List_of_Events.md</a></li>
+  <li><a href="../topics/3-Event-Action.md.html">3-Event-Action.md</a></li>
+  <li><a href="../topics/3-Event-Channel-notice.md.html">3-Event-Channel-notice.md</a></li>
+  <li><a href="../topics/3-Event-Command.md.html">3-Event-Command.md</a></li>
+  <li><a href="../topics/3-Event-Connect.md.html">3-Event-Connect.md</a></li>
+  <li><a href="../topics/3-Event-Invite.md.html">3-Event-Invite.md</a></li>
+  <li><a href="../topics/3-Event-Join.md.html">3-Event-Join.md</a></li>
+  <li><a href="../topics/3-Event-Kick.md.html">3-Event-Kick.md</a></li>
+  <li><a href="../topics/3-Event-Load.md.html">3-Event-Load.md</a></li>
+  <li><a href="../topics/3-Event-Message.md.html">3-Event-Message.md</a></li>
+  <li><a href="../topics/3-Event-Mode.md.html">3-Event-Mode.md</a></li>
+  <li><a href="../topics/3-Event-Nick.md.html">3-Event-Nick.md</a></li>
+  <li><a href="../topics/3-Event-Notice.md.html">3-Event-Notice.md</a></li>
+  <li><a href="../topics/3-Event-Part.md.html">3-Event-Part.md</a></li>
+  <li><a href="../topics/3-Event-Query.md.html">3-Event-Query.md</a></li>
+  <li><a href="../topics/3-Event-Reload.md.html">3-Event-Reload.md</a></li>
+  <li><a href="../topics/3-Event-Topic.md.html">3-Event-Topic.md</a></li>
+  <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
+  <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
+</ul>
+<h2 class="kind">Examples</h2>
+<ul>
+  <li><a href="../examples/Deferred.lua.html">Deferred.lua</a></li>
+  <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
+  <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
+</ul>
+
+</div><!-- !menu -->
+
+<div id="content">
+
+  <h2>Module <code>irccd.parser</code></h2>
+
+<p>Config file parser.</p>
+<p> This API provides basic support of .ini syntax based configurations files.
+ It provides support of multiple redefinition of sections, so it is
+ possible to have one or more section with the same name in a
+ file config.</p>
+
+
+<h2 class="kind"><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#new">new&nbsp;(path, tuning, commentChar)</a></td>
+	<td class="summary">Create a new Parser object.</td>
+	</tr>
+</table>
+<h2 class="kind"><a href="#Tuning">Tuning </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#DisableVerbosity">DisableVerbosity</a></td>
+	<td class="summary">Disable the verbosity.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#DisableRootSection">DisableRootSection</a></td>
+	<td class="summary">Forbid options on root.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#DisableRedefinition">DisableRedefinition</a></td>
+	<td class="summary">Disable multiple sections.</td>
+	</tr>
+</table>
+<h2 class="kind"><a href="#Class_Parser">Class Parser </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Parser:open">Parser:open&nbsp;()</a></td>
+	<td class="summary">Open the file and read config.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Parser:findSections">Parser:findSections&nbsp;(name)</a></td>
+	<td class="summary">Iterator over all sections that matches name.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Parser:hasSection">Parser:hasSection&nbsp;(name)</a></td>
+	<td class="summary">Checks for a section.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Parser:getSection">Parser:getSection&nbsp;(name)</a></td>
+	<td class="summary">Get a specific section.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Parser:requireSection">Parser:requireSection&nbsp;(name)</a></td>
+	<td class="summary">Get a specific section.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Parser:onLog">Parser:onLog&nbsp;(func)</a></td>
+	<td class="summary">Add a specific logging function.</td>
+	</tr>
+</table>
+<h2 class="kind"><a href="#Parser_metamethods">Parser metamethods </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Parser:__tostring">Parser:__tostring&nbsp;()</a></td>
+	<td class="summary">Convert object to string.</td>
+	</tr>
+</table>
+<h2 class="kind"><a href="#Class_Section">Class Section </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Section:hasOption">Section:hasOption&nbsp;(name)</a></td>
+	<td class="summary">Tells if the section has an option.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Section:getOption">Section:getOption&nbsp;(name)</a></td>
+	<td class="summary">Get an option value.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Section:getOptions">Section:getOptions&nbsp;()</a></td>
+	<td class="summary">Get all options in a table.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Section:requireOption">Section:requireOption&nbsp;(name)</a></td>
+	<td class="summary">Requires an option.</td>
+	</tr>
+</table>
+<h2 class="kind"><a href="#Section_metamethods">Section metamethods </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Section:__eq">Section:__eq&nbsp;(other)</a></td>
+	<td class="summary">Test equality.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Section:__le">Section:__le&nbsp;(other)</a></td>
+	<td class="summary">Test inferiority</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Sectio:__tostring">Sectio:__tostring&nbsp;()</a></td>
+	<td class="summary">Convert object to string.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="kind"><a name="Functions"></a>Functions</h2>
+    <dl class="function">
+    <dt>
+    <a name = "new"></a>
+    <strong>new&nbsp;(path, tuning, commentChar)</strong>
+    </dt>
+    <dd>
+    Create a new Parser object.
+ This function does not open any file, you need to call open.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path</li>
+        <li><span class="parameter">tuning</span>
+         optional table of tuning options</li>
+        <li><span class="parameter">commentChar</span>
+         optional comment delimiter</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Parser object
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.parser.html#Parser:open">Parser:open</a>
+    </ul>
+
+
+</dd>
+</dl>
+    <h2 class="kind"><a name="Tuning"></a>Tuning </h2>
+        Tuning
+    <dl class="function">
+    <dt>
+    <a name = "DisableVerbosity"></a>
+    <strong>DisableVerbosity</strong>
+    </dt>
+    <dd>
+    Disable the verbosity.
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "DisableRootSection"></a>
+    <strong>DisableRootSection</strong>
+    </dt>
+    <dd>
+    Forbid options on root.
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "DisableRedefinition"></a>
+    <strong>DisableRedefinition</strong>
+    </dt>
+    <dd>
+    Disable multiple sections.
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="kind"><a name="Class_Parser"></a>Class Parser </h2>
+        Parser
+    <dl class="function">
+    <dt>
+    <a name = "Parser:open"></a>
+    <strong>Parser:open&nbsp;()</strong>
+    </dt>
+    <dd>
+    Open the file and read config.
+ This function will read and extract any section found in the file.
+
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        true on success</li>
+        <li>
+        error message if failed</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Parser:findSections"></a>
+    <strong>Parser:findSections&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Iterator over all sections that matches name.  Note that this function
+ will be relevant only if DisableRedefinition is not set. The iterator returns
+ a Section object.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the sections name</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">
+ <span class="comment">-- Find all sections named "socket"
+</span> <span class="keyword">for</span> s <span class="keyword">in</span> p:findSections(<span class="string">"socket"</span>) <span class="keyword">do</span>
+ 	<span class="comment">-- Play with s as a Section object
+</span> 	<span class="keyword">if</span> s:hasOption(<span class="string">"type"</span>) <span class="keyword">then</span>
+ 		<span class="global">print</span>(<span class="string">"Type = "</span> .. <span class="global">tostring</span>(s:getOption(<span class="string">"type"</span>)))
+ 	<span class="keyword">end</span>
+ <span class="keyword">end</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Parser:hasSection"></a>
+    <strong>Parser:hasSection&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Checks for a section.
+ Checks if a specific section exists.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+
+
+</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if exists
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Parser:getSection"></a>
+    <strong>Parser:getSection&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Get a specific section.
+ Check if the parser has a specific section and return it, otherwise
+ return nil plus an error message.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the section name</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        a Section object or nil</li>
+        <li>
+        error message if not found</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Parser:requireSection"></a>
+    <strong>Parser:requireSection&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Get a specific section.
+ This returns a section but if the section
+ is not found it calls luaL_error, thus aborting the script.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the section name</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Section
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.parser.html#Parser:getSection">Parser:getSection</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "Parser:onLog"></a>
+    <strong>Parser:onLog&nbsp;(func)</strong>
+    </dt>
+    <dd>
+    Add a specific logging function.
+ This add a logging function for verbosity warnings. The function must have
+ the following signature:</p>
+
+<pre><code>function log(lineno, section, warning)
+</code></pre>
+
+<p> <br/></p>
+
+<p> The parameters are:
+ <ul>
+ <li>lineno: the current line number</li>
+ <li>section: the current section</li>
+ <li>warning: the message</li>
+ </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">func</span>
+         the function to use</li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="kind"><a name="Parser_metamethods"></a>Parser metamethods </h2>
+        Parser metamethods.
+ The metamethods available for object Parser.
+    <dl class="function">
+    <dt>
+    <a name = "Parser:__tostring"></a>
+    <strong>Parser:__tostring&nbsp;()</strong>
+    </dt>
+    <dd>
+    Convert object to string.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="kind"><a name="Class_Section"></a>Class Section </h2>
+        Section
+    <dl class="function">
+    <dt>
+    <a name = "Section:hasOption"></a>
+    <strong>Section:hasOption&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Tells if the section has an option.
+ Check if the section contains a specific option.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the option's name</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the value
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Section:getOption"></a>
+    <strong>Section:getOption&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Get an option value.
+ This function returns the value if found and nil plus an error
+ message in the other case.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the option name</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the option's value or nil</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.parser.html#Section:requireOption">Section:requireOption</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "Section:getOptions"></a>
+    <strong>Section:getOptions&nbsp;()</strong>
+    </dt>
+    <dd>
+    Get all options in a table.
+ This function will return a table with all options in a
+ key / value pair basis.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a table
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Section:requireOption"></a>
+    <strong>Section:requireOption&nbsp;(name)</strong>
+    </dt>
+    <dd>
+    Requires an option.
+ This returns a value but if the option
+ is not found it calls luaL_error, thus aborting the script.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the option name</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the option's value
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.parser.html#Section:getOption">Section:getOption</a>
+    </ul>
+
+
+</dd>
+</dl>
+    <h2 class="kind"><a name="Section_metamethods"></a>Section metamethods </h2>
+        Section metamethods.
+ The metamethods available for object Section.
+    <dl class="function">
+    <dt>
+    <a name = "Section:__eq"></a>
+    <strong>Section:__eq&nbsp;(other)</strong>
+    </dt>
+    <dd>
+    Test equality.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other section</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if they equals
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Section:__le"></a>
+    <strong>Section:__le&nbsp;(other)</strong>
+    </dt>
+    <dd>
+    Test inferiority
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other section</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        self &lt;= other comparison
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Sectio:__tostring"></a>
+    <strong>Sectio:__tostring&nbsp;()</strong>
+    </dt>
+    <dd>
+    Convert object to string.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc</a></i>
+</div> <!-- id="about" -->
+</body>
+</html>
