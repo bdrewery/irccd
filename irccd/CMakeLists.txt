@@ -22,6 +22,9 @@ project(irccd)
 # Optional Lua support
 option(WITH_LUA "Build with Lua plugin support" On)
 
+# Use bundled libircclient or not
+option(WITH_BUNDLE_IRCCLIENT "Build with bundled libircclient" On)
+
 set(SOURCES
 	Server.cpp
 	Server.h
@@ -93,17 +96,44 @@ if (WITH_LUA)
 
 endif ()
 
-#
-# Compile libircclient as internal
-#
-add_subdirectory(
-	"${CMAKE_SOURCE_DIR}/extern/libircclient"
-	"${CMAKE_BINARY_DIR}/libircclient"
-)
+if (WITH_BUNDLE_IRCCLIENT)
+	#
+	# Compile libircclient as internal
+	#
+	add_subdirectory(
+		"${CMAKE_SOURCE_DIR}/extern/libircclient"
+		"${CMAKE_BINARY_DIR}/libircclient"
+	)
+
+	list(
+		APPEND
+		INCLUDES
+		"${CMAKE_SOURCE_DIR}/extern/libircclient/include"
+	)
+
+	list(
+		APPEND
+		LIBRARIES
+		ircclient
+	)
+else ()
+	find_package(Libircclient REQUIRED)
+
+	list(
+		APPEND
+		INCLUDES
+		${LIBIRCCLIENT_INCLUDE_DIR}
+	)
+
+	list(
+		APPEND
+		LIBRARIES
+		${LIBIRCCLIENT_LIBRARIES}
+	)
+endif ()
 
 include_directories(
 	${INCLUDES}
-	"${CMAKE_SOURCE_DIR}/extern/libircclient/include"
 )
 
 add_executable(irccd ${SOURCES})
@@ -115,7 +145,6 @@ endif ()
 target_link_libraries(
 	irccd
 	common
-	ircclient
 	${LIBRARIES}
 )
 
