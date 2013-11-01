@@ -119,17 +119,8 @@ if (WITH_BUNDLE_IRCCLIENT)
 else ()
 	find_package(Libircclient REQUIRED)
 
-	list(
-		APPEND
-		INCLUDES
-		${LIBIRCCLIENT_INCLUDE_DIR}
-	)
-
-	list(
-		APPEND
-		LIBRARIES
-		${LIBIRCCLIENT_LIBRARIES}
-	)
+	list(APPEND INCLUDES ${LIBIRCCLIENT_INCLUDE_DIR})
+	list(APPEND LIBRARIES ${LIBIRCCLIENT_LIBRARIES})
 endif ()
 
 include_directories(
