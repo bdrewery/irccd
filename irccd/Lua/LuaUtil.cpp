@@ -31,10 +31,11 @@
 #include "Irccd.h"
 #include "LuaUtil.h"
 
-using namespace irccd;
-using namespace std;
+namespace irccd
+{
 
-namespace util {
+namespace util
+{
 
 /* --------------------------------------------------------
  * Color and attributes
@@ -70,7 +71,7 @@ enum class Attribute {
 	Reverse		= '\x16'
 };
 
-static std::unordered_map<std::string, Color> colors = {
+std::unordered_map<std::string, Color> colors = {
 	{ "White",		Color::White			},
 	{ "Black",		Color::Black			},
 	{ "Blue",		Color::Blue			},
@@ -89,7 +90,7 @@ static std::unordered_map<std::string, Color> colors = {
 	{ "LightGrey",		Color::LightGrey		}
 };
 
-static std::unordered_map<std::string, Attribute> attributes = {
+std::unordered_map<std::string, Attribute> attributes = {
 	{ "Bold",		Attribute::Bold			},
 	{ "Color",		Attribute::Color		},
 	{ "Italic",		Attribute::Italic		},
@@ -100,41 +101,42 @@ static std::unordered_map<std::string, Attribute> attributes = {
 	{ "Reverse",		Attribute::Reverse		}
 };
 
-static int basename(lua_State *L)
+int basename(lua_State *L)
 {
-	string path = luaL_checkstring(L, 1);
-	string ret = Util::baseName(path);
+	std::string path = luaL_checkstring(L, 1);
+	std::string ret = Util::baseName(path);
 
 	lua_pushstring(L, ret.c_str());
 
 	return 1;
 }
 
-static int date(lua_State *L)
+int date(lua_State *L)
 {
-	if (lua_gettop(L) >= 1) {
+	if (lua_gettop(L) >= 1)
+	{
 		int tm = luaL_checkinteger(L, 1);
 		new (L, DATE_TYPE) Date(tm);
-	} else {
-		new (L, DATE_TYPE) Date();
 	}
+	else
+		new (L, DATE_TYPE) Date();
 
 	return 1;
 }
 
-static int dirname(lua_State *L)
+int dirname(lua_State *L)
 {
-	string path = luaL_checkstring(L, 1);
-	string ret = Util::dirName(path);
+	std::string path = luaL_checkstring(L, 1);
+	std::string ret = Util::dirName(path);
 
 	lua_pushstring(L, ret.c_str());
 
 	return 1;
 }
 
-static int exist(lua_State *L)
+int exist(lua_State *L)
 {
-	string path = luaL_checkstring(L, 1);
+	std::string path = luaL_checkstring(L, 1);
 	bool ret = Util::exist(path);
 
 	lua_pushboolean(L, ret);
@@ -142,10 +144,10 @@ static int exist(lua_State *L)
 	return 1;
 }
 
-static int format(lua_State *L)
+int format(lua_State *L)
 {
-	string text = luaL_checkstring(L, 1);
-	ostringstream oss;
+	std::string text = luaL_checkstring(L, 1);
+	std::ostringstream oss;
 
 	luaL_checktype(L, 2, LUA_TTABLE);
 
@@ -191,32 +193,34 @@ static int format(lua_State *L)
 	return 1;
 }
 
-static int getHome(lua_State *L)
+int getHome(lua_State *L)
 {
 	lua_pushstring(L, Util::getHome().c_str());
 
 	return 1;
 }
 
-static int getTicks(lua_State *L)
+int getTicks(lua_State *L)
 {
 	lua_pushinteger(L, static_cast<int>(Util::getTicks()));
 
 	return 1;
 }
 
-static int mkdir(lua_State *L)
+int mkdir(lua_State *L)
 {
 	int mode = 0700;
-	string path;
+	std::string path;
 
 	path = luaL_checkstring(L, 1);
 	if (lua_gettop(L) >= 2)
 		mode = luaL_checkinteger(L, 2);
 
-	try {
+	try
+	{
 		Util::mkdir(path, mode);
-	} catch (Util::ErrorException ex) {
+	}
+	catch (Util::ErrorException ex) {
 		lua_pushboolean(L, false);
 		lua_pushstring(L, "");
 
@@ -228,21 +232,23 @@ static int mkdir(lua_State *L)
 	return 1;
 }
 
-static int opendir(lua_State *L)
+int opendir(lua_State *L)
 {
-	string path;
+	std::string path;
 	bool skipParents = false;
 
 	path = luaL_checkstring(L, 1);
 
 	// Optional boolean
-	if (lua_gettop(L) >= 2) {
+	if (lua_gettop(L) >= 2)
+	{
 	       	luaL_checktype(L, 2, LUA_TBOOLEAN);
 		skipParents = (lua_toboolean(L, 2) != 0);
 	}
 
 	Directory d(path);
-	if (!d.open(skipParents)) {
+	if (!d.open(skipParents))
+	{
 		lua_pushnil(L);
 		lua_pushstring(L, d.getError().c_str());
 
@@ -254,15 +260,15 @@ static int opendir(lua_State *L)
 	return 1;
 }
 
-static int splitUser(lua_State *L)
+int splitUser(lua_State *L)
 {
 	char nick[64], host[128];
 	const char* nickname;
 
 	nickname = luaL_checkstring(L, 1);
 
-	memset(nick, 0, sizeof (nick));
-	memset(host, 0, sizeof (host));
+	std::memset(nick, 0, sizeof (nick));
+	std::memset(host, 0, sizeof (host));
 
 	irc_target_get_nick(nickname, nick, sizeof (nick) - 1);
 	irc_target_get_host(nickname, host, sizeof (host) - 1);
@@ -273,7 +279,7 @@ static int splitUser(lua_State *L)
 	return 2;
 }
 
-static int usleep(lua_State *L)
+int usleep(lua_State *L)
 {
 	int msec = lua_tointeger(L, 1);
 
@@ -303,9 +309,10 @@ const luaL_Reg functions[] = {
  * Date methods
  * -------------------------------------------------------- */
 
-namespace date {
+namespace date
+{
 
-static int calendar(lua_State *L)
+int calendar(lua_State *L)
 {
 	Date *date;
 	time_t stamp;
@@ -336,10 +343,10 @@ static int calendar(lua_State *L)
 	return 1;
 }
 
-static int format(lua_State *L)
+int format(lua_State *L)
 {
 	Date *d;
-	string fmt, result;
+	std::string fmt, result;
 
 	// Extract parameters
 	d = toType<Date *>(L, 1, DATE_TYPE);
@@ -351,7 +358,7 @@ static int format(lua_State *L)
 	return 1;
 }
 
-static int timestamp(lua_State *L)
+int timestamp(lua_State *L)
 {
 	Date *date;
 
@@ -367,9 +374,10 @@ static int timestamp(lua_State *L)
  * Date meta methods
  * -------------------------------------------------------- */
 
-namespace dateMt {
+namespace dateMt
+{
 
-static int equals(lua_State *L)
+int equals(lua_State *L)
 {
 	Date *d1, *d2;
 
@@ -381,14 +389,14 @@ static int equals(lua_State *L)
 	return 1;
 }
 
-static int gc(lua_State *L)
+int gc(lua_State *L)
 {
 	toType<Date *>(L, 1, DATE_TYPE)->~Date();
 
 	return 0;
 }
 
-static int le(lua_State *L)
+int le(lua_State *L)
 {
 	Date *d1, *d2;
 
@@ -400,7 +408,7 @@ static int le(lua_State *L)
 	return 1;
 }
 
-static int tostring(lua_State *L)
+int tostring(lua_State *L)
 {
 	Date *date;
 
@@ -416,9 +424,10 @@ static int tostring(lua_State *L)
  * Directory methods
  * -------------------------------------------------------- */
 
-namespace dir {
+namespace dir
+{
 
-static int iter(lua_State *L)
+int iter(lua_State *L)
 {
 	const Directory *d;
 	int idx;
@@ -440,7 +449,7 @@ static int iter(lua_State *L)
 	return 2;
 }
 
-static int count(lua_State *L)
+int count(lua_State *L)
 {
 	Directory *d;
 
@@ -450,7 +459,7 @@ static int count(lua_State *L)
 	return 1;
 }
 
-static int read(lua_State *L)
+int read(lua_State *L)
 {
 	Directory *d;
 
@@ -469,9 +478,10 @@ static int read(lua_State *L)
  * Directory metamethods
  * -------------------------------------------------------- */
 
-namespace dirMt {
+namespace dirMt
+{
 
-static int eq(lua_State *L)
+int eq(lua_State *L)
 {
 	Directory *d1, *d2;
 
@@ -483,14 +493,14 @@ static int eq(lua_State *L)
 	return 1;
 }
 
-static int gc(lua_State *L)
+int gc(lua_State *L)
 {
 	toType<Directory *>(L, 1, DIR_TYPE)->~Directory();
 
 	return 0;
 }
 
-static int tostring(lua_State *L)
+int tostring(lua_State *L)
 {
 	Directory *d;
 
@@ -503,14 +513,14 @@ static int tostring(lua_State *L)
 
 } // !dirMt
 
-static const luaL_Reg dateMethodsList[] = {
+const luaL_Reg dateMethodsList[] = {
 	{ "calendar",		date::calendar		},
 	{ "format",		date::format		},
 	{ "timestamp",		date::timestamp		},
 	{ nullptr,		nullptr			}
 };
 
-static const luaL_Reg dateMtList[] = {
+const luaL_Reg dateMtList[] = {
 	{ "__eq",		dateMt::equals		},
 	{ "__gc",		dateMt::gc		},
 	{ "__le",		dateMt::le		},
@@ -518,20 +528,20 @@ static const luaL_Reg dateMtList[] = {
 	{ nullptr,		nullptr			}
 };
 
-static const luaL_Reg dirMethodsList[] = {
+const luaL_Reg dirMethodsList[] = {
 	{ "count",		dir::count		},
 	{ "read",		dir::read		},
 	{ nullptr,		nullptr			}
 };
 
-static const luaL_Reg dirMtList[] = {
+const luaL_Reg dirMtList[] = {
 	{ "__eq",		dirMt::eq		},
 	{ "__gc",		dirMt::gc		},
 	{ "__tostring",		dirMt::tostring		},
 	{ nullptr,		nullptr			}
 };
 
-int irccd::luaopen_util(lua_State *L)
+int luaopen_util(lua_State *L)
 {
 	// Util library
 	luaL_newlib(L, functions);
@@ -572,3 +582,5 @@ int irccd::luaopen_util(lua_State *L)
 
 	return 1;
 }
+
+} // !irccd

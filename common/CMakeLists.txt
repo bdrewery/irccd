@@ -18,6 +18,9 @@
 
 project(common)
 
+# Use bundled xdg-basedir or not
+option(WITH_BUNDLE_XDGBASEDIR "Build with bundled libxdg-basedir" On)
+
 set(SOURCES
 	Date.cpp
 	Date.h
@@ -39,10 +42,29 @@ set(SOURCES
 )
 
 if (UNIX)
-	find_package(XDG REQUIRED)
+	if (WITH_BUNDLE_XDGBASEDIR)
+		add_subdirectory(
+			"${CMAKE_SOURCE_DIR}/extern/libxdg-basedir"
+			"${CMAKE_BINARY_DIR}/libxdg-basedir"
+		)
 
-	list(APPEND INCLUDES ${XDG_INCLUDE_DIR})
-	list(APPEND LIBRARIES ${XDG_LIBRARY})
+		list(
+			APPEND
+			INCLUDES
+			"${CMAKE_SOURCE_DIR}/extern/libxdg-basedir/include"
+		)
+
+		list(
+			APPEND
+			LIBRARIES
+			xdg-basedir
+		)
+	else ()
+		find_package(XDG REQUIRED)
+
+		list(APPEND INCLUDES ${XDG_INCLUDE_DIR})
+		list(APPEND LIBRARIES ${XDG_LIBRARY})
+	endif ()
 endif ()
 
 if (WIN32)

@@ -54,6 +54,14 @@ public:
 		virtual const char * what() const throw();
 	};
 
+	struct Library
+	{
+		const char *		m_name;		//! name of library to load
+		lua_CFunction		m_func;		//! C function for it
+	};
+
+	using Libraries = std::vector<Library>;
+
 private:
 	// Plugin identity
 	std::string m_name;		//! name like "foo"
@@ -72,15 +80,17 @@ private:
 		  std::vector<std::string> params = std::vector<std::string>());
 
 public:
+	static const Libraries luaLibs;
+	static const Libraries irccdLibs;
+
 	Plugin();
 
 	Plugin(const std::string &name);
 
 	Plugin(Plugin &&src);
 
-	Plugin & operator=(Plugin &&src);
+	Plugin &operator=(Plugin &&src);
 
-	~Plugin();
 
 	/**
 	 * Get the plugin name.
@@ -221,6 +231,19 @@ public:
 		       const std::string &channel,
 		       const std::string &who,
 		       const std::string &message);
+
+	/**
+	 * A Lua function called on CTCP Action.
+	 *
+	 * @param server the server
+	 * @param channel on which channel
+	 * @param who who spoke
+	 * @param message the message sent
+	 */
+	void onMe(std::shared_ptr<Server> server,
+		  const std::string &channel,
+		  const std::string &who,
+		  const std::string &message);
 
 	/**
 	 * A Lua function triggered on a channel mode event.

@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 	Irccd *irccd = Irccd::getInstance();
 	int ch;
 
-	setprogname(argv[0]);
+	setprogname("irccd");
 	
 	while ((ch = getopt(argc, argv, "fc:p:P:v")) != -1) {
 		switch (ch) {

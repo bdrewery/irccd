@@ -8,7 +8,8 @@ CURRENT
   * Windows irccd's home is now the irccd.exe parent directory,
   * Added new socket API for Lua,
   * Added support for server reconnection,
-  * Added support for text formatting with colors and attributes.
+  * Added support for text formatting with colors and attributes,
+  * Added support for onMe (CTCP Action) event.
 
 1.0.2 November 1, 2013
 ---------------------------------------

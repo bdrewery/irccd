@@ -23,9 +23,11 @@
 
 #include <Parser.h>
 
-namespace irccd {
+namespace irccd
+{
 
-class LuaParser : public Parser {
+class LuaParser : public Parser
+{
 private:
 	lua_State *m_state;	//! back pointer for log
 	int m_logRef;		//! reference for log()
@@ -80,6 +82,9 @@ public:
 	 */
 	void setLogRef(int logRef);
 
+	/**
+	 * @copydoc Parser::log
+	 */
 	virtual void log(int number, const std::string &section, const std::string &message);
 };
 

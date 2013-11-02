@@ -23,27 +23,110 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <lua.hpp>
 
 namespace irccd
 {
 
-class LuaDeleter
+/**
+ * @class LuaState
+ * @brief Wrapper for lua_State
+ *
+ * This class automatically create a new Lua state and add implicit
+ * cast operator plus RAII destruction.
+ */
+class LuaState
 {
-public:
-	void operator()(lua_State *L)
+private:
+	struct Deleter
 	{
-		lua_close(L);
-	}
+		void operator()(lua_State *L)
+		{
+			lua_close(L);
+		}
+	};
+
+	using Ptr = std::unique_ptr<lua_State, Deleter>;
+
+	Ptr m_state;
+
+public:
+	/**
+	 * Default constructor. Create a new state.
+	 */
+	LuaState();
+
+	/**
+	 * Use the already created state.
+	 *
+	 * @param L the state to use
+	 */
+	LuaState(lua_State *L);
+
+	/**
+	 * Implicit cast operator for convenient usage to C Lua API.
+	 *
+	 * @return the state as lua_State *
+	 */
+	operator lua_State*();
 };
 
-typedef std::unique_ptr<lua_State, LuaDeleter> LuaState;
+/**
+ * @class LuaValue
+ * @brief A fake variant for Lua values
+ *
+ * This class is primarly used for copying Lua values without checking
+ * the types, useful to pass data.
+ */
+class LuaValue
+{
+private:
+	union
+	{
+		lua_Number	 number;
+		bool		 boolean;
+	};
 
+	int type;
+	std::string str;
+	std::vector<std::pair<LuaValue, LuaValue>> table;
+
+public:
+	/**
+	 * Dump a value at the specific index.
+	 *
+	 * @param L the Lua state
+	 * @param index the value
+	 * @return a tree of values
+	 */
+	static LuaValue copy(lua_State *L, int index);
+
+	/**
+	 * Push a value to a state.
+	 *
+	 * @param L the Lua state
+	 * @param value the value to push
+	 */
+	static void push(lua_State *L, const LuaValue &value);
+
+	/**
+	 * Default constructor (type nil)
+	 */
+	LuaValue();
+};
+
+/**
+ * @class Luae
+ * @brief Add lot of convenience for Lua
+ *
+ * This class adds lot of functions for Lua and C++.
+ */
 class Luae
 {
 public:
-	typedef std::function<void(lua_State *L, int tkey, int tvalue)> ReadFunction;
+	using ReadFunction = std::function<void(lua_State *L, int tkey, int tvalue)>;
 
 	/**
 	 * Get a field of a specific type from a table. Specialized for the
@@ -181,14 +264,9 @@ public:
 
 } // !irccd
 
-void * operator new(size_t size, lua_State *L);
+void *operator new(size_t size, lua_State *L);
 
-void * operator new(size_t size, lua_State *L, const char *metaname);
-
-/*
- * Delete operators are just present to avoid some warnings, Lua does garbage
- * collection so these functions just do nothing.
- */
+void *operator new(size_t size, lua_State *L, const char *metaname);
 
 void operator delete(void *ptr, lua_State *L);
 

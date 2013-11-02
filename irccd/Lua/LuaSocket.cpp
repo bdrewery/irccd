@@ -676,6 +676,8 @@ int addrBindInet(lua_State *L)
 	return 1;
 }
 
+#if !defined(_WIN32)
+
 int addrUnix(lua_State *L)
 {
 	const char *path = luaL_checkstring(L, 1);
@@ -688,6 +690,8 @@ int addrUnix(lua_State *L)
 
 	return 1;
 }
+
+#endif
 
 int addrToString(lua_State *L)
 {
@@ -708,7 +712,9 @@ int addrGc(lua_State *L)
 const luaL_Reg addrFunctions[] = {
 	{ "connectInet",	addrConnectInet		},
 	{ "bindInet",		addrBindInet		},
+#if !defined(_WIN32)
 	{ "unix",		addrUnix		},
+#endif
 	{ nullptr,		nullptr			}
 };
 
