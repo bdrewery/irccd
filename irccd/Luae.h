@@ -53,6 +53,9 @@ private:
 	Ptr m_state;
 
 public:
+	LuaState(const LuaState &) = delete;
+	LuaState &operator=(const LuaState &) = delete;
+
 	/**
 	 * Default constructor. Create a new state.
 	 */
@@ -64,6 +67,20 @@ public:
 	 * @param L the state to use
 	 */
 	LuaState(lua_State *L);
+
+	/**
+	 * Move constructor.
+	 *
+	 * @param state the Lua state to move
+	 */
+	LuaState(LuaState &&state);
+
+	/**
+	 * Move assignment operator.
+	 *
+	 * @param state the Lua state to move
+	 */
+	LuaState &operator=(LuaState &&state);
 
 	/**
 	 * Implicit cast operator for convenient usage to C Lua API.

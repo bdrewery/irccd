@@ -31,6 +31,18 @@ LuaState::LuaState(lua_State *L)
 	m_state = Ptr(L);
 }
 
+LuaState::LuaState(LuaState &&state)
+{
+	m_state = std::move(state.m_state);
+}
+
+LuaState &LuaState::operator=(LuaState &&state)
+{
+	m_state = std::move(state.m_state);
+
+	return *this;
+}
+
 LuaState::operator lua_State*()
 {
 	return m_state.get();

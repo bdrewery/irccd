@@ -145,7 +145,7 @@ Plugin::Plugin()
 Plugin::Plugin(const std::string &name)
 	: m_name(name)
 {
-	m_state = LuaState(luaL_newstate());
+	m_state = std::move(LuaState(luaL_newstate()));
 }
 
 Plugin::Plugin(Plugin &&src)
