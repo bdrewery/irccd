@@ -75,10 +75,15 @@
 
 <h2>Reload</h2>
 
-<p>This function is called when <em>irccd</em> instance reload a plugin. This can be done
-within the <em>irccdctl</em> utility.</p>
+<p>This function is called when <em>irccd</em> instance reload a plugin. Thus,
+there are <strong>no</strong> IRC events that call this function.</p>
 
-<p>There are <strong>no</strong> IRC events that call this function.</p>
+<p><br />
+This function does nothing in the irccd internals, it just calls a function
+that you can use to reload some data. It does not delete anything.</p>
+
+<p><br />
+If you want to fully unload a plugin, use irccdctl unload then irccdctl load.</p>
 
 <p><a name="Function"></a></p>
 <h3>Function</h3>
