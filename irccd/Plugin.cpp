@@ -147,6 +147,7 @@ Plugin::Plugin(const std::string &name)
 {
 	m_state = std::move(LuaState(luaL_newstate()));
 }
+#if 0
 
 Plugin::Plugin(Plugin &&src)
 {
@@ -155,6 +156,9 @@ Plugin::Plugin(Plugin &&src)
 	m_error = std::move(src.m_error);
 	m_state = std::move(src.m_state);
 }
+#endif
+
+#if 0
 
 Plugin & Plugin::operator=(Plugin &&src)
 {
@@ -165,6 +169,7 @@ Plugin & Plugin::operator=(Plugin &&src)
 
 	return *this;
 }
+#endif
 
 const std::string &Plugin::getName() const
 {
@@ -222,6 +227,16 @@ bool Plugin::open(const std::string &path)
 	}
 
 	return true;
+}
+
+void Plugin::addThread(Thread::Ptr th)
+{
+	m_threads.push_back(th);
+}
+
+Plugin::ThreadList &Plugin::getThreads()
+{
+	return m_threads;
 }
 
 void Plugin::onCommand(std::shared_ptr<Server> server,

@@ -73,6 +73,8 @@ if (WITH_LUA)
 			Plugin.h
 			Test.cpp
 			Test.h
+			Thread.cpp
+			Thread.h
 		)
 
 		# Optional Lua includes

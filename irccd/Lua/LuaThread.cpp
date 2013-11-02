@@ -17,7 +17,6 @@
  */
 
 #include <string>
-#include <thread>
 
 #include "Irccd.h"
 #include "Logger.h"
@@ -74,45 +73,27 @@ const char *loader(lua_State *, Buffer *buffer, size_t *size)
 
 const char *THREAD_TYPE = "Thread";
 
-class Thread {
-private:
-	std::thread m_handle;
-	std::mutex m_mutex;
-	bool m_waited;
-
-public:
-	Thread()
-		: m_waited(false)
-	{
-	}
-
-	void setHandle(std::thread &&handle)
-	{
-		std::lock_guard<std::mutex> lk(m_mutex);
-
-		m_handle = std::move(handle);
-	}
-
-	void wait()
-	{
-		std::lock_guard<std::mutex> lk(m_mutex);
-
-		if (!m_waited)
-		{
-			m_handle.join();
-			m_waited = true;
-		}
-	}
-};
-
 /* ---------------------------------------------------------
  * Functions and metamethods
  * --------------------------------------------------------- */
 
+void threadCallback(lua_State *threadState, lua_State *L, int nparams)
+{
+	if (lua_pcall(threadState, nparams, 0, 0) != LUA_OK)
+	{
+		Logger::warn("plugin %s: %s",
+		    Irccd::getInstance()->findPlugin(L)->getName().c_str(),
+		    lua_tostring(threadState, -1));
+		lua_pop(threadState, 1);
+	}
+
+	Irccd::getInstance()->unregisterThread(threadState);
+}
+
 int l_threadNew(lua_State *L)
 {
 	Buffer chunk;
-	lua_State *newL;
+	LuaState threadState;
 	int np;
 
 	luaL_checktype(L, 1, LUA_TFUNCTION);
@@ -122,66 +103,41 @@ int l_threadNew(lua_State *L)
 	lua_dump(L, reinterpret_cast<lua_Writer>(writer), &chunk);
 	lua_pop(L, 1);
 
-	// Create a new state and load the function in it
-	newL = luaL_newstate();
-
 	/*
 	 * Load the same libs as a new Plugin.
 	 */
 	for (const Plugin::Library &l : Plugin::luaLibs)
-		Luae::require(newL, l.m_name, l.m_func, true);
+		Luae::require(threadState, l.m_name, l.m_func, true);
 	for (const Plugin::Library &l : Plugin::irccdLibs)
-		Luae::preload(newL, l.m_name, l.m_func);
+		Luae::preload(threadState, l.m_name, l.m_func);
 
-	lua_load(newL, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
+	lua_load(threadState, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
 
 	np = 0;
 	for (int i = 2; i <= lua_gettop(L); ++i)
 	{
 		LuaValue v = LuaValue::copy(L, i);
-		LuaValue::push(newL, v);
+		LuaValue::push(threadState, v);
 		++ np;
 	}
 
-	try {
-		// Register it so logger can use the name
-		Irccd::getInstance()->registerPluginThread(
-		    Irccd::getInstance()->findPlugin(L),
-		    newL
-		);
+	try
+	{
+		Plugin::Ptr self = Irccd::getInstance()->findPlugin(L);
+		Thread::Ptr thread = Thread::create();
 
-		/*
-		 * Create the thread object before running the thread
-		 * because if the user discard the return value, the
-		 * thread must destroy the object itself.
-		 */
-		Thread *t = new (L, THREAD_TYPE) Thread();
+		Irccd::getInstance()->registerThread(threadState, self);
+	
+		std::thread threadFunc(threadCallback,
+		    static_cast<lua_State *>(threadState),
+		    static_cast<lua_State *>(L),
+		    np);
 
-		/*
-		 * Copy it to the registry so that even if the value is
-		 * we never call __gc until the thread is finished.
-		 */
-		lua_pushvalue(L, -1);
-		lua_rawsetp(L, LUA_REGISTRYINDEX, t);
+		thread->setState(std::move(threadState));
+		thread->setHandle(std::move(threadFunc));
 
-		std::thread handle = std::thread([&] () {
-			if (lua_pcall(newL, np, 0, 0) != LUA_OK)
-			{
-				Logger::warn("plugin %s: %s",
-				    Irccd::getInstance()->findPlugin(L)->getName().c_str(),
-				    lua_tostring(newL, -1));
-				lua_pop(L, 1);
-			}
+		new (L, THREAD_TYPE) Thread::Ptr(thread);
 
-			/*
-			 * Remove the reference from the registry so it can
-			 * be safely deleted.
-			 */
-			lua_pushnil(L);
-			lua_rawsetp(L, LUA_REGISTRYINDEX, t);
-		});
-
-		t->setHandle(std::move(handle));
 	}
 	catch (std::out_of_range)
 	{
@@ -193,19 +149,19 @@ int l_threadNew(lua_State *L)
 
 int l_threadWait(lua_State *L)
 {
-	Thread *t = toType<Thread *>(L, 1, THREAD_TYPE);
+	Thread::Ptr *t = toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
 
-	t->wait();
+	(*t)->wait();
 
 	return 0;
 }
 
 int l_threadGc(lua_State *L)
 {
-	Thread *t = toType<Thread *>(L, 1, THREAD_TYPE);
+	Thread::Ptr *t = toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
 
-	t->wait();
-	t->~Thread();
+	(*t)->detach();
+	(*t).~shared_ptr<Thread>();
 
 	return 0;
 }

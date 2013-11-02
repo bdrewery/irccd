@@ -570,7 +570,9 @@ void Irccd::unloadPlugin(const std::string &name)
 		}
 
 		m_pluginMap.erase(i->getState());
-	} catch (std::out_of_range) {
+	}
+	catch (std::out_of_range)
+	{
 		Logger::warn("irccd: there is no plugin %s loaded", name.c_str());
 	}
 
@@ -913,12 +915,23 @@ void Irccd::addWantedPlugin(const std::string &name)
 
 std::shared_ptr<Plugin> Irccd::findPlugin(lua_State *state)
 {
-	auto p = m_pluginMap.find(state);
+	for (auto plugin : m_pluginMap)
+	{
+		/*
+		 * Test if the current plugin is the one with that
+		 * Lua state.
+		 */
+		if (plugin.first == state)
+			return plugin.second;
+	}
 
-	if (p == m_pluginMap.end())
-		throw std::out_of_range("plugin not found");
+	for (auto plugin : m_threadMap)
+	{
+		if (plugin.first == state)
+			return plugin.second;
+	}
 
-	return (*p).second;
+	throw std::out_of_range("plugin not found");
 }
 
 std::shared_ptr<Plugin> Irccd::findPlugin(const std::string &name)
@@ -952,13 +965,18 @@ void Irccd::addDeferred(std::shared_ptr<Server> server, DefCall call)
 	m_deferred[server].push_back(call);
 }
 
-void Irccd::registerPluginThread(std::shared_ptr<Plugin> p,
-				 lua_State *newState)
+void Irccd::registerThread(lua_State *L, std::shared_ptr<Plugin> plugin)
 {
-	std::lock_guard<std::mutex> glock(m_pluginLock);
+	Lock lk(m_pluginLock);
 
-	m_pluginMap[newState] = p;
-	m_threadMap[newState] = true;
+	m_threadMap[L] = plugin;
+}
+
+void Irccd::unregisterThread(lua_State *L)
+{
+	Lock lk(m_pluginLock);
+	
+	m_threadMap.erase(L);
 }
 
 #endif

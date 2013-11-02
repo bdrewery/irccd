@@ -24,6 +24,7 @@
 #include <string>
 
 #include "Luae.h"
+#include "Thread.h"
 
 namespace irccd
 {
@@ -60,7 +61,9 @@ public:
 		lua_CFunction		m_func;		//! C function for it
 	};
 
-	using Libraries = std::vector<Library>;
+	using Libraries		= std::vector<Library>;
+	using Ptr		= std::shared_ptr<Plugin>;
+	using ThreadList	= std::vector<Thread::Ptr>;
 
 private:
 	// Plugin identity
@@ -68,7 +71,9 @@ private:
 	std::string m_home;		//! home, usually ~/.config/<name>/
 	std::string m_error;		//! error message if needed
 
+	// Lua state and its optional threads
 	LuaState m_state;
+	ThreadList m_threads;
 
 	/**
 	 * Call the function plugin with optional parameters.
@@ -86,11 +91,12 @@ public:
 	Plugin();
 
 	Plugin(const std::string &name);
+#if 0
 
 	Plugin(Plugin &&src);
 
 	Plugin &operator=(Plugin &&src);
-
+#endif
 
 	/**
 	 * Get the plugin name.
@@ -117,7 +123,7 @@ public:
 	 *
 	 * @return the Lua state
 	 */
-	LuaState & getState();
+	LuaState &getState();
 
 	/**
 	 * Get the error message if something failed.
@@ -133,6 +139,20 @@ public:
 	 * @return true on success
 	 */
 	bool open(const std::string &path);
+
+	/**
+	 * Register a thread as a plugin children.
+	 *
+	 * @param th the thread to register
+	 */
+	void addThread(Thread::Ptr th);
+
+	/**
+	 * Get the list of threads that the plugin owns.
+	 *
+	 * @return the list of threads
+	 */
+	ThreadList &getThreads();
 
 	/* ------------------------------------------------
 	 * IRC commands

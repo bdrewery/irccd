@@ -108,13 +108,15 @@ using PluginList	= std::vector<
 
 using ThreadMap		= std::unordered_map<
 				lua_State *,
-				bool
+				Plugin::Ptr
 			  >;
 
 using DefCallList	= std::unordered_map<
 				std::shared_ptr<Server>,
 				std::vector<DefCall>
 			  >;
+
+using Lock		= std::lock_guard<std::mutex>;
 
 #endif
 
@@ -313,14 +315,20 @@ public:
 	void addDeferred(std::shared_ptr<Server> server, DefCall call);
 
 	/**
-	 * This function is used to register the plugin name for the
-	 * new state of the given plugin.
+	 * Register the thread to one plugin so that irccd.plugin
+	 * think that L state is of plugin.
 	 *
-	 * @param plugin the existing plugin
-	 * @param newState the new state for the thread function
+	 * @param L the new Lua state
+	 * @param plugin for which plugin
 	 */
-	void registerPluginThread(std::shared_ptr<Plugin> p,
-				  lua_State *newState);
+	void registerThread(lua_State *L, std::shared_ptr<Plugin> plugin);
+
+	/**
+	 * Remove the attach thread from that Lua state
+	 *
+	 * @param L the Lua state from which thread
+	 */
+	void unregisterThread(lua_State *L);
 #endif
 
 	/**
