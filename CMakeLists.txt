@@ -24,7 +24,7 @@ project(irccd)
 
 set(MAJOR "1")
 set(MINOR "0")
-set(VERSION "${MAJOR}.${MINOR}.1")
+set(VERSION "${MAJOR}.${MINOR}.2")
 
 # General settings
 if (UNIX)
