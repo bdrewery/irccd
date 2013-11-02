@@ -66,6 +66,8 @@ set this only once.
 .Bl -tag -width PARAMETERXXX -compact
 .It type
 (string) Required. type of socket "internet" or "unix"
+.It protocol
+(string) Protocol to use, "tcp" or "udp", default: "tcp".
 .El
 .Pp
 The following parameters are available for type "internet":

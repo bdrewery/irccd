@@ -19,9 +19,8 @@
 #include "Irccd.h"
 #include "LuaPlugin.h"
 
-using namespace irccd;
-
-namespace functions {
+namespace irccd
+{
 
 static int getName(lua_State *L)
 {
@@ -41,17 +40,17 @@ static int getHome(lua_State *L)
 	return 1;
 }
 
-} // !functions
-
 const luaL_Reg functionList[] = {
-	{ "getName",		functions::getName	},
-	{ "getHome",		functions::getHome	},
+	{ "getName",		getName			},
+	{ "getHome",		getHome			},
 	{ nullptr,		nullptr			}
 };
 
-int irccd::luaopen_plugin(lua_State *L)
+int luaopen_plugin(lua_State *L)
 {
 	luaL_newlib(L, functionList);
 
 	return 1;
 }
+
+} // !irccd

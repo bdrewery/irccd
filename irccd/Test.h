@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-namespace irccd {
+namespace irccd
+{
 
 void test(int argc, char **argv);
 

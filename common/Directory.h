@@ -22,14 +22,17 @@
 #include <string>
 #include <vector>
 
-namespace irccd {
+namespace irccd
+{
 
-struct Entry {
+struct Entry
+{
 	std::string m_name;
 	bool m_isDirectory;
 };
 
-class Directory {
+class Directory
+{
 private:
 	std::string m_path;
 	std::string m_error;
@@ -70,6 +73,7 @@ public:
 };
 
 bool operator==(const Entry &e1, const Entry &e2);
+
 bool operator==(const Directory &d1, const Directory &d2);
 
 } // !irccd

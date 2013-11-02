@@ -17,6 +17,7 @@
  */
 
 #include <cstdlib>
+#include <cstring>
 
 #include <signal.h>
 
@@ -36,9 +37,7 @@ static void quit(int)
 static void usage()
 {
 	Logger::warn("usage: %s [-fv] [-c config] [-p pluginpath] [-P plugin]", getprogname());
-	Logger::warn("       %s test plugin.lua [command] [parameters...]", getprogname());
-
-	exit(1);
+	Logger::fatal(1, "       %s test plugin.lua [command] [parameters...]", getprogname());
 }
 
 int main(int argc, char **argv)
@@ -52,11 +51,11 @@ int main(int argc, char **argv)
 		switch (ch) {
 		case 'c':
 			irccd->setConfigPath(string(optarg));
-			irccd->override(options::Config);
+			irccd->override(Options::Config);
 			break;
 		case 'f':
 			irccd->setForeground(true);
-			irccd->override(options::Foreground);
+			irccd->override(Options::Foreground);
 			break;
 		case 'p':
 			irccd->addPluginPath(string(optarg));
@@ -66,7 +65,7 @@ int main(int argc, char **argv)
 			break;
 		case 'v':
 			Logger::setVerbose(true);
-			irccd->override(options::Verbose);
+			irccd->override(Options::Verbose);
 			break;
 		case '?':
 		default:
@@ -82,8 +81,7 @@ int main(int argc, char **argv)
 		test(argc, argv);
 		// NOTREACHED
 #else
-		Logger::warn("The command test is not available, Lua support is disabled");
-		exit(1);
+		Logger::fatal(1, "The command test is not available, Lua support is disabled");
 #endif
 	}
 

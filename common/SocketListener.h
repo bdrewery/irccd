@@ -1,7 +1,7 @@
 /*
- * SocketListener.h -- portable wrapper around select()
+ * SocketListener.h -- portable select() wrapper
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,15 +23,21 @@
 
 #include "Socket.h"
 
-namespace irccd {
+namespace irccd
+{
 
-class SocketListener : public Socket {
+/**
+ * @class SocketTimeout
+ * @brief thrown when a timeout occured
+ */
+class SocketTimeout : public std::exception
+{
 public:
-	class TimeoutException : public std::exception {
-	public:
-		virtual const char * what() const throw();
-	};
+	virtual const char * what(void) const throw();
+};
 
+class SocketListener
+{
 private:
 	std::vector<Socket> m_clients;
 
@@ -41,14 +47,21 @@ public:
 	 *
 	 * @param s the socket
 	 */
-	void add(Socket &s);
+	void add(Socket s);
+
+	/**
+	 * Get the number of client in the listener.
+	 *
+	 * @return the number
+	 */
+	long size() const;
 
 	/**
 	 * Remove a socket from the list.
 	 *
 	 * @param s the socket
 	 */
-	void remove(Socket &s);
+	void remove(Socket s);
 
 	/**
 	 * Remove every sockets in the listener.
@@ -56,21 +69,16 @@ public:
 	void clear();
 
 	/**
-	 * Get the number of sockets registered for listening.
+	 * Wait for an event in the socket list. If both s and us are set to 0 then
+	 * it waits indefinitely.
 	 *
-	 * @return the number of sockets to listen
-	 */
-	size_t size();
-
-	/**
-	 * Wait for an event in the socket liste.
-	 *
-	 * @param timeout an optional timeout, 0 means forever
+	 * @param s the timeout in seconds
+	 * @param us the timeout in milliseconds
 	 * @return the socket ready
-	 * @throw Socket::ErrorException on error
-	 * @throw SocketListener::TimeoutException on timeout
+	 * @throw SocketError on error
+	 * @throw SocketTimeout on timeout
 	 */
-	Socket & select(int timeout = 0);
+	Socket select(int s = 0, int us = 0);
 };
 
 } // !irccd

@@ -41,7 +41,7 @@ Connect to one or more servers,
 .It
 Use different identities for each servers,
 .It
-Manageable by UNIX or Internet TCP sockets,
+Manageable by UNIX or Internet sockets (both TCP and UDP),
 .It
 Highly extensible with Lua plugins,
 .El

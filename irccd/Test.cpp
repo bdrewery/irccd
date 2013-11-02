@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cstring>
 #include <functional>
 #include <map>
 #include <string>
@@ -28,11 +29,11 @@
 #include "Server.h"
 #include "Test.h"
 
-using namespace irccd;
-using namespace std;
+namespace irccd
+{
 
-typedef function<void()>							HelpFunction;
-typedef function<void(shared_ptr<Plugin>, shared_ptr<Server>, int, char **)>	TestFunction;
+typedef std::function<void()> HelpFunction;
+typedef std::function<void(std::shared_ptr<Plugin>, std::shared_ptr<Server>, int, char **)> TestFunction;
 
 class FakeServer : public Server {
 public:
@@ -42,35 +43,35 @@ public:
 		m_identity = identity;
 	}
 
-	void cnotice(const string &channel, const string &message)
+	void cnotice(const std::string &channel, const std::string &message)
 	{
 		Logger::log("test: notice: (%s) %s", channel.c_str(), message.c_str());
 	}
 
-	void invite(const string &target, const string &channel)
+	void invite(const std::string &target, const std::string &channel)
 	{
 		Logger::log("test: invite: %s invited to channel %s",
 		    target.c_str(), channel.c_str());
 	}
 
-	void join(const string &name, const string &password)
+	void join(const std::string &name, const std::string &password)
 	{
 		Logger::log("test: join: joining channel %s with password \"%s\"",
 		    name.c_str(), password.c_str());
 	}
 
-	void kick(const string &name, const string &channel, const string &reason)
+	void kick(const std::string &name, const std::string &channel, const std::string &reason)
 	{
 		Logger::log("test: kick: kicking %s from channel %s reason \"%s\"",
 		    name.c_str(), channel.c_str(), reason.c_str());
 	}
 
-	void me(const string &target, const string &message)
+	void me(const std::string &target, const std::string &message)
 	{
 		Logger::log("test: me: * %s: %s", target.c_str(), message.c_str());
 	}
 
-	void mode(const string &channel, const string &mode)
+	void mode(const std::string &channel, const std::string &mode)
 	{
 		Logger::log("test: mode: %s mode %s", channel.c_str(), mode.c_str());
 	}
@@ -80,34 +81,34 @@ public:
 		Logger::log("test: names: gettings names from %s", channel.c_str());
 	}
 
-	void nick(const string &nick)
+	void nick(const std::string &nick)
 	{
 		Logger::log("test: nick: changing nick to %s", nick.c_str());
 	}
 
-	void notice(const string &nickname, const string &message)
+	void notice(const std::string &nickname, const std::string &message)
 	{
 		Logger::log("test: notice: from %s: %s", nickname.c_str(), message.c_str());
 	}
 
-	void part(const string &channel)
+	void part(const std::string &channel)
 	{
 		Logger::log("test: part: leaving channel %s", channel.c_str());
 	}
 
-	void query(const string &who, const string &message)
+	void query(const std::string &who, const std::string &message)
 	{
 		Logger::log("test: query: private message from %s: %s",
 		    who.c_str(), message.c_str());
 	}
 
-	void say(const string &target, const string &message)
+	void say(const std::string &target, const std::string &message)
 	{
 		Logger::log("test: say: said %s to %s", message.c_str(),
 		    target.c_str());
 	}
 
-	void topic(const string &channel, const string &topic)
+	void topic(const std::string &channel, const std::string &topic)
 	{
 		Logger::log("test: topic: changing %s topic to %s",
 		    channel.c_str(), topic.c_str());
@@ -252,9 +253,9 @@ static void helpUserMode()
 	Logger::warn("\t%s test file onUserMode john +i");
 }
 
-static map<string, HelpFunction> createHelpCommands()
+static std::map<std::string, HelpFunction> createHelpCommands()
 {
-	map<string, HelpFunction> commands;
+	std::map<std::string, HelpFunction> commands;
 
 	commands["onCommand"]		= helpCommand;
 	commands["onConnect"]		= helpConnect;
@@ -274,152 +275,139 @@ static map<string, HelpFunction> createHelpCommands()
 	return commands;
 }
 
-static map<string, HelpFunction> helpCommands = createHelpCommands();
+static std::map<std::string, HelpFunction> helpCommands = createHelpCommands();
 
 // }}}
 
 // {{{ Test functions
 
-static void testCommand(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
+static void testCommand(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
-	if (argc < 3) {
+	if (argc < 3)
 		Logger::warn("test: onCommand requires 3 arguments");
-	} else {
+	else
 		p->onCommand(s, argv[0], argv[1], argv[2]);
-	}
 }
 
-static void testConnect(shared_ptr<Plugin> p, shared_ptr<Server> s, int, char **)
+static void testConnect(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int, char **)
 {
 	p->onConnect(s);
 }
 
-static void testChannelNotice(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
+static void testChannelNotice(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
-	if (argc < 3) {
+	if (argc < 3)
 		Logger::warn("test: onChannelNotice requires 3 arguments");
-	} else {
+	else
 		p->onChannelNotice(s, argv[0], argv[1], argv[2]);
-	}
 }
 
-static void testInvite(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
+static void testInvite(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
-	if (argc < 2) {
+	if (argc < 2)
 		Logger::warn("test: onInvite requires 2 arguments");
-	} else {
+	else
 		p->onInvite(s, argv[0], argv[1]);
-	}
 }
 
-static void testJoin(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
+static void testJoin(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
-	if (argc < 2) {
+	if (argc < 2)
 		Logger::warn("test: onJoin requires 2 arguments");
-	} else {
+	else
 		p->onJoin(s, argv[0], argv[1]);
-	}
 }
 
-static void testKick(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
+static void testKick(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
-	string reason;
+	std::string reason;
 
-	if (argc < 3) {
+	if (argc < 3)
 		Logger::warn("test: onKick requires at least 3 arguments");
-	} else {
+	else
 		if (argc > 4)
 			reason = argv[3];
 
 		p->onKick(s, argv[0], argv[1], argv[2], reason);
-	}
 }
 
-static void testMessage(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
+static void testMessage(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
-	if (argc < 3) {
+	if (argc < 3)
 		Logger::warn("test: onMessage requires 3 arguments");
-	} else {
+	else
 		p->onMessage(s, argv[0], argv[1], argv[2]);
-	}
 }
 
-static void testMode(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
+static void testMode(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
-	string modeArg;
+	std::string modeArg;
 
-	if (argc < 3) {
+	if (argc < 3)
 		Logger::warn("test: onMode requires at least 3 arguments");
-	} else {
+	else
 		if (argc >= 4)
 			modeArg = argv[3];
 
 		p->onMode(s, argv[0], argv[1], argv[2], modeArg);
-	}
 }
 
-static void testNick(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
+static void testNick(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
-	if (argc < 2) {
+	if (argc < 2)
 		Logger::warn("test: onNick requires 2 arguments");
-	} else {
+	else
 		p->onNick(s, argv[0], argv[1]);
-	}
 }
 
-static void testNotice(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
+static void testNotice(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
-	if (argc < 3) {
+	if (argc < 3)
 		Logger::warn("test: onNotice requires 3 arguments");
-	} else {
+	else
 		p->onNotice(s, argv[0], argv[1], argv[2]);
-	}
 }
 
-static void testPart(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
+static void testPart(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
-	string reason;
+	std::string reason;
 
-	if (argc < 3) {
+	if (argc < 3)
 		Logger::warn("test: onPart requires at least 2 argument");
-	} else {
+	else
 		if (argc >= 3)
 			reason = argv[2];
 
 		p->onPart(s, argv[0], argv[1], reason);
-	}
 }
 
-static void testQuery(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
+static void testQuery(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
-	if (argc < 2) {
+	if (argc < 2)
 		Logger::warn("test: onQuery requires 2 arguments");
-	} else {
+	else
 		p->onQuery(s, argv[0], argv[1]);
-	}
 }
 
-static void testTopic(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
+static void testTopic(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
-	if (argc < 3) {
+	if (argc < 3)
 		Logger::warn("test: onTopic requires 3 arguments");
-	} else {
+	else
 		p->onTopic(s, argv[0], argv[1], argv[2]);
-	}
 }
 
-static void testUserMode(shared_ptr<Plugin> p, shared_ptr<Server> s, int argc, char **argv)
+static void testUserMode(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
-	if (argc < 2) {
+	if (argc < 2)
 		Logger::warn("test: onUserMode requires 2 arguments");
-	} else {
+	else
 		p->onUserMode(s, argv[0], argv[1]);
-	}
 }
 
-static map<string, TestFunction> createCommands()
+static std::map<std::string, TestFunction> createCommands()
 {
-	map<string, TestFunction> commands;
+	std::map<std::string, TestFunction> commands;
 
 	commands["onCommand"]		= testCommand;
 	commands["onConnect"]		= testConnect;
@@ -439,7 +427,7 @@ static map<string, TestFunction> createCommands()
 	return commands;
 }
 
-static map<string, TestFunction> testCommands = createCommands();
+static std::map<std::string, TestFunction> testCommands = createCommands();
 
 // }}}
 
@@ -451,53 +439,62 @@ static void testPlugin(const char *file, int argc, char **argv)
 	info.m_name = "local";
 	info.m_host = "local";
 	info.m_port = 6667;
-	shared_ptr<FakeServer> server = make_shared<FakeServer>(info, ident);
+	std::shared_ptr<FakeServer> server = std::make_shared<FakeServer>(info, ident);
 
-	if (strcmp(argv[0], "help") == 0) {
-		if (argc > 1) {
-			try {
+	if (strcmp(argv[0], "help") == 0)
+	{
+		if (argc > 1)
+		{
+			try
+			{
 				helpCommands.at(argv[1])();
 				exit(0);
-			} catch (out_of_range ex) {
-				Logger::warn("There is no subject named %s", argv[1]);
-				exit(1);
 			}
-		} else {
-			Logger::warn("test: help requires 1 argument");
-			exit(1);
+			catch (std::out_of_range ex)
+			{
+				Logger::fatal(1, "There is no subject named %s", argv[1]);
+			}
 		}
+		else
+			Logger::fatal(1, "test: help requires 1 argument");
 	}
 
 	// Always push before calling it
-	string name = Util::baseName(string(file));
+	std::string name = Util::baseName(std::string(file));
 	size_t epos = name.find(".lua");
-	if (epos != string::npos)
+	if (epos != std::string::npos)
 		name = name.erase(epos);
 
-	Irccd::getInstance()->getPlugins().push_back(make_shared<Plugin>(name));
+	Irccd::getInstance()->getPlugins().push_back(std::make_shared<Plugin>(name));
 
-	shared_ptr<Plugin> plugin = Irccd::getInstance()->getPlugins().back();
-	if (!plugin->open(file)) {
+	std::shared_ptr<Plugin> plugin = Irccd::getInstance()->getPlugins().back();
+	if (!plugin->open(file))
 		Logger::warn("Failed to open plugin: %s", plugin->getError().c_str());
-	}
 
 	// Simulate handler is optional
-	if (argc > 1) {
-		try {
+	if (argc > 1)
+	{
+		try
+		{
 			testCommands.at(argv[1])(plugin, server, argc - 2, argv + 2);
-		} catch (out_of_range ex) {
+		}
+		catch (std::out_of_range ex)
+		{
 			Logger::warn("Unknown test command named %s", argv[1]);
-		} catch (Plugin::ErrorException ex) {
+		}
+		catch (Plugin::ErrorException ex)
+		{
 			Logger::warn("Error in script %s", ex.what());
 		}
 	}
 }
 
-void irccd::test(int argc, char **argv)
+void test(int argc, char **argv)
 {
 	Logger::setVerbose(true);
 
-	if (argc < 2) {
+	if (argc < 2)
+	{
 		Logger::warn("usage: %s test plugin.lua [command] [parameters...]", getprogname());
 		Logger::warn("       %s test help <command>", getprogname());
 
@@ -514,10 +511,11 @@ void irccd::test(int argc, char **argv)
 		Logger::warn("\tonNick\t\t\tChange your nickname");
 		Logger::warn("\tonPart\t\t\tLeave a channel");
 		Logger::warn("\tonTopic\t\t\tTest a topic channel change");
-		Logger::warn("\tonUserMode\t\tTest a user mode change");
-	} else {
-		testPlugin(argv[1], argc - 1, argv + 1);
+		Logger::fatal(1, "\tonUserMode\t\tTest a user mode change");
 	}
 
-	exit(1);
+	testPlugin(argv[1], argc - 1, argv + 1);
+	std::exit(0);
 }
+
+} // !irccd

@@ -27,31 +27,15 @@
 
 #include <config.h>
 
-namespace irccd {
+namespace irccd
+{
 
-class Util {
-private:
-	/**
-	 * Get the installation prefix or installation directory. Also append
-	 * the path to it.
-	 *
-	 * @param path what to append
-	 * @return the final path
-	 */
-	static std::string pathBase(const std::string &path);
-
-	/**
-	 * Get the local path to the user append the path at the end.
-	 *
-	 * @param path what to append
-	 * @return the final path
-	 */
-	static std::string pathUser(const std::string &path);
-
+class Util
+{
 public:
-	typedef std::function<bool (const std::string &)> ConfigFinder;
-
-	class ErrorException : public std::exception {
+	class ErrorException : public std::exception
+	{
+	private:
 		std::string m_error;
 
 	public:
@@ -62,10 +46,28 @@ public:
 		virtual const char * what() const throw();
 	};
 
+public:
 	/**
 	 * Directory separator, / on unix, \ on Windows.
 	 */
 	static const char DIR_SEP;
+
+	/**
+	 * Get the installation prefix or installation directory. Also append
+	 * the path to it.
+	 *
+	 * @param path what to append
+	 * @return the final path
+	 */
+	static std::string pathBase(const std::string &path = "");
+
+	/**
+	 * Get the local path to the user append the path at the end.
+	 *
+	 * @param path what to append
+	 * @return the final path
+	 */
+	static std::string pathUser(const std::string &path = "");
 
 	/**
 	 * Get the basename of a file path, that is, remove
@@ -77,49 +79,6 @@ public:
 	static std::string baseName(const std::string &path);
 
 	/**
-	 * Get the system config path, usually /usr/local/etc on Unix
-	 * and the install path for Windows.
-	 *
-	 * @return the path
-	 */
-	static inline std::string configSystem()
-	{
-		return pathBase(ETCDIR) + DIR_SEP;
-	}
-
-	/**
-	 * Get the user config directory, on Unix it will be
-	 * XDG_CONFIG_HOME or ~/.config/home
-	 *
-	 * @return the path
-	 */
-	static inline std::string configUser()
-	{
-		return pathUser("") + DIR_SEP;
-	}
-
-	/**
-	 * Return the plugin system path, usually /usr/local/share/irccd/plugins
-	 * on Unix and the installation path + plugins on Windows.
-	 *
-	 * @return the path
-	 */
-	static inline std::string pluginPathSystem()
-	{
-		return pathBase(MODDIR) + DIR_SEP;
-	}
-
-	/**
-	 * Return the default user plugin path.
-	 *
-	 * @return the path
-	 */
-	static inline std::string pluginPathUser()
-	{
-		return pathUser("plugins") + DIR_SEP;
-	}
-
-	/**
 	 * Wrapper around dirname(3) for portability. Returns the parent
 	 * directory of the file
 	 *
@@ -129,12 +88,60 @@ public:
 	static std::string dirName(const std::string &file);
 
 	/**
+	 * Find a configuration file, only for irccd.conf or
+	 * irccdctl.conf. Order is:
+	 *
+	 * 1. User's config
+	 * 2. System
+	 *
+	 * Example:
+	 * 	~/.config/irccd || C:\Users\jean\irccd
+	 * 	/usr/local/etc/ || Path\To\Irccd\etc
+	 *
+	 * @param filename the filename to append
+	 * @return the found path
+	 * @throw ErrorException if none found
+	 */
+	static std::string findConfiguration(const std::string &filename);
+
+	/**
+	 * Find the plugin home directory. Order is:
+	 *
+	 * 1. User's config
+	 * 2. System
+	 *
+	 * Example:
+	 * 	~/.config/irccd/<name> || C:\Users\jean\irccd\<name>
+	 * 	/usr/local/etc/irccd/<name> || Path\To\Irccd\etc\irccd\<name>
+	 *
+	 * @param name the plugin name
+	 * @return the found path or system one
+	 */
+	static std::string findPluginHome(const std::string &name);
+
+	/**
 	 * Tell if a specified file or directory exists
 	 *
 	 * @param path the file / directory to check
 	 * @return true on success
 	 */
 	static bool exist(const std::string &path);
+
+	/**
+	 * Tells if the path is absolute.
+	 *
+	 * @param path the path
+	 * @return true if it is
+	 */
+	static bool isAbsolute(const std::string &path);
+
+	/**
+	 * Tells if the user has access to a file.
+	 *
+	 * @param path the path
+	 * @return true if has
+	 */
+	static bool hasAccess(const std::string &path);
 
 	/**
 	 * Get home directory usually /home/foo
@@ -152,33 +159,12 @@ public:
 	static uint64_t getTicks();
 
 	/**
-	 * Get the prefix of installation. This is mostly used on Windows as
-	 * the installer let the user install the software where he wants. Also
-	 * this let the application being distributed just as a simple ZIP file.
-	 *
-	 * The function called must return true if it has successfully opened the
-	 * file.
-	 *
-	 * @param name the file name
-	 * @param func the function to call
-	 * @return true if a file has been opened false otherwise
-	 */
-	static bool findConfig(const std::string &name, ConfigFinder func);
-
-	/**
 	 * Create a directory.
 	 *
 	 * @param dir the directory path
 	 * @param mode the mode
 	 */
 	static void mkdir(const std::string &dir, int mode);
-
-	/**
-	 * Get the user plugin directory. This add a trailing slash.
-	 *
-	 * @return a string to the plugin path
-	 */
-	static std::string pluginDirectory();
 
 	/**
 	 * Split a string by delimiters.
@@ -188,7 +174,9 @@ public:
 	 * @param max max number of split
 	 * @return a list of string splitted
 	 */
-	static std::vector<std::string> split(const std::string &list, const std::string &delimiter, int max = -1);
+	static std::vector<std::string> split(const std::string &list,
+					      const std::string &delimiter,
+					      int max = -1);
 
 	/**
 	 * Sleep for milli seconds.

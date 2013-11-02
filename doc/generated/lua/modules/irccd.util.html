@@ -18,6 +18,7 @@
 <h2 class="kind">Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
 <li><a href="#Class_Date">Class Date </a></li>
 <li><a href="#Date_metamethods">Date metamethods </a></li>
 <li><a href="#Class_Directory">Class Directory </a></li>
@@ -31,34 +32,40 @@
   <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
   <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
   <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
+  <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
+  <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
   <li><strong>irccd.util</strong></li>
 </ul>
 <h2 class="kind">Topics</h2>
 <ul>
   <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
-  <li><a href="../topics/2-Plugin-creation.md.html">2-Plugin-creation.md</a></li>
-  <li><a href="../topics/2.1-Using-irccd-test.md.html">2.1-Using-irccd-test.md</a></li>
-  <li><a href="../topics/3-Events.md.html">3-Events.md</a></li>
-  <li><a href="../topics/3.101-Action.md.html">3.101-Action.md</a></li>
-  <li><a href="../topics/3.102-Command.md.html">3.102-Command.md</a></li>
-  <li><a href="../topics/3.103-Connect.md.html">3.103-Connect.md</a></li>
-  <li><a href="../topics/3.104-Channel-notice.md.html">3.104-Channel-notice.md</a></li>
-  <li><a href="../topics/3.105-Invite.md.html">3.105-Invite.md</a></li>
-  <li><a href="../topics/3.106-Join.md.html">3.106-Join.md</a></li>
-  <li><a href="../topics/3.107-Kick.md.html">3.107-Kick.md</a></li>
-  <li><a href="../topics/3.108-Message.md.html">3.108-Message.md</a></li>
-  <li><a href="../topics/3.109-Mode.md.html">3.109-Mode.md</a></li>
-  <li><a href="../topics/3.110-Nick.md.html">3.110-Nick.md</a></li>
-  <li><a href="../topics/3.111-Notice.md.html">3.111-Notice.md</a></li>
-  <li><a href="../topics/3.112-Part.md.html">3.112-Part.md</a></li>
-  <li><a href="../topics/3.113-Query.md.html">3.113-Query.md</a></li>
-  <li><a href="../topics/3.114-Reload.md.html">3.114-Reload.md</a></li>
-  <li><a href="../topics/3.115-Topic.md.html">3.115-Topic.md</a></li>
-  <li><a href="../topics/3.116-User-mode.md.html">3.116-User-mode.md</a></li>
+  <li><a href="../topics/2-Plugin_creation.md.html">2-Plugin_creation.md</a></li>
+  <li><a href="../topics/2.1-Using_irccd_test.md.html">2.1-Using_irccd_test.md</a></li>
+  <li><a href="../topics/2.2-List_of_Events.md.html">2.2-List_of_Events.md</a></li>
+  <li><a href="../topics/3-Event-Action.md.html">3-Event-Action.md</a></li>
+  <li><a href="../topics/3-Event-Channel-notice.md.html">3-Event-Channel-notice.md</a></li>
+  <li><a href="../topics/3-Event-Command.md.html">3-Event-Command.md</a></li>
+  <li><a href="../topics/3-Event-Connect.md.html">3-Event-Connect.md</a></li>
+  <li><a href="../topics/3-Event-Invite.md.html">3-Event-Invite.md</a></li>
+  <li><a href="../topics/3-Event-Join.md.html">3-Event-Join.md</a></li>
+  <li><a href="../topics/3-Event-Kick.md.html">3-Event-Kick.md</a></li>
+  <li><a href="../topics/3-Event-Load.md.html">3-Event-Load.md</a></li>
+  <li><a href="../topics/3-Event-Message.md.html">3-Event-Message.md</a></li>
+  <li><a href="../topics/3-Event-Mode.md.html">3-Event-Mode.md</a></li>
+  <li><a href="../topics/3-Event-Nick.md.html">3-Event-Nick.md</a></li>
+  <li><a href="../topics/3-Event-Notice.md.html">3-Event-Notice.md</a></li>
+  <li><a href="../topics/3-Event-Part.md.html">3-Event-Part.md</a></li>
+  <li><a href="../topics/3-Event-Query.md.html">3-Event-Query.md</a></li>
+  <li><a href="../topics/3-Event-Reload.md.html">3-Event-Reload.md</a></li>
+  <li><a href="../topics/3-Event-Topic.md.html">3-Event-Topic.md</a></li>
+  <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
+  <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
 </ul>
 <h2 class="kind">Examples</h2>
 <ul>
   <li><a href="../examples/Deferred.lua.html">Deferred.lua</a></li>
+  <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
   <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
 </ul>
 
@@ -91,6 +98,10 @@
 	<td class="summary">Check if a file exists.</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#format">format&nbsp;(text, attrs)</a></td>
+	<td class="summary">Format text with colors and attributes.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#getHome">getHome&nbsp;()</a></td>
 	<td class="summary">Get the home directory.</td>
 	</tr>
@@ -113,6 +124,17 @@
 	<tr>
 	<td class="name" nowrap><a href="#usleep">usleep&nbsp;(msec)</a></td>
 	<td class="summary">Sleep for milliseconds.</td>
+	</tr>
+</table>
+<h2 class="kind"><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#color">color</a></td>
+	<td class="summary">Colors</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#attribute">attribute</a></td>
+	<td class="summary">Attributes</td>
 	</tr>
 </table>
 <h2 class="kind"><a href="#Class_Date">Class Date </a></h2>
@@ -278,6 +300,44 @@
 
 </dd>
     <dt>
+    <a name = "format"></a>
+    <strong>format&nbsp;(text, attrs)</strong>
+    </dt>
+    <dd>
+    Format text with colors and attributes.
+ The table attrs may have the following fields:
+ <ul>
+ <li><strong>fg (int)</strong>: the foreground color</li>
+ <li><strong>bg (int)</strong>: the background color</li>
+ <li><strong>attrs (table or int)</strong>: may be a sequence or one attribute</li>
+ </ul>
+ <br />
+ <strong>Note: some attributes are not available on all IRC servers and
+ colours are based on mIRC, nothing standard.</strong>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">text</span>
+         the text to format</li>
+        <li><span class="parameter">attrs</span>
+         the parameters, see above</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string ready to be sent
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../examples/Formatting.lua.html#">Formatting.lua</a>
+    </ul>
+
+
+</dd>
+    <dt>
     <a name = "getHome"></a>
     <strong>getHome&nbsp;()</strong>
     </dt>
@@ -417,6 +477,89 @@
     <ul>
         <li><span class="parameter">msec</span>
          the number of milliseconds</li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="kind"><a name="Tables"></a>Tables</h2>
+    <dl class="function">
+    <dt>
+    <a name = "color"></a>
+    <strong>color</strong>
+    </dt>
+    <dd>
+    Colors
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">White</span>
+        White.</li>
+        <li><span class="parameter">Black</span>
+        Black.</li>
+        <li><span class="parameter">Blue</span>
+        Blue.</li>
+        <li><span class="parameter">Green</span>
+        Green.</li>
+        <li><span class="parameter">Red</span>
+        Red.</li>
+        <li><span class="parameter">Brown</span>
+        Brown.</li>
+        <li><span class="parameter">Purple</span>
+        Purple.</li>
+        <li><span class="parameter">Orange</span>
+        Orange.</li>
+        <li><span class="parameter">Yellow</span>
+        Yellow.</li>
+        <li><span class="parameter">LightGreen</span>
+        LightGreen.</li>
+        <li><span class="parameter">Cyan</span>
+        Cyan.</li>
+        <li><span class="parameter">LightCyan</span>
+        LightCyan.</li>
+        <li><span class="parameter">LightBlue</span>
+        LightBlue.</li>
+        <li><span class="parameter">Pink</span>
+        Pink.</li>
+        <li><span class="parameter">Grey</span>
+        Grey.</li>
+        <li><span class="parameter">LightGrey</span>
+        LightGrey.</li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "attribute"></a>
+    <strong>attribute</strong>
+    </dt>
+    <dd>
+    Attributes
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">Bold</span>
+        Bold.</li>
+        <li><span class="parameter">Color</span>
+        Color (start a color sequence).</li>
+        <li><span class="parameter">Italic</span>
+        Italic.</li>
+        <li><span class="parameter">StrikeThrough</span>
+        StrikeThrough.</li>
+        <li><span class="parameter">Reset</span>
+        Reset (remove all formatting).</li>
+        <li><span class="parameter">Underline</span>
+        Underline1.</li>
+        <li><span class="parameter">Underline2</span>
+        Underline2.</li>
+        <li><span class="parameter">Reverse</span>
+        Reverse (reverse foreground and background).</li>
     </ul>
 
 

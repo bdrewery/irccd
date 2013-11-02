@@ -16,9 +16,17 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cstring>
 #include <iostream>
 #include <map>
 #include <utility>
+
+#if !defined(_WIN32)
+#  include <sys/types.h>
+#  include <netinet/in.h>
+#  include <arpa/nameser.h>
+#  include <resolv.h>
+#endif
 
 #include <libirc_rfcnumeric.h>
 
@@ -27,8 +35,8 @@
 
 #include "Irccd.h"
 
-using namespace irccd;
-using namespace std;
+namespace irccd
+{
 
 /* {{{ IRC handlers */
 
@@ -38,11 +46,11 @@ static void handleChannel(irc_session_t *s,
 			  const char **params,
 			  unsigned int)
 {
-	shared_ptr<Server> server = Server::toServer(s);
+	std::shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
-	evparams.push_back(orig);
+	evparams.push_back((orig == nullptr) ? "" : orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
 	Irccd::getInstance()->handleIrcEvent(
@@ -56,10 +64,10 @@ static void handleChannelNotice(irc_session_t *s,
 				const char **params,
 				unsigned int)
 {
-	shared_ptr<Server> server = Server::toServer(s);
+	std::shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
-	evparams.push_back(orig);
+	evparams.push_back((orig == nullptr) ? "" : orig);
 	evparams.push_back(params[0]);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
@@ -74,23 +82,34 @@ static void handleConnect(irc_session_t *s,
 			  const char **,
 			  unsigned int)
 {
-	shared_ptr<Server> server = Server::toServer(s);
+	std::shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	Irccd::getInstance()->handleIrcEvent(
 	    IrcEvent(IrcEventType::Connection, evparams, server)
 	);
 
-	irc_cmd_whois(s, "harddev");
+	server->resetRetries();
 }
 
-static void handleCtcpRequest(irc_session_t *,
+static void handleCtcpRequest(irc_session_t *s,
 			      const char *,
-			      const char *,
-			      const char **,
+			      const char *orig,
+			      const char **params,
 			      unsigned int)
 {
-	// not implemented yet
+	std::shared_ptr<Server> server = Server::toServer(s);
+	std::string target = orig;
+	std::ostringstream oss;
+
+	if (params[0] != nullptr && strcmp(params[0], "VERSION") == 0)
+	{
+		oss << "VERSION ";
+		oss << server->getIdentity().m_ctcpVersion;
+
+		if (server->getIdentity().m_ctcpReply)
+			irc_cmd_ctcp_reply(s, orig, oss.str().c_str());
+	}
 }
 
 static void handleInvite(irc_session_t *s,
@@ -99,7 +118,7 @@ static void handleInvite(irc_session_t *s,
 			 const char **params,
 			 unsigned int)
 {
-	shared_ptr<Server> server = Server::toServer(s);
+	std::shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[1]);
@@ -116,7 +135,7 @@ static void handleJoin(irc_session_t *s,
 		       const char **params,
 		       unsigned int)
 {
-	shared_ptr<Server> server = Server::toServer(s);
+	std::shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -133,7 +152,7 @@ static void handleKick(irc_session_t *s,
 		       const char **params,
 		       unsigned int)
 {
-	shared_ptr<Server> server = Server::toServer(s);
+	std::shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -152,7 +171,7 @@ static void handleMode(irc_session_t *s,
 		       const char **params,
 		       unsigned int)
 {
-	shared_ptr<Server> server = Server::toServer(s);
+	std::shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -171,7 +190,7 @@ static void handleNick(irc_session_t *s,
 		       const char **params,
 		       unsigned int)
 {
-	shared_ptr<Server> server = Server::toServer(s);
+	std::shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(orig);
@@ -188,7 +207,7 @@ static void handleNotice(irc_session_t *s,
 			 const char **params,
 			 unsigned int)
 {
-	shared_ptr<Server> server = Server::toServer(s);
+	std::shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(orig);
@@ -206,27 +225,33 @@ static void handleNumeric(irc_session_t *s,
 			  const char **params,
 			  unsigned int c)
 {
-	shared_ptr<Server> server = Server::toServer(s);
+	std::shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
-	if (event == LIBIRC_RFC_RPL_NAMREPLY) {
+	if (event == LIBIRC_RFC_RPL_NAMREPLY)
+	{
 		Server::NameList &list = server->getNameLists();
 
-		if (params[3] != nullptr && params[2] != nullptr) {
-			std::vector<string> users = Util::split(params[3], " \t");
+		if (params[3] != nullptr && params[2] != nullptr)
+		{
+			std::vector<std::string> users = Util::split(params[3], " \t");
 
 			// The listing may add some prefixes, remove them if needed
-			for (string u : users) {
+			for (std::string u : users)
+			{
 				if (server->hasPrefix(u))
 					u.erase(0, 1);
 
 				list[params[2]].push_back(u);
 			}
 		}
-	} else if (event == LIBIRC_RFC_RPL_ENDOFNAMES) {
+	}
+	else if (event == LIBIRC_RFC_RPL_ENDOFNAMES)
+	{
 		Server::NameList &list = server->getNameLists();
 
-		if (params[1] != nullptr) {
+		if (params[1] != nullptr)
+		{
 			Irccd::getInstance()->handleIrcEvent(
 				IrcEvent(IrcEventType::Names, list[params[1]], server)
 			);
@@ -236,7 +261,8 @@ static void handleNumeric(irc_session_t *s,
 		list.clear();
 	}
 
-	if (event == LIBIRC_RFC_RPL_WHOISUSER) {
+	if (event == LIBIRC_RFC_RPL_WHOISUSER)
+	{
 		Server::WhoisInfo info;
 
 		info.nick = params[1];
@@ -245,15 +271,19 @@ static void handleNumeric(irc_session_t *s,
 		info.realname = params[5];
 
 		server->getWhoisLists()[info.nick] = info;
-	} else if (event == LIBIRC_RFC_RPL_WHOISCHANNELS) {
+	}
+	else if (event == LIBIRC_RFC_RPL_WHOISCHANNELS)
+	{
 		Server::WhoisInfo &info = server->getWhoisLists()[params[1]];
 
 		// Add all channels
 		for (unsigned int i = 2; i < c; ++i)
 			info.channels.push_back(params[i]);
-	} else if (event == LIBIRC_RFC_RPL_ENDOFWHOIS) {
+	}
+	else if (event == LIBIRC_RFC_RPL_ENDOFWHOIS)
+	{
 		const Server::WhoisInfo &info = server->getWhoisLists()[params[1]];
-		vector<string> params;
+		std::vector<std::string> params;
 
 		// Convert as nick, user, host, realname, chan1, chan2, ... chanN
 		params.push_back(info.nick);
@@ -274,9 +304,12 @@ static void handleNumeric(irc_session_t *s,
 	 * seeing here, if someone could give me an explanation. I've also read
 	 * somewhere that the event 5 is ISUPPORT. So?
 	 */
-	if (event == 5) {
-		for (unsigned int i = 0; i < c; ++i) {
-			if (strncmp(params[i], "PREFIX", 6) == 0) {
+	if (event == 5)
+	{
+		for (unsigned int i = 0; i < c; ++i)
+		{
+			if (strncmp(params[i], "PREFIX", 6) == 0)
+			{
 				server->extractPrefixes(params[i]);
 				break;
 			}
@@ -290,7 +323,7 @@ static void handlePart(irc_session_t *s,
 		       const char **params,
 		       unsigned int)
 {
-	shared_ptr<Server> server = Server::toServer(s);
+	std::shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -308,7 +341,7 @@ static void handleQuery(irc_session_t *s,
 			const char **params,
 			unsigned int)
 {
-	shared_ptr<Server> server = Server::toServer(s);
+	std::shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(orig);
@@ -325,7 +358,7 @@ static void handleTopic(irc_session_t *s,
 			const char **params,
 			unsigned int)
 {
-	shared_ptr<Server> server = Server::toServer(s);
+	std::shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -343,7 +376,7 @@ static void handleUserMode(irc_session_t *s,
 			   const char **params,
 			   unsigned int)
 {
-	shared_ptr<Server> server = Server::toServer(s);
+	std::shared_ptr<Server> server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(orig);
@@ -379,9 +412,9 @@ IrcEvent::~IrcEvent()
  * Server
  * -------------------------------------------------------- */
 
-shared_ptr<Server> Server::toServer(irc_session_t *s)
+std::shared_ptr<Server> Server::toServer(irc_session_t *s)
 {
-	return *reinterpret_cast<shared_ptr<Server> *>(irc_get_ctx(s));
+	return *reinterpret_cast<std::shared_ptr<Server> *>(irc_get_ctx(s));
 }
 
 Server::Server()
@@ -423,20 +456,22 @@ void Server::init()
 	m_callbacks.event_umode			= handleUserMode;
 }
 
-void Server::extractPrefixes(const string &line)
+void Server::extractPrefixes(const std::string &line)
 {
-	pair<char, char> table[16];
-	string buf = line.substr(7);
+	std::pair<char, char> table[16];
+	std::string buf = line.substr(7);
 
 	for (int i = 0; i < 16; ++i)
-		table[i] = make_pair(-1, -1);
+		table[i] = std::make_pair(-1, -1);
 
 	int j = 0;
 	bool readModes = true;
-	for (size_t i = 0; i < buf.size(); ++i) {
+	for (size_t i = 0; i < buf.size(); ++i)
+	{
 		if (buf[i] == '(')
 			continue;
-		if (buf[i] == ')') {
+		if (buf[i] == ')')
+		{
 			j = 0;
 			readModes = false;
 			continue;
@@ -449,7 +484,8 @@ void Server::extractPrefixes(const string &line)
 	}
 
 	// Put these as a map of mode to prefix
-	for (int i = 0; i < 16; ++i) {
+	for (int i = 0; i < 16; ++i)
+	{
 		IrcChanNickMode key = static_cast<IrcChanNickMode>(table[i].first);
 		char value = table[i].second;
 
@@ -482,16 +518,17 @@ const Server::Options & Server::getOptions() const
 	return m_options;
 }
 
-const vector<Server::Channel> & Server::getChannels() const
+const std::vector<Server::Channel> & Server::getChannels() const
 {
 	return m_info.m_channels;
 }
 
-void Server::addChannel(const string &name, const string &password)
+void Server::addChannel(const std::string &name, const std::string &password)
 {
 	Channel channel;
 
-	if (!hasChannel(name)) {
+	if (!hasChannel(name))
+	{
 		channel.m_name = name;
 		channel.m_password = password;
 
@@ -499,7 +536,7 @@ void Server::addChannel(const string &name, const string &password)
 	}
 }
 
-bool Server::hasChannel(const string &name)
+bool Server::hasChannel(const std::string &name)
 {
 	for (auto c : m_info.m_channels)
 		if (c.m_name == name)
@@ -508,12 +545,13 @@ bool Server::hasChannel(const string &name)
 	return false;
 }
 
-bool Server::hasPrefix(const string &nickname)
+bool Server::hasPrefix(const std::string &nickname)
 {
 	if (nickname.length() == 0)
 		return false;
 
-	for (auto p : m_info.m_prefixes) {
+	for (auto p : m_info.m_prefixes)
+	{
 		if (nickname[0] == p.second)
 			return true;
 	}
@@ -521,13 +559,15 @@ bool Server::hasPrefix(const string &nickname)
 	return false;
 }
 
-void Server::removeChannel(const string &name)
+void Server::removeChannel(const std::string &name)
 {
-	vector<Channel>::iterator iter;
+	std::vector<Channel>::iterator iter;
 	bool found = false;
 
-	for (iter = m_info.m_channels.begin(); iter != m_info.m_channels.end(); ++iter) {
-		if ((*iter).m_name == name) {
+	for (iter = m_info.m_channels.begin(); iter != m_info.m_channels.end(); ++iter)
+	{
+		if ((*iter).m_name == name)
+		{
 			found = true;
 			break;
 		}
@@ -539,26 +579,46 @@ void Server::removeChannel(const string &name)
 
 void Server::startConnection()
 {
-	m_thread = thread([=] () {
-		irc_session_t *s = irc_create_session(&m_callbacks);
-		if (s != nullptr) {
+	auto command = [&] () {
+		bool shouldConnect;
+
+		/*
+		 * Main thread loop
+		 */
+		shouldConnect = true;
+		while (shouldConnect)
+		{
+			/*
+			 * This is needed if irccd is started before DHCP or if
+			 * DNS cache is outdated.
+			 *
+			 * For more information see #190
+			 */
+#if !defined(_WIN32)
+			(void)res_init();
+#endif
+
+			irc_session_t *s = irc_create_session(&m_callbacks);
+			if (s == nullptr)
+				return;
+
 			const char *password = nullptr;	
-			int error;
 			unsigned major, minor;
 
 			// Copy the unique pointer.
-			m_session = unique_ptr<irc_session_t, IrcDeleter>(s);
+			m_session = std::unique_ptr<irc_session_t, IrcDeleter>(s);
 			if (m_info.m_password.length() > 0)
 				password = m_info.m_password.c_str();
 
-			irc_set_ctx(m_session.get(), new shared_ptr<Server>(shared_from_this()));
+			irc_set_ctx(m_session.get(), new std::shared_ptr<Server>(shared_from_this()));
 			irc_get_version(&major, &minor);
 
 			/*
 			 * After some discuss with George, SSL has been fixed in older version
 			 * of libircclient. > 1.6 is needed for SSL.
 			 */
-			if (major >= 1 && minor > 6) {
+			if (major >= 1 && minor > 6)
+			{
 				// SSL needs to add # front of host
 				if (m_info.m_ssl)
 					m_info.m_host.insert(0, 1, '#');
@@ -566,13 +626,15 @@ void Server::startConnection()
 				if (!m_info.m_sslVerify)
 					irc_option_set(m_session.get(),
 					    LIBIRC_OPTION_SSL_NO_VERIFY);
-			} else {
+			}
+			else
+			{
 				if (m_info.m_ssl)
 					Logger::log("server %s: SSL is only supported with libircclient > 1.6",
 					    m_info.m_name.c_str());
 			}
-			
-			error = irc_connect(
+
+			irc_connect(
 			    m_session.get(),
 			    m_info.m_host.c_str(),
 			    m_info.m_port,
@@ -581,45 +643,85 @@ void Server::startConnection()
 			    m_identity.m_username.c_str(),
 			    m_identity.m_realname.c_str());
 
-			if (error) {
+			/**
+			 * Run over the forever loop.
+			 */
+			m_threadStarted = true;
+			if (irc_run(m_session.get()))
+			{
 				m_threadStarted = false;
+				irc_disconnect(m_session.get());
 
 				Logger::warn("server %s: failed to connect to %s: %s",
 				    m_info.m_name.c_str(),
 				    m_info.m_host.c_str(),
 				    irc_strerror(irc_errno(m_session.get())));
-			} else {
-				m_threadStarted = true;
-				irc_run(m_session.get());
+
+				/**
+				 * Value of 0 mean retry forever.
+				 */
+				if (m_options.m_maxretries > 0)
+				{
+					m_options.m_curretries ++;
+				
+					shouldConnect = m_options.m_retry &&
+					    m_options.m_curretries < m_options.m_maxretries;
+				}
+
+				/**
+				 * Don't show the message if the user didn't wanted
+				 * the retry mechanism.
+				 */
+				if (!shouldConnect && m_options.m_retry)
+					Logger::warn("server %s: giving up",
+					    m_info.m_name.c_str());
+				else if (shouldConnect)
+				{
+					Logger::warn("server %s: retrying in %d seconds...",
+					    m_info.m_name.c_str(),
+					    m_options.m_timeout);
+					Util::usleep(m_options.m_timeout * 1000);
+				}
 			}
+			else
+				irc_disconnect(m_session.get());
 		}
-	});
+	};
+
+	m_thread = std::thread(command);
+}
+
+void Server::resetRetries()
+{
+	m_options.m_curretries = 0;
 }
 
 void Server::stopConnection()
 {
-	if (m_threadStarted) {
+	if (m_threadStarted)
+	{
 		Logger::log("server %s: disconnecting...", m_info.m_name.c_str());
 		m_threadStarted = false;
 		m_thread.detach();
 	}
 }
 
-void Server::cnotice(const string &channel, const string &message)
+void Server::cnotice(const std::string &channel, const std::string &message)
 {
 	if (m_threadStarted && channel[0] == '#')
 		irc_cmd_notice(m_session.get(), channel.c_str(), message.c_str());
 }
 
-void Server::invite(const string &target, const string &channel)
+void Server::invite(const std::string &target, const std::string &channel)
 {
 	if (m_threadStarted)
 		irc_cmd_invite(m_session.get(), target.c_str(), channel.c_str());
 }
 
-void Server::join(const string &name, const string &password)
+void Server::join(const std::string &name, const std::string &password)
 {
-	if (m_threadStarted) {
+	if (m_threadStarted)
+	{
 		Channel c;
 
 		c.m_name = name;
@@ -630,32 +732,32 @@ void Server::join(const string &name, const string &password)
 	}
 }
 
-void Server::kick(const string &name, const string &channel, const string &reason)
+void Server::kick(const std::string &name, const std::string &channel, const std::string &reason)
 {
 	if (m_threadStarted)
 		irc_cmd_kick(m_session.get(), name.c_str(), channel.c_str(),
 		    (reason.length() == 0) ? nullptr : reason.c_str());
 }
 
-void Server::me(const string &target, const string &message)
+void Server::me(const std::string &target, const std::string &message)
 {
 	if (m_threadStarted)
 		irc_cmd_me(m_session.get(), target.c_str(), message.c_str());
 }
 
-void Server::mode(const string &channel, const string &mode)
+void Server::mode(const std::string &channel, const std::string &mode)
 {
 	if (m_threadStarted)
 		irc_cmd_channel_mode(m_session.get(), channel.c_str(), mode.c_str());
 }
 
-void Server::names(const string &channel)
+void Server::names(const std::string &channel)
 {
 	if (m_threadStarted)
 		irc_cmd_names(m_session.get(), channel.c_str());
 }
 
-void Server::nick(const string &nick)
+void Server::nick(const std::string &nick)
 {
 	if (m_threadStarted)
 		irc_cmd_nick(m_session.get(), nick.c_str());
@@ -664,47 +766,56 @@ void Server::nick(const string &nick)
 	m_identity.m_nickname = nick;
 }
 
-void Server::notice(const string &nickname, const string &message)
+void Server::notice(const std::string &nickname, const std::string &message)
 {
 	if (m_threadStarted && nickname[0] != '#')
 		irc_cmd_notice(m_session.get(), nickname.c_str(), message.c_str());
 }
 
-void Server::part(const string &channel)
+void Server::part(const std::string &channel)
 {
-	if (m_threadStarted) {
+	if (m_threadStarted)
+	{
 		irc_cmd_part(m_session.get(), channel.c_str());
 		removeChannel(channel);
 	}
 }
 
-void Server::query(const string &who, const string &message)
+void Server::query(const std::string &who, const std::string &message)
 {
 	// Do not write to public channel
 	if (m_threadStarted && who[0] != '#')
 		irc_cmd_msg(m_session.get(), who.c_str(), message.c_str());
 }
 
-void Server::say(const string &target, const string &message)
+void Server::say(const std::string &target, const std::string &message)
 {
 	if (m_threadStarted)
 		irc_cmd_msg(m_session.get(), target.c_str(), message.c_str());
 }
 
-void Server::topic(const string &channel, const string &topic)
+void Server::sendRaw(const std::string &msg)
+{
+	if (m_threadStarted)
+		irc_send_raw(m_session.get(), "%s", msg.c_str());
+}
+
+void Server::topic(const std::string &channel, const std::string &topic)
 {
 	if (m_threadStarted)
 		irc_cmd_topic(m_session.get(), channel.c_str(), topic.c_str());
 }
 
-void Server::umode(const string &mode)
+void Server::umode(const std::string &mode)
 {
 	if (m_threadStarted)
 		irc_cmd_user_mode(m_session.get(), mode.c_str());
 }
 
-void Server::whois(const string &target)
+void Server::whois(const std::string &target)
 {
 	if (m_threadStarted)
 		irc_cmd_whois(m_session.get(), target.c_str());
 }
+
+} // !irccd

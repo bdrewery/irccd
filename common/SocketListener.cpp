@@ -1,7 +1,7 @@
 /*
- * SocketListener.cpp -- portable wrapper around select()
+ * SocketListener.cpp -- portable select() wrapper
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,67 +20,66 @@
 
 #include "SocketListener.h"
 
-using namespace irccd;
+namespace irccd
+{
 
-const char * SocketListener::TimeoutException::what() const throw()
+const char *SocketTimeout::what() const throw()
 {
 	return "Timeout occured";
 }
 
-void SocketListener::add(Socket &s)
+void SocketListener::add(Socket s)
 {
 	m_clients.push_back(s);
 }
 
-void SocketListener::remove(Socket &s)
+long SocketListener::size() const
+{
+	return static_cast<long>(m_clients.size());
+}
+
+void SocketListener::remove(Socket s)
 {
 	m_clients.erase(std::remove(m_clients.begin(), m_clients.end(), s), m_clients.end());
 }
 
-void SocketListener::clear()
+void SocketListener::clear(void)
 {
 	m_clients.clear();
 }
 
-size_t SocketListener::size()
-{
-	return m_clients.size();
-}
-
-Socket & SocketListener::select(int timeout)
+Socket SocketListener::select(int s, int us)
 {
 	fd_set fds;
 	timeval maxwait, *towait;
 	int error;
-	int fdmax;
-
-	if (m_clients.size() == 0)
-		throw Socket::ErrorException("No socket to listen to");
-	
-	fdmax = m_clients.front().getSocket();
+	int fdmax = m_clients.front().getSocket();
 
 	FD_ZERO(&fds);
-	for (Socket &c : m_clients) {
+	for (Socket &c : m_clients)
+	{
 		FD_SET(c.getSocket(), &fds);
 		if ((int)c.getSocket() > fdmax)
 			fdmax = c.getSocket();
 	}
 
-	maxwait.tv_sec = timeout;
-	maxwait.tv_usec = 0;
+	maxwait.tv_sec = s;
+	maxwait.tv_usec = us;
 
         // Set to NULL for infinite timeout.
-	towait = (timeout == 0) ? nullptr : &maxwait;
+	towait = (s == 0 && us == 0) ? nullptr : &maxwait;
 
 	error = ::select(fdmax + 1, &fds, NULL, NULL, towait);
-	if (error == SOCKET_ERROR) 
-		throw ErrorException(getLastSysError());
+	if (error == SOCKET_ERROR)
+		throw SocketError(Socket::getLastSysError());
 	if (error == 0)
-		throw SocketListener::TimeoutException();
+		throw SocketTimeout();
 
 	for (Socket &c : m_clients)
 		if (FD_ISSET(c.getSocket(), &fds))
 			return c;
 
-	throw ErrorException("No socket found");
+	throw SocketError("No socket found");
 }
+
+} // !irccd

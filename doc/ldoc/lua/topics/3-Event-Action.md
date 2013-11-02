@@ -2,11 +2,6 @@
 
 This is an event most known as **/me**. What you usually see like this:
 
-<br />
-**Note: this event is not available yet.**
-<br />
-<br />
-
 > \* markand loves irccd
 
 ### Function

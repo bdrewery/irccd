@@ -19,6 +19,11 @@
 #define DATE_TYPE	"DateType"
 #define DIR_TYPE	"DirectoryType"
 
+#include <cstring>
+#include <initializer_list>
+#include <unordered_map>
+#include <sstream>
+
 #include <Date.h>
 #include <Directory.h>
 #include <Util.h>
@@ -30,6 +35,70 @@ using namespace irccd;
 using namespace std;
 
 namespace util {
+
+/* --------------------------------------------------------
+ * Color and attributes
+ * -------------------------------------------------------- */
+
+enum class Color {
+	White		= 0,
+	Black		= 1,
+	Blue		= 2,
+	Green		= 3,
+	Red		= 4,
+	Brown		= 5,
+	Purple		= 6,
+	Orange		= 7,
+	Yellow		= 8,
+	LightGreen	= 9,
+	Cyan		= 10,
+	LightCyan	= 11,
+	LightBlue	= 12,
+	Pink		= 13,
+	Grey		= 14,
+	LightGrey	= 15
+};
+
+enum class Attribute {
+	Bold		= '\x02',
+	Color		= '\x03',
+	Italic		= '\x09',
+	StrikeThrough	= '\x13',
+	Reset		= '\x0f',
+	Underline	= '\x15',
+	Underline2	= '\x1f',
+	Reverse		= '\x16'
+};
+
+static std::unordered_map<std::string, Color> colors = {
+	{ "White",		Color::White			},
+	{ "Black",		Color::Black			},
+	{ "Blue",		Color::Blue			},
+	{ "Green",		Color::Green			},
+	{ "Red",		Color::Red			},
+	{ "Brown",		Color::Brown			},
+	{ "Purple",		Color::Purple			},
+	{ "Orange",		Color::Orange			},
+	{ "Yellow",		Color::Yellow			},
+	{ "LightGreen",		Color::LightGreen		},
+	{ "Cyan",		Color::Cyan			},
+	{ "LightCyan",		Color::LightCyan		},
+	{ "LightBlue",		Color::LightBlue		},
+	{ "Pink",		Color::Pink			},
+	{ "Grey",		Color::Grey			},
+	{ "LightGrey",		Color::LightGrey		}
+};
+
+static std::unordered_map<std::string, Attribute> attributes = {
+	{ "Bold",		Attribute::Bold			},
+	{ "Color",		Attribute::Color		},
+	{ "Italic",		Attribute::Italic		},
+	{ "StrikeThrough",	Attribute::StrikeThrough	},
+	{ "Reset",		Attribute::Reset		},
+	{ "Underline",		Attribute::Underline		},
+	{ "Underline2",		Attribute::Underline2		},
+	{ "Reverse",		Attribute::Reverse		}
+};
 
 static int basename(lua_State *L)
 {
@@ -69,6 +138,55 @@ static int exist(lua_State *L)
 	bool ret = Util::exist(path);
 
 	lua_pushboolean(L, ret);
+
+	return 1;
+}
+
+static int format(lua_State *L)
+{
+	string text = luaL_checkstring(L, 1);
+	ostringstream oss;
+
+	luaL_checktype(L, 2, LUA_TTABLE);
+
+	/*
+	 * First, if "fg" or "bg" field is defined we append the color
+	 * escape code and then the background or the foreground
+	 * without testing.
+	 */
+	if (Luae::typeField(L, 2, "fg") != LUA_TNIL ||
+	    Luae::typeField(L, 2, "bg") != LUA_TNIL)
+		oss << static_cast<char>(Attribute::Color);
+
+	if (Luae::typeField(L, 2, "fg") != LUA_TNIL)
+		oss << Luae::getField<int>(L, 2, "fg");
+	if (Luae::typeField(L, 2, "bg") != LUA_TNIL)
+		oss << ',' << Luae::getField<int>(L, 2, "bg");
+
+	/*
+	 * Attributes can be a table or a single attribute. If it's a table
+	 * we iterate it and add every attributes.
+	 */
+	lua_getfield(L, 2, "attrs");
+
+	if (lua_type(L, -1) == LUA_TTABLE)
+	{
+		int length = lua_rawlen(L, -1);
+
+		for (int i = 1; i <= length; ++i)
+		{
+			lua_pushinteger(L, i);
+			lua_gettable(L, -2);
+
+			oss << static_cast<char>(lua_tointeger(L, -1));
+			lua_pop(L, 1);
+		}
+	} else if (lua_type(L, -1) == LUA_TNUMBER)
+		oss << static_cast<char>(lua_tointeger(L, -1));
+
+	lua_pop(L, 1);
+	oss << text << static_cast<char>(Attribute::Reset);
+	lua_pushstring(L, oss.str().c_str());
 
 	return 1;
 }
@@ -171,6 +289,7 @@ const luaL_Reg functions[] = {
 	{ "date",		util::date		},
 	{ "dirname",		util::dirname		},
 	{ "exist",		util::exist		},
+	{ "format",		util::format		},
 	{ "getTicks",		util::getTicks		},
 	{ "getHome",		util::getHome		},
 	{ "mkdir",		util::mkdir		},
@@ -430,6 +549,26 @@ int irccd::luaopen_util(lua_State *L)
 	luaL_newlib(L, dirMethodsList);
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
+
+	// Colors
+	lua_createtable(L, 0, 0);
+
+	for (auto p : util::colors) {
+		lua_pushinteger(L, static_cast<int>(p.second));
+		lua_setfield(L, -2, p.first.c_str());
+	}
+
+	lua_setfield(L, -2, "color");
+
+	// Attributes
+	lua_createtable(L, 0, 0);
+
+	for (auto p : util::attributes) {
+		lua_pushinteger(L, static_cast<int>(p.second));
+		lua_setfield(L, -2, p.first.c_str());
+	}
+
+	lua_setfield(L, -2, "attribute");
 
 	return 1;
 }

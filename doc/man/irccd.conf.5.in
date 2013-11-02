@@ -53,17 +53,17 @@ This section shows all available sections with the options allowed for them.
 .Ss general
 This section covers general options.
 .Pp
-.Bl -tag -width PARAMETERXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
 .It foreground
-(bool) keep irccd to foreground, default: false.
+(bool) Keep irccd to foreground, default: false.
 .It plugins
-(string list) a list of plugins to load, default: empty.
+(string list) A list of plugins to load, default: empty.
 .It plugin-path
-(string) a path to local modules, default: empty.
+(string) A path to local modules, default: empty.
 .It syslog
-(bool) if enabled, use syslog instead of standard output, default: false.
+(bool) If enabled, use syslog instead of standard output, default: false.
 .It verbose
-(bool) enable verbose message, default: false.
+(bool) Enable verbose message, default: false.
 .El
 .\" IDENTITY
 .Ss identity
@@ -72,7 +72,7 @@ if provided by the
 .Nm irccd
 binary and will use it if none is specified.
 .Pp
-.Bl -tag -width PARAMETERXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
 .It name
 (string) Required. the identity unique id.
 .It nickname
@@ -81,15 +81,21 @@ binary and will use it if none is specified.
 (string) The realname, default: IRC Client daemon.
 .It username
 (string) The username, default: irccd.
+.It ctcp-version
+(string) What version to respond to CTCP VERSION, default: IRC Client Daemon.
+.It ctcp-autoreply
+(bool) Enable auto CTCP VERSION reply, default: true.
 .El
 .\" LISTENER
 .Ss listener
 A listener is a socket that waits for any input from clients. You may add
 as many as you want. They are completely optional.
 .Pp
-.Bl -tag -width PARAMETERXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
 .It type
 (string) Required. type of listener "internet" or "unix"
+.It protocol
+(string) Protocol to use, "tcp" or "udp", default: "tcp".
 .El
 .Pp
 The following parameters are available for type "internet":
@@ -114,7 +120,7 @@ The following parameters are available for type "unix":
 This define a server, you may add any as you want, at least one must be defined
 in the file.
 .Pp
-.Bl -tag -width PARAMETERXXX -compact
+.Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
 .It name
 (string) Required. A unique id.
 .It host
@@ -135,6 +141,13 @@ in the file.
 (bool) Enable or disable SSL, default: false.
 .It ssl-verify
 (bool) Verify the SSL certificates, default: true.
+.It reconnect
+(bool) Enable reconnection after failure, default: true.
+.It reconnect-tries
+(int) Number of tries before giving up. A value of 0 means indefinitely,
+default: 0.
+.It reconnect-timeout
+(int) Number of seconds to wait before retrying, default: 30.
 .El
 .\" EXAMPLES
 .Sh EXAMPLES

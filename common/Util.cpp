@@ -18,6 +18,7 @@
 
 #include <cerrno>
 #include <cstring>
+#include <fstream>
 #include <sstream>
 
 #if defined(_WIN32)
@@ -39,7 +40,9 @@
 
 #include <sys/stat.h>
 
+#include "config.h"
 #include "Util.h"
+#include "Logger.h"
 
 namespace irccd
 {
@@ -75,8 +78,8 @@ std::string Util::pathBase(const std::string &append)
 	std::ostringstream oss;
 
 #if defined(_WIN32)
-	char exepath[512];
 	std::string base;
+	char exepath[512];
 	size_t pos;
 
 	/*
@@ -109,27 +112,32 @@ std::string Util::pathUser(const std::string &append)
 
 	if (SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, 0, path) != S_OK)
 		oss << "";
-	else {
+	else
+	{
 		oss << path;
-		oss << "\\irccd";
+		oss << "\\irccd\\";
 	}
 #else
 	xdgHandle handle;
 
-	if ((xdgInitHandle(&handle)) == nullptr) {
+	if ((xdgInitHandle(&handle)) == nullptr)
+	{
 		const char *home = getenv("HOME");
 
 		if (home != nullptr)
 			oss << home;
 
 		// append default path.
-		oss << "/.config/irccd";
-	} else {
+		oss << "/.config/irccd/";
+	}
+	else
+	{
 		oss << xdgConfigHome(&handle);
-		oss << "/irccd";
+		oss << "/irccd/";
+
+		xdgWipeHandle(&handle);
 	}
 
-	xdgWipeHandle(&handle);
 #endif
 
 	oss << append;
@@ -175,29 +183,68 @@ std::string Util::baseName(const std::string &path)
 #endif
 }
 
-bool Util::findConfig(const std::string &name, ConfigFinder func)
+std::string Util::findConfiguration(const std::string &filename)
 {
 	std::ostringstream oss;
-	std::string path;
+	std::string fpath;
 
-	// 1. Always user first
-	oss << configUser();
-	oss << name;
-	path = oss.str();
+	// 1. User first
+	oss << pathUser() << filename;
+	fpath = oss.str();
 
-	if (func(path))
-		return true;
+	Logger::log("%s: checking for %s", getprogname(), fpath.c_str());
+	if (hasAccess(fpath))
+		return fpath;
 
-	// 2. System config
+	// 2. Base + ETCDIR + filename
 	oss.str("");
-	oss << configSystem();
+
+	if (!isAbsolute(ETCDIR))
+		oss << pathBase();
+
+	oss << ETCDIR << Util::DIR_SEP << filename;
+	fpath = oss.str();
+
+	Logger::log("%s: checking for %s", getprogname(), fpath.c_str());
+	if (hasAccess(fpath))
+		return fpath;
+
+	// Failure
+	oss.str("");
+	oss << "could not find configuration file for " << filename;
+
+	throw ErrorException(oss.str());
+}
+
+std::string Util::findPluginHome(const std::string &name)
+{
+	std::ostringstream oss;
+	std::string fpath;
+
+	// 1. User first
+	oss << pathUser() << name;
+	fpath = oss.str();
+
+	if (hasAccess(fpath))
+		return fpath;
+
+	// 2. Base + ETCDIR + "irccd" + name
+	oss.str("");
+
+	if (!isAbsolute(ETCDIR))
+		oss << pathBase();
+
+	oss << ETCDIR << Util::DIR_SEP << "irccd" << Util::DIR_SEP;
 	oss << name;
-	path = oss.str();
+	fpath = oss.str();
 
-	if (func(path))
-		return true;
+	/*
+	 * We returns the system path so that plugins can just check
+	 * the error code of opening files and such wich a real path
+	 * and not ""
+	 */
 
-	return false;
+	return fpath;
 }
 
 std::string Util::dirName(const std::string &file)
@@ -233,6 +280,23 @@ bool Util::exist(const std::string &path)
 	struct stat st;
 
 	return (stat(path.c_str(), &st) != -1);
+}
+
+bool Util::isAbsolute(const std::string &path)
+{
+	return path.length() > 0 && path[0] == Util::DIR_SEP;
+}
+
+bool Util::hasAccess(const std::string &path)
+{
+	std::ifstream file;
+	bool ret;
+
+	file.open(path);
+	ret = file.is_open();
+	file.close();
+
+	return ret;
 }
 
 std::string Util::getHome()
@@ -272,7 +336,8 @@ void Util::mkdir(const std::string &dir, int mode)
 
 	oss << "mkdir: ";
 
-	for (size_t i = 0; i < dir.length(); ++i) {
+	for (size_t i = 0; i < dir.length(); ++i)
+	{
 		if (dir[i] != '/')
 			continue;
 
@@ -280,41 +345,19 @@ void Util::mkdir(const std::string &dir, int mode)
 		if (part.length() <= 0 || exist(part))
 			continue;
 
-		if (_MKDIR(part.c_str(), mode) == -1) {
+		if (_MKDIR(part.c_str(), mode) == -1)
+		{
 			oss << part << ": " << strerror(errno);
 			throw Util::ErrorException(oss.str());
 		}
 	}
 
 	// Last part
-	if (_MKDIR(dir.c_str(), mode) == -1) {
+	if (_MKDIR(dir.c_str(), mode) == -1)
+	{
 		oss << dir << ": " << strerror(errno);
 		throw Util::ErrorException(oss.str());
 	}
-}
-
-std::string Util::pluginDirectory()
-{
-	/*
-	 * Under unix, we store local plugins under the same directory
-	 * as the config, plus /plugins suffix, so it's usually:
-	 *
-	 * ~/.config/irccd/plugins.
-	 *
-	 * On windows, it reside inside the user home like :
-	 * C:\Users\Simone\irccd\plugins
-	 */
-	std::ostringstream oss;
-
-	oss << configUser();
-
-#if defined(_WIN32)
-	oss << "plugins\\";
-#else
-	oss << "plugins/";
-#endif
-
-	return oss.str();
 }
 
 std::vector<std::string> Util::split(const std::string &list,
@@ -326,23 +369,28 @@ std::vector<std::string> Util::split(const std::string &list,
 	int count = 1;
 	bool finished = false;
 
-	do {
+	do
+	{
 		std::string val;
 
 		current = next + 1;
 		next = list.find_first_of(delimiter, current);
 
 		// split max, get until the end
-		if (max >= 0 && count++ >= max) {
+		if (max >= 0 && count++ >= max)
+		{
 			val = list.substr(current, std::string::npos);
 			finished = true;
-		} else {
+		}
+		else
+		{
 			val = list.substr(current, next - current);
 			finished = next == std::string::npos;
 		}
 
 		result.push_back(val);
-	} while (!finished);
+	}
+	while (!finished);
 
 	return result;
 }

@@ -25,13 +25,16 @@
 
 #include "Luae.h"
 
-namespace irccd {
+namespace irccd
+{
 
 class Server;
 
-class Plugin {
+class Plugin
+{
 public:
-	class ErrorException : public std::exception {
+	class ErrorException : public std::exception
+	{
 	private:
 		std::string m_error;
 		std::string m_which;
@@ -61,7 +64,7 @@ private:
 
 	/**
 	 * Call the function plugin with optional parameters.
-	 * 
+	 *
 	 * @throw ErrorException on failure
 	 */
 	void call(const std::string &func,
@@ -84,14 +87,20 @@ public:
 	 *
 	 * @return the name
 	 */
-	const std::string & getName() const;
+	const std::string &getName() const;
 
 	/**
 	 * Get the plugin home directory.
 	 *
 	 * @return the directory
 	 */
-	const std::string & getHome() const;
+	const std::string &getHome() const;
+
+	/**
+	 * Find the plugin's home. It first tries to load user's one
+	 * and system after.
+	 */
+	void setHome();
 
 	/**
 	 * Get the plugin Lua state.
@@ -196,6 +205,11 @@ public:
 		    const std::string &reason);
 
 	/**
+	 * Load the plugin.
+	 */
+	void onLoad();
+
+	/**
 	 * A Lua function triggered on a message event.
 	 *
 	 * @param server the server
@@ -288,6 +302,11 @@ public:
 		     const std::string &channel,
 		     const std::string &who,
 		     const std::string &topic);
+
+	/**
+	 * Unload the plugin.
+	 */
+	void onUnload();
 
 	/**
 	 * A Lua function triggered on a user mode change event.

@@ -792,7 +792,7 @@ the default configurations paths.</p></div>
 </li>
 <li>
 <p>
-<em>&lt;irccd.exe location&gt;\..\etc\irccd.conf</em>
+<em>Path\To\Irccd\Directory\etc\irccd.conf</em>
 </p>
 </li>
 </ol></div>
@@ -857,27 +857,27 @@ application.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-<span class="monospaced">foreground</span>: (bool) keep irccd to foreground, default: false.
+<span class="monospaced">foreground</span>: (bool) Keep irccd to foreground, default: false.
 </p>
 </li>
 <li>
 <p>
-<span class="monospaced">plugins</span>: (string list) a list of plugins to load, default: empty.
+<span class="monospaced">plugins</span>: (string list) A list of plugins to load, default: empty.
 </p>
 </li>
 <li>
 <p>
-<span class="monospaced">plugin-path</span>: (string) a path to local plugins, default: empty.
+<span class="monospaced">plugin-path</span>: (string) A path to local plugins, default: empty.
 </p>
 </li>
 <li>
 <p>
-<span class="monospaced">syslog</span>: (bool) if enabled, use syslog instead of standard output, default: false.
+<span class="monospaced">syslog</span>: (bool) If enabled, use syslog instead of standard output, default: false.
 </p>
 </li>
 <li>
 <p>
-<span class="monospaced">verbose</span>: (bool) enable verbose message, default: false.
+<span class="monospaced">verbose</span>: (bool) Enable verbose message, default: false.
 </p>
 </li>
 </ul></div>
@@ -922,7 +922,17 @@ default identity with <span class="monospaced">irccd</span> as nickname and user
 </li>
 <li>
 <p>
-<span class="monospaced">username</span>: (string) The username name, default: irccd
+<span class="monospaced">username</span>: (string) The username name, default: irccd.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">ctcp-version</span>: (string) What version to respond to CTCP VERSION, default: IRC Client Daemon.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">ctcp-autoreply</span>: (bool) Enable auto CTCP VERSION reply, default: true.
 </p>
 </li>
 </ul></div>
@@ -999,6 +1009,21 @@ section is also redefinable.</p></div>
 <span class="monospaced">ssl-verify</span>: (bool) Verify the SSL certificates, default: true.
 </p>
 </li>
+<li>
+<p>
+<span class="monospaced">reconnect</span>: (bool) Enable reconnection after failure, default: true.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">reconnect-tries</span>: (int) Number of tries before giving up. A value of 0 means indefinitely, default: 0.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">reconnect-timeout</span>: (int) Number of seconds to wait before retrying, default: 30.
+</p>
+</li>
 </ul></div>
 <div class="listingblock">
 <div class="title">Example</div>
@@ -1016,14 +1041,6 @@ http://www.gnu.org/software/src-highlite -->
 <h3 id="_the_section_span_class_monospaced_listener_span">The section <span class="monospaced">listener</span></h3>
 <div class="paragraph"><p>This section defines listeners, you may use sockets to do a basic IPC system
 in irccd. This let you controlling irccd with sockets.</p></div>
-<div class="admonitionblock">
-<table><tr>
-<td class="icon">
-<img src="icons/note.png" alt="Note">
-</td>
-<td class="content">Currently only TCP are supported.</td>
-</tr></table>
-</div>
 <div class="paragraph"><p>For instance, with listeners, you may ask <span class="monospaced">irccd</span> to send a message, a notice or
 even kicking someone from a channel. This is done with the <a href="#irccdctl">irccdctl</a>
 utility.</p></div>
@@ -1040,7 +1057,19 @@ Unix sockets, based on files (not available on Windows)
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>Both of the listener has an option <span class="monospaced">type</span> which is set to <span class="monospaced">internet</span> or <span class="monospaced">unix</span>.</p></div>
+<div class="paragraph"><p>The following options are available for both types.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">type</span>: (string) Required. type of listener "internet" or "unix"
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">protocol</span>: (string) Protocol to use, "tcp" or "udp", default: "tcp".
+</p>
+</li>
+</ul></div>
 </div>
 <div class="sect2">
 <h3 id="_using_internet_sockets">Using internet sockets</h3>
@@ -1232,7 +1261,7 @@ Specified by -p on command line
 </li>
 <li>
 <p>
-<em>C:\Program Files\irccd\plugins</em>
+<em>Path\To\Irccd\Directory\share\plugins</em>
 </p>
 </li>
 </ol></div>
@@ -1246,6 +1275,22 @@ irccd <a href="#irccdpaths">config path</a> plus the plugin name. For example, t
 <span class="monospaced">ask.lua</span> will have the following home:</p></div>
 <div class="paragraph"><p>On Unix: <em>~/.config/irccd/ask/</em></p></div>
 <div class="paragraph"><p>On Windows: <em>C:/Users/YourUser/irccd/ask/</em></p></div>
+<div class="paragraph"><p>And the respective installation config path or Windows executable location :</p></div>
+<div class="paragraph"><p>On Unix: <em>/usr/local/etc/irccd/ask</em></p></div>
+<div class="paragraph"><p>On Windows: <em>Path\To\Irccd\Directory\etc\irccd\ask</em></p></div>
+<div class="paragraph"><p>The order is :</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+User config directory
+</p>
+</li>
+<li>
+<p>
+System directory
+</p>
+</li>
+</ol></div>
 <div class="paragraph"><p><a id="irccdpatterns"></a></p></div>
 </div>
 <div class="sect2">
@@ -1327,7 +1372,7 @@ server named <span class="monospaced">local</span>, a channel <span class="monos
 <h2 id="_the_irccdctl_utility">The irccdctl utility</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>The <span class="monospaced">irccdctl</span> utility let you controlling a running <span class="monospaced">irccd</span> instance. It uses
-TCP sockets to perform any operation.</p></div>
+sockets to perform any operation.</p></div>
 <div class="paragraph"><p>First, you need to define at least one <a href="#listeners">listener</a> before using
 irccdctl.</p></div>
 <div class="paragraph"><p>Second, you need to write a configuration file named <span class="monospaced">irccdctl.conf</span>. It takes
@@ -1357,7 +1402,19 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>The section socket permit irccdctl to connect to a specific irccd listener,
 only one may be defined.</p></div>
 <div class="paragraph"><p>Just like <a href="#listeners">listeners</a> you can connect to Unix or internet sockets.</p></div>
-<div class="paragraph"><p>Both of the listener has an option <span class="monospaced">type</span> which is set to <span class="monospaced">internet</span> or <span class="monospaced">unix</span>.</p></div>
+<div class="paragraph"><p>The following options are available for both types.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">type</span>: (string) Required. type of listener "internet" or "unix"
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">protocol</span>: (string) Required. Protocol to use, "tcp" or "udp".
+</p>
+</li>
+</ul></div>
 </div>
 <div class="sect2">
 <h3 id="_using_internet_sockets_2">Using internet sockets</h3>
@@ -1782,7 +1839,7 @@ quotes.</p></div>
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-09-16 20:30:10 CEST
+Last updated 2013-10-26 10:25:35 CEST
 </div>
 </div>
 </body>

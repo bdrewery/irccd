@@ -23,9 +23,11 @@
 
 #include "Server.h"
 
-namespace irccd {
+namespace irccd
+{
 
-class LuaServer {
+class LuaServer
+{
 public:
 	/**
 	 * Push the object on the stack so it can

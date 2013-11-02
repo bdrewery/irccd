@@ -25,8 +25,9 @@
 #include <sstream>
 
 #include <Parser.h>
+#include <Socket.h>
+#include <SocketAddress.h>
 #include <SocketListener.h>
-#include <SocketTCP.h>
 
 #include <config.h>
 
@@ -37,22 +38,15 @@
 #  include "Plugin.h"
 #endif
 
-namespace irccd {
+namespace irccd
+{
 
 /* --------------------------------------------------------
  * Irccd main class
  * -------------------------------------------------------- */
 
-typedef std::vector<std::shared_ptr<Server>> ServerList;
-
-#if defined(WITH_LUA)
-  typedef std::vector<std::shared_ptr<Plugin>> PluginList;
-  typedef std::map<std::shared_ptr<Server>, std::vector<DefCall>> DefCallList;
-#endif
-
-namespace options {
-
-enum {
+enum Options
+{
 	Config		= 'c',
 	Foreground	= 'f',
 	Verbose		= 'v',
@@ -60,9 +54,54 @@ enum {
 	PluginWanted	= 'P'
 };
 
-} // !options
+class Message
+{
+private:
+	std::ostringstream m_data;
 
-class Irccd {
+public:
+	/**
+	 * Default constructor.
+	 */
+	Message();
+
+	/**
+	 * Copy constructor.
+	 *
+	 * @param m the old message
+	 */
+	Message(const Message &m);
+
+	/**
+	 * Tell if the client message has finished. A client message
+	 * ends with '\n'.
+	 *
+	 * @param msg the received data
+	 * @param command the final command (if finished)
+	 * @return true if finished
+	 */
+	bool isFinished(const std::string &msg, std::string &command);
+
+	/**
+	 * Copy assignment.
+	 *
+	 * @param m the message
+	 * @return the message
+	 */
+	Message &operator=(const Message &m);
+};
+
+typedef std::vector<std::shared_ptr<Server>> ServerList;
+typedef std::map<Socket, Message> StreamClients;
+typedef std::map<SocketAddress, Message> DatagramClients;
+
+#if defined(WITH_LUA)
+  typedef std::vector<std::shared_ptr<Plugin>> PluginList;
+  typedef std::map<std::shared_ptr<Server>, std::vector<DefCall>> DefCallList;
+#endif
+
+class Irccd
+{
 private:
 	static Irccd *m_instance;			//! unique instance
 
@@ -88,17 +127,50 @@ private:
 	ServerList m_servers;				//! list of servers
 
 	// Socket clients and listeners
-	std::vector<SocketTCP> m_socketServers;		//! socket servers
-	std::map<SocketTCP, std::string> m_clients;	//! socket clients
+	std::vector<Socket> m_socketServers;		//! socket servers
 	SocketListener m_listener;			//! socket listener
+
+	StreamClients m_streamClients;			//! tcp based clients
+	DatagramClients m_dgramClients;			//! udp based "clients"
 
 	// Identities
 	std::vector<Server::Identity> m_identities;	//! user identities
 	Server::Identity m_defaultIdentity;		//! default identity
 
-	void clientAdd(SocketTCP &client);
-	void clientRead(SocketTCP &client);
-	void execute(SocketTCP &client, const std::string &cmd);
+	/*
+	 * These functions are used for TCP clients.
+	 */
+	void clientAdd(Socket &client);
+	void clientRead(Socket &client);
+
+	/*
+	 * This function is used for UDP "clients".
+	 */
+	void peerRead(Socket &s);
+
+	/**
+	 * Execute a command from a client, if the client
+	 * is a UDP, the info is discarded.
+	 *
+	 * @param cmd the command
+	 * @param s the socket to read
+	 * @param info the info (UDP only)
+	 */
+	void execute(const std::string &cmd,
+		     Socket &s,
+		     const SocketAddress &info = SocketAddress());
+
+	/**
+	 * Send a response to the client.
+	 *
+	 * @param message the message to send
+	 * @param s the socket
+	 * @param info the address
+	 */
+	void notifySocket(const std::string &message,
+			  Socket &s,
+			  const SocketAddress &info);
+
 	bool isPluginLoaded(const std::string &name);
 	bool isOverriden(char c);
 
@@ -116,10 +188,10 @@ private:
 
 	// [listener]
 	void openListeners(const Parser &config);
-	void extractInternet(const Section &s);
+	void extractInternet(const Section &s, int type);
 
 #if !defined(_WIN32)
-	void extractUnix(const Section &s);
+	void extractUnix(const Section &s, int type);
 #endif
 
 	// [server]

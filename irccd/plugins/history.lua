@@ -34,7 +34,7 @@ local function loadFormats()
 	local config = parser.new(path, { parser.DisableRedefinition })
 
 	if not config:open() then
-		logger.warn(path .. "  not found, using default answers")
+		logger.warn(path .. " not found, using default answers")
 		return
 	end
 

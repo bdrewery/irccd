@@ -28,7 +28,8 @@
 
 #include <libircclient.h>
 
-namespace irccd {
+namespace irccd
+{
 
 class Server;
 
@@ -36,7 +37,8 @@ class Server;
  * IRC Events, used by Server
  * -------------------------------------------------------- */
 
-enum class IrcEventType {
+enum class IrcEventType
+{
 	Connection,					//! when connection
 	ChannelNotice,					//! channel notices
 	Invite,						//! invitation
@@ -54,7 +56,8 @@ enum class IrcEventType {
 	Whois						//! (def) whois response
 };
 
-enum class IrcChanNickMode {
+enum class IrcChanNickMode
+{
 	Creator		= 'O',				//! channel creator
 	HalfOperator	= 'h',				//! half operator
 	Operator	= 'o',				//! channel operator
@@ -65,7 +68,8 @@ enum class IrcChanNickMode {
 typedef std::vector<std::string> IrcEventParams;
 typedef std::map<IrcChanNickMode, char> IrcPrefixes;
 
-struct IrcEvent {
+struct IrcEvent
+{
 	IrcEventType m_type;				//! event type
 	IrcEventParams m_params;			//! parameters
 
@@ -92,13 +96,14 @@ struct IrcEvent {
 	~IrcEvent();
 };
 
-class IrcDeleter {
+class IrcDeleter
+{
 public:
 	void operator()(irc_session_t *s)
 	{
-		irc_destroy_session(s);
-
 		delete reinterpret_cast<std::shared_ptr<Server> *>(irc_get_ctx(s));
+	
+		irc_destroy_session(s);
 	}
 };
 
@@ -108,27 +113,37 @@ typedef std::unique_ptr<irc_session_t, IrcDeleter> IrcSession;
  * Server class, each class define a server that irccd
  * can connect to
  */
-class Server : public std::enable_shared_from_this<Server> {
+class Server : public std::enable_shared_from_this<Server>
+{
 public:
-	struct Channel {
+	struct Channel
+	{
 		std::string m_name;			//! channel name
 		std::string m_password;			//! channel optional password
 	};
 
-	struct Options {
+	struct Options
+	{
 		std::string m_commandChar;		//! command token
 		bool m_joinInvite;			//! auto join on invites
-		bool m_ctcpReply;			//! auto reply CTCP
+		unsigned m_maxretries;			//! number of connection retries
+		unsigned m_curretries;			//! current number of retries
+		unsigned m_timeout;			//! number of seconds to wait
+		bool m_retry;				//! for reconnecting
 
 		Options()
 			: m_commandChar("!")
 			, m_joinInvite(false)
-			, m_ctcpReply(true)
+			, m_maxretries(0)
+			, m_curretries(0)
+			, m_timeout(30)
+			, m_retry(true)
 		{
 		}
 	};
 
-	struct Info {
+	struct Info
+	{
 		std::string m_name;			//! server's name
 		std::string m_host;			//! hostname
 		unsigned m_port;			//! server's port
@@ -139,13 +154,15 @@ public:
 		IrcPrefixes m_prefixes;			//! comes with event 5
 
 		Info()
-			: m_ssl(false)
+			: m_port(0)
+			, m_ssl(false)
 			, m_sslVerify(true)
 		{
 		}
 	};
 
-	struct WhoisInfo {
+	struct WhoisInfo
+	{
 		bool found;				//! if no such nick
 		std::string nick;			//! user's nickname
 		std::string user;			//! user's user
@@ -159,7 +176,8 @@ public:
 		std::string m_nickname;			//! user nickname
 		std::string m_username;			//! IRC client user
 		std::string m_realname;			//! user real name
-		std::string m_ctcpversion;		//! CTCP version
+		std::string m_ctcpVersion;		//! CTCP version
+		bool m_ctcpReply;			//! auto reply CTCP
 
 		Identity()
 		{
@@ -167,7 +185,8 @@ public:
 			m_nickname = "irccd";
 			m_username = "irccd";
 			m_realname = "IRC Client Daemon";
-			m_ctcpversion = "IRC Client Daemon (dev)";
+			m_ctcpVersion = "IRC Client Daemon";
+			m_ctcpReply = true;
 		}
 	};
 
@@ -314,6 +333,11 @@ public:
 	void startConnection();
 
 	/**
+	 * Reset the number of retries.
+	 */
+	void resetRetries();
+
+	/**
 	 * Stop the connection on that server.
 	 */
 	void stopConnection();
@@ -417,6 +441,13 @@ public:
 	 * @param message the message to send
 	 */
 	virtual void say(const std::string &target, const std::string &message);
+
+	/**
+	 * Send a raw message to the server.
+	 *
+	 * @param message the message
+	 */
+	virtual void sendRaw(const std::string &msg);
 
 	/**
 	 * Change a channel topic.

@@ -137,7 +137,7 @@ On Unix, the files are loaded in the following order:
 On Windows, the files are loaded in the following order:
 
 . 'C:\Users\YourUser\irccd\irccd.conf'
-. '<irccd.exe location>\..\etc\irccd.conf'
+. 'Path\To\Irccd\Directory\etc\irccd.conf'
 
 .Specify at the command line
 [NOTE]
@@ -189,11 +189,11 @@ application.
 
 The options available:
 
-* `foreground`: (bool) keep irccd to foreground, default: false.
-* `plugins`: (string list) a list of plugins to load, default: empty.
-* `plugin-path`: (string) a path to local plugins, default: empty.
-* `syslog`: (bool) if enabled, use syslog instead of standard output, default: false.
-* `verbose`: (bool) enable verbose message, default: false.
+* `foreground`: (bool) Keep irccd to foreground, default: false.
+* `plugins`: (string list) A list of plugins to load, default: empty.
+* `plugin-path`: (string) A path to local plugins, default: empty.
+* `syslog`: (bool) If enabled, use syslog instead of standard output, default: false.
+* `verbose`: (bool) Enable verbose message, default: false.
 
 [NOTE]
 The options foreground and syslog are only available on Unix systems.
@@ -217,7 +217,9 @@ The options available:
 * `name`: (string) Required. the identity unique id.
 * `nickname`: (string) The nickname, default: irccd.
 * `realname`: (string) The realname, default: IRC Client daemon.
-* `username`: (string) The username name, default: irccd
+* `username`: (string) The username name, default: irccd.
+* `ctcp-version`: (string) What version to respond to CTCP VERSION, default: IRC Client Daemon.
+* `ctcp-autoreply`: (bool) Enable auto CTCP VERSION reply, default: true.
 
 .Example
 [source, ini]
@@ -253,6 +255,9 @@ The options available:
 * `command-char`: (string) The prefix for invoking special commands, default: !.
 * `ssl`: (bool) Enable or disable SSL, default: false.
 * `ssl-verify`: (bool) Verify the SSL certificates, default: true.
+* `reconnect`: (bool) Enable reconnection after failure, default: true.
+* `reconnect-tries`: (int) Number of tries before giving up. A value of 0 means indefinitely, default: 0.
+* `reconnect-timeout`: (int) Number of seconds to wait before retrying, default: 30.
 
 .Example
 [source, ini]
@@ -270,9 +275,6 @@ anchor:listeners[]
 This section defines listeners, you may use sockets to do a basic IPC system
 in irccd. This let you controlling irccd with sockets.
 
-[NOTE]
-Currently only TCP are supported.
-
 For instance, with listeners, you may ask `irccd` to send a message, a notice or
 even kicking someone from a channel. This is done with the <<irccdctl,irccdctl>>
 utility.
@@ -282,7 +284,10 @@ There are two type of listeners availables:
 * Internet sockets, IPv4 and IPv6
 * Unix sockets, based on files (not available on Windows)
 
-Both of the listener has an option `type` which is set to `internet` or `unix`.
+The following options are available for both types.
+
+* `type`: (string) Required. type of listener "internet" or "unix"
+* `protocol`: (string) Protocol to use, "tcp" or "udp", default: "tcp".
 
 === Using internet sockets
 
@@ -403,7 +408,7 @@ On Windows, the paths are searched in the following order:
 
 . Specified by -p on command line
 . 'C:\Users\YourUser\irccd\plugins'
-. 'C:\Program Files\irccd\plugins'
+. 'Path\To\Irccd\Directory\share\plugins'
 
 anchor:irccdplugnote[]
 
@@ -417,6 +422,17 @@ irccd <<irccdpaths,config path>> plus the plugin name. For example, the plugin
 On Unix: '~/.config/irccd/ask/'
 
 On Windows: 'C:/Users/YourUser/irccd/ask/'
+
+And the respective installation config path or Windows executable location :
+
+On Unix: '/usr/local/etc/irccd/ask'
+
+On Windows: 'Path\To\Irccd\Directory\etc\irccd\ask'
+
+The order is :
+
+. User config directory
+. System directory
 
 anchor:irccdpatterns[]
 
@@ -486,7 +502,7 @@ anchor:irccdctl[]
 == The irccdctl utility
 
 The `irccdctl` utility let you controlling a running `irccd` instance. It uses
-TCP sockets to perform any operation.
+sockets to perform any operation.
 
 First, you need to define at least one <<listeners,listener>> before using
 irccdctl.
@@ -516,7 +532,10 @@ only one may be defined.
 
 Just like <<listeners,listeners>> you can connect to Unix or internet sockets.
 
-Both of the listener has an option `type` which is set to `internet` or `unix`.
+The following options are available for both types.
+
+* `type`: (string) Required. type of listener "internet" or "unix"
+* `protocol`: (string) Required. Protocol to use, "tcp" or "udp".
 
 === Using internet sockets
 

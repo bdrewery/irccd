@@ -18,19 +18,16 @@
 
 #include "Luae.h"
 
-using namespace irccd;
-using namespace std;
-
 namespace irccd
 {
 
 template <>
-bool Luae::getField(lua_State *L, int idx, const string &name)
+bool Luae::getField(lua_State *L, int idx, const std::string &name)
 {
 	bool value = false;
 
 	lua_getfield(L, idx, name.c_str());
-	if (lua_type(L, idx) == LUA_TBOOLEAN)
+	if (lua_type(L, -1) == LUA_TBOOLEAN)
 		value = lua_toboolean(L, -1) == 1;
 	lua_pop(L, 1);
 
@@ -38,12 +35,12 @@ bool Luae::getField(lua_State *L, int idx, const string &name)
 }
 
 template <>
-double Luae::getField(lua_State *L, int idx, const string &name)
+double Luae::getField(lua_State *L, int idx, const std::string &name)
 {
 	double value = 0;
 
 	lua_getfield(L, idx, name.c_str());
-	if (lua_type(L, idx) == LUA_TNUMBER)
+	if (lua_type(L, -1) == LUA_TNUMBER)
 		value = lua_tonumber(L, -1);
 	lua_pop(L, 1);
 
@@ -51,12 +48,12 @@ double Luae::getField(lua_State *L, int idx, const string &name)
 }
 
 template <>
-int Luae::getField(lua_State *L, int idx, const string &name)
+int Luae::getField(lua_State *L, int idx, const std::string &name)
 {
 	int value = 0;
 
 	lua_getfield(L, idx, name.c_str());
-	if (lua_type(L, idx) == LUA_TNUMBER)
+	if (lua_type(L, -1) == LUA_TNUMBER)
 		value = lua_tointeger(L, -1);
 	lua_pop(L, 1);
 
@@ -64,21 +61,34 @@ int Luae::getField(lua_State *L, int idx, const string &name)
 }
 
 template <>
-string Luae::getField(lua_State *L, int idx, const string &name)
+std::string Luae::getField(lua_State *L, int idx, const std::string &name)
 {
-	string value;
+	std::string value;
 
 	lua_getfield(L, idx, name.c_str());
-	if (lua_type(L, idx) == LUA_TSTRING)
+	if (lua_type(L, -1) == LUA_TSTRING)
 		value = lua_tostring(L, -1);
 	lua_pop(L, 1);
 
 	return value;
 }
 
-} // !irccd
+int Luae::typeField(lua_State *L, int idx, const std::string &name)
+{
+	int type;
 
-void Luae::preload(lua_State *L, const string &name, lua_CFunction func)
+	LUA_STACK_CHECKBEGIN(L);
+
+	lua_getfield(L, idx, name.c_str());
+	type = lua_type(L, -1);
+	lua_pop(L, 1);
+
+	LUA_STACK_CHECKEQUALS(L);
+
+	return type;
+}
+
+void Luae::preload(lua_State *L, const std::string &name, lua_CFunction func)
 {
 	LUA_STACK_CHECKBEGIN(L);
 
@@ -106,7 +116,7 @@ void Luae::readTable(lua_State *L, int idx, ReadFunction func)
 	lua_pop(L, 1);
 }
 
-int Luae::referenceField(lua_State *L, int idx, int type, const string &name)
+int Luae::referenceField(lua_State *L, int idx, int type, const std::string &name)
 {
 	int ref = LUA_REFNIL;
 
@@ -122,7 +132,7 @@ int Luae::referenceField(lua_State *L, int idx, int type, const string &name)
 	return ref;
 }
 
-void Luae::require(lua_State *L, const string &name, lua_CFunction func, bool global)
+void Luae::require(lua_State *L, const std::string &name, lua_CFunction func, bool global)
 {
 	LUA_STACK_CHECKBEGIN(L);
 
@@ -131,6 +141,8 @@ void Luae::require(lua_State *L, const string &name, lua_CFunction func, bool gl
 
 	LUA_STACK_CHECKEQUALS(L);
 }
+
+} // !irccd
 
 void * operator new(size_t size, lua_State *L)
 {
@@ -151,6 +163,8 @@ void operator delete(void *, lua_State *)
 {
 }
 
-void operator delete(void *, lua_State *, const char *)
+void operator delete(void *, lua_State *L, const char *)
 {
+	lua_pushnil(L);
+	lua_setmetatable(L, -2);
 }

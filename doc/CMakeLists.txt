@@ -33,7 +33,7 @@ set(MONTH "September")
 set(DAY 10)
 set(YEAR 2013)
 
-function(DEFINE_MAN file man)
+function(define_man file man)
 	if (WITH_MAN)
 		# Remove .in end
 		string(REGEX REPLACE "(.*)\\.in$" "\\1" output ${file})
@@ -46,10 +46,10 @@ function(DEFINE_MAN file man)
 	endif()
 endfunction()
 
-DEFINE_MAN(irccd.1.in man1)
-DEFINE_MAN(irccd.conf.5.in man5)
-DEFINE_MAN(irccdctl.1.in man1)
-DEFINE_MAN(irccdctl.conf.5.in man5)
+define_man(irccd.1.in man1)
+define_man(irccd.conf.5.in man5)
+define_man(irccdctl.1.in man1)
+define_man(irccdctl.conf.5.in man5)
 
 find_file(
 	LDOC ldoc
@@ -125,7 +125,7 @@ endif ()
 #
 if (WITH_DOC)
 	# Macro to define new guides to be processed.
-	macro(DEFINE_GUIDE file name isplugin)
+	macro(define_guide file name isplugin)
 		string(REGEX REPLACE "(.*)\\.txt$" "\\1" output ${file})
 
 		if (ASCIIDOC)
@@ -162,14 +162,16 @@ if (WITH_DOC)
 		unset(smprefix)
 	endmacro ()
 
-	DEFINE_GUIDE(user-guide.txt "User guide" false)
-	DEFINE_GUIDE(socket-guide.txt "Socket guide" false)
-	DEFINE_GUIDE(plugin-antiflood.txt "Antiflood" true)		# antiflood.lua
-	DEFINE_GUIDE(plugin-ask.txt "Ask" true)				# ask.lua
-	DEFINE_GUIDE(plugin-badwords.txt "Badwords" true)		# badwords.lua
-	DEFINE_GUIDE(plugin-history.txt "History" true)			# history.lua
-	DEFINE_GUIDE(plugin-logger.txt "Logger" true)			# logger.lua
-	DEFINE_GUIDE(plugin-roulette.txt "Roulette" true)		# roulette.lua
+	define_guide(user-guide.txt "User guide" false)
+	define_guide(socket-guide.txt "Socket guide" false)
+	define_guide(plugin-antiflood.txt "Antiflood" true)		# antiflood.lua
+	define_guide(plugin-ask.txt "Ask" true)				# ask.lua
+	define_guide(plugin-auth.txt "Auth" true)			# auth.lua
+	define_guide(plugin-badwords.txt "Badwords" true)		# badwords.lua
+	define_guide(plugin-date.txt "Date" true)
+	define_guide(plugin-history.txt "History" true)			# history.lua
+	define_guide(plugin-logger.txt "Logger" true)			# logger.lua
+	define_guide(plugin-roulette.txt "Roulette" true)		# roulette.lua
 
 	#
 	# Regenerate the documentation inside using make generate-doc
@@ -187,7 +189,6 @@ if (WITH_DOC)
 			${COMMANDS}
 		)
 	endif ()
-
 
 	install(
 		DIRECTORY "generated/guides"
