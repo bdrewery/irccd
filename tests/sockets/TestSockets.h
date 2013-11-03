@@ -1,7 +1,7 @@
 /*
- * TestParser.cpp -- test the config file parser
+ * TestSockets.h -- test the sockets API
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,29 +16,21 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cppunit/TextTestRunner.h>
+#ifndef _TEST_SOCKETS_H_
+#define _TEST_SOCKETS_H_
 
-#include <common/Parser.h>
+#include <cppunit/extensions/HelperMacros.h>
+#include <cppunit/TestFixture.h>
 
-#include "TestParser.h"
-
-TestParser::TestParser()
+class TestSockets : public CppUnit::TestFixture
 {
-}
+private:
+	CPPUNIT_TEST_SUITE(TestSockets);
+	CPPUNIT_TEST(bindAndConnect);
+	CPPUNIT_TEST_SUITE_END();
 
-TestParser::~TestParser()
-{
-}
+public:
+	void bindAndConnect();
+};
 
-void TestParser::openCorrect()
-{
-	CPPUNIT_ASSERT(true);
-}
-
-int main()
-{
-	CppUnit::TextTestRunner runnerText;
-
-	runnerText.addTest(TestParser::suite());
-	runnerText.run();
-}
+#endif // _TEST_SOCKETS_H_

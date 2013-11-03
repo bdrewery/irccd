@@ -1,7 +1,7 @@
 /*
- * TestParser.h -- test the config file parser
+ * TestParser.cpp -- test the config file parser
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,22 +16,23 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _TEST_PARSER_H_
-#define _TEST_PARSER_H_
+#include <cppunit/TextTestRunner.h>
 
-#include <cppunit/extensions/HelperMacros.h>
-#include <cppunit/TestFixture.h>
+#include <common/Parser.h>
 
-class TestParser : public CppUnit::TestFixture {
-	CPPUNIT_TEST_SUITE(TestParser);
-	CPPUNIT_TEST(openCorrect);
-	CPPUNIT_TEST_SUITE_END();
+#include "TestParser.h"
 
-public:
-	TestParser();
-	~TestParser();
+void TestParser::openCorrect()
+{
+	CPPUNIT_ASSERT(true);
+}
 
-	void openCorrect();
-};
+int main()
+{
+	CppUnit::TextTestRunner runnerText;
 
-#endif // !_TEST_PARSER_H_
+	runnerText.addTest(TestParser::suite());
+	runnerText.run();
+
+	return 0;
+}

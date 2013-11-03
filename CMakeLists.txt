@@ -216,4 +216,8 @@ set(CPACK_SOURCE_IGNORE_FILES ".hg;_build_")
 
 include(CPack)
 
+# Tests
+include(CTest)
+add_subdirectory(tests)
+
 # vim: set syntax=cmake:
