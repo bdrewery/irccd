@@ -66,8 +66,8 @@ enum class IrcChanNickMode
 	Voiced		= 'v'				//! voice power
 };
 
-typedef std::vector<std::string> IrcEventParams;
-typedef std::map<IrcChanNickMode, char> IrcPrefixes;
+using IrcEventParams	= std::vector<std::string>;
+using IrcPrefixes	= std::map<IrcChanNickMode, char>;
 
 struct IrcEvent
 {
@@ -88,7 +88,8 @@ struct IrcEvent
 	 * @param params eventual parameters
 	 * @param server which server
 	 */
-	IrcEvent(IrcEventType type, IrcEventParams params,
+	IrcEvent(IrcEventType type,
+		 IrcEventParams params,
 		 std::shared_ptr<Server> server);
 
 	/**
@@ -191,8 +192,19 @@ public:
 		}
 	};
 
-	typedef std::unordered_map<std::string, std::vector<std::string>> NameList;
-	typedef std::unordered_map<std::string, WhoisInfo> WhoisList;
+	using NameList	= std::unordered_map<
+				std::string,
+				std::vector<std::string>
+			  >;
+
+	using WhoisList	= std::unordered_map<
+				std::string,
+				WhoisInfo
+			  >;
+
+	using ChanList	= std::vector<Channel>;
+
+	using Ptr	= std::shared_ptr<Server>;
 
 private:
 	// IRC thread
@@ -227,7 +239,7 @@ public:
 	 * @param s the session
 	 * @return the shared_ptr.
 	 */
-	static std::shared_ptr<Server> toServer(irc_session_t *s);
+	static Ptr toServer(irc_session_t *s);
 
 	/**
 	 * Better constructor with information and options.
@@ -236,7 +248,9 @@ public:
 	 * @param identity the identity
 	 * @param options some options
 	 */
-	Server(const Info &info, const Identity &identity, const Options &options);
+	Server(const Info &info,
+	       const Identity &identity,
+	       const Options &options);
 
 	/**
 	 * Default destructor.
@@ -256,42 +270,42 @@ public:
 	 *
 	 * @return the current list
 	 */
-	NameList & getNameLists();
+	NameList &getNameLists();
 
 	/**
 	 * Get the whois lists to build /whois reporting.
 	 *
 	 * @return the current list
 	 */
-	WhoisList & getWhoisLists();
+	WhoisList &getWhoisLists();
 
 	/**
 	 * Get the server information.
 	 *
 	 * @return the server information
 	 */
-	const Info & getInfo() const;
+	const Info &getInfo() const;
 
 	/**
 	 * Get the identity used for that server
 	 *
 	 * @return the identity
 	 */
-	const Identity & getIdentity() const;
+	const Identity &getIdentity() const;
 
 	/**
 	 * Get the server options.
 	 *
 	 * @return the options
 	 */
-	const Options & getOptions() const;
+	const Options &getOptions() const;
 
 	/**
 	 * Get all channels that will be auto joined
 	 *
 	 * @return the list of channels
 	 */
-	const std::vector<Channel> & getChannels() const;
+	const ChanList &getChannels() const;
 
 	/**
 	 * Add a channel that the server will connect to when the
@@ -300,7 +314,8 @@ public:
 	 * @param name the channel name
 	 * @param password an optional channel password
 	 */
-	void addChannel(const std::string &name, const std::string &password = "");
+	void addChannel(const std::string &name,
+			const std::string &password = "");
 
 	/**
 	 * Tells if we already have a channel in the list.
@@ -353,7 +368,8 @@ public:
 	 * @param channel the target channel
 	 * @param message the message to send
 	 */
-	virtual void cnotice(const std::string &channel, const std::string &message);
+	virtual void cnotice(const std::string &channel,
+			     const std::string &message);
 
 	/**
 	 * Invite someone to a channel.
@@ -361,7 +377,8 @@ public:
 	 * @param target the target nickname
 	 * @param channel the channel
 	 */
-	virtual void invite(const std::string &target, const std::string &channel);
+	virtual void invite(const std::string &target,
+			    const std::string &channel);
 
 	/**
 	 * Join a channel.
@@ -369,7 +386,8 @@ public:
 	 * @param channel the channel name
 	 * @param password an optional password
 	 */
-	virtual void join(const std::string &name, const std::string &password = "");
+	virtual void join(const std::string &name,
+			  const std::string &password = "");
 
 	/**
 	 * Kick someone from a channel.
@@ -378,7 +396,9 @@ public:
 	 * @param channel the channel from
 	 * @param reason an optional reason
 	 */
-	virtual void kick(const std::string &name, const std::string &channel, const std::string &reason = "");
+	virtual void kick(const std::string &name,
+			  const std::string &channel,
+			  const std::string &reason = "");
 
 	/**
 	 * Send a CTCP ACTION known as /me.
@@ -386,7 +406,8 @@ public:
 	 * @param target the nickname or channel
 	 * @param message the message to send
 	 */
-	virtual void me(const std::string &target, const std::string &message);
+	virtual void me(const std::string &target,
+			const std::string &message);
 
 	/**
 	 * Change the channel mode.
@@ -394,7 +415,8 @@ public:
 	 * @param channel the target channel
 	 * @param mode the mode
 	 */
-	virtual void mode(const std::string &channel, const std::string &mode);
+	virtual void mode(const std::string &channel,
+			  const std::string &mode);
 
 	/**
 	 * Get the list of names as a deferred call.
@@ -418,7 +440,8 @@ public:
 	 * @param nickname the target nickname
 	 * @param message the message
 	 */
-	virtual void notice(const std::string &nickname, const std::string &message);
+	virtual void notice(const std::string &nickname,
+			    const std::string &message);
 
 	/**
 	 * Leave a channel.
@@ -433,7 +456,8 @@ public:
 	 * @param who the target nickname
 	 * @param message the message
 	 */
-	virtual void query(const std::string &who, const std::string &message);
+	virtual void query(const std::string &who,
+			   const std::string &message);
 
 	/**
 	 * Say something to a channel or to a nickname.
@@ -441,7 +465,8 @@ public:
 	 * @param target the nickname or channel
 	 * @param message the message to send
 	 */
-	virtual void say(const std::string &target, const std::string &message);
+	virtual void say(const std::string &target,
+			 const std::string &message);
 
 	/**
 	 * Send a raw message to the server.
@@ -456,7 +481,8 @@ public:
 	 * @param channel the channel target
 	 * @param topic the new topic
 	 */
-	virtual void topic(const std::string &channel, const std::string &topic);
+	virtual void topic(const std::string &channel,
+			   const std::string &topic);
 
 	/**
 	 * Change your own user mode.

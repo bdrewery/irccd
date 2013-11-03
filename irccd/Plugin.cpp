@@ -100,7 +100,7 @@ const char * Plugin::ErrorException::what() const throw()
  * -------------------------------------------------------- */
 
 void Plugin::call(const std::string &func,
-		  std::shared_ptr<Server> server,
+		  Server::Ptr server,
 		  std::vector<std::string> params)
 {
 	lua_State *L = m_state;
@@ -239,7 +239,7 @@ Plugin::ThreadList &Plugin::getThreads()
 	return m_threads;
 }
 
-void Plugin::onCommand(std::shared_ptr<Server> server,
+void Plugin::onCommand(Server::Ptr server,
 		       const std::string &channel,
 		       const std::string &who,
 		       const std::string &message)
@@ -253,12 +253,12 @@ void Plugin::onCommand(std::shared_ptr<Server> server,
 	call("onCommand", server, params);
 }
 
-void Plugin::onConnect(std::shared_ptr<Server> server)
+void Plugin::onConnect(Server::Ptr server)
 {
 	call("onConnect", server);
 }
 
-void Plugin::onChannelNotice(std::shared_ptr<Server> server,
+void Plugin::onChannelNotice(Server::Ptr server,
 			     const std::string &nick,
 			     const std::string &target,
 			     const std::string &notice)
@@ -272,7 +272,7 @@ void Plugin::onChannelNotice(std::shared_ptr<Server> server,
 	call("onChannelNotice", server, params);
 }
 
-void Plugin::onInvite(std::shared_ptr<Server> server,
+void Plugin::onInvite(Server::Ptr server,
 		      const std::string &channel,
 		      const std::string &who)
 {
@@ -284,7 +284,7 @@ void Plugin::onInvite(std::shared_ptr<Server> server,
 	call("onInvite", server, params);
 }
 
-void Plugin::onJoin(std::shared_ptr<Server> server,
+void Plugin::onJoin(Server::Ptr server,
 		    const std::string &channel,
 		    const std::string &nickname)
 {
@@ -296,7 +296,7 @@ void Plugin::onJoin(std::shared_ptr<Server> server,
 	call("onJoin", server, params);
 }
 
-void Plugin::onKick(std::shared_ptr<Server> server,
+void Plugin::onKick(Server::Ptr server,
 		    const std::string &channel,
 		    const std::string &who,
 		    const std::string &kicked,
@@ -317,7 +317,7 @@ void Plugin::onLoad()
 	call("onLoad");
 }
 
-void Plugin::onMessage(std::shared_ptr<Server> server,
+void Plugin::onMessage(Server::Ptr server,
 		       const std::string &channel,
 		       const std::string &who,
 		       const std::string &message)
@@ -332,7 +332,7 @@ void Plugin::onMessage(std::shared_ptr<Server> server,
 	call("onMessage", server, params);
 }
 
-void Plugin::onMe(std::shared_ptr<Server> server,
+void Plugin::onMe(Server::Ptr server,
 		  const std::string &channel,
 		  const std::string &who,
 		  const std::string &message)
@@ -347,7 +347,7 @@ void Plugin::onMe(std::shared_ptr<Server> server,
 	call("onMe", server, params);
 }
 
-void Plugin::onMode(std::shared_ptr<Server> server,
+void Plugin::onMode(Server::Ptr server,
 		    const std::string &channel,
 		    const std::string &who,
 		    const std::string &mode,
@@ -363,7 +363,7 @@ void Plugin::onMode(std::shared_ptr<Server> server,
 	call("onMode", server, params);
 }
 
-void Plugin::onNick(std::shared_ptr<Server> server,
+void Plugin::onNick(Server::Ptr server,
 		    const std::string &oldnick,
 		    const std::string &newnick)
 {
@@ -375,7 +375,7 @@ void Plugin::onNick(std::shared_ptr<Server> server,
 	call("onNick", server, params);
 }
 
-void Plugin::onNotice(std::shared_ptr<Server> server,
+void Plugin::onNotice(Server::Ptr server,
 		      const std::string &nick,
 		      const std::string &target,
 		      const std::string &notice)
@@ -389,7 +389,7 @@ void Plugin::onNotice(std::shared_ptr<Server> server,
 	call("onNotice", server, params);
 }
 
-void Plugin::onPart(std::shared_ptr<Server> server,
+void Plugin::onPart(Server::Ptr server,
 		    const std::string &channel,
 		    const std::string &who,
 		    const std::string &reason)
@@ -403,7 +403,7 @@ void Plugin::onPart(std::shared_ptr<Server> server,
 	call("onPart", server, params);
 }
 
-void Plugin::onQuery(std::shared_ptr<Server> server,
+void Plugin::onQuery(Server::Ptr server,
 		     const std::string &who,
 		     const std::string &message)
 {
@@ -420,7 +420,7 @@ void Plugin::onReload()
 	call("onReload");
 }
 
-void Plugin::onTopic(std::shared_ptr<Server> server,
+void Plugin::onTopic(Server::Ptr server,
 		     const std::string &channel,
 		     const std::string &who,
 		     const std::string &topic)
@@ -434,7 +434,7 @@ void Plugin::onTopic(std::shared_ptr<Server> server,
 	call("onTopic", server, params);
 }
 
-void Plugin::onUserMode(std::shared_ptr<Server> server,
+void Plugin::onUserMode(Server::Ptr server,
 			const std::string &who,
 			const std::string &mode)
 {

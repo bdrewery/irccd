@@ -18,8 +18,8 @@
 
 #include <cstring>
 #include <functional>
-#include <map>
 #include <string>
+#include <unordered_map>
 
 #include <Logger.h>
 #include <Util.h>
@@ -32,10 +32,14 @@
 namespace irccd
 {
 
-typedef std::function<void()> HelpFunction;
-typedef std::function<void(std::shared_ptr<Plugin>, std::shared_ptr<Server>, int, char **)> TestFunction;
+namespace
+{
 
-class FakeServer : public Server {
+using HelpFunction	= std::function<void ()>;
+using TestFunction	= std::function<void (Plugin::Ptr, Server::Ptr, int, char **)>;
+
+class FakeServer : public Server
+{
 public:
 	FakeServer(const Info &info, const Identity &identity)
 	{
@@ -253,35 +257,28 @@ static void helpUserMode()
 	Logger::warn("\t%s test file onUserMode john +i");
 }
 
-static std::map<std::string, HelpFunction> createHelpCommands()
-{
-	std::map<std::string, HelpFunction> commands;
-
-	commands["onCommand"]		= helpCommand;
-	commands["onConnect"]		= helpConnect;
-	commands["onChannelNotice"]	= helpChannelNotice;
-	commands["onInvite"]		= helpInvite;
-	commands["onJoin"]		= helpJoin;
-	commands["onKick"]		= helpKick;
-	commands["onMessage"]		= helpMessage;
-	commands["onMode"]		= helpMode;
-	commands["onNick"]		= helpNick;
-	commands["onNotice"]		= helpNotice;
-	commands["onPart"]		= helpPart;
-	commands["onQuery"]		= helpQuery;
-	commands["onTopic"]		= helpTopic;
-	commands["onUserMode"]		= helpUserMode;
-
-	return commands;
-}
-
-static std::map<std::string, HelpFunction> helpCommands = createHelpCommands();
+std::unordered_map<std::string, HelpFunction> helpCommands {
+	{ "onCommand",		helpCommand		},
+	{ "onConnect",		helpConnect		},
+	{ "onChannelNotice",	helpChannelNotice	},
+	{ "onInvite",		helpInvite		},
+	{ "onJoin",		helpJoin		},
+	{ "onKick",		helpKick		},
+	{ "onMessage",		helpMessage		},
+	{ "onMode",		helpMode		},
+	{ "onNick",		helpNick		},
+	{ "onNotice",		helpNotice		},
+	{ "onPart",		helpPart		},
+	{ "onQuery",		helpQuery		},
+	{ "onTopic",		helpTopic		},
+	{ "onUserMode",		helpUserMode		}
+};
 
 // }}}
 
 // {{{ Test functions
 
-static void testCommand(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
+void testCommand(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onCommand requires 3 arguments");
@@ -289,12 +286,12 @@ static void testCommand(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, in
 		p->onCommand(s, argv[0], argv[1], argv[2]);
 }
 
-static void testConnect(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int, char **)
+void testConnect(Plugin::Ptr p, Server::Ptr s, int, char **)
 {
 	p->onConnect(s);
 }
 
-static void testChannelNotice(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
+void testChannelNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onChannelNotice requires 3 arguments");
@@ -302,7 +299,7 @@ static void testChannelNotice(std::shared_ptr<Plugin> p, std::shared_ptr<Server>
 		p->onChannelNotice(s, argv[0], argv[1], argv[2]);
 }
 
-static void testInvite(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
+void testInvite(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onInvite requires 2 arguments");
@@ -310,7 +307,7 @@ static void testInvite(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int
 		p->onInvite(s, argv[0], argv[1]);
 }
 
-static void testJoin(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
+void testJoin(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onJoin requires 2 arguments");
@@ -318,7 +315,7 @@ static void testJoin(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int a
 		p->onJoin(s, argv[0], argv[1]);
 }
 
-static void testKick(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
+void testKick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
 	std::string reason;
 
@@ -331,7 +328,7 @@ static void testKick(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int a
 		p->onKick(s, argv[0], argv[1], argv[2], reason);
 }
 
-static void testMessage(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
+void testMessage(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onMessage requires 3 arguments");
@@ -339,7 +336,7 @@ static void testMessage(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, in
 		p->onMessage(s, argv[0], argv[1], argv[2]);
 }
 
-static void testMode(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
+void testMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
 	std::string modeArg;
 
@@ -352,7 +349,7 @@ static void testMode(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int a
 		p->onMode(s, argv[0], argv[1], argv[2], modeArg);
 }
 
-static void testNick(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
+void testNick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onNick requires 2 arguments");
@@ -360,7 +357,7 @@ static void testNick(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int a
 		p->onNick(s, argv[0], argv[1]);
 }
 
-static void testNotice(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
+void testNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onNotice requires 3 arguments");
@@ -368,7 +365,7 @@ static void testNotice(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int
 		p->onNotice(s, argv[0], argv[1], argv[2]);
 }
 
-static void testPart(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
+void testPart(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
 	std::string reason;
 
@@ -381,7 +378,7 @@ static void testPart(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int a
 		p->onPart(s, argv[0], argv[1], reason);
 }
 
-static void testQuery(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
+void testQuery(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onQuery requires 2 arguments");
@@ -389,7 +386,7 @@ static void testQuery(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int 
 		p->onQuery(s, argv[0], argv[1]);
 }
 
-static void testTopic(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
+void testTopic(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onTopic requires 3 arguments");
@@ -397,7 +394,7 @@ static void testTopic(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int 
 		p->onTopic(s, argv[0], argv[1], argv[2]);
 }
 
-static void testUserMode(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
+void testUserMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onUserMode requires 2 arguments");
@@ -405,33 +402,26 @@ static void testUserMode(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, i
 		p->onUserMode(s, argv[0], argv[1]);
 }
 
-static std::map<std::string, TestFunction> createCommands()
-{
-	std::map<std::string, TestFunction> commands;
-
-	commands["onCommand"]		= testCommand;
-	commands["onConnect"]		= testConnect;
-	commands["onChannelNotice"]	= testChannelNotice;
-	commands["onInvite"]		= testInvite;
-	commands["onJoin"]		= testJoin;
-	commands["onKick"]		= testKick;
-	commands["onMessage"]		= testMessage;
-	commands["onMode"]		= testMode;
-	commands["onNick"]		= testNick;
-	commands["onNotice"]		= testNotice;
-	commands["onPart"]		= testPart;
-	commands["onQuery"]		= testQuery;
-	commands["onTopic"]		= testTopic;
-	commands["onUserMode"]		= testUserMode;
-
-	return commands;
-}
-
-static std::map<std::string, TestFunction> testCommands = createCommands();
+std::unordered_map<std::string, TestFunction> testCommands {
+	{ "onCommand",		testCommand		},
+	{ "onConnect",		testConnect		},
+	{ "onChannelNotice",	testChannelNotice	},
+	{ "onInvite",		testInvite		},
+	{ "onJoin",		testJoin		},
+	{ "onKick",		testKick		},
+	{ "onMessage",		testMessage		},
+	{ "onMode",		testMode		},
+	{ "onNick",		testNick		},
+	{ "onNotice",		testNotice		},
+	{ "onPart",		testPart		},
+	{ "onQuery",		testQuery		},
+	{ "onTopic",		testTopic		},
+	{ "onUserMode",		testUserMode		}
+};
 
 // }}}
 
-static void testPlugin(const char *file, int argc, char **argv)
+void testPlugin(const char *file, int argc, char **argv)
 {
 	Server::Info info;
 	Server::Identity ident;
@@ -486,6 +476,8 @@ static void testPlugin(const char *file, int argc, char **argv)
 			Logger::warn("Error in script %s", ex.what());
 		}
 	}
+}
+
 }
 
 void test(int argc, char **argv)

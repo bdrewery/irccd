@@ -32,7 +32,7 @@ namespace
 std::string makeMessage(lua_State *L, const std::string &message)
 {
 	std::ostringstream oss;
-	std::shared_ptr<Plugin> p = Irccd::getInstance()->findPlugin(L);
+	Plugin::Ptr p = Irccd::getInstance()->findPlugin(L);
 
 	oss << "plugin " << p->getName() << ": " << message;
 

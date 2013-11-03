@@ -81,7 +81,7 @@ private:
 	 * @throw ErrorException on failure
 	 */
 	void call(const std::string &func,
-		  std::shared_ptr<Server> server = std::shared_ptr<Server>(),
+		  Server::Ptr server = Server::Ptr(),
 		  std::vector<std::string> params = std::vector<std::string>());
 
 public:
@@ -171,7 +171,7 @@ public:
 	 * @param who who spoke
 	 * @param message the message sent without the command and plugin
 	 */
-	void onCommand(std::shared_ptr<Server> server,
+	void onCommand(Server::Ptr server,
 		       const std::string &channel,
 		       const std::string &who,
 		       const std::string &message);
@@ -182,7 +182,7 @@ public:
 	 *
 	 * @param server the current server
 	 */
-	void onConnect(std::shared_ptr<Server> server);
+	void onConnect(Server::Ptr server);
 
 	/**
 	 * A Lua function triggered on a channel notice
@@ -192,7 +192,7 @@ public:
 	 * @param target the target channel
 	 * @param notice the optional notice
 	 */
-	void onChannelNotice(std::shared_ptr<Server> server,
+	void onChannelNotice(Server::Ptr server,
 			     const std::string &nick,
 			     const std::string &target,
 			     const std::string &notice);
@@ -204,7 +204,7 @@ public:
 	 * @param channel on which channel
 	 * @param who who invited you
 	 */
-	void onInvite(std::shared_ptr<Server> server,
+	void onInvite(Server::Ptr server,
 		      const std::string &channel,
 		      const std::string &who);
 
@@ -215,7 +215,7 @@ public:
 	 * @param channel on which channel
 	 * @param nickname the nickname
 	 */
-	void onJoin(std::shared_ptr<Server> server,
+	void onJoin(Server::Ptr server,
 		    const std::string &channel,
 		    const std::string &nickname);
 
@@ -228,7 +228,7 @@ public:
 	 * @param kicked the person kicked
 	 * @param reason an optional reason
 	 */
-	void onKick(std::shared_ptr<Server> server,
+	void onKick(Server::Ptr server,
 		    const std::string &channel,
 		    const std::string &who,
 		    const std::string &kicked,
@@ -247,7 +247,7 @@ public:
 	 * @param who who spoke
 	 * @param message the message sent
 	 */
-	void onMessage(std::shared_ptr<Server> server,
+	void onMessage(Server::Ptr server,
 		       const std::string &channel,
 		       const std::string &who,
 		       const std::string &message);
@@ -260,7 +260,7 @@ public:
 	 * @param who who spoke
 	 * @param message the message sent
 	 */
-	void onMe(std::shared_ptr<Server> server,
+	void onMe(Server::Ptr server,
 		  const std::string &channel,
 		  const std::string &who,
 		  const std::string &message);
@@ -274,7 +274,7 @@ public:
 	 * @param mode the mode
 	 * @param modeArg an optional mode argument
 	 */
-	void onMode(std::shared_ptr<Server> server,
+	void onMode(Server::Ptr server,
 		    const std::string &channel,
 		    const std::string &who,
 		    const std::string &mode,
@@ -287,7 +287,7 @@ public:
 	 * @param oldnick the old nickname
 	 * @param newnick the new nickname
 	 */
-	void onNick(std::shared_ptr<Server> server,
+	void onNick(Server::Ptr server,
 		    const std::string &oldnick,
 		    const std::string &newnick);
 
@@ -299,7 +299,7 @@ public:
 	 * @param target the target nickname
 	 * @param notice the optional notice
 	 */
-	void onNotice(std::shared_ptr<Server> server,
+	void onNotice(Server::Ptr server,
 		      const std::string &nick,
 		      const std::string &target,
 		      const std::string &notice);
@@ -312,7 +312,7 @@ public:
 	 * @param who who left
 	 * @param reason an optional reason
 	 */
-	void onPart(std::shared_ptr<Server> server,
+	void onPart(Server::Ptr server,
 		    const std::string &channel,
 		    const std::string &who,
 		    const std::string &reason);
@@ -324,7 +324,7 @@ public:
 	 * @param who who sent
 	 * @param message the message
 	 */
-	void onQuery(std::shared_ptr<Server> server,
+	void onQuery(Server::Ptr server,
 		     const std::string &who,
 		     const std::string &message);
 
@@ -341,7 +341,7 @@ public:
 	 * @param who who changed the topic
 	 * @param topic the new topic
 	 */
-	void onTopic(std::shared_ptr<Server> server,
+	void onTopic(Server::Ptr server,
 		     const std::string &channel,
 		     const std::string &who,
 		     const std::string &topic);
@@ -358,7 +358,7 @@ public:
 	 * @param who who changed *your* mode
 	 * @param mode the mode
 	 */
-	void onUserMode(std::shared_ptr<Server> server,
+	void onUserMode(Server::Ptr server,
 			const std::string &who,
 			const std::string &mode);
 };

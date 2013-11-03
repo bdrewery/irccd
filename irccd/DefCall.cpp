@@ -41,7 +41,7 @@ DefCall::DefCall()
 {
 }
 
-DefCall::DefCall(IrcEventType type, std::shared_ptr<Plugin> plugin, int ref)
+DefCall::DefCall(IrcEventType type, Plugin::Ptr plugin, int ref)
 	: m_type(type)
 	, m_plugin(plugin)
 	, m_ref(ref)

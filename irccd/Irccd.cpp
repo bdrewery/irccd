@@ -533,7 +533,7 @@ void Irccd::loadPlugin(const std::string &name)
 		m_pluginLock.lock();
 		Plugin *p = new Plugin(name);
 
-		m_pluginMap[p->getState()] = std::shared_ptr<Plugin>(p);
+		m_pluginMap[p->getState()] = Plugin::Ptr(p);
 		m_pluginLock.unlock();
 
 		if (!p->open(finalPath))
@@ -829,7 +829,7 @@ void Irccd::openServers(const Parser &config)
 			if (s.hasOption("reconnect-timeout"))
 				options.m_timeout = s.getOption<int>("reconnect-timeout");
 
-			std::shared_ptr<Server> server = std::make_shared<Server>(info, identity, options);
+			Server::Ptr server = std::make_shared<Server>(info, identity, options);
 
 			// Extract channels to auto join
 			extractChannels(s, server);
@@ -840,7 +840,7 @@ void Irccd::openServers(const Parser &config)
 	}
 }
 
-void Irccd::extractChannels(const Section &section, std::shared_ptr<Server> server)
+void Irccd::extractChannels(const Section &section, Server::Ptr server)
 {
 	std::vector<std::string> channels;
 	std::string list, name, password;
@@ -913,7 +913,7 @@ void Irccd::addWantedPlugin(const std::string &name)
 
 #if defined(WITH_LUA)
 
-std::shared_ptr<Plugin> Irccd::findPlugin(lua_State *state)
+Plugin::Ptr Irccd::findPlugin(lua_State *state)
 {
 	for (auto plugin : m_pluginMap)
 	{
@@ -934,9 +934,9 @@ std::shared_ptr<Plugin> Irccd::findPlugin(lua_State *state)
 	throw std::out_of_range("plugin not found");
 }
 
-std::shared_ptr<Plugin> Irccd::findPlugin(const std::string &name)
+Plugin::Ptr Irccd::findPlugin(const std::string &name)
 {
-	using type = std::pair<lua_State *, std::shared_ptr<Plugin>>;
+	using type = std::pair<lua_State *, Plugin::Ptr>;
 
 	std::ostringstream oss;
 
@@ -955,17 +955,12 @@ std::shared_ptr<Plugin> Irccd::findPlugin(const std::string &name)
 	return (*i).second;
 }
 
-std::mutex &Irccd::getPluginLock()
-{
-	return m_pluginLock;
-}
-
-void Irccd::addDeferred(std::shared_ptr<Server> server, DefCall call)
+void Irccd::addDeferred(Server::Ptr server, DefCall call)
 {
 	m_deferred[server].push_back(call);
 }
 
-void Irccd::registerThread(lua_State *L, std::shared_ptr<Plugin> plugin)
+void Irccd::registerThread(lua_State *L, Plugin::Ptr plugin)
 {
 	Lock lk(m_pluginLock);
 
@@ -996,9 +991,9 @@ void Irccd::setForeground(bool mode)
 	m_foreground = mode;
 }
 
-std::shared_ptr<Server> &Irccd::findServer(const std::string &name)
+Server::Ptr Irccd::findServer(const std::string &name)
 {
-	for (std::shared_ptr<Server> &s : m_servers)
+	for (auto s : m_servers)
 		if (s->getInfo().m_name == name)
 			return s;
 
@@ -1035,7 +1030,7 @@ int Irccd::run()
 	}
 
 	// Start all servers
-	for (std::shared_ptr<Server> &s : m_servers)
+	for (auto s : m_servers)
 	{
 		Logger::log("server %s: trying to connect to %s...",
 		    s->getInfo().m_name.c_str(), s->getInfo().m_host.c_str());
@@ -1081,10 +1076,10 @@ void Irccd::stop()
 {
 	m_running = false;
 
-	for (std::shared_ptr<Server> &s : m_servers)
+	for (auto s : m_servers)
 		s->stopConnection();
 
-	for (Socket &s : m_socketServers)
+	for (auto s : m_socketServers)
 		s.close();
 }
 
@@ -1102,7 +1097,7 @@ void Irccd::handleIrcEvent(const IrcEvent &ev)
 		handleKick(ev);
 
 #if defined(WITH_LUA)
-	std::lock_guard<std::mutex> ulock(m_pluginLock);
+	Lock lk(m_pluginLock);
 
 	/**
 	 * This is the handle of deferred calls, they are not handled in the
@@ -1143,12 +1138,13 @@ void Irccd::handleIrcEvent(const IrcEvent &ev)
 
 void Irccd::handleConnection(const IrcEvent &event)
 {
-	std::shared_ptr<Server> server = event.m_server;
+	Server::Ptr server = event.m_server;
 
-	Logger::log("server %s: successfully connected", server->getInfo().m_name.c_str());
+	Logger::log("server %s: successfully connected",
+	    server->getInfo().m_name.c_str());
 
 	// Auto join channels
-	for (Server::Channel c : server->getChannels()) {
+	for (auto c : server->getChannels()) {
 		Logger::log("server %s: autojoining channel %s",
 		    server->getInfo().m_name.c_str(), c.m_name.c_str());
 
@@ -1158,7 +1154,7 @@ void Irccd::handleConnection(const IrcEvent &event)
 
 void Irccd::handleInvite(const IrcEvent &event)
 {
-	std::shared_ptr<Server> server = event.m_server;
+	Server::Ptr server = event.m_server;
 
 	// if join-invite is set to true join it
 	if (server->getOptions().m_joinInvite)
@@ -1167,7 +1163,7 @@ void Irccd::handleInvite(const IrcEvent &event)
 
 void Irccd::handleKick(const IrcEvent &event)
 {
-	std::shared_ptr<Server> server = event.m_server;
+	Server::Ptr server = event.m_server;
 
 	// If I was kicked, I need to remove the channel list
 	if (server->getIdentity().m_nickname == event.m_params[2])
@@ -1176,7 +1172,7 @@ void Irccd::handleKick(const IrcEvent &event)
 
 #if defined(WITH_LUA)
 
-void Irccd::callPlugin(std::shared_ptr<Plugin> p, const IrcEvent &ev)
+void Irccd::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
 {
 	switch (ev.m_type)
 	{

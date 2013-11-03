@@ -40,13 +40,16 @@ namespace irccd
 
 /* {{{ IRC handlers */
 
-static void handleChannel(irc_session_t *s,
-			  const char *,
-			  const char *orig,
-			  const char **params,
-			  unsigned int)
+namespace 
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
+
+void handleChannel(irc_session_t *s,
+		   const char *,
+		   const char *orig,
+		   const char **params,
+		   unsigned int)
+{
+	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -58,13 +61,13 @@ static void handleChannel(irc_session_t *s,
 	);
 }
 
-static void handleChannelNotice(irc_session_t *s,
-				const char *,
-				const char *orig,
-				const char **params,
-				unsigned int)
+void handleChannelNotice(irc_session_t *s,
+			 const char *,
+			 const char *orig,
+			 const char **params,
+			 unsigned int)
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
+	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back((orig == nullptr) ? "" : orig);
@@ -76,13 +79,13 @@ static void handleChannelNotice(irc_session_t *s,
 	);
 }
 
-static void handleConnect(irc_session_t *s,
-			  const char *,
-			  const char *,
-			  const char **,
-			  unsigned int)
+void handleConnect(irc_session_t *s,
+		   const char *,
+		   const char *,
+		   const char **,
+		   unsigned int)
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
+	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	Irccd::getInstance()->handleIrcEvent(
@@ -92,13 +95,13 @@ static void handleConnect(irc_session_t *s,
 	server->resetRetries();
 }
 
-static void handleCtcpAction(irc_session_t *s,
-			      const char *,
-			      const char *orig,
-			      const char **params,
-			      unsigned int)
+void handleCtcpAction(irc_session_t *s,
+		      const char *,
+		      const char *orig,
+		      const char **params,
+		      unsigned int)
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
+	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(orig);
@@ -110,13 +113,13 @@ static void handleCtcpAction(irc_session_t *s,
 	);
 }
 
-static void handleInvite(irc_session_t *s,
-			 const char *,
-			 const char *orig,
-			 const char **params,
-			 unsigned int)
+void handleInvite(irc_session_t *s,
+		  const char *,
+		  const char *orig,
+		  const char **params,
+		  unsigned int)
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
+	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[1]);
@@ -127,13 +130,13 @@ static void handleInvite(irc_session_t *s,
 	);
 }
 
-static void handleJoin(irc_session_t *s,
-		       const char *,
-		       const char *orig,
-		       const char **params,
-		       unsigned int)
+void handleJoin(irc_session_t *s,
+		const char *,
+		const char *orig,
+		const char **params,
+		unsigned int)
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
+	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -144,13 +147,13 @@ static void handleJoin(irc_session_t *s,
 	);
 }
 
-static void handleKick(irc_session_t *s,
-		       const char *,
-		       const char *orig,
-		       const char **params,
-		       unsigned int)
+void handleKick(irc_session_t *s,
+		const char *,
+		const char *orig,
+		const char **params,
+		unsigned int)
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
+	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -163,13 +166,13 @@ static void handleKick(irc_session_t *s,
 	);
 }
 
-static void handleMode(irc_session_t *s,
-		       const char *,
-		       const char *orig,
-		       const char **params,
-		       unsigned int)
+void handleMode(irc_session_t *s,
+		const char *,
+		const char *orig,
+		const char **params,
+		unsigned int)
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
+	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -182,13 +185,13 @@ static void handleMode(irc_session_t *s,
 	);
 }
 
-static void handleNick(irc_session_t *s,
-		       const char *,
-		       const char *orig,
-		       const char **params,
-		       unsigned int)
+void handleNick(irc_session_t *s,
+		const char *,
+		const char *orig,
+		const char **params,
+		unsigned int)
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
+	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(orig);
@@ -199,13 +202,13 @@ static void handleNick(irc_session_t *s,
 	);
 }
 
-static void handleNotice(irc_session_t *s,
-			 const char *,
-			 const char *orig,
-			 const char **params,
-			 unsigned int)
+void handleNotice(irc_session_t *s,
+		  const char *,
+		  const char *orig,
+		  const char **params,
+		  unsigned int)
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
+	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(orig);
@@ -217,14 +220,13 @@ static void handleNotice(irc_session_t *s,
 	);
 }
 
-static void handleNumeric(irc_session_t *s,
-			  unsigned int event,
-			  const char *,
-			  const char **params,
-			  unsigned int c)
+void handleNumeric(irc_session_t *s,
+		   unsigned int event,
+		   const char *,
+		   const char **params,
+		   unsigned int c)
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
-	IrcEventParams evparams;
+	Server::Ptr server = Server::toServer(s);
 
 	if (event == LIBIRC_RFC_RPL_NAMREPLY)
 	{
@@ -315,13 +317,13 @@ static void handleNumeric(irc_session_t *s,
 	}
 }
 
-static void handlePart(irc_session_t *s,
-		       const char *,
-		       const char *orig,
-		       const char **params,
-		       unsigned int)
+void handlePart(irc_session_t *s,
+		const char *,
+		const char *orig,
+		const char **params,
+		unsigned int)
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
+	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -333,13 +335,13 @@ static void handlePart(irc_session_t *s,
 	);
 }
 
-static void handleQuery(irc_session_t *s,
-			const char *,
-			const char *orig,
-			const char **params,
-			unsigned int)
+void handleQuery(irc_session_t *s,
+		 const char *,
+		 const char *orig,
+		 const char **params,
+		 unsigned int)
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
+	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(orig);
@@ -350,13 +352,13 @@ static void handleQuery(irc_session_t *s,
 	);
 }
 
-static void handleTopic(irc_session_t *s,
-			const char *,
-			const char *orig,
-			const char **params,
-			unsigned int)
+void handleTopic(irc_session_t *s,
+		 const char *,
+		 const char *orig,
+		 const char **params,
+		 unsigned int)
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
+	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(params[0]);
@@ -368,13 +370,13 @@ static void handleTopic(irc_session_t *s,
 	);
 }
 
-static void handleUserMode(irc_session_t *s,
-			   const char *,
-			   const char *orig,
-			   const char **params,
-			   unsigned int)
+void handleUserMode(irc_session_t *s,
+		    const char *,
+		    const char *orig,
+		    const char **params,
+		    unsigned int)
 {
-	std::shared_ptr<Server> server = Server::toServer(s);
+	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
 	evparams.push_back(orig);
@@ -383,6 +385,8 @@ static void handleUserMode(irc_session_t *s,
 	Irccd::getInstance()->handleIrcEvent(
 	    IrcEvent(IrcEventType::UserMode, evparams, server)
 	);
+}
+
 }
 
 /* }}} */
@@ -395,7 +399,9 @@ IrcEvent::IrcEvent()
 {
 }
 
-IrcEvent::IrcEvent(IrcEventType type, IrcEventParams params, std::shared_ptr<Server> server)
+IrcEvent::IrcEvent(IrcEventType type,
+		   IrcEventParams params,
+		   Server::Ptr server)
 	: m_type(type)
 	, m_params(params)
 	, m_server(server)
@@ -410,9 +416,9 @@ IrcEvent::~IrcEvent()
  * Server
  * -------------------------------------------------------- */
 
-std::shared_ptr<Server> Server::toServer(irc_session_t *s)
+Server::Ptr Server::toServer(irc_session_t *s)
 {
-	return *reinterpret_cast<std::shared_ptr<Server> *>(irc_get_ctx(s));
+	return *reinterpret_cast<Server::Ptr *>(irc_get_ctx(s));
 }
 
 Server::Server()
@@ -420,7 +426,9 @@ Server::Server()
 	init();
 }
 
-Server::Server(const Info &info, const Identity &identity, const Options &options)
+Server::Server(const Info &info,
+	       const Identity &identity,
+	       const Options &options)
 	: m_info(info)
 	, m_identity(identity)
 	, m_options(options)
@@ -491,37 +499,38 @@ void Server::extractPrefixes(const std::string &line)
 	}
 }
 
-Server::NameList & Server::getNameLists()
+Server::NameList &Server::getNameLists()
 {
 	return m_nameLists;
 }
 
-Server::WhoisList & Server::getWhoisLists()
+Server::WhoisList &Server::getWhoisLists()
 {
 	return m_whoisLists;
 }
 
-const Server::Info & Server::getInfo() const
+const Server::Info &Server::getInfo() const
 {
 	return m_info;
 }
 
-const Server::Identity & Server::getIdentity() const
+const Server::Identity &Server::getIdentity() const
 {
 	return m_identity;
 }
 
-const Server::Options & Server::getOptions() const
+const Server::Options &Server::getOptions() const
 {
 	return m_options;
 }
 
-const std::vector<Server::Channel> & Server::getChannels() const
+const Server::ChanList &Server::getChannels() const
 {
 	return m_info.m_channels;
 }
 
-void Server::addChannel(const std::string &name, const std::string &password)
+void Server::addChannel(const std::string &name,
+			const std::string &password)
 {
 	Channel channel;
 
@@ -608,7 +617,7 @@ void Server::startConnection()
 			if (m_info.m_password.length() > 0)
 				password = m_info.m_password.c_str();
 
-			irc_set_ctx(m_session.get(), new std::shared_ptr<Server>(shared_from_this()));
+			irc_set_ctx(m_session.get(), new Server::Ptr(shared_from_this()));
 			irc_get_version(&major, &minor);
 
 			/*

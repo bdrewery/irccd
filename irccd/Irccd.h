@@ -91,7 +91,7 @@ public:
 	Message &operator=(const Message &m);
 };
 
-using ServerList	= std::vector<std::shared_ptr<Server>>;
+using ServerList	= std::vector<Server::Ptr>;
 using StreamClients	= std::map<Socket, Message>;
 using DatagramClients	= std::map<SocketAddress, Message>;
 
@@ -99,11 +99,15 @@ using DatagramClients	= std::map<SocketAddress, Message>;
 
 using PluginMap		= std::unordered_map<
 				lua_State *,
-				std::shared_ptr<Plugin>
+				Plugin::Ptr
 			  >;
 
 using PluginList	= std::vector<
-				std::shared_ptr<Plugin>
+				Plugin::Ptr
+			  >;
+
+using IdentityList	= std::vector<
+				Server::Identity
 			  >;
 
 using ThreadMap		= std::unordered_map<
@@ -112,7 +116,7 @@ using ThreadMap		= std::unordered_map<
 			  >;
 
 using DefCallList	= std::unordered_map<
-				std::shared_ptr<Server>,
+				Server::Ptr,
 				std::vector<DefCall>
 			  >;
 
@@ -156,7 +160,7 @@ private:
 	DatagramClients m_dgramClients;			//! udp based "clients"
 
 	// Identities
-	std::vector<Server::Identity> m_identities;	//! user identities
+	IdentityList m_identities;				//! user identities
 	Server::Identity m_defaultIdentity;		//! default identity
 
 	/*
@@ -218,7 +222,11 @@ private:
 
 	// [server]
 	void openServers(const Parser &config);
-	void extractChannels(const Section &section, std::shared_ptr<Server> server);
+	void extractChannels(const Section &section, Server::Ptr server);
+
+	void handleConnection(const IrcEvent &event);
+	void handleInvite(const IrcEvent &event);
+	void handleKick(const IrcEvent &event);
 
 	// Avoid constructor.
 	Irccd();
@@ -231,7 +239,7 @@ public:
 	 *
 	 * @return the irccd instance
 	 */
-	static Irccd * getInstance();
+	static Irccd *getInstance();
 
 	/**
 	 * Tells irccd that a parameter from command line has been set.
@@ -287,7 +295,7 @@ public:
 	 * @return the plugin
 	 * @throw out_of_range when not found
 	 */
-	std::shared_ptr<Plugin> findPlugin(lua_State *state);
+	Plugin::Ptr findPlugin(lua_State *state);
 
 	/**
 	 * Find a plugin by it's name. It is used by irccdctl
@@ -297,14 +305,7 @@ public:
 	 * @return the plugin
 	 * @throw out_of_range when not found
 	 */
-	std::shared_ptr<Plugin> findPlugin(const std::string &name);
-
-	/**
-	 * Get the plugin lock, used to load / unload module.
-	 *
-	 * @return the mutex lock
-	 */
-	std::mutex & getPluginLock();
+	Plugin::Ptr findPlugin(const std::string &name);
 
 	/**
 	 * Add a deferred call for a specific server.
@@ -312,7 +313,7 @@ public:
 	 * @param sever the server that request it
 	 * @param call the plugin to call
 	 */
-	void addDeferred(std::shared_ptr<Server> server, DefCall call);
+	void addDeferred(Server::Ptr server, DefCall call);
 
 	/**
 	 * Register the thread to one plugin so that irccd.plugin
@@ -321,7 +322,7 @@ public:
 	 * @param L the new Lua state
 	 * @param plugin for which plugin
 	 */
-	void registerThread(lua_State *L, std::shared_ptr<Plugin> plugin);
+	void registerThread(lua_State *L, Plugin::Ptr plugin);
 
 	/**
 	 * Remove the attach thread from that Lua state
@@ -336,7 +337,7 @@ public:
 	 *
 	 * @return the list of servers
 	 */
-	ServerList & getServers();
+	ServerList &getServers();
 
 	/**
 	 * Set the config path to open.
@@ -358,7 +359,7 @@ public:
 	 * @param name the server's resource name
 	 * @return a server
 	 */
-	std::shared_ptr<Server> & findServer(const std::string &name);
+	Server::Ptr findServer(const std::string &name);
 
 	/**
 	 * Find an identity.
@@ -366,7 +367,7 @@ public:
 	 * @param name the identity's resource name.
 	 * @return an identity or the default one
 	 */
-	const Server::Identity & findIdentity(const std::string &name);
+	const Server::Identity &findIdentity(const std::string &name);
 
 	/**
 	 * Run the application.
@@ -394,30 +395,6 @@ public:
 	 * @param event the event
 	 */
 	void handleIrcEvent(const IrcEvent &event);
-
-	/**
-	 * The handleConnection will auto join servers
-	 * defined in the server of that event.
-	 *
-	 * @param event the event
-	 */
-	void handleConnection(const IrcEvent &event);
-
-	/**
-	 * The handleInvite will auto join the server if the
-	 * user want it.
-	 *
-	 * @param event the event
-	 */
-	void handleInvite(const IrcEvent &event);
-
-	/**
-	 * The kick function just remove the channel if I'm the one who was
-	 * kicked.
-	 *
-	 * @param event the event
-	 */
-	void handleKick(const IrcEvent &event);
 
 #if defined(WITH_LUA)
 	/**
