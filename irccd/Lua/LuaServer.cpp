@@ -203,13 +203,13 @@ int serverNames(lua_State *L)
 
 	try
 	{
-		Plugin::Ptr p = Irccd::getInstance()->findPlugin(L);
+		Plugin::Ptr p = Irccd::getInstance().findPlugin(L);
 
 		// Get the function reference.
 		lua_pushvalue(L, 3);
 		ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-		Irccd::getInstance()->addDeferred(
+		Irccd::getInstance().addDeferred(
 		    s, DefCall(IrcEventType::Names, p, ref)
 		);
 
@@ -317,13 +317,13 @@ int serverWhois(lua_State *L)
 
 	try
 	{
-		Plugin::Ptr p = Irccd::getInstance()->findPlugin(L);
+		Plugin::Ptr p = Irccd::getInstance().findPlugin(L);
 
 		// Get the function reference.
 		lua_pushvalue(L, 3);
 		ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-		Irccd::getInstance()->addDeferred(
+		Irccd::getInstance().addDeferred(
 		    s, DefCall(IrcEventType::Whois, p, ref)
 		);
 

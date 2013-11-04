@@ -127,7 +127,7 @@ using Lock		= std::lock_guard<std::mutex>;
 class Irccd
 {
 private:
-	static Irccd *m_instance;			//! unique instance
+	static Irccd m_instance;			//! unique instance
 
 	// Ignition
 	bool m_running;					//! forever loop
@@ -239,7 +239,7 @@ public:
 	 *
 	 * @return the irccd instance
 	 */
-	static Irccd *getInstance();
+	static Irccd &getInstance();
 
 	/**
 	 * Tells irccd that a parameter from command line has been set.

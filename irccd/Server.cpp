@@ -56,7 +56,7 @@ void handleChannel(irc_session_t *s,
 	evparams.push_back((orig == nullptr) ? "" : orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance()->handleIrcEvent(
+	Irccd::getInstance().handleIrcEvent(
 	    IrcEvent(IrcEventType::Message, evparams, server)
 	);
 }
@@ -74,7 +74,7 @@ void handleChannelNotice(irc_session_t *s,
 	evparams.push_back(params[0]);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance()->handleIrcEvent(
+	Irccd::getInstance().handleIrcEvent(
 	    IrcEvent(IrcEventType::ChannelNotice, evparams, server)
 	);
 }
@@ -88,7 +88,7 @@ void handleConnect(irc_session_t *s,
 	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
-	Irccd::getInstance()->handleIrcEvent(
+	Irccd::getInstance().handleIrcEvent(
 	    IrcEvent(IrcEventType::Connection, evparams, server)
 	);
 
@@ -108,7 +108,7 @@ void handleCtcpAction(irc_session_t *s,
 	evparams.push_back(params[0]);
 	evparams.push_back(params[1]);
 
-	Irccd::getInstance()->handleIrcEvent(
+	Irccd::getInstance().handleIrcEvent(
 	    IrcEvent(IrcEventType::Me, evparams, server)
 	);
 }
@@ -125,7 +125,7 @@ void handleInvite(irc_session_t *s,
 	evparams.push_back(params[1]);
 	evparams.push_back(orig);
 
-	Irccd::getInstance()->handleIrcEvent(
+	Irccd::getInstance().handleIrcEvent(
 	    IrcEvent(IrcEventType::Invite, evparams, server)
 	);
 }
@@ -142,7 +142,7 @@ void handleJoin(irc_session_t *s,
 	evparams.push_back(params[0]);
 	evparams.push_back(orig);
 
-	Irccd::getInstance()->handleIrcEvent(
+	Irccd::getInstance().handleIrcEvent(
 	    IrcEvent(IrcEventType::Join, evparams, server)
 	);
 }
@@ -161,7 +161,7 @@ void handleKick(irc_session_t *s,
 	evparams.push_back(params[1]);
 	evparams.push_back((params[2] == nullptr) ? "" : params[2]);
 
-	Irccd::getInstance()->handleIrcEvent(
+	Irccd::getInstance().handleIrcEvent(
 	    IrcEvent(IrcEventType::Kick, evparams, server)
 	);
 }
@@ -180,7 +180,7 @@ void handleMode(irc_session_t *s,
 	evparams.push_back(params[1]);
 	evparams.push_back((params[2] == nullptr) ? "" : params[2]);
 
-	Irccd::getInstance()->handleIrcEvent(
+	Irccd::getInstance().handleIrcEvent(
 	    IrcEvent(IrcEventType::Mode, evparams, server)
 	);
 }
@@ -197,7 +197,7 @@ void handleNick(irc_session_t *s,
 	evparams.push_back(orig);
 	evparams.push_back(params[0]);
 
-	Irccd::getInstance()->handleIrcEvent(
+	Irccd::getInstance().handleIrcEvent(
 	    IrcEvent(IrcEventType::Nick, evparams, server)
 	);
 }
@@ -215,7 +215,7 @@ void handleNotice(irc_session_t *s,
 	evparams.push_back(params[0]);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance()->handleIrcEvent(
+	Irccd::getInstance().handleIrcEvent(
 	    IrcEvent(IrcEventType::Notice, evparams, server)
 	);
 }
@@ -252,7 +252,7 @@ void handleNumeric(irc_session_t *s,
 
 		if (params[1] != nullptr)
 		{
-			Irccd::getInstance()->handleIrcEvent(
+			Irccd::getInstance().handleIrcEvent(
 				IrcEvent(IrcEventType::Names, list[params[1]], server)
 			);
 		}
@@ -294,7 +294,7 @@ void handleNumeric(irc_session_t *s,
 		for (size_t i = 0; i < info.channels.size(); ++i)
 			params.push_back(info.channels[i]);
 
-		Irccd::getInstance()->handleIrcEvent(
+		Irccd::getInstance().handleIrcEvent(
 			IrcEvent(IrcEventType::Whois, params, server)
 		);
 	}
@@ -330,7 +330,7 @@ void handlePart(irc_session_t *s,
 	evparams.push_back(orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance()->handleIrcEvent(
+	Irccd::getInstance().handleIrcEvent(
 	    IrcEvent(IrcEventType::Part, evparams, server)
 	);
 }
@@ -347,7 +347,7 @@ void handleQuery(irc_session_t *s,
 	evparams.push_back(orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance()->handleIrcEvent(
+	Irccd::getInstance().handleIrcEvent(
 	    IrcEvent(IrcEventType::Query, evparams, server)
 	);
 }
@@ -365,7 +365,7 @@ void handleTopic(irc_session_t *s,
 	evparams.push_back(orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance()->handleIrcEvent(
+	Irccd::getInstance().handleIrcEvent(
 	    IrcEvent(IrcEventType::Topic, evparams, server)
 	);
 }
@@ -382,7 +382,7 @@ void handleUserMode(irc_session_t *s,
 	evparams.push_back(orig);
 	evparams.push_back(params[0]);
 
-	Irccd::getInstance()->handleIrcEvent(
+	Irccd::getInstance().handleIrcEvent(
 	    IrcEvent(IrcEventType::UserMode, evparams, server)
 	);
 }
