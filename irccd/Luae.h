@@ -246,6 +246,20 @@ public:
 			    bool global);
 
 	/**
+	 * Convert a new placement made object, without testing if its a real
+	 * object.
+	 *
+	 * @param L the Lua state
+	 * @param idx the object index
+	 * @return the converted object
+	 */
+	template<class T>
+	static T toType(lua_State *L, int idx)
+	{
+		return reinterpret_cast<T>(lua_touserdata(L, idx));
+	}
+
+	/**
 	 * Convert a class created with new placement.
 	 *
 	 * @param L the Lua state

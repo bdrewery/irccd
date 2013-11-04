@@ -149,7 +149,7 @@ int l_threadNew(lua_State *L)
 
 int l_threadWait(lua_State *L)
 {
-	Thread::Ptr *t = toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
+	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
 
 	(*t)->wait();
 
@@ -158,7 +158,7 @@ int l_threadWait(lua_State *L)
 
 int l_threadGc(lua_State *L)
 {
-	Thread::Ptr *t = toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
+	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
 
 	(*t)->detach();
 	(*t).~shared_ptr<Thread>();
@@ -168,7 +168,7 @@ int l_threadGc(lua_State *L)
 
 int l_threadToString(lua_State *L)
 {
-	Thread *t = toType<Thread *>(L, 1, THREAD_TYPE);
+	Thread *t = Luae::toType<Thread *>(L, 1, THREAD_TYPE);
 
 	lua_pushfstring(L, "thread %p", t);
 

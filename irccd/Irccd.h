@@ -414,22 +414,6 @@ public:
 #endif
 };
 
-#if defined(WITH_LUA)
-
-template<class T>
-static T toType(lua_State *L, int idx)
-{
-	return reinterpret_cast<T>(lua_touserdata(L, idx));
-}
-
-template<class T>
-static T toType(lua_State *L, int idx, const char *tname)
-{
-	return reinterpret_cast<T>(luaL_checkudata(L, idx, tname));
-}
-
-#endif
-
 } // !irccd
 
 #endif // !_IRCCD_H_
