@@ -106,10 +106,10 @@ int l_threadNew(lua_State *L)
 	/*
 	 * Load the same libs as a new Plugin.
 	 */
-	for (const Plugin::Library &l : Plugin::luaLibs)
-		Luae::require(threadState, l.m_name, l.m_func, true);
-	for (const Plugin::Library &l : Plugin::irccdLibs)
-		Luae::preload(threadState, l.m_name, l.m_func);
+	for (auto l : Plugin::luaLibs)
+		Luae::require(threadState, l.first, l.second, true);
+	for (auto l : Plugin::irccdLibs)
+		Luae::preload(threadState, l.first, l.second);
 
 	lua_load(threadState, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
 

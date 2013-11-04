@@ -55,13 +55,7 @@ public:
 		virtual const char * what() const throw();
 	};
 
-	struct Library
-	{
-		const char *		m_name;		//! name of library to load
-		lua_CFunction		m_func;		//! C function for it
-	};
-
-	using Libraries		= std::vector<Library>;
+	using Libraries		= std::unordered_map<const char *, lua_CFunction>;
 	using Ptr		= std::shared_ptr<Plugin>;
 	using ThreadList	= std::vector<Thread::Ptr>;
 
