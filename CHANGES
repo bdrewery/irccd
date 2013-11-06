@@ -1,0 +1,26 @@
+IRC Client Daemon CHANGES
+=========================
+
+CURRENT
+-------
+  * Added support for UDP sockets,
+  * Added a plugin for authentication,
+  * Windows irccd's home is now the irccd.exe parent directory,
+  * Added new socket API for Lua,
+  * Added support for server reconnection,
+  * Added support for text formatting with colors and attributes.
+
+1.0.2 November 1, 2013
+---------------------------------------
+  * Errata, onMe event is not implemented.  
+
+1.0.1 September 17, 2013
+---------------------------------------
+  * Fixed build without Lua,
+  * Improved documentation a lot,
+  * Improved NSIS installer,
+  * Fixed basename() issue.
+
+1.0 September 13, 2013
+---------------------------------------
+  * Initial release.
