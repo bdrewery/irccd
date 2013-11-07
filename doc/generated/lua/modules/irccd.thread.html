@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+  <title>Irccd Lua API Documentation</title>
+  <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+
+<!-- Menu -->
+<div id="menu">
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2 class="kind">Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Class_Thread">Class Thread </a></li>
+<li><a href="#Thread_metamethods">Thread metamethods </a></li>
+</ul>
+
+<h2 class="kind">Modules</h2>
+<ul>
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
+  <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
+  <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
+  <li><strong>irccd.thread</strong></li>
+  <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
+</ul>
+<h2 class="kind">Topics</h2>
+<ul>
+  <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
+  <li><a href="../topics/2-Plugin_creation.md.html">2-Plugin_creation.md</a></li>
+  <li><a href="../topics/2.1-Using_irccd_test.md.html">2.1-Using_irccd_test.md</a></li>
+  <li><a href="../topics/2.2-List_of_Events.md.html">2.2-List_of_Events.md</a></li>
+  <li><a href="../topics/3-Event-Action.md.html">3-Event-Action.md</a></li>
+  <li><a href="../topics/3-Event-Channel-notice.md.html">3-Event-Channel-notice.md</a></li>
+  <li><a href="../topics/3-Event-Command.md.html">3-Event-Command.md</a></li>
+  <li><a href="../topics/3-Event-Connect.md.html">3-Event-Connect.md</a></li>
+  <li><a href="../topics/3-Event-Invite.md.html">3-Event-Invite.md</a></li>
+  <li><a href="../topics/3-Event-Join.md.html">3-Event-Join.md</a></li>
+  <li><a href="../topics/3-Event-Kick.md.html">3-Event-Kick.md</a></li>
+  <li><a href="../topics/3-Event-Load.md.html">3-Event-Load.md</a></li>
+  <li><a href="../topics/3-Event-Message.md.html">3-Event-Message.md</a></li>
+  <li><a href="../topics/3-Event-Mode.md.html">3-Event-Mode.md</a></li>
+  <li><a href="../topics/3-Event-Nick.md.html">3-Event-Nick.md</a></li>
+  <li><a href="../topics/3-Event-Notice.md.html">3-Event-Notice.md</a></li>
+  <li><a href="../topics/3-Event-Part.md.html">3-Event-Part.md</a></li>
+  <li><a href="../topics/3-Event-Query.md.html">3-Event-Query.md</a></li>
+  <li><a href="../topics/3-Event-Reload.md.html">3-Event-Reload.md</a></li>
+  <li><a href="../topics/3-Event-Topic.md.html">3-Event-Topic.md</a></li>
+  <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
+  <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
+</ul>
+<h2 class="kind">Examples</h2>
+<ul>
+  <li><a href="../examples/Deferred.lua.html">Deferred.lua</a></li>
+  <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
+  <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
+</ul>
+
+</div><!-- !menu -->
+
+<div id="content">
+
+  <h2>Module <code>irccd.thread</code></h2>
+
+<p>Threads.</p>
+<p> <br />
+ <strong>Note: Threads are very experimental and not widely tested yet.</strong>
+ <br /><br /></p>
+
+<p> This API provides functions to create individual threads within
+ plugins.</p>
+
+
+<h2 class="kind"><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#new">new&nbsp;(func, ...)</a></td>
+	<td class="summary">Create a new thread.</td>
+	</tr>
+</table>
+<h2 class="kind"><a href="#Class_Thread">Class Thread </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Thread:wait">Thread:wait&nbsp;()</a></td>
+	<td class="summary">Wait the thread to finish.</td>
+	</tr>
+</table>
+<h2 class="kind"><a href="#Thread_metamethods">Thread metamethods </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Thread:__gc">Thread:__gc&nbsp;()</a></td>
+	<td class="summary">Thread destructor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Thread:__tostring">Thread:__tostring&nbsp;()</a></td>
+	<td class="summary">Convert thread to string.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="kind"><a name="Functions"></a>Functions</h2>
+    <dl class="function">
+    <dt>
+    <a name = "new"></a>
+    <strong>new&nbsp;(func, ...)</strong>
+    </dt>
+    <dd>
+    Create a new thread.
+ Use the function as the thread function. You can pass any parameter
+ you like to the thread just after the function itself.</p>
+
+<p> <br />
+ <strong>Note: userdata, function are not supported as parameters.</strong></p>
+
+<p> You may discard the return value, the thread will automatically be deleted
+ when its execution has finished
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">func</span>
+         the thread function</li>
+        <li><span class="parameter">...</span>
+         the arguments to pass to the thread function</li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Thread object
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="kind"><a name="Class_Thread"></a>Class Thread </h2>
+        Thread
+    <dl class="function">
+    <dt>
+    <a name = "Thread:wait"></a>
+    <strong>Thread:wait&nbsp;()</strong>
+    </dt>
+    <dd>
+    Wait the thread to finish.
+ This function blocks until the thread finishes its execution. Be
+ careful using this function as it may block other plugins.
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="kind"><a name="Thread_metamethods"></a>Thread metamethods </h2>
+        Thread metamethods.
+ The metamethods available for object Thread.
+    <dl class="function">
+    <dt>
+    <a name = "Thread:__gc"></a>
+    <strong>Thread:__gc&nbsp;()</strong>
+    </dt>
+    <dd>
+    Thread destructor.
+ This function is only called when the thread has finished its
+ execution.
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Thread:__tostring"></a>
+    <strong>Thread:__tostring&nbsp;()</strong>
+    </dt>
+    <dd>
+    Convert thread to string.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the string
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc</a></i>
+</div> <!-- id="about" -->
+</body>
+</html>
