@@ -22,15 +22,22 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/TestFixture.h>
 
+namespace irccd
+{
+
 class TestSockets : public CppUnit::TestFixture
 {
 private:
 	CPPUNIT_TEST_SUITE(TestSockets);
-	CPPUNIT_TEST(bindAndConnect);
+	CPPUNIT_TEST(addListener);
+	CPPUNIT_TEST(timeoutListener);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
-	void bindAndConnect();
+	void addListener();
+	void timeoutListener();
 };
+
+} // !irccd
 
 #endif // _TEST_SOCKETS_H_

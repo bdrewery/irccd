@@ -42,9 +42,8 @@ class FakeServer : public Server
 {
 public:
 	FakeServer(const Info &info, const Identity &identity)
+		: Server(info, identity, Options())
 	{
-		m_info = info;
-		m_identity = identity;
 	}
 
 	void cnotice(const std::string &channel, const std::string &message)

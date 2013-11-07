@@ -131,7 +131,7 @@ private:
 	using PluginList		= std::vector<std::string>;
 	using PluginSpecifiedMap	= std::unordered_map<std::string, bool>;
 
-	static Irccd *m_instance;			//! unique instance
+	static Irccd m_instance;			//! unique instance
 
 	// Ignition
 	bool m_running;					//! forever loop
@@ -244,7 +244,7 @@ public:
 	 *
 	 * @return the irccd instance
 	 */
-	static Irccd *getInstance();
+	static Irccd &getInstance();
 
 	/**
 	 * Tells irccd that a parameter from command line has been set.
@@ -419,22 +419,6 @@ public:
 	void callDeferred(const IrcEvent &ev);
 #endif
 };
-
-#if defined(WITH_LUA)
-
-template<class T>
-static T toType(lua_State *L, int idx)
-{
-	return reinterpret_cast<T>(lua_touserdata(L, idx));
-}
-
-template<class T>
-static T toType(lua_State *L, int idx, const char *tname)
-{
-	return reinterpret_cast<T>(luaL_checkudata(L, idx, tname));
-}
-
-#endif
 
 } // !irccd
 

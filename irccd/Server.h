@@ -37,6 +37,10 @@ class Server;
  * IRC Events, used by Server
  * -------------------------------------------------------- */
 
+/**
+ * @enum IrcEventType
+ * @brief Type of IRC event
+ */
 enum class IrcEventType
 {
 	Connection,					//! when connection
@@ -57,6 +61,10 @@ enum class IrcEventType
 	Whois						//! (def) whois response
 };
 
+/**
+ * @enum IrcChanNickMode
+ * @brief Prefixes for channels
+ */
 enum class IrcChanNickMode
 {
 	Creator		= 'O',				//! channel creator
@@ -69,17 +77,16 @@ enum class IrcChanNickMode
 using IrcEventParams	= std::vector<std::string>;
 using IrcPrefixes	= std::map<IrcChanNickMode, char>;
 
+/**
+ * @struct IrcEvent
+ * @brief An IRC event
+ */
 struct IrcEvent
 {
 	IrcEventType m_type;				//! event type
 	IrcEventParams m_params;			//! parameters
 
 	std::shared_ptr<Server> m_server;		//! on which server
-
-	/**
-	 * Default constructor.
-	 */
-	IrcEvent();
 
 	/**
 	 * Better constructor.
@@ -91,27 +98,51 @@ struct IrcEvent
 	IrcEvent(IrcEventType type,
 		 IrcEventParams params,
 		 std::shared_ptr<Server> server);
-
-	/**
-	 * Default destructor.
-	 */
-	~IrcEvent();
 };
 
+/**
+ * @class IrcDeleter
+ * @brief Delete the irc_session_t
+ */
 class IrcDeleter
 {
 public:
-	void operator()(irc_session_t *s)
-	{
-		delete reinterpret_cast<std::shared_ptr<Server> *>(irc_get_ctx(s));
-	
-		irc_destroy_session(s);
-	}
+	void operator()(irc_session_t *s);
 };
 
-typedef std::unique_ptr<irc_session_t, IrcDeleter> IrcSession;
+/**
+ * @class IrcSession
+ * @brief Wrapper for irc_session_t
+ */
+class IrcSession
+{
+private:
+	using Ptr	= std::unique_ptr<irc_session_t, IrcDeleter>;
+
+	Ptr m_handle;
+
+public:
+	IrcSession() = delete;
+
+	/**
+	 * Constructor with irc_session_state.
+	 *
+	 * @param s the irc_session_t initialized
+	 */
+	IrcSession(irc_session_t *s);
+
+	/**
+	 * Cast to irc_session_t for raw commands.
+	 *
+	 * @return the irc_session_t
+	 */
+	operator irc_session_t *();
+};
 
 /**
+ * @class Server
+ * @brief Connect to an IRC server
+ *
  * Server class, each class define a server that irccd
  * can connect to
  */
@@ -226,11 +257,6 @@ protected:
 	Info m_info;				//! server info
 	Identity m_identity;			//! identity to use
 	Options m_options;			//! some options
-
-	/**
-	 * Default constructor. Should not be used.
-	 */
-	Server();
 
 public:	
 	/**

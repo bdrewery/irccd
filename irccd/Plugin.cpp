@@ -114,7 +114,7 @@ void Plugin::call(const std::string &func,
 
 		if (server)
 		{
-			LuaServer::pushObject(L, server);
+			Luae::pushShared<Server>(L, server, ServerType);
 			++ np;
 		}
 
@@ -148,6 +148,8 @@ Plugin::Plugin(const std::string &name,
 	, m_path(path)
 {
 	m_state = std::move(LuaState(luaL_newstate()));
+
+	Luae::initRegistry(m_state);
 }
 
 const std::string &Plugin::getName() const
@@ -173,13 +175,13 @@ const std::string & Plugin::getError() const
 bool Plugin::open()
 {
 	// Load default library as it was done by require.
-	for (const Library &l : luaLibs)
-		Luae::require(m_state, l.m_name, l.m_func, true);
+	for (auto l : luaLibs)
+		Luae::require(m_state, l.first, l.second, true);
 
 	// Put external modules in package.preload so user
 	// will need require (modname)
-	for (const Library &l : irccdLibs)
-		Luae::preload(m_state, l.m_name, l.m_func);
+	for (auto l : irccdLibs)
+		Luae::preload(m_state, l.first, l.second);
 
 	// Find the home directory for the plugin
 	m_home = Util::findPluginHome(m_name);

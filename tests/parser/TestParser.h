@@ -22,15 +22,22 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/TestFixture.h>
 
+namespace irccd
+{
+
 class TestParser : public CppUnit::TestFixture
 {
 private:
 	CPPUNIT_TEST_SUITE(TestParser);
 	CPPUNIT_TEST(openCorrect);
+	CPPUNIT_TEST(openMultiples);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
 	void openCorrect();
+	void openMultiples();
 };
+
+} // !irccd
 
 #endif // !_TEST_PARSER_H_

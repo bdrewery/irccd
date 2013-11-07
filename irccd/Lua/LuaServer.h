@@ -26,18 +26,7 @@
 namespace irccd
 {
 
-class LuaServer
-{
-public:
-	/**
-	 * Push the object on the stack so it can
-	 * be used for a further call.
-	 *
-	 * @param L the Lua state
-	 * @param server the server
-	 */
-	static void pushObject(lua_State *L, Server::Ptr server);
-};
+extern const char *ServerType;
 
 int luaopen_server(lua_State *L);
 

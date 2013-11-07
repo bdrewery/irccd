@@ -18,18 +18,65 @@
 
 #include <cppunit/TextTestRunner.h>
 
+#include <common/Socket.h>
+#include <common/SocketAddress.h>
+#include <common/SocketListener.h>
+
 #include "TestSockets.h"
 
-void TestSockets::bindAndConnect()
+namespace irccd
 {
+
+void TestSockets::addListener()
+{
+	try
+	{
+		SocketListener listener;	
+		Socket s;
+
+		listener.add(s);
+		CPPUNIT_ASSERT_EQUAL(static_cast<int>(listener.size()), 1);
+
+		listener.remove(s);
+		CPPUNIT_ASSERT_EQUAL(static_cast<int>(listener.size()), 0);
+	}
+	catch (SocketError error)
+	{
+	}
 }
+
+void TestSockets::timeoutListener()
+{
+	try
+	{
+		Socket s(AF_INET, SOCK_STREAM, 0);
+		SocketListener listener;
+
+		s.bind(BindAddressIP("*", 9999, AF_INET));
+		s.listen(10);
+
+		listener.add(s);
+		listener.select(0, 500);
+
+		CPPUNIT_ASSERT_MESSAGE("Timeout expected!", false);
+	}
+	catch (SocketError error)
+	{
+	}
+	catch (SocketTimeout timeout)
+	{
+	}
+}
+
+} // !irccd
 
 int main(void)
 {
+	using namespace irccd;
+
 	CppUnit::TextTestRunner runnerText;
 
 	runnerText.addTest(TestSockets::suite());
-	runnerText.run();
 
-	return 0;
+	return runnerText.run("", false) == 1 ? 0 : 1;
 }

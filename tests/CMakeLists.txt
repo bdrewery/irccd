@@ -33,9 +33,17 @@ function(create_test name sources)
 	)
 
 	add_executable(${name} ${sources})
-	add_test(${name} ${name})
 
-	target_link_libraries(${name} ${CPPUNIT_LIBRARY})
+	add_test(
+		NAME ${name}
+		COMMAND ${name}
+	)
+
+	target_link_libraries(
+		${name}
+		common
+		${CPPUNIT_LIBRARY}
+	)
 endfunction()
 
 # Create and copy a directory

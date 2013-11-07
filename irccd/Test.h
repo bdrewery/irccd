@@ -16,9 +16,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef _TEST_H_
+#define _TEST_H_
+
 namespace irccd
 {
 
 void test(int argc, char **argv);
 
 } // !irccd
+
+#endif // !_TEST_H_
