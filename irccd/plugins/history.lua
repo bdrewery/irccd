@@ -17,10 +17,10 @@
 --
 
 -- Modules
-local logger = require "irccd.logger"
-local parser = require "irccd.parser"
-local plugin = require "irccd.plugin"
-local util = require "irccd.util"
+local logger	= require "irccd.logger"
+local parser	= require "irccd.parser"
+local plugin	= require "irccd.plugin"
+local util	= require "irccd.util"
 
 local format = {
 	error	= "I could not open my database file",
@@ -114,6 +114,9 @@ local function convert(what, keywords, date)
 
 	-- Remove ~ if found.
 	line = line:gsub("~", util.getHome())
+
+	-- Add environment variable.
+	line = line:gsub("%${(%w+)}", util.getEnv)
 
 	-- Now convert the # with gsub.
 	return line:gsub("#(.)", keywords)

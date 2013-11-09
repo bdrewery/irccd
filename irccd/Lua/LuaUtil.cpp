@@ -309,6 +309,7 @@ const luaL_Reg functions[] = {
 	{ "dirname",		util::dirname		},
 	{ "exist",		util::exist		},
 	{ "format",		util::format		},
+	{ "getEnv",		util::getEnv		},
 	{ "getTicks",		util::getTicks		},
 	{ "getHome",		util::getHome		},
 	{ "mkdir",		util::mkdir		},
