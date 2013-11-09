@@ -31,7 +31,7 @@ a:hover {
  * Left navigation menu
  * -------------------------------------------------------- */
 
-#menu {
+#navigation {
 	float: left;
 	width: 16em;
 	background-color: #f0f0f0;
@@ -42,11 +42,10 @@ a:hover {
         color: #2B2B2B;
 }
 
-#menu ul li {
+#navigation ul li {
 	list-style-type: none;
 	margin: 2px 0 2px -30px;
 }
-
 
 /* --------------------------------------------------------
  * Main content
