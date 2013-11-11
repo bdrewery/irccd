@@ -22,8 +22,7 @@
 #include "Socket.h"
 #include "SocketAddress.h"
 
-namespace irccd
-{
+namespace irccd {
 
 /* --------------------------------------------------------
  * SocketError implementation
@@ -70,8 +69,7 @@ std::string Socket::getLastSysError()
 		(LPSTR)&str, 0, NULL);
 
 
-	if (str)
-	{
+	if (str) {
 		errmsg = std::string(str);
 		LocalFree(str);
 	}

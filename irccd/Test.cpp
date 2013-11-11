@@ -29,17 +29,14 @@
 #include "Server.h"
 #include "Test.h"
 
-namespace irccd
-{
+namespace irccd {
 
-namespace
-{
+namespace {
 
 using HelpFunction	= std::function<void ()>;
 using TestFunction	= std::function<void (Plugin::Ptr, Server::Ptr, int, char **)>;
 
-class FakeServer : public Server
-{
+class FakeServer : public Server {
 public:
 	FakeServer(const Info &info, const Identity &identity)
 		: Server(info, identity, Options())
@@ -320,11 +317,12 @@ void testKick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 
 	if (argc < 3)
 		Logger::warn("test: onKick requires at least 3 arguments");
-	else
+	else {
 		if (argc > 4)
 			reason = argv[3];
 
 		p->onKick(s, argv[0], argv[1], argv[2], reason);
+	}
 }
 
 void testMessage(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -341,11 +339,12 @@ void testMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 
 	if (argc < 3)
 		Logger::warn("test: onMode requires at least 3 arguments");
-	else
+	else {
 		if (argc >= 4)
 			modeArg = argv[3];
 
 		p->onMode(s, argv[0], argv[1], argv[2], modeArg);
+	}
 }
 
 void testNick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -370,11 +369,12 @@ void testPart(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 
 	if (argc < 3)
 		Logger::warn("test: onPart requires at least 2 argument");
-	else
+	else {
 		if (argc >= 3)
 			reason = argv[2];
 
 		p->onPart(s, argv[0], argv[1], reason);
+	}
 }
 
 void testQuery(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -430,21 +430,15 @@ void testPlugin(const char *file, int argc, char **argv)
 	info.m_port = 6667;
 	std::shared_ptr<FakeServer> server = std::make_shared<FakeServer>(info, ident);
 
-	if (strcmp(argv[0], "help") == 0)
-	{
-		if (argc > 1)
-		{
-			try
-			{
+	if (strcmp(argv[0], "help") == 0) {
+		if (argc > 1) {
+			try {
 				helpCommands.at(argv[1])();
 				exit(0);
-			}
-			catch (std::out_of_range ex)
-			{
+			} catch (std::out_of_range ex) {
 				Logger::fatal(1, "There is no subject named %s", argv[1]);
 			}
-		}
-		else
+		} else
 			Logger::fatal(1, "test: help requires 1 argument");
 	}
 
@@ -460,18 +454,12 @@ void testPlugin(const char *file, int argc, char **argv)
 		Logger::warn("Failed to open plugin: %s", plugin->getError().c_str());
 
 	// Simulate handler is optional
-	if (argc > 1)
-	{
-		try
-		{
+	if (argc > 1) {
+		try {
 			testCommands.at(argv[1])(plugin, server, argc - 2, argv + 2);
-		}
-		catch (std::out_of_range ex)
-		{
+		} catch (std::out_of_range ex) {
 			Logger::warn("Unknown test command named %s", argv[1]);
-		}
-		catch (Plugin::ErrorException ex)
-		{
+		} catch (Plugin::ErrorException ex) {
 			Logger::warn("Error in script %s", ex.what());
 		}
 	}
@@ -483,8 +471,7 @@ void test(int argc, char **argv)
 {
 	Logger::setVerbose(true);
 
-	if (argc < 2)
-	{
+	if (argc < 2) {
 		Logger::warn("usage: %s test plugin.lua [command] [parameters...]", getprogname());
 		Logger::warn("       %s test help <command>", getprogname());
 

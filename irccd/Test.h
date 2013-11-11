@@ -19,8 +19,7 @@
 #ifndef _TEST_H_
 #define _TEST_H_
 
-namespace irccd
-{
+namespace irccd {
 
 void test(int argc, char **argv);
 

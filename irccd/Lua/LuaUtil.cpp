@@ -31,11 +31,9 @@
 #include "Irccd.h"
 #include "LuaUtil.h"
 
-namespace irccd
-{
+namespace irccd {
 
-namespace util
-{
+namespace util {
 
 /* --------------------------------------------------------
  * Color and attributes
@@ -113,12 +111,10 @@ int basename(lua_State *L)
 
 int date(lua_State *L)
 {
-	if (lua_gettop(L) >= 1)
-	{
+	if (lua_gettop(L) >= 1) {
 		int tm = luaL_checkinteger(L, 1);
 		new (L, DATE_TYPE) Date(tm);
-	}
-	else
+	} else
 		new (L, DATE_TYPE) Date();
 
 	return 1;
@@ -171,12 +167,10 @@ int format(lua_State *L)
 	 */
 	lua_getfield(L, 2, "attrs");
 
-	if (lua_type(L, -1) == LUA_TTABLE)
-	{
+	if (lua_type(L, -1) == LUA_TTABLE) {
 		int length = lua_rawlen(L, -1);
 
-		for (int i = 1; i <= length; ++i)
-		{
+		for (int i = 1; i <= length; ++i) {
 			lua_pushinteger(L, i);
 			lua_gettable(L, -2);
 
@@ -229,11 +223,9 @@ int mkdir(lua_State *L)
 	if (lua_gettop(L) >= 2)
 		mode = luaL_checkinteger(L, 2);
 
-	try
-	{
+	try {
 		Util::mkdir(path, mode);
-	}
-	catch (Util::ErrorException ex) {
+	} catch (Util::ErrorException ex) {
 		lua_pushboolean(L, false);
 		lua_pushstring(L, "");
 
@@ -253,15 +245,13 @@ int opendir(lua_State *L)
 	path = luaL_checkstring(L, 1);
 
 	// Optional boolean
-	if (lua_gettop(L) >= 2)
-	{
+	if (lua_gettop(L) >= 2) {
 	       	luaL_checktype(L, 2, LUA_TBOOLEAN);
 		skipParents = (lua_toboolean(L, 2) != 0);
 	}
 
 	Directory d(path);
-	if (!d.open(skipParents))
-	{
+	if (!d.open(skipParents)) {
 		lua_pushnil(L);
 		lua_pushstring(L, d.getError().c_str());
 
@@ -323,8 +313,7 @@ const luaL_Reg functions[] = {
  * Date methods
  * -------------------------------------------------------- */
 
-namespace date
-{
+namespace date {
 
 int calendar(lua_State *L)
 {
@@ -388,8 +377,7 @@ int timestamp(lua_State *L)
  * Date meta methods
  * -------------------------------------------------------- */
 
-namespace dateMt
-{
+namespace dateMt {
 
 int equals(lua_State *L)
 {
@@ -438,8 +426,7 @@ int tostring(lua_State *L)
  * Directory methods
  * -------------------------------------------------------- */
 
-namespace dir
-{
+namespace dir {
 
 int iter(lua_State *L)
 {
@@ -492,8 +479,7 @@ int read(lua_State *L)
  * Directory metamethods
  * -------------------------------------------------------- */
 
-namespace dirMt
-{
+namespace dirMt {
 
 int eq(lua_State *L)
 {

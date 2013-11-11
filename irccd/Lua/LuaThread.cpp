@@ -24,18 +24,15 @@
 #include "LuaThread.h"
 #include "Plugin.h"
 
-namespace irccd
-{
+namespace irccd {
 
-namespace
-{
+namespace {
 
 /* ---------------------------------------------------------
  * Buffer management for loading threads
  * --------------------------------------------------------- */
 
-struct Buffer
-{
+struct Buffer {
 	std::vector<char>	array;
 	bool			given;
 
@@ -55,8 +52,7 @@ int writer(lua_State *, const char *data, size_t size, Buffer *buffer)
 
 const char *loader(lua_State *, Buffer *buffer, size_t *size)
 {
-	if (buffer->given)
-	{
+	if (buffer->given) {
 		*size = 0;
 		return nullptr;
 	}
@@ -79,8 +75,7 @@ const char *THREAD_TYPE = "Thread";
 
 void threadCallback(lua_State *threadState, lua_State *L, int nparams)
 {
-	if (lua_pcall(threadState, nparams, 0, 0) != LUA_OK)
-	{
+	if (lua_pcall(threadState, nparams, 0, 0) != LUA_OK) {
 		Logger::warn("plugin %s: %s",
 		    Irccd::getInstance().findPlugin(L)->getName().c_str(),
 		    lua_tostring(threadState, -1));
@@ -116,15 +111,13 @@ int l_threadNew(lua_State *L)
 	lua_load(threadState, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
 
 	np = 0;
-	for (int i = 2; i <= lua_gettop(L); ++i)
-	{
+	for (int i = 2; i <= lua_gettop(L); ++i) {
 		LuaValue v = LuaValue::copy(L, i);
 		LuaValue::push(threadState, v);
 		++ np;
 	}
 
-	try
-	{
+	try {
 		Plugin::Ptr self = Irccd::getInstance().findPlugin(L);
 		Thread::Ptr thread = Thread::create();
 
@@ -140,9 +133,7 @@ int l_threadNew(lua_State *L)
 
 		new (L, THREAD_TYPE) Thread::Ptr(thread);
 
-	}
-	catch (std::out_of_range)
-	{
+	} catch (std::out_of_range) {
 		Logger::fatal(1, "irccd: could not find plugin from Lua state %p", L);
 	}
 

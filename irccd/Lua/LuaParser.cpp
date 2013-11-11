@@ -24,23 +24,20 @@
 #include "Irccd.h"
 #include "LuaParser.h"
 
-namespace irccd
-{
+namespace irccd {
 
 int LuaParser::readTuning(lua_State *L, int idx)
 {
 	int tuning = 0;
 	int rel = idx;
 
-	if (lua_type(L, rel) == LUA_TTABLE)
-	{
+	if (lua_type(L, rel) == LUA_TTABLE) {
 		lua_pushnil(L);
 
 		if (rel < 0)
 			--rel;
 
-		while (lua_next(L, rel))
-		{
+		while (lua_next(L, rel)) {
 			if (lua_isnumber(L, -1))
 				tuning |= lua_tointeger(L, -1);
 
@@ -85,8 +82,7 @@ void LuaParser::log(int number, const std::string &section, const std::string &m
 {
 	if (m_logRef == LUA_NOREF)
 		Parser::log(number, section, message);
-	else if (m_state != nullptr)
-	{
+	else if (m_state != nullptr) {
 		// Call the Lua ref function
 		lua_rawgeti(m_state, LUA_REGISTRYINDEX, m_logRef);
 		lua_pushinteger(m_state, number);
@@ -111,11 +107,11 @@ int create(lua_State *L)
 
 	// Get the flags
 	path = luaL_checkstring(L, 1);
-	if (lua_gettop(L) >= 2)
-	{
+	if (lua_gettop(L) >= 2) {
 		luaL_checktype(L, 2, LUA_TTABLE);
 		tuning = LuaParser::readTuning(L, 2);
 	}
+
 	if (lua_gettop(L) >= 3)
 		ch = luaL_checkstring(L, 1)[0];
 		
@@ -154,8 +150,7 @@ int parserOpen(lua_State *L)
 {
 	LuaParser *p = Luae::toType<LuaParser *>(L, 1, PARSER_TYPE);
 
-	if (!p->open())
-	{
+	if (!p->open()) {
 		lua_pushboolean(L, false);
 		lua_pushstring(L, p->getError().c_str());
 
@@ -171,13 +166,18 @@ int parserFindSections(lua_State *L)
 {
 	LuaParser *p;
 	std::string name;
+	std::vector<Section> sections;
 
 	// Get the parameters for that functions
 	p = Luae::toType<LuaParser *>(L, 1, PARSER_TYPE);
 	name = luaL_checkstring(L, 2);
 
+	p->findSections(name, [&] (const Section &s) {
+		sections.push_back(s);
+	});
+
 	// Push the list of array and the current index to iterate one
-	new (L) std::vector<Section>(p->findSections(name));
+	new (L) std::vector<Section>(sections);
 	lua_pushinteger(L, 0);
 	lua_pushcclosure(L, sectionIterator, 2);
 
@@ -203,14 +203,11 @@ int parserGetSection(lua_State *L)
 	std::string name = luaL_checkstring(L, 2);
 	int ret = 0;
 
-	try
-	{
+	try {
 		new (L, SECTION_TYPE) Section(p->getSection(name));
 
 		ret = 1;
-	}
-	catch (NotFoundException ex)
-	{
+	} catch (NotFoundException ex) {
 		lua_pushnil(L);
 		lua_pushfstring(L, "section %s not found", name.c_str());
 
@@ -305,8 +302,7 @@ int sectionGetOption(lua_State *L)
 	Section *s = Luae::toType<Section *>(L, 1, SECTION_TYPE);
 	std::string name = luaL_checkstring(L, 2);
 
-	if (!s->hasOption(name))
-	{
+	if (!s->hasOption(name)) {
 		lua_pushnil(L);
 		lua_pushfstring(L, "option %s not found", name.c_str());
 
@@ -324,12 +320,9 @@ int sectionRequireOption(lua_State *L)
 	std::string name = luaL_checkstring(L, 2);
 	std::string value;
 
-	try
-	{
+	try {
 		lua_pushstring(L, s->requireOption<std::string>(name).c_str());
-	}
-	catch (NotFoundException ex)
-	{
+	} catch (NotFoundException ex) {
 		return luaL_error(L, "required option %s not found", ex.which().c_str());
 	}
 
@@ -341,8 +334,7 @@ int sectionGetOptions(lua_State *L)
 	Section *s = Luae::toType<Section *>(L, 1, SECTION_TYPE);
 
 	lua_createtable(L, s->getOptions().size(), s->getOptions().size());
-	for (const Option &o : s->getOptions())
-	{
+	for (const Option &o : s->getOptions()) {
 		lua_pushstring(L, o.m_key.c_str());
 		lua_setfield(L, -2, o.m_value.c_str());
 	}

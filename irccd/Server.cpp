@@ -35,13 +35,11 @@
 
 #include "Irccd.h"
 
-namespace irccd
-{
+namespace irccd {
 
 /* {{{ IRC handlers */
 
-namespace 
-{
+namespace {
 
 void handleChannel(irc_session_t *s,
 		   const char *,
@@ -228,30 +226,24 @@ void handleNumeric(irc_session_t *s,
 {
 	Server::Ptr server = Server::toServer(s);
 
-	if (event == LIBIRC_RFC_RPL_NAMREPLY)
-	{
+	if (event == LIBIRC_RFC_RPL_NAMREPLY) {
 		Server::NameList &list = server->getNameLists();
 
-		if (params[3] != nullptr && params[2] != nullptr)
-		{
+		if (params[3] != nullptr && params[2] != nullptr) {
 			std::vector<std::string> users = Util::split(params[3], " \t");
 
 			// The listing may add some prefixes, remove them if needed
-			for (std::string u : users)
-			{
+			for (std::string u : users) {
 				if (server->hasPrefix(u))
 					u.erase(0, 1);
 
 				list[params[2]].push_back(u);
 			}
 		}
-	}
-	else if (event == LIBIRC_RFC_RPL_ENDOFNAMES)
-	{
+	} else if (event == LIBIRC_RFC_RPL_ENDOFNAMES) {
 		Server::NameList &list = server->getNameLists();
 
-		if (params[1] != nullptr)
-		{
+		if (params[1] != nullptr) {
 			Irccd::getInstance().handleIrcEvent(
 				IrcEvent(IrcEventType::Names, list[params[1]], server)
 			);
@@ -261,8 +253,7 @@ void handleNumeric(irc_session_t *s,
 		list.clear();
 	}
 
-	if (event == LIBIRC_RFC_RPL_WHOISUSER)
-	{
+	if (event == LIBIRC_RFC_RPL_WHOISUSER) {
 		Server::WhoisInfo info;
 
 		info.nick = params[1];
@@ -271,17 +262,13 @@ void handleNumeric(irc_session_t *s,
 		info.realname = params[5];
 
 		server->getWhoisLists()[info.nick] = info;
-	}
-	else if (event == LIBIRC_RFC_RPL_WHOISCHANNELS)
-	{
+	} else if (event == LIBIRC_RFC_RPL_WHOISCHANNELS) {
 		Server::WhoisInfo &info = server->getWhoisLists()[params[1]];
 
 		// Add all channels
 		for (unsigned int i = 2; i < c; ++i)
 			info.channels.push_back(params[i]);
-	}
-	else if (event == LIBIRC_RFC_RPL_ENDOFWHOIS)
-	{
+	} else if (event == LIBIRC_RFC_RPL_ENDOFWHOIS) {
 		const Server::WhoisInfo &info = server->getWhoisLists()[params[1]];
 		std::vector<std::string> params;
 
@@ -304,12 +291,9 @@ void handleNumeric(irc_session_t *s,
 	 * seeing here, if someone could give me an explanation. I've also read
 	 * somewhere that the event 5 is ISUPPORT. So?
 	 */
-	if (event == 5)
-	{
-		for (unsigned int i = 0; i < c; ++i)
-		{
-			if (strncmp(params[i], "PREFIX", 6) == 0)
-			{
+	if (event == 5) {
+		for (unsigned int i = 0; i < c; ++i) {
+			if (strncmp(params[i], "PREFIX", 6) == 0) {
 				server->extractPrefixes(params[i]);
 				break;
 			}
@@ -481,12 +465,10 @@ void Server::extractPrefixes(const std::string &line)
 
 	int j = 0;
 	bool readModes = true;
-	for (size_t i = 0; i < buf.size(); ++i)
-	{
+	for (size_t i = 0; i < buf.size(); ++i) {
 		if (buf[i] == '(')
 			continue;
-		if (buf[i] == ')')
-		{
+		if (buf[i] == ')') {
 			j = 0;
 			readModes = false;
 			continue;
@@ -499,8 +481,7 @@ void Server::extractPrefixes(const std::string &line)
 	}
 
 	// Put these as a map of mode to prefix
-	for (int i = 0; i < 16; ++i)
-	{
+	for (int i = 0; i < 16; ++i) {
 		IrcChanNickMode key = static_cast<IrcChanNickMode>(table[i].first);
 		char value = table[i].second;
 
@@ -543,8 +524,7 @@ void Server::addChannel(const std::string &name,
 {
 	Channel channel;
 
-	if (!hasChannel(name))
-	{
+	if (!hasChannel(name)) {
 		channel.m_name = name;
 		channel.m_password = password;
 
@@ -566,8 +546,7 @@ bool Server::hasPrefix(const std::string &nickname)
 	if (nickname.length() == 0)
 		return false;
 
-	for (auto p : m_info.m_prefixes)
-	{
+	for (auto p : m_info.m_prefixes) {
 		if (nickname[0] == p.second)
 			return true;
 	}
@@ -580,10 +559,8 @@ void Server::removeChannel(const std::string &name)
 	std::vector<Channel>::iterator iter;
 	bool found = false;
 
-	for (iter = m_info.m_channels.begin(); iter != m_info.m_channels.end(); ++iter)
-	{
-		if ((*iter).m_name == name)
-		{
+	for (iter = m_info.m_channels.begin(); iter != m_info.m_channels.end(); ++iter) {
+		if ((*iter).m_name == name) {
 			found = true;
 			break;
 		}
@@ -602,8 +579,7 @@ void Server::startConnection()
 		 * Main thread loop
 		 */
 		shouldConnect = true;
-		while (shouldConnect)
-		{
+		while (shouldConnect) {
 			/*
 			 * This is needed if irccd is started before DHCP or if
 			 * DNS cache is outdated.
@@ -633,8 +609,7 @@ void Server::startConnection()
 			 * After some discuss with George, SSL has been fixed in older version
 			 * of libircclient. > 1.6 is needed for SSL.
 			 */
-			if (major >= 1 && minor > 6)
-			{
+			if (major >= 1 && minor > 6) {
 				// SSL needs to add # front of host
 				if (m_info.m_ssl)
 					m_info.m_host.insert(0, 1, '#');
@@ -642,9 +617,7 @@ void Server::startConnection()
 				if (!m_info.m_sslVerify)
 					irc_option_set(m_session,
 					    LIBIRC_OPTION_SSL_NO_VERIFY);
-			}
-			else
-			{
+			} else {
 				if (m_info.m_ssl)
 					Logger::log("server %s: SSL is only supported with libircclient > 1.6",
 					    m_info.m_name.c_str());
@@ -663,8 +636,7 @@ void Server::startConnection()
 			 * Run over the forever loop.
 			 */
 			m_threadStarted = true;
-			if (irc_run(m_session))
-			{
+			if (irc_run(m_session)) {
 				m_threadStarted = false;
 				irc_disconnect(m_session);
 
@@ -676,8 +648,7 @@ void Server::startConnection()
 				/**
 				 * Value of 0 mean retry forever.
 				 */
-				if (m_options.m_maxretries > 0)
-				{
+				if (m_options.m_maxretries > 0) {
 					m_options.m_curretries ++;
 				
 					shouldConnect = m_options.m_retry &&
@@ -691,15 +662,13 @@ void Server::startConnection()
 				if (!shouldConnect && m_options.m_retry)
 					Logger::warn("server %s: giving up",
 					    m_info.m_name.c_str());
-				else if (shouldConnect)
-				{
+				else if (shouldConnect) {
 					Logger::warn("server %s: retrying in %d seconds...",
 					    m_info.m_name.c_str(),
 					    m_options.m_timeout);
 					Util::usleep(m_options.m_timeout * 1000);
 				}
-			}
-			else
+			} else
 				irc_disconnect(m_session);
 		}
 	};
@@ -714,8 +683,7 @@ void Server::resetRetries()
 
 void Server::stopConnection()
 {
-	if (m_threadStarted)
-	{
+	if (m_threadStarted) {
 		Logger::log("server %s: disconnecting...", m_info.m_name.c_str());
 		m_threadStarted = false;
 		m_thread.detach();
@@ -736,8 +704,7 @@ void Server::invite(const std::string &target, const std::string &channel)
 
 void Server::join(const std::string &name, const std::string &password)
 {
-	if (m_threadStarted)
-	{
+	if (m_threadStarted) {
 		Channel c;
 
 		c.m_name = name;
@@ -790,8 +757,7 @@ void Server::notice(const std::string &nickname, const std::string &message)
 
 void Server::part(const std::string &channel)
 {
-	if (m_threadStarted)
-	{
+	if (m_threadStarted) {
 		irc_cmd_part(m_session, channel.c_str());
 		removeChannel(channel);
 	}

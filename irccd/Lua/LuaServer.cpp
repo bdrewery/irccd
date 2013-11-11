@@ -22,11 +22,9 @@
 #include "Irccd.h"
 #include "LuaServer.h"
 
-namespace irccd
-{
+namespace irccd {
 
-namespace
-{
+namespace {
 
 int serverGetChannels(lua_State *L)
 {
@@ -38,8 +36,7 @@ int serverGetChannels(lua_State *L)
 	// Create table even if no channels
 	lua_createtable(L, s->getChannels().size(), s->getChannels().size());
 	i = 0;
-	for (auto c : s->getChannels())
-	{
+	for (auto c : s->getChannels()) {
 		lua_pushinteger(L, ++i);
 		lua_pushstring(L, c.m_name.c_str());
 		lua_settable(L, -3);
@@ -192,8 +189,7 @@ int serverNames(lua_State *L)
 
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 
-	try
-	{
+	try {
 		Plugin::Ptr p = Irccd::getInstance().findPlugin(L);
 
 		// Get the function reference.
@@ -205,10 +201,7 @@ int serverNames(lua_State *L)
 		);
 
 		s->names(channel);
-	}
-	catch (std::out_of_range)
-	{
-	}
+	} catch (std::out_of_range) { }
 
 	// Deferred call
 	return 0;
@@ -306,8 +299,7 @@ int serverWhois(lua_State *L)
 
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 
-	try
-	{
+	try {
 		Plugin::Ptr p = Irccd::getInstance().findPlugin(L);
 
 		// Get the function reference.
@@ -319,10 +311,7 @@ int serverWhois(lua_State *L)
 		);
 
 		s->whois(target);
-	}
-	catch (std::out_of_range)
-	{
-	}
+	} catch (std::out_of_range) { }
 
 	// Deferred call
 	return 0;
@@ -395,12 +384,46 @@ const luaL_Reg serverMt[] = {
 	{ nullptr,		nullptr				}
 };
 
+int l_find(lua_State *L)
+{
+	std::string name = luaL_checkstring(L, 1);
+	int ret;
+
+	try {
+		Server::Ptr server = Irccd::getInstance().findServer(name);
+
+		Luae::pushShared<Server>(L, server, ServerType);
+
+		ret = 1;
+	} catch (std::out_of_range ex) {
+		lua_pushnil(L);
+		lua_pushstring(L, ex.what());
+	}
+
+	return ret;
+}
+
+int l_connect(lua_State *)
+{
+	// XXX: TBD
+
+	return 0;
+}
+
+const luaL_Reg functions[] = {
+	{ "find",		l_find				},
+	{ "connect",		l_connect			},
+	{ nullptr,		nullptr				}
+};
+
 }
 
 const char *ServerType = "Server";
 
 int luaopen_server(lua_State *L)
 {
+	luaL_newlib(L, functions);
+
 	// Create the metatable for Server
 	luaL_newmetatable(L, ServerType);
 	luaL_setfuncs(L, serverMt, 0);

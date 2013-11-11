@@ -23,11 +23,9 @@
 #include "Irccd.h"
 #include "LuaLogger.h"
 
-namespace irccd
-{
+namespace irccd {
 
-namespace
-{
+namespace {
 
 std::string makeMessage(lua_State *L, const std::string &message)
 {

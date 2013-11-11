@@ -24,11 +24,9 @@
 #include <cstdarg>
 #include <string>
 
-namespace irccd
-{
+namespace irccd {
 
-class Logger
-{
+class Logger {
 private:
 	static bool m_verbose;
 

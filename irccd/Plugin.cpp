@@ -36,8 +36,7 @@
 #include "Lua/LuaThread.h"
 #include "Lua/LuaUtil.h"
 
-namespace irccd
-{
+namespace irccd {
 
 /* --------------------------------------------------------
  * list of libraries to load
@@ -74,10 +73,6 @@ const Plugin::Libraries Plugin::irccdLibs = {
 /* --------------------------------------------------------
  * Plugin exception
  * -------------------------------------------------------- */
-
-Plugin::ErrorException::ErrorException()
-{
-}
 
 Plugin::ErrorException::ErrorException(const std::string &which, const std::string &error)
 	: m_error(error)
@@ -138,10 +133,6 @@ void Plugin::call(const std::string &func,
  * public methods and members
  * -------------------------------------------------------- */
 
-Plugin::Plugin()
-{
-}
-
 Plugin::Plugin(const std::string &name,
 	       const std::string &path)
 	: m_name(name)
@@ -186,8 +177,7 @@ bool Plugin::open()
 	// Find the home directory for the plugin
 	m_home = Util::findPluginHome(m_name);
 
-	if (luaL_dofile(m_state, m_path.c_str()) != LUA_OK)
-	{
+	if (luaL_dofile(m_state, m_path.c_str()) != LUA_OK) {
 		m_error = lua_tostring(m_state, -1);
 		lua_pop(m_state, 1);
 
@@ -195,12 +185,9 @@ bool Plugin::open()
 	}
 
 	// Do a initial load
-	try
-	{
+	try {
 		onLoad();
-	}
-	catch (ErrorException ex)
-	{
+	} catch (ErrorException ex) {
 		m_error = ex.what();
 		return false;
 	}

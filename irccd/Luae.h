@@ -27,8 +27,7 @@
 
 #include <lua.hpp>
 
-namespace irccd
-{
+namespace irccd {
 
 /**
  * @class LuaState
@@ -37,11 +36,9 @@ namespace irccd
  * This class automatically create a new Lua state and add implicit
  * cast operator plus RAII destruction.
  */
-class LuaState
-{
+class LuaState {
 private:
-	struct Deleter
-	{
+	struct Deleter {
 		void operator()(lua_State *L)
 		{
 			lua_close(L);
@@ -97,11 +94,9 @@ public:
  * This class is primarly used for copying Lua values without checking
  * the types, useful to pass data.
  */
-class LuaValue
-{
+class LuaValue {
 private:
-	union
-	{
+	union {
 		lua_Number	 number;
 		bool		 boolean;
 	};
@@ -283,8 +278,7 @@ public:
 
 		lua_rawgetp(L, -1, o.get());
 
-		if (lua_type(L, -1) == LUA_TNIL)
-		{
+		if (lua_type(L, -1) == LUA_TNIL) {
 			lua_pop(L, 1);
 
 			new (L, name.c_str()) std::shared_ptr<T>(o);

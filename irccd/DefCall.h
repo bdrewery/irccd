@@ -22,8 +22,7 @@
 #include "Server.h"
 #include "Plugin.h"
 
-namespace irccd
-{
+namespace irccd {
 
 /**
  * @class DefCall
@@ -31,8 +30,7 @@ namespace irccd
  *
  * This class is used to call deferred functions.
  */
-class DefCall
-{
+class DefCall {
 private:
 	IrcEventType m_type;		//! which type of event
 	Plugin::Ptr m_plugin;		//! for which plugin
@@ -51,7 +49,7 @@ public:
 	/**
 	 * Default constructor.
 	 */
-	DefCall();
+	DefCall() = default;
 
 	/**
 	 */

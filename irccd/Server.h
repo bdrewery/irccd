@@ -28,8 +28,7 @@
 
 #include <libircclient.h>
 
-namespace irccd
-{
+namespace irccd {
 
 class Server;
 
@@ -41,8 +40,7 @@ class Server;
  * @enum IrcEventType
  * @brief Type of IRC event
  */
-enum class IrcEventType
-{
+enum class IrcEventType {
 	Connection,					//! when connection
 	ChannelNotice,					//! channel notices
 	Invite,						//! invitation
@@ -65,8 +63,7 @@ enum class IrcEventType
  * @enum IrcChanNickMode
  * @brief Prefixes for channels
  */
-enum class IrcChanNickMode
-{
+enum class IrcChanNickMode {
 	Creator		= 'O',				//! channel creator
 	HalfOperator	= 'h',				//! half operator
 	Operator	= 'o',				//! channel operator
@@ -81,8 +78,7 @@ using IrcPrefixes	= std::map<IrcChanNickMode, char>;
  * @struct IrcEvent
  * @brief An IRC event
  */
-struct IrcEvent
-{
+struct IrcEvent {
 	IrcEventType m_type;				//! event type
 	IrcEventParams m_params;			//! parameters
 
@@ -104,8 +100,7 @@ struct IrcEvent
  * @class IrcDeleter
  * @brief Delete the irc_session_t
  */
-class IrcDeleter
-{
+class IrcDeleter {
 public:
 	void operator()(irc_session_t *s);
 };
@@ -114,8 +109,7 @@ public:
  * @class IrcSession
  * @brief Wrapper for irc_session_t
  */
-class IrcSession
-{
+class IrcSession {
 private:
 	using Ptr	= std::unique_ptr<irc_session_t, IrcDeleter>;
 
@@ -146,17 +140,14 @@ public:
  * Server class, each class define a server that irccd
  * can connect to
  */
-class Server : public std::enable_shared_from_this<Server>
-{
+class Server : public std::enable_shared_from_this<Server> {
 public:
-	struct Channel
-	{
+	struct Channel {
 		std::string m_name;			//! channel name
 		std::string m_password;			//! channel optional password
 	};
 
-	struct Options
-	{
+	struct Options {
 		std::string m_commandChar;		//! command token
 		bool m_joinInvite;			//! auto join on invites
 		unsigned m_maxretries;			//! number of connection retries
@@ -175,8 +166,7 @@ public:
 		}
 	};
 
-	struct Info
-	{
+	struct Info {
 		std::string m_name;			//! server's name
 		std::string m_host;			//! hostname
 		unsigned m_port;			//! server's port
@@ -194,8 +184,7 @@ public:
 		}
 	};
 
-	struct WhoisInfo
-	{
+	struct WhoisInfo {
 		bool found;				//! if no such nick
 		std::string nick;			//! user's nickname
 		std::string user;			//! user's user

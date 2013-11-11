@@ -24,15 +24,13 @@
 
 #include "Luae.h"
 
-namespace irccd
-{
+namespace irccd {
 
 /**
  * @class Thread
  * @brief A thread inside a plugin
  */
-class Thread
-{
+class Thread {
 private:
 	std::thread m_handle;
 	std::mutex m_mutex;

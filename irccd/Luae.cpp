@@ -18,8 +18,7 @@
 
 #include "Luae.h"
 
-namespace irccd
-{
+namespace irccd {
 
 LuaState::LuaState()
 {
@@ -54,8 +53,7 @@ LuaValue LuaValue::copy(lua_State *L, int index)
 
 	v.type = lua_type(L, index);
 
-	switch (v.type)
-	{
+	switch (v.type) {
 	case LUA_TBOOLEAN:
 		v.boolean = lua_toboolean(L, index);
 		break;
@@ -90,8 +88,7 @@ LuaValue LuaValue::copy(lua_State *L, int index)
 
 void LuaValue::push(lua_State *L, const LuaValue &value)
 {
-	switch (value.type)
-	{
+	switch (value.type) {
 	case LUA_TBOOLEAN:
 		lua_pushboolean(L, value.boolean);
 		break;
@@ -105,8 +102,7 @@ void LuaValue::push(lua_State *L, const LuaValue &value)
 	{
 		lua_createtable(L, 0, 0);
 
-		for (auto p : value.table)
-		{
+		for (auto p : value.table) {
 			LuaValue::push(L, p.first);
 			LuaValue::push(L, p.second);
 

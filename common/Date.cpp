@@ -18,8 +18,7 @@
 
 #include "Date.h"
 
-namespace irccd
-{
+namespace irccd {
 
 Date::Date()
 {
@@ -29,10 +28,6 @@ Date::Date()
 Date::Date(time_t timestamp)
 {
 	m_timestamp = timestamp;
-}
-
-Date::~Date()
-{
 }
 
 time_t Date::getTimestamp() const

@@ -48,8 +48,7 @@
 #  define SOCKET_ERROR		-1
 #endif
 
-namespace irccd
-{
+namespace irccd {
 
 class SocketAddress;
 
@@ -59,8 +58,7 @@ class SocketAddress;
  *
  * This class is mainly used in all socket operations that may fail.
  */
-class SocketError : public std::exception
-{
+class SocketError : public std::exception {
 private:
 	std::string m_error;
 
@@ -77,8 +75,7 @@ public:
  * This class is a big wrapper around sockets functions but portable,
  * there is some functions that helps for getting error reporting.
  */
-class Socket
-{
+class Socket {
 public:
 #if defined(_WIN32)
 	typedef SOCKET		Type;

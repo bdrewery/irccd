@@ -21,28 +21,27 @@
 
 #include <cstdlib>
 #include <exception>
+#include <functional>
 #include <iostream>
 #include <string>
 #include <vector>
 
-namespace irccd
-{
+namespace irccd {
 
 /**
  * Thrown when a section or an option is not found.
  */
-class NotFoundException : public std::exception
-{
+class NotFoundException : public std::exception {
 private:
 	std::string m_key;
 
 public:
 	NotFoundException(const std::string &key)
-		:m_key(key)
+		: m_key(key)
 	{
 	}
 
-	const std::string & which() const
+	const std::string &which() const
 	{
 		return m_key;
 	}
@@ -56,8 +55,7 @@ public:
 /**
  * An option referenced by a key and a value.
  */
-struct Option
-{
+struct Option {
 	std::string m_key;		/*! option name */
 	std::string m_value;		/*! option value */
 };
@@ -69,14 +67,16 @@ bool operator==(const Option &o1, const Option &o2);
  * options are allowed (default behavior), the root
  * section is "".
  */
-struct Section
-{
+class Section {
+private:
+	std::string findOption(const std::string &name) const;
+
+public:
 	std::string m_name;		/*! name of section */
 	std::vector<Option> m_options;	/*! list of options inside */
 	bool m_allowed;			/*! is authorized to push */
 
 	Section();
-	~Section();
 
 	/**
 	 * Copy constructor
@@ -88,22 +88,14 @@ struct Section
 	 *
 	 * @return the section name
 	 */
-	const std::string & getName() const;
-
-	/**
-	 * Search an option value.
-	 *
-	 * @param name the option name
-	 * @return the value or "" if not found
-	 */
-	const std::string findOption(const std::string &name) const;
+	const std::string &getName() const;
 
 	/**
 	 * Get all options from that section.
 	 *
 	 * @return the list of options
 	 */
-	const std::vector<Option> & getOptions() const;
+	const std::vector<Option> &getOptions() const;
 
 	/**
 	 * Tells if that section has the specified option name.
@@ -140,7 +132,7 @@ struct Section
 		return getOption<T>(name);
 	}
 
-	friend std::ostream & operator<<(std::ostream & stream, const Section &section)
+	friend std::ostream &operator<<(std::ostream & stream, const Section &section)
 	{
 		stream << "[" << section.getName() << "]" << std::endl;
 
@@ -153,18 +145,18 @@ struct Section
 
 bool operator==(const Section &s1, const Section &s2);
 
-class Parser
-{
+class Parser {
 public:
 	/**
 	 * Options available for the parser.
 	 */
-	enum Tuning
-	{
+	enum Tuning {
 		DisableRootSection	= 1,	/*! disable options on root */
 		DisableRedefinition	= 2,	/*! disable multiple redefinition */
 		DisableVerbosity	= 4	/*! be verbose by method */
 	};
+
+	typedef std::function<void (const Section &)> FindFunc;
 
 private:
 	std::vector<Section> m_sections;	/*! list of sections found */
@@ -193,7 +185,9 @@ public:
 	 * @param commentToken an optional comment delimiter
 	 * @see Tuning
 	 */
-	Parser(const std::string &path, int tuning = 0, char commentToken = Parser::DEFAULT_COMMENT_CHAR);
+	Parser(const std::string &path,
+	       int tuning = 0,
+	       char commentToken = Parser::DEFAULT_COMMENT_CHAR);
 
 	/**
 	 * Default constructor.
@@ -217,24 +211,22 @@ public:
 	 *
 	 * @return the error message
 	 */
-	const std::string & getError() const;
+	const std::string &getError() const;
 
 	/**
 	 * Get all sections found
 	 *
 	 * @return all sections
 	 */
-	const std::vector<Section> & getSections() const;
+	const std::vector<Section> &getSections() const;
 
 	/**
-	 * Get a list of sections for config which multiple
-	 * definitions are allowed. This does a full copy of sections
-	 * and options.
+	 * Find all sections matching this name
 	 *
 	 * @param name the sections name
-	 * @return a list of section with the options
+	 * @param func the function
 	 */
-	std::vector<Section> findSections(const std::string &name) const;
+	void findSections(const std::string &name, FindFunc func) const;
 
 	/**
 	 * Tell if a section is existing.
@@ -248,18 +240,9 @@ public:
 	 *
 	 * @param name the section name
 	 * @return a section
-	 */
-	Section getSection(const std::string &name) const;
-
-	/**
-	 * Same as getSection except that throws an exception if
-	 * the section is not found.
-	 *
-	 * @param name the section name
 	 * @throw NotFoundException if not found
-	 * @return the section
 	 */
-	Section requireSection(const std::string &name) const;
+	const Section &getSection(const std::string &name) const;
 
 	/**
 	 * Logging function, used only if DisableVerbosity is not set. The
@@ -271,7 +254,9 @@ public:
 	 * @param section the current section worked on
 	 * @param message the message
 	 */
-	virtual void log(int number, const std::string &section, const std::string &message);
+	virtual void log(int number,
+			 const std::string &section,
+			 const std::string &message);
 
 	/**
 	 * Dump all sections and options.

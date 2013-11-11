@@ -23,8 +23,7 @@
 
 #include "Server.h"
 
-namespace irccd
-{
+namespace irccd {
 
 extern const char *ServerType;
 

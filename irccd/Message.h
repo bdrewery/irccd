@@ -1,5 +1,5 @@
 /*
- * Date.h -- date and time manipulation
+ * Message.h -- message handler for clients
  *
  * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
@@ -16,42 +16,53 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _DATE_H_
-#define _DATE_H_
+#ifndef _MESSAGE_H_
+#define _MESSAGE_H_
 
-#include <cstdint>
-#include <ctime>
+#include <sstream>
 #include <string>
 
-namespace irccd {
+/**
+ * @class Message
+ * @brief Message handler for clients
+ *
+ * This class handles incoming data from clients and tells when a data
+ * is finished.
+ */
+class Message {
+private:
+	std::ostringstream m_data;
 
-struct Date {
-	time_t m_timestamp;		//! time epoch
-
-	Date();
-	Date(time_t timestamp);
+public:
+	/**
+	 * Default constructor.
+	 */
+	Message();
 
 	/**
-	 * Get the timestamp.
+	 * Copy constructor.
 	 *
-	 * @return the timestamp
+	 * @param m the old message
 	 */
-	time_t getTimestamp() const;
+	Message(const Message &m);
 
 	/**
-	 * Format the current that in the specified format,
-	 * see strftime(3) for patterns.
+	 * Tell if the client message has finished. A client message
+	 * ends with '\n'.
 	 *
-	 * @param format the format
-	 * @return the date formated
+	 * @param msg the received data
+	 * @param command the final command (if finished)
+	 * @return true if finished
 	 */
-	std::string format(const std::string &format);
+	bool isFinished(const std::string &msg, std::string &command);
+
+	/**
+	 * Copy assignment.
+	 *
+	 * @param m the message
+	 * @return the message
+	 */
+	Message &operator=(const Message &m);
 };
 
-bool operator==(const Date &, const Date &);
-
-bool operator<=(const Date &, const Date &);
-
-} // !irccd
-
-#endif // !_DATE_H_
+#endif // !_MESSAGE_H_

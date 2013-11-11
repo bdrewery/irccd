@@ -31,6 +31,7 @@
 
 #include <config.h>
 
+#include "Message.h"
 #include "Server.h"
 
 #if defined(WITH_LUA)
@@ -54,42 +55,6 @@ enum Options
 	PluginWanted	= 'P'
 };
 
-class Message
-{
-private:
-	std::ostringstream m_data;
-
-public:
-	/**
-	 * Default constructor.
-	 */
-	Message();
-
-	/**
-	 * Copy constructor.
-	 *
-	 * @param m the old message
-	 */
-	Message(const Message &m);
-
-	/**
-	 * Tell if the client message has finished. A client message
-	 * ends with '\n'.
-	 *
-	 * @param msg the received data
-	 * @param command the final command (if finished)
-	 * @return true if finished
-	 */
-	bool isFinished(const std::string &msg, std::string &command);
-
-	/**
-	 * Copy assignment.
-	 *
-	 * @param m the message
-	 * @return the message
-	 */
-	Message &operator=(const Message &m);
-};
 
 using ServerList	= std::vector<Server::Ptr>;
 using StreamClients	= std::map<Socket, Message>;
@@ -124,8 +89,7 @@ using Lock		= std::lock_guard<std::mutex>;
 
 #endif
 
-class Irccd
-{
+class Irccd {
 private:
 	using PluginDirs		= std::vector<std::string>;
 	using PluginList		= std::vector<std::string>;
@@ -165,76 +129,76 @@ private:
 	DatagramClients m_dgramClients;			//! udp based "clients"
 
 	// Identities
-	IdentityList m_identities;				//! user identities
+	IdentityList m_identities;			//! user identities
 	Server::Identity m_defaultIdentity;		//! default identity
 
-	/*
-	 * These functions are used for TCP clients.
-	 */
+	/* {{{ Private miscellaneous methods */
+	
+	Irccd();
+
+	bool isOverriden(char c);
+
+	/* }}} */
+
+	/* {{{ Private client management */
+
 	void clientAdd(Socket &client);
 	void clientRead(Socket &client);
 
-	/*
-	 * This function is used for UDP "clients".
-	 */
 	void peerRead(Socket &s);
 
-	/**
-	 * Execute a command from a client, if the client
-	 * is a UDP, the info is discarded.
-	 *
-	 * @param cmd the command
-	 * @param s the socket to read
-	 * @param info the info (UDP only)
-	 */
 	void execute(const std::string &cmd,
 		     Socket &s,
 		     const SocketAddress &info = SocketAddress());
 
-	/**
-	 * Send a response to the client.
-	 *
-	 * @param message the message to send
-	 * @param s the socket
-	 * @param info the address
-	 */
 	void notifySocket(const std::string &message,
 			  Socket &s,
 			  const SocketAddress &info);
 
-	bool isPluginLoaded(const std::string &name);
-	bool isOverriden(char c);
+	/* }}} */
 
-	/**
+	/* {{{ Private plugin management */
+
+	void loadWantedPlugins();
+	bool isPluginLoaded(const std::string &name);
+
+	/* }}} */
+
+	/* {{{ Private open functions (configuration) */
+
+	/*
 	 * Open will call the below function in the same order they are
 	 * declared, do not change that.
 	 */
 	void openConfig();
+	void readGeneral(const Parser &config);		// [general]
+	void readPlugins(const Parser &config);		// [plugins]
+	void readIdentities(const Parser &config);	// [identity]
 
-	// [general]
-	void openPlugins();
-
-	// [identity]
-	void openIdentities(const Parser &config);
-
-	// [listener]
-	void openListeners(const Parser &config);
+	void readListeners(const Parser &config);
 	void extractInternet(const Section &s, int type);
 
 #if !defined(_WIN32)
 	void extractUnix(const Section &s, int type);
 #endif
 
-	// [server]
-	void openServers(const Parser &config);
+	void readServers(const Parser &config);
 	void extractChannels(const Section &section, Server::Ptr server);
+
+	/* }}} */
+
+	/* {{{ Private server management */
 
 	void handleConnection(const IrcEvent &event);
 	void handleInvite(const IrcEvent &event);
 	void handleKick(const IrcEvent &event);
 
-	// Avoid constructor.
-	Irccd();
+#if defined(WITH_LUA)
+	void callPlugin(std::shared_ptr<Plugin> p, const IrcEvent &ev);
+	void callDeferred(const IrcEvent &ev);
+#endif
+
+	/* }}} */
 
 public:
 	~Irccd();
@@ -364,6 +328,7 @@ public:
 	 *
 	 * @param name the server's resource name
 	 * @return a server
+	 * @throw std::out_of_range if not found
 	 */
 	Server::Ptr findServer(const std::string &name);
 
@@ -402,22 +367,6 @@ public:
 	 */
 	void handleIrcEvent(const IrcEvent &event);
 
-#if defined(WITH_LUA)
-	/**
-	 * Call the plugin function depending on the event.
-	 *
-	 * @param p the current plugin
-	 * @param ev the event
-	 */
-	void callPlugin(std::shared_ptr<Plugin> p, const IrcEvent &ev);
-
-	/**
-	 * Call a deferred function.
-	 *
-	 * @param ev the event
-	 */
-	void callDeferred(const IrcEvent &ev);
-#endif
 };
 
 } // !irccd

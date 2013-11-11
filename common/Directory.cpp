@@ -28,16 +28,11 @@
 
 #include "Directory.h"
 
-namespace irccd
-{
+namespace irccd {
 
 Directory::Directory(const std::string &path)
 {
 	m_path = path;
-}
-
-Directory::~Directory()
-{
 }
 
 bool Directory::open(bool skipParents)

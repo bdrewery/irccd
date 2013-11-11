@@ -1,5 +1,5 @@
 /*
- * LuaUtil.h -- Lua bindings for class Util
+ * Message.cpp -- message handler for clients
  *
  * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
@@ -16,15 +16,38 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LUA_UTIL_H_
-#define _LUA_UTIL_H_
+#include "Message.h"
 
-#include <lua.hpp>
+Message::Message()
+{
+}
 
-namespace irccd {
+Message::Message(const Message &m)
+{
+	m_data.str(m.m_data.str());
+}
 
-int luaopen_util(lua_State *L);
+bool Message::isFinished(const std::string &data, std::string &ret)
+{
+	std::size_t pos;
+	std::string tmp;
 
-} // !irccd
+	m_data << data;
+	tmp = m_data.str();
 
-#endif // !_LUA_UTIL_H_
+	if ((pos = tmp.find_first_of("\n")) == std::string::npos)
+		return false;
+
+	// Remove the '\n'	
+	tmp.erase(pos);
+	ret = tmp;
+
+	return true;
+}
+
+Message &Message::operator=(const Message &m)
+{
+	m_data.str(m.m_data.str());
+
+	return *this;
+}
