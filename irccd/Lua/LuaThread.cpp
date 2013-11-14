@@ -106,6 +106,8 @@ int l_threadNew(lua_State *L)
 	/*
 	 * Load the same libs as a new Plugin.
 	 */
+	Luae::initRegistry(threadState);
+
 	for (auto l : Plugin::luaLibs)
 		Luae::require(threadState, l.first, l.second, true);
 	for (auto l : Plugin::irccdLibs)

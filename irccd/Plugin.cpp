@@ -114,7 +114,7 @@ void Plugin::call(const std::string &func,
 
 		if (server)
 		{
-			LuaServer::pushObject(L, server);
+			Luae::pushShared<Server>(L, server, ServerType);
 			++ np;
 		}
 
@@ -146,30 +146,9 @@ Plugin::Plugin(const std::string &name)
 	: m_name(name)
 {
 	m_state = std::move(LuaState(luaL_newstate()));
+
+	Luae::initRegistry(m_state);
 }
-#if 0
-
-Plugin::Plugin(Plugin &&src)
-{
-	m_name = std::move(src.m_name);
-	m_home = std::move(src.m_home);
-	m_error = std::move(src.m_error);
-	m_state = std::move(src.m_state);
-}
-#endif
-
-#if 0
-
-Plugin & Plugin::operator=(Plugin &&src)
-{
-	m_name = std::move(src.m_name);
-	m_home = std::move(src.m_home);
-	m_error = std::move(src.m_error);
-	m_state = std::move(src.m_state);
-
-	return *this;
-}
-#endif
 
 const std::string &Plugin::getName() const
 {

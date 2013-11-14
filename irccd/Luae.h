@@ -246,6 +246,75 @@ public:
 			    bool global);
 
 	/**
+	 * Initialize the registry for shared objects.
+	 *
+	 * @param L the Lua state
+	 */
+	static void initRegistry(lua_State *L)
+	{
+		lua_createtable(L, 0, 0);
+		lua_createtable(L, 0, 1);
+		lua_pushstring(L, "v");
+		lua_setfield(L, -2, "__mode");
+		lua_setmetatable(L, -2);
+		lua_setfield(L, LUA_REGISTRYINDEX, "refs");
+	}
+
+	/**
+	 * Push a shared object to Lua, it also push it to the "refs"
+	 * table with __mode = "v". That is if we need to push the object
+	 * again we use the same reference so Lua get always the same
+	 * userdata and gain the following benefits:
+	 *
+	 * 1. The user can use the userdata as table key
+	 * 2. A performance gain thanks to less allocations
+	 *
+	 * @param L the Lua state
+	 * @param o the object to push
+	 * @param name the object metatable name
+	 */
+	template <typename T>
+	static void pushShared(lua_State *L,
+			std::shared_ptr<T> o,
+			const std::string &name)
+	{
+		lua_getfield(L, LUA_REGISTRYINDEX, "refs");
+		assert(lua_type(L, -1) == LUA_TTABLE);
+
+		lua_rawgetp(L, -1, o.get());
+
+		if (lua_type(L, -1) == LUA_TNIL)
+		{
+			lua_pop(L, 1);
+
+			new (L, name.c_str()) std::shared_ptr<T>(o);
+			
+			lua_pushvalue(L, -1);
+			lua_rawsetp(L, -3, o.get());
+		}
+
+		lua_replace(L, -2);
+	}
+
+	/**
+	 * Get an object from Lua that was previously push with pushShared.
+	 *
+	 * @param L the Lua state
+	 * @param index the object index
+	 * @param meta the object metatable name
+	 * @return the object
+	 */
+	template <typename T>
+	static std::shared_ptr<T> getShared(lua_State *L, int index, const char *meta)
+	{
+		using Ptr = std::shared_ptr<T>;
+		
+		Ptr *ptr = static_cast<Ptr *>(luaL_checkudata(L, index, meta));
+		
+		return *ptr;
+	}
+
+	/**
 	 * Convert a new placement made object, without testing if its a real
 	 * object.
 	 *
