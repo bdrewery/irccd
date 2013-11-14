@@ -1,7 +1,7 @@
 /*
  * LuaServer.cpp -- Lua API for Server class
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define SERVER_TYPE	"ServerType"
+#define SERVER_TYPE	"Server"
 
 #include <sstream>
 
@@ -26,20 +26,20 @@
 namespace irccd
 {
 
-void LuaServer::pushObject(lua_State *L, std::shared_ptr<Server> server)
+void LuaServer::pushObject(lua_State *L, Server::Ptr server)
 {
-	new (L, SERVER_TYPE) std::shared_ptr<Server>(server);
+	new (L, SERVER_TYPE) Server::Ptr(server);
 }
 
 namespace
 {
 
 #define TO_SSERVER(L, idx) \
-	*reinterpret_cast<std::shared_ptr<Server> *>(luaL_checkudata((L), (idx), SERVER_TYPE));
+	*reinterpret_cast<Server::Ptr *>(luaL_checkudata((L), (idx), SERVER_TYPE));
 
 int serverGetChannels(lua_State *L)
 {
-	std::shared_ptr<Server> s;
+	Server::Ptr s;
 	int i = 0;
 
 	s = TO_SSERVER(L, 1);
@@ -47,7 +47,7 @@ int serverGetChannels(lua_State *L)
 	// Create table even if no channels
 	lua_createtable(L, s->getChannels().size(), s->getChannels().size());
 	i = 0;
-	for (const Server::Channel &c : s->getChannels())
+	for (auto c : s->getChannels())
 	{
 		lua_pushinteger(L, ++i);
 		lua_pushstring(L, c.m_name.c_str());
@@ -59,7 +59,7 @@ int serverGetChannels(lua_State *L)
 
 int serverGetIdentity(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	const Server::Identity &ident = s->getIdentity();
 
 	// Create the identity table result
@@ -87,7 +87,7 @@ int serverGetIdentity(lua_State *L)
 
 int serverGetInfo(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 
 	lua_createtable(L, 3, 3);
 
@@ -111,7 +111,7 @@ int serverGetInfo(lua_State *L)
 
 int serverGetName(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 
 	lua_pushstring(L, s->getInfo().m_name.c_str());
 
@@ -120,7 +120,7 @@ int serverGetName(lua_State *L)
 
 int serverCnotice(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string channel = luaL_checkstring(L, 2);
 	std::string notice = luaL_checkstring(L, 3);
 
@@ -131,7 +131,7 @@ int serverCnotice(lua_State *L)
 
 int serverInvite(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string nick = luaL_checkstring(L, 2);
 	std::string channel = luaL_checkstring(L, 3);
 
@@ -142,7 +142,7 @@ int serverInvite(lua_State *L)
 
 int serverJoin(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string channel = luaL_checkstring(L, 2);
 	std::string password;
 
@@ -157,7 +157,7 @@ int serverJoin(lua_State *L)
 
 int serverKick(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string target = luaL_checkstring(L, 2);
 	std::string channel = luaL_checkstring(L, 3);
 	std::string reason;
@@ -173,7 +173,7 @@ int serverKick(lua_State *L)
 
 int serverMe(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string target = luaL_checkstring(L, 2);
 	std::string message = luaL_checkstring(L, 3);
 
@@ -195,7 +195,7 @@ int serverMode(lua_State *L)
 
 int serverNames(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string channel = luaL_checkstring(L, 2);
 	int ref;
 
@@ -203,13 +203,13 @@ int serverNames(lua_State *L)
 
 	try
 	{
-		std::shared_ptr<Plugin> p = Irccd::getInstance()->findPlugin(L);
+		Plugin::Ptr p = Irccd::getInstance().findPlugin(L);
 
 		// Get the function reference.
 		lua_pushvalue(L, 3);
 		ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-		Irccd::getInstance()->addDeferred(
+		Irccd::getInstance().addDeferred(
 		    s, DefCall(IrcEventType::Names, p, ref)
 		);
 
@@ -225,7 +225,7 @@ int serverNames(lua_State *L)
 
 int serverNick(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string newnick = luaL_checkstring(L, 2);
 
 	s->nick(newnick);
@@ -235,7 +235,7 @@ int serverNick(lua_State *L)
 
 int serverNotice(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string nickname = luaL_checkstring(L, 2);
 	std::string notice = luaL_checkstring(L, 3);
 
@@ -246,7 +246,7 @@ int serverNotice(lua_State *L)
 
 int serverPart(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string channel = luaL_checkstring(L, 2);
 
 	s->part(channel);
@@ -256,7 +256,7 @@ int serverPart(lua_State *L)
 
 int serverQuery(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string target = luaL_checkstring(L, 2);
 	std::string message = luaL_checkstring(L, 3);
 
@@ -267,7 +267,7 @@ int serverQuery(lua_State *L)
 
 int serverSay(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string target = luaL_checkstring(L, 2);
 	std::string message = luaL_checkstring(L, 3);
 
@@ -278,7 +278,7 @@ int serverSay(lua_State *L)
 
 int serverSend(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string message = luaL_checkstring(L, 2);
 
 	s->sendRaw(message);
@@ -288,7 +288,7 @@ int serverSend(lua_State *L)
 
 int serverTopic(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string channel = luaL_checkstring(L, 2);
 	std::string topic = luaL_checkstring(L, 3);
 
@@ -299,7 +299,7 @@ int serverTopic(lua_State *L)
 
 int serverUmode(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string mode = luaL_checkstring(L, 2);
 
 	s->umode(mode);
@@ -309,7 +309,7 @@ int serverUmode(lua_State *L)
 
 int serverWhois(lua_State *L)
 {
-	std::shared_ptr<Server> s = TO_SSERVER(L, 1);
+	Server::Ptr s = TO_SSERVER(L, 1);
 	std::string target = luaL_checkstring(L, 2);
 	int ref;
 
@@ -317,13 +317,13 @@ int serverWhois(lua_State *L)
 
 	try
 	{
-		std::shared_ptr<Plugin> p = Irccd::getInstance()->findPlugin(L);
+		Plugin::Ptr p = Irccd::getInstance().findPlugin(L);
 
 		// Get the function reference.
 		lua_pushvalue(L, 3);
 		ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-		Irccd::getInstance()->addDeferred(
+		Irccd::getInstance().addDeferred(
 		    s, DefCall(IrcEventType::Whois, p, ref)
 		);
 
@@ -363,7 +363,7 @@ const luaL_Reg serverMethods[] = {
 
 int serverTostring(lua_State *L)
 {
-	std::shared_ptr<Server> server;
+	Server::Ptr server;
 	std::ostringstream oss;
 
 	server = TO_SSERVER(L, 1);
@@ -380,7 +380,7 @@ int serverTostring(lua_State *L)
 
 int serverEquals(lua_State *L)
 {
-	std::shared_ptr<Server> s1, s2;
+	Server::Ptr s1, s2;
 
 	s1 = TO_SSERVER(L, 1);
 	s2 = TO_SSERVER(L, 2);
@@ -392,7 +392,7 @@ int serverEquals(lua_State *L)
 
 int serverGc(lua_State *L)
 {
-	(static_cast<std::shared_ptr<Server> *>(luaL_checkudata(L, 1, SERVER_TYPE)))->~shared_ptr<Server>();
+	(static_cast<Server::Ptr *>(luaL_checkudata(L, 1, SERVER_TYPE)))->~shared_ptr<Server>();
 
 	return 0;
 }

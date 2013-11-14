@@ -20,6 +20,7 @@
 #define _THREAD_H_
 
 #include <thread>
+#include <mutex>
 
 #include "Luae.h"
 

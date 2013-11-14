@@ -26,7 +26,7 @@ option(WITH_TESTS "Enable unit testing" Off)
 set(UNIT_TESTS "disabled" PARENT_SCOPE)
 
 # Function to create a test
-function(CREATE_TEST name sources)
+function(create_test name sources)
 	include_directories(
 		${CPPUNIT_INCLUDE_DIR}
 		${CMAKE_SOURCE_DIR}
@@ -34,11 +34,20 @@ function(CREATE_TEST name sources)
 
 	add_executable(${name} ${sources})
 
-	target_link_libraries(${name} ${CPPUNIT_LIBRARY})
+	add_test(
+		NAME ${name}
+		COMMAND ${name}
+	)
+
+	target_link_libraries(
+		${name}
+		common
+		${CPPUNIT_LIBRARY}
+	)
 endfunction()
 
 # Create and copy a directory
-function(CREATE_DIR target dirname)
+function(create_dir target dirname)
 	add_custom_command(
 		TARGET ${target}
 		POST_BUILD
@@ -49,7 +58,8 @@ function(CREATE_DIR target dirname)
 		COMMAND
 		    cmake -E copy_directory
 		    ${CMAKE_CURRENT_SOURCE_DIR}/${dirname}
-		    ${CMAKE_CURRENT_BINARY_DIR}/${dirname})
+		    ${CMAKE_CURRENT_BINARY_DIR}/${dirname}
+	)
 endfunction()
 
 if (WITH_TESTS)
@@ -59,8 +69,11 @@ if (WITH_TESTS)
 		set(UNIT_TESTS "enabled" PARENT_SCOPE)
 
 		# Parser tests
-		CREATE_TEST(TestParser TestParser.cpp)	
-		CREATE_DIR(TestParser configs)
+		create_test(TestParser parser/TestParser.cpp)	
+		create_dir(TestParser parser/configs)
+
+		# Sockets
+		create_test(TestSocket sockets/TestSockets.cpp)
 	endif ()
 endif ()
 

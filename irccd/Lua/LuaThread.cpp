@@ -1,7 +1,7 @@
 /*
  * LuaThread.cpp -- Lua bindings for threads
  *
- * Copyright 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -82,12 +82,12 @@ void threadCallback(lua_State *threadState, lua_State *L, int nparams)
 	if (lua_pcall(threadState, nparams, 0, 0) != LUA_OK)
 	{
 		Logger::warn("plugin %s: %s",
-		    Irccd::getInstance()->findPlugin(L)->getName().c_str(),
+		    Irccd::getInstance().findPlugin(L)->getName().c_str(),
 		    lua_tostring(threadState, -1));
 		lua_pop(threadState, 1);
 	}
 
-	Irccd::getInstance()->unregisterThread(threadState);
+	Irccd::getInstance().unregisterThread(threadState);
 }
 
 int l_threadNew(lua_State *L)
@@ -106,10 +106,10 @@ int l_threadNew(lua_State *L)
 	/*
 	 * Load the same libs as a new Plugin.
 	 */
-	for (const Plugin::Library &l : Plugin::luaLibs)
-		Luae::require(threadState, l.m_name, l.m_func, true);
-	for (const Plugin::Library &l : Plugin::irccdLibs)
-		Luae::preload(threadState, l.m_name, l.m_func);
+	for (auto l : Plugin::luaLibs)
+		Luae::require(threadState, l.first, l.second, true);
+	for (auto l : Plugin::irccdLibs)
+		Luae::preload(threadState, l.first, l.second);
 
 	lua_load(threadState, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
 
@@ -123,10 +123,10 @@ int l_threadNew(lua_State *L)
 
 	try
 	{
-		Plugin::Ptr self = Irccd::getInstance()->findPlugin(L);
+		Plugin::Ptr self = Irccd::getInstance().findPlugin(L);
 		Thread::Ptr thread = Thread::create();
 
-		Irccd::getInstance()->registerThread(threadState, self);
+		Irccd::getInstance().registerThread(threadState, self);
 	
 		std::thread threadFunc(threadCallback,
 		    static_cast<lua_State *>(threadState),
@@ -149,7 +149,7 @@ int l_threadNew(lua_State *L)
 
 int l_threadWait(lua_State *L)
 {
-	Thread::Ptr *t = toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
+	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
 
 	(*t)->wait();
 
@@ -158,7 +158,7 @@ int l_threadWait(lua_State *L)
 
 int l_threadGc(lua_State *L)
 {
-	Thread::Ptr *t = toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
+	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
 
 	(*t)->detach();
 	(*t).~shared_ptr<Thread>();
@@ -168,7 +168,7 @@ int l_threadGc(lua_State *L)
 
 int l_threadToString(lua_State *L)
 {
-	Thread *t = toType<Thread *>(L, 1, THREAD_TYPE);
+	Thread *t = Luae::toType<Thread *>(L, 1, THREAD_TYPE);
 
 	lua_pushfstring(L, "thread %p", t);
 

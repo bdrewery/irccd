@@ -1,7 +1,7 @@
 /*
  * TestParser.h -- test the config file parser
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,16 +22,22 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/TestFixture.h>
 
-class TestParser : public CppUnit::TestFixture {
+namespace irccd
+{
+
+class TestParser : public CppUnit::TestFixture
+{
+private:
 	CPPUNIT_TEST_SUITE(TestParser);
 	CPPUNIT_TEST(openCorrect);
+	CPPUNIT_TEST(openMultiples);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
-	TestParser();
-	~TestParser();
-
 	void openCorrect();
+	void openMultiples();
 };
+
+} // !irccd
 
 #endif // !_TEST_PARSER_H_

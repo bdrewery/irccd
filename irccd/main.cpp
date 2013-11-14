@@ -1,7 +1,7 @@
 /*
  * main.cpp -- irccd main file
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,7 +31,7 @@ using namespace std;
 
 static void quit(int)
 {
-	Irccd::getInstance()->stop();
+	Irccd::getInstance().stop();
 }
 
 static void usage()
@@ -42,7 +42,7 @@ static void usage()
 
 int main(int argc, char **argv)
 {
-	Irccd *irccd = Irccd::getInstance();
+	Irccd &irccd = Irccd::getInstance();
 	int ch;
 
 	setprogname("irccd");
@@ -50,22 +50,22 @@ int main(int argc, char **argv)
 	while ((ch = getopt(argc, argv, "fc:p:P:v")) != -1) {
 		switch (ch) {
 		case 'c':
-			irccd->setConfigPath(string(optarg));
-			irccd->override(Options::Config);
+			irccd.setConfigPath(string(optarg));
+			irccd.override(Options::Config);
 			break;
 		case 'f':
-			irccd->setForeground(true);
-			irccd->override(Options::Foreground);
+			irccd.setForeground(true);
+			irccd.override(Options::Foreground);
 			break;
 		case 'p':
-			irccd->addPluginPath(string(optarg));
+			irccd.addPluginPath(string(optarg));
 			break;
 		case 'P':
-			irccd->addWantedPlugin(string(optarg));
+			irccd.addWantedPlugin(string(optarg));
 			break;
 		case 'v':
 			Logger::setVerbose(true);
-			irccd->override(Options::Verbose);
+			irccd.override(Options::Verbose);
 			break;
 		case '?':
 		default:
@@ -92,5 +92,5 @@ int main(int argc, char **argv)
 	signal(SIGQUIT, quit);
 #endif
 
-	return irccd->run();
+	return irccd.run();
 }

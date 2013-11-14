@@ -17,7 +17,7 @@
 #
 
 # Libircclient bundled
-project(libircclient)
+project(extern-libircclient)
 
 find_package(OpenSSL REQUIRED)
 

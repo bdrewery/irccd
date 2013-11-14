@@ -1,7 +1,7 @@
 /*
  * LuaLogger.cpp -- Lua bindings for class Logger
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -32,7 +32,7 @@ namespace
 std::string makeMessage(lua_State *L, const std::string &message)
 {
 	std::ostringstream oss;
-	std::shared_ptr<Plugin> p = Irccd::getInstance()->findPlugin(L);
+	Plugin::Ptr p = Irccd::getInstance().findPlugin(L);
 
 	oss << "plugin " << p->getName() << ": " << message;
 

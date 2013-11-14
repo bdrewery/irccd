@@ -6,4 +6,3 @@ IRC Client Daemon TODO
 * Switch typedef to using =
 * Add using Ptr for std::shared_ptr<Server> (same for Plugin)
 * Document onLoad and onUnload in irccd(1)
-* Add notice about onReload

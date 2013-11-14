@@ -1,7 +1,7 @@
 /*
  * Server.h -- a IRC server to connect to
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,6 +37,10 @@ class Server;
  * IRC Events, used by Server
  * -------------------------------------------------------- */
 
+/**
+ * @enum IrcEventType
+ * @brief Type of IRC event
+ */
 enum class IrcEventType
 {
 	Connection,					//! when connection
@@ -57,6 +61,10 @@ enum class IrcEventType
 	Whois						//! (def) whois response
 };
 
+/**
+ * @enum IrcChanNickMode
+ * @brief Prefixes for channels
+ */
 enum class IrcChanNickMode
 {
 	Creator		= 'O',				//! channel creator
@@ -66,9 +74,13 @@ enum class IrcChanNickMode
 	Voiced		= 'v'				//! voice power
 };
 
-typedef std::vector<std::string> IrcEventParams;
-typedef std::map<IrcChanNickMode, char> IrcPrefixes;
+using IrcEventParams	= std::vector<std::string>;
+using IrcPrefixes	= std::map<IrcChanNickMode, char>;
 
+/**
+ * @struct IrcEvent
+ * @brief An IRC event
+ */
 struct IrcEvent
 {
 	IrcEventType m_type;				//! event type
@@ -77,40 +89,60 @@ struct IrcEvent
 	std::shared_ptr<Server> m_server;		//! on which server
 
 	/**
-	 * Default constructor.
-	 */
-	IrcEvent();
-
-	/**
 	 * Better constructor.
 	 *
 	 * @param type the event type
 	 * @param params eventual parameters
 	 * @param server which server
 	 */
-	IrcEvent(IrcEventType type, IrcEventParams params,
+	IrcEvent(IrcEventType type,
+		 IrcEventParams params,
 		 std::shared_ptr<Server> server);
-
-	/**
-	 * Default destructor.
-	 */
-	~IrcEvent();
 };
 
+/**
+ * @class IrcDeleter
+ * @brief Delete the irc_session_t
+ */
 class IrcDeleter
 {
 public:
-	void operator()(irc_session_t *s)
-	{
-		delete reinterpret_cast<std::shared_ptr<Server> *>(irc_get_ctx(s));
-	
-		irc_destroy_session(s);
-	}
+	void operator()(irc_session_t *s);
 };
 
-typedef std::unique_ptr<irc_session_t, IrcDeleter> IrcSession;
+/**
+ * @class IrcSession
+ * @brief Wrapper for irc_session_t
+ */
+class IrcSession
+{
+private:
+	using Ptr	= std::unique_ptr<irc_session_t, IrcDeleter>;
+
+	Ptr m_handle;
+
+public:
+	IrcSession() = delete;
+
+	/**
+	 * Constructor with irc_session_state.
+	 *
+	 * @param s the irc_session_t initialized
+	 */
+	IrcSession(irc_session_t *s);
+
+	/**
+	 * Cast to irc_session_t for raw commands.
+	 *
+	 * @return the irc_session_t
+	 */
+	operator irc_session_t *();
+};
 
 /**
+ * @class Server
+ * @brief Connect to an IRC server
+ *
  * Server class, each class define a server that irccd
  * can connect to
  */
@@ -191,8 +223,19 @@ public:
 		}
 	};
 
-	typedef std::unordered_map<std::string, std::vector<std::string>> NameList;
-	typedef std::unordered_map<std::string, WhoisInfo> WhoisList;
+	using NameList	= std::unordered_map<
+				std::string,
+				std::vector<std::string>
+			  >;
+
+	using WhoisList	= std::unordered_map<
+				std::string,
+				WhoisInfo
+			  >;
+
+	using ChanList	= std::vector<Channel>;
+
+	using Ptr	= std::shared_ptr<Server>;
 
 private:
 	// IRC thread
@@ -215,11 +258,6 @@ protected:
 	Identity m_identity;			//! identity to use
 	Options m_options;			//! some options
 
-	/**
-	 * Default constructor. Should not be used.
-	 */
-	Server();
-
 public:	
 	/**
 	 * Convert the s context to a shared_ptr<Server>.
@@ -227,7 +265,7 @@ public:
 	 * @param s the session
 	 * @return the shared_ptr.
 	 */
-	static std::shared_ptr<Server> toServer(irc_session_t *s);
+	static Ptr toServer(irc_session_t *s);
 
 	/**
 	 * Better constructor with information and options.
@@ -236,7 +274,9 @@ public:
 	 * @param identity the identity
 	 * @param options some options
 	 */
-	Server(const Info &info, const Identity &identity, const Options &options);
+	Server(const Info &info,
+	       const Identity &identity,
+	       const Options &options);
 
 	/**
 	 * Default destructor.
@@ -256,42 +296,42 @@ public:
 	 *
 	 * @return the current list
 	 */
-	NameList & getNameLists();
+	NameList &getNameLists();
 
 	/**
 	 * Get the whois lists to build /whois reporting.
 	 *
 	 * @return the current list
 	 */
-	WhoisList & getWhoisLists();
+	WhoisList &getWhoisLists();
 
 	/**
 	 * Get the server information.
 	 *
 	 * @return the server information
 	 */
-	const Info & getInfo() const;
+	const Info &getInfo() const;
 
 	/**
 	 * Get the identity used for that server
 	 *
 	 * @return the identity
 	 */
-	const Identity & getIdentity() const;
+	const Identity &getIdentity() const;
 
 	/**
 	 * Get the server options.
 	 *
 	 * @return the options
 	 */
-	const Options & getOptions() const;
+	const Options &getOptions() const;
 
 	/**
 	 * Get all channels that will be auto joined
 	 *
 	 * @return the list of channels
 	 */
-	const std::vector<Channel> & getChannels() const;
+	const ChanList &getChannels() const;
 
 	/**
 	 * Add a channel that the server will connect to when the
@@ -300,7 +340,8 @@ public:
 	 * @param name the channel name
 	 * @param password an optional channel password
 	 */
-	void addChannel(const std::string &name, const std::string &password = "");
+	void addChannel(const std::string &name,
+			const std::string &password = "");
 
 	/**
 	 * Tells if we already have a channel in the list.
@@ -353,7 +394,8 @@ public:
 	 * @param channel the target channel
 	 * @param message the message to send
 	 */
-	virtual void cnotice(const std::string &channel, const std::string &message);
+	virtual void cnotice(const std::string &channel,
+			     const std::string &message);
 
 	/**
 	 * Invite someone to a channel.
@@ -361,7 +403,8 @@ public:
 	 * @param target the target nickname
 	 * @param channel the channel
 	 */
-	virtual void invite(const std::string &target, const std::string &channel);
+	virtual void invite(const std::string &target,
+			    const std::string &channel);
 
 	/**
 	 * Join a channel.
@@ -369,7 +412,8 @@ public:
 	 * @param channel the channel name
 	 * @param password an optional password
 	 */
-	virtual void join(const std::string &name, const std::string &password = "");
+	virtual void join(const std::string &name,
+			  const std::string &password = "");
 
 	/**
 	 * Kick someone from a channel.
@@ -378,7 +422,9 @@ public:
 	 * @param channel the channel from
 	 * @param reason an optional reason
 	 */
-	virtual void kick(const std::string &name, const std::string &channel, const std::string &reason = "");
+	virtual void kick(const std::string &name,
+			  const std::string &channel,
+			  const std::string &reason = "");
 
 	/**
 	 * Send a CTCP ACTION known as /me.
@@ -386,7 +432,8 @@ public:
 	 * @param target the nickname or channel
 	 * @param message the message to send
 	 */
-	virtual void me(const std::string &target, const std::string &message);
+	virtual void me(const std::string &target,
+			const std::string &message);
 
 	/**
 	 * Change the channel mode.
@@ -394,7 +441,8 @@ public:
 	 * @param channel the target channel
 	 * @param mode the mode
 	 */
-	virtual void mode(const std::string &channel, const std::string &mode);
+	virtual void mode(const std::string &channel,
+			  const std::string &mode);
 
 	/**
 	 * Get the list of names as a deferred call.
@@ -418,7 +466,8 @@ public:
 	 * @param nickname the target nickname
 	 * @param message the message
 	 */
-	virtual void notice(const std::string &nickname, const std::string &message);
+	virtual void notice(const std::string &nickname,
+			    const std::string &message);
 
 	/**
 	 * Leave a channel.
@@ -433,7 +482,8 @@ public:
 	 * @param who the target nickname
 	 * @param message the message
 	 */
-	virtual void query(const std::string &who, const std::string &message);
+	virtual void query(const std::string &who,
+			   const std::string &message);
 
 	/**
 	 * Say something to a channel or to a nickname.
@@ -441,7 +491,8 @@ public:
 	 * @param target the nickname or channel
 	 * @param message the message to send
 	 */
-	virtual void say(const std::string &target, const std::string &message);
+	virtual void say(const std::string &target,
+			 const std::string &message);
 
 	/**
 	 * Send a raw message to the server.
@@ -456,7 +507,8 @@ public:
 	 * @param channel the channel target
 	 * @param topic the new topic
 	 */
-	virtual void topic(const std::string &channel, const std::string &topic);
+	virtual void topic(const std::string &channel,
+			   const std::string &topic);
 
 	/**
 	 * Change your own user mode.

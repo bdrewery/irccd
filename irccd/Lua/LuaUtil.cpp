@@ -1,7 +1,7 @@
 /*
  * LuaUtil.cpp -- Lua bindings for class Util
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -318,7 +318,7 @@ int calendar(lua_State *L)
 	time_t stamp;
 	struct tm tm;
 
-	date = toType<Date *>(L, 1, DATE_TYPE);
+	date = Luae::toType<Date *>(L, 1, DATE_TYPE);
 	stamp = date->getTimestamp();
 	tm = *localtime(&stamp);
 
@@ -349,7 +349,7 @@ int format(lua_State *L)
 	std::string fmt, result;
 
 	// Extract parameters
-	d = toType<Date *>(L, 1, DATE_TYPE);
+	d = Luae::toType<Date *>(L, 1, DATE_TYPE);
 	fmt = luaL_checkstring(L, 2);
 
 	result = d->format(fmt);
@@ -362,7 +362,7 @@ int timestamp(lua_State *L)
 {
 	Date *date;
 
-	date = toType<Date *>(L, 1, DATE_TYPE);
+	date = Luae::toType<Date *>(L, 1, DATE_TYPE);
 	lua_pushinteger(L, (lua_Integer)date->getTimestamp());
 
 	return 1;
@@ -381,8 +381,8 @@ int equals(lua_State *L)
 {
 	Date *d1, *d2;
 
-	d1 = toType<Date *>(L, 1, DATE_TYPE);
-	d2 = toType<Date *>(L, 2, DATE_TYPE);
+	d1 = Luae::toType<Date *>(L, 1, DATE_TYPE);
+	d2 = Luae::toType<Date *>(L, 2, DATE_TYPE);
 
 	lua_pushboolean(L, *d1 == *d2);
 
@@ -391,7 +391,7 @@ int equals(lua_State *L)
 
 int gc(lua_State *L)
 {
-	toType<Date *>(L, 1, DATE_TYPE)->~Date();
+	Luae::toType<Date *>(L, 1, DATE_TYPE)->~Date();
 
 	return 0;
 }
@@ -400,8 +400,8 @@ int le(lua_State *L)
 {
 	Date *d1, *d2;
 
-	d1 = toType<Date *>(L, 1, DATE_TYPE);
-	d2 = toType<Date *>(L, 2, DATE_TYPE);
+	d1 = Luae::toType<Date *>(L, 1, DATE_TYPE);
+	d2 = Luae::toType<Date *>(L, 2, DATE_TYPE);
 
 	lua_pushboolean(L, *d1 <= *d2);
 
@@ -412,7 +412,7 @@ int tostring(lua_State *L)
 {
 	Date *date;
 
-	date = toType<Date *>(L, 1, DATE_TYPE);
+	date = Luae::toType<Date *>(L, 1, DATE_TYPE);
 	lua_pushfstring(L, "%d", date->getTimestamp());
 
 	return 1;
@@ -453,7 +453,7 @@ int count(lua_State *L)
 {
 	Directory *d;
 
-	d = toType<Directory *>(L, 1, DIR_TYPE);
+	d = Luae::toType<Directory *>(L, 1, DIR_TYPE);
 	lua_pushinteger(L, d->getEntries().size());
 
 	return 1;
@@ -463,7 +463,7 @@ int read(lua_State *L)
 {
 	Directory *d;
 
-	d = toType<Directory *>(L, 1, DIR_TYPE);
+	d = Luae::toType<Directory *>(L, 1, DIR_TYPE);
 
 	lua_pushlightuserdata(L, d);
 	lua_pushinteger(L, 0);
@@ -485,8 +485,8 @@ int eq(lua_State *L)
 {
 	Directory *d1, *d2;
 
-	d1 = toType<Directory *>(L, 1, DIR_TYPE);
-	d2 = toType<Directory *>(L, 2, DIR_TYPE);
+	d1 = Luae::toType<Directory *>(L, 1, DIR_TYPE);
+	d2 = Luae::toType<Directory *>(L, 2, DIR_TYPE);
 
 	lua_pushboolean(L, *d1 == *d2);
 
@@ -495,7 +495,7 @@ int eq(lua_State *L)
 
 int gc(lua_State *L)
 {
-	toType<Directory *>(L, 1, DIR_TYPE)->~Directory();
+	Luae::toType<Directory *>(L, 1, DIR_TYPE)->~Directory();
 
 	return 0;
 }
@@ -504,7 +504,7 @@ int tostring(lua_State *L)
 {
 	Directory *d;
 
-	d = toType<Directory *>(L, 1, DIR_TYPE);
+	d = Luae::toType<Directory *>(L, 1, DIR_TYPE);
 	lua_pushfstring(L, "Directory %s has %d entries", d->getPath().c_str(),
 	    d->getEntries().size());
 

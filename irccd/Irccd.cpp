@@ -1,7 +1,7 @@
 /*
  * Irccd.cpp -- main irccd class
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -73,12 +73,12 @@ struct ClientHandler
 
 void handleChannelNotice(const std::vector<std::string> &params)
 {
-	Irccd::getInstance()->findServer(params[0])->cnotice(params[1], params[2]);
+	Irccd::getInstance().findServer(params[0])->cnotice(params[1], params[2]);
 }
 
 void handleInvite(const std::vector<std::string> &params)
 {
-	Irccd::getInstance()->findServer(params[0])->invite(params[1], params[2]);
+	Irccd::getInstance().findServer(params[0])->invite(params[1], params[2]);
 }
 
 void handleJoin(const std::vector<std::string> &params)
@@ -87,7 +87,7 @@ void handleJoin(const std::vector<std::string> &params)
 	if (params.size() == 3)
 		password = params[2];
 
-	Irccd::getInstance()->findServer(params[0])->join(params[1], password);
+	Irccd::getInstance().findServer(params[0])->join(params[1], password);
 }
 
 void handleKick(const std::vector<std::string> &params)
@@ -96,62 +96,62 @@ void handleKick(const std::vector<std::string> &params)
 	if (params.size() == 4)
 		reason = params[3];
 
-	Irccd::getInstance()->findServer(params[0])->kick(params[1], params[2], reason);
+	Irccd::getInstance().findServer(params[0])->kick(params[1], params[2], reason);
 }
 
 void handleLoad(const std::vector<std::string> &params)
 {
-	Irccd::getInstance()->loadPlugin(params[0]);
+	Irccd::getInstance().loadPlugin(params[0]);
 }
 
 void handleMe(const std::vector<std::string> &params)
 {
-	Irccd::getInstance()->findServer(params[0])->me(params[1], params[2]);
+	Irccd::getInstance().findServer(params[0])->me(params[1], params[2]);
 }
 
 void handleMessage(const std::vector<std::string> &params)
 {
-	Irccd::getInstance()->findServer(params[0])->say(params[1], params[2]);
+	Irccd::getInstance().findServer(params[0])->say(params[1], params[2]);
 }
 
 void handleMode(const std::vector<std::string> &params)
 {
-	Irccd::getInstance()->findServer(params[0])->mode(params[1], params[2]);
+	Irccd::getInstance().findServer(params[0])->mode(params[1], params[2]);
 }
 
 void handleNick(const std::vector<std::string> &params)
 {
-	Irccd::getInstance()->findServer(params[0])->nick(params[1]);
+	Irccd::getInstance().findServer(params[0])->nick(params[1]);
 }
 
 void handleNotice(const std::vector<std::string> &params)
 {
-	Irccd::getInstance()->findServer(params[0])->notice(params[1], params[2]);
+	Irccd::getInstance().findServer(params[0])->notice(params[1], params[2]);
 }
 
 void handlePart(const std::vector<std::string> &params)
 {
-	Irccd::getInstance()->findServer(params[0])->part(params[1]);
+	Irccd::getInstance().findServer(params[0])->part(params[1]);
 }
 
 void handleReload(const std::vector<std::string> &params)
 {
-	Irccd::getInstance()->reloadPlugin(params[0]);
+	Irccd::getInstance().reloadPlugin(params[0]);
 }
 
 void handleTopic(const std::vector<std::string> &params)
 {
-	Irccd::getInstance()->findServer(params[0])->topic(params[1], params[2]);
+	Irccd::getInstance().findServer(params[0])->topic(params[1], params[2]);
 }
 
 void handleUnload(const std::vector<std::string> &params)
 {
-	Irccd::getInstance()->unloadPlugin(params[0]);
+	Irccd::getInstance().unloadPlugin(params[0]);
 }
 
 void handleUserMode(const std::vector<std::string> &params)
 {
-	Irccd::getInstance()->findServer(params[0])->umode(params[1]);
+	Irccd::getInstance().findServer(params[0])->umode(params[1]);
 }
 
 std::unordered_map<std::string, ClientHandler> handlers {
@@ -218,7 +218,7 @@ Message &Message::operator=(const Message &m)
  * Clients from listener management
  * -------------------------------------------------------- */
 
-Irccd * Irccd::m_instance = nullptr;
+Irccd Irccd::m_instance;
 
 void Irccd::clientAdd(Socket &server)
 {
@@ -533,7 +533,7 @@ void Irccd::loadPlugin(const std::string &name)
 		m_pluginLock.lock();
 		Plugin *p = new Plugin(name);
 
-		m_pluginMap[p->getState()] = std::shared_ptr<Plugin>(p);
+		m_pluginMap[p->getState()] = Plugin::Ptr(p);
 		m_pluginLock.unlock();
 
 		if (!p->open(finalPath))
@@ -829,7 +829,7 @@ void Irccd::openServers(const Parser &config)
 			if (s.hasOption("reconnect-timeout"))
 				options.m_timeout = s.getOption<int>("reconnect-timeout");
 
-			std::shared_ptr<Server> server = std::make_shared<Server>(info, identity, options);
+			Server::Ptr server = std::make_shared<Server>(info, identity, options);
 
 			// Extract channels to auto join
 			extractChannels(s, server);
@@ -840,7 +840,7 @@ void Irccd::openServers(const Parser &config)
 	}
 }
 
-void Irccd::extractChannels(const Section &section, std::shared_ptr<Server> server)
+void Irccd::extractChannels(const Section &section, Server::Ptr server)
 {
 	std::vector<std::string> channels;
 	std::string list, name, password;
@@ -888,11 +888,8 @@ Irccd::~Irccd()
 	Socket::finish();
 }
 
-Irccd * Irccd::getInstance()
+Irccd &Irccd::getInstance()
 {
-	if (m_instance == nullptr)
-		m_instance = new Irccd();
-
 	return m_instance;
 }
 
@@ -913,7 +910,7 @@ void Irccd::addWantedPlugin(const std::string &name)
 
 #if defined(WITH_LUA)
 
-std::shared_ptr<Plugin> Irccd::findPlugin(lua_State *state)
+Plugin::Ptr Irccd::findPlugin(lua_State *state)
 {
 	for (auto plugin : m_pluginMap)
 	{
@@ -934,9 +931,9 @@ std::shared_ptr<Plugin> Irccd::findPlugin(lua_State *state)
 	throw std::out_of_range("plugin not found");
 }
 
-std::shared_ptr<Plugin> Irccd::findPlugin(const std::string &name)
+Plugin::Ptr Irccd::findPlugin(const std::string &name)
 {
-	using type = std::pair<lua_State *, std::shared_ptr<Plugin>>;
+	using type = std::pair<lua_State *, Plugin::Ptr>;
 
 	std::ostringstream oss;
 
@@ -955,17 +952,12 @@ std::shared_ptr<Plugin> Irccd::findPlugin(const std::string &name)
 	return (*i).second;
 }
 
-std::mutex &Irccd::getPluginLock()
-{
-	return m_pluginLock;
-}
-
-void Irccd::addDeferred(std::shared_ptr<Server> server, DefCall call)
+void Irccd::addDeferred(Server::Ptr server, DefCall call)
 {
 	m_deferred[server].push_back(call);
 }
 
-void Irccd::registerThread(lua_State *L, std::shared_ptr<Plugin> plugin)
+void Irccd::registerThread(lua_State *L, Plugin::Ptr plugin)
 {
 	Lock lk(m_pluginLock);
 
@@ -996,9 +988,9 @@ void Irccd::setForeground(bool mode)
 	m_foreground = mode;
 }
 
-std::shared_ptr<Server> &Irccd::findServer(const std::string &name)
+Server::Ptr Irccd::findServer(const std::string &name)
 {
-	for (std::shared_ptr<Server> &s : m_servers)
+	for (auto s : m_servers)
 		if (s->getInfo().m_name == name)
 			return s;
 
@@ -1035,7 +1027,7 @@ int Irccd::run()
 	}
 
 	// Start all servers
-	for (std::shared_ptr<Server> &s : m_servers)
+	for (auto s : m_servers)
 	{
 		Logger::log("server %s: trying to connect to %s...",
 		    s->getInfo().m_name.c_str(), s->getInfo().m_host.c_str());
@@ -1081,10 +1073,10 @@ void Irccd::stop()
 {
 	m_running = false;
 
-	for (std::shared_ptr<Server> &s : m_servers)
+	for (auto s : m_servers)
 		s->stopConnection();
 
-	for (Socket &s : m_socketServers)
+	for (auto s : m_socketServers)
 		s.close();
 }
 
@@ -1102,7 +1094,7 @@ void Irccd::handleIrcEvent(const IrcEvent &ev)
 		handleKick(ev);
 
 #if defined(WITH_LUA)
-	std::lock_guard<std::mutex> ulock(m_pluginLock);
+	Lock lk(m_pluginLock);
 
 	/**
 	 * This is the handle of deferred calls, they are not handled in the
@@ -1143,12 +1135,13 @@ void Irccd::handleIrcEvent(const IrcEvent &ev)
 
 void Irccd::handleConnection(const IrcEvent &event)
 {
-	std::shared_ptr<Server> server = event.m_server;
+	Server::Ptr server = event.m_server;
 
-	Logger::log("server %s: successfully connected", server->getInfo().m_name.c_str());
+	Logger::log("server %s: successfully connected",
+	    server->getInfo().m_name.c_str());
 
 	// Auto join channels
-	for (Server::Channel c : server->getChannels()) {
+	for (auto c : server->getChannels()) {
 		Logger::log("server %s: autojoining channel %s",
 		    server->getInfo().m_name.c_str(), c.m_name.c_str());
 
@@ -1158,7 +1151,7 @@ void Irccd::handleConnection(const IrcEvent &event)
 
 void Irccd::handleInvite(const IrcEvent &event)
 {
-	std::shared_ptr<Server> server = event.m_server;
+	Server::Ptr server = event.m_server;
 
 	// if join-invite is set to true join it
 	if (server->getOptions().m_joinInvite)
@@ -1167,7 +1160,7 @@ void Irccd::handleInvite(const IrcEvent &event)
 
 void Irccd::handleKick(const IrcEvent &event)
 {
-	std::shared_ptr<Server> server = event.m_server;
+	Server::Ptr server = event.m_server;
 
 	// If I was kicked, I need to remove the channel list
 	if (server->getIdentity().m_nickname == event.m_params[2])
@@ -1176,7 +1169,7 @@ void Irccd::handleKick(const IrcEvent &event)
 
 #if defined(WITH_LUA)
 
-void Irccd::callPlugin(std::shared_ptr<Plugin> p, const IrcEvent &ev)
+void Irccd::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
 {
 	switch (ev.m_type)
 	{

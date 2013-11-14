@@ -17,7 +17,7 @@
 #
 
 # Libxdg-basedir bundled
-project(libxdg-basedir)
+project(extern-libxdg-basedir)
 
 include_directories(include)
 

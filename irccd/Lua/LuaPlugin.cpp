@@ -1,7 +1,7 @@
 /*
  * LuaPlugin.cpp -- Lua bindings for class Plugin
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -27,18 +27,18 @@ namespace
 
 int getName(lua_State *L)
 {
-	Irccd *irccd = Irccd::getInstance();
+	Irccd &irccd = Irccd::getInstance();
 
-	lua_pushstring(L, irccd->findPlugin(L)->getName().c_str());
+	lua_pushstring(L, irccd.findPlugin(L)->getName().c_str());
 
 	return 1;
 }
 
 int getHome(lua_State *L)
 {
-	Irccd *irccd = Irccd::getInstance();
+	Irccd &irccd = Irccd::getInstance();
 
-	lua_pushstring(L, irccd->findPlugin(L)->getHome().c_str());
+	lua_pushstring(L, irccd.findPlugin(L)->getHome().c_str());
 
 	return 1;
 }

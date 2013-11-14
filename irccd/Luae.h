@@ -1,7 +1,7 @@
 /*
  * Lua.h -- Lua helpers and such
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -244,6 +244,20 @@ public:
 			    const std::string &name,
 			    lua_CFunction func,
 			    bool global);
+
+	/**
+	 * Convert a new placement made object, without testing if its a real
+	 * object.
+	 *
+	 * @param L the Lua state
+	 * @param idx the object index
+	 * @return the converted object
+	 */
+	template<class T>
+	static T toType(lua_State *L, int idx)
+	{
+		return reinterpret_cast<T>(lua_touserdata(L, idx));
+	}
 
 	/**
 	 * Convert a class created with new placement.

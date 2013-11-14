@@ -1,7 +1,7 @@
 /*
  * DefCall.cpp -- deferred plugin function call
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -41,7 +41,7 @@ DefCall::DefCall()
 {
 }
 
-DefCall::DefCall(IrcEventType type, std::shared_ptr<Plugin> plugin, int ref)
+DefCall::DefCall(IrcEventType type, Plugin::Ptr plugin, int ref)
 	: m_type(type)
 	, m_plugin(plugin)
 	, m_ref(ref)

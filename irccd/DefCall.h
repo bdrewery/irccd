@@ -1,7 +1,7 @@
 /*
  * DefCall.h -- deferred plugin function call
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,9 +34,9 @@ namespace irccd
 class DefCall
 {
 private:
-	IrcEventType m_type;			//! which type of event
-	std::shared_ptr<Plugin> m_plugin;	//! for which plugin
-	int m_ref;				//! function reference
+	IrcEventType m_type;		//! which type of event
+	Plugin::Ptr m_plugin;		//! for which plugin
+	int m_ref;			//! function reference
 
 	/**
 	 * Call the function that is pushed on the stack, also remove it from
@@ -55,7 +55,7 @@ public:
 
 	/**
 	 */
-	DefCall(IrcEventType type, std::shared_ptr<Plugin> plugin, int ref);
+	DefCall(IrcEventType type, Plugin::Ptr plugin, int ref);
 
 	/**
 	 * Get the deferred IRC event type.
