@@ -24,6 +24,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <unordered_map>
 
 #include <Logger.h>
 #include <Parser.h>
@@ -43,12 +44,12 @@ namespace irccd
 namespace
 {
 
-/*
- * This is the function used for socket handler message from clients.
- */
-typedef std::function<void(const std::vector<std::string> &params)> SocketFunction;
+using SocketFunction = std::function<void(const std::vector<std::string> &params)>;
 
-/*
+/**
+ * @struct ClientHandler
+ * @brief Irccdctl function
+ *
  * This describe a function to be called. It requires a number of arguments,
  * how many to split and a function to call.
  */
@@ -82,7 +83,7 @@ void handleInvite(const std::vector<std::string> &params)
 
 void handleJoin(const std::vector<std::string> &params)
 {
-	std::string password = "";
+	std::string password;
 	if (params.size() == 3)
 		password = params[2];
 
@@ -91,7 +92,7 @@ void handleJoin(const std::vector<std::string> &params)
 
 void handleKick(const std::vector<std::string> &params)
 {
-	std::string reason = "";
+	std::string reason;
 	if (params.size() == 4)
 		reason = params[3];
 
@@ -153,30 +154,23 @@ void handleUserMode(const std::vector<std::string> &params)
 	Irccd::getInstance()->findServer(params[0])->umode(params[1]);
 }
 
-std::map<std::string, ClientHandler> createHandlers()
-{
-	std::map<std::string, ClientHandler> handlers;
-
-	handlers["CNOTICE"]	= ClientHandler(3, 3, handleChannelNotice);
-	handlers["INVITE"]	= ClientHandler(3, 3, handleInvite);
-	handlers["JOIN"]	= ClientHandler(2, 3, handleJoin);
-	handlers["KICK"]	= ClientHandler(3, 4, handleKick);
-	handlers["LOAD"]	= ClientHandler(1, 1, handleLoad);
-	handlers["ME"]		= ClientHandler(3, 3, handleMe);
-	handlers["MSG"]		= ClientHandler(3, 3, handleMessage);
-	handlers["MODE"]	= ClientHandler(3, 3, handleMode);
-	handlers["NICK"]	= ClientHandler(2, 2, handleNick);
-	handlers["NOTICE"]	= ClientHandler(3, 3, handleNotice);
-	handlers["PART"]	= ClientHandler(2, 2, handlePart);
-	handlers["RELOAD"]	= ClientHandler(1, 1, handleReload);
-	handlers["TOPIC"]	= ClientHandler(3, 3, handleTopic);
-	handlers["UMODE"]	= ClientHandler(2, 2, handleUserMode);
-	handlers["UNLOAD"]	= ClientHandler(1, 1, handleUnload);
-
-	return handlers;
-}
-
-std::map<std::string, ClientHandler> handlers = createHandlers();
+std::unordered_map<std::string, ClientHandler> handlers {
+	{ "CNOTICE",	ClientHandler(3, 3, handleChannelNotice)	},
+	{ "INVITE",	ClientHandler(3, 3, handleInvite)		},
+	{ "JOIN",	ClientHandler(2, 3, handleJoin)			},
+	{ "KICK",	ClientHandler(3, 4, handleKick)			},
+	{ "LOAD",	ClientHandler(1, 1, handleLoad)			},
+	{ "ME",		ClientHandler(3, 3, handleMe)			},
+	{ "MSG",	ClientHandler(3, 3, handleMessage)		},
+	{ "MODE",	ClientHandler(3, 3, handleMode)			},
+	{ "NICK",	ClientHandler(2, 2, handleNick)			},
+	{ "NOTICE",	ClientHandler(3, 3, handleNotice)		},
+	{ "PART",	ClientHandler(2, 2, handlePart)			},
+	{ "RELOAD",	ClientHandler(1, 1, handleReload)		},
+	{ "TOPIC",	ClientHandler(3, 3, handleTopic)		},
+	{ "UMODE",	ClientHandler(2, 2, handleUserMode)		},
+	{ "UNLOAD",	ClientHandler(1, 1, handleUnload)		}
+};
 
 }
 
@@ -451,14 +445,6 @@ void Irccd::openConfig()
 	if (!config.open())
 		Logger::fatal(1, "irccd: could not open %s, exiting", m_configPath.c_str());
 
-#if !defined(_WIN32)
-	if (!m_foreground)
-	{
-		Logger::log("irccd: forking to background...");
-		daemon(0, 0);
-	}
-#endif
-
 	Logger::log("irccd: using configuration %s", m_configPath.c_str());
 
 	Section general = config.getSection("general");
@@ -480,6 +466,15 @@ void Irccd::openConfig()
 	if (general.hasOption("foreground") && !isOverriden(Options::Foreground))
 		m_foreground = general.getOption<bool>("foreground");
 #endif
+
+#if !defined(_WIN32)
+	if (!m_foreground)
+	{
+		Logger::log("irccd: forking to background...");
+		daemon(0, 0);
+	}
+#endif
+
 
 	if (general.hasOption("verbose") && !isOverriden(Options::Verbose))
 		Logger::setVerbose(general.getOption<bool>("verbose"));
@@ -536,10 +531,9 @@ void Irccd::loadPlugin(const std::string &name)
 		 */
 		
 		m_pluginLock.lock();
-
 		Plugin *p = new Plugin(name);
-		m_plugins.push_back(std::shared_ptr<Plugin>(p));		// don't remove that
 
+		m_pluginMap[p->getState()] = std::shared_ptr<Plugin>(p);
 		m_pluginLock.unlock();
 
 		if (!p->open(finalPath))
@@ -548,7 +542,7 @@ void Irccd::loadPlugin(const std::string &name)
 			    name.c_str(), p->getError().c_str());
 
 			m_pluginLock.lock();
-			m_plugins.pop_back();
+			m_pluginMap.erase(p->getState());
 			m_pluginLock.unlock();
 		}
 	}
@@ -560,20 +554,14 @@ void Irccd::loadPlugin(const std::string &name)
 void Irccd::unloadPlugin(const std::string &name)
 {
 #if defined(WITH_LUA)
-	std::vector<std::shared_ptr<Plugin>>::iterator i;	
-
 	m_pluginLock.lock();
-	i = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (std::shared_ptr<Plugin> &p) -> bool {
-		return p->getName() == name;
-	});
 
-	if (i == m_plugins.end())
-		Logger::warn("irccd: there is no module %s loaded", name.c_str());
-	else
-	{
+	try {
+		auto i = findPlugin(name);
+
 		try
 		{
-			(*i)->onUnload();
+			i->onUnload();
 		}
 		catch (Plugin::ErrorException ex)
 		{
@@ -581,7 +569,11 @@ void Irccd::unloadPlugin(const std::string &name)
 			    name.c_str(), ex.what());
 		}
 
-		m_plugins.erase(i);
+		m_pluginMap.erase(i->getState());
+	}
+	catch (std::out_of_range)
+	{
+		Logger::warn("irccd: there is no plugin %s loaded", name.c_str());
 	}
 
 	m_pluginLock.unlock();
@@ -858,7 +850,7 @@ void Irccd::extractChannels(const Section &section, std::shared_ptr<Server> serv
 		list = section.getOption<std::string>("channels");
 		channels = Util::split(list, " \t");
 
-		for (std::string s : channels)
+		for (const std::string &s : channels)
 		{
 			// detect an optional channel password
 			colon = s.find_first_of(':');
@@ -923,30 +915,44 @@ void Irccd::addWantedPlugin(const std::string &name)
 
 std::shared_ptr<Plugin> Irccd::findPlugin(lua_State *state)
 {
-	for (std::shared_ptr<Plugin> p : m_plugins)
-		if (p->getState().get() == state)
-			return p;
+	for (auto plugin : m_pluginMap)
+	{
+		/*
+		 * Test if the current plugin is the one with that
+		 * Lua state.
+		 */
+		if (plugin.first == state)
+			return plugin.second;
+	}
 
-	// This one should not happen
+	for (auto plugin : m_threadMap)
+	{
+		if (plugin.first == state)
+			return plugin.second;
+	}
+
 	throw std::out_of_range("plugin not found");
 }
 
 std::shared_ptr<Plugin> Irccd::findPlugin(const std::string &name)
 {
+	using type = std::pair<lua_State *, std::shared_ptr<Plugin>>;
+
 	std::ostringstream oss;
 
-	for (std::shared_ptr<Plugin> p : m_plugins)
-		if (p->getName() == name)
-			return p;
+	auto i = std::find_if(m_pluginMap.begin(), m_pluginMap.end(),
+	    [&] (type p) -> bool {
+		return p.second->getName() == name;
+	    }
+	);
 
-	oss << "plugin " << name << " not found";
+	if (i == m_pluginMap.end()) {
+		oss << "plugin " << name << " not found";
 
-	throw std::out_of_range(oss.str());
-}
+		throw std::out_of_range(oss.str());
+	}
 
-PluginList &Irccd::getPlugins()
-{
-	return m_plugins;
+	return (*i).second;
 }
 
 std::mutex &Irccd::getPluginLock()
@@ -957,6 +963,20 @@ std::mutex &Irccd::getPluginLock()
 void Irccd::addDeferred(std::shared_ptr<Server> server, DefCall call)
 {
 	m_deferred[server].push_back(call);
+}
+
+void Irccd::registerThread(lua_State *L, std::shared_ptr<Plugin> plugin)
+{
+	Lock lk(m_pluginLock);
+
+	m_threadMap[L] = plugin;
+}
+
+void Irccd::unregisterThread(lua_State *L)
+{
+	Lock lk(m_pluginLock);
+	
+	m_threadMap.erase(L);
 }
 
 #endif
@@ -1099,18 +1119,23 @@ void Irccd::handleIrcEvent(const IrcEvent &ev)
 		Logger::warn("plugin %s: %s", ex.which().c_str(), ex.what());
 	}
 
-	/**
-	 * And this is the block of normal events.
-	 */
-	for (std::shared_ptr<Plugin> p : m_plugins)
+	for (auto p : m_pluginMap)
 	{
+		/*
+		 * Ignore Lua threads that share the same Plugin
+		 * object.
+		 */
+		if (m_threadMap.find(p.first) != m_threadMap.end())
+			continue;
+
 		try
 		{
-			callPlugin(p, ev);
+			callPlugin(p.second, ev);
 		}
 		catch (Plugin::ErrorException ex)
 		{
-			Logger::warn("plugin %s: %s", p->getName().c_str(), ex.what());
+			Logger::warn("plugin %s: %s",
+			    p.second->getName().c_str(), ex.what());
 		}
 	}
 #endif
@@ -1197,6 +1222,9 @@ void Irccd::callPlugin(std::shared_ptr<Plugin> p, const IrcEvent &ev)
 			p->onMessage(ev.m_server, ev.m_params[0], ev.m_params[1],
 				    ev.m_params[2]);
 	}
+		break;
+	case IrcEventType::Me:
+		p->onMe(ev.m_server, ev.m_params[1], ev.m_params[0], ev.m_params[2]);
 		break;
 	case IrcEventType::Mode:
 		p->onMode(ev.m_server, ev.m_params[0], ev.m_params[1],

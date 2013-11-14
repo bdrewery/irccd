@@ -45,6 +45,7 @@ enum class IrcEventType
 	Join,						//! on joins
 	Kick,						//! on kick
 	Message,					//! on channel messages
+	Me,						//! CTCP Action
 	Mode,						//! channel mode
 	Nick,						//! nick change
 	Names,						//! (def) names listing

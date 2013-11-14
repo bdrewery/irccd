@@ -84,9 +84,9 @@ void useParams(Irccdctl &ctl, const unordered_map<char, string> &params)
 	if (domstr == "internet")
 	{
 		if (params.find('4') != params.end())
-			domain = AF_INET6;
-		else
 			domain = AF_INET;
+		else
+			domain = AF_INET6;
 
 		try
 		{
@@ -96,7 +96,6 @@ void useParams(Irccdctl &ctl, const unordered_map<char, string> &params)
 			    domain,
 			    type
 			);
-			
 		}
 		catch (...)
 		{
@@ -118,7 +117,7 @@ int main(int argc, char **argv)
 	unordered_map<char, string> params;
 	int ch;
 
-	setprogname(argv[0]);
+	setprogname("irccdctl");
 
 	while ((ch = getopt(argc, argv, "46c:h:P:p:T:t:v")) != -1)
 	{

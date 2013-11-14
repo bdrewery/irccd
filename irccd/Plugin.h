@@ -24,6 +24,7 @@
 #include <string>
 
 #include "Luae.h"
+#include "Thread.h"
 
 namespace irccd
 {
@@ -54,13 +55,25 @@ public:
 		virtual const char * what() const throw();
 	};
 
+	struct Library
+	{
+		const char *		m_name;		//! name of library to load
+		lua_CFunction		m_func;		//! C function for it
+	};
+
+	using Libraries		= std::vector<Library>;
+	using Ptr		= std::shared_ptr<Plugin>;
+	using ThreadList	= std::vector<Thread::Ptr>;
+
 private:
 	// Plugin identity
 	std::string m_name;		//! name like "foo"
 	std::string m_home;		//! home, usually ~/.config/<name>/
 	std::string m_error;		//! error message if needed
 
+	// Lua state and its optional threads
 	LuaState m_state;
+	ThreadList m_threads;
 
 	/**
 	 * Call the function plugin with optional parameters.
@@ -72,15 +85,18 @@ private:
 		  std::vector<std::string> params = std::vector<std::string>());
 
 public:
+	static const Libraries luaLibs;
+	static const Libraries irccdLibs;
+
 	Plugin();
 
 	Plugin(const std::string &name);
+#if 0
 
 	Plugin(Plugin &&src);
 
-	Plugin & operator=(Plugin &&src);
-
-	~Plugin();
+	Plugin &operator=(Plugin &&src);
+#endif
 
 	/**
 	 * Get the plugin name.
@@ -107,7 +123,7 @@ public:
 	 *
 	 * @return the Lua state
 	 */
-	LuaState & getState();
+	LuaState &getState();
 
 	/**
 	 * Get the error message if something failed.
@@ -123,6 +139,20 @@ public:
 	 * @return true on success
 	 */
 	bool open(const std::string &path);
+
+	/**
+	 * Register a thread as a plugin children.
+	 *
+	 * @param th the thread to register
+	 */
+	void addThread(Thread::Ptr th);
+
+	/**
+	 * Get the list of threads that the plugin owns.
+	 *
+	 * @return the list of threads
+	 */
+	ThreadList &getThreads();
 
 	/* ------------------------------------------------
 	 * IRC commands
@@ -221,6 +251,19 @@ public:
 		       const std::string &channel,
 		       const std::string &who,
 		       const std::string &message);
+
+	/**
+	 * A Lua function called on CTCP Action.
+	 *
+	 * @param server the server
+	 * @param channel on which channel
+	 * @param who who spoke
+	 * @param message the message sent
+	 */
+	void onMe(std::shared_ptr<Server> server,
+		  const std::string &channel,
+		  const std::string &who,
+		  const std::string &message);
 
 	/**
 	 * A Lua function triggered on a channel mode event.

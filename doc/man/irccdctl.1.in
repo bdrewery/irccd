@@ -34,12 +34,16 @@
 .Fl T Ar type
 .Fl p Ar port
 .Brq Fl 4 | Fl 6 
+.Ar command
+.Ar parameters
 .\" CLI SPECIFIED UNIX
 .Nm irccdctl
 .Op Fl v
 .Fl t Ar unix
 .Fl T Ar type
 .Fl P Ar path
+.Ar command
+.Ar parameters
 .Pp
 This is the list of commands supported by
 .Ns Nm

@@ -22,7 +22,10 @@
 namespace irccd
 {
 
-static int getName(lua_State *L)
+namespace
+{
+
+int getName(lua_State *L)
 {
 	Irccd *irccd = Irccd::getInstance();
 
@@ -31,7 +34,7 @@ static int getName(lua_State *L)
 	return 1;
 }
 
-static int getHome(lua_State *L)
+int getHome(lua_State *L)
 {
 	Irccd *irccd = Irccd::getInstance();
 
@@ -45,6 +48,8 @@ const luaL_Reg functionList[] = {
 	{ "getHome",		getHome			},
 	{ nullptr,		nullptr			}
 };
+
+}
 
 int luaopen_plugin(lua_State *L)
 {

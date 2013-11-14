@@ -91,13 +91,33 @@ public:
 	Message &operator=(const Message &m);
 };
 
-typedef std::vector<std::shared_ptr<Server>> ServerList;
-typedef std::map<Socket, Message> StreamClients;
-typedef std::map<SocketAddress, Message> DatagramClients;
+using ServerList	= std::vector<std::shared_ptr<Server>>;
+using StreamClients	= std::map<Socket, Message>;
+using DatagramClients	= std::map<SocketAddress, Message>;
 
 #if defined(WITH_LUA)
-  typedef std::vector<std::shared_ptr<Plugin>> PluginList;
-  typedef std::map<std::shared_ptr<Server>, std::vector<DefCall>> DefCallList;
+
+using PluginMap		= std::unordered_map<
+				lua_State *,
+				std::shared_ptr<Plugin>
+			  >;
+
+using PluginList	= std::vector<
+				std::shared_ptr<Plugin>
+			  >;
+
+using ThreadMap		= std::unordered_map<
+				lua_State *,
+				Plugin::Ptr
+			  >;
+
+using DefCallList	= std::unordered_map<
+				std::shared_ptr<Server>,
+				std::vector<DefCall>
+			  >;
+
+using Lock		= std::lock_guard<std::mutex>;
+
 #endif
 
 class Irccd
@@ -120,7 +140,9 @@ private:
 #if defined(WITH_LUA)
 	std::mutex m_pluginLock;			//! lock to add plugin
 
-	PluginList m_plugins;				//! list of plugins loaded
+	PluginMap m_pluginMap;				//! map of plugins loaded
+	ThreadMap m_threadMap;				//! map of threads
+	
 	DefCallList m_deferred;				//! list of deferred call
 #endif
 
@@ -278,13 +300,6 @@ public:
 	std::shared_ptr<Plugin> findPlugin(const std::string &name);
 
 	/**
-	 * Get plugins.
-	 *
-	 * @return a list of plugins
-	 */
-	PluginList & getPlugins();
-
-	/**
 	 * Get the plugin lock, used to load / unload module.
 	 *
 	 * @return the mutex lock
@@ -298,6 +313,22 @@ public:
 	 * @param call the plugin to call
 	 */
 	void addDeferred(std::shared_ptr<Server> server, DefCall call);
+
+	/**
+	 * Register the thread to one plugin so that irccd.plugin
+	 * think that L state is of plugin.
+	 *
+	 * @param L the new Lua state
+	 * @param plugin for which plugin
+	 */
+	void registerThread(lua_State *L, std::shared_ptr<Plugin> plugin);
+
+	/**
+	 * Remove the attach thread from that Lua state
+	 *
+	 * @param L the Lua state from which thread
+	 */
+	void unregisterThread(lua_State *L);
 #endif
 
 	/**

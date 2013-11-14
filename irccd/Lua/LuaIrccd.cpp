@@ -19,10 +19,10 @@
 #include "Irccd.h"
 #include "LuaIrccd.h"
 
-using namespace irccd;
-using namespace std;
+namespace irccd
+{
 
-int irccd::luaopen_irccd(lua_State *L)
+int luaopen_irccd(lua_State *L)
 {
 	lua_createtable(L, 3, 3);
 
@@ -37,3 +37,5 @@ int irccd::luaopen_irccd(lua_State *L)
 
 	return 1;
 }
+
+} // !irccd

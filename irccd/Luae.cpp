@@ -21,6 +21,110 @@
 namespace irccd
 {
 
+LuaState::LuaState()
+{
+	m_state = Ptr(luaL_newstate());
+}
+
+LuaState::LuaState(lua_State *L)
+{
+	m_state = Ptr(L);
+}
+
+LuaState::LuaState(LuaState &&state)
+{
+	m_state = std::move(state.m_state);
+}
+
+LuaState &LuaState::operator=(LuaState &&state)
+{
+	m_state = std::move(state.m_state);
+
+	return *this;
+}
+
+LuaState::operator lua_State*()
+{
+	return m_state.get();
+}
+
+LuaValue LuaValue::copy(lua_State *L, int index)
+{
+	LuaValue v;
+
+	v.type = lua_type(L, index);
+
+	switch (v.type)
+	{
+	case LUA_TBOOLEAN:
+		v.boolean = lua_toboolean(L, index);
+		break;
+	case LUA_TNUMBER:
+		v.number = lua_tonumber(L, index);
+		break;
+	case LUA_TSTRING:
+		v.str = lua_tostring(L, index);
+		break;
+	case LUA_TTABLE:
+	{
+		LuaValue k;
+
+		if (index < 0)
+			-- index;
+
+		lua_pushnil(L);
+		while (lua_next(L, index)) {
+			v.table.push_back(std::make_pair(copy(L, -2), copy(L, -1)));
+			lua_pop(L, 1);
+		}
+
+		break;
+	}
+	default:
+		v.type = LUA_TNIL;
+		break;
+	}
+
+	return v;
+}
+
+void LuaValue::push(lua_State *L, const LuaValue &value)
+{
+	switch (value.type)
+	{
+	case LUA_TBOOLEAN:
+		lua_pushboolean(L, value.boolean);
+		break;
+	case LUA_TSTRING:
+		lua_pushlstring(L,  value.str.c_str(), value.str.size());
+		break;
+	case LUA_TNUMBER:
+		lua_pushnumber(L, value.number);
+		break;
+	case LUA_TTABLE:
+	{
+		lua_createtable(L, 0, 0);
+
+		for (auto p : value.table)
+		{
+			LuaValue::push(L, p.first);
+			LuaValue::push(L, p.second);
+
+			lua_settable(L, -3);
+		}
+		break;
+	}
+	default:
+		lua_pushnil(L);
+		break;
+	}
+}
+
+LuaValue::LuaValue()
+	: type(LUA_TNIL)
+{
+}
+
 template <>
 bool Luae::getField(lua_State *L, int idx, const std::string &name)
 {

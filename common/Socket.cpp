@@ -57,10 +57,10 @@ void Socket::init()
 
 #if defined(_WIN32)
 
-string Socket::getLastSysError()
+std::string Socket::getLastSysError()
 {
 	LPSTR str = nullptr;
-	string errmsg = "Unknown error";
+	std::string errmsg = "Unknown error";
 
 	FormatMessageA(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -72,7 +72,7 @@ string Socket::getLastSysError()
 
 	if (str)
 	{
-		errmsg = string(str);
+		errmsg = std::string(str);
 		LocalFree(str);
 	}
 
@@ -243,8 +243,6 @@ unsigned Socket::recvfrom(void *data, unsigned dataLen)
 
 	return recvfrom(data, dataLen, dummy);
 }
-
-#include <sys/un.h>
 
 unsigned Socket::recvfrom(void *data, unsigned dataLen, SocketAddress &info)
 {

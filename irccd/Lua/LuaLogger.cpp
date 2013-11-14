@@ -26,7 +26,10 @@
 namespace irccd
 {
 
-static std::string makeMessage(lua_State *L, const std::string &message)
+namespace
+{
+
+std::string makeMessage(lua_State *L, const std::string &message)
 {
 	std::ostringstream oss;
 	std::shared_ptr<Plugin> p = Irccd::getInstance()->findPlugin(L);
@@ -36,14 +39,14 @@ static std::string makeMessage(lua_State *L, const std::string &message)
 	return oss.str();
 }
 
-static int log(lua_State *L)
+int log(lua_State *L)
 {
 	Logger::log("%s", makeMessage(L, luaL_checkstring(L, 1)).c_str());
 
 	return 0;
 }
 
-static int warn(lua_State *L)
+int warn(lua_State *L)
 {
 	Logger::warn("%s", makeMessage(L, luaL_checkstring(L, 1)).c_str());
 
@@ -55,6 +58,8 @@ const luaL_Reg functions[] = {
 	{ "warn",	warn			},
 	{ nullptr,	nullptr			}
 };
+
+}
 
 int luaopen_logger(lua_State *L)
 {
