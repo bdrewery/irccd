@@ -127,6 +127,10 @@ using Lock		= std::lock_guard<std::mutex>;
 class Irccd
 {
 private:
+	using PluginDirs		= std::vector<std::string>;
+	using PluginList		= std::vector<std::string>;
+	using PluginSpecifiedMap	= std::unordered_map<std::string, bool>;
+
 	static Irccd m_instance;			//! unique instance
 
 	// Ignition
@@ -138,8 +142,9 @@ private:
 	std::unordered_map<char, bool> m_overriden;	//! overriden parameters
 
 	// Plugins
-	std::vector<std::string> m_pluginDirs;		//! list of plugin directories
-	std::vector<std::string> m_pluginWanted;	//! list of wanted modules
+	PluginDirs m_pluginDirs;			//! list of plugin directories
+	PluginList m_pluginWanted;			//! list of wanted modules
+	PluginSpecifiedMap m_pluginSpecified;		//! list of plugin specified by paths
 
 #if defined(WITH_LUA)
 	std::mutex m_pluginLock;			//! lock to add plugin
@@ -256,13 +261,14 @@ public:
 	void addPluginPath(const std::string &path);
 
 	/**
-	 * Add a wanted plugin, irccd will concatenate ".lua"
-	 * to the plugin name and try to find it in the
-	 * plugin directories.
+	 * Request for loading the plugin. If specified is set to true
+	 * then the name is the full path to the plugin otherwise, it is
+	 * searched.
 	 *
-	 * @param name the plugin name
+	 * @param name the plugin name or path
+	 * @param bool is specified by path?
 	 */
-	void addWantedPlugin(const std::string &name);
+	void addWantedPlugin(const std::string &name, bool specified = false);
 
 	/**
 	 * Load a plugin externally, used for irccdctl.

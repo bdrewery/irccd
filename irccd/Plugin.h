@@ -62,6 +62,7 @@ public:
 private:
 	// Plugin identity
 	std::string m_name;		//! name like "foo"
+	std::string m_path;		//! path used like "/opt/foo.lua"
 	std::string m_home;		//! home, usually ~/.config/<name>/
 	std::string m_error;		//! error message if needed
 
@@ -84,13 +85,8 @@ public:
 
 	Plugin();
 
-	Plugin(const std::string &name);
-#if 0
-
-	Plugin(Plugin &&src);
-
-	Plugin &operator=(Plugin &&src);
-#endif
+	Plugin(const std::string &name,
+	       const std::string &path);
 
 	/**
 	 * Get the plugin name.
@@ -127,12 +123,11 @@ public:
 	const std::string & getError() const;
 
 	/**
-	 * Open the plugin specified by path.
+	 * Open the plugin.
 	 *
-	 * @param path the plugin path
 	 * @return true on success
 	 */
-	bool open(const std::string &path);
+	bool open();
 
 	/**
 	 * Register a thread as a plugin children.

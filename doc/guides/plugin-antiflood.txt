@@ -15,10 +15,11 @@ banning and kicking.
 == Installation
 
 The plugin `antiflood` is distributed with `irccd`. To enable it add the
-following to your `plugins` parameter:
+following to your `plugins` section:
 
 ----
-plugins = "antiflood"
+[plugins]
+antiflood =
 ----
 
 == Usage

@@ -57,9 +57,9 @@ This section covers general options.
 .It foreground
 (bool) Keep irccd to foreground, default: false.
 .It plugins
-(string list) A list of plugins to load, default: empty.
+(DEPRECATED) (string list) A list of plugins to load, default: empty.
 .It plugin-path
-(string) A path to local modules, default: empty.
+(string) A path to local plugins, default: empty.
 .It syslog
 (bool) If enabled, use syslog instead of standard output, default: false.
 .It verbose
@@ -149,6 +149,15 @@ default: 0.
 .It reconnect-timeout
 (int) Number of seconds to wait before retrying, default: 30.
 .El
+.\" PLUGINS
+.Ss plugins
+This section is used to load plugins. Just add any key you like to load
+a plugin. If the value is not specified, the plugin is searched through
+the standard directories, otherwise, provide the full path (including the .lua
+extension).
+.Pp
+See examples for usage
+.El
 .\" EXAMPLES
 .Sh EXAMPLES
 .Bd -literal
@@ -186,6 +195,11 @@ identity = "myIdentity"
 host = "chat.wanadoo.fr"
 port = "6667"
 identity = "myIdentity"
+
+# Load some plugins
+[plugins]
+ask =					# This search for plugin ask
+myplugin = /path/to/myplugin.lua	# This use absolute path
 .Ed
 .\" FILES
 .Sh FILES

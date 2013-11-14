@@ -454,9 +454,9 @@ void testPlugin(const char *file, int argc, char **argv)
 	if (epos != std::string::npos)
 		name = name.erase(epos);
 
-	auto plugin = std::make_shared<Plugin>(name);
+	auto plugin = std::make_shared<Plugin>(name, file);
 
-	if (!plugin->open(file))
+	if (!plugin->open())
 		Logger::warn("Failed to open plugin: %s", plugin->getError().c_str());
 
 	// Simulate handler is optional

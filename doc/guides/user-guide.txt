@@ -190,7 +190,7 @@ application.
 The options available:
 
 * `foreground`: (bool) Keep irccd to foreground, default: false.
-* `plugins`: (string list) A list of plugins to load, default: empty.
+* `plugins`: (DEPRECATED) (string list) A list of plugins to load, default: empty.
 * `plugin-path`: (string) A path to local plugins, default: empty.
 * `syslog`: (bool) If enabled, use syslog instead of standard output, default: false.
 * `verbose`: (bool) Enable verbose message, default: false.
@@ -202,7 +202,22 @@ The options foreground and syslog are only available on Unix systems.
 [source, ini]
 ----
 [general]
-plugins = "history logger"
+verbose = true
+----
+
+=== The section `plugins`
+
+This section is used to load plugins. Just add any key you like to load
+a plugin. If the value is not specified, the plugin is searched through
+the standard directories, otherwise, provide the full path (including the .lua
+extension).
+
+.Example
+[source, ini]
+----
+[plugins]
+history =
+myplugin = /tmp/myplugin.lua
 ----
 
 === The section `identity`
@@ -374,6 +389,11 @@ identity = "myIdentity"
 host = "chat.wanadoo.fr"
 port = "6667"
 identity = "myIdentity"
+
+# Load some plugins
+[plugins]
+ask =					# This search for plugin ask
+myplugin = /path/to/myplugin.lua	# This use absolute path
 ----
 
 == Running irccd

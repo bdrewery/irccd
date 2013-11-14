@@ -453,12 +453,27 @@ void Irccd::openConfig()
 	if (general.hasOption("plugin-path"))
 		addPluginPath(general.getOption<std::string>("plugin-path"));
 
+	// Old way of loading plugins
 	if (general.hasOption("plugins"))
 	{
+		Logger::warn("irccd: general.plugins option is deprecated, use [plugins]");
+
 		std::string list = general.getOption<std::string>("plugins");
-		for (std::string s : Util::split(list, " \t"))
+		for (auto s : Util::split(list, " \t"))
 			addWantedPlugin(s);
 	}
+
+	// New way of loading plugins
+	Section plugins = config.getSection("plugins");
+
+	for (auto opt : plugins.getOptions())
+	{
+		if (opt.m_value.length() == 0)
+			addWantedPlugin(opt.m_key);
+		else
+			addWantedPlugin(opt.m_value, true);
+	}
+
 
 #if !defined(_WIN32)
 	if (general.hasOption("syslog"))
@@ -475,7 +490,6 @@ void Irccd::openConfig()
 	}
 #endif
 
-
 	if (general.hasOption("verbose") && !isOverriden(Options::Verbose))
 		Logger::setVerbose(general.getOption<bool>("verbose"));
 
@@ -491,34 +505,62 @@ void Irccd::loadPlugin(const std::string &name)
 {
 #if defined(WITH_LUA)
 	std::ostringstream oss;
-	std::string finalPath;
+	std::string realname, realpath;
 	bool found = false;
 
 	if (isPluginLoaded(name))
 		return;
 
-	// Seek the plugin in the directories.
-	for (const std::string &path : m_pluginDirs)
+	/*
+	 * If the plugin has been specified by path using foo = /path then
+	 * it should contains the .lua extension, otherwise we search
+	 * for it.
+	 */
+	if (m_pluginSpecified.count(name) >= 1)
 	{
-		oss.str("");
-		oss << path;
+		Logger::log("irccd: checking for plugin %s", name.c_str());
+		found = Util::exist(name);
 
-		// Add a / or \\ only if needed
-		if (path.length() > 0 && path[path.length() - 1] != Util::DIR_SEP)
-			oss << Util::DIR_SEP;
+		/*
+		 * Compute the name by removing .lua extension and optional
+		 * directory.
+		 */
+		realpath = name;
+		realname = Util::baseName(realpath);
 
-		oss << name << ".lua";
+		auto pos = realname.find(".lua");
+		if (pos != std::string::npos)
+			realname.erase(pos);
+	}
+	else
+	{
+		realname = name;
 
-		finalPath = oss.str();
-		Logger::log("irccd: checking for plugin %s", finalPath.c_str());
-		if (Util::exist(finalPath)) {
-			found = true;
-			break;
+		// Seek the plugin in the directories.
+		for (auto p : m_pluginDirs)
+		{
+			oss.str("");
+			oss << p;
+
+			// Add a / or \\ only if needed
+			if (p.length() > 0 && p[p.length() - 1] != Util::DIR_SEP)
+				oss << Util::DIR_SEP;
+
+			oss << name << ".lua";
+
+			realpath = oss.str();
+			Logger::log("irccd: checking for plugin %s", realpath.c_str());
+
+			if (Util::exist(realpath))
+			{
+				found = true;
+				break;
+			}
 		}
 	}
 
 	if (!found)
-		Logger::warn("irccd: plugin %s not found", name.c_str());
+		Logger::warn("irccd: plugin %s not found", realname.c_str());
 	else
 	{
 		/*
@@ -529,17 +571,16 @@ void Irccd::loadPlugin(const std::string &name)
 		 * it only on failure and expect plugins to be well
 		 * coded.
 		 */
-		
 		m_pluginLock.lock();
-		Plugin *p = new Plugin(name);
+		Plugin *p = new Plugin(realname, realpath);
 
 		m_pluginMap[p->getState()] = Plugin::Ptr(p);
 		m_pluginLock.unlock();
 
-		if (!p->open(finalPath))
+		if (!p->open())
 		{
-			Logger::warn("irccd: failed to load module %s: %s",
-			    name.c_str(), p->getError().c_str());
+			Logger::warn("irccd: failed to load plugin %s: %s",
+			    realname.c_str(), p->getError().c_str());
 
 			m_pluginLock.lock();
 			m_pluginMap.erase(p->getState());
@@ -903,9 +944,12 @@ void Irccd::addPluginPath(const std::string &path)
 	m_pluginDirs.push_back(path);
 }
 
-void Irccd::addWantedPlugin(const std::string &name)
+void Irccd::addWantedPlugin(const std::string &name, bool specified)
 {
 	m_pluginWanted.push_back(name);
+
+	if (specified)
+		m_pluginSpecified[name] = true;
 }
 
 #if defined(WITH_LUA)

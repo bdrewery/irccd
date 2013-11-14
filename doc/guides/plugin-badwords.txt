@@ -14,10 +14,11 @@ The plugin `badwords` can avoid people saying bad words.
 == Installation
 
 The plugin `badwords` is distributed with `irccd`. To enable it add the
-following to your `plugins` parameter:
+following to your `plugins` section:
 
 ----
-plugins = "badwords"
+[plugins]
+badwords =
 ----
 
 == Usage

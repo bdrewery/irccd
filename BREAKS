@@ -1,0 +1,9 @@
+IRC Client Daemon BREAKS
+========================
+
+This is the list of things that changed and are now marked as deprecated.
+
+CURRENT
+-------
+
+* Option general.plugins is deprecated. Use section [plugins] to load plugins.

@@ -15,10 +15,11 @@ is set from the server.
 == Installation
 
 The plugin `date` is distributed with `irccd`. To enable it add the following to your
-`plugins` parameter:
+`plugins` section:
 
 ----
-plugins = "date"
+[plugins]
+date =
 ----
 
 == Usage

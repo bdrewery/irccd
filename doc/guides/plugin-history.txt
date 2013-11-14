@@ -16,10 +16,11 @@ if possible.
 == Installation
 
 The plugin `history` is distributed with `irccd`. To enable it add the following
-to your `plugins` parameter:
+to your `plugins` section:
 
 ----
-plugins = "history"
+[plugins]
+history =
 ----
 
 == Usage

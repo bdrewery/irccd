@@ -15,10 +15,11 @@ will be rich, famous and so on.
 == Installation
 
 The plugin `ask` is distributed with `irccd`. To enable it add the following to your
-`plugins` parameter:
+`plugins` section:
 
 ----
-plugins = "ask"
+[plugins]
+ask =
 ----
 
 == Usage

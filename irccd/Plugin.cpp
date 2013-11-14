@@ -142,8 +142,10 @@ Plugin::Plugin()
 {
 }
 
-Plugin::Plugin(const std::string &name)
+Plugin::Plugin(const std::string &name,
+	       const std::string &path)
 	: m_name(name)
+	, m_path(path)
 {
 	m_state = std::move(LuaState(luaL_newstate()));
 
@@ -170,10 +172,8 @@ const std::string & Plugin::getError() const
 	return m_error;
 }
 
-bool Plugin::open(const std::string &path)
+bool Plugin::open()
 {
-	std::ostringstream oss;
-
 	// Load default library as it was done by require.
 	for (auto l : luaLibs)
 		Luae::require(m_state, l.first, l.second, true);
@@ -186,7 +186,7 @@ bool Plugin::open(const std::string &path)
 	// Find the home directory for the plugin
 	m_home = Util::findPluginHome(m_name);
 
-	if (luaL_dofile(m_state, path.c_str()) != LUA_OK)
+	if (luaL_dofile(m_state, m_path.c_str()) != LUA_OK)
 	{
 		m_error = lua_tostring(m_state, -1);
 		lua_pop(m_state, 1);

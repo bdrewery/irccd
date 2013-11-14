@@ -25,10 +25,11 @@ following events:
 == Installation
 
 The plugin `logger` is distributed with `irccd`. To enable it add the following
-to your `plugins` parameter:
+to your `plugins` section:
 
 ----
-plugins = "logger"
+[plugins]
+logger =
 ----
 
 == Usage

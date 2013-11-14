@@ -862,7 +862,7 @@ application.</p></div>
 </li>
 <li>
 <p>
-<span class="monospaced">plugins</span>: (string list) A list of plugins to load, default: empty.
+<span class="monospaced">plugins</span>: (DEPRECATED) (string list) A list of plugins to load, default: empty.
 </p>
 </li>
 <li>
@@ -896,7 +896,23 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000000">[general]</span></span>
-<span style="color: #009900">plugins </span><span style="color: #990000">=</span> <span style="color: #FF0000">"history logger"</span></tt></pre></div></div>
+<span style="color: #009900">verbose </span><span style="color: #990000">=</span> true</tt></pre></div></div>
+</div>
+<div class="sect2">
+<h3 id="_the_section_span_class_monospaced_plugins_span">The section <span class="monospaced">plugins</span></h3>
+<div class="paragraph"><p>This section is used to load plugins. Just add any key you like to load
+a plugin. If the value is not specified, the plugin is searched through
+the standard directories, otherwise, provide the full path (including the .lua
+extension).</p></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">[plugins]</span></span>
+<span style="color: #009900">history </span><span style="color: #990000">=</span>
+<span style="color: #009900">myplugin </span><span style="color: #990000">=</span> <span style="color: #990000">/</span>tmp<span style="color: #990000">/</span>myplugin<span style="color: #990000">.</span>lua</tt></pre></div></div>
 </div>
 <div class="sect2">
 <h3 id="_the_section_span_class_monospaced_identity_span">The section <span class="monospaced">identity</span></h3>
@@ -1180,7 +1196,12 @@ http://www.gnu.org/software/src-highlite -->
 <span style="font-weight: bold"><span style="color: #000000">[server]</span></span>
 <span style="color: #009900">host </span><span style="color: #990000">=</span> <span style="color: #FF0000">"chat.wanadoo.fr"</span>
 <span style="color: #009900">port </span><span style="color: #990000">=</span> <span style="color: #FF0000">"6667"</span>
-<span style="color: #009900">identity </span><span style="color: #990000">=</span> <span style="color: #FF0000">"myIdentity"</span></tt></pre></div></div>
+<span style="color: #009900">identity </span><span style="color: #990000">=</span> <span style="color: #FF0000">"myIdentity"</span>
+
+<span style="font-style: italic"><span style="color: #9A1900"># Load some plugins</span></span>
+<span style="font-weight: bold"><span style="color: #000000">[plugins]</span></span>
+<span style="color: #009900">ask </span><span style="color: #990000">=</span>                                   <span style="font-style: italic"><span style="color: #9A1900"># This search for plugin ask</span></span>
+<span style="color: #009900">myplugin </span><span style="color: #990000">=</span> <span style="color: #990000">/</span>path<span style="color: #990000">/</span>to<span style="color: #990000">/</span>myplugin<span style="color: #990000">.</span>lua        <span style="font-style: italic"><span style="color: #9A1900"># This use absolute path</span></span></tt></pre></div></div>
 </div>
 </div>
 </div>
@@ -1898,7 +1919,7 @@ quotes.</p></div>
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-10-30 22:54:29 CET
+Last updated 2013-11-07 20:54:48 CET
 </div>
 </div>
 </body>
