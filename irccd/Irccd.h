@@ -20,18 +20,12 @@
 #define _IRCCD_H_
 
 #include <exception>
-#include <map>
 #include <mutex>
 #include <sstream>
 
 #include <Parser.h>
-#include <Socket.h>
-#include <SocketAddress.h>
-#include <SocketListener.h>
-
 #include <config.h>
 
-#include "Message.h"
 #include "Server.h"
 
 #if defined(WITH_LUA)
@@ -39,26 +33,19 @@
 #  include "Plugin.h"
 #endif
 
-namespace irccd
-{
+namespace irccd {
 
 /* --------------------------------------------------------
  * Irccd main class
  * -------------------------------------------------------- */
 
-enum Options
-{
+enum Options {
 	Config		= 'c',
 	Foreground	= 'f',
 	Verbose		= 'v',
 	PluginPath	= 'p',
 	PluginWanted	= 'P'
 };
-
-
-using ServerList	= std::vector<Server::Ptr>;
-using StreamClients	= std::map<Socket, Message>;
-using DatagramClients	= std::map<SocketAddress, Message>;
 
 #if defined(WITH_LUA)
 
@@ -86,6 +73,9 @@ using DefCallList	= std::unordered_map<
 			  >;
 
 using Lock		= std::lock_guard<std::mutex>;
+using RLock		= std::lock_guard<std::recursive_mutex>;
+
+using ServerList	= std::vector<Server::Ptr>;
 
 #endif
 
@@ -105,32 +95,25 @@ private:
 	std::string m_configPath;			//! config file path
 	std::unordered_map<char, bool> m_overriden;	//! overriden parameters
 
+	// Identities
+	IdentityList m_identities;			//! user identities
+	Server::Identity m_defaultIdentity;		//! default identity
+
 	// Plugins
 	PluginDirs m_pluginDirs;			//! list of plugin directories
 	PluginList m_pluginWanted;			//! list of wanted modules
 	PluginSpecifiedMap m_pluginSpecified;		//! list of plugin specified by paths
 
 #if defined(WITH_LUA)
-	std::mutex m_pluginLock;			//! lock to add plugin
-
+	std::recursive_mutex m_pluginLock;		//! lock to add plugin
 	PluginMap m_pluginMap;				//! map of plugins loaded
 	ThreadMap m_threadMap;				//! map of threads
-	
 	DefCallList m_deferred;				//! list of deferred call
 #endif
 
 	ServerList m_servers;				//! list of servers
+	std::mutex m_serverLock;			//! lock for managing servers
 
-	// Socket clients and listeners
-	std::vector<Socket> m_socketServers;		//! socket servers
-	SocketListener m_listener;			//! socket listener
-
-	StreamClients m_streamClients;			//! tcp based clients
-	DatagramClients m_dgramClients;			//! udp based "clients"
-
-	// Identities
-	IdentityList m_identities;			//! user identities
-	Server::Identity m_defaultIdentity;		//! default identity
 
 	/* {{{ Private miscellaneous methods */
 	
@@ -140,22 +123,6 @@ private:
 
 	/* }}} */
 
-	/* {{{ Private client management */
-
-	void clientAdd(Socket &client);
-	void clientRead(Socket &client);
-
-	void peerRead(Socket &s);
-
-	void execute(const std::string &cmd,
-		     Socket &s,
-		     const SocketAddress &info = SocketAddress());
-
-	void notifySocket(const std::string &message,
-			  Socket &s,
-			  const SocketAddress &info);
-
-	/* }}} */
 
 	/* {{{ Private plugin management */
 
@@ -198,9 +165,13 @@ private:
 	void callDeferred(const IrcEvent &ev);
 #endif
 
+	void removeServer(Server::Ptr sv);
+
 	/* }}} */
 
 public:
+	/* {{{ Public constructor, destructor and miscellaneous methods */
+
 	~Irccd();
 
 	/**
@@ -216,6 +187,32 @@ public:
 	 * @param c the option
 	 */
 	void override(char c);
+
+	/**
+	 * Set the config path to open.
+	 *
+	 * @param path the config file path
+	 */
+	void setConfigPath(const std::string &path);
+
+	/**
+	 * Tells if we should run to foreground or not.
+	 *
+	 * @param mode the mode
+	 */
+	void setForeground(bool mode);
+
+	/**
+	 * Find an identity.
+	 *
+	 * @param name the identity's resource name.
+	 * @return an identity or the default one
+	 */
+	const Server::Identity &findIdentity(const std::string &name);
+
+	/* }}} */
+
+	/* {{{ Public Plugin management */
 
 	/**
 	 * Add a plugin path to find other plugins.
@@ -302,26 +299,20 @@ public:
 	void unregisterThread(lua_State *L);
 #endif
 
+	/* }}} */
+
+	/* {{{ Public Server management */
+
+	void connectServer(const Server::Info &info,
+			   const Server::Identity &identity,
+			   const Server::Options &options);
+
 	/**
 	 * Get the servers list
 	 *
 	 * @return the list of servers
 	 */
 	ServerList &getServers();
-
-	/**
-	 * Set the config path to open.
-	 *
-	 * @param path the config file path
-	 */
-	void setConfigPath(const std::string &path);
-
-	/**
-	 * Tells if we should run to foreground or not.
-	 *
-	 * @param mode the mode
-	 */
-	void setForeground(bool mode);
 
 	/**
 	 * Find a server by its resource name.
@@ -333,12 +324,19 @@ public:
 	Server::Ptr findServer(const std::string &name);
 
 	/**
-	 * Find an identity.
+	 * Global IRC event handler, process the event type and call
+	 * every Lua plugin if Lua is compiled in.
 	 *
-	 * @param name the identity's resource name.
-	 * @return an identity or the default one
+	 * For some event, also call handleConnection
+	 * and handleInvite to do specific things.
+	 *
+	 * @param event the event
 	 */
-	const Server::Identity &findIdentity(const std::string &name);
+	void handleIrcEvent(const IrcEvent &event);
+
+	/* }}} */
+
+	/* {{{ Irccd management */
 
 	/**
 	 * Run the application.
@@ -352,21 +350,7 @@ public:
 	 */
 	void stop();
 
-	/* ------------------------------------------------
-	 * IRC Handlers
-	 * ------------------------------------------------ */
-
-	/**
-	 * Global IRC event handler, process the event type and call
-	 * every Lua plugin if Lua is compiled in.
-	 *
-	 * For some event, also call handleConnection
-	 * and handleInvite to do specific things.
-	 *
-	 * @param event the event
-	 */
-	void handleIrcEvent(const IrcEvent &event);
-
+	/* }}} */
 };
 
 } // !irccd

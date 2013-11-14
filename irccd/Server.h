@@ -232,6 +232,7 @@ private:
 	std::thread m_thread;			//! server's thread
 	IrcSession m_session;			//! libircclient session
 	bool m_threadStarted;			//! thread's status
+	bool m_shouldDelete;			//! tells if we must delete the server
 
 	// For deferred events
 	NameList m_nameLists;			//! channels names to receive
@@ -257,6 +258,18 @@ public:
 	static Ptr toServer(irc_session_t *s);
 
 	/**
+	 * Convert a channel line to Channel. The line must be in the
+	 * following form:
+	 *	#channel:password
+	 *
+	 * Password is optional and : must be removed.
+	 *
+	 * @param line the line to convert
+	 * @return a channel
+	 */
+	static Channel toChannel(const std::string &line);
+
+	/**
 	 * Better constructor with information and options.
 	 *
 	 * @param info the host info
@@ -271,6 +284,13 @@ public:
 	 * Default destructor.
 	 */
 	virtual ~Server();
+
+	/**
+	 * Tells if the server must be removed.
+	 *
+	 * @return true if needed
+	 */
+	bool mustBeRemoved() const;
 
 	/**
 	 * Extract the prefixes from the server.
@@ -326,11 +346,9 @@ public:
 	 * Add a channel that the server will connect to when the
 	 * connection is complete.
 	 *
-	 * @param name the channel name
-	 * @param password an optional channel password
+	 * @param channel the channel to add
 	 */
-	void addChannel(const std::string &name,
-			const std::string &password = "");
+	void addChannel(const Channel &channel);
 
 	/**
 	 * Tells if we already have a channel in the list.

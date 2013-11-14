@@ -403,9 +403,32 @@ int l_find(lua_State *L)
 	return ret;
 }
 
-int l_connect(lua_State *)
+int l_connect(lua_State *L)
 {
-	// XXX: TBD
+	Server::Info info;
+	Server::Identity ident;
+	Server::Options options;
+
+	luaL_checktype(L, 1, LUA_TTABLE);
+
+	info.m_name	= Luae::requireField<std::string>(L, 1, "name");
+	info.m_host	= Luae::requireField<std::string>(L, 1, "host");
+	info.m_port	= Luae::requireField<int>(L, 1, "port");
+
+	if (Luae::typeField(L, 1, "password"))
+		info.m_password = Luae::requireField<std::string>(L, 1, "password");
+#if 0
+	if (Luae::typeField(L, 1, "channels")) {
+		Luae::readTable(L, 1, [&] (lua_State *L, int, int tvalue) {
+			if (tvalue == LUA_TSTRING) {
+				//printf("%s\n", lua_tostring(L, -1));
+				//info.m_channels.push_back(Server::toChannel(lua_tostring(L, -1)));
+			}
+		});
+	}
+#endif
+
+	Irccd::getInstance().connectServer(info, ident, options);
 
 	return 0;
 }
@@ -431,7 +454,7 @@ int luaopen_server(lua_State *L)
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 
-	return 0;
+	return 1;
 }
 
 } // !irccd

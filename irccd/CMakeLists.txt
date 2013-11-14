@@ -32,6 +32,8 @@ set(SOURCES
 	Irccd.h
 	Message.cpp
 	Message.h
+	Listener.cpp
+	Listener.h
 	main.cpp
 )
 

@@ -418,10 +418,29 @@ Server::Ptr Server::toServer(irc_session_t *s)
 	return *reinterpret_cast<Server::Ptr *>(irc_get_ctx(s));
 }
 
+Server::Channel Server::toChannel(const std::string &line)
+{
+	Channel c;
+	size_t colon;
+
+	// detect an optional channel password
+	colon = line.find_first_of(':');
+	if (colon != std::string::npos) {
+		c.m_name = line.substr(0, colon);
+		c.m_password = line.substr(colon + 1);
+	} else {
+		c.m_name = line;
+		c.m_password = "";
+	}
+
+	return c;
+}
+
 Server::Server(const Info &info,
 	       const Identity &identity,
 	       const Options &options)
 	: m_session(nullptr)
+	, m_shouldDelete(false)
 	, m_info(info)
 	, m_identity(identity)
 	, m_options(options)
@@ -432,6 +451,11 @@ Server::Server(const Info &info,
 Server::~Server()
 {
 	stopConnection();
+}
+
+bool Server::mustBeRemoved() const
+{
+	return m_shouldDelete;
 }
 
 void Server::init()
@@ -519,17 +543,10 @@ const Server::ChanList &Server::getChannels() const
 	return m_info.m_channels;
 }
 
-void Server::addChannel(const std::string &name,
-			const std::string &password)
+void Server::addChannel(const Channel &channel)
 {
-	Channel channel;
-
-	if (!hasChannel(name)) {
-		channel.m_name = name;
-		channel.m_password = password;
-
+	if (!hasChannel(channel.m_name))
 		m_info.m_channels.push_back(channel);
-	}
 }
 
 bool Server::hasChannel(const std::string &name)
@@ -632,7 +649,7 @@ void Server::startConnection()
 			    m_identity.m_username.c_str(),
 			    m_identity.m_realname.c_str());
 
-			/**
+			/*
 			 * Run over the forever loop.
 			 */
 			m_threadStarted = true;
@@ -645,7 +662,7 @@ void Server::startConnection()
 				    m_info.m_host.c_str(),
 				    irc_strerror(irc_errno(m_session)));
 
-				/**
+				/*
 				 * Value of 0 mean retry forever.
 				 */
 				if (m_options.m_maxretries > 0) {
@@ -655,22 +672,29 @@ void Server::startConnection()
 					    m_options.m_curretries < m_options.m_maxretries;
 				}
 
-				/**
+				/*
 				 * Don't show the message if the user didn't wanted
 				 * the retry mechanism.
 				 */
-				if (!shouldConnect && m_options.m_retry)
+				if (!shouldConnect && m_options.m_retry) {
 					Logger::warn("server %s: giving up",
 					    m_info.m_name.c_str());
-				else if (shouldConnect) {
+				} else if (shouldConnect) {
 					Logger::warn("server %s: retrying in %d seconds...",
 					    m_info.m_name.c_str(),
 					    m_options.m_timeout);
 					Util::usleep(m_options.m_timeout * 1000);
 				}
-			} else
+			} else {
+				m_threadStarted = false;
 				irc_disconnect(m_session);
+			}
 		}
+
+		/*
+		 * Here we are in the step that the server should be destroyed.
+		 */
+		m_shouldDelete = true;
 	};
 
 	m_thread = std::thread(command);
@@ -685,6 +709,7 @@ void Server::stopConnection()
 {
 	if (m_threadStarted) {
 		Logger::log("server %s: disconnecting...", m_info.m_name.c_str());
+		irc_disconnect(m_session);
 		m_threadStarted = false;
 		m_thread.detach();
 	}
@@ -711,7 +736,7 @@ void Server::join(const std::string &name, const std::string &password)
 		c.m_password = password;
 
 		irc_cmd_join(m_session, name.c_str(), password.c_str());
-		addChannel(name, password);
+		addChannel(c);
 	}
 }
 
