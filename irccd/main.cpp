@@ -58,10 +58,10 @@ int main(int argc, char **argv)
 			irccd.override(Options::Foreground);
 			break;
 		case 'p':
-			irccd.addPluginPath(string(optarg));
+			Plugin::addPath(string(optarg));
 			break;
 		case 'P':
-			irccd.addWantedPlugin(string(optarg));
+			irccd.deferPlugin(string(optarg));
 			break;
 		case 'v':
 			Logger::setVerbose(true);

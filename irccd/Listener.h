@@ -36,6 +36,9 @@ namespace irccd {
  *
  * This class is used to manage irccd via sockets or irccdctl. It supports
  * Unix and Internet sockets.
+ *
+ * Listeners are currently not thread safe and should only be used
+ * in the main thread.
  */
 class Listener {
 private:

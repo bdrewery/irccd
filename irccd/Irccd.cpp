@@ -43,33 +43,18 @@ namespace irccd {
 
 Irccd Irccd::m_instance;
 
-/* {{{ Private miscellaneous methods */
-
 Irccd::Irccd()
 	: m_running(true)
 	, m_foreground(false)
 {
-	Socket::init();
-
-	Logger::setVerbose(false);
-}
-
-bool Irccd::isOverriden(char c)
-{
-	return m_overriden.find(c) != m_overriden.end();
-}
-
-/* }}} */
-
-/* {{{ Private plugin management */
-
-void Irccd::loadWantedPlugins()
-{
 	std::ostringstream oss;
+
+	Socket::init();
+	Logger::setVerbose(false);
 
 	// Add user's path
 	oss << Util::pathUser() << "plugins/";
-	addPluginPath(oss.str());
+	Plugin::addPath(oss.str());
 
 	// Add system's path
 	oss.str("");
@@ -77,35 +62,13 @@ void Irccd::loadWantedPlugins()
 		oss << Util::pathBase();
 
 	oss << MODDIR << Util::DIR_SEP;
-	addPluginPath(oss.str());
-
-	// Get list of modules to load from config
-	for (const std::string &s : m_pluginWanted)
-		loadPlugin(s);
+	Plugin::addPath(oss.str());
 }
 
-bool Irccd::isPluginLoaded(const std::string &name)
+bool Irccd::isOverriden(char c)
 {
-#if defined(WITH_LUA)
-	bool ret = true;
-
-	try {
-		(void)findPlugin(name);
-	} catch (std::out_of_range ex) {
-		ret = false;
-	}
-
-	return ret;
-#else
-	(void)name;
-
-	return false;
-#endif
+	return m_overriden.find(c) != m_overriden.end();
 }
-
-/* }}} */
-
-/* {{{ Private open functions (configuration) */
 
 /*
  * Order is:
@@ -149,6 +112,11 @@ void Irccd::openConfig()
 	readIdentities(config);
 	readListeners(config);
 	readPlugins(config);
+
+	/* Now, we load plugins specified by command line */
+	for (auto s : m_wantedPlugins)
+		Plugin::load(s);
+
 	readServers(config);
 }
 
@@ -159,7 +127,7 @@ void Irccd::readGeneral(const Parser &config)
 
 		// Extract parameters that are needed for the next
 		if (general.hasOption("plugin-path"))
-			addPluginPath(general.getOption<std::string>("plugin-path"));
+			Plugin::addPath(general.getOption<std::string>("plugin-path"));
 
 		// Old way of loading plugins
 		if (general.hasOption("plugins")) {
@@ -167,7 +135,7 @@ void Irccd::readGeneral(const Parser &config)
 
 			std::string list = general.getOption<std::string>("plugins");
 			for (auto s : Util::split(list, " \t"))
-				addWantedPlugin(s);
+				Plugin::load(s);
 		}
 
 #if !defined(_WIN32)
@@ -185,17 +153,15 @@ void Irccd::readPlugins(const Parser &config)
 {
 	// New way of loading plugins
 	if (config.hasSection("plugins")) {
-		Section plugins = config.getSection("plugins");
+		Section section = config.getSection("plugins");
 
-		for (auto opt : plugins.getOptions()) {
+		for (auto opt : section.getOptions()) {
 			if (opt.m_value.length() == 0)
-				addWantedPlugin(opt.m_key);
+				Plugin::load(opt.m_key);
 			else
-				addWantedPlugin(opt.m_value, true);
+				Plugin::load(opt.m_value, false);
 		}
 	}
-
-	loadWantedPlugins();
 }
 
 void Irccd::readIdentities(const Parser &config)
@@ -344,7 +310,7 @@ void Irccd::extractUnix(const Section &s, int type)
 
 void Irccd::readServers(const Parser &config)
 {
-	config.findSections("server", [&]  (const Section &s) {
+	config.findSections("server", [&] (const Section &s) {
 		try {
 			Server::Info info;
 			Server::Options options;
@@ -383,7 +349,7 @@ void Irccd::readServers(const Parser &config)
 
 			// Extract channels to auto join
 			extractChannels(s, server);
-			m_servers.push_back(std::move(server));
+			Server::add(server);
 		} catch (NotFoundException ex) {
 			Logger::warn("server: missing parameter %s", ex.which().c_str());
 		}
@@ -403,176 +369,6 @@ void Irccd::extractChannels(const Section &section, Server::Ptr server)
 			server->addChannel(Server::toChannel(s));
 	}
 }
-
-/* }}} */
-
-/* {{{ Private server management */
-
-void Irccd::handleConnection(const IrcEvent &event)
-{
-	Server::Ptr server = event.m_server;
-
-	Logger::log("server %s: successfully connected",
-	    server->getInfo().m_name.c_str());
-
-	// Auto join channels
-	for (auto c : server->getChannels()) {
-		Logger::log("server %s: autojoining channel %s",
-		    server->getInfo().m_name.c_str(), c.m_name.c_str());
-
-		server->join(c.m_name, c.m_password);
-	}
-}
-
-void Irccd::handleInvite(const IrcEvent &event)
-{
-	Server::Ptr server = event.m_server;
-
-	// if join-invite is set to true join it
-	if (server->getOptions().m_joinInvite)
-		server->join(event.m_params[0], "");
-}
-
-void Irccd::handleKick(const IrcEvent &event)
-{
-	Server::Ptr server = event.m_server;
-
-	// If I was kicked, I need to remove the channel list
-	if (server->getIdentity().m_nickname == event.m_params[2])
-		server->removeChannel(event.m_params[0]);
-}
-
-#if defined(WITH_LUA)
-
-void Irccd::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
-{
-	switch (ev.m_type) {
-	case IrcEventType::Connection:
-		p->onConnect(ev.m_server);
-		break;
-	case IrcEventType::ChannelNotice:
-		p->onChannelNotice(ev.m_server, ev.m_params[0], ev.m_params[1],
-		    ev.m_params[2]);
-		break;
-	case IrcEventType::Invite:
-		p->onInvite(ev.m_server, ev.m_params[0], ev.m_params[1]);
-		break;
-	case IrcEventType::Join:
-		p->onJoin(ev.m_server, ev.m_params[0], ev.m_params[1]);
-		break;
-	case IrcEventType::Kick:
-		p->onKick(ev.m_server, ev.m_params[0], ev.m_params[1],
-		    ev.m_params[2], ev.m_params[3]);
-		break;
-	case IrcEventType::Message:
-	{
-		std::string cc = ev.m_server->getOptions().m_commandChar;
-		std::string sp = cc + p->getName();
-		std::string msg = ev.m_params[2];
-
-		// handle special commands "!<plugin> command"
-		if (cc.length() > 0 && msg.compare(0, sp.length(), sp) == 0) {
-			std::string plugin = msg.substr(
-			    cc.length(), sp.length() - cc.length());
-
-			if (plugin == p->getName()) {
-				p->onCommand(ev.m_server,
-						ev.m_params[0],
-						ev.m_params[1],
-						msg.substr(sp.length())
-				);
-			}
-		} else
-			p->onMessage(ev.m_server, ev.m_params[0], ev.m_params[1],
-			    ev.m_params[2]);
-	}
-		break;
-	case IrcEventType::Me:
-		p->onMe(ev.m_server, ev.m_params[1], ev.m_params[0], ev.m_params[2]);
-		break;
-	case IrcEventType::Mode:
-		p->onMode(ev.m_server, ev.m_params[0], ev.m_params[1],
-		    ev.m_params[2], ev.m_params[3]);
-		break;
-	case IrcEventType::Nick:
-		p->onNick(ev.m_server, ev.m_params[0], ev.m_params[1]);
-		break;
-	case IrcEventType::Notice:
-		p->onNotice(ev.m_server, ev.m_params[0], ev.m_params[1],
-		    ev.m_params[2]);
-		break;
-	case IrcEventType::Part:
-		p->onPart(ev.m_server, ev.m_params[0], ev.m_params[1],
-		    ev.m_params[2]);
-		break;
-	case IrcEventType::Query:
-		p->onQuery(ev.m_server, ev.m_params[0], ev.m_params[1]);
-		break;
-	case IrcEventType::Topic:
-		p->onTopic(ev.m_server, ev.m_params[0], ev.m_params[1],
-		     ev.m_params[2]);
-		break;
-	case IrcEventType::UserMode:
-		p->onUserMode(ev.m_server, ev.m_params[0], ev.m_params[1]);
-		break;
-	default:
-		break;
-	}
-}
-
-void Irccd::callDeferred(const IrcEvent &ev)
-{
-	// Check if we have deferred call for this server
-	if (m_deferred.find(ev.m_server) == m_deferred.end())
-		return;
-
-	std::vector<DefCall>::iterator it = m_deferred[ev.m_server].begin();
-
-	for (; it != m_deferred[ev.m_server].end(); ) {
-		bool deleteIt = true;
-
-		if (ev.m_type == it->type()) {
-			switch (it->type()) {
-			case IrcEventType::Names:
-				it->onNames(ev.m_params);
-				break;
-			case IrcEventType::Whois:
-				it->onWhois(ev.m_params);
-				break;
-			default:
-				deleteIt = false;
-				break;
-			}
-		} else
-			deleteIt = false;
-
-		/*
-		 * If found and executed, break the loop if not, we will
-		 * call multiple times for the same event.
-		 */
-		if (deleteIt) {
-			it = m_deferred[ev.m_server].erase(it);
-			break;
-		} else
-			++it;
-	}
-}
-
-void Irccd::removeServer(Server::Ptr sv)
-{
-	Lock lk(m_serverLock);
-
-	if (sv->mustBeRemoved()) {
-		sv->stopConnection();
-		m_servers.erase(
-		    std::remove(m_servers.begin(), m_servers.end(), sv)
-		);
-	}
-}
-
-/* }}} */
-
-/* {{{ Public constructor, destructor and miscellaneous methods */
 
 Irccd::~Irccd()
 {
@@ -599,6 +395,11 @@ void Irccd::setForeground(bool mode)
 	m_foreground = mode;
 }
 
+void Irccd::deferPlugin(const std::string &name)
+{
+	m_wantedPlugins.push_back(name);
+}
+
 const Server::Identity &Irccd::findIdentity(const std::string &name)
 {
 	/*
@@ -618,306 +419,9 @@ const Server::Identity &Irccd::findIdentity(const std::string &name)
 	return m_defaultIdentity;
 }
 
-/* }}} */
-
-/* {{{ Public Plugin management */
-
-void Irccd::addPluginPath(const std::string &path)
-{
-	m_pluginDirs.push_back(path);
-}
-
-void Irccd::addWantedPlugin(const std::string &name, bool specified)
-{
-	m_pluginWanted.push_back(name);
-
-	if (specified)
-		m_pluginSpecified[name] = true;
-}
-
-void Irccd::loadPlugin(const std::string &name)
-{
-#if defined(WITH_LUA)
-	std::ostringstream oss;
-	std::string realname, realpath;
-	bool found = false;
-
-	if (isPluginLoaded(name))
-		return;
-
-	/*
-	 * If the plugin has been specified by path using foo = /path then
-	 * it should contains the .lua extension, otherwise we search
-	 * for it.
-	 */
-	if (m_pluginSpecified.count(name) >= 1) {
-		Logger::log("irccd: checking for plugin %s", name.c_str());
-		found = Util::exist(name);
-
-		/*
-		 * Compute the name by removing .lua extension and optional
-		 * directory.
-		 */
-		realpath = name;
-		realname = Util::baseName(realpath);
-
-		auto pos = realname.find(".lua");
-		if (pos != std::string::npos)
-			realname.erase(pos);
-	} else {
-		realname = name;
-
-		// Seek the plugin in the directories.
-		for (auto p : m_pluginDirs) {
-			oss.str("");
-			oss << p;
-
-			// Add a / or \\ only if needed
-			if (p.length() > 0 && p[p.length() - 1] != Util::DIR_SEP)
-				oss << Util::DIR_SEP;
-
-			oss << name << ".lua";
-
-			realpath = oss.str();
-			Logger::log("irccd: checking for plugin %s", realpath.c_str());
-
-			if (Util::exist(realpath)) {
-				found = true;
-				break;
-			}
-		}
-	}
-
-	if (!found)
-		Logger::warn("irccd: plugin %s not found", realname.c_str());
-	else {
-		/*
-		 * At this step, the open function will open the lua
-		 * script, that script may want to call some bindings
-		 * directly so we need to add it to the registered
-		 * Lua plugins even if it has failed. So we remove
-		 * it only on failure and expect plugins to be well
-		 * coded.
-		 */
-		m_pluginLock.lock();
-		Plugin *p = new Plugin(realname, realpath);
-
-		m_pluginMap[p->getState()] = Plugin::Ptr(p);
-		m_pluginLock.unlock();
-
-		if (!p->open()) {
-			Logger::warn("irccd: failed to load plugin %s: %s",
-			    realname.c_str(), p->getError().c_str());
-
-			m_pluginLock.lock();
-			m_pluginMap.erase(p->getState());
-			m_pluginLock.unlock();
-		}
-	}
-#else
-	Logger::warn("irccd: can't load plugin %s, Lua support disabled", name.c_str());
-#endif
-}
-
-void Irccd::unloadPlugin(const std::string &name)
-{
-#if defined(WITH_LUA)
-	m_pluginLock.lock();
-
-	try {
-		auto i = findPlugin(name);
-
-		try {
-			i->onUnload();
-		} catch (Plugin::ErrorException ex) {
-			Logger::warn("irccd: error while unloading %s: %s",
-			    name.c_str(), ex.what());
-		}
-
-		m_pluginMap.erase(i->getState());
-	} catch (std::out_of_range) {
-		Logger::warn("irccd: there is no plugin %s loaded", name.c_str());
-	}
-
-	m_pluginLock.unlock();
-#else
-	Logger::warn("irccd: can't unload plugin %s, Lua support disabled", name.c_str());
-#endif
-}
-
-void Irccd::reloadPlugin(const std::string &name)
-{
-#if defined(WITH_LUA)
-	try {
-		findPlugin(name)->onReload();
-	} catch (std::out_of_range ex) {
-		Logger::warn("irccd: %s", ex.what());
-	}
-#else
-	Logger::warn("irccd: can't reload plugin %s, Lua support disabled", name.c_str());
-#endif
-}
-
-#if defined(WITH_LUA)
-
-Plugin::Ptr Irccd::findPlugin(lua_State *state)
-{
-	for (auto plugin : m_pluginMap) {
-		/*
-		 * Test if the current plugin is the one with that
-		 * Lua state.
-		 */
-		if (plugin.first == state)
-			return plugin.second;
-	}
-
-	for (auto plugin : m_threadMap) {
-		if (plugin.first == state)
-			return plugin.second;
-	}
-
-	throw std::out_of_range("plugin not found");
-}
-
-Plugin::Ptr Irccd::findPlugin(const std::string &name)
-{
-	using type = std::pair<lua_State *, Plugin::Ptr>;
-
-	std::ostringstream oss;
-
-	auto i = std::find_if(m_pluginMap.begin(), m_pluginMap.end(),
-	    [&] (type p) -> bool {
-		return p.second->getName() == name;
-	    }
-	);
-
-	if (i == m_pluginMap.end()) {
-		oss << "plugin " << name << " not found";
-
-		throw std::out_of_range(oss.str());
-	}
-
-	return (*i).second;
-}
-
-void Irccd::addDeferred(Server::Ptr server, DefCall call)
-{
-	m_deferred[server].push_back(call);
-}
-
-void Irccd::registerThread(lua_State *L, Plugin::Ptr plugin)
-{
-	RLock lk(m_pluginLock);
-
-	m_threadMap[L] = plugin;
-}
-
-void Irccd::unregisterThread(lua_State *L)
-{
-	RLock lk(m_pluginLock);
-
-	m_threadMap.erase(L);
-}
-
-#endif
-
-/* }}} */
-	
-/* {{{ Public Server management */
-
-void Irccd::connectServer(const Server::Info &info,
-			  const Server::Identity &identity,
-			  const Server::Options &options)
-{
-	Lock lk(m_serverLock);
-
-	Server::Ptr server = std::make_shared<Server>(info, identity, options);	
-	//server->startConnection();
-
-	m_servers.push_back(std::move(server));
-}
-
-ServerList &Irccd::getServers()
-{
-	return m_servers;
-}
-
-Server::Ptr Irccd::findServer(const std::string &name)
-{
-	Lock lk(m_serverLock);
-
-	for (auto s : m_servers)
-		if (s->getInfo().m_name == name)
-			return s;
-
-	throw std::out_of_range("could not find server with resource " + name);
-}
-
-void Irccd::handleIrcEvent(const IrcEvent &ev)
-{
-	/*
-	 * The following function does not call plugin at all, they just do some
-	 * specific action like joining, managing channels, etc.
-	 */
-	if (ev.m_type == IrcEventType::Connection)
-		handleConnection(ev);
-	else if (ev.m_type == IrcEventType::Invite)
-		handleInvite(ev);
-	else if (ev.m_type == IrcEventType::Kick)
-		handleKick(ev);
-
-#if defined(WITH_LUA)
-	RLock lk(m_pluginLock);
-
-	/**
-	 * This is the handle of deferred calls, they are not handled in the
-	 * next callPlugin block.
-	 */
-	try {
-		if (ev.m_type == IrcEventType::Names ||
-		    ev.m_type == IrcEventType::Whois)
-			callDeferred(ev);
-	} catch (Plugin::ErrorException ex) {
-		Logger::warn("plugin %s: %s", ex.which().c_str(), ex.what());
-	}
-
-	for (auto p : m_pluginMap) {
-		/*
-		 * Ignore Lua threads that share the same Plugin
-		 * object.
-		 */
-		if (m_threadMap.find(p.first) != m_threadMap.end())
-			continue;
-
-		try {
-			callPlugin(p.second, ev);
-		} catch (Plugin::ErrorException ex) {
-			Logger::warn("plugin %s: %s",
-			    p.second->getName().c_str(), ex.what());
-		}
-	}
-#endif
-}
-
-/* }}} */
-
-/* {{{ Irccd management */
-
 int Irccd::run()
 {
 	openConfig();
-
-	if (m_servers.size() <= 0) {
-		Logger::warn("irccd: no server defined, exiting");
-		return 1;
-	}
-
-	// Start all servers
-	for (auto s : m_servers) {
-		Logger::log("server %s: trying to connect to %s...",
-		    s->getInfo().m_name.c_str(), s->getInfo().m_host.c_str());
-		s->startConnection();
-	}
 
 	while (m_running) {
 		/*
@@ -930,12 +434,6 @@ int Irccd::run()
 			Util::usleep(250);
 		else
 			Listener::process();
-
-		/*
-		 * Remove useless servers or dead servers.
-		 */
-		for (auto s : m_servers)
-			removeServer(s);
 	}
 
 	return 0;
@@ -945,14 +443,11 @@ void Irccd::stop()
 {
 	m_running = false;
 
-	for (auto s : m_servers)
-		s->stopConnection();
+	Server::forAll([] (Server::Ptr s) {
+	    s->stopConnection();
+	});
 
 	Listener::close();
 }
 
-/* }}} */
-
 } // !irccd
-
-#endif

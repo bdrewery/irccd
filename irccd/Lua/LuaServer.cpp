@@ -20,6 +20,7 @@
 #include <sstream>
 
 #include "Irccd.h"
+#include "DefCall.h"
 #include "LuaServer.h"
 
 namespace irccd {
@@ -190,16 +191,13 @@ int serverNames(lua_State *L)
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 
 	try {
-		Plugin::Ptr p = Irccd::getInstance().findPlugin(L);
+		Plugin::Ptr p = Plugin::find(L);
 
 		// Get the function reference.
 		lua_pushvalue(L, 3);
 		ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-		Irccd::getInstance().addDeferred(
-		    s, DefCall(IrcEventType::Names, p, ref)
-		);
-
+		Plugin::defer(s, DefCall(IrcEventType::Names, p, ref));
 		s->names(channel);
 	} catch (std::out_of_range) { }
 
@@ -300,15 +298,13 @@ int serverWhois(lua_State *L)
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 
 	try {
-		Plugin::Ptr p = Irccd::getInstance().findPlugin(L);
+		Plugin::Ptr p = Plugin::find(L);
 
 		// Get the function reference.
 		lua_pushvalue(L, 3);
 		ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-		Irccd::getInstance().addDeferred(
-		    s, DefCall(IrcEventType::Whois, p, ref)
-		);
+		Plugin::defer(s, DefCall(IrcEventType::Whois, p, ref));
 
 		s->whois(target);
 	} catch (std::out_of_range) { }
@@ -390,7 +386,7 @@ int l_find(lua_State *L)
 	int ret;
 
 	try {
-		Server::Ptr server = Irccd::getInstance().findServer(name);
+		Server::Ptr server = Server::get(name);
 
 		Luae::pushShared<Server>(L, server, ServerType);
 
@@ -428,7 +424,7 @@ int l_connect(lua_State *L)
 	}
 #endif
 
-	Irccd::getInstance().connectServer(info, ident, options);
+	//Irccd::getInstance().connectServer(info, ident, options);
 
 	return 0;
 }

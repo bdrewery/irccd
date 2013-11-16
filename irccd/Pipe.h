@@ -83,14 +83,14 @@ public:
 	 *
 	 * @return the first value
 	 */
-	const LuaValue &first();
+	LuaValue first();
 
 	/**
 	 * Get the last value.
 	 *
 	 * @return the last value
 	 */
-	const LuaValue &last();
+	LuaValue last();
 
 	/**
 	 * Completely clear the queue.

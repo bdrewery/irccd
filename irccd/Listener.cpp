@@ -54,12 +54,12 @@ struct ClientHandler {
 
 void handleChannelNotice(const std::vector<std::string> &params)
 {
-	Irccd::getInstance().findServer(params[0])->cnotice(params[1], params[2]);
+	Server::get(params[0])->cnotice(params[1], params[2]);
 }
 
 void handleInvite(const std::vector<std::string> &params)
 {
-	Irccd::getInstance().findServer(params[0])->invite(params[1], params[2]);
+	Server::get(params[0])->invite(params[1], params[2]);
 }
 
 void handleJoin(const std::vector<std::string> &params)
@@ -68,7 +68,7 @@ void handleJoin(const std::vector<std::string> &params)
 	if (params.size() == 3)
 		password = params[2];
 
-	Irccd::getInstance().findServer(params[0])->join(params[1], password);
+	Server::get(params[0])->join(params[1], password);
 }
 
 void handleKick(const std::vector<std::string> &params)
@@ -77,62 +77,62 @@ void handleKick(const std::vector<std::string> &params)
 	if (params.size() == 4)
 		reason = params[3];
 
-	Irccd::getInstance().findServer(params[0])->kick(params[1], params[2], reason);
+	Server::get(params[0])->kick(params[1], params[2], reason);
 }
 
 void handleLoad(const std::vector<std::string> &params)
 {
-	Irccd::getInstance().loadPlugin(params[0]);
+	Plugin::load(params[0]);
 }
 
 void handleMe(const std::vector<std::string> &params)
 {
-	Irccd::getInstance().findServer(params[0])->me(params[1], params[2]);
+	Server::get(params[0])->me(params[1], params[2]);
 }
 
 void handleMessage(const std::vector<std::string> &params)
 {
-	Irccd::getInstance().findServer(params[0])->say(params[1], params[2]);
+	Server::get(params[0])->say(params[1], params[2]);
 }
 
 void handleMode(const std::vector<std::string> &params)
 {
-	Irccd::getInstance().findServer(params[0])->mode(params[1], params[2]);
+	Server::get(params[0])->mode(params[1], params[2]);
 }
 
 void handleNick(const std::vector<std::string> &params)
 {
-	Irccd::getInstance().findServer(params[0])->nick(params[1]);
+	Server::get(params[0])->nick(params[1]);
 }
 
 void handleNotice(const std::vector<std::string> &params)
 {
-	Irccd::getInstance().findServer(params[0])->notice(params[1], params[2]);
+	Server::get(params[0])->notice(params[1], params[2]);
 }
 
 void handlePart(const std::vector<std::string> &params)
 {
-	Irccd::getInstance().findServer(params[0])->part(params[1]);
+	Server::get(params[0])->part(params[1]);
 }
 
 void handleReload(const std::vector<std::string> &params)
 {
-	Irccd::getInstance().reloadPlugin(params[0]);
+	Plugin::reload(params[0]);
 }
 
 void handleTopic(const std::vector<std::string> &params)
 {
-	Irccd::getInstance().findServer(params[0])->topic(params[1], params[2]);
+	Server::get(params[0])->topic(params[1], params[2]);
 }
 
 void handleUnload(const std::vector<std::string> &params)
 {
-	Irccd::getInstance().unloadPlugin(params[0]);
+	Plugin::unload(params[0]);
 }
 
 void handleUserMode(const std::vector<std::string> &params)
 {
-	Irccd::getInstance().findServer(params[0])->umode(params[1]);
+	Server::get(params[0])->umode(params[1]);
 }
 
 std::unordered_map<std::string, ClientHandler> handlers {
@@ -328,7 +328,7 @@ void Listener::process()
 			peerRead(s);
 	} catch (SocketError er) {
 		Logger::warn("listener: socket error %s", er.what());
-	}
+	} catch (SocketTimeout) { }
 }
 
 void Listener::close()

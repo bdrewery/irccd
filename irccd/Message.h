@@ -37,7 +37,7 @@ public:
 	/**
 	 * Default constructor.
 	 */
-	Message();
+	Message() = default;
 
 	/**
 	 * Copy constructor.

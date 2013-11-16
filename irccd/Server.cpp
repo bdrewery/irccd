@@ -54,7 +54,7 @@ void handleChannel(irc_session_t *s,
 	evparams.push_back((orig == nullptr) ? "" : orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance().handleIrcEvent(
+	Plugin::handleIrcEvent(
 	    IrcEvent(IrcEventType::Message, evparams, server)
 	);
 }
@@ -72,7 +72,7 @@ void handleChannelNotice(irc_session_t *s,
 	evparams.push_back(params[0]);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance().handleIrcEvent(
+	Plugin::handleIrcEvent(
 	    IrcEvent(IrcEventType::ChannelNotice, evparams, server)
 	);
 }
@@ -86,7 +86,18 @@ void handleConnect(irc_session_t *s,
 	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
-	Irccd::getInstance().handleIrcEvent(
+	Logger::log("server %s: successfully connected",
+	    server->getInfo().m_name.c_str());
+
+	// Auto join channels
+	for (auto c : server->getChannels()) {
+		Logger::log("server %s: autojoining channel %s",
+		    server->getInfo().m_name.c_str(), c.m_name.c_str());
+
+		server->join(c.m_name, c.m_password);
+	}
+
+	Plugin::handleIrcEvent(
 	    IrcEvent(IrcEventType::Connection, evparams, server)
 	);
 
@@ -106,7 +117,7 @@ void handleCtcpAction(irc_session_t *s,
 	evparams.push_back(params[0]);
 	evparams.push_back(params[1]);
 
-	Irccd::getInstance().handleIrcEvent(
+	Plugin::handleIrcEvent(
 	    IrcEvent(IrcEventType::Me, evparams, server)
 	);
 }
@@ -120,10 +131,14 @@ void handleInvite(irc_session_t *s,
 	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
+	// if join-invite is set to true join it
+	if (server->getOptions().m_joinInvite)
+		server->join(params[0], "");
+
 	evparams.push_back(params[1]);
 	evparams.push_back(orig);
 
-	Irccd::getInstance().handleIrcEvent(
+	Plugin::handleIrcEvent(
 	    IrcEvent(IrcEventType::Invite, evparams, server)
 	);
 }
@@ -140,7 +155,7 @@ void handleJoin(irc_session_t *s,
 	evparams.push_back(params[0]);
 	evparams.push_back(orig);
 
-	Irccd::getInstance().handleIrcEvent(
+	Plugin::handleIrcEvent(
 	    IrcEvent(IrcEventType::Join, evparams, server)
 	);
 }
@@ -154,12 +169,16 @@ void handleKick(irc_session_t *s,
 	Server::Ptr server = Server::toServer(s);
 	IrcEventParams evparams;
 
+	// If I was kicked, I need to remove the channel list
+	if (server->getIdentity().m_nickname == params[1])
+		server->removeChannel(params[0]);
+
 	evparams.push_back(params[0]);
 	evparams.push_back(orig);
 	evparams.push_back(params[1]);
 	evparams.push_back((params[2] == nullptr) ? "" : params[2]);
 
-	Irccd::getInstance().handleIrcEvent(
+	Plugin::handleIrcEvent(
 	    IrcEvent(IrcEventType::Kick, evparams, server)
 	);
 }
@@ -178,7 +197,7 @@ void handleMode(irc_session_t *s,
 	evparams.push_back(params[1]);
 	evparams.push_back((params[2] == nullptr) ? "" : params[2]);
 
-	Irccd::getInstance().handleIrcEvent(
+	Plugin::handleIrcEvent(
 	    IrcEvent(IrcEventType::Mode, evparams, server)
 	);
 }
@@ -190,12 +209,16 @@ void handleNick(irc_session_t *s,
 		unsigned int)
 {
 	Server::Ptr server = Server::toServer(s);
+	Server::Identity &id = server->getIdentity();
 	IrcEventParams evparams;
+
+	if (id.m_nickname == std::string(orig))
+		id.m_nickname = std::string(orig);
 
 	evparams.push_back(orig);
 	evparams.push_back(params[0]);
 
-	Irccd::getInstance().handleIrcEvent(
+	Plugin::handleIrcEvent(
 	    IrcEvent(IrcEventType::Nick, evparams, server)
 	);
 }
@@ -213,7 +236,7 @@ void handleNotice(irc_session_t *s,
 	evparams.push_back(params[0]);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance().handleIrcEvent(
+	Plugin::handleIrcEvent(
 	    IrcEvent(IrcEventType::Notice, evparams, server)
 	);
 }
@@ -244,8 +267,8 @@ void handleNumeric(irc_session_t *s,
 		Server::NameList &list = server->getNameLists();
 
 		if (params[1] != nullptr) {
-			Irccd::getInstance().handleIrcEvent(
-				IrcEvent(IrcEventType::Names, list[params[1]], server)
+			Plugin::handleIrcEvent(
+			    IrcEvent(IrcEventType::Names, list[params[1]], server)
 			);
 		}
 
@@ -281,8 +304,8 @@ void handleNumeric(irc_session_t *s,
 		for (size_t i = 0; i < info.channels.size(); ++i)
 			params.push_back(info.channels[i]);
 
-		Irccd::getInstance().handleIrcEvent(
-			IrcEvent(IrcEventType::Whois, params, server)
+		Plugin::handleIrcEvent(
+		    IrcEvent(IrcEventType::Whois, params, server)
 		);
 	}
 
@@ -308,13 +331,20 @@ void handlePart(irc_session_t *s,
 		unsigned int)
 {
 	Server::Ptr server = Server::toServer(s);
+	Server::Identity id = server->getIdentity();
+	std::string who;
 	IrcEventParams evparams;
+
+	printf("who part = %s\n", orig);
+
+	if (id.m_nickname == who)
+		server->removeChannel(params[0]);
 
 	evparams.push_back(params[0]);
 	evparams.push_back(orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance().handleIrcEvent(
+	Plugin::handleIrcEvent(
 	    IrcEvent(IrcEventType::Part, evparams, server)
 	);
 }
@@ -331,7 +361,7 @@ void handleQuery(irc_session_t *s,
 	evparams.push_back(orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance().handleIrcEvent(
+	Plugin::handleIrcEvent(
 	    IrcEvent(IrcEventType::Query, evparams, server)
 	);
 }
@@ -349,7 +379,7 @@ void handleTopic(irc_session_t *s,
 	evparams.push_back(orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Irccd::getInstance().handleIrcEvent(
+	Plugin::handleIrcEvent(
 	    IrcEvent(IrcEventType::Topic, evparams, server)
 	);
 }
@@ -366,7 +396,7 @@ void handleUserMode(irc_session_t *s,
 	evparams.push_back(orig);
 	evparams.push_back(params[0]);
 
-	Irccd::getInstance().handleIrcEvent(
+	Plugin::handleIrcEvent(
 	    IrcEvent(IrcEventType::UserMode, evparams, server)
 	);
 }
@@ -412,6 +442,45 @@ IrcSession::operator irc_session_t *()
 /* --------------------------------------------------------
  * Server
  * -------------------------------------------------------- */
+
+Server::List Server::servers;
+Server::Mutex Server::serverLock;
+
+void Server::add(Server::Ptr server)
+{
+	Lock lk(serverLock);
+
+	servers[server->getInfo().m_name] = server;
+	server->startConnection();
+
+ 	Logger::log("server %s: connecting...",
+ 	    server->getInfo().m_name.c_str());
+}
+
+Server::Ptr Server::get(const std::string &name)
+{
+	Lock lk(serverLock);
+
+	return servers.at(name);
+}
+
+void Server::forAll(MapFunc func)
+{
+	Lock lk(serverLock);
+
+	for (auto s : servers)
+		func(s.second);
+}
+
+void Server::remove(Server::Ptr sv)
+{
+	Lock lk(serverLock);
+
+	if (sv->mustBeRemoved()) {
+		sv->stopConnection();
+		servers.erase(sv->getInfo().m_name);
+	}
+}
 
 Server::Ptr Server::toServer(irc_session_t *s)
 {
@@ -523,17 +592,17 @@ Server::WhoisList &Server::getWhoisLists()
 	return m_whoisLists;
 }
 
-const Server::Info &Server::getInfo() const
+Server::Info &Server::getInfo()
 {
 	return m_info;
 }
 
-const Server::Identity &Server::getIdentity() const
+Server::Identity &Server::getIdentity()
 {
 	return m_identity;
 }
 
-const Server::Options &Server::getOptions() const
+Server::Options &Server::getOptions()
 {
 	return m_options;
 }
@@ -558,7 +627,7 @@ bool Server::hasChannel(const std::string &name)
 	return false;
 }
 
-bool Server::hasPrefix(const std::string &nickname)
+bool Server::hasPrefix(const std::string &nickname) const
 {
 	if (nickname.length() == 0)
 		return false;
@@ -573,6 +642,8 @@ bool Server::hasPrefix(const std::string &nickname)
 
 void Server::removeChannel(const std::string &name)
 {
+	Lock lk(m_lock);
+
 	std::vector<Channel>::iterator iter;
 	bool found = false;
 
@@ -589,6 +660,8 @@ void Server::removeChannel(const std::string &name)
 
 void Server::startConnection()
 {
+	Lock lk(m_lock);
+
 	auto command = [&] () {
 		bool shouldConnect;
 
@@ -702,46 +775,54 @@ void Server::startConnection()
 
 void Server::resetRetries()
 {
+	Lock lk(m_lock);
+
 	m_options.m_curretries = 0;
 }
 
 void Server::stopConnection()
 {
+	Lock lk(m_lock);
+
 	if (m_threadStarted) {
 		Logger::log("server %s: disconnecting...", m_info.m_name.c_str());
 		irc_disconnect(m_session);
 		m_threadStarted = false;
-		m_thread.detach();
+
+		try {
+			m_thread.join();
+		} catch (std::system_error er) { }
 	}
 }
 
 void Server::cnotice(const std::string &channel, const std::string &message)
 {
+	Lock lk(m_lock);
+
 	if (m_threadStarted && channel[0] == '#')
 		irc_cmd_notice(m_session, channel.c_str(), message.c_str());
 }
 
 void Server::invite(const std::string &target, const std::string &channel)
 {
+	Lock lk(m_lock);
+
 	if (m_threadStarted)
 		irc_cmd_invite(m_session, target.c_str(), channel.c_str());
 }
 
 void Server::join(const std::string &name, const std::string &password)
 {
-	if (m_threadStarted) {
-		Channel c;
+	Lock lk(m_lock);
 
-		c.m_name = name;
-		c.m_password = password;
-
+	if (m_threadStarted)
 		irc_cmd_join(m_session, name.c_str(), password.c_str());
-		addChannel(c);
-	}
 }
 
 void Server::kick(const std::string &name, const std::string &channel, const std::string &reason)
 {
+	Lock lk(m_lock);
+
 	if (m_threadStarted)
 		irc_cmd_kick(m_session, name.c_str(), channel.c_str(),
 		    (reason.length() == 0) ? nullptr : reason.c_str());
@@ -749,47 +830,56 @@ void Server::kick(const std::string &name, const std::string &channel, const std
 
 void Server::me(const std::string &target, const std::string &message)
 {
+	Lock lk(m_lock);
+
 	if (m_threadStarted)
 		irc_cmd_me(m_session, target.c_str(), message.c_str());
 }
 
 void Server::mode(const std::string &channel, const std::string &mode)
 {
+	Lock lk(m_lock);
+
 	if (m_threadStarted)
 		irc_cmd_channel_mode(m_session, channel.c_str(), mode.c_str());
 }
 
 void Server::names(const std::string &channel)
 {
+	Lock lk(m_lock);
+
 	if (m_threadStarted)
 		irc_cmd_names(m_session, channel.c_str());
 }
 
 void Server::nick(const std::string &nick)
 {
+	Lock lk(m_lock);
+
 	if (m_threadStarted)
 		irc_cmd_nick(m_session, nick.c_str());
-
-	// Don't forget to change our own name
-	m_identity.m_nickname = nick;
 }
 
 void Server::notice(const std::string &nickname, const std::string &message)
 {
+	Lock lk(m_lock);
+
 	if (m_threadStarted && nickname[0] != '#')
 		irc_cmd_notice(m_session, nickname.c_str(), message.c_str());
 }
 
 void Server::part(const std::string &channel)
 {
-	if (m_threadStarted) {
+	Lock lk(m_lock);
+
+	if (m_threadStarted)
 		irc_cmd_part(m_session, channel.c_str());
-		removeChannel(channel);
-	}
 }
 
 void Server::query(const std::string &who, const std::string &message)
 {
+	Lock lk(m_lock);
+
 	// Do not write to public channel
 	if (m_threadStarted && who[0] != '#')
 		irc_cmd_msg(m_session, who.c_str(), message.c_str());
@@ -797,30 +887,40 @@ void Server::query(const std::string &who, const std::string &message)
 
 void Server::say(const std::string &target, const std::string &message)
 {
+	Lock lk(m_lock);
+
 	if (m_threadStarted)
 		irc_cmd_msg(m_session, target.c_str(), message.c_str());
 }
 
 void Server::sendRaw(const std::string &msg)
 {
+	Lock lk(m_lock);
+
 	if (m_threadStarted)
 		irc_send_raw(m_session, "%s", msg.c_str());
 }
 
 void Server::topic(const std::string &channel, const std::string &topic)
 {
+	Lock lk(m_lock);
+
 	if (m_threadStarted)
 		irc_cmd_topic(m_session, channel.c_str(), topic.c_str());
 }
 
 void Server::umode(const std::string &mode)
 {
+	Lock lk(m_lock);
+
 	if (m_threadStarted)
 		irc_cmd_user_mode(m_session, mode.c_str());
 }
 
 void Server::whois(const std::string &target)
 {
+	Lock lk(m_lock);
+
 	if (m_threadStarted)
 		irc_cmd_whois(m_session, target.c_str());
 }

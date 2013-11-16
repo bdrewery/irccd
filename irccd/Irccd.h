@@ -29,7 +29,6 @@
 #include "Server.h"
 
 #if defined(WITH_LUA)
-#  include "DefCall.h"
 #  include "Plugin.h"
 #endif
 
@@ -47,44 +46,14 @@ enum Options {
 	PluginWanted	= 'P'
 };
 
-#if defined(WITH_LUA)
-
-using PluginMap		= std::unordered_map<
-				lua_State *,
-				Plugin::Ptr
-			  >;
-
-using PluginList	= std::vector<
-				Plugin::Ptr
-			  >;
-
 using IdentityList	= std::vector<
 				Server::Identity
 			  >;
 
-using ThreadMap		= std::unordered_map<
-				lua_State *,
-				Plugin::Ptr
-			  >;
-
-using DefCallList	= std::unordered_map<
-				Server::Ptr,
-				std::vector<DefCall>
-			  >;
-
 using Lock		= std::lock_guard<std::mutex>;
-using RLock		= std::lock_guard<std::recursive_mutex>;
-
-using ServerList	= std::vector<Server::Ptr>;
-
-#endif
 
 class Irccd {
 private:
-	using PluginDirs		= std::vector<std::string>;
-	using PluginList		= std::vector<std::string>;
-	using PluginSpecifiedMap	= std::unordered_map<std::string, bool>;
-
 	static Irccd m_instance;			//! unique instance
 
 	// Ignition
@@ -99,39 +68,15 @@ private:
 	IdentityList m_identities;			//! user identities
 	Server::Identity m_defaultIdentity;		//! default identity
 
-	// Plugins
-	PluginDirs m_pluginDirs;			//! list of plugin directories
-	PluginList m_pluginWanted;			//! list of wanted modules
-	PluginSpecifiedMap m_pluginSpecified;		//! list of plugin specified by paths
+	/*
+	 * Plugin specified by commands line that should be
+	 * loaded after initialization.
+	 */
+	std::vector<std::string> m_wantedPlugins;
 
-#if defined(WITH_LUA)
-	std::recursive_mutex m_pluginLock;		//! lock to add plugin
-	PluginMap m_pluginMap;				//! map of plugins loaded
-	ThreadMap m_threadMap;				//! map of threads
-	DefCallList m_deferred;				//! list of deferred call
-#endif
-
-	ServerList m_servers;				//! list of servers
-	std::mutex m_serverLock;			//! lock for managing servers
-
-
-	/* {{{ Private miscellaneous methods */
-	
 	Irccd();
 
 	bool isOverriden(char c);
-
-	/* }}} */
-
-
-	/* {{{ Private plugin management */
-
-	void loadWantedPlugins();
-	bool isPluginLoaded(const std::string &name);
-
-	/* }}} */
-
-	/* {{{ Private open functions (configuration) */
 
 	/*
 	 * Open will call the below function in the same order they are
@@ -152,26 +97,7 @@ private:
 	void readServers(const Parser &config);
 	void extractChannels(const Section &section, Server::Ptr server);
 
-	/* }}} */
-
-	/* {{{ Private server management */
-
-	void handleConnection(const IrcEvent &event);
-	void handleInvite(const IrcEvent &event);
-	void handleKick(const IrcEvent &event);
-
-#if defined(WITH_LUA)
-	void callPlugin(std::shared_ptr<Plugin> p, const IrcEvent &ev);
-	void callDeferred(const IrcEvent &ev);
-#endif
-
-	void removeServer(Server::Ptr sv);
-
-	/* }}} */
-
 public:
-	/* {{{ Public constructor, destructor and miscellaneous methods */
-
 	~Irccd();
 
 	/**
@@ -203,140 +129,20 @@ public:
 	void setForeground(bool mode);
 
 	/**
+	 * Only for command line, defer a plugin to be load after the
+	 * configuration file load.
+	 *
+	 * @param name the name
+	 */
+	void deferPlugin(const std::string &name);
+
+	/**
 	 * Find an identity.
 	 *
 	 * @param name the identity's resource name.
 	 * @return an identity or the default one
 	 */
 	const Server::Identity &findIdentity(const std::string &name);
-
-	/* }}} */
-
-	/* {{{ Public Plugin management */
-
-	/**
-	 * Add a plugin path to find other plugins.
-	 *
-	 * @param path the directory path
-	 */
-	void addPluginPath(const std::string &path);
-
-	/**
-	 * Request for loading the plugin. If specified is set to true
-	 * then the name is the full path to the plugin otherwise, it is
-	 * searched.
-	 *
-	 * @param name the plugin name or path
-	 * @param bool is specified by path?
-	 */
-	void addWantedPlugin(const std::string &name, bool specified = false);
-
-	/**
-	 * Load a plugin externally, used for irccdctl.
-	 *
-	 * @param name the plugin name to load
-	 */
-	void loadPlugin(const std::string &name);
-
-	/**
-	 * Unload a plugin.
-	 *
-	 * @param name the plugin name to unload.
-	 */
-	void unloadPlugin(const std::string &name);
-
-	/**
-	 * Reload a plugin, it does not close but calls a specific
-	 * Lua function defined in the file.
-	 *
-	 * @param name the plugin name
-	 */
-	void reloadPlugin(const std::string &name);
-
-#if defined(WITH_LUA)
-	/**
-	 * Find a plugin by it's associated Lua State, so it can
-	 * be retrieved by every Lua bindings.
-	 *
-	 * @param state the Lua state
-	 * @return the plugin
-	 * @throw out_of_range when not found
-	 */
-	Plugin::Ptr findPlugin(lua_State *state);
-
-	/**
-	 * Find a plugin by it's name. It is used by irccdctl
-	 * to load, unload and reload on command.
-	 *
-	 * @param name the plugin name
-	 * @return the plugin
-	 * @throw out_of_range when not found
-	 */
-	Plugin::Ptr findPlugin(const std::string &name);
-
-	/**
-	 * Add a deferred call for a specific server.
-	 *
-	 * @param sever the server that request it
-	 * @param call the plugin to call
-	 */
-	void addDeferred(Server::Ptr server, DefCall call);
-
-	/**
-	 * Register the thread to one plugin so that irccd.plugin
-	 * think that L state is of plugin.
-	 *
-	 * @param L the new Lua state
-	 * @param plugin for which plugin
-	 */
-	void registerThread(lua_State *L, Plugin::Ptr plugin);
-
-	/**
-	 * Remove the attach thread from that Lua state
-	 *
-	 * @param L the Lua state from which thread
-	 */
-	void unregisterThread(lua_State *L);
-#endif
-
-	/* }}} */
-
-	/* {{{ Public Server management */
-
-	void connectServer(const Server::Info &info,
-			   const Server::Identity &identity,
-			   const Server::Options &options);
-
-	/**
-	 * Get the servers list
-	 *
-	 * @return the list of servers
-	 */
-	ServerList &getServers();
-
-	/**
-	 * Find a server by its resource name.
-	 *
-	 * @param name the server's resource name
-	 * @return a server
-	 * @throw std::out_of_range if not found
-	 */
-	Server::Ptr findServer(const std::string &name);
-
-	/**
-	 * Global IRC event handler, process the event type and call
-	 * every Lua plugin if Lua is compiled in.
-	 *
-	 * For some event, also call handleConnection
-	 * and handleInvite to do specific things.
-	 *
-	 * @param event the event
-	 */
-	void handleIrcEvent(const IrcEvent &event);
-
-	/* }}} */
-
-	/* {{{ Irccd management */
 
 	/**
 	 * Run the application.
@@ -349,8 +155,6 @@ public:
 	 * Stop all threads and everything else.
 	 */
 	void stop();
-
-	/* }}} */
 };
 
 } // !irccd

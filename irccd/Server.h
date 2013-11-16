@@ -75,13 +75,13 @@ using IrcEventParams	= std::vector<std::string>;
 using IrcPrefixes	= std::map<IrcChanNickMode, char>;
 
 /**
- * @struct IrcEvent
+ * @class IrcEvent
  * @brief An IRC event
  */
-struct IrcEvent {
+class IrcEvent {
+public:
 	IrcEventType m_type;				//! event type
 	IrcEventParams m_params;			//! parameters
-
 	std::shared_ptr<Server> m_server;		//! on which server
 
 	/**
@@ -222,11 +222,20 @@ public:
 				WhoisInfo
 			  >;
 
-	using ChanList	= std::vector<Channel>;
-
 	using Ptr	= std::shared_ptr<Server>;
+	using List	= std::unordered_map<
+				std::string,
+				Server::Ptr
+			  >;
+
+	using ChanList	= std::vector<Channel>;
+	using Mutex	= std::mutex;
+	using MapFunc	= std::function<void (Server::Ptr)>;
 
 private:
+	static List servers;			//! all servers
+	static Mutex serverLock;		//! lock for server management
+
 	// IRC thread
 	irc_callbacks_t m_callbacks;		//! callbacks for libircclient
 	std::thread m_thread;			//! server's thread
@@ -238,6 +247,8 @@ private:
 	NameList m_nameLists;			//! channels names to receive
 	WhoisList m_whoisLists;			//! list of whois
 
+	Mutex m_lock;
+
 	/**
 	 * Initialize callbacks.
 	 */
@@ -248,7 +259,39 @@ protected:
 	Identity m_identity;			//! identity to use
 	Options m_options;			//! some options
 
-public:	
+public:
+	/**
+	 * Add a new server to the registry. It also start the server
+	 * immediately.
+	 *
+	 * @param server the server to add
+	 */
+	static void add(Server::Ptr server);
+
+	/**
+	 * Get an existing server.
+	 *
+	 * @param name the server name
+	 * @return the server
+	 * @throw std::out_of_range if not found
+	 */
+	static Server::Ptr get(const std::string &name);
+
+	/**
+	 * Call a function for all servers.
+	 *
+	 * @param func the function
+	 */
+	static void forAll(MapFunc func);
+
+	/**
+	 * Remove a server from the registry only if it must
+	 * be removed, that is if the connection is done.
+	 *
+	 * @param server the server to remove
+	 */
+	static void remove(Server::Ptr server);
+
 	/**
 	 * Convert the s context to a shared_ptr<Server>.
 	 *
@@ -319,21 +362,21 @@ public:
 	 *
 	 * @return the server information
 	 */
-	const Info &getInfo() const;
+	Info &getInfo();
 
 	/**
 	 * Get the identity used for that server
 	 *
 	 * @return the identity
 	 */
-	const Identity &getIdentity() const;
+	Identity &getIdentity();
 
 	/**
 	 * Get the server options.
 	 *
 	 * @return the options
 	 */
-	const Options &getOptions() const;
+	Options &getOptions();
 
 	/**
 	 * Get all channels that will be auto joined
@@ -364,7 +407,7 @@ public:
 	 * @param nick the nickname
 	 * @return true if has
 	 */
-	bool hasPrefix(const std::string &nick);
+	bool hasPrefix(const std::string &nick) const;
 
 	/**
 	 * Remove a channel from the server list.

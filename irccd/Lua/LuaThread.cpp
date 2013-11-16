@@ -77,12 +77,12 @@ void threadCallback(lua_State *threadState, lua_State *L, int nparams)
 {
 	if (lua_pcall(threadState, nparams, 0, 0) != LUA_OK) {
 		Logger::warn("plugin %s: %s",
-		    Irccd::getInstance().findPlugin(L)->getName().c_str(),
+		    Plugin::find(L)->getName().c_str(),
 		    lua_tostring(threadState, -1));
 		lua_pop(threadState, 1);
 	}
 
-	Irccd::getInstance().unregisterThread(threadState);
+	Plugin::unregisterThread(threadState);
 }
 
 int l_threadNew(lua_State *L)
@@ -118,10 +118,10 @@ int l_threadNew(lua_State *L)
 	}
 
 	try {
-		Plugin::Ptr self = Irccd::getInstance().findPlugin(L);
+		Plugin::Ptr self = Plugin::find(L);
 		Thread::Ptr thread = Thread::create();
 
-		Irccd::getInstance().registerThread(threadState, self);
+		Plugin::registerThread(threadState, self, thread);
 	
 		std::thread threadFunc(threadCallback,
 		    static_cast<lua_State *>(threadState),

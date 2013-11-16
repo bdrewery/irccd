@@ -21,8 +21,7 @@
 
 #include <lua.hpp>
 
-namespace irccd
-{
+namespace irccd {
 
 int luaopen_thread_pipe(lua_State *L);
 

@@ -18,10 +18,6 @@
 
 #include "Message.h"
 
-Message::Message()
-{
-}
-
 Message::Message(const Message &m)
 {
 	m_data.str(m.m_data.str());
