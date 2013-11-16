@@ -58,23 +58,25 @@ This section configures the answers that irccd will uses to answers requests.
 When the plugin history could not open the database files, it uses this option
 to respond an error.
 
+link:user-guide.html#irccdpatterns[Keywords supported: env]
+
 .Option `seen`
 
 This option is used for the command `!history seen`.
 
-link:user-guide.html#irccdpatterns[Keywords supported: #c, #U, time]
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #U, time, env]
 
 .Option `said`
 
 This option is used for the command `!history said`.
 
-link:user-guide.html#irccdpatterns[Keywords supported: #c, #m, #U, time]
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #m, #U, time, env]
 
 .Option `unknown`
 
 This option is used when irccd has never seen the requested nickname.
 
-link:user-guide.html#irccdpatterns[Keywords supported: #c, #U]
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #U, env]
 
 .Example
 [source, ini]

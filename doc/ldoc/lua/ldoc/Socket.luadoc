@@ -5,7 +5,6 @@
 -- @module irccd.socket
 
 --- Socket address family
--- @class table
 local family = {
 	Inet = 1,		--- AF_INET (IPv4) family.
 	Inet6 = 2,		--- AF_INET6 (IPv6) family.
@@ -13,14 +12,12 @@ local family = {
 }
 
 --- Socket type
--- @class table
 local type = {
 	Stream,			--- SOCK_STREAM sockets
 	Datagram,		--- SOCK_DGRAM sockets
 }
 
 --- Socket protocol
--- @class table
 local protocol = {
 	Tcp,			--- IPPROTO_TCP
 	Udp,			--- IPPROTO_UDP

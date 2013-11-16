@@ -17,23 +17,24 @@
 --
 
 -- Modules
-local parser = require "irccd.parser"
-local plugin = require "irccd.plugin"
-local util = require "irccd.util"
+local parser	= require "irccd.parser"
+local plugin	= require "irccd.plugin"
+local util	= require "irccd.util"
 
 -- Logger configuration
 local configuration = { }
 
 local format = {
 	cnotice	= "[#c] #m",
-	join	= ">> #u joined #c",
-	me	= "* #u #m",
-	message	= "%H:%M #u: #m",
-	mode	= ":: #u changed the mode to: #m #M",
-	notice	= "[notice] (#u) #T: #m",
-	part	= "<< #u left #c [#m]",
-	topic	= ":: #u changed the topic to: #t",
-	umode	= "#u set mode #m to #T"
+	join	= ">> #U joined #c",
+	kick	= "#t has been kicked by #U [reason: #m]",
+	me	= "* #U #m",
+	message	= "%H:%M #U: #m",
+	mode	= ":: #U changed the mode to: #m #M",
+	notice	= "[notice] (#U) #T: #m",
+	part	= "<< #U left #c [#m]",
+	topic	= ":: #U changed the topic to: #t",
+	umode	= "#U set mode #m to #T"
 }
 
 -- Load the config.
@@ -81,6 +82,9 @@ local function convert(what, keywords)
 
 	-- Remove ~ if found.
 	line = line:gsub("~", util.getHome())
+	
+	-- Add environment variable.
+	line = line:gsub("%${(%w+)}", util.getEnv)
 
 	-- Now convert the # with gsub.
 	return line:gsub("#(.)", keywords)
@@ -125,23 +129,35 @@ function onChannelNotice(server, who, channel, notice)
 		c = channel,
 		m = notice,
 		s = server:getName(),
-		u = util.splitUser(who),
-		U = who
+		u = who,
+		U = util.splitUser(who)
 	}
 
 	write(format.cnotice, keywords)
 end
 
--- Log joins
 function onJoin(server, channel, nickname)
 	local keywords = {
 		c = channel,
 		s = server:getName(),
-		u = util.splitUser(nickname),
-		U = nickname
+		u = nickname,
+		U = util.splitUser(nickname)
 	}
 
 	write(format.join, keywords)
+end
+
+function onKick(server, channel, who, target, reason)
+	local keywords = {
+		c = channel,
+		s = server:getName(),
+		t = target,
+		u = who,
+		U = util.splitUser(who),
+		m = reason
+	}
+
+	write(format.kick, keywords)
 end
 
 function onMe(server, channel, who, message)
@@ -149,21 +165,20 @@ function onMe(server, channel, who, message)
 		c = channel,
 		s = server:getName(),
 		m = message,
-		U = util.splitUser(who),
-		u = who
+		u = who,
+		U = util.splitUser(who)
 	}
 
 	write(format.me, keywords)
 end
 
--- Log message
 function onMessage(server, channel, who, message)
 	local keywords = {
 		c = channel,
 		s = server:getName(),
 		m = message,
-		U = util.splitUser(who),
-		u = who
+		u = who,
+		U = util.splitUser(who)
 	}
 
 	write(format.message, keywords)
@@ -175,8 +190,8 @@ function onMode(server, channel, who, mode, modeArg)
 		s = server:getName(),
 		m = mode,
 		M = modeArg,
-		u = util.splitUser(who),
-		U = who
+		u = who,
+		U = util.splitUser(who)
 	}
 
 	write(format.mode, keywords)
@@ -188,21 +203,20 @@ function onNotice(server, who, target, notice)
 		m = notice,
 		s = server:getName(),
 		T = target,
-		u = util.splitUser(who),
-		U = who
+		u = who,
+		U = util.splitUser(who)
 	}
 
 	write(format.notice, keywords)
 end
 
--- Log parts
 function onPart(server, channel, nickname, reason)
 	local keywords = {
 		c = channel,
 		s = server:getName(),
 		m = reason,
-		u = util.splitUser(nickname),
-		U = who
+		u = who,
+		U = util.splitUser(nickname)
 	}
 
 	write(format.part, keywords)
@@ -212,14 +226,13 @@ function onReload()
 	loadConfig()
 end
 
--- Log topic
 function onTopic(server, channel, who, topic)
 	local keywords = {
 		c = channel,
 		s = server:getName(),
 		t = topic,
-		u = util.splitUser(who),
-		U = who
+		u = who,
+		U = util.splitUser(who)
 	}
 
 	write(format.topic, keywords)

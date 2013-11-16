@@ -193,6 +193,19 @@ int format(lua_State *L)
 	return 1;
 }
 
+int getEnv(lua_State *L)
+{
+	std::string var = luaL_checkstring(L, 1);
+	char *value;
+
+	if ((value = getenv(var.c_str())) != nullptr)
+		lua_pushstring(L, value);
+	else
+		lua_pushstring(L, "");
+
+	return 1;
+}
+
 int getHome(lua_State *L)
 {
 	lua_pushstring(L, Util::getHome().c_str());
@@ -296,6 +309,7 @@ const luaL_Reg functions[] = {
 	{ "dirname",		util::dirname		},
 	{ "exist",		util::exist		},
 	{ "format",		util::format		},
+	{ "getEnv",		util::getEnv		},
 	{ "getTicks",		util::getTicks		},
 	{ "getHome",		util::getHome		},
 	{ "mkdir",		util::mkdir		},

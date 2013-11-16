@@ -474,6 +474,11 @@ will be substituted to the nickname and *#c* to the channel name.
 Note, some keywords are obviously not available for all contexts. When plugins
 supports these patterns, they are marked as *Keywords supported: #c, #m*.
 
+.Environment variables
+
+If supported, you can use environment variables like *$\{HOME\}*. Please not that
+braces are mandatory.
+
 .Time
 
 When you can use patterns, the date and time may be used just like `strftime(3)`

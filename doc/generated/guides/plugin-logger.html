@@ -716,22 +716,26 @@ logger =</pre>
 <h3 id="_section_span_class_monospaced_general_span">Section <span class="monospaced">general</span></h3>
 <div class="paragraph"><p>This section configures global options.</p></div>
 <div class="paragraph"><div class="title">Option <span class="monospaced">directory</span> (required)</div><p>The directory where to store logs.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: ~, #s, #c, time</a></p></div>
+<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: ~, #s, #c, time, env</a></p></div>
 </div>
 <div class="sect2">
 <h3 id="_section_span_class_monospaced_formats_span">Section <span class="monospaced">formats</span></h3>
 <div class="paragraph"><p>Event log formats. By default all events are logged, if you
 want to disable any of them, set the desired option to "".</p></div>
 <div class="paragraph"><div class="title">Option <span class="monospaced">cnotice</span></div><p>Format for channel notices.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #u, #s, #U, time</a></p></div>
+<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #u, #s, #U, time,
+env</a></p></div>
 <div class="paragraph"><div class="title">Option <span class="monospaced">join</span></div><p>Format for channel joins.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #u, #s, #U, time</a></p></div>
+<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #u, #s, #U, time, env</a></p></div>
 <div class="paragraph"><div class="title">Option <span class="monospaced">me</span> (CTCP Action)</div><p>Format for /me.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #u, #U, time</a></p></div>
+<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #u, #U, time,
+env</a></p></div>
 <div class="paragraph"><div class="title">Option <span class="monospaced">message</span></div><p>Format for messages.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #u, #U, time</a></p></div>
+<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #u, #U, time,
+env</a></p></div>
 <div class="paragraph"><div class="title">Option <span class="monospaced">mode</span></div><p>Format for channel mode changes.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #M, #s, #u, #U, time</a></p></div>
+<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #M, #s, #u, #U,
+time, env</a></p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -741,7 +745,8 @@ want to disable any of them, set the desired option to "".</p></div>
 </tr></table>
 </div>
 <div class="paragraph"><div class="title">Option <span class="monospaced">notice</span></div><p>Format for private notices</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #T #u, #U, time</a></p></div>
+<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #T #u, #U,
+time, env</a></p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -752,11 +757,13 @@ sender nickname.</td>
 </tr></table>
 </div>
 <div class="paragraph"><div class="title">Option <span class="monospaced">part</span></div><p>Format for parts.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #u, #U, time</a></p></div>
+<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #m, #s, #u, #U, time,
+env</a></p></div>
 <div class="paragraph"><div class="title">Option <span class="monospaced">topic</span></div><p>Format for topic changes.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #s, #t, #u, #U, time</a></p></div>
+<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #c, #s, #t, #u, #U, time,
+env</a></p></div>
 <div class="paragraph"><div class="title">Option <span class="monospaced">umode</span></div><p>Format for user mode change. This only affects you.</p></div>
-<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #m, #s, #T, time</a></p></div>
+<div class="paragraph"><p><a href="user-guide.html#irccdpatterns">Keywords supported: #m, #s, #T, time, env</a></p></div>
 </div>
 </div>
 </div>
@@ -764,7 +771,7 @@ sender nickname.</td>
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-11-07 20:52:16 CET
+Last updated 2013-11-09 11:29:17 CET
 </div>
 </div>
 </body>

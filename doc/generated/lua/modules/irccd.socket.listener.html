@@ -1,28 +1,42 @@
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <head>
-  <title>Irccd Lua API Documentation</title>
-  <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+    <title>Irccd Lua API Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
 </head>
 <body>
 
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
 
 <!-- Menu -->
-<div id="menu">
 
+<div id="navigation">
+<h1>Navigation</h1>
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
 
-<h2 class="kind">Contents</h2>
+<h2>Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
 <li><a href="#Class_Listener">Class Listener </a></li>
 </ul>
 
-<h2 class="kind">Modules</h2>
-<ul>
+
+<h2>Modules</h2>
+<ul class="nowrap">
   <li><a href="../modules/irccd.html">irccd</a></li>
   <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
   <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
@@ -35,8 +49,8 @@
   <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
   <li><a href="../modules/irccd.util.html">irccd.util</a></li>
 </ul>
-<h2 class="kind">Topics</h2>
-<ul>
+<h2>Topics</h2>
+<ul class="nowrap">
   <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
   <li><a href="../topics/2-Plugin_creation.md.html">2-Plugin_creation.md</a></li>
   <li><a href="../topics/2.1-Using_irccd_test.md.html">2.1-Using_irccd_test.md</a></li>
@@ -60,46 +74,46 @@
   <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
   <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
 </ul>
-<h2 class="kind">Examples</h2>
-<ul>
+<h2>Examples</h2>
+<ul class="nowrap">
   <li><a href="../examples/Deferred.lua.html">Deferred.lua</a></li>
   <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
   <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
 </ul>
 
-</div><!-- !menu -->
+</div>
 
 <div id="content">
 
-  <h2>Module <code>irccd.socket.listener</code></h2>
+<h1>Module <code>irccd.socket.listener</code></h1>
 
 <p>Listener object.</p>
 <p> Wraps the select() calls in a convenient way.</p>
 
 
-<h2 class="kind"><a href="#Functions">Functions</a></h2>
+<h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#new">new&nbsp;()</a></td>
+	<td class="name" nowrap><a href="#new">new ()</a></td>
 	<td class="summary">Create a listener.</td>
 	</tr>
 </table>
-<h2 class="kind"><a href="#Class_Listener">Class Listener </a></h2>
+<h2><a href="#Class_Listener">Class Listener </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#Listener:add">Listener:add&nbsp;(sock)</a></td>
+	<td class="name" nowrap><a href="#Listener:add">Listener:add (sock)</a></td>
 	<td class="summary">Add a socket to the listener.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Listener:remove">Listener:remove&nbsp;(sock)</a></td>
+	<td class="name" nowrap><a href="#Listener:remove">Listener:remove (sock)</a></td>
 	<td class="summary">Remove the socket from the listener.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Listener:clear">Listener:clear&nbsp;()</a></td>
+	<td class="name" nowrap><a href="#Listener:clear">Listener:clear ()</a></td>
 	<td class="summary">Remove all sockets from the listener.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Listener:select">Listener:select&nbsp;(seconds, microseconds)</a></td>
+	<td class="name" nowrap><a href="#Listener:select">Listener:select (seconds, microseconds)</a></td>
 	<td class="summary">Select a socket ready for input.</td>
 	</tr>
 </table>
@@ -108,11 +122,11 @@
 <br/>
 
 
-    <h2 class="kind"><a name="Functions"></a>Functions</h2>
+    <h2><a name="Functions"></a>Functions</h2>
     <dl class="function">
     <dt>
     <a name = "new"></a>
-    <strong>new&nbsp;()</strong>
+    <strong>new ()</strong>
     </dt>
     <dd>
     Create a listener.
@@ -129,12 +143,12 @@
 
 </dd>
 </dl>
-    <h2 class="kind"><a name="Class_Listener"></a>Class Listener </h2>
-        Listener
+    <h2><a name="Class_Listener"></a>Class Listener </h2>
+
     <dl class="function">
     <dt>
     <a name = "Listener:add"></a>
-    <strong>Listener:add&nbsp;(sock)</strong>
+    <strong>Listener:add (sock)</strong>
     </dt>
     <dd>
     Add a socket to the listener.
@@ -142,7 +156,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">sock</span>
-         the socket</li>
+         the socket
+        </li>
     </ul>
 
 
@@ -152,7 +167,7 @@
 </dd>
     <dt>
     <a name = "Listener:remove"></a>
-    <strong>Listener:remove&nbsp;(sock)</strong>
+    <strong>Listener:remove (sock)</strong>
     </dt>
     <dd>
     Remove the socket from the listener.
@@ -160,7 +175,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">sock</span>
-         the socket to remove</li>
+         the socket to remove
+        </li>
     </ul>
 
 
@@ -170,7 +186,7 @@
 </dd>
     <dt>
     <a name = "Listener:clear"></a>
-    <strong>Listener:clear&nbsp;()</strong>
+    <strong>Listener:clear ()</strong>
     </dt>
     <dd>
     Remove all sockets from the listener.
@@ -183,7 +199,7 @@
 </dd>
     <dt>
     <a name = "Listener:select"></a>
-    <strong>Listener:select&nbsp;(seconds, microseconds)</strong>
+    <strong>Listener:select (seconds, microseconds)</strong>
     </dt>
     <dd>
     Select a socket ready for input.
@@ -193,9 +209,11 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">seconds</span>
-         optional seconds, default 0</li>
+         optional seconds, default 0
+        </li>
         <li><span class="parameter">microseconds</span>
-         optional microseconds, default 0</li>
+         optional microseconds, default 0
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -214,8 +232,10 @@
 
 
 </div> <!-- id="content" -->
+</div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc</a></i>
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.0</a></i>
 </div> <!-- id="about" -->
+</div> <!-- id="container" -->
 </body>
 </html>

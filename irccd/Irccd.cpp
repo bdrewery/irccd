@@ -1221,8 +1221,8 @@ void Irccd::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
 		p->onConnect(ev.m_server);
 		break;
 	case IrcEventType::ChannelNotice:
-		p->onNotice(ev.m_server, ev.m_params[0], ev.m_params[1],
-			   ev.m_params[2]);
+		p->onChannelNotice(ev.m_server, ev.m_params[0], ev.m_params[1],
+		    ev.m_params[2]);
 		break;
 	case IrcEventType::Invite:
 		p->onInvite(ev.m_server, ev.m_params[0], ev.m_params[1]);
@@ -1232,7 +1232,7 @@ void Irccd::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
 		break;
 	case IrcEventType::Kick:
 		p->onKick(ev.m_server, ev.m_params[0], ev.m_params[1],
-			 ev.m_params[2], ev.m_params[3]);
+		    ev.m_params[2], ev.m_params[3]);
 		break;
 	case IrcEventType::Message:
 	{
@@ -1257,7 +1257,7 @@ void Irccd::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
 		}
 		else
 			p->onMessage(ev.m_server, ev.m_params[0], ev.m_params[1],
-				    ev.m_params[2]);
+			    ev.m_params[2]);
 	}
 		break;
 	case IrcEventType::Me:
@@ -1265,21 +1265,28 @@ void Irccd::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
 		break;
 	case IrcEventType::Mode:
 		p->onMode(ev.m_server, ev.m_params[0], ev.m_params[1],
-			 ev.m_params[2], ev.m_params[3]);
+		    ev.m_params[2], ev.m_params[3]);
 		break;
 	case IrcEventType::Nick:
 		p->onNick(ev.m_server, ev.m_params[0], ev.m_params[1]);
 		break;
 	case IrcEventType::Notice:
 		p->onNotice(ev.m_server, ev.m_params[0], ev.m_params[1],
-			   ev.m_params[2]);
+		    ev.m_params[2]);
 		break;
 	case IrcEventType::Part:
 		p->onPart(ev.m_server, ev.m_params[0], ev.m_params[1],
-			 ev.m_params[2]);
+		    ev.m_params[2]);
 		break;
 	case IrcEventType::Query:
 		p->onQuery(ev.m_server, ev.m_params[0], ev.m_params[1]);
+		break;
+	case IrcEventType::Topic:
+		p->onTopic(ev.m_server, ev.m_params[0], ev.m_params[1],
+		     ev.m_params[2]);
+		break;
+	case IrcEventType::UserMode:
+		p->onUserMode(ev.m_server, ev.m_params[0], ev.m_params[1]);
 		break;
 	default:
 		break;

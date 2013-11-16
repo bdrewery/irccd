@@ -1,21 +1,34 @@
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <head>
-  <title>Irccd Lua API Documentation</title>
-  <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+    <title>Irccd Lua API Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
 </head>
 <body>
 
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
 
 <!-- Menu -->
-<div id="menu">
 
+<div id="navigation">
+<h1>Navigation</h1>
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
 
-<h2 class="kind">Contents</h2>
+<h2>Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
 <li><a href="#Tuning">Tuning </a></li>
@@ -25,8 +38,9 @@
 <li><a href="#Section_metamethods">Section metamethods </a></li>
 </ul>
 
-<h2 class="kind">Modules</h2>
-<ul>
+
+<h2>Modules</h2>
+<ul class="nowrap">
   <li><a href="../modules/irccd.html">irccd</a></li>
   <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
   <li><strong>irccd.parser</strong></li>
@@ -39,8 +53,8 @@
   <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
   <li><a href="../modules/irccd.util.html">irccd.util</a></li>
 </ul>
-<h2 class="kind">Topics</h2>
-<ul>
+<h2>Topics</h2>
+<ul class="nowrap">
   <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
   <li><a href="../topics/2-Plugin_creation.md.html">2-Plugin_creation.md</a></li>
   <li><a href="../topics/2.1-Using_irccd_test.md.html">2.1-Using_irccd_test.md</a></li>
@@ -64,18 +78,18 @@
   <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
   <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
 </ul>
-<h2 class="kind">Examples</h2>
-<ul>
+<h2>Examples</h2>
+<ul class="nowrap">
   <li><a href="../examples/Deferred.lua.html">Deferred.lua</a></li>
   <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
   <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
 </ul>
 
-</div><!-- !menu -->
+</div>
 
 <div id="content">
 
-  <h2>Module <code>irccd.parser</code></h2>
+<h1>Module <code>irccd.parser</code></h1>
 
 <p>Config file parser.</p>
 <p> This API provides basic support of .ini syntax based configurations files.
@@ -84,14 +98,14 @@
  file config.</p>
 
 
-<h2 class="kind"><a href="#Functions">Functions</a></h2>
+<h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#new">new&nbsp;(path, tuning, commentChar)</a></td>
+	<td class="name" nowrap><a href="#new">new (path, tuning, commentChar)</a></td>
 	<td class="summary">Create a new Parser object.</td>
 	</tr>
 </table>
-<h2 class="kind"><a href="#Tuning">Tuning </a></h2>
+<h2><a href="#Tuning">Tuning </a></h2>
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#DisableVerbosity">DisableVerbosity</a></td>
@@ -106,71 +120,71 @@
 	<td class="summary">Disable multiple sections.</td>
 	</tr>
 </table>
-<h2 class="kind"><a href="#Class_Parser">Class Parser </a></h2>
+<h2><a href="#Class_Parser">Class Parser </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#Parser:open">Parser:open&nbsp;()</a></td>
+	<td class="name" nowrap><a href="#Parser:open">Parser:open ()</a></td>
 	<td class="summary">Open the file and read config.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Parser:findSections">Parser:findSections&nbsp;(name)</a></td>
+	<td class="name" nowrap><a href="#Parser:findSections">Parser:findSections (name)</a></td>
 	<td class="summary">Iterator over all sections that matches name.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Parser:hasSection">Parser:hasSection&nbsp;(name)</a></td>
+	<td class="name" nowrap><a href="#Parser:hasSection">Parser:hasSection (name)</a></td>
 	<td class="summary">Checks for a section.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Parser:getSection">Parser:getSection&nbsp;(name)</a></td>
+	<td class="name" nowrap><a href="#Parser:getSection">Parser:getSection (name)</a></td>
 	<td class="summary">Get a specific section.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Parser:requireSection">Parser:requireSection&nbsp;(name)</a></td>
+	<td class="name" nowrap><a href="#Parser:requireSection">Parser:requireSection (name)</a></td>
 	<td class="summary">Get a specific section.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Parser:onLog">Parser:onLog&nbsp;(func)</a></td>
+	<td class="name" nowrap><a href="#Parser:onLog">Parser:onLog (func)</a></td>
 	<td class="summary">Add a specific logging function.</td>
 	</tr>
 </table>
-<h2 class="kind"><a href="#Parser_metamethods">Parser metamethods </a></h2>
+<h2><a href="#Parser_metamethods">Parser metamethods </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#Parser:__tostring">Parser:__tostring&nbsp;()</a></td>
+	<td class="name" nowrap><a href="#Parser:__tostring">Parser:__tostring ()</a></td>
 	<td class="summary">Convert object to string.</td>
 	</tr>
 </table>
-<h2 class="kind"><a href="#Class_Section">Class Section </a></h2>
+<h2><a href="#Class_Section">Class Section </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#Section:hasOption">Section:hasOption&nbsp;(name)</a></td>
+	<td class="name" nowrap><a href="#Section:hasOption">Section:hasOption (name)</a></td>
 	<td class="summary">Tells if the section has an option.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Section:getOption">Section:getOption&nbsp;(name)</a></td>
+	<td class="name" nowrap><a href="#Section:getOption">Section:getOption (name)</a></td>
 	<td class="summary">Get an option value.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Section:getOptions">Section:getOptions&nbsp;()</a></td>
+	<td class="name" nowrap><a href="#Section:getOptions">Section:getOptions ()</a></td>
 	<td class="summary">Get all options in a table.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Section:requireOption">Section:requireOption&nbsp;(name)</a></td>
+	<td class="name" nowrap><a href="#Section:requireOption">Section:requireOption (name)</a></td>
 	<td class="summary">Requires an option.</td>
 	</tr>
 </table>
-<h2 class="kind"><a href="#Section_metamethods">Section metamethods </a></h2>
+<h2><a href="#Section_metamethods">Section metamethods </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#Section:__eq">Section:__eq&nbsp;(other)</a></td>
+	<td class="name" nowrap><a href="#Section:__eq">Section:__eq (other)</a></td>
 	<td class="summary">Test equality.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Section:__le">Section:__le&nbsp;(other)</a></td>
+	<td class="name" nowrap><a href="#Section:__le">Section:__le (other)</a></td>
 	<td class="summary">Test inferiority</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Sectio:__tostring">Sectio:__tostring&nbsp;()</a></td>
+	<td class="name" nowrap><a href="#Sectio:__tostring">Sectio:__tostring ()</a></td>
 	<td class="summary">Convert object to string.</td>
 	</tr>
 </table>
@@ -179,11 +193,11 @@
 <br/>
 
 
-    <h2 class="kind"><a name="Functions"></a>Functions</h2>
+    <h2><a name="Functions"></a>Functions</h2>
     <dl class="function">
     <dt>
     <a name = "new"></a>
-    <strong>new&nbsp;(path, tuning, commentChar)</strong>
+    <strong>new (path, tuning, commentChar)</strong>
     </dt>
     <dd>
     Create a new Parser object.
@@ -192,11 +206,14 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">path</span>
-         the path</li>
+         the path
+        </li>
         <li><span class="parameter">tuning</span>
-         optional table of tuning options</li>
+         optional table of tuning options
+        </li>
         <li><span class="parameter">commentChar</span>
-         optional comment delimiter</li>
+         optional comment delimiter
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -214,8 +231,8 @@
 
 </dd>
 </dl>
-    <h2 class="kind"><a name="Tuning"></a>Tuning </h2>
-        Tuning
+    <h2><a name="Tuning"></a>Tuning </h2>
+
     <dl class="function">
     <dt>
     <a name = "DisableVerbosity"></a>
@@ -257,12 +274,12 @@
 
 </dd>
 </dl>
-    <h2 class="kind"><a name="Class_Parser"></a>Class Parser </h2>
-        Parser
+    <h2><a name="Class_Parser"></a>Class Parser </h2>
+
     <dl class="function">
     <dt>
     <a name = "Parser:open"></a>
-    <strong>Parser:open&nbsp;()</strong>
+    <strong>Parser:open ()</strong>
     </dt>
     <dd>
     Open the file and read config.
@@ -283,7 +300,7 @@
 </dd>
     <dt>
     <a name = "Parser:findSections"></a>
-    <strong>Parser:findSections&nbsp;(name)</strong>
+    <strong>Parser:findSections (name)</strong>
     </dt>
     <dd>
     Iterator over all sections that matches name.  Note that this function
@@ -293,7 +310,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">name</span>
-         the sections name</li>
+         the sections name
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -319,7 +337,7 @@
 </dd>
     <dt>
     <a name = "Parser:hasSection"></a>
-    <strong>Parser:hasSection&nbsp;(name)</strong>
+    <strong>Parser:hasSection (name)</strong>
     </dt>
     <dd>
     Checks for a section.
@@ -330,7 +348,8 @@
         <li><span class="parameter">name</span>
 
 
-</li>
+
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -345,7 +364,7 @@
 </dd>
     <dt>
     <a name = "Parser:getSection"></a>
-    <strong>Parser:getSection&nbsp;(name)</strong>
+    <strong>Parser:getSection (name)</strong>
     </dt>
     <dd>
     Get a specific section.
@@ -355,7 +374,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">name</span>
-         the section name</li>
+         the section name
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -372,7 +392,7 @@
 </dd>
     <dt>
     <a name = "Parser:requireSection"></a>
-    <strong>Parser:requireSection&nbsp;(name)</strong>
+    <strong>Parser:requireSection (name)</strong>
     </dt>
     <dd>
     Get a specific section.
@@ -382,7 +402,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">name</span>
-         the section name</li>
+         the section name
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -401,7 +422,7 @@
 </dd>
     <dt>
     <a name = "Parser:onLog"></a>
-    <strong>Parser:onLog&nbsp;(func)</strong>
+    <strong>Parser:onLog (func)</strong>
     </dt>
     <dd>
     Add a specific logging function.
@@ -423,7 +444,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">func</span>
-         the function to use</li>
+         the function to use
+        </li>
     </ul>
 
 
@@ -432,13 +454,13 @@
 
 </dd>
 </dl>
-    <h2 class="kind"><a name="Parser_metamethods"></a>Parser metamethods </h2>
-        Parser metamethods.
+    <h2><a name="Parser_metamethods"></a>Parser metamethods </h2>
+
  The metamethods available for object Parser.
     <dl class="function">
     <dt>
     <a name = "Parser:__tostring"></a>
-    <strong>Parser:__tostring&nbsp;()</strong>
+    <strong>Parser:__tostring ()</strong>
     </dt>
     <dd>
     Convert object to string.
@@ -455,12 +477,12 @@
 
 </dd>
 </dl>
-    <h2 class="kind"><a name="Class_Section"></a>Class Section </h2>
-        Section
+    <h2><a name="Class_Section"></a>Class Section </h2>
+
     <dl class="function">
     <dt>
     <a name = "Section:hasOption"></a>
-    <strong>Section:hasOption&nbsp;(name)</strong>
+    <strong>Section:hasOption (name)</strong>
     </dt>
     <dd>
     Tells if the section has an option.
@@ -469,7 +491,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">name</span>
-         the option's name</li>
+         the option's name
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -484,7 +507,7 @@
 </dd>
     <dt>
     <a name = "Section:getOption"></a>
-    <strong>Section:getOption&nbsp;(name)</strong>
+    <strong>Section:getOption (name)</strong>
     </dt>
     <dd>
     Get an option value.
@@ -494,7 +517,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">name</span>
-         the option name</li>
+         the option name
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -515,7 +539,7 @@
 </dd>
     <dt>
     <a name = "Section:getOptions"></a>
-    <strong>Section:getOptions&nbsp;()</strong>
+    <strong>Section:getOptions ()</strong>
     </dt>
     <dd>
     Get all options in a table.
@@ -535,7 +559,7 @@
 </dd>
     <dt>
     <a name = "Section:requireOption"></a>
-    <strong>Section:requireOption&nbsp;(name)</strong>
+    <strong>Section:requireOption (name)</strong>
     </dt>
     <dd>
     Requires an option.
@@ -545,7 +569,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">name</span>
-         the option name</li>
+         the option name
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -563,13 +588,13 @@
 
 </dd>
 </dl>
-    <h2 class="kind"><a name="Section_metamethods"></a>Section metamethods </h2>
-        Section metamethods.
+    <h2><a name="Section_metamethods"></a>Section metamethods </h2>
+
  The metamethods available for object Section.
     <dl class="function">
     <dt>
     <a name = "Section:__eq"></a>
-    <strong>Section:__eq&nbsp;(other)</strong>
+    <strong>Section:__eq (other)</strong>
     </dt>
     <dd>
     Test equality.
@@ -577,7 +602,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">other</span>
-         the other section</li>
+         the other section
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -592,7 +618,7 @@
 </dd>
     <dt>
     <a name = "Section:__le"></a>
-    <strong>Section:__le&nbsp;(other)</strong>
+    <strong>Section:__le (other)</strong>
     </dt>
     <dd>
     Test inferiority
@@ -600,7 +626,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">other</span>
-         the other section</li>
+         the other section
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -615,7 +642,7 @@
 </dd>
     <dt>
     <a name = "Sectio:__tostring"></a>
-    <strong>Sectio:__tostring&nbsp;()</strong>
+    <strong>Sectio:__tostring ()</strong>
     </dt>
     <dd>
     Convert object to string.
@@ -635,8 +662,10 @@
 
 
 </div> <!-- id="content" -->
+</div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc</a></i>
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.0</a></i>
 </div> <!-- id="about" -->
+</div> <!-- id="container" -->
 </body>
 </html>

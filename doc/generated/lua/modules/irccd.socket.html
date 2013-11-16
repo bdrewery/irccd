@@ -1,29 +1,43 @@
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <head>
-  <title>Irccd Lua API Documentation</title>
-  <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+    <title>Irccd Lua API Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
 </head>
 <body>
 
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
 
 <!-- Menu -->
-<div id="menu">
 
+<div id="navigation">
+<h1>Navigation</h1>
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
 
-<h2 class="kind">Contents</h2>
+<h2>Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
 <li><a href="#Tables">Tables</a></li>
 <li><a href="#Class_Socket">Class Socket </a></li>
 </ul>
 
-<h2 class="kind">Modules</h2>
-<ul>
+
+<h2>Modules</h2>
+<ul class="nowrap">
   <li><a href="../modules/irccd.html">irccd</a></li>
   <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
   <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
@@ -36,8 +50,8 @@
   <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
   <li><a href="../modules/irccd.util.html">irccd.util</a></li>
 </ul>
-<h2 class="kind">Topics</h2>
-<ul>
+<h2>Topics</h2>
+<ul class="nowrap">
   <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
   <li><a href="../topics/2-Plugin_creation.md.html">2-Plugin_creation.md</a></li>
   <li><a href="../topics/2.1-Using_irccd_test.md.html">2.1-Using_irccd_test.md</a></li>
@@ -61,32 +75,32 @@
   <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
   <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
 </ul>
-<h2 class="kind">Examples</h2>
-<ul>
+<h2>Examples</h2>
+<ul class="nowrap">
   <li><a href="../examples/Deferred.lua.html">Deferred.lua</a></li>
   <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
   <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
 </ul>
 
-</div><!-- !menu -->
+</div>
 
 <div id="content">
 
-  <h2>Module <code>irccd.socket</code></h2>
+<h1>Module <code>irccd.socket</code></h1>
 
 <p>Sockets.</p>
 <p> This API provides support for low level sockets. It currently
  suports AF<em>INET, AF</em>INET6 and AF_LOCAL (on Unix only).</p>
 
 
-<h2 class="kind"><a href="#Functions">Functions</a></h2>
+<h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#new">new&nbsp;(family, type)</a></td>
+	<td class="name" nowrap><a href="#new">new (family, type)</a></td>
 	<td class="summary">Create a new socket.</td>
 	</tr>
 </table>
-<h2 class="kind"><a href="#Tables">Tables</a></h2>
+<h2><a href="#Tables">Tables</a></h2>
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#family">family</a></td>
@@ -101,50 +115,50 @@
 	<td class="summary">Socket protocol</td>
 	</tr>
 </table>
-<h2 class="kind"><a href="#Class_Socket">Class Socket </a></h2>
+<h2><a href="#Class_Socket">Class Socket </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#Socket:accept">Socket:accept&nbsp;()</a></td>
+	<td class="name" nowrap><a href="#Socket:accept">Socket:accept ()</a></td>
 	<td class="summary">Accept a client.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Socket:bind">Socket:bind&nbsp;(address)</a></td>
+	<td class="name" nowrap><a href="#Socket:bind">Socket:bind (address)</a></td>
 	<td class="summary">Bind to an address.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Socket:blockMode">Socket:blockMode&nbsp;(mode)</a></td>
+	<td class="name" nowrap><a href="#Socket:blockMode">Socket:blockMode (mode)</a></td>
 	<td class="summary">Set the blocking mode.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Socket:close">Socket:close&nbsp;()</a></td>
+	<td class="name" nowrap><a href="#Socket:close">Socket:close ()</a></td>
 	<td class="summary">Close the sockets.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Socket:connect">Socket:connect&nbsp;(address)</a></td>
+	<td class="name" nowrap><a href="#Socket:connect">Socket:connect (address)</a></td>
 	<td class="summary">Connect to an end point.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Socket:listen">Socket:listen&nbsp;(count)</a></td>
+	<td class="name" nowrap><a href="#Socket:listen">Socket:listen (count)</a></td>
 	<td class="summary">Listen to a number of pending connections.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Socket:receive">Socket:receive&nbsp;(howmany)</a></td>
+	<td class="name" nowrap><a href="#Socket:receive">Socket:receive (howmany)</a></td>
 	<td class="summary">Receive some data.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Socket:receiveFrom">Socket:receiveFrom&nbsp;(howmany, from)</a></td>
+	<td class="name" nowrap><a href="#Socket:receiveFrom">Socket:receiveFrom (howmany, from)</a></td>
 	<td class="summary">Receive some data.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Socket:send">Socket:send&nbsp;(data)</a></td>
+	<td class="name" nowrap><a href="#Socket:send">Socket:send (data)</a></td>
 	<td class="summary">Send some data.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Socket:send">Socket:send&nbsp;(data, address)</a></td>
+	<td class="name" nowrap><a href="#Socket:send">Socket:send (data, address)</a></td>
 	<td class="summary">Send some data.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Socket:set">Socket:set&nbsp;(level, name, arg)</a></td>
+	<td class="name" nowrap><a href="#Socket:set">Socket:set (level, name, arg)</a></td>
 	<td class="summary">Set an option.</td>
 	</tr>
 </table>
@@ -153,11 +167,11 @@
 <br/>
 
 
-    <h2 class="kind"><a name="Functions"></a>Functions</h2>
+    <h2><a name="Functions"></a>Functions</h2>
     <dl class="function">
     <dt>
     <a name = "new"></a>
-    <strong>new&nbsp;(family, type)</strong>
+    <strong>new (family, type)</strong>
     </dt>
     <dd>
     Create a new socket.
@@ -165,9 +179,11 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">family</span>
-         one of the irccd.socket.family</li>
+         one of the irccd.socket.family
+        </li>
         <li><span class="parameter">type</span>
-         one of the irccd.socket.type</li>
+         one of the irccd.socket.type
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -183,7 +199,7 @@
 
 </dd>
 </dl>
-    <h2 class="kind"><a name="Tables"></a>Tables</h2>
+    <h2><a name="Tables"></a>Tables</h2>
     <dl class="function">
     <dt>
     <a name = "family"></a>
@@ -195,11 +211,14 @@
     <h3>Fields:</h3>
     <ul>
         <li><span class="parameter">Inet</span>
-        AF_INET (IPv4) family.</li>
+        AF_INET (IPv4) family.
+        </li>
         <li><span class="parameter">Inet6</span>
-        AF_INET6 (IPv6) family.</li>
+        AF_INET6 (IPv6) family.
+        </li>
         <li><span class="parameter">Unix</span>
-        AF_LOCAL (Unix) family, only on Unix.</li>
+        AF_LOCAL (Unix) family, only on Unix.
+        </li>
     </ul>
 
 
@@ -217,9 +236,11 @@
     <h3>Fields:</h3>
     <ul>
         <li><span class="parameter">Stream</span>
-        SOCK_STREAM sockets</li>
+        SOCK_STREAM sockets
+        </li>
         <li><span class="parameter">Datagram</span>
-        SOCK_DGRAM sockets</li>
+        SOCK_DGRAM sockets
+        </li>
     </ul>
 
 
@@ -237,13 +258,17 @@
     <h3>Fields:</h3>
     <ul>
         <li><span class="parameter">Tcp</span>
-        IPPROTO_TCP</li>
+        IPPROTO_TCP
+        </li>
         <li><span class="parameter">Udp</span>
-        IPPROTO_UDP</li>
+        IPPROTO_UDP
+        </li>
         <li><span class="parameter">IPv4</span>
-        IPPROTO_IPV4</li>
+        IPPROTO_IPV4
+        </li>
         <li><span class="parameter">IPv6</span>
-        IPPROTO_IPv6</li>
+        IPPROTO_IPv6
+        </li>
     </ul>
 
 
@@ -252,12 +277,12 @@
 
 </dd>
 </dl>
-    <h2 class="kind"><a name="Class_Socket"></a>Class Socket </h2>
-        Socket
+    <h2><a name="Class_Socket"></a>Class Socket </h2>
+
     <dl class="function">
     <dt>
     <a name = "Socket:accept"></a>
-    <strong>Socket:accept&nbsp;()</strong>
+    <strong>Socket:accept ()</strong>
     </dt>
     <dd>
     Accept a client.
@@ -279,7 +304,7 @@
 </dd>
     <dt>
     <a name = "Socket:bind"></a>
-    <strong>Socket:bind&nbsp;(address)</strong>
+    <strong>Socket:bind (address)</strong>
     </dt>
     <dd>
 
@@ -293,7 +318,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">address</span>
-         the address</li>
+         the address
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -314,7 +340,7 @@
 </dd>
     <dt>
     <a name = "Socket:blockMode"></a>
-    <strong>Socket:blockMode&nbsp;(mode)</strong>
+    <strong>Socket:blockMode (mode)</strong>
     </dt>
     <dd>
     Set the blocking mode.
@@ -322,7 +348,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">mode</span>
-         the mode</li>
+         the mode
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -339,7 +366,7 @@
 </dd>
     <dt>
     <a name = "Socket:close"></a>
-    <strong>Socket:close&nbsp;()</strong>
+    <strong>Socket:close ()</strong>
     </dt>
     <dd>
     Close the sockets.
@@ -354,7 +381,7 @@
 </dd>
     <dt>
     <a name = "Socket:connect"></a>
-    <strong>Socket:connect&nbsp;(address)</strong>
+    <strong>Socket:connect (address)</strong>
     </dt>
     <dd>
     Connect to an end point.
@@ -364,7 +391,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">address</span>
-         the address</li>
+         the address
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -386,7 +414,7 @@
 </dd>
     <dt>
     <a name = "Socket:listen"></a>
-    <strong>Socket:listen&nbsp;(count)</strong>
+    <strong>Socket:listen (count)</strong>
     </dt>
     <dd>
     Listen to a number of pending connections.
@@ -394,7 +422,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">count</span>
-         an optional count, default: 64.</li>
+         an optional count, default: 64.
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -411,7 +440,7 @@
 </dd>
     <dt>
     <a name = "Socket:receive"></a>
-    <strong>Socket:receive&nbsp;(howmany)</strong>
+    <strong>Socket:receive (howmany)</strong>
     </dt>
     <dd>
     Receive some data.
@@ -420,7 +449,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">howmany</span>
-         how much to receive</li>
+         how much to receive
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -437,7 +467,7 @@
 </dd>
     <dt>
     <a name = "Socket:receiveFrom"></a>
-    <strong>Socket:receiveFrom&nbsp;(howmany, from)</strong>
+    <strong>Socket:receiveFrom (howmany, from)</strong>
     </dt>
     <dd>
     Receive some data.
@@ -446,9 +476,11 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">howmany</span>
-         how much to receive</li>
+         how much to receive
+        </li>
         <li><span class="parameter">from</span>
-         the address from</li>
+         the address from
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -469,7 +501,7 @@
 </dd>
     <dt>
     <a name = "Socket:send"></a>
-    <strong>Socket:send&nbsp;(data)</strong>
+    <strong>Socket:send (data)</strong>
     </dt>
     <dd>
     Send some data.
@@ -478,7 +510,8 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">data</span>
-         the data</li>
+         the data
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -495,7 +528,7 @@
 </dd>
     <dt>
     <a name = "Socket:send"></a>
-    <strong>Socket:send&nbsp;(data, address)</strong>
+    <strong>Socket:send (data, address)</strong>
     </dt>
     <dd>
     Send some data.
@@ -504,9 +537,11 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">data</span>
-         the data</li>
+         the data
+        </li>
         <li><span class="parameter">address</span>
-         where to send</li>
+         where to send
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -527,7 +562,7 @@
 </dd>
     <dt>
     <a name = "Socket:set"></a>
-    <strong>Socket:set&nbsp;(level, name, arg)</strong>
+    <strong>Socket:set (level, name, arg)</strong>
     </dt>
     <dd>
     Set an option.
@@ -597,11 +632,14 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">level</span>
-         the level</li>
+         the level
+        </li>
         <li><span class="parameter">name</span>
-         the name</li>
+         the name
+        </li>
         <li><span class="parameter">arg</span>
-         the argument (depend on above)</li>
+         the argument (depend on above)
+        </li>
     </ul>
 
     <h3>Returns:</h3>
@@ -620,8 +658,10 @@
 
 
 </div> <!-- id="content" -->
+</div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc</a></i>
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.0</a></i>
 </div> <!-- id="about" -->
+</div> <!-- id="container" -->
 </body>
 </html>

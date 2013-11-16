@@ -4,7 +4,6 @@
 -- @module irccd.util
 
 --- Colors
--- @class table
 
 local color = {
 	White           = 0,		--- White.
@@ -26,7 +25,6 @@ local color = {
 }
 
 --- Attributes
--- @class table
 
 local attribute = {
 	Bold            = '\x02',	--- Bold.
@@ -86,6 +84,11 @@ end
 -- @return a string ready to be sent
 -- @see Formatting.lua
 function util.format(text, attrs)
+end
+
+--- Get a environment variable.
+-- @return the variable or an empty string
+function util.getEnv()
 end
 
 --- Get the home directory.
