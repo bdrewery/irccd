@@ -245,15 +245,7 @@ public:
 	 *
 	 * @param L the Lua state
 	 */
-	static void initRegistry(lua_State *L)
-	{
-		lua_createtable(L, 0, 0);
-		lua_createtable(L, 0, 1);
-		lua_pushstring(L, "v");
-		lua_setfield(L, -2, "__mode");
-		lua_setmetatable(L, -2);
-		lua_setfield(L, LUA_REGISTRYINDEX, "refs");
-	}
+	static void initRegistry(lua_State *L);
 
 	/**
 	 * Push a shared object to Lua, it also push it to the "refs"

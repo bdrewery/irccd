@@ -242,6 +242,16 @@ void Luae::require(lua_State *L, const std::string &name, lua_CFunction func, bo
 	LUA_STACK_CHECKEQUALS(L);
 }
 
+void Luae::initRegistry(lua_State *L)
+{
+	lua_createtable(L, 0, 0);
+	lua_createtable(L, 0, 1);
+	lua_pushstring(L, "v");
+	lua_setfield(L, -2, "__mode");
+	lua_setmetatable(L, -2);
+	lua_setfield(L, LUA_REGISTRYINDEX, "refs");
+}
+
 } // !irccd
 
 void * operator new(size_t size, lua_State *L)
