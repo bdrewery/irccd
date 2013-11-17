@@ -788,10 +788,7 @@ void Server::stopConnection()
 		Logger::log("server %s: disconnecting...", m_info.m_name.c_str());
 		irc_disconnect(m_session);
 		m_threadStarted = false;
-
-		try {
-			m_thread.join();
-		} catch (std::system_error er) { }
+		m_thread.detach();
 	}
 }
 

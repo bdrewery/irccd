@@ -28,30 +28,12 @@
   <li><a href="../index.html">Index</a></li>
 </ul>
 
-<h2>Contents</h2>
-<ul>
-<li><a href="#Functions">Functions</a></li>
-</ul>
 
 
-<h2>Modules</h2>
-<ul class="nowrap">
-  <li><a href="../modules/irccd.html">irccd</a></li>
-  <li><strong>irccd.logger</strong></li>
-  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
-  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
-  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
-  <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
-  <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
-  <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
-  <li><a href="../modules/irccd.thread.html">irccd.thread</a></li>
-  <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
-  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
-</ul>
 <h2>Topics</h2>
 <ul class="nowrap">
   <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
-  <li><a href="../topics/1.1-Standard-Libraries.md.html">1.1-Standard-Libraries.md</a></li>
+  <li><strong>1.1-Standard-Libraries.md</strong></li>
   <li><a href="../topics/2-Plugin_creation.md.html">2-Plugin_creation.md</a></li>
   <li><a href="../topics/2.1-Using_irccd_test.md.html">2.1-Using_irccd_test.md</a></li>
   <li><a href="../topics/2.2-List_of_Events.md.html">2.2-List_of_Events.md</a></li>
@@ -74,6 +56,20 @@
   <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
   <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
 </ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
+  <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
+  <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
+  <li><a href="../modules/irccd.thread.html">irccd.thread</a></li>
+  <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
+</ul>
 <h2>Examples</h2>
 <ul class="nowrap">
   <li><a href="../examples/Deferred.lua.html">Deferred.lua</a></li>
@@ -85,72 +81,24 @@
 
 <div id="content">
 
-<h1>Module <code>irccd.logger</code></h1>
-
-<p>Logger functions.</p>
-<p> Log, emit a warning within a plugin.</p>
+<h1>Topic <code>1.1-Standard-Libraries.md</code></h1>
 
 
-<h2><a href="#Functions">Functions</a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#log">log (message)</a></td>
-	<td class="summary">Log something.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#warn">warn (message)</a></td>
-	<td class="summary">Emit a warning.</td>
-	</tr>
-</table>
+<h2>Standard Lua libraries</h2>
 
-<br/>
-<br/>
+<p>The following Lua libraries are automatically loaded within irccd : <br /><br /></p>
 
+<ul>
+    <li><a href="http://www.lua.org/manual/5.2/manual.html#pdf-io.close" title="io">io</a></li>
+    <li><a href="http://www.lua.org/manual/5.2/manual.html#pdf-math.abs" title="math">math</a></li>
+    <li><a href="http://www.lua.org/manual/5.2/manual.html#pdf-package.config" title="package">package</a></li>
+    <li><a href="http://www.lua.org/manual/5.2/manual.html#pdf-string.byte" title="string">string</a></li>
+    <li><a href="http://www.lua.org/manual/5.2/manual.html#pdf-table.concat" title="table">table</a></li>
+</ul>
 
-    <h2><a name="Functions"></a>Functions</h2>
-    <dl class="function">
-    <dt>
-    <a name = "log"></a>
-    <strong>log (message)</strong>
-    </dt>
-    <dd>
-    Log something.
- This will append a message into stdout only if irccd
- runs in verbose mode.
+<p><br /></p>
 
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">message</span>
-         the message write
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "warn"></a>
-    <strong>warn (message)</strong>
-    </dt>
-    <dd>
-    Emit a warning.
- Write a message to stderr even if verbosity is disabled
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">message</span>
-         the message to write
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-</dl>
+<p>All global keywords are available as usual.</p>
 
 
 </div> <!-- id="content" -->
