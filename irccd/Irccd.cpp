@@ -434,6 +434,9 @@ int Irccd::run()
 			Util::usleep(250);
 		else
 			Listener::process();
+
+		// Remove dead servers
+		Server::flush();
 	}
 
 	return 0;

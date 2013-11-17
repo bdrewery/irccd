@@ -284,13 +284,7 @@ public:
 	 */
 	static void forAll(MapFunc func);
 
-	/**
-	 * Remove a server from the registry only if it must
-	 * be removed, that is if the connection is done.
-	 *
-	 * @param server the server to remove
-	 */
-	static void remove(Server::Ptr server);
+	static void flush();
 
 	/**
 	 * Convert the s context to a shared_ptr<Server>.
@@ -327,13 +321,6 @@ public:
 	 * Default destructor.
 	 */
 	virtual ~Server();
-
-	/**
-	 * Tells if the server must be removed.
-	 *
-	 * @return true if needed
-	 */
-	bool mustBeRemoved() const;
 
 	/**
 	 * Extract the prefixes from the server.

@@ -313,7 +313,7 @@ int Listener::count()
 void Listener::process()
 {
 	try {
-		Socket s = m_listener.select(100);
+		Socket s = m_listener.select(0, 250);
 
 		/*
 		 * For stream based server add a client and wait for its data,

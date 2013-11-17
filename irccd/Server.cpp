@@ -472,13 +472,16 @@ void Server::forAll(MapFunc func)
 		func(s.second);
 }
 
-void Server::remove(Server::Ptr sv)
+void Server::flush()
 {
 	Lock lk(serverLock);
+	auto i(servers.begin());
 
-	if (sv->mustBeRemoved()) {
-		sv->stopConnection();
-		servers.erase(sv->getInfo().m_name);
+	while (i != servers.end()) {
+		if (i->second->m_shouldDelete)
+			i = servers.erase(i);
+		else
+			++i;
 	}
 }
 
@@ -520,11 +523,6 @@ Server::Server(const Info &info,
 Server::~Server()
 {
 	stopConnection();
-}
-
-bool Server::mustBeRemoved() const
-{
-	return m_shouldDelete;
 }
 
 void Server::init()
@@ -768,9 +766,11 @@ void Server::startConnection()
 		 * Here we are in the step that the server should be destroyed.
 		 */
 		m_shouldDelete = true;
+		m_session = nullptr;
 	};
 
 	m_thread = std::thread(command);
+	m_thread.detach();
 }
 
 void Server::resetRetries()
@@ -786,9 +786,11 @@ void Server::stopConnection()
 
 	if (m_threadStarted) {
 		Logger::log("server %s: disconnecting...", m_info.m_name.c_str());
-		irc_disconnect(m_session);
+
+		if (m_session != nullptr)
+			irc_disconnect(m_session);
+
 		m_threadStarted = false;
-		m_thread.detach();
 	}
 }
 
