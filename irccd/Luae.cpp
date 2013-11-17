@@ -203,6 +203,8 @@ void Luae::preload(lua_State *L, const std::string &name, lua_CFunction func)
 
 void Luae::readTable(lua_State *L, int idx, ReadFunction func)
 {
+	LUA_STACK_CHECKBEGIN(L);
+
 	lua_pushnil(L);
 
 	if (idx < 0)
@@ -213,7 +215,7 @@ void Luae::readTable(lua_State *L, int idx, ReadFunction func)
 		lua_pop(L, 1);
 	}
 
-	lua_pop(L, 1);
+	LUA_STACK_CHECKEQUALS(L);
 }
 
 int Luae::referenceField(lua_State *L, int idx, int type, const std::string &name)

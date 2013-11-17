@@ -4,6 +4,33 @@
 --
 -- @module irccd.server
 
+--- Find an existing server by name.
+-- @param name the server's resource name
+-- @return the server or nil if not found
+-- @return the error message
+function server.find(name)
+end
+
+--- Connect to a server.
+-- <ul>
+-- <li><strong>name (string)</strong>: required, the server name</li>
+-- <li><strong>host (string)</strong>: required, the hostname</li>
+-- <li><strong>port (int)</strong>: required, the port number</li>
+-- <li><strong>password (string)</strong>: an optional password for the IRC server</li>
+-- <li><strong>channels (table)</strong>: list of string or name, password pairs of channels to join</li>
+-- <li><strong>identity (table)</strong>: an identity to use with fields:
+--  <ul>
+--  <li><strong>name (string)</strong>: the identity name</li>
+--  <li><strong>nickname (string)</strong>: the nickname to use</li>
+--  <li><strong>username (string)</strong>: the username</li>
+--  <li><strong>realname (string)</strong>: the full name</li>
+--  </ul>
+-- </ul>
+-- @param params the parameters
+-- @see Connect.lua
+function server.connect(params)
+end
+
 --- Server
 -- @type Server
 
