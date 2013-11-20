@@ -335,8 +335,6 @@ void handlePart(irc_session_t *s,
 	std::string who;
 	IrcEventParams evparams;
 
-	printf("who part = %s\n", orig);
-
 	if (id.m_nickname == who)
 		server->removeChannel(params[0]);
 
