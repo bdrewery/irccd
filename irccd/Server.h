@@ -278,6 +278,14 @@ public:
 	static Server::Ptr get(const std::string &name);
 
 	/**
+	 * Check if a server exists
+	 *
+	 * @param name the server name
+	 * @return true if the server by this name is loaded
+	 */
+	static bool has(const std::string &name);
+
+	/**
 	 * Call a function for all servers.
 	 *
 	 * @param func the function

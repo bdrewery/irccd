@@ -84,14 +84,14 @@ void handleConnect(const std::vector<std::string> &params)
 	info.m_name = params[0];
 	info.m_host = params[1];
 
+	if (Server::has(info.m_name))
+		throw std::runtime_error("server " + info.m_name + " already connected");
+
 	try {
 		info.m_port = std::stoi(params[2]);
 	} catch (...) {
 		throw std::runtime_error("invalid port");
 	}
-
-	for (auto s : params)
-		printf("PARAM %s\n", s.c_str());
 
 	if (params.size() >= 4) {
 		Optional o;

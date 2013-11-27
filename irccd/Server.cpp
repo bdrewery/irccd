@@ -446,6 +446,8 @@ Server::Mutex Server::serverLock;
 
 void Server::add(Server::Ptr server)
 {
+	assert(!Server::has(server->getInfo().m_name));
+
 	Lock lk(serverLock);
 
 	servers[server->getInfo().m_name] = server;
@@ -453,6 +455,13 @@ void Server::add(Server::Ptr server)
 
  	Logger::log("server %s: connecting...",
  	    server->getInfo().m_name.c_str());
+}
+
+bool Server::has(const std::string &name)
+{
+	Lock lk(serverLock);
+
+	return servers.count(name) > 0;
 }
 
 Server::Ptr Server::get(const std::string &name)

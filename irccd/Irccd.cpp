@@ -349,7 +349,10 @@ void Irccd::readServers(const Parser &config)
 
 			// Extract channels to auto join
 			extractChannels(s, server);
-			Server::add(server);
+			if (Server::has(info.m_name))
+				Logger::warn("server %s: duplicated server", info.m_name.c_str());
+			else
+				Server::add(server);
 		} catch (NotFoundException ex) {
 			Logger::warn("server: missing parameter %s", ex.which().c_str());
 		}
