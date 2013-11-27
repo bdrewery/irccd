@@ -16,7 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
 #include <sstream>
 #include <unordered_map>
 
@@ -471,6 +470,14 @@ int l_connect(lua_State *L)
 	info.m_host	= Luae::requireField<std::string>(L, 1, "host");
 	info.m_port	= Luae::requireField<int>(L, 1, "port");
 
+	if (Server::has(info.m_name)) {
+		lua_pushboolean(L, false);
+		lua_pushfstring(L, "server %s already connected",
+		    info.m_name.c_str());
+
+		return 2;
+	}
+
 	if (Luae::typeField(L, 1, "password") == LUA_TSTRING)
 		info.m_password = Luae::requireField<std::string>(L, 1, "password");
 
@@ -480,7 +487,9 @@ int l_connect(lua_State *L)
 	server = std::make_shared<Server>(info, ident, options);
 	Server::add(server);
 
-	return 0;
+	lua_pushboolean(L, true);
+
+	return 1;
 }
 
 const luaL_Reg functions[] = {

@@ -27,6 +27,8 @@ end
 --  </ul>
 -- </ul>
 -- @param params the parameters
+-- @return true on success or false
+-- @return the error message
 -- @see Connect.lua
 function server.connect(params)
 end
