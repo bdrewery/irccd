@@ -48,6 +48,18 @@ void helpChannelNotice()
 	Logger::warn("\t%s cnotice freenode #staff \"Don't flood\"", getprogname());
 }
 
+void helpConnect()
+{
+	Logger::warn("usage: %s [-k password] [-i identity] connect name address port\n", getprogname());
+	Logger::warn("Connect to a new server. Specify the server ressource name, address and the port");
+	Logger::warn("to use. Optional -k option specify a password. Optional -i option specify a");
+	Logger::warn("specific identity to use.\n");
+
+	Logger::warn("Example:");
+	Logger::warn("\t%s connect superserver irc.superserver.foo 6667", getprogname());
+	Logger::warn("\t%s connect -k secret -i fabrice serverz irc.svz.bar 6667", getprogname());
+}
+
 void helpInvite()
 {
 	Logger::warn("usage: %s invite server nickname channel\n", getprogname());
@@ -184,6 +196,7 @@ void helpUserMode()
 
 std::unordered_map<std::string, HelpHandler> helpHandlers {
 	{ "cnotice", 	helpChannelNotice	},
+	{ "connect",	helpConnect		},
 	{ "invite",	helpInvite		},
 	{ "join",	helpJoin		},
 	{ "kick",	helpKick		},
@@ -229,6 +242,26 @@ void handleChannelNotice(Irccdctl *ctl, int argc, char **argv)
 
 	oss << "CNOTICE " << argv[0] << " " << argv[1];
 	oss << " " << argv[2] << "\n";
+	ctl->sendRaw(oss.str());
+}
+
+void handleConnect(Irccdctl *ctl, int argc, char **argv)
+{
+	std::ostringstream oss;
+
+	if (argc < 3)
+		Logger::fatal(1, "connect requires 3 arguments");
+
+	oss << "CONNECT " << argv[0] << " " << argv[1];
+	oss << " " << argv[2];
+
+	// Identity and password are optional
+	if (ctl->hasArg('i'))
+		oss << " ident:" << ctl->getArg('i');
+	if (ctl->hasArg('k'))
+		oss << " key:" << ctl->getArg('k');
+	oss << "\n";
+	
 	ctl->sendRaw(oss.str());
 }
 
@@ -403,6 +436,7 @@ void handleUserMode(Irccdctl *ctl, int argc, char **argv)
 
 std::unordered_map<std::string, Handler> handlers {
 	{ "cnotice",	handleChannelNotice	},
+	{ "connect",	handleConnect		},
 	{ "help",	handleHelp		},
 	{ "invite",	handleInvite		},
 	{ "join",	handleJoin		},
@@ -657,12 +691,28 @@ int Irccdctl::getResponse()
 	return ret;
 }
 
+void Irccdctl::addArg(char c, const std::string &arg)
+{
+	m_args[c] = arg;
+}
+
+bool Irccdctl::hasArg(char c)
+{
+	return m_args.count(c) > 0;
+}
+
+const std::string &Irccdctl::getArg(char c)
+{
+	return m_args[c];
+}
+
 void Irccdctl::usage()
 {
 	Logger::warn("usage: %s [-cv] <command> [<args>]\n", getprogname());
 
 	Logger::warn("Commands supported:");
 	Logger::warn("\tcnotice\t\tSend a channel notice");
+	Logger::warn("\tconnect\t\tConnect to a server");
 	Logger::warn("\thelp\t\tGet this help");
 	Logger::warn("\tinvite\t\tInvite someone to a channel");
 	Logger::warn("\tjoin\t\tJoin a channel");

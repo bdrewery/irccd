@@ -106,7 +106,8 @@ int main(int argc, char **argv)
 
 	setprogname("irccdctl");
 
-	while ((ch = getopt(argc, argv, "46c:h:P:p:T:t:v")) != -1) {
+	opterr = false;
+	while ((ch = getopt(argc, argv, "46c:h:i:k:P:p:T:t:v")) != -1) {
 		switch (ch)
 		{
 		case '4':
@@ -114,7 +115,11 @@ int main(int argc, char **argv)
 			params[ch] = "1";			// IPv4 or IPv6?
 			break;
 		case 'c':
-			ctl.setConfigPath(string(optarg));
+			ctl.setConfigPath(optarg);
+			break;
+		case 'i':					// identity
+		case 'k':					// key (password)
+			ctl.addArg(ch, optarg);
 			break;
 		case 'h':					// host
 		case 'P':					// unix path

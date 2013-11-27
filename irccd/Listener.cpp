@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <utility>
+
 #include <Logger.h>
 #include <Util.h>
 
@@ -26,7 +28,9 @@ namespace irccd {
 
 namespace {
 
-using SocketFunction = std::function<void(const std::vector<std::string> &params)>;
+using Params		= std::vector<std::string>;
+using SocketFunction	= std::function<void(const Params &params)>;
+using Optional		= std::pair<std::string, std::string>;
 
 /**
  * @struct ClientHandler
@@ -51,6 +55,55 @@ struct ClientHandler {
 	{
 	}
 };
+
+Optional getOptional(const std::string &line)
+{
+	Optional opt;
+	size_t pos;
+
+	pos = line.find(":");
+	if (pos != std::string::npos) {
+		opt = std::make_pair(
+			line.substr(0, pos),
+			line.substr(pos + 1)
+		);
+	}
+
+	return opt;
+}
+
+void handleConnect(const std::vector<std::string> &params)
+{
+	Server::Info info;
+	Server::Identity ident;
+	Server::Options options;
+
+	// Set a max retry count to avoid forever loop
+	options.m_maxretries = 5;
+
+	info.m_name = params[0];
+	info.m_host = params[1];
+
+	try {
+		info.m_port = std::stoi(params[2]);
+	} catch (...) {
+		throw std::runtime_error("invalid port");
+	}
+
+	if (params.size() >= 4) {
+		Optional o;
+
+		for (size_t i = 3; i < params.size(); ++i) {
+			o = getOptional(params[i]);
+			if (o.first == "key")
+				info.m_password = o.second;
+			if (o.first == "ident")
+				ident = Irccd::getInstance().findIdentity(o.second);
+		}
+	}
+
+	Server::add(std::make_shared<Server>(info, ident, options));
+}
 
 void handleChannelNotice(const std::vector<std::string> &params)
 {
@@ -137,6 +190,7 @@ void handleUserMode(const std::vector<std::string> &params)
 
 std::unordered_map<std::string, ClientHandler> handlers {
 	{ "CNOTICE",	ClientHandler(3, 3, handleChannelNotice)	},
+	{ "CONNECT",	ClientHandler(3, 5, handleConnect)		},
 	{ "INVITE",	ClientHandler(3, 3, handleInvite)		},
 	{ "JOIN",	ClientHandler(2, 3, handleJoin)			},
 	{ "KICK",	ClientHandler(3, 4, handleKick)			},
@@ -276,6 +330,12 @@ void Listener::execute(const std::string &cmd,
 					notifySocket("OK\n", s, addr);
 				}
 			} catch (std::out_of_range ex) {
+				std::ostringstream oss;
+
+				oss << ex.what() << "\n";
+
+				notifySocket(oss.str(), s, addr);
+			} catch (std::runtime_error ex) {
 				std::ostringstream oss;
 
 				oss << ex.what() << "\n";

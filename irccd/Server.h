@@ -284,6 +284,9 @@ public:
 	 */
 	static void forAll(MapFunc func);
 
+	/**
+	 * Remove all dead servers.
+	 */
 	static void flush();
 
 	/**
