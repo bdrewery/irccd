@@ -537,12 +537,12 @@ void Irccdctl::removeUnixFiles()
 
 void Irccdctl::loadInet(const Section &section)
 {
-	std::string host, inet;
+	std::string inet;
 
-	host = section.requireOption<std::string>("host");
-	inet = section.requireOption<std::string>("family");
+	m_host = section.requireOption<std::string>("host");
 	m_port = section.requireOption<int>("port");
 
+	inet = section.requireOption<std::string>("family");
 	if (inet == "ipv4")
 		m_domain = AF_INET;
 	else if (inet == "ipv6")
