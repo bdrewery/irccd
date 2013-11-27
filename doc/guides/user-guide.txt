@@ -599,6 +599,9 @@ path = "/tmp/irccd.sock"
 The following options are available:
 
 * `-c`, a path to a config file.
+* `-i identity`, use a specific identity, only used by connect command.
+* `-k key`, use a password, only used by connect command.
+* `-s`, use SSL, only used by connect command.
 * `-t domain`, the domain to use, specify internet or unix.
 * `-T type`, the type to use, tcp or udp.
 * `-v`, be more verbose.
@@ -624,6 +627,7 @@ Only `load`, `reload` and `unload` do not need it.
 The following commands are available for irccdctl:
 
 * <<irccdctlcnotice,cnotice>>
+* <<irccdctlconnect,connect>>
 * <<irccdctlhelp,help>>
 * <<irccdctlinvite,invite>>
 * <<irccdctljoin,join>>
@@ -638,8 +642,6 @@ The following commands are available for irccdctl:
 * <<irccdctlreload,reload>>
 * <<irccdctlumode,umode>>
 * <<irccdctlunload,unload>>
-
-anchor:irccdctlcnotice[]
 
 [IMPORTANT]
 .Shell parsing warning
@@ -658,6 +660,8 @@ $ irccdctl join localhost "#staff"
 ----
 ==========================
 
+anchor:irccdctlcnotice[]
+
 === Channel notice
 
 Send a notice to a public channel. This is a notice that everyone
@@ -671,6 +675,24 @@ $ irccdctl cnotice server channel message
 .Example
 ----
 $ irccdctl cnotice freenode #staff "Don't flood"
+----
+
+anchor:irccdctlconnect[]
+
+=== Connect
+
+Connect to a new IRC server.
+
+.Usage
+----
+$ irccdctl [-s] [-i identity] [-k password] connect name host port
+----
+
+.Example
+----
+$ irccdctl connect wanadoo chat.wanadoo.fr 6667
+$ irccdctl connect -s wanadoo chat.wanadoo.fr 6697
+$ irccdctl connect -k "secret" wanadoo chat.wanadoo.fr 6667
 ----
 
 anchor:irccdctlhelp[]

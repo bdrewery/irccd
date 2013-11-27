@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 	setprogname("irccdctl");
 
 	opterr = false;
-	while ((ch = getopt(argc, argv, "46c:h:i:k:P:p:T:t:v")) != -1) {
+	while ((ch = getopt(argc, argv, "46c:h:i:k:P:p:sT:t:v")) != -1) {
 		switch (ch)
 		{
 		case '4':
@@ -116,6 +116,9 @@ int main(int argc, char **argv)
 			break;
 		case 'c':
 			ctl.setConfigPath(optarg);
+			break;
+		case 's':					// ssl
+			ctl.addArg(ch, "dummy");
 			break;
 		case 'i':					// identity
 		case 'k':					// key (password)

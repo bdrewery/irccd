@@ -260,6 +260,8 @@ void handleConnect(Irccdctl *ctl, int argc, char **argv)
 		oss << " ident:" << ctl->getArg('i');
 	if (ctl->hasArg('k'))
 		oss << " key:" << ctl->getArg('k');
+	if (ctl->hasArg('s'))
+		oss << " ssl:on";
 	oss << "\n";
 	
 	ctl->sendRaw(oss.str());

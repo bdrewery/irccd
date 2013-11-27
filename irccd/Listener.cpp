@@ -90,6 +90,9 @@ void handleConnect(const std::vector<std::string> &params)
 		throw std::runtime_error("invalid port");
 	}
 
+	for (auto s : params)
+		printf("PARAM %s\n", s.c_str());
+
 	if (params.size() >= 4) {
 		Optional o;
 
@@ -97,6 +100,8 @@ void handleConnect(const std::vector<std::string> &params)
 			o = getOptional(params[i]);
 			if (o.first == "key")
 				info.m_password = o.second;
+			if (o.first == "ssl")
+				info.m_ssl = true;
 			if (o.first == "ident")
 				ident = Irccd::getInstance().findIdentity(o.second);
 		}
@@ -190,7 +195,7 @@ void handleUserMode(const std::vector<std::string> &params)
 
 std::unordered_map<std::string, ClientHandler> handlers {
 	{ "CNOTICE",	ClientHandler(3, 3, handleChannelNotice)	},
-	{ "CONNECT",	ClientHandler(3, 5, handleConnect)		},
+	{ "CONNECT",	ClientHandler(3, 6, handleConnect)		},
 	{ "INVITE",	ClientHandler(3, 3, handleInvite)		},
 	{ "JOIN",	ClientHandler(2, 3, handleJoin)			},
 	{ "KICK",	ClientHandler(3, 4, handleKick)			},
