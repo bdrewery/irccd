@@ -33,7 +33,7 @@ namespace irccd {
 class DefCall;
 class IrcEvent;
 
-class Plugin {
+class Plugin : public std::enable_shared_from_this<Plugin> {
 public:
 	class ErrorException : public std::exception {
 	private:
@@ -63,27 +63,20 @@ public:
 					Plugin::Ptr
 				  >;
 
-	using ThreadList	= std::vector<Thread::Ptr>;
-	using ThreadMap		= std::unordered_map<
-					lua_State *,
-					Plugin::Ptr
-				  >;
-
 	using DefCallList	= std::unordered_map<
 					Server::Ptr,
 					std::vector<DefCall>
 				  >;
 
-	using Mutex		= std::recursive_mutex;
-	using Lock		= std::lock_guard<std::recursive_mutex>;
-
 	using MapFunc		= std::function<void (Plugin::Ptr)>;
+
+	using Mutex		= std::recursive_mutex;
+	using Lock		= std::lock_guard<Mutex>;
 
 private:
 	static Mutex		pluginLock;	//! lock for managing plugins
 	static Dirs		pluginDirs;	//! list of plugin directories
 	static Map		pluginMap;	//! map of plugins loaded
-	static ThreadMap	threadMap;	//! map of threads
 	static DefCallList	deferred;	//! list of deferred call
 
 	// Plugin identity
@@ -94,7 +87,6 @@ private:
 
 	// Lua state and its optional threads
 	LuaState		m_state;
-	ThreadList		m_threads;
 
 	static bool isPluginLoaded(const std::string &name);
 	static void callPlugin(std::shared_ptr<Plugin> p, const IrcEvent &ev);
@@ -105,6 +97,17 @@ private:
 			  std::vector<std::string> params = std::vector<std::string>());
 
 public:
+	/*
+	 * The following fields are store in the lua_State * registry
+	 * and may be retrieved at any time from any Lua API.
+	 */
+	static const char *	FieldName;
+	static const char *	FieldHome;
+
+	/*
+	 * The following tables are libraries to load, luaLibs are
+	 * required and irccdLibs are preloaded.
+	 */
 	static const Libraries luaLibs;
 	static const Libraries irccdLibs;
 
@@ -114,6 +117,15 @@ public:
 	 * @param path the path
 	 */
 	static void addPath(const std::string &path);
+
+	/**
+	 * Add plugin information to the Lua state registry. It's used
+	 * by some plugins.
+	 *
+	 * @param L the Lua state
+	 * @param owner the plugin owner
+	 */
+	static void initialize(LuaState &L, Plugin::Ptr owner);
 
 	/**
 	 * Try to load a plugin.
@@ -169,24 +181,6 @@ public:
 	 * @param call the function to be called when needed
 	 */
 	static void defer(Server::Ptr server, DefCall call);
-
-	/**
-	 * Register a thread Lua state for the specific plugin.
-	 *
-	 * @param L the Lua state
-	 * @param plugin the plugin that owns the thread
-	 * @param thread the new plugin children
-	 */
-	static void registerThread(lua_State *L,
-				   Plugin::Ptr plugin,
-				   Thread::Ptr thrd);
-
-	/**
-	 * Get rid of plugin thread.
-	 *
-	 * @param L the Lua state
-	 */
-	static void unregisterThread(lua_State *L);
 
 	/**
 	 * Handle an IRC event and dispatch it to all plugins.

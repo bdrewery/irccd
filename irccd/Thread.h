@@ -20,7 +20,6 @@
 #define _THREAD_H_
 
 #include <thread>
-#include <mutex>
 
 #include "Luae.h"
 
@@ -32,16 +31,16 @@ namespace irccd {
  */
 class Thread {
 private:
-	std::thread m_handle;
-	std::mutex m_mutex;
-	bool m_waited;
-	LuaState m_state;
+	std::thread	m_thread;
+	bool		m_joined;
+	LuaState	m_state;
 
 	Thread();
 
 public:
 	using Ptr	= std::shared_ptr<Thread>;
-	using Lock	= std::lock_guard<std::mutex>;
+
+	friend class Plugin;
 
 	/**
 	 * Create a new thread as a shared pointer.
@@ -51,35 +50,37 @@ public:
 	static Ptr create();
 
 	/**
-	 * Kills the threads by running its detach state.
+	 * Start a thread by calling the function already pushed
+	 * with its parameters.
+	 *
+	 * @param thread the thread to start
+	 * @param np the number of parameters pushed
+	 */
+	static void start(Thread::Ptr thread, int np);
+
+	/**
+	 * Default destructor.
 	 */
 	~Thread();
 
 	/**
-	 * Set the Lua state for the thread.
+	 * Move the state to the thread.
 	 *
-	 * @param state the Lua state to move
+	 * @param state the new Lua state to move
 	 */
 	void setState(LuaState &&state);
 
 	/**
-	 * Get the current Lua state
+	 * Check if the thread has been joined or detached.
 	 *
-	 * @return the state
+	 * @return true if any
 	 */
-	LuaState &getState();
-
-	/**
-	 * Set the function handle for that thread.
-	 *
-	 * @param handle the thread to move
-	 */
-	void setHandle(std::thread &&handle);
+	bool hasJoined() const;
 
 	/**
 	 * Wait the thread to finish.
 	 */
-	void wait();
+	void join();
 
 	/**
 	 * Detach the thread, the object can be safely destroyed.

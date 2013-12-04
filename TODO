@@ -7,3 +7,5 @@ IRC Client Daemon TODO
 * Add using Ptr for std::shared_ptr<Server> (same for Plugin)
 * Document onLoad and onUnload in irccd(1)
 * Common::splitUser
+* Generalize DefCall to not be in Plugin so that Thread can use them
+* Get rid of Irccd::find(lua_State *L)

@@ -30,9 +30,11 @@ namespace {
 std::string makeMessage(lua_State *L, const std::string &message)
 {
 	std::ostringstream oss;
-	Plugin::Ptr p = Plugin::find(L);
+	std::string name;
 
-	oss << "plugin " << p->getName() << ": " << message;
+	name = Luae::requireField<std::string>(L, LUA_REGISTRYINDEX, Plugin::FieldName);
+
+	oss << "plugin " << name << ": " << message;
 
 	return oss.str();
 }

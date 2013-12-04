@@ -258,10 +258,12 @@ void Plugin::callFunction(const std::string &func,
  * public methods and members
  * -------------------------------------------------------- */
 
+const char *	Plugin::FieldName = "__plugin_name__";
+const char *	Plugin::FieldHome = "__plugin_home__";
+
 Plugin::Mutex		Plugin::pluginLock;
 Plugin::Dirs		Plugin::pluginDirs;
 Plugin::Map		Plugin::pluginMap;
-Plugin::ThreadMap	Plugin::threadMap;
 Plugin::DefCallList	Plugin::deferred;
 
 void Plugin::addPath(const std::string &path)
@@ -269,6 +271,18 @@ void Plugin::addPath(const std::string &path)
 	Lock lk(pluginLock);
 
 	pluginDirs.push_back(path);
+}
+
+void Plugin::initialize(LuaState &L, Plugin::Ptr owner)
+{
+	auto name = owner->getName();
+	auto home = owner->getHome();
+
+	lua_pushlstring(L, name.c_str(), name.length());
+	lua_setfield(L, LUA_REGISTRYINDEX, FieldName);
+
+	lua_pushlstring(L, home.c_str(), home.length());
+	lua_setfield(L, LUA_REGISTRYINDEX, FieldHome);
 }
 
 void Plugin::load(const std::string &name, bool relative)
@@ -383,17 +397,12 @@ void Plugin::reload(const std::string &name)
 Plugin::Ptr Plugin::find(lua_State *state)
 {
 	Lock lk(pluginLock);
-
+	
 	for (auto plugin : pluginMap) {
 		/*
 		 * Test if the current plugin is the one with that
 		 * Lua state.
 		 */
-		if (plugin.first == state)
-			return plugin.second;
-	}
-
-	for (auto plugin : threadMap) {
 		if (plugin.first == state)
 			return plugin.second;
 	}
@@ -438,23 +447,6 @@ void Plugin::defer(Server::Ptr server, DefCall call)
 	deferred[server].push_back(call);
 }
 
-void Plugin::registerThread(lua_State *L,
-			    Plugin::Ptr plugin,
-			    Thread::Ptr thrd)
-{
-	Lock lk(pluginLock);
-
-	threadMap[L] = plugin;
-	plugin->m_threads.push_back(thrd);
-}
-
-void Plugin::unregisterThread(lua_State *L)
-{
-	Lock lk(pluginLock);
-
-	threadMap.erase(L);
-}
-
 void Plugin::handleIrcEvent(const IrcEvent &ev)
 {
 	Lock lk(pluginLock);
@@ -472,13 +464,6 @@ void Plugin::handleIrcEvent(const IrcEvent &ev)
 	}
 
 	for (auto p : pluginMap) {
-		/*
-		 * Ignore Lua threads that share the same Plugin
-		 * object.
-		 */
-		if (threadMap.find(p.first) != threadMap.end())
-			continue;
-
 		try {
 			callPlugin(p.second, ev);
 		} catch (Plugin::ErrorException ex) {
@@ -531,6 +516,9 @@ bool Plugin::open()
 
 	// Find the home directory for the plugin
 	m_home = Util::findPluginHome(m_name);
+
+	// Initialize the plugin name and its data
+	Plugin::initialize(m_state, shared_from_this());
 
 	if (luaL_dofile(m_state, m_path.c_str()) != LUA_OK) {
 		m_error = lua_tostring(m_state, -1);

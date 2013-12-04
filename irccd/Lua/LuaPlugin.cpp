@@ -25,14 +25,20 @@ namespace {
 
 int getName(lua_State *L)
 {
-	lua_pushstring(L, Plugin::find(L)->getName().c_str());
+	auto name = Luae::requireField<std::string>(L,
+	    LUA_REGISTRYINDEX, Plugin::FieldName);
+
+	lua_pushlstring(L, name.c_str(), name.length());
 
 	return 1;
 }
 
 int getHome(lua_State *L)
 {
-	lua_pushstring(L, Plugin::find(L)->getHome().c_str());
+	auto home = Luae::requireField<std::string>(L,
+	    LUA_REGISTRYINDEX, Plugin::FieldHome);
+
+	lua_pushlstring(L, home.c_str(), home.length());
 
 	return 1;
 }

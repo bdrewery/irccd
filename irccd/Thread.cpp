@@ -16,65 +16,57 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "Thread.h"
+#include <Logger.h>
+
+#include "Plugin.h"
 
 namespace irccd {
 
 Thread::Ptr Thread::create()
 {
-	return std::shared_ptr<Thread>(new Thread());
+	return std::shared_ptr<Thread>(new Thread);
+}
+
+void Thread::start(Thread::Ptr thread, int np)
+{
+	thread->m_thread = std::thread([=] () {
+		if (lua_pcall(thread->m_state, np, 0, 0) != LUA_OK) {
+			Logger::warn("thread: %s", lua_tostring(thread->m_state, -1));
+			lua_pop(thread->m_state, 1);
+		}
+	});
 }
 
 Thread::Thread()
-	: m_waited(false)
+	: m_joined(false)
 {
 }
 
 Thread::~Thread()
 {
-	detach();
+	Logger::debug("thread: destructor called");
 }
 
 void Thread::setState(LuaState &&state)
 {
-	Lock lk(m_mutex);
-
 	m_state = std::move(state);
 }
 
-LuaState &Thread::getState()
+bool Thread::hasJoined() const
 {
-	Lock lk(m_mutex);
-
-	return m_state;
+	return m_joined;
 }
 
-void Thread::setHandle(std::thread &&handle)
+void Thread::join()
 {
-	Lock lk(m_mutex);
-
-	m_handle = std::move(handle);
-}
-
-void Thread::wait()
-{
-	Lock lk(m_mutex);
-
-	if (!m_waited) {
-		m_handle.join();
-		m_waited = true;
-	}
+	m_thread.join();
+	m_joined = true;
 }
 
 void Thread::detach()
 {
-	Lock lk(m_mutex);
-
-	try
-	{
-		m_handle.detach();
-	}
-	catch (...) { }
+	m_thread.detach();
+	m_joined = true;
 }
 
 } // !irccd
