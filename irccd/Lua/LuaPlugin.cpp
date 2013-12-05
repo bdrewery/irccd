@@ -26,7 +26,7 @@ namespace {
 int getName(lua_State *L)
 {
 	auto name = Luae::requireField<std::string>(L,
-	    LUA_REGISTRYINDEX, Plugin::FieldName);
+	    LUA_REGISTRYINDEX, Process::FieldName);
 
 	lua_pushlstring(L, name.c_str(), name.length());
 
@@ -36,7 +36,7 @@ int getName(lua_State *L)
 int getHome(lua_State *L)
 {
 	auto home = Luae::requireField<std::string>(L,
-	    LUA_REGISTRYINDEX, Plugin::FieldHome);
+	    LUA_REGISTRYINDEX, Process::FieldHome);
 
 	lua_pushlstring(L, home.c_str(), home.length());
 

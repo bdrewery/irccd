@@ -22,6 +22,7 @@
 #include <thread>
 
 #include "Luae.h"
+#include "Process.h"
 
 namespace irccd {
 
@@ -33,7 +34,7 @@ class Thread {
 private:
 	std::thread	m_thread;
 	bool		m_joined;
-	LuaState	m_state;
+	Process::Ptr	m_process;
 
 	Thread();
 
@@ -86,6 +87,8 @@ public:
 	 * Detach the thread, the object can be safely destroyed.
 	 */
 	void detach();
+
+	operator lua_State *();
 };
 
 } // !irccd

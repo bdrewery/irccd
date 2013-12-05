@@ -47,6 +47,7 @@ private:
 
 	using Ptr = std::unique_ptr<lua_State, Deleter>;
 
+	std::string test;
 	Ptr m_state;
 
 public:

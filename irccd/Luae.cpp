@@ -44,6 +44,7 @@ LuaState &LuaState::operator=(LuaState &&state)
 
 LuaState::operator lua_State*()
 {
+	printf("PRINT BEFORE = %s\n", test.c_str());
 	return m_state.get();
 }
 

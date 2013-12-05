@@ -33,7 +33,7 @@ namespace irccd {
 class DefCall {
 private:
 	IrcEventType m_type;		//! which type of event
-	Plugin::Ptr m_plugin;		//! for which plugin
+	lua_State *m_state;
 	int m_ref;			//! function reference
 
 	/**
@@ -51,9 +51,8 @@ public:
 	 */
 	DefCall() = default;
 
-	/**
-	 */
-	DefCall(IrcEventType type, Plugin::Ptr plugin, int ref);
+
+	DefCall(IrcEventType type, lua_State *L, int ref);
 
 	/**
 	 * Get the deferred IRC event type.

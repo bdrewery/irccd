@@ -247,13 +247,11 @@ int serverNames(lua_State *L)
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 
 	try {
-		Plugin::Ptr p = Plugin::find(L);
-
 		// Get the function reference.
 		lua_pushvalue(L, 3);
 		ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-		Plugin::defer(s, DefCall(IrcEventType::Names, p, ref));
+		Plugin::defer(s, DefCall(IrcEventType::Names, L, ref));
 		s->names(channel);
 	} catch (std::out_of_range) { }
 
@@ -354,13 +352,11 @@ int serverWhois(lua_State *L)
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 
 	try {
-		Plugin::Ptr p = Plugin::find(L);
-
 		// Get the function reference.
 		lua_pushvalue(L, 3);
 		ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-		Plugin::defer(s, DefCall(IrcEventType::Whois, p, ref));
+		Plugin::defer(s, DefCall(IrcEventType::Whois, L, ref));
 
 		s->whois(target);
 	} catch (std::out_of_range) { }

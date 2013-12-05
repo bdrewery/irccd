@@ -75,6 +75,8 @@ if (WITH_LUA)
 			Pipe.h
 			Plugin.cpp
 			Plugin.h
+			Process.cpp
+			Process.h
 			Test.cpp
 			Test.h
 			Thread.cpp

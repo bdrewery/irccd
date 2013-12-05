@@ -23,6 +23,7 @@
 #include "Luae.h"
 #include "LuaThread.h"
 #include "Plugin.h"
+#include "Thread.h"
 
 namespace irccd {
 
@@ -75,8 +76,8 @@ const char *THREAD_TYPE = "Thread";
 
 int l_threadNew(lua_State *L)
 {
+	Thread::Ptr thread = Thread::create();
 	Buffer chunk;
-	LuaState state;
 	int np;
 
 	luaL_checktype(L, 1, LUA_TFUNCTION);
@@ -89,30 +90,32 @@ int l_threadNew(lua_State *L)
 	/*
 	 * Load the same libs as a new Plugin.
 	 */
-	Luae::initRegistry(state);
+	Luae::initRegistry(*thread);
 
-	for (auto l : Plugin::luaLibs)
-		Luae::require(state, l.first, l.second, true);
-	for (auto l : Plugin::irccdLibs)
-		Luae::preload(state, l.first, l.second);
+	for (auto l : Process::luaLibs)
+		Luae::require(*thread, l.first, l.second, true);
+	for (auto l : Process::irccdLibs)
+		Luae::preload(*thread, l.first, l.second);
 
-	lua_load(state, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
+	lua_load(*thread, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
 
 	np = 0;
 	for (int i = 2; i <= lua_gettop(L); ++i) {
 		LuaValue v = LuaValue::copy(L, i);
-		LuaValue::push(state, v);
+		LuaValue::push(*thread, v);
 		++ np;
 	}
 
 	try {
-		Plugin::Ptr self = Plugin::find(L);
-		Thread::Ptr thread = Thread::create();
+		auto name = Luae::requireField<std::string>(L,
+		    LUA_REGISTRYINDEX, Process::FieldName);
+		auto home = Luae::requireField<std::string>(L,
+		    LUA_REGISTRYINDEX, Process::FieldHome);
 
 		// Set home and name like the plugin
-		Plugin::initialize(state, self);
+		Process::initialize(*thread, name, home);
 
-		thread->setState(std::move(state));
+		//thread->setState(std::move(state));
 
 		// Create the object to push as return value
 		Thread::Ptr *ptr = new (L, THREAD_TYPE) Thread::Ptr(thread);

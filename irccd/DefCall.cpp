@@ -22,22 +22,21 @@ namespace irccd {
 
 void DefCall::call(int nparams)
 {
-	lua_State *L = m_plugin->getState();
-
-	bool result = lua_pcall(L, nparams, 0, 0) == LUA_OK;
-	luaL_unref(L, LUA_REGISTRYINDEX, m_ref);
+	bool result = lua_pcall(m_state, nparams, 0, 0) == LUA_OK;
+	luaL_unref(m_state, LUA_REGISTRYINDEX, m_ref);
 	
 	if (!result) {
-		std::string error = lua_tostring(L, -1);
-		lua_pop(L, 1);
+		std::string error = lua_tostring(m_state, -1);
+		lua_pop(m_state, 1);
 
-		throw Plugin::ErrorException(m_plugin->getName(), error);
+		// XXX: GET NAME HERE
+		//throw Plugin::ErrorException(m_plugin->getName(), error);
 	}
 }
 
-DefCall::DefCall(IrcEventType type, Plugin::Ptr plugin, int ref)
+DefCall::DefCall(IrcEventType type, lua_State *L, int ref)
 	: m_type(type)
-	, m_plugin(plugin)
+	, m_state(L)
 	, m_ref(ref)
 {
 }
@@ -49,14 +48,12 @@ IrcEventType DefCall::type() const
 
 void DefCall::onNames(const std::vector<std::string> &users)
 {
-	lua_State *L = m_plugin->getState();
-
-	lua_rawgeti(L, LUA_REGISTRYINDEX, m_ref);
-	lua_createtable(L, users.size(), users.size());
+	lua_rawgeti(m_state, LUA_REGISTRYINDEX, m_ref);
+	lua_createtable(m_state, users.size(), users.size());
 
 	for (size_t i = 0; i < users.size(); ++i) {
-		lua_pushstring(L, users[i].c_str());
-		lua_rawseti(L, -2, i + 1);
+		lua_pushstring(m_state, users[i].c_str());
+		lua_rawseti(m_state, -2, i + 1);
 	}
 	
 	call(1);
@@ -64,32 +61,30 @@ void DefCall::onNames(const std::vector<std::string> &users)
 
 void DefCall::onWhois(const std::vector<std::string> &params)
 {
-	lua_State *L = m_plugin->getState();
+	lua_rawgeti(m_state, LUA_REGISTRYINDEX, m_ref);
+	lua_createtable(m_state, 0, 0);
 
-	lua_rawgeti(L, LUA_REGISTRYINDEX, m_ref);
-	lua_createtable(L, 0, 0);
+	lua_pushstring(m_state, params[0].c_str());
+	lua_setfield(m_state, -2, "nickname");
 
-	lua_pushstring(L, params[0].c_str());
-	lua_setfield(L, -2, "nickname");
+	lua_pushstring(m_state, params[1].c_str());
+	lua_setfield(m_state, -2, "user");
 
-	lua_pushstring(L, params[1].c_str());
-	lua_setfield(L, -2, "user");
+	lua_pushstring(m_state, params[2].c_str());
+	lua_setfield(m_state, -2, "host");
 
-	lua_pushstring(L, params[2].c_str());
-	lua_setfield(L, -2, "host");
-
-	lua_pushstring(L, params[3].c_str());
-	lua_setfield(L, -2, "realname");
+	lua_pushstring(m_state, params[3].c_str());
+	lua_setfield(m_state, -2, "realname");
 
 	if (params.size() >= 4) {
-		lua_createtable(L, 0, 0);
+		lua_createtable(m_state, 0, 0);
 
 		for (size_t i = 4; i < params.size(); ++i) {
-			lua_pushstring(L, params[i].c_str());
-			lua_rawseti(L, -2, i - 3);
+			lua_pushstring(m_state, params[i].c_str());
+			lua_rawseti(m_state, -2, i - 3);
 		}
 
-		lua_setfield(L, -2, "channels");
+		lua_setfield(m_state, -2, "channels");
 	}
 
 	call(1);
@@ -98,7 +93,7 @@ void DefCall::onWhois(const std::vector<std::string> &params)
 bool DefCall::operator==(const DefCall &c1)
 {
 	return m_type == c1.m_type &&
-	    m_plugin == c1.m_plugin &&
+	    m_state == c1.m_state &&
 	    m_ref == c1.m_ref;
 }
 

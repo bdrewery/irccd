@@ -32,7 +32,7 @@ std::string makeMessage(lua_State *L, const std::string &message)
 	std::ostringstream oss;
 	std::string name;
 
-	name = Luae::requireField<std::string>(L, LUA_REGISTRYINDEX, Plugin::FieldName);
+	name = Luae::requireField<std::string>(L, LUA_REGISTRYINDEX, Process::FieldName);
 
 	oss << "plugin " << name << ": " << message;
 

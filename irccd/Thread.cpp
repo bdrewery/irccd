@@ -18,7 +18,7 @@
 
 #include <Logger.h>
 
-#include "Plugin.h"
+#include "Thread.h"
 
 namespace irccd {
 
@@ -30,9 +30,11 @@ Thread::Ptr Thread::create()
 void Thread::start(Thread::Ptr thread, int np)
 {
 	thread->m_thread = std::thread([=] () {
-		if (lua_pcall(thread->m_state, np, 0, 0) != LUA_OK) {
-			Logger::warn("thread: %s", lua_tostring(thread->m_state, -1));
-			lua_pop(thread->m_state, 1);
+		lua_State *L = *thread->m_process;
+
+		if (lua_pcall(L, np, 0, 0) != LUA_OK) {
+			Logger::warn("thread: %s", lua_tostring(L, -1));
+			lua_pop(L, 1);
 		}
 	});
 }
@@ -47,9 +49,9 @@ Thread::~Thread()
 	Logger::debug("thread: destructor called");
 }
 
-void Thread::setState(LuaState &&state)
+void Thread::setState(LuaState &&)
 {
-	m_state = std::move(state);
+	//m_state = std::move(state);
 }
 
 bool Thread::hasJoined() const
@@ -67,6 +69,11 @@ void Thread::detach()
 {
 	m_thread.detach();
 	m_joined = true;
+}
+
+Thread::operator lua_State *()
+{
+	return static_cast<lua_State *>(*m_process);
 }
 
 } // !irccd

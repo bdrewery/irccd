@@ -23,53 +23,14 @@
 #include <Logger.h>
 #include <Util.h>
 
+#include "Lua/LuaServer.h"
+
 #include "DefCall.h"
 #include "Irccd.h"
 #include "Plugin.h"
 
-#include "Lua/LuaIrccd.h"
-#include "Lua/LuaLogger.h"
-#include "Lua/LuaParser.h"
-#include "Lua/LuaPipe.h"
-#include "Lua/LuaPlugin.h"
-#include "Lua/LuaServer.h"
-#include "Lua/LuaSocket.h"
-#include "Lua/LuaThread.h"
-#include "Lua/LuaUtil.h"
-
 namespace irccd {
 
-/* --------------------------------------------------------
- * list of libraries to load
- * -------------------------------------------------------- */
-
-const Plugin::Libraries Plugin::luaLibs = {
-	{ "_G",				luaopen_base		},
-	{ "io",				luaopen_io		},
-	{ "math",			luaopen_math		},
-	{ "package",			luaopen_package		},
-	{ "string",			luaopen_string		},
-	{ "table",			luaopen_table		},
-
-	/*
-	 * There is no function for this one, but server object is passed
-	 * through almost every function, so we load it for convenience
-	 */
-	{ "irccd.server",		luaopen_server		},
-};
-
-const Plugin::Libraries Plugin::irccdLibs = {
-	{ "irccd",			luaopen_irccd		},
-	{ "irccd.logger",		luaopen_logger		},
-	{ "irccd.parser",		luaopen_parser		},
-	{ "irccd.plugin",		luaopen_plugin		},
-	{ "irccd.socket",		luaopen_socket		},
-	{ "irccd.socket.address",	luaopen_socket_address	},
-	{ "irccd.socket.listener",	luaopen_socket_listener	},
-	{ "irccd.thread",		luaopen_thread		},
-	{ "irccd.thread.pipe",		luaopen_thread_pipe	},
-	{ "irccd.util",			luaopen_util		}
-};
 
 /* --------------------------------------------------------
  * Plugin exception
@@ -227,7 +188,7 @@ void Plugin::callFunction(const std::string &func,
 			  Server::Ptr server,
 			  std::vector<std::string> params)
 {
-	lua_State *L = m_state;
+	lua_State *L = *m_process;
 
 	lua_getglobal(L, func.c_str());
 	if (lua_type(L, -1) != LUA_TFUNCTION)
@@ -258,9 +219,6 @@ void Plugin::callFunction(const std::string &func,
  * public methods and members
  * -------------------------------------------------------- */
 
-const char *	Plugin::FieldName = "__plugin_name__";
-const char *	Plugin::FieldHome = "__plugin_home__";
-
 Plugin::Mutex		Plugin::pluginLock;
 Plugin::Dirs		Plugin::pluginDirs;
 Plugin::Map		Plugin::pluginMap;
@@ -271,18 +229,6 @@ void Plugin::addPath(const std::string &path)
 	Lock lk(pluginLock);
 
 	pluginDirs.push_back(path);
-}
-
-void Plugin::initialize(LuaState &L, Plugin::Ptr owner)
-{
-	auto name = owner->getName();
-	auto home = owner->getHome();
-
-	lua_pushlstring(L, name.c_str(), name.length());
-	lua_setfield(L, LUA_REGISTRYINDEX, FieldName);
-
-	lua_pushlstring(L, home.c_str(), home.length());
-	lua_setfield(L, LUA_REGISTRYINDEX, FieldHome);
 }
 
 void Plugin::load(const std::string &name, bool relative)
@@ -394,22 +340,6 @@ void Plugin::reload(const std::string &name)
 	}
 }
 
-Plugin::Ptr Plugin::find(lua_State *state)
-{
-	Lock lk(pluginLock);
-	
-	for (auto plugin : pluginMap) {
-		/*
-		 * Test if the current plugin is the one with that
-		 * Lua state.
-		 */
-		if (plugin.first == state)
-			return plugin.second;
-	}
-
-	throw std::out_of_range("plugin not found");
-}
-
 Plugin::Ptr Plugin::find(const std::string &name)
 {
 	using Type = std::pair<lua_State *, Plugin::Ptr>;
@@ -478,9 +408,7 @@ Plugin::Plugin(const std::string &name,
 	: m_name(name)
 	, m_path(path)
 {
-	m_state = std::move(LuaState(luaL_newstate()));
-
-	Luae::initRegistry(m_state);
+	Luae::initRegistry(*m_process);
 }
 
 const std::string &Plugin::getName() const
@@ -493,9 +421,9 @@ const std::string &Plugin::getHome() const
 	return m_home;
 }
 
-LuaState &Plugin::getState()
+lua_State *Plugin::getState()
 {
-	return m_state;
+	return static_cast<lua_State *>(*m_process);
 }
 
 const std::string &Plugin::getError() const
@@ -505,24 +433,26 @@ const std::string &Plugin::getError() const
 
 bool Plugin::open()
 {
+	lua_State *L = static_cast<lua_State *>(*m_process);
+
 	// Load default library as it was done by require.
-	for (auto l : luaLibs)
-		Luae::require(m_state, l.first, l.second, true);
+	for (auto l : Process::luaLibs)
+		Luae::require(L, l.first, l.second, true);
 
 	// Put external modules in package.preload so user
 	// will need require (modname)
-	for (auto l : irccdLibs)
-		Luae::preload(m_state, l.first, l.second);
+	for (auto l : Process::irccdLibs)
+		Luae::preload(L, l.first, l.second);
 
 	// Find the home directory for the plugin
 	m_home = Util::findPluginHome(m_name);
 
 	// Initialize the plugin name and its data
-	Plugin::initialize(m_state, shared_from_this());
+	Process::initialize(L, m_name, m_home);
 
-	if (luaL_dofile(m_state, m_path.c_str()) != LUA_OK) {
-		m_error = lua_tostring(m_state, -1);
-		lua_pop(m_state, 1);
+	if (luaL_dofile(L, m_path.c_str()) != LUA_OK) {
+		m_error = lua_tostring(L, -1);
+		lua_pop(L, 1);
 
 		return false;
 	}

@@ -25,15 +25,15 @@
 #include <mutex>
 
 #include "Luae.h"
+#include "Process.h"
 #include "Server.h"
-#include "Thread.h"
 
 namespace irccd {
 
 class DefCall;
 class IrcEvent;
 
-class Plugin : public std::enable_shared_from_this<Plugin> {
+class Plugin {
 public:
 	class ErrorException : public std::exception {
 	private:
@@ -55,7 +55,6 @@ public:
 		virtual const char * what() const throw();
 	};
 
-	using Libraries		= std::unordered_map<const char *, lua_CFunction>;
 	using Ptr		= std::shared_ptr<Plugin>;
 	using Dirs		= std::vector<std::string>;
 	using Map		= std::unordered_map<
@@ -79,14 +78,14 @@ private:
 	static Map		pluginMap;	//! map of plugins loaded
 	static DefCallList	deferred;	//! list of deferred call
 
+	// Process for that plugin
+	Process::Ptr		m_process;
+
 	// Plugin identity
 	std::string		m_name;		//! name like "foo"
-	std::string		m_path;		//! path used like "/opt/foo.lua"
 	std::string		m_home;		//! home, usually ~/.config/<name>/
+	std::string		m_path;		//! path used like "/opt/foo.lua"
 	std::string		m_error;	//! error message if needed
-
-	// Lua state and its optional threads
-	LuaState		m_state;
 
 	static bool isPluginLoaded(const std::string &name);
 	static void callPlugin(std::shared_ptr<Plugin> p, const IrcEvent &ev);
@@ -97,35 +96,12 @@ private:
 			  std::vector<std::string> params = std::vector<std::string>());
 
 public:
-	/*
-	 * The following fields are store in the lua_State * registry
-	 * and may be retrieved at any time from any Lua API.
-	 */
-	static const char *	FieldName;
-	static const char *	FieldHome;
-
-	/*
-	 * The following tables are libraries to load, luaLibs are
-	 * required and irccdLibs are preloaded.
-	 */
-	static const Libraries luaLibs;
-	static const Libraries irccdLibs;
-
 	/**
 	 * Add path for finding plugins.
 	 *
 	 * @param path the path
 	 */
 	static void addPath(const std::string &path);
-
-	/**
-	 * Add plugin information to the Lua state registry. It's used
-	 * by some plugins.
-	 *
-	 * @param L the Lua state
-	 * @param owner the plugin owner
-	 */
-	static void initialize(LuaState &L, Plugin::Ptr owner);
 
 	/**
 	 * Try to load a plugin.
@@ -148,15 +124,6 @@ public:
 	 * @param name the plugin to reload
 	 */
 	static void reload(const std::string &name);
-
-	/**
-	 * Find a plugin or thread by its Lua state.
-	 *
-	 * @param state the Lua state
-	 * @return the plugin
-	 * @throw std::out_of_range if not found
-	 */
-	static Ptr find(lua_State *state);
 
 	/**
 	 * Find a plugin by its name.
@@ -228,7 +195,7 @@ public:
 	 *
 	 * @return the Lua state
 	 */
-	LuaState &getState();
+	lua_State *getState();
 
 	/**
 	 * Get the error message if something failed.
