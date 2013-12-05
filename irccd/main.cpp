@@ -40,12 +40,16 @@ static void usage()
 	Logger::fatal(1, "       %s test plugin.lua [command] [parameters...]", getprogname());
 }
 
+#include <mutex>
+
 int main(int argc, char **argv)
 {
 	Irccd &irccd = Irccd::getInstance();
 	int ch;
 
 	setprogname("irccd");
+
+	irccd.initialize();
 	
 	while ((ch = getopt(argc, argv, "fc:p:P:v")) != -1) {
 		switch (ch) {

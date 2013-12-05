@@ -47,7 +47,6 @@ private:
 
 	using Ptr = std::unique_ptr<lua_State, Deleter>;
 
-	std::string test;
 	Ptr m_state;
 
 public:
@@ -64,7 +63,7 @@ public:
 	 *
 	 * @param L the state to use
 	 */
-	LuaState(lua_State *L);
+	explicit LuaState(lua_State *L);
 
 	/**
 	 * Move constructor.

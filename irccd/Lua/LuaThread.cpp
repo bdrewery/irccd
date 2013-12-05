@@ -87,11 +87,6 @@ int l_threadNew(lua_State *L)
 	lua_dump(L, reinterpret_cast<lua_Writer>(writer), &chunk);
 	lua_pop(L, 1);
 
-	/*
-	 * Load the same libs as a new Plugin.
-	 */
-	Luae::initRegistry(*thread);
-
 	for (auto l : Process::luaLibs)
 		Luae::require(*thread, l.first, l.second, true);
 	for (auto l : Process::irccdLibs)
@@ -107,15 +102,12 @@ int l_threadNew(lua_State *L)
 	}
 
 	try {
-		auto name = Luae::requireField<std::string>(L,
-		    LUA_REGISTRYINDEX, Process::FieldName);
-		auto home = Luae::requireField<std::string>(L,
-		    LUA_REGISTRYINDEX, Process::FieldHome);
+		auto name = Process::getName(L);
+		auto home = Process::getHome(L);
+		auto process = thread->process();
 
 		// Set home and name like the plugin
-		Process::initialize(*thread, name, home);
-
-		//thread->setState(std::move(state));
+		Process::initialize(process, name, home);
 
 		// Create the object to push as return value
 		Thread::Ptr *ptr = new (L, THREAD_TYPE) Thread::Ptr(thread);

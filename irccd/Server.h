@@ -23,6 +23,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <mutex>
 #include <unordered_map>
 #include <vector>
 
@@ -116,6 +117,9 @@ private:
 	Ptr m_handle;
 
 public:
+	/**
+	 * Default constructor forbidden.
+	 */
 	IrcSession() = delete;
 
 	/**
@@ -123,7 +127,22 @@ public:
 	 *
 	 * @param s the irc_session_t initialized
 	 */
-	IrcSession(irc_session_t *s);
+	explicit IrcSession(irc_session_t *s);
+
+	/**
+	 * Move constructor.
+	 *
+	 * @param other the other IrcSession
+	 */
+	IrcSession(IrcSession &&other);
+
+	/**
+	 * Move assignment operator.
+	 *
+	 * @param other the other IrcSession
+	 * @return self
+	 */
+	IrcSession &operator=(IrcSession &&other);
 
 	/**
 	 * Cast to irc_session_t for raw commands.

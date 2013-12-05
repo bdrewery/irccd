@@ -88,6 +88,11 @@ public:
 	 */
 	void detach();
 
+	Process::Ptr process()
+	{
+		return m_process;
+	}
+
 	operator lua_State *();
 };
 

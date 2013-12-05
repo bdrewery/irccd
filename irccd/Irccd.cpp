@@ -47,6 +47,10 @@ Irccd::Irccd()
 	: m_running(true)
 	, m_foreground(false)
 {
+}
+
+void Irccd::initialize()
+{
 	std::ostringstream oss;
 
 	Socket::init();

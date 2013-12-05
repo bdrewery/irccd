@@ -30,9 +30,15 @@
 
 namespace irccd {
 
-class DefCall;
 class IrcEvent;
 
+/**
+ * @class Plugin
+ * @brief Lua plugin
+ *
+ * A plugin is identified by name and can be loaded and unloaded
+ * at runtime.
+ */
 class Plugin {
 public:
 	class ErrorException : public std::exception {
@@ -62,13 +68,6 @@ public:
 					Plugin::Ptr
 				  >;
 
-	using DefCallList	= std::unordered_map<
-					Server::Ptr,
-					std::vector<DefCall>
-				  >;
-
-	using MapFunc		= std::function<void (Plugin::Ptr)>;
-
 	using Mutex		= std::recursive_mutex;
 	using Lock		= std::lock_guard<Mutex>;
 
@@ -76,7 +75,6 @@ private:
 	static Mutex		pluginLock;	//! lock for managing plugins
 	static Dirs		pluginDirs;	//! list of plugin directories
 	static Map		pluginMap;	//! map of plugins loaded
-	static DefCallList	deferred;	//! list of deferred call
 
 	// Process for that plugin
 	Process::Ptr		m_process;
@@ -88,12 +86,16 @@ private:
 	std::string		m_error;	//! error message if needed
 
 	static bool isPluginLoaded(const std::string &name);
-	static void callPlugin(std::shared_ptr<Plugin> p, const IrcEvent &ev);
-	static void callDeferred(const IrcEvent &ev);
 
 	void callFunction(const std::string &func,
 			  Server::Ptr server = Server::Ptr(),
 			  std::vector<std::string> params = std::vector<std::string>());
+
+	void callFunctionNum(const std::string &func,
+			  Server::Ptr server,
+			  int np = 0);
+
+	static void callPlugin(Plugin::Ptr p, const IrcEvent &ev);
 
 public:
 	/**
@@ -135,31 +137,20 @@ public:
 	static Ptr find(const std::string &name);
 
 	/**
-	 * Call a function for all plugins.
-	 *
-	 * @param func the function called for each plugin
-	 */
-	static void forAll(MapFunc func);
-
-	/**
-	 * Defer a function call.
-	 *
-	 * @param server which server
-	 * @param call the function to be called when needed
-	 */
-	static void defer(Server::Ptr server, DefCall call);
-
-	/**
-	 * Handle an IRC event and dispatch it to all plugins.
+	 * Handle a IRC event.
 	 *
 	 * @param ev the event
 	 */
+#if defined(WITH_LUA)
 	static void handleIrcEvent(const IrcEvent &ev);
+#else
+	static void handleIrcEvent(const IrcEvent &ev) { }
+#endif
 
 	/**
-	 * Default constructor.
+	 * Default constructor. (Forbidden)
 	 */
-	Plugin() = default;
+	Plugin() = delete;
 
 	/**
 	 * Correct constructor.
@@ -338,6 +329,15 @@ public:
 		    const std::string &modeArg);
 
 	/**
+	 * A Lua function triggered on names list of channel
+	 *
+	 * @param server the server
+	 * @param list the names
+	 */
+	void onNames(Server::Ptr server,
+		     const std::vector<std::string> &list);
+
+	/**
 	 * A Lua function triggered on a nick event.
 	 *
 	 * @param server the server
@@ -418,6 +418,15 @@ public:
 	void onUserMode(Server::Ptr server,
 			const std::string &who,
 			const std::string &mode);
+
+	/**
+	 * A Lua function triggered on a whois information.
+	 *
+	 * @param server the server
+	 * @param info the whois information
+	 */
+	void onWhois(Server::Ptr,
+		     const Server::WhoisInfo &info);
 };
 
 } // !irccd

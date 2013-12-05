@@ -25,12 +25,10 @@
 
 #include "Lua/LuaServer.h"
 
-#include "DefCall.h"
 #include "Irccd.h"
 #include "Plugin.h"
 
 namespace irccd {
-
 
 /* --------------------------------------------------------
  * Plugin exception
@@ -68,6 +66,66 @@ bool Plugin::isPluginLoaded(const std::string &name)
 	}
 
 	return ret;
+}
+
+void Plugin::callFunction(const std::string &func,
+			  Server::Ptr server,
+			  std::vector<std::string> params)
+{
+	lua_State *L = *m_process;
+
+	lua_getglobal(L, func.c_str());
+	if (lua_type(L, -1) != LUA_TFUNCTION)
+		lua_pop(L, 1);
+	else {
+		int np = 0;
+
+		if (server) {
+			Luae::pushShared<Server>(L, server, ServerType);
+			++ np;
+		}
+
+		for (const std::string &a : params) {
+			lua_pushstring(L, a.c_str());
+			++ np;
+		}
+
+		if (lua_pcall(L, np, 0, 0) != LUA_OK) {
+			std::string error = lua_tostring(L, -1);
+			lua_pop(L, 1);
+
+			throw Plugin::ErrorException(m_name, error);
+		}
+	}
+}
+
+void Plugin::callFunctionNum(const std::string &func, Server::Ptr server, int np)
+{
+	lua_State *L = *m_process;
+
+	lua_getglobal(L, func.c_str());
+	if (lua_type(L, -1) != LUA_TFUNCTION)
+		lua_pop(L, 1);
+	else {
+		// Move the function
+		lua_insert(L, 1);
+
+		// Push a server an optional arguments
+		if (server) {
+			Luae::pushShared<Server>(L, server, ServerType);
+			lua_insert(L, lua_gettop(L) - np++);
+		}
+
+		for (int i = lua_gettop(L); i >= 1; --i)
+			printf("%d: %s\n", i, luaL_typename(L, i));
+
+		if (lua_pcall(L, np, 0, 0) != LUA_OK) {
+			std::string error = lua_tostring(L, -1);
+			lua_pop(L, 1);
+
+			throw Plugin::ErrorException(m_name, error);
+		}
+	}
 }
 
 void Plugin::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
@@ -120,6 +178,9 @@ void Plugin::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
 		p->onMode(ev.m_server, ev.m_params[0], ev.m_params[1],
 		    ev.m_params[2], ev.m_params[3]);
 		break;
+	case IrcEventType::Names:
+		p->onNames(ev.m_server, ev.m_params);
+		break;
 	case IrcEventType::Nick:
 		p->onNick(ev.m_server, ev.m_params[0], ev.m_params[1]);
 		break;
@@ -141,88 +202,33 @@ void Plugin::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
 	case IrcEventType::UserMode:
 		p->onUserMode(ev.m_server, ev.m_params[0], ev.m_params[1]);
 		break;
+	case IrcEventType::Whois:
+	{
+		Server::WhoisInfo info;
+
+		info.nick = ev.m_params[0];
+		info.user = ev.m_params[1];
+		info.host = ev.m_params[2];
+		info.realname = ev.m_params[3];
+
+		for (auto i = 4; i < ev.m_params.size(); ++i)
+			info.channels.push_back(ev.m_params[i]);
+
+		p->onWhois(ev.m_server, info);
+	}
+		break;
 	default:
 		break;
 	}
 }
 
-void Plugin::callDeferred(const IrcEvent &ev)
-{
-	// Check if we have deferred call for this server
-	if (deferred.find(ev.m_server) == deferred.end())
-		return;
-
-	std::vector<DefCall>::iterator it = deferred[ev.m_server].begin();
-
-	for (; it != deferred[ev.m_server].end(); ) {
-		bool deleteIt = true;
-
-		if (ev.m_type == it->type()) {
-			switch (it->type()) {
-			case IrcEventType::Names:
-				it->onNames(ev.m_params);
-				break;
-			case IrcEventType::Whois:
-				it->onWhois(ev.m_params);
-				break;
-			default:
-				deleteIt = false;
-				break;
-			}
-		} else
-			deleteIt = false;
-
-		/*
-		 * If found and executed, break the loop if not, we will
-		 * call multiple times for the same event.
-		 */
-		if (deleteIt) {
-			it = deferred[ev.m_server].erase(it);
-			break;
-		} else
-			++it;
-	}
-}
-
-void Plugin::callFunction(const std::string &func,
-			  Server::Ptr server,
-			  std::vector<std::string> params)
-{
-	lua_State *L = *m_process;
-
-	lua_getglobal(L, func.c_str());
-	if (lua_type(L, -1) != LUA_TFUNCTION)
-		lua_pop(L, 1);
-	else {
-		int np = 0;
-
-		if (server) {
-			Luae::pushShared<Server>(L, server, ServerType);
-			++ np;
-		}
-
-		for (const std::string &a : params) {
-			lua_pushstring(L, a.c_str());
-			++ np;
-		}
-
-		if (lua_pcall(L, np, 0, 0) != LUA_OK) {
-			std::string error = lua_tostring(L, -1);
-			lua_pop(L, 1);
-
-			throw ErrorException(m_name, error);
-		}
-	}
-}
-
 /* --------------------------------------------------------
- * public methods and members
+ * public static methods and members
  * -------------------------------------------------------- */
 
 Plugin::Mutex		Plugin::pluginLock;
 Plugin::Dirs		Plugin::pluginDirs;
 Plugin::Map		Plugin::pluginMap;
-Plugin::DefCallList	Plugin::deferred;
 
 void Plugin::addPath(const std::string &path)
 {
@@ -362,36 +368,9 @@ Plugin::Ptr Plugin::find(const std::string &name)
 	return (*i).second;
 }
 
-void Plugin::forAll(MapFunc func)
-{
-	Lock lk(pluginLock);
-
-	for (auto p : pluginMap)
-		func(p.second);
-}
-
-void Plugin::defer(Server::Ptr server, DefCall call)
-{
-	Lock lk(pluginLock);
-
-	deferred[server].push_back(call);
-}
-
 void Plugin::handleIrcEvent(const IrcEvent &ev)
 {
 	Lock lk(pluginLock);
-
-	/*
-	 * This is the handle of deferred calls, they are not handled in the
-	 * next callPlugin block.
-	 */
-	try {
-		if (ev.m_type == IrcEventType::Names ||
-		    ev.m_type == IrcEventType::Whois)
-			callDeferred(ev);
-	} catch (Plugin::ErrorException ex) {
-		Logger::warn("plugin %s: %s", ex.which().c_str(), ex.what());
-	}
 
 	for (auto p : pluginMap) {
 		try {
@@ -403,12 +382,16 @@ void Plugin::handleIrcEvent(const IrcEvent &ev)
 	}
 }
 
+/* --------------------------------------------------------
+ * public methods
+ * -------------------------------------------------------- */
+
 Plugin::Plugin(const std::string &name,
 	       const std::string &path)
 	: m_name(name)
 	, m_path(path)
 {
-	Luae::initRegistry(*m_process);
+	m_process = Process::create();
 }
 
 const std::string &Plugin::getName() const
@@ -448,7 +431,7 @@ bool Plugin::open()
 	m_home = Util::findPluginHome(m_name);
 
 	// Initialize the plugin name and its data
-	Process::initialize(L, m_name, m_home);
+	Process::initialize(m_process, m_name, m_home);
 
 	if (luaL_dofile(L, m_path.c_str()) != LUA_OK) {
 		m_error = lua_tostring(L, -1);
@@ -592,6 +575,23 @@ void Plugin::onMode(Server::Ptr server,
 	callFunction("onMode", server, params);
 }
 
+void Plugin::onNames(Server::Ptr server,
+		     const std::vector<std::string> &names)
+{
+	// 1. Push the channel name
+	lua_pushlstring(*m_process, names[0].c_str(), names[0].length());
+
+	// 2. Push the users
+	lua_createtable(*m_process, 0, 0);
+
+	for (auto i = 1; i < names.size(); ++i) {
+		lua_pushlstring(*m_process, names[i].c_str(), names[i].length());
+		lua_rawseti(*m_process, -2, i);
+	}
+
+	callFunctionNum("onNames", server, 2);
+}
+
 void Plugin::onNick(Server::Ptr server,
 		    const std::string &oldnick,
 		    const std::string &newnick)
@@ -663,6 +663,11 @@ void Plugin::onTopic(Server::Ptr server,
 	callFunction("onTopic", server, params);
 }
 
+void Plugin::onUnload()
+{
+	callFunction("onUnload");
+}
+
 void Plugin::onUserMode(Server::Ptr server,
 			const std::string &who,
 			const std::string &mode)
@@ -675,9 +680,35 @@ void Plugin::onUserMode(Server::Ptr server,
 	callFunction("onUserMode", server, params);
 }
 
-void Plugin::onUnload()
+void Plugin::onWhois(Server::Ptr server,
+		     const Server::WhoisInfo &info)
 {
-	callFunction("onUnload");
+	lua_createtable(*m_process, 0, 0);
+
+	lua_pushlstring(*m_process, info.nick.c_str(), info.nick.length());
+	lua_setfield(*m_process, -2, "nickname");
+
+	lua_pushlstring(*m_process, info.user.c_str(), info.user.length());
+	lua_setfield(*m_process, -2, "user");
+
+	lua_pushlstring(*m_process, info.host.c_str(), info.host.length());
+	lua_setfield(*m_process, -2, "host");
+
+	lua_pushlstring(*m_process, info.realname.c_str(), info.realname.length());
+	lua_setfield(*m_process, -2, "realname");
+
+	if (info.channels.size() >= 4) {
+		lua_createtable(*m_process, 0, 0);
+
+		for (size_t i = 4; i < info.channels.size(); ++i) {
+			lua_pushstring(*m_process, info.channels[i].c_str());
+			lua_rawseti(*m_process, -2, i - 3);
+		}
+
+		lua_setfield(*m_process, -2, "channels");
+	}
+
+	callFunctionNum("onWhois", server, 1);
 }
 
 } // !irccd

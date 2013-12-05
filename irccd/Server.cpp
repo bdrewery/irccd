@@ -267,6 +267,9 @@ void handleNumeric(irc_session_t *s,
 		Server::NameList &list = server->getNameLists();
 
 		if (params[1] != nullptr) {
+			// Insert channel name at first position
+			list[params[1]].insert(list[params[1]].begin(), params[1]);
+
 			Plugin::handleIrcEvent(
 			    IrcEvent(IrcEventType::Names, list[params[1]], server)
 			);
@@ -430,6 +433,18 @@ void IrcDeleter::operator()(irc_session_t *s)
 IrcSession::IrcSession(irc_session_t *s)
 	: m_handle(s)
 {
+}
+
+IrcSession::IrcSession(IrcSession &&other)
+{
+	m_handle = std::move(other.m_handle);
+}
+
+IrcSession &IrcSession::operator=(IrcSession &&other)
+{
+	m_handle = std::move(other.m_handle);
+
+	return *this;
 }
 
 IrcSession::operator irc_session_t *()
@@ -773,7 +788,7 @@ void Server::startConnection()
 		 * Here we are in the step that the server should be destroyed.
 		 */
 		m_shouldDelete = true;
-		m_session = nullptr;
+		m_session = IrcSession(nullptr);
 	};
 
 	m_thread = std::thread(command);

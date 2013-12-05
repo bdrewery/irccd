@@ -67,8 +67,6 @@ if (WITH_LUA)
 			Lua/LuaThread.h
 			Lua/LuaUtil.cpp
 			Lua/LuaUtil.h
-			DefCall.cpp
-			DefCall.h
 			Luae.cpp
 			Luae.h
 			Pipe.cpp

@@ -107,6 +107,11 @@ public:
 	 */
 	static Irccd &getInstance();
 
+	/*
+	 * Initialize common settings.
+	 */
+	void initialize();
+
 	/**
 	 * Tells irccd that a parameter from command line has been set.
 	 *

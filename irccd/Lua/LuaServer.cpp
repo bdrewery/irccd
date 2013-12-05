@@ -20,7 +20,6 @@
 #include <unordered_map>
 
 #include "Irccd.h"
-#include "DefCall.h"
 #include "LuaServer.h"
 
 namespace irccd {
@@ -60,11 +59,11 @@ void extractChannels(lua_State *L, Server::Info &info)
 
 void extractIdentity(lua_State *L, Server::Identity &ident)
 {
-	std::unordered_map<std::string, std::string &> table {
-		{ "name",		ident.m_name		},
-		{ "nickname",		ident.m_nickname	},
-		{ "username",		ident.m_username	},
-		{ "realname",		ident.m_realname	},
+	std::unordered_map<std::string, std::string *> table {
+		{ "name",		&ident.m_name		},
+		{ "nickname",		&ident.m_nickname	},
+		{ "username",		&ident.m_username	},
+		{ "realname",		&ident.m_realname	},
 	};
 
 	std::string key;
@@ -76,7 +75,7 @@ void extractIdentity(lua_State *L, Server::Identity &ident)
 				key = lua_tostring(L, -2);
 
 				if (table.count(key) > 0)
-					table[key] = lua_tostring(L, -1);
+					*table[key] = lua_tostring(L, -1);
 			}
 		});
 		lua_pop(L, 1);
@@ -242,18 +241,8 @@ int serverNames(lua_State *L)
 {
 	Server::Ptr s = Luae::getShared<Server>(L, 1, ServerType);
 	std::string channel = luaL_checkstring(L, 2);
-	int ref;
 
-	luaL_checktype(L, 3, LUA_TFUNCTION);
-
-	try {
-		// Get the function reference.
-		lua_pushvalue(L, 3);
-		ref = luaL_ref(L, LUA_REGISTRYINDEX);
-
-		Plugin::defer(s, DefCall(IrcEventType::Names, L, ref));
-		s->names(channel);
-	} catch (std::out_of_range) { }
+	s->names(channel);
 
 	// Deferred call
 	return 0;
@@ -345,21 +334,10 @@ int serverUmode(lua_State *L)
 
 int serverWhois(lua_State *L)
 {
-	Server::Ptr s = Luae::getShared<Server>(L, 1, ServerType);
-	std::string target = luaL_checkstring(L, 2);
-	int ref;
+	Server::Ptr s		= Luae::getShared<Server>(L, 1, ServerType);
+	std::string target	= luaL_checkstring(L, 2);
 
-	luaL_checktype(L, 3, LUA_TFUNCTION);
-
-	try {
-		// Get the function reference.
-		lua_pushvalue(L, 3);
-		ref = luaL_ref(L, LUA_REGISTRYINDEX);
-
-		Plugin::defer(s, DefCall(IrcEventType::Whois, L, ref));
-
-		s->whois(target);
-	} catch (std::out_of_range) { }
+	s->whois(target);
 
 	// Deferred call
 	return 0;
