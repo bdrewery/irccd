@@ -9,3 +9,4 @@ IRC Client Daemon TODO
 * Common::splitUser
 * Generalize DefCall to not be in Plugin so that Thread can use them
 * Get rid of Irccd::find(lua_State *L)
+* Clean manpage and fix PREFIX on it

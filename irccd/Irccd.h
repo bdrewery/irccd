@@ -50,29 +50,33 @@ using IdentityList	= std::vector<
 				Server::Identity
 			  >;
 
-using Lock		= std::lock_guard<std::mutex>;
-
 class Irccd {
+public:
+	using Wanted	= std::vector<std::string>;
+	using Overriden	= std::unordered_map<char, bool>;
+
 private:
-	static Irccd m_instance;			//! unique instance
+	static Irccd	m_instance;		//! unique instance
 
 	// Ignition
-	bool m_running;					//! forever loop
-	bool m_foreground;				//! run to foreground
+	bool		m_running;		//! forever loop
+	bool		m_foreground;		//! run to foreground
 
 	// Config
-	std::string m_configPath;			//! config file path
-	std::unordered_map<char, bool> m_overriden;	//! overriden parameters
+	std::string	m_configPath;		//! config file path
+	Overriden	m_overriden;		//! overriden parameters
 
 	// Identities
-	IdentityList m_identities;			//! user identities
-	Server::Identity m_defaultIdentity;		//! default identity
+	IdentityList	m_identities;		//! user identities
+	Server::Identity m_defaultIdentity;	//! default identity
 
 	/*
 	 * Plugin specified by commands line that should be
 	 * loaded after initialization.
 	 */
-	std::vector<std::string> m_wantedPlugins;
+#if defined(WITH_LUA)
+	Wanted m_wantedPlugins;
+#endif
 
 	Irccd();
 
@@ -155,6 +159,15 @@ public:
 	 * @return the error code
 	 */
 	int run();
+
+	/**
+	 * Check if the server is still running.
+	 *
+	 * @return the status
+	 */
+	bool isRunning() const;
+
+	void shutdown();
 
 	/**
 	 * Stop all threads and everything else.

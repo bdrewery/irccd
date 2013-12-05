@@ -88,10 +88,12 @@ public:
 	 */
 	void detach();
 
-	Process::Ptr process()
-	{
-		return m_process;
-	}
+	/**
+	 * Get the process.
+	 *
+	 * @return the process
+	 */
+	Process::Ptr process();
 
 	operator lua_State *();
 };

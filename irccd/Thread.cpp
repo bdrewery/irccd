@@ -71,6 +71,11 @@ void Thread::detach()
 	m_joined = true;
 }
 
+Process::Ptr Proces::process()
+{
+	return m_process;
+}
+
 Thread::operator lua_State *()
 {
 	return static_cast<lua_State *>(*m_process);

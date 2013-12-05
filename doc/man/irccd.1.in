@@ -249,6 +249,22 @@ The new mode.
 .It modeArg
 The mode argument, if supported.
 .El
+.\" Names
+.Ss Names
+This event is triggered when a list of names has come.
+.Bd -literal -offset indent
+function onNames(server, channel, list)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+Which channel.
+.It list
+A sequence with all users.
+.El
 .\" Nick
 .Ss Nick
 This event is triggered when someone changed its nickname.
@@ -356,6 +372,33 @@ The current server.
 The person who changed the mode.
 .It mode
 The new mode.
+.El
+.\" Whois
+.Ss Whois
+This event is triggered when irccd get information from a user.
+.Bd -literal -offset indent
+function onWhois(server, info)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It info
+A table with the following information:
+.Pp
+.Bl -tag -compact
+.It Ar nickname
+The user nickname.
+.It Ar user
+The user name.
+.It Ar host
+The hostname.
+.It Ar realname
+The real name used.
+.It Ar channels
+An optional sequences of channels joined.
+.El
 .El
 .\" TESTING LUA PLUGINS
 .Sh TESTING LUA PLUGINS

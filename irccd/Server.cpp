@@ -466,7 +466,7 @@ void Server::add(Server::Ptr server)
 	Lock lk(serverLock);
 
 	servers[server->getInfo().m_name] = server;
-	server->startConnection();
+	server->start();
 
  	Logger::log("server %s: connecting...",
  	    server->getInfo().m_name.c_str());
@@ -500,9 +500,10 @@ void Server::flush()
 	auto i(servers.begin());
 
 	while (i != servers.end()) {
-		if (i->second->m_shouldDelete)
+		if (i->second->m_shouldDelete) {
+			i->second->join();
 			i = servers.erase(i);
-		else
+		} else
 			++i;
 	}
 }
@@ -535,6 +536,8 @@ Server::Server(const Info &info,
 	       const Options &options)
 	: m_session(nullptr)
 	, m_shouldDelete(false)
+	, m_threadJoined(false)
+	, m_retrying(true)
 	, m_info(info)
 	, m_identity(identity)
 	, m_options(options)
@@ -544,7 +547,6 @@ Server::Server(const Info &info,
 
 Server::~Server()
 {
-	stopConnection();
 }
 
 void Server::init()
@@ -678,121 +680,121 @@ void Server::removeChannel(const std::string &name)
 		m_info.m_channels.erase(iter);
 }
 
-void Server::startConnection()
+void Server::prepareSession()
 {
-	Lock lk(m_lock);
+	irc_session_t *s = irc_create_session(&m_callbacks);
+	if (s == nullptr)
+		m_retrying = false;
 
-	auto command = [&] () {
-		bool shouldConnect;
+	unsigned major, minor;
 
-		/*
-		 * Main thread loop
-		 */
-		shouldConnect = true;
-		while (shouldConnect) {
-			/*
-			 * This is needed if irccd is started before DHCP or if
-			 * DNS cache is outdated.
-			 *
-			 * For more information see #190
-			 */
+	// Copy the unique pointer.
+	m_session = IrcSession(s);
+
+	irc_set_ctx(m_session, new Server::Ptr(shared_from_this()));
+	irc_get_version(&major, &minor);
+
+	/*
+	 * After some discuss with George, SSL has been fixed in older version
+	 * of libircclient. > 1.6 is needed for SSL.
+	 */
+	if (major >= 1 && minor > 6) {
+		// SSL needs to add # front of host
+		if (m_info.m_ssl)
+			m_info.m_host.insert(0, 1, '#');
+
+		if (!m_info.m_sslVerify)
+			irc_option_set(m_session,
+			    LIBIRC_OPTION_SSL_NO_VERIFY);
+	} else {
+		if (m_info.m_ssl)
+			Logger::log("server %s: SSL is only supported with libircclient > 1.6",
+			    m_info.m_name.c_str());
+	}
+}
+
+void Server::tryConnect()
+{
+	const char *password = nullptr;
+
+	/*
+	 * This is needed if irccd is started before DHCP or if
+	 * DNS cache is outdated.
+	 *
+	 * For more information see #190
+	 */
 #if !defined(_WIN32)
-			(void)res_init();
+	(void)res_init();
 #endif
 
-			irc_session_t *s = irc_create_session(&m_callbacks);
-			if (s == nullptr)
-				return;
+	if (m_info.m_password.length() > 0)
+		password = m_info.m_password.c_str();
 
-			const char *password = nullptr;	
-			unsigned major, minor;
+	irc_connect(
+	    m_session,
+	    m_info.m_host.c_str(),
+	    m_info.m_port,
+	    password,
+	    m_identity.m_nickname.c_str(),
+	    m_identity.m_username.c_str(),
+	    m_identity.m_realname.c_str());
 
-			// Copy the unique pointer.
-			m_session = IrcSession(s);
-			if (m_info.m_password.length() > 0)
-				password = m_info.m_password.c_str();
+	if (irc_run(m_session)) {
+		irc_disconnect(m_session);
 
-			irc_set_ctx(m_session, new Server::Ptr(shared_from_this()));
-			irc_get_version(&major, &minor);
+		Logger::warn("server %s: failed to connect to %s: %s",
+		    m_info.m_name.c_str(),
+		    m_info.m_host.c_str(),
+		    irc_strerror(irc_errno(m_session)));
+	}
+}
 
-			/*
-			 * After some discuss with George, SSL has been fixed in older version
-			 * of libircclient. > 1.6 is needed for SSL.
-			 */
-			if (major >= 1 && minor > 6) {
-				// SSL needs to add # front of host
-				if (m_info.m_ssl)
-					m_info.m_host.insert(0, 1, '#');
+void Server::shouldContinue()
+{
+	// Value of 0 mean retry forever
+	if (m_options.m_maxretries > 0) {
+		m_options.m_curretries ++;
 
-				if (!m_info.m_sslVerify)
-					irc_option_set(m_session,
-					    LIBIRC_OPTION_SSL_NO_VERIFY);
-			} else {
-				if (m_info.m_ssl)
-					Logger::log("server %s: SSL is only supported with libircclient > 1.6",
-					    m_info.m_name.c_str());
-			}
+		m_retrying = Irccd::getInstance().isRunning() &&
+		    m_options.m_retry &&
+		    m_options.m_curretries < m_options.m_maxretries;
+	}
 
-			irc_connect(
-			    m_session,
-			    m_info.m_host.c_str(),
-			    m_info.m_port,
-			    password,
-			    m_identity.m_nickname.c_str(),
-			    m_identity.m_username.c_str(),
-			    m_identity.m_realname.c_str());
-
-			/*
-			 * Run over the forever loop.
-			 */
-			m_threadStarted = true;
-			if (irc_run(m_session)) {
-				m_threadStarted = false;
-				irc_disconnect(m_session);
-
-				Logger::warn("server %s: failed to connect to %s: %s",
-				    m_info.m_name.c_str(),
-				    m_info.m_host.c_str(),
-				    irc_strerror(irc_errno(m_session)));
-
-				/*
-				 * Value of 0 mean retry forever.
-				 */
-				if (m_options.m_maxretries > 0) {
-					m_options.m_curretries ++;
-				
-					shouldConnect = m_options.m_retry &&
-					    m_options.m_curretries < m_options.m_maxretries;
-				}
-
-				/*
-				 * Don't show the message if the user didn't wanted
-				 * the retry mechanism.
-				 */
-				if (!shouldConnect && m_options.m_retry) {
-					Logger::warn("server %s: giving up",
-					    m_info.m_name.c_str());
-				} else if (shouldConnect) {
-					Logger::warn("server %s: retrying in %d seconds...",
-					    m_info.m_name.c_str(),
-					    m_options.m_timeout);
-					Util::usleep(m_options.m_timeout * 1000);
-				}
-			} else {
-				m_threadStarted = false;
-				irc_disconnect(m_session);
-			}
-		}
-
+	/*
+	 * Don't show the message if the user didn't wanted
+	 * the retry mechanism.
+	 */
+	if (!m_retrying && m_options.m_retry) {
+		Logger::warn("server %s: giving up",
+		    m_info.m_name.c_str());
+	} else if (m_retrying) {
+		Logger::warn("server %s: retrying in %d seconds...",
+		    m_info.m_name.c_str(),
+		    m_options.m_timeout);
+		Util::usleep(m_options.m_timeout * 1000);
+	} else {
 		/*
 		 * Here we are in the step that the server should be destroyed.
 		 */
 		m_shouldDelete = true;
 		m_session = IrcSession(nullptr);
-	};
+	}
+}
 
-	m_thread = std::thread(command);
-	m_thread.detach();
+void Server::routine()
+{
+	while (Irccd::getInstance().isRunning() && m_retrying) {
+		prepareSession();
+		tryConnect();
+		shouldContinue();
+	}
+}
+
+void Server::start()
+{
+	Lock lk(m_lock);
+
+	m_thread = std::thread(&Server::routine, this);
 }
 
 void Server::resetRetries()
@@ -802,25 +804,37 @@ void Server::resetRetries()
 	m_options.m_curretries = 0;
 }
 
-void Server::stopConnection()
+void Server::join()
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted) {
-		Logger::log("server %s: disconnecting...", m_info.m_name.c_str());
-
-		if (m_session != nullptr)
-			irc_disconnect(m_session);
-
-		m_threadStarted = false;
+	try {
+		if (!m_threadJoined) {
+			m_thread.join();
+			m_threadJoined = true;
+		}
+	} catch (std::system_error error) {
+		Logger::warn("server %s: %s",
+		    m_info.m_name.c_str(),
+		    error.what());
 	}
+}
+
+void Server::stop()
+{
+	Lock lk(m_lock);
+
+	Logger::log("server %s: disconnecting...", m_info.m_name.c_str());
+
+	if (m_session != nullptr)
+		irc_disconnect(m_session);
 }
 
 void Server::cnotice(const std::string &channel, const std::string &message)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted && channel[0] == '#')
+	if (channel[0] == '#')
 		irc_cmd_notice(m_session, channel.c_str(), message.c_str());
 }
 
@@ -828,64 +842,57 @@ void Server::invite(const std::string &target, const std::string &channel)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted)
-		irc_cmd_invite(m_session, target.c_str(), channel.c_str());
+	irc_cmd_invite(m_session, target.c_str(), channel.c_str());
 }
 
 void Server::join(const std::string &name, const std::string &password)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted)
-		irc_cmd_join(m_session, name.c_str(), password.c_str());
+	irc_cmd_join(m_session, name.c_str(), password.c_str());
 }
 
 void Server::kick(const std::string &name, const std::string &channel, const std::string &reason)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted)
-		irc_cmd_kick(m_session, name.c_str(), channel.c_str(),
-		    (reason.length() == 0) ? nullptr : reason.c_str());
+	irc_cmd_kick(m_session, name.c_str(), channel.c_str(),
+	    (reason.length() == 0) ? nullptr : reason.c_str());
 }
 
 void Server::me(const std::string &target, const std::string &message)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted)
-		irc_cmd_me(m_session, target.c_str(), message.c_str());
+	irc_cmd_me(m_session, target.c_str(), message.c_str());
 }
 
 void Server::mode(const std::string &channel, const std::string &mode)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted)
-		irc_cmd_channel_mode(m_session, channel.c_str(), mode.c_str());
+	irc_cmd_channel_mode(m_session, channel.c_str(), mode.c_str());
 }
 
 void Server::names(const std::string &channel)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted)
-		irc_cmd_names(m_session, channel.c_str());
+	irc_cmd_names(m_session, channel.c_str());
 }
 
 void Server::nick(const std::string &nick)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted)
-		irc_cmd_nick(m_session, nick.c_str());
+	irc_cmd_nick(m_session, nick.c_str());
 }
 
 void Server::notice(const std::string &nickname, const std::string &message)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted && nickname[0] != '#')
+	if (nickname[0] != '#')
 		irc_cmd_notice(m_session, nickname.c_str(), message.c_str());
 }
 
@@ -893,8 +900,7 @@ void Server::part(const std::string &channel)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted)
-		irc_cmd_part(m_session, channel.c_str());
+	irc_cmd_part(m_session, channel.c_str());
 }
 
 void Server::query(const std::string &who, const std::string &message)
@@ -902,7 +908,7 @@ void Server::query(const std::string &who, const std::string &message)
 	Lock lk(m_lock);
 
 	// Do not write to public channel
-	if (m_threadStarted && who[0] != '#')
+	if (who[0] != '#')
 		irc_cmd_msg(m_session, who.c_str(), message.c_str());
 }
 
@@ -910,40 +916,35 @@ void Server::say(const std::string &target, const std::string &message)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted)
-		irc_cmd_msg(m_session, target.c_str(), message.c_str());
+	irc_cmd_msg(m_session, target.c_str(), message.c_str());
 }
 
 void Server::sendRaw(const std::string &msg)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted)
-		irc_send_raw(m_session, "%s", msg.c_str());
+	irc_send_raw(m_session, "%s", msg.c_str());
 }
 
 void Server::topic(const std::string &channel, const std::string &topic)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted)
-		irc_cmd_topic(m_session, channel.c_str(), topic.c_str());
+	irc_cmd_topic(m_session, channel.c_str(), topic.c_str());
 }
 
 void Server::umode(const std::string &mode)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted)
-		irc_cmd_user_mode(m_session, mode.c_str());
+	irc_cmd_user_mode(m_session, mode.c_str());
 }
 
 void Server::whois(const std::string &target)
 {
 	Lock lk(m_lock);
 
-	if (m_threadStarted)
-		irc_cmd_whois(m_session, target.c_str());
+	irc_cmd_whois(m_session, target.c_str());
 }
 
 } // !irccd

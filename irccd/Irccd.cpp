@@ -442,19 +442,29 @@ int Irccd::run()
 		else
 			Listener::process();
 
-		// Remove dead servers
-		Server::flush();
+		if (m_running)
+			Server::flush();
 	}
+
+	stop();
 
 	return 0;
 }
 
-void Irccd::stop()
+bool Irccd::isRunning() const
+{
+	return m_running;
+}
+
+void Irccd::shutdown()
 {
 	m_running = false;
+}
 
+void Irccd::stop()
+{
 	Server::forAll([] (Server::Ptr s) {
-	    s->stopConnection();
+		s->stop();
 	});
 
 	Listener::close();

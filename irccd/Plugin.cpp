@@ -211,7 +211,7 @@ void Plugin::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
 		info.host = ev.m_params[2];
 		info.realname = ev.m_params[3];
 
-		for (auto i = 4; i < ev.m_params.size(); ++i)
+		for (size_t i = 4; i < ev.m_params.size(); ++i)
 			info.channels.push_back(ev.m_params[i]);
 
 		p->onWhois(ev.m_server, info);
@@ -584,7 +584,7 @@ void Plugin::onNames(Server::Ptr server,
 	// 2. Push the users
 	lua_createtable(*m_process, 0, 0);
 
-	for (auto i = 1; i < names.size(); ++i) {
+	for (size_t i = 1; i < names.size(); ++i) {
 		lua_pushlstring(*m_process, names[i].c_str(), names[i].length());
 		lua_rawseti(*m_process, -2, i);
 	}

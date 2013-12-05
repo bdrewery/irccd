@@ -70,14 +70,14 @@ const Process::Libraries Process::irccdLibs = {
 	{ "irccd.util",			luaopen_util		}
 };
 
-Process::Ptr Process::create()
+Process::Ptr Process::create() noexcept
 {
 	return std::shared_ptr<Process>(new Process);
 }
 
 void Process::initialize(Process::Ptr process,
 			 const std::string &name,
-			 const std::string &home)
+			 const std::string &home) noexcept
 {
 	lua_pushlstring(*process, name.c_str(), name.length());
 	lua_setfield(*process, LUA_REGISTRYINDEX, FieldName);
@@ -86,17 +86,17 @@ void Process::initialize(Process::Ptr process,
 	lua_setfield(*process, LUA_REGISTRYINDEX, FieldHome);
 }
 
-std::string Process::getName(lua_State *L)
+std::string Process::getName(lua_State *L) noexcept
 {
 	return Luae::requireField<std::string>(L, LUA_REGISTRYINDEX, FieldName);
 }
 
-std::string Process::getHome(lua_State *L)
+std::string Process::getHome(lua_State *L) noexcept
 {
 	return Luae::requireField<std::string>(L, LUA_REGISTRYINDEX, FieldHome);
 }
 
-Process::operator lua_State *()
+Process::operator lua_State *() noexcept
 {
 	return m_state;
 }

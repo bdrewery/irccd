@@ -249,34 +249,46 @@ public:
 
 	using ChanList	= std::vector<Channel>;
 	using Mutex	= std::mutex;
+	using Lock	= std::lock_guard<Mutex>;
 	using MapFunc	= std::function<void (Server::Ptr)>;
 
 private:
-	static List servers;			//! all servers
-	static Mutex serverLock;		//! lock for server management
+	static List	servers;		//! all servers
+	static Mutex	serverLock;		//! lock for server management
 
 	// IRC thread
-	irc_callbacks_t m_callbacks;		//! callbacks for libircclient
-	std::thread m_thread;			//! server's thread
-	IrcSession m_session;			//! libircclient session
-	bool m_threadStarted;			//! thread's status
-	bool m_shouldDelete;			//! tells if we must delete the server
+	irc_callbacks_t	m_callbacks;		//! callbacks for libircclient
+	IrcSession	m_session;		//! libircclient session
+	bool		m_shouldDelete;		//! tells if we must delete the server
+
+	// The thread
+	std::thread	m_thread;		//! server's thread
+	bool		m_threadJoined;		//! thread's status
+	bool		m_retrying;		//! tells if we must continue connecting
 
 	// For deferred events
-	NameList m_nameLists;			//! channels names to receive
-	WhoisList m_whoisLists;			//! list of whois
+	NameList	m_nameLists;		//! channels names to receive
+	WhoisList	m_whoisLists;		//! list of whois
 
-	Mutex m_lock;
+	Mutex		m_lock;			//! lock for client operation
 
-	/**
+	/*
 	 * Initialize callbacks.
 	 */
 	void init();
 
+	/*
+	 * Thread functions
+	 */
+	void prepareSession();
+	void tryConnect();
+	void shouldContinue();
+	void routine();
+
 protected:
-	Info m_info;				//! server info
-	Identity m_identity;			//! identity to use
-	Options m_options;			//! some options
+	Info		m_info;			//! server info
+	Identity	m_identity;		//! identity to use
+	Options		m_options;		//! some options
 
 public:
 	/**
@@ -433,13 +445,17 @@ public:
 	 */
 	void removeChannel(const std::string &name);
 
+	/* -------------------------------------------------
+	 * Thread functions
+	 * ------------------------------------------------- */
+
 	/**
 	 * Start listening on that server, this will create a thread that
-	 * can be stopped with stopConnection();
+	 * can be stopped with stop();
 	 *
-	 * @see stopConnection
+	 * @see stop
 	 */
-	void startConnection();
+	void start();
 
 	/**
 	 * Reset the number of retries.
@@ -447,9 +463,14 @@ public:
 	void resetRetries();
 
 	/**
+	 * Join the thread in a safe manner.
+	 */
+	void join();
+
+	/**
 	 * Stop the connection on that server.
 	 */
-	void stopConnection();
+	void stop();
 
 	/* ------------------------------------------------
 	 * IRC commands
