@@ -21,6 +21,7 @@
 
 #define ETCDIR			"@ETCDIR@"
 #define MODDIR			"@MODDIR@"
+#define DOCDIR			"@DOCDIR@"
 #define PREFIX			"@CMAKE_INSTALL_PREFIX@"
 
 // Optional Lua support

@@ -80,15 +80,11 @@ section is only for short information.
 .Pp
 For more
 information about all irccd Lua API, see
-.Em @DOCDIR@/lua/index.html .
+.Em @CMAKE_INSTALL_PREFIX@/@DOCDIR@/lua/index.html .
 .\" Action
 .Ss Action
 This event is triggered when someone said a message as a CTCP ACTION, most
 known as /me.
-.Pp
-.Bf -symbolic
-Note: this event is not available yet.
-.Ef
 .Bd -literal -offset indent
 function onMe(server, channel, nickname, message)
 .Ed
@@ -211,6 +207,15 @@ The kicked person.
 .It reason
 An optional reason.
 .El
+.\" Load
+.Ss Load
+This function is called when irccd instance load a plugin. If this function
+raises an error, the script is not loaded.
+.Pp
+There are no IRC events that call this function.
+.Bd -literal -offset indent
+function onLoad()
+.Ed
 .\" Message
 .Ss Message
 This event is triggered when someone said something on a specific channel.
@@ -357,6 +362,14 @@ The person who changed the topic.
 .It topic
 The new topic (may be empty).
 .El
+.\" Unload
+.Ss Unload
+This function is called when irccd instance unload a plugin.
+.Pp
+There are no IRC events that call this function.
+.Bd -literal -offset indent
+function onUnload()
+.Ed
 .\" User mode
 .Ss User mode
 This event is triggered when someone changed your mode.
