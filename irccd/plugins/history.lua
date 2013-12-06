@@ -203,18 +203,11 @@ end
 function onJoin(server, channel, nickname)
 	nickname = util.splitUser(nickname)
 	updateDatabase(server, channel, nickname)
+end
 
-	-- Update all nickname when I join a channel
-	local ident = server:getIdentity()
-	if ident.nickname == nickname then
-		server:names(
-			channel,
-			function (names)
-				for _, n in ipairs(names) do
-					updateDatabase(server, channel, n)
-				end
-			end
-		)
+function onNames(server, channel, names)
+	for _, n in ipairs(names) do
+		updateDatabase(server, channel, n)
 	end
 end
 

@@ -116,9 +116,6 @@ void Plugin::callFunctionNum(const std::string &func, Server::Ptr server, int np
 			lua_insert(L, lua_gettop(L) - np++);
 		}
 
-		for (int i = lua_gettop(L); i >= 1; --i)
-			printf("%d: %s\n", i, luaL_typename(L, i));
-
 		if (lua_pcall(L, np, 0, 0) != LUA_OK) {
 			std::string error = lua_tostring(L, -1);
 			lua_pop(L, 1);
