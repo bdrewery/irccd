@@ -10,7 +10,8 @@ CURRENT
   * Added support for server reconnection,
   * Added support for text formatting with colors and attributes,
   * Added support for onMe (CTCP Action) event,
-  * Added new way to load plugin by paths.
+  * Added new way to load plugin by paths,
+  * Server:whois and server:names generate a new events instead of callback.
 
 1.0.2 November 1, 2013
 ---------------------------------------

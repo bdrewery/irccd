@@ -228,7 +228,7 @@ int serverMe(lua_State *L)
 
 int serverMode(lua_State *L)
 {
-	std::shared_ptr<Server> s = Luae::getShared<Server>(L, 1, ServerType);
+	Server::Ptr s = Luae::getShared<Server>(L, 1, ServerType);
 	std::string channel = luaL_checkstring(L, 2);
 	std::string mode = luaL_checkstring(L, 3);
 

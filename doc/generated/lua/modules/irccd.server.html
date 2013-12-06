@@ -81,7 +81,6 @@
 <h2>Examples</h2>
 <ul class="nowrap">
   <li><a href="../examples/Connect.lua.html">Connect.lua</a></li>
-  <li><a href="../examples/Deferred.lua.html">Deferred.lua</a></li>
   <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
   <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
 </ul>
@@ -143,7 +142,7 @@
 	<td class="summary">Change the channel mode.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Server:names">Server:names (channel, func)</a></td>
+	<td class="name" nowrap><a href="#Server:names">Server:names (channel)</a></td>
 	<td class="summary">Get the list of names.</td>
 	</tr>
 	<tr>
@@ -175,7 +174,7 @@
 	<td class="summary">Change your own user mode.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Server:whois">Server:whois (target, func)</a></td>
+	<td class="name" nowrap><a href="#Server:whois">Server:whois (target)</a></td>
 	<td class="summary">Get whois information from a user.</td>
 	</tr>
 </table>
@@ -463,25 +462,16 @@
 </dd>
     <dt>
     <a name = "Server:names"></a>
-    <strong>Server:names (channel, func)</strong>
+    <strong>Server:names (channel)</strong>
     </dt>
     <dd>
     Get the list of names.
- This is a deferred call, the function <strong>func</strong> must have the
- following signature and will be called when irccd get the results.</p>
-
-<pre><code>function callback(list)
-</code></pre>
-
-<p> where <strong>list</strong> is a sequence table with all nicknames.
+ This function will generate the onNames event.
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">channel</span>
-         the channel to check
-        </li>
-        <li><span class="parameter">func</span>
-         the function
+         the channel
         </li>
     </ul>
 
@@ -489,18 +479,9 @@
 
     <h3>See also:</h3>
     <ul>
-         <a href="../examples/Deferred.lua.html#">Deferred.lua</a>
+         <a href="../topics/3-Event-Names.md.html#">3-Event-Names.md</a>
     </ul>
 
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"> server:names(
-	<span class="string">"#test"</span>,
-	<span class="keyword">function</span> (list)
-		<span class="comment">-- Play with list sequence
-</span>	<span class="keyword">end</span>
- )</pre>
-    </ul>
 
 </dd>
     <dt>
@@ -651,32 +632,16 @@
 </dd>
     <dt>
     <a name = "Server:whois"></a>
-    <strong>Server:whois (target, func)</strong>
+    <strong>Server:whois (target)</strong>
     </dt>
     <dd>
     Get whois information from a user.
- This is a deferred call, the function <strong>func</strong> must have the
- following signature</p>
-
-<pre><code>function callback(info)
-</code></pre>
-
-<p> where <strong>info</strong> is a table with the following fields:
- <ul>
-   <li><strong>nickname (string)</strong>: the nickname</li>
-   <li><strong>user (string)</strong>: the username</li>
-   <li><strong>host (string)</strong>: user's hostname</li>
-   <li><strong>realname (string)</strong>: the realname</li>
-   <li><strong>channels (table)</strong>: a sequence table of all channels</li>
- </ul>
+ The function will generate the onWhois event.
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">target</span>
-         the nickname target
-        </li>
-        <li><span class="parameter">func</span>
-         the function
+         the target
         </li>
     </ul>
 
@@ -684,18 +649,9 @@
 
     <h3>See also:</h3>
     <ul>
-         <a href="../examples/Deferred.lua.html#">Deferred.lua</a>
+         <a href="../topics/3-Event-Whois.md.html#">3-Event-Whois.md</a>
     </ul>
 
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example"> server:whois(
-	<span class="string">"test"</span>,
-	<span class="keyword">function</span> (info)
-		<span class="comment">-- Play with info
-</span>	<span class="keyword">end</span>
- )</pre>
-    </ul>
 
 </dd>
 </dl>
