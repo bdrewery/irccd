@@ -1,9 +1,10 @@
 IRC Client Daemon BREAKS
 ========================
 
-This is the list of things that changed and are now marked as deprecated.
+This is the list of changes that breaks compatibility.
 
-CURRENT
--------
+Between 1.0 and 1.1
+-------------------
 
-* Option general.plugins is deprecated. Use section [plugins] to load plugins.
+* The functions server:whois() and server:names() do not use deferred calls
+  anymore.
