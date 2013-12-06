@@ -58,10 +58,10 @@
   <li><a href="../topics/3-Event-Part.md.html">3-Event-Part.md</a></li>
   <li><a href="../topics/3-Event-Query.md.html">3-Event-Query.md</a></li>
   <li><a href="../topics/3-Event-Reload.md.html">3-Event-Reload.md</a></li>
-  <li><strong>3-Event-Topic.md</strong></li>
+  <li><a href="../topics/3-Event-Topic.md.html">3-Event-Topic.md</a></li>
   <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
   <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
-  <li><a href="../topics/3-Event-Whois.md.html">3-Event-Whois.md</a></li>
+  <li><strong>3-Event-Whois.md</strong></li>
 </ul>
 <h2>Modules</h2>
 <ul class="nowrap">
@@ -89,33 +89,36 @@
 
 <div id="content">
 
-<h1>Topic <code>3-Event-Topic.md</code></h1>
+<h1>Topic <code>3-Event-Whois.md</code></h1>
 
 
-<h2>Topic</h2>
+<h2>Whois</h2>
 
-<p>This event is triggered when someone changed the channel's topic.</p>
+<p>This event is triggered when irccd get information from a user.</p>
 
 <p><a name="Function"></a></p>
 <h3>Function</h3>
 
 
 <pre>
- <span class="keyword">function</span> onTopic(server, channel, who, topic)
+ <span class="keyword">function</span> onWhois(server, info)
 </pre>
 
 <p><a name="Parameters"></a></p>
 <h3>Parameters</h3>
 
+
 <ul>
-    <li>server, the current server.</li>
-    <li>channel, the channel.</li>
-    <li>who, the person who changed the topic.</li>
-    <li>topic, the new topic (may be empty).</li>
+<li>server, the current server.</li>
+<li>info, a table with the following information:</li>
+  <ul>
+  <li>nickname, the user nickname.</li>
+  <li>user, the user name.</li>
+  <li>host, the hostname.</li>
+  <li>realname, the real name used.</li>
+  <li>channels, an optional sequences of channels joined.</li>
+  </ul>
 </ul>
-
-
-<!--- vim: set syntax=mkd: -->
 
 
 

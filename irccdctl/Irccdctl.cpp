@@ -60,6 +60,15 @@ void helpConnect()
 	Logger::warn("\t%s connect -k secret -i fabrice serverz irc.svz.bar 6667", getprogname());
 }
 
+void helpDisconnect()
+{
+	Logger::warn("usage: %s disconnect server\n", getprogname());
+	Logger::warn("Disconnect from a connected server.\n");
+
+	Logger::warn("Example:");
+	Logger::warn("\t%s disconnect server", getprogname());
+}
+
 void helpInvite()
 {
 	Logger::warn("usage: %s invite server nickname channel\n", getprogname());
@@ -196,6 +205,7 @@ void helpUserMode()
 
 std::unordered_map<std::string, HelpHandler> helpHandlers {
 	{ "cnotice", 	helpChannelNotice	},
+	{ "disconnect",	helpDisconnect		},
 	{ "connect",	helpConnect		},
 	{ "invite",	helpInvite		},
 	{ "join",	helpJoin		},
@@ -264,6 +274,17 @@ void handleConnect(Irccdctl *ctl, int argc, char **argv)
 		oss << " ssl:on";
 	oss << "\n";
 	
+	ctl->sendRaw(oss.str());
+}
+
+void handleDisconnect(Irccdctl *ctl, int argc, char **argv)
+{
+	std::ostringstream oss;
+
+	if (argc < 1)
+		Logger::fatal(1, "disonnect requires 1 argument");
+
+	oss << "DISCONNECT " << argv[0] << "\n";
 	ctl->sendRaw(oss.str());
 }
 
@@ -439,6 +460,7 @@ void handleUserMode(Irccdctl *ctl, int argc, char **argv)
 std::unordered_map<std::string, Handler> handlers {
 	{ "cnotice",	handleChannelNotice	},
 	{ "connect",	handleConnect		},
+	{ "disconnect",	handleDisconnect	},
 	{ "help",	handleHelp		},
 	{ "invite",	handleInvite		},
 	{ "join",	handleJoin		},
@@ -715,6 +737,7 @@ void Irccdctl::usage()
 	Logger::warn("Commands supported:");
 	Logger::warn("\tcnotice\t\tSend a channel notice");
 	Logger::warn("\tconnect\t\tConnect to a server");
+	Logger::warn("\tdisconnect\tDisconnect from a server");
 	Logger::warn("\thelp\t\tGet this help");
 	Logger::warn("\tinvite\t\tInvite someone to a channel");
 	Logger::warn("\tjoin\t\tJoin a channel");

@@ -42,16 +42,12 @@ void Thread::start(Thread::Ptr thread, int np)
 Thread::Thread()
 	: m_joined(false)
 {
+	m_process = Process::create();
 }
 
 Thread::~Thread()
 {
 	Logger::debug("thread: destructor called");
-}
-
-void Thread::setState(LuaState &&)
-{
-	//m_state = std::move(state);
 }
 
 bool Thread::hasJoined() const
@@ -71,7 +67,7 @@ void Thread::detach()
 	m_joined = true;
 }
 
-Process::Ptr Proces::process()
+Process::Ptr Thread::process() const
 {
 	return m_process;
 }

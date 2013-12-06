@@ -65,7 +65,7 @@ public:
 	 */
 	static Ptr create() noexcept;
 
-	/*
+	/**
 	 * Initialize the process, adds the name and home
 	 *
 	 * @param process the process
@@ -76,7 +76,7 @@ public:
 			       const std::string &name,
 			       const std::string &home) noexcept;
 
-	/*
+	/**
 	 * Get the name from the registry.
 	 *
 	 * @param L the Lua state
@@ -84,7 +84,7 @@ public:
 	 */
 	static std::string getName(lua_State *L) noexcept;
 
-	/*
+	/**
 	 * Get the home from the registry.
 	 *
 	 * @param L the Lua state

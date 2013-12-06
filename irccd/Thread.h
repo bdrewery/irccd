@@ -65,13 +65,6 @@ public:
 	~Thread();
 
 	/**
-	 * Move the state to the thread.
-	 *
-	 * @param state the new Lua state to move
-	 */
-	void setState(LuaState &&state);
-
-	/**
 	 * Check if the thread has been joined or detached.
 	 *
 	 * @return true if any
@@ -93,7 +86,7 @@ public:
 	 *
 	 * @return the process
 	 */
-	Process::Ptr process();
+	Process::Ptr process() const;
 
 	operator lua_State *();
 };

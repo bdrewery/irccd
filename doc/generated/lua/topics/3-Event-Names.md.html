@@ -52,13 +52,13 @@
   <li><a href="../topics/3-Event-Load.md.html">3-Event-Load.md</a></li>
   <li><a href="../topics/3-Event-Message.md.html">3-Event-Message.md</a></li>
   <li><a href="../topics/3-Event-Mode.md.html">3-Event-Mode.md</a></li>
-  <li><a href="../topics/3-Event-Names.md.html">3-Event-Names.md</a></li>
+  <li><strong>3-Event-Names.md</strong></li>
   <li><a href="../topics/3-Event-Nick.md.html">3-Event-Nick.md</a></li>
   <li><a href="../topics/3-Event-Notice.md.html">3-Event-Notice.md</a></li>
   <li><a href="../topics/3-Event-Part.md.html">3-Event-Part.md</a></li>
   <li><a href="../topics/3-Event-Query.md.html">3-Event-Query.md</a></li>
   <li><a href="../topics/3-Event-Reload.md.html">3-Event-Reload.md</a></li>
-  <li><strong>3-Event-Topic.md</strong></li>
+  <li><a href="../topics/3-Event-Topic.md.html">3-Event-Topic.md</a></li>
   <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
   <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
   <li><a href="../topics/3-Event-Whois.md.html">3-Event-Whois.md</a></li>
@@ -89,29 +89,28 @@
 
 <div id="content">
 
-<h1>Topic <code>3-Event-Topic.md</code></h1>
+<h1>Topic <code>3-Event-Names.md</code></h1>
 
 
-<h2>Topic</h2>
+<h2>Names</h2>
 
-<p>This event is triggered when someone changed the channel's topic.</p>
+<p>This event is triggered when a list of names has come.</p>
 
 <p><a name="Function"></a></p>
 <h3>Function</h3>
 
 
 <pre>
- <span class="keyword">function</span> onTopic(server, channel, who, topic)
+ <span class="keyword">function</span> onNames(server, channel, list)
 </pre>
 
 <p><a name="Parameters"></a></p>
 <h3>Parameters</h3>
 
 <ul>
-    <li>server, the current server.</li>
-    <li>channel, the channel.</li>
-    <li>who, the person who changed the topic.</li>
-    <li>topic, the new topic (may be empty).</li>
+    <li>server, he current server.</li>
+    <li>channel, which channel.</li>
+    <li>list, a sequence with all users.</li>
 </ul>
 
 

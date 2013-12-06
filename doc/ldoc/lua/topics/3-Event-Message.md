@@ -8,9 +8,9 @@ This event is triggered when someone said something on a specific channel.
 
 ### Parameters
 
-server, the current server.
-channel, the channel.
-nickname, the person that said something.
-message, the message sent.
+* server, the current server.
+* channel, the channel.
+* nickname, the person that said something.
+* message, the message sent.
 
 <!--- vim: set syntax=mkd: -->

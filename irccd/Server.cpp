@@ -482,8 +482,15 @@ bool Server::has(const std::string &name)
 Server::Ptr Server::get(const std::string &name)
 {
 	Lock lk(serverLock);
+	Server::Ptr sv;
 
-	return servers.at(name);
+	try {
+		sv = servers.at(name);
+	} catch (std::out_of_range) {
+		throw std::out_of_range("server " + name + " not found");
+	}
+
+	return sv;
 }
 
 void Server::forAll(MapFunc func)
@@ -825,6 +832,9 @@ void Server::stop()
 	Lock lk(m_lock);
 
 	Logger::log("server %s: disconnecting...", m_info.m_name.c_str());
+
+	m_retrying = false;
+	m_shouldDelete = true;
 
 	if (m_session != nullptr)
 		irc_disconnect(m_session);
