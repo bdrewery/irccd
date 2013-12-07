@@ -315,6 +315,7 @@ void Listener::execute(const std::string &cmd,
 		if (handlers.find(cmdName) == handlers.end())
 			Logger::warn("listener: invalid command %s", cmdName.c_str());
 		else {
+			std::string result = "OK\n";
 			auto h = handlers[cmdName];
 
 			try {
@@ -326,35 +327,19 @@ void Listener::execute(const std::string &cmd,
 				 */
 				if (params.size() < static_cast<size_t>(h.m_noargs)) {
 					std::ostringstream oss;
-					std::string error;
 
 					oss << cmdName << " requires at least ";
 					oss << handlers[cmdName].m_noargs << "\n";
-					error = oss.str();
-
-					s.send(error);
-				} else {
-					/*
-					 * Send a response "OK\n" to notify irccdctl.
-					 */
+					result = oss.str();
+				} else
 					h.m_function(params);
-					notifySocket("OK\n", s, addr);
-				}
 			} catch (std::out_of_range ex) {
-				std::ostringstream oss;
-
-				oss << ex.what() << "\n";
-
-				notifySocket(oss.str(), s, addr);
+				result = ex.what() + std::string("\n");
 			} catch (std::runtime_error ex) {
-				std::ostringstream oss;
-
-				oss << ex.what() << "\n";
-
-				notifySocket(oss.str(), s, addr);
-			} catch (SocketError ex) {
-				Logger::warn("listener: failed to send: %s", ex.what());
+				result = ex.what() + std::string("\n");
 			}
+
+			notifySocket(result, s, addr);
 		}
 	}
 }

@@ -63,18 +63,14 @@ public:
 
 	using Ptr		= std::shared_ptr<Plugin>;
 	using Dirs		= std::vector<std::string>;
-	using Map		= std::unordered_map<
-					lua_State *,
-					Plugin::Ptr
-				  >;
-
+	using List		= std::vector<Plugin::Ptr>;
 	using Mutex		= std::recursive_mutex;
 	using Lock		= std::lock_guard<Mutex>;
 
 private:
 	static Mutex		pluginLock;	//! lock for managing plugins
 	static Dirs		pluginDirs;	//! list of plugin directories
-	static Map		pluginMap;	//! map of plugins loaded
+	static List		plugins;	//! map of plugins loaded
 
 	// Process for that plugin
 	Process::Ptr		m_process;
@@ -85,7 +81,7 @@ private:
 	std::string		m_path;		//! path used like "/opt/foo.lua"
 	std::string		m_error;	//! error message if needed
 
-	static bool isPluginLoaded(const std::string &name);
+	static void callPlugin(Plugin::Ptr p, const IrcEvent &ev);
 
 	void callFunction(const std::string &func,
 			  Server::Ptr server = Server::Ptr(),
@@ -95,9 +91,22 @@ private:
 			  Server::Ptr server,
 			  int np = 0);
 
-	static void callPlugin(Plugin::Ptr p, const IrcEvent &ev);
-
 public:
+	/**
+	 * Check whether a plugin is loaded.
+	 *
+	 * @param name the name
+	 * @return true if loaded
+	 */
+	static bool isLoaded(const std::string &name);
+
+	/**
+	 * Get a list of loaded plugins.
+	 *
+	 * @return the list of loaded plugins
+	 */
+	static std::vector<std::string> loaded();
+
 	/**
 	 * Add path for finding plugins.
 	 *
@@ -110,6 +119,7 @@ public:
 	 *
 	 * @param path the full path
 	 * @param relative tell if the path is relative
+	 * @throw std::runtime_error on failure
 	 */
 	static void load(const std::string &path, bool relative = false);
 

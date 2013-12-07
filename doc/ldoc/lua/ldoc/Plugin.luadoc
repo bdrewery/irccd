@@ -18,4 +18,40 @@ end
 function plugin.getHome()
 end
 
+--- Add a path for searching plugins.
+-- This function add paths where irccd can find plugins.
+-- @param path the path to add
+function plugin.addPath(path)
+end
+
+--- Check if a plugin is loaded.
+-- @param name the plugin to check
+-- @return true if loaded
+function plugin.isLoaded(name)
+end
+
+--- Get a list of loaded plugins.
+-- @return a list of loaded plugins
+function plugin.loaded()
+end
+
+--- Load a plugin.
+-- If the path is relative, the plugin is searched through the standard
+-- directories, otherwise the absolute path is used.
+-- @param path the path
+-- @return true on success or nil on failure
+-- @return the error message
+function plugin.load(path)
+end
+
+--- Reload a plugin.
+-- @param name the plugin to reload
+function plugin.reload(name)
+end
+
+--- Unload a plugin.
+-- @param name the plugin
+function plugin.unload(name)
+end
+
 -- vim: set syntax=lua:

@@ -118,8 +118,13 @@ void Irccd::openConfig()
 	readPlugins(config);
 
 	/* Now, we load plugins specified by command line */
-	for (auto s : m_wantedPlugins)
-		Plugin::load(s);
+	for (auto s : m_wantedPlugins) {
+		try {
+			Plugin::load(s);
+		} catch (std::runtime_error error) {
+			Logger::warn("irccd: %s", error.what());
+		}
+	}
 
 	readServers(config);
 }
@@ -133,14 +138,21 @@ void Irccd::readGeneral(const Parser &config)
 		if (general.hasOption("plugin-path"))
 			Plugin::addPath(general.getOption<std::string>("plugin-path"));
 
+#if !defined(WITH_NOCOMPAT)
 		// Old way of loading plugins
 		if (general.hasOption("plugins")) {
 			Logger::warn("irccd: general.plugins option is deprecated, use [plugins]");
 
 			std::string list = general.getOption<std::string>("plugins");
-			for (auto s : Util::split(list, " \t"))
-				Plugin::load(s);
+			for (auto s : Util::split(list, " \t")) {
+				try {
+					Plugin::load(s);
+				} catch (std::runtime_error error) {
+					Logger::warn("irccd: %s", error.what());
+				}
+			}
 		}
+#endif
 
 #if !defined(_WIN32)
 		if (general.hasOption("syslog"))

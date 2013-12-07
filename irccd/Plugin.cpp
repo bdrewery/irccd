@@ -55,19 +55,6 @@ const char * Plugin::ErrorException::what() const throw()
  * private methods and members
  * -------------------------------------------------------- */
 
-bool Plugin::isPluginLoaded(const std::string &name)
-{
-	bool ret = true;
-
-	try {
-		(void)find(name);
-	} catch (std::out_of_range ex) {
-		ret = false;
-	}
-
-	return ret;
-}
-
 void Plugin::callFunction(const std::string &func,
 			  Server::Ptr server,
 			  std::vector<std::string> params)
@@ -225,7 +212,32 @@ void Plugin::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
 
 Plugin::Mutex		Plugin::pluginLock;
 Plugin::Dirs		Plugin::pluginDirs;
-Plugin::Map		Plugin::pluginMap;
+Plugin::List		Plugin::plugins;
+
+bool Plugin::isLoaded(const std::string &name)
+{
+	Lock lk(pluginLock);
+	bool ret = true;
+
+	try {
+		(void)find(name);
+	} catch (std::out_of_range ex) {
+		ret = false;
+	}
+
+	return ret;
+}
+
+std::vector<std::string> Plugin::loaded()
+{
+	Lock lk(pluginLock);
+	std::vector<std::string> list;
+
+	for (auto p : plugins)
+		list.push_back(p->m_name);
+
+	return list;
+}
 
 void Plugin::addPath(const std::string &path)
 {
@@ -242,8 +254,8 @@ void Plugin::load(const std::string &name, bool relative)
 	std::string realname, realpath;
 	bool found = false;
 
-	if (isPluginLoaded(name))
-		return;
+	if (isLoaded(name))
+		throw std::runtime_error("plugin " + name + " already loaded");
 
 	/*
 	 * If the plugin has been specified by path using foo = /path then
@@ -289,26 +301,29 @@ void Plugin::load(const std::string &name, bool relative)
 	}
 
 	if (!found)
-		Logger::warn("irccd: plugin %s not found", realname.c_str());
-	else {
-		/*
-		 * At this step, the open function will open the lua
-		 * script, that script may want to call some bindings
-		 * directly so we need to add it to the registered
-		 * Lua plugins even if it has failed. So we remove
-		 * it only on failure and expect plugins to be well
-		 * coded.
-		 */
-		 
-		Plugin::Ptr p = std::make_shared<Plugin>(realname, realpath);
-		pluginMap[p->getState()] = p;
+		throw std::runtime_error("plugin " + realname + " not found");
 
-		if (!p->open()) {
-			Logger::warn("irccd: failed to load plugin %s: %s",
-			    realname.c_str(), p->getError().c_str());
+	/*
+	 * At this step, the open function will open the lua
+	 * script, that script may want to call some bindings
+	 * directly so we need to add it to the registered
+	 * Lua plugins even if it has failed. So we remove
+	 * it only on failure and expect plugins to be well
+	 * coded.
+	 */
 
-			pluginMap.erase(p->getState());
-		}
+	Plugin::Ptr p = std::make_shared<Plugin>(realname, realpath);
+	plugins.push_back(p);
+
+	bool result = p->open();
+
+	if (!result) {
+		plugins.erase(
+			std::remove(plugins.begin(), plugins.end(), p),
+			plugins.end()
+		);
+
+		throw std::runtime_error("failed to load " + realname + ": " + p->getError());
 	}
 }
 
@@ -326,7 +341,10 @@ void Plugin::unload(const std::string &name)
 			    name.c_str(), ex.what());
 		}
 
-		pluginMap.erase(i->getState());
+		plugins.erase(
+			std::remove(plugins.begin(), plugins.end(), i),
+			plugins.end()
+		);
 	} catch (std::out_of_range) {
 		Logger::warn("irccd: there is no plugin %s loaded", name.c_str());
 	}
@@ -345,36 +363,33 @@ void Plugin::reload(const std::string &name)
 
 Plugin::Ptr Plugin::find(const std::string &name)
 {
-	using Type = std::pair<lua_State *, Plugin::Ptr>;
-
 	Lock lk(pluginLock);
 	std::ostringstream oss;
 
-	auto i = std::find_if(pluginMap.begin(), pluginMap.end(),
-	    [&] (Type p) -> bool {
-		return p.second->getName() == name;
+	auto i = std::find_if(plugins.begin(), plugins.end(),
+	    [&] (Plugin::Ptr p) -> bool {
+		return p->getName() == name;
 	    }
 	);
 
-	if (i == pluginMap.end()) {
+	if (i == plugins.end()) {
 		oss << "plugin " << name << " not found";
 
 		throw std::out_of_range(oss.str());
 	}
 
-	return (*i).second;
+	return *i;
 }
 
 void Plugin::handleIrcEvent(const IrcEvent &ev)
 {
 	Lock lk(pluginLock);
 
-	for (auto p : pluginMap) {
+	for (size_t i = 0; i < plugins.size(); ++i) {
 		try {
-			callPlugin(p.second, ev);
+			callPlugin(plugins[i], ev);
 		} catch (Plugin::ErrorException ex) {
-			Logger::warn("plugin %s: %s",
-			    p.second->getName().c_str(), ex.what());
+			Logger::warn("plugin: %s", ex.what());
 		}
 	}
 }

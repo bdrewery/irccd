@@ -105,6 +105,30 @@
 	<td class="name" nowrap><a href="#getHome">getHome ()</a></td>
 	<td class="summary">Get the plugin home.</td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#addPath">addPath (path)</a></td>
+	<td class="summary">Add a path for searching plugins.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#isLoaded">isLoaded (name)</a></td>
+	<td class="summary">Check if a plugin is loaded.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#loaded">loaded ()</a></td>
+	<td class="summary">Get a list of loaded plugins.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#load">load (path)</a></td>
+	<td class="summary">Load a plugin.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#reload">reload (name)</a></td>
+	<td class="summary">Reload a plugin.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#unload">unload (name)</a></td>
+	<td class="summary">Unload a plugin.</td>
+	</tr>
 </table>
 
 <br/>
@@ -147,6 +171,134 @@
 
         the plugin home
     </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "addPath"></a>
+    <strong>addPath (path)</strong>
+    </dt>
+    <dd>
+    Add a path for searching plugins.
+ This function add paths where irccd can find plugins.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path to add
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "isLoaded"></a>
+    <strong>isLoaded (name)</strong>
+    </dt>
+    <dd>
+    Check if a plugin is loaded.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the plugin to check
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if loaded
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "loaded"></a>
+    <strong>loaded ()</strong>
+    </dt>
+    <dd>
+    Get a list of loaded plugins.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a list of loaded plugins
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "load"></a>
+    <strong>load (path)</strong>
+    </dt>
+    <dd>
+    Load a plugin.
+ If the path is relative, the plugin is searched through the standard
+ directories, otherwise the absolute path is used.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        true on success or nil on failure</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "reload"></a>
+    <strong>reload (name)</strong>
+    </dt>
+    <dd>
+    Reload a plugin.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the plugin to reload
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "unload"></a>
+    <strong>unload (name)</strong>
+    </dt>
+    <dd>
+    Unload a plugin.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the plugin
+        </li>
+    </ul>
+
 
 
 
