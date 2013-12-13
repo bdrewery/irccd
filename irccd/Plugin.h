@@ -58,6 +58,16 @@ public:
 		 */
 		std::string which() const;
 
+		/**
+		 * Get the error.
+		 *
+		 * @return the error
+		 */
+		std::string error() const;
+
+		/**
+		 * @copydoc std::exception::what
+		 */
 		virtual const char * what() const throw();
 	};
 
@@ -72,16 +82,12 @@ private:
 	static Dirs		pluginDirs;	//! list of plugin directories
 	static List		plugins;	//! map of plugins loaded
 
-	// Process for that plugin
-	Process::Ptr		m_process;
-
-	// Plugin identity
-	std::string		m_name;		//! name like "foo"
-	std::string		m_home;		//! home, usually ~/.config/<name>/
-	std::string		m_path;		//! path used like "/opt/foo.lua"
-	std::string		m_error;	//! error message if needed
+	Process::Ptr		m_process;	//! lua_State
+	Process::Info		m_info;		//! plugin information
 
 	static void callPlugin(Plugin::Ptr p, const IrcEvent &ev);
+
+	std::string getGlobal(const std::string &name);
 
 	void callFunction(const std::string &func,
 			  Server::Ptr server = Server::Ptr(),
@@ -105,7 +111,7 @@ public:
 	 *
 	 * @return the list of loaded plugins
 	 */
-	static std::vector<std::string> loaded();
+	static std::vector<std::string> list();
 
 	/**
 	 * Add path for finding plugins.
@@ -199,18 +205,11 @@ public:
 	lua_State *getState();
 
 	/**
-	 * Get the error message if something failed.
-	 *
-	 * @return the message
-	 */
-	const std::string &getError() const;
-
-	/**
 	 * Open the plugin.
 	 *
-	 * @return true on success
+	 * @throw ErrorException on error
 	 */
-	bool open();
+	void open();
 
 	/* ------------------------------------------------
 	 * IRC commands

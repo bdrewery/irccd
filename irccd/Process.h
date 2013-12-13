@@ -38,6 +38,23 @@ public:
 	using Ptr	= std::shared_ptr<Process>;
 	using Libraries	= std::unordered_map<const char *, lua_CFunction>;
 
+	/**
+	 * @struct Info
+	 * @brief Process information
+	 *
+	 * This structure is store within the Lua state registry instead of the
+	 * process, thus it's possible to get it from any Lua C function.
+	 */
+	struct Info {
+		std::string	name;		//! name like "foo"
+		std::string	path;		//! the full path
+		std::string	home;		//! plugin's home
+		std::string	author;		//! the author (optional)
+		std::string	comment;	//! a summary (optional)
+		std::string	version;	//! a version (optional)
+		std::string	license;	//! a license (optional)
+	};
+
 private:
 	LuaState	m_state;
 
@@ -48,8 +65,7 @@ public:
 	 * The following fields are store in the lua_State * registry
 	 * and may be retrieved at any time from any Lua API.
 	 */
-	static const char *	FieldName;
-	static const char *	FieldHome;
+	static const char *	FieldInfo;
 
 	/*
 	 * The following tables are libraries to load, luaLibs are
@@ -69,28 +85,18 @@ public:
 	 * Initialize the process, adds the name and home
 	 *
 	 * @param process the process
-	 * @param name the name
-	 * @param home the home
+	 * @param info the info
 	 */
-	static void initialize(Process::Ptr process,
-			       const std::string &name,
-			       const std::string &home) noexcept;
+	static void initialize(Ptr process, const Info &info) noexcept;
 
 	/**
-	 * Get the name from the registry.
+	 * Get the info from the registry. Calls luaL_error if any functions
+	 * are called directly in the plugin.
 	 *
-	 * @param L the Lua state
-	 * @return the name
+	 * @param L the state to get info from
+	 * @return the info
 	 */
-	static std::string getName(lua_State *L) noexcept;
-
-	/**
-	 * Get the home from the registry.
-	 *
-	 * @param L the Lua state
-	 * @return the name
-	 */
-	static std::string getHome(lua_State *L) noexcept;
+	static Info info(lua_State *L) noexcept;
 
 	/**
 	 * Convert the process to a C lua_State.

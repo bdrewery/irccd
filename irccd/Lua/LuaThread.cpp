@@ -102,12 +102,11 @@ int l_threadNew(lua_State *L)
 	}
 
 	try {
-		auto name = Process::getName(L);
-		auto home = Process::getHome(L);
+		auto info = Process::info(L);
 		auto process = thread->process();
 
 		// Set home and name like the plugin
-		Process::initialize(process, name, home);
+		Process::initialize(process, info);
 
 		// Create the object to push as return value
 		Thread::Ptr *ptr = new (L, THREAD_TYPE) Thread::Ptr(thread);

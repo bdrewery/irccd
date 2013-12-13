@@ -450,8 +450,11 @@ void testPlugin(const char *file, int argc, char **argv)
 
 	auto plugin = std::make_shared<Plugin>(name, file);
 
-	if (!plugin->open())
-		Logger::warn("Failed to open plugin: %s", plugin->getError().c_str());
+	try {
+		plugin->open();
+	} catch (Plugin::ErrorException ex) {
+		Logger::warn("Failed to open plugin: %s", ex.what());
+	}
 
 	// Simulate handler is optional
 	if (argc > 1) {

@@ -135,8 +135,7 @@ public:
  *
  * This class adds lot of functions for Lua and C++.
  */
-class Luae
-{
+class Luae {
 public:
 	using ReadFunction = std::function<void(lua_State *L, int tkey, int tvalue)>;
 

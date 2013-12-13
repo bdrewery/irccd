@@ -35,8 +35,7 @@ namespace irccd {
  * fields used for registring plugin or thread information
  * --------------------------------------------------------- */
 
-const char *	Process::FieldName = "__process_name__";
-const char *	Process::FieldHome = "__process_home__";
+const char *	Process::FieldInfo = "__process_info__";
 
 /* --------------------------------------------------------
  * list of libraries to load
@@ -49,6 +48,10 @@ const Process::Libraries Process::luaLibs = {
 	{ "package",			luaopen_package		},
 	{ "string",			luaopen_string		},
 	{ "table",			luaopen_table		},
+
+#if !defined(NDEBUG)
+	{ "debug",			luaopen_debug		},
+#endif
 
 	/*
 	 * There is no function for this one, but server object is passed
@@ -75,25 +78,50 @@ Process::Ptr Process::create() noexcept
 	return std::shared_ptr<Process>(new Process);
 }
 
-void Process::initialize(Process::Ptr process,
-			 const std::string &name,
-			 const std::string &home) noexcept
+void Process::initialize(Ptr process, const Info &info) noexcept
 {
-	lua_pushlstring(*process, name.c_str(), name.length());
-	lua_setfield(*process, LUA_REGISTRYINDEX, FieldName);
+	auto setField = [&] (const std::string &which, const std::string &name) {
+		lua_pushlstring(*process, which.c_str(), which.length());
+		lua_setfield(*process, -2, name.c_str());
+	};
 
-	lua_pushlstring(*process, home.c_str(), home.length());
-	lua_setfield(*process, LUA_REGISTRYINDEX, FieldHome);
+	auto L = static_cast<lua_State *>(*process);
+
+	LUA_STACK_CHECKBEGIN(L);
+
+	/* Plugin information */
+	lua_createtable(L, 0, 0);
+
+	setField(info.name, "name");
+	setField(info.path, "path");
+	setField(info.home, "home");
+	setField(info.author, "author");
+	setField(info.comment, "comment");
+	setField(info.version, "version");
+	setField(info.license, "license");
+
+	lua_setfield(L, LUA_REGISTRYINDEX, FieldInfo);
+
+	LUA_STACK_CHECKEQUALS(L);
 }
 
-std::string Process::getName(lua_State *L) noexcept
+Process::Info Process::info(lua_State *L) noexcept
 {
-	return Luae::requireField<std::string>(L, LUA_REGISTRYINDEX, FieldName);
-}
+	Process::Info info;
 
-std::string Process::getHome(lua_State *L) noexcept
-{
-	return Luae::requireField<std::string>(L, LUA_REGISTRYINDEX, FieldHome);
+	lua_getfield(L, LUA_REGISTRYINDEX, FieldInfo);
+	if (lua_type(L, -1) != LUA_TTABLE)
+		luaL_error(L, "uninitialized state");
+
+	info.name = Luae::requireField<std::string>(L, -1, "name");
+	info.path = Luae::requireField<std::string>(L, -1, "path");
+	info.home = Luae::requireField<std::string>(L, -1, "home");
+	info.author = Luae::requireField<std::string>(L, -1, "author");
+	info.comment = Luae::requireField<std::string>(L, -1, "comment");
+	info.version = Luae::requireField<std::string>(L, -1, "version");
+	info.license = Luae::requireField<std::string>(L, -1, "license");
+
+	return info;
 }
 
 Process::operator lua_State *() noexcept

@@ -32,44 +32,50 @@ int l_addPath(lua_State *L)
 	return 0;
 }
 
-int l_getName(lua_State *L)
+int l_info(lua_State *L)
 {
-	auto name = Luae::requireField<std::string>(L,
-	    LUA_REGISTRYINDEX, Process::FieldName);
+	std::string name;
+	int ret = 0;
 
-	lua_pushlstring(L, name.c_str(), name.length());
+	/*
+	 * If the name is specified, search for a plugin, otherwise use
+	 * ourselve.
+	 */
+	if (lua_gettop(L) >= 1) {
+		name = luaL_checkstring(L, 1);
 
-	return 1;
+		try {
+			auto plugin = Plugin::find(name);
+			auto state = plugin->getState();
+
+			lua_getfield(state, LUA_REGISTRYINDEX, Process::FieldInfo);
+			LuaValue::push(L, LuaValue::copy(state, -1));
+			lua_pop(state, 1);
+
+			ret = 1;
+		} catch (std::out_of_range ex) {
+			lua_pushnil(L);
+			lua_pushstring(L, ex.what());
+
+			ret = 2;
+		}
+	} else {
+		lua_getfield(L, LUA_REGISTRYINDEX, Process::FieldInfo);
+
+		ret = 1;
+	}
+
+	return ret;
 }
 
-int l_getHome(lua_State *L)
+int l_list(lua_State *L)
 {
-	auto home = Luae::requireField<std::string>(L,
-	    LUA_REGISTRYINDEX, Process::FieldHome);
-
-	lua_pushlstring(L, home.c_str(), home.length());
-
-	return 1;
-}
-
-int l_isLoaded(lua_State *L)
-{
-	std::string name = luaL_checkstring(L, 1);
-
-	lua_pushboolean(L, Plugin::isLoaded(name));
-
-	return 1;
-}
-
-int l_loaded(lua_State *L)
-{
-	auto list = Plugin::loaded();
-	int i = 0;
+	auto list = Plugin::list();
+	auto i = 0;
 
 	lua_createtable(L, list.size(), list.size());
-
-	for (auto p : list) {
-		lua_pushlstring(L, p.c_str(), p.length());
+	for (auto s : list) {
+		lua_pushlstring(L, s.c_str(), s.length());
 		lua_rawseti(L, -2, ++i);
 	}
 
@@ -114,10 +120,8 @@ int l_unload(lua_State *L)
 
 const luaL_Reg functionList[] = {
 	{ "addPath",		l_addPath		},
-	{ "getName",		l_getName		},
-	{ "getHome",		l_getHome		},
-	{ "isLoaded",		l_isLoaded		},
-	{ "loaded",		l_loaded		},
+	{ "info",		l_info			},
+	{ "list",		l_list			},
 	{ "load",		l_load			},
 	{ "reload",		l_reload		},
 	{ "unload",		l_unload		},

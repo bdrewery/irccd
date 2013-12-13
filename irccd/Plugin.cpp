@@ -46,6 +46,11 @@ std::string Plugin::ErrorException::which() const
 	return m_which;
 }
 
+std::string Plugin::ErrorException::error() const
+{
+	return m_error;
+}
+
 const char * Plugin::ErrorException::what() const throw()
 {
 	return m_error.c_str();
@@ -54,6 +59,18 @@ const char * Plugin::ErrorException::what() const throw()
 /* --------------------------------------------------------
  * private methods and members
  * -------------------------------------------------------- */
+
+std::string Plugin::getGlobal(const std::string &name)
+{
+	std::string result;
+
+	lua_getglobal(*m_process, name.c_str());
+	if (lua_type(*m_process, -1) == LUA_TSTRING)
+		result = lua_tostring(*m_process, -1);
+	lua_pop(*m_process, 1);
+
+	return result;
+}
 
 void Plugin::callFunction(const std::string &func,
 			  Server::Ptr server,
@@ -78,10 +95,10 @@ void Plugin::callFunction(const std::string &func,
 		}
 
 		if (lua_pcall(L, np, 0, 0) != LUA_OK) {
-			std::string error = lua_tostring(L, -1);
+			auto error = lua_tostring(L, -1);
 			lua_pop(L, 1);
 
-			throw Plugin::ErrorException(m_name, error);
+			throw Plugin::ErrorException(m_info.name, error);
 		}
 	}
 }
@@ -107,7 +124,7 @@ void Plugin::callFunctionNum(const std::string &func, Server::Ptr server, int np
 			std::string error = lua_tostring(L, -1);
 			lua_pop(L, 1);
 
-			throw Plugin::ErrorException(m_name, error);
+			throw Plugin::ErrorException(m_info.name, error);
 		}
 	}
 }
@@ -228,13 +245,13 @@ bool Plugin::isLoaded(const std::string &name)
 	return ret;
 }
 
-std::vector<std::string> Plugin::loaded()
+std::vector<std::string> Plugin::list()
 {
 	Lock lk(pluginLock);
 	std::vector<std::string> list;
 
 	for (auto p : plugins)
-		list.push_back(p->m_name);
+		list.push_back(p->m_info.name);
 
 	return list;
 }
@@ -315,15 +332,15 @@ void Plugin::load(const std::string &name, bool relative)
 	Plugin::Ptr p = std::make_shared<Plugin>(realname, realpath);
 	plugins.push_back(p);
 
-	bool result = p->open();
-
-	if (!result) {
+	try {
+		p->open();
+	} catch (ErrorException ex) {
 		plugins.erase(
 			std::remove(plugins.begin(), plugins.end(), p),
 			plugins.end()
 		);
 
-		throw std::runtime_error("failed to load " + realname + ": " + p->getError());
+		throw std::runtime_error("failed to load " + ex.which() + ": " + ex.error());
 	}
 }
 
@@ -400,20 +417,21 @@ void Plugin::handleIrcEvent(const IrcEvent &ev)
 
 Plugin::Plugin(const std::string &name,
 	       const std::string &path)
-	: m_name(name)
-	, m_path(path)
 {
+	m_info.name = name;
+	m_info.path = path;
+
 	m_process = Process::create();
 }
 
 const std::string &Plugin::getName() const
 {
-	return m_name;
+	return m_info.name;
 }
 
 const std::string &Plugin::getHome() const
 {
-	return m_home;
+	return m_info.home;
 }
 
 lua_State *Plugin::getState()
@@ -421,12 +439,7 @@ lua_State *Plugin::getState()
 	return static_cast<lua_State *>(*m_process);
 }
 
-const std::string &Plugin::getError() const
-{
-	return m_error;
-}
-
-bool Plugin::open()
+void Plugin::open()
 {
 	lua_State *L = static_cast<lua_State *>(*m_process);
 
@@ -439,28 +452,27 @@ bool Plugin::open()
 	for (auto l : Process::irccdLibs)
 		Luae::preload(L, l.first, l.second);
 
-	// Find the home directory for the plugin
-	m_home = Util::findPluginHome(m_name);
-
-	// Initialize the plugin name and its data
-	Process::initialize(m_process, m_name, m_home);
-
-	if (luaL_dofile(L, m_path.c_str()) != LUA_OK) {
-		m_error = lua_tostring(L, -1);
+	if (luaL_dofile(L, m_info.path.c_str()) != LUA_OK) {
+		auto error = lua_tostring(L, -1);
 		lua_pop(L, 1);
 
-		return false;
+		throw ErrorException(m_info.name, error);
 	}
+
+	// Find the home directory for the plugin
+	m_info.home = Util::findPluginHome(m_info.name);
+
+	// Extract global information
+	m_info.author	= getGlobal("AUTHOR");
+	m_info.comment	= getGlobal("COMMENT");
+	m_info.version	= getGlobal("VERSION");
+	m_info.license	= getGlobal("LICENSE");
+
+	// Initialize the plugin name and its data
+	Process::initialize(m_process, m_info);
 
 	// Do a initial load
-	try {
-		onLoad();
-	} catch (ErrorException ex) {
-		m_error = ex.what();
-		return false;
-	}
-
-	return true;
+	onLoad();
 }
 
 void Plugin::onCommand(Server::Ptr server,
