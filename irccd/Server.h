@@ -28,8 +28,7 @@
 
 #include <libircclient.h>
 
-namespace irccd
-{
+namespace irccd {
 
 class Server;
 
@@ -41,8 +40,7 @@ class Server;
  * @enum IrcEventType
  * @brief Type of IRC event
  */
-enum class IrcEventType
-{
+enum class IrcEventType {
 	Connection,					//! when connection
 	ChannelNotice,					//! channel notices
 	Invite,						//! invitation
@@ -65,8 +63,7 @@ enum class IrcEventType
  * @enum IrcChanNickMode
  * @brief Prefixes for channels
  */
-enum class IrcChanNickMode
-{
+enum class IrcChanNickMode {
 	Creator		= 'O',				//! channel creator
 	HalfOperator	= 'h',				//! half operator
 	Operator	= 'o',				//! channel operator
@@ -78,14 +75,13 @@ using IrcEventParams	= std::vector<std::string>;
 using IrcPrefixes	= std::map<IrcChanNickMode, char>;
 
 /**
- * @struct IrcEvent
+ * @class IrcEvent
  * @brief An IRC event
  */
-struct IrcEvent
-{
+class IrcEvent {
+public:
 	IrcEventType m_type;				//! event type
 	IrcEventParams m_params;			//! parameters
-
 	std::shared_ptr<Server> m_server;		//! on which server
 
 	/**
@@ -104,8 +100,7 @@ struct IrcEvent
  * @class IrcDeleter
  * @brief Delete the irc_session_t
  */
-class IrcDeleter
-{
+class IrcDeleter {
 public:
 	void operator()(irc_session_t *s);
 };
@@ -114,8 +109,7 @@ public:
  * @class IrcSession
  * @brief Wrapper for irc_session_t
  */
-class IrcSession
-{
+class IrcSession {
 private:
 	using Ptr	= std::unique_ptr<irc_session_t, IrcDeleter>;
 
@@ -146,17 +140,14 @@ public:
  * Server class, each class define a server that irccd
  * can connect to
  */
-class Server : public std::enable_shared_from_this<Server>
-{
+class Server : public std::enable_shared_from_this<Server> {
 public:
-	struct Channel
-	{
+	struct Channel {
 		std::string m_name;			//! channel name
 		std::string m_password;			//! channel optional password
 	};
 
-	struct Options
-	{
+	struct Options {
 		std::string m_commandChar;		//! command token
 		bool m_joinInvite;			//! auto join on invites
 		unsigned m_maxretries;			//! number of connection retries
@@ -175,8 +166,7 @@ public:
 		}
 	};
 
-	struct Info
-	{
+	struct Info {
 		std::string m_name;			//! server's name
 		std::string m_host;			//! hostname
 		unsigned m_port;			//! server's port
@@ -194,8 +184,7 @@ public:
 		}
 	};
 
-	struct WhoisInfo
-	{
+	struct WhoisInfo {
 		bool found;				//! if no such nick
 		std::string nick;			//! user's nickname
 		std::string user;			//! user's user
@@ -233,20 +222,32 @@ public:
 				WhoisInfo
 			  >;
 
-	using ChanList	= std::vector<Channel>;
-
 	using Ptr	= std::shared_ptr<Server>;
+	using List	= std::unordered_map<
+				std::string,
+				Server::Ptr
+			  >;
+
+	using ChanList	= std::vector<Channel>;
+	using Mutex	= std::mutex;
+	using MapFunc	= std::function<void (Server::Ptr)>;
 
 private:
+	static List servers;			//! all servers
+	static Mutex serverLock;		//! lock for server management
+
 	// IRC thread
 	irc_callbacks_t m_callbacks;		//! callbacks for libircclient
 	std::thread m_thread;			//! server's thread
 	IrcSession m_session;			//! libircclient session
 	bool m_threadStarted;			//! thread's status
+	bool m_shouldDelete;			//! tells if we must delete the server
 
 	// For deferred events
 	NameList m_nameLists;			//! channels names to receive
 	WhoisList m_whoisLists;			//! list of whois
+
+	Mutex m_lock;
 
 	/**
 	 * Initialize callbacks.
@@ -258,7 +259,36 @@ protected:
 	Identity m_identity;			//! identity to use
 	Options m_options;			//! some options
 
-public:	
+public:
+	/**
+	 * Add a new server to the registry. It also start the server
+	 * immediately.
+	 *
+	 * @param server the server to add
+	 */
+	static void add(Server::Ptr server);
+
+	/**
+	 * Get an existing server.
+	 *
+	 * @param name the server name
+	 * @return the server
+	 * @throw std::out_of_range if not found
+	 */
+	static Server::Ptr get(const std::string &name);
+
+	/**
+	 * Call a function for all servers.
+	 *
+	 * @param func the function
+	 */
+	static void forAll(MapFunc func);
+
+	/**
+	 * Remove all dead servers.
+	 */
+	static void flush();
+
 	/**
 	 * Convert the s context to a shared_ptr<Server>.
 	 *
@@ -266,6 +296,18 @@ public:
 	 * @return the shared_ptr.
 	 */
 	static Ptr toServer(irc_session_t *s);
+
+	/**
+	 * Convert a channel line to Channel. The line must be in the
+	 * following form:
+	 *	#channel:password
+	 *
+	 * Password is optional and : must be removed.
+	 *
+	 * @param line the line to convert
+	 * @return a channel
+	 */
+	static Channel toChannel(const std::string &line);
 
 	/**
 	 * Better constructor with information and options.
@@ -310,21 +352,21 @@ public:
 	 *
 	 * @return the server information
 	 */
-	const Info &getInfo() const;
+	Info &getInfo();
 
 	/**
 	 * Get the identity used for that server
 	 *
 	 * @return the identity
 	 */
-	const Identity &getIdentity() const;
+	Identity &getIdentity();
 
 	/**
 	 * Get the server options.
 	 *
 	 * @return the options
 	 */
-	const Options &getOptions() const;
+	Options &getOptions();
 
 	/**
 	 * Get all channels that will be auto joined
@@ -337,11 +379,9 @@ public:
 	 * Add a channel that the server will connect to when the
 	 * connection is complete.
 	 *
-	 * @param name the channel name
-	 * @param password an optional channel password
+	 * @param channel the channel to add
 	 */
-	void addChannel(const std::string &name,
-			const std::string &password = "");
+	void addChannel(const Channel &channel);
 
 	/**
 	 * Tells if we already have a channel in the list.
@@ -357,7 +397,7 @@ public:
 	 * @param nick the nickname
 	 * @return true if has
 	 */
-	bool hasPrefix(const std::string &nick);
+	bool hasPrefix(const std::string &nick) const;
 
 	/**
 	 * Remove a channel from the server list.

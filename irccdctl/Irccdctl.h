@@ -20,6 +20,7 @@
 #define _IRCCDCTL_H_
 
 #include <string>
+#include <unordered_map>
 
 #include <config.h>
 
@@ -30,9 +31,12 @@ namespace irccd {
 
 class Irccdctl {
 private:
+	using Args = std::unordered_map<char, std::string>;
+
 	Socket m_socket;
 	SocketAddress m_addr;
 	std::string m_configPath;
+	Args m_args;
 	bool m_needResponse;
 
 	// For specifying socket to connect at command line
@@ -119,6 +123,18 @@ public:
 	 * @return the code to return to main
 	 */
 	int getResponse();
+
+	/**
+	 * Add an optional argument 
+	 *
+	 * @param c the character used
+	 * @param arg the value
+	 */
+	void addArg(char c, const std::string &arg);
+
+	bool hasArg(char c);
+
+	const std::string &getArg(char c);
 
 	/**
 	 * Run the application with the arguments.

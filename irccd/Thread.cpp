@@ -18,8 +18,7 @@
 
 #include "Thread.h"
 
-namespace irccd
-{
+namespace irccd {
 
 Thread::Ptr Thread::create()
 {
@@ -61,8 +60,7 @@ void Thread::wait()
 {
 	Lock lk(m_mutex);
 
-	if (!m_waited)
-	{
+	if (!m_waited) {
 		m_handle.join();
 		m_waited = true;
 	}

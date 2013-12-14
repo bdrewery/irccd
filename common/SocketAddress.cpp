@@ -22,8 +22,7 @@
 
 #include "SocketAddress.h"
 
-namespace irccd
-{
+namespace irccd {
 
 /* --------------------------------------------------------
  * BindAddressIP implementation
@@ -34,8 +33,7 @@ BindAddressIP::BindAddressIP(const std::string &iface, unsigned port, int family
 	, m_family(family)
 	, m_port(port)
 {
-	if (m_family == AF_INET6)
-	{
+	if (m_family == AF_INET6) {
 		sockaddr_in6 *ptr = (sockaddr_in6 *)&m_addr;
 
 		ptr->sin6_family = AF_INET6;
@@ -47,9 +45,7 @@ BindAddressIP::BindAddressIP(const std::string &iface, unsigned port, int family
 			throw SocketError(Socket::getLastSysError());
 
 		m_addrlen = sizeof (sockaddr_in6);
-	}
-	else
-	{
+	} else {
 		sockaddr_in *ptr = (sockaddr_in *)&m_addr;
 
 		ptr->sin_family = AF_INET;

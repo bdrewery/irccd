@@ -42,18 +42,26 @@ void Pipe::push(const LuaValue &value)
 	m_cond.notify_all();
 }
 
-const LuaValue &Pipe::first()
+LuaValue Pipe::first()
 {
 	Lock lk(m_mutex);
+	LuaValue v;
 
-	return m_queue.front();
+	if (m_queue.size() > 0)
+		return m_queue.front();
+
+	return v;
 }
 
-const LuaValue &Pipe::last()
+LuaValue Pipe::last()
 {
 	Lock lk(m_mutex);
+	LuaValue v;
 
-	return m_queue.back();
+	if (m_queue.size() > 0)
+		return m_queue.back();
+
+	return v;
 }
 
 void Pipe::clear()

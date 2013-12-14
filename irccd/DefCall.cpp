@@ -18,8 +18,7 @@
 
 #include "DefCall.h"
 
-namespace irccd
-{
+namespace irccd {
 
 void DefCall::call(int nparams)
 {
@@ -28,17 +27,12 @@ void DefCall::call(int nparams)
 	bool result = lua_pcall(L, nparams, 0, 0) == LUA_OK;
 	luaL_unref(L, LUA_REGISTRYINDEX, m_ref);
 	
-	if (!result)
-	{
+	if (!result) {
 		std::string error = lua_tostring(L, -1);
 		lua_pop(L, 1);
 
 		throw Plugin::ErrorException(m_plugin->getName(), error);
 	}
-}
-
-DefCall::DefCall()
-{
 }
 
 DefCall::DefCall(IrcEventType type, Plugin::Ptr plugin, int ref)
@@ -60,8 +54,7 @@ void DefCall::onNames(const std::vector<std::string> &users)
 	lua_rawgeti(L, LUA_REGISTRYINDEX, m_ref);
 	lua_createtable(L, users.size(), users.size());
 
-	for (size_t i = 0; i < users.size(); ++i)
-	{
+	for (size_t i = 0; i < users.size(); ++i) {
 		lua_pushstring(L, users[i].c_str());
 		lua_rawseti(L, -2, i + 1);
 	}
@@ -88,12 +81,10 @@ void DefCall::onWhois(const std::vector<std::string> &params)
 	lua_pushstring(L, params[3].c_str());
 	lua_setfield(L, -2, "realname");
 
-	if (params.size() >= 4)
-	{
+	if (params.size() >= 4) {
 		lua_createtable(L, 0, 0);
 
-		for (size_t i = 4; i < params.size(); ++i)
-		{
+		for (size_t i = 4; i < params.size(); ++i) {
 			lua_pushstring(L, params[i].c_str());
 			lua_rawseti(L, -2, i - 3);
 		}

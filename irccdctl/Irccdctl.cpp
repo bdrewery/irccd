@@ -30,11 +30,9 @@
 
 #include "Irccdctl.h"
 
-namespace irccd
-{
+namespace irccd {
 
-namespace
-{
+namespace {
 
 /* {{{ help messages */
 
@@ -48,6 +46,18 @@ void helpChannelNotice()
 
 	Logger::warn("Example:");
 	Logger::warn("\t%s cnotice freenode #staff \"Don't flood\"", getprogname());
+}
+
+void helpConnect()
+{
+	Logger::warn("usage: %s [-k password] [-i identity] connect name address port\n", getprogname());
+	Logger::warn("Connect to a new server. Specify the server ressource name, address and the port");
+	Logger::warn("to use. Optional -k option specify a password. Optional -i option specify a");
+	Logger::warn("specific identity to use.\n");
+
+	Logger::warn("Example:");
+	Logger::warn("\t%s connect superserver irc.superserver.foo 6667", getprogname());
+	Logger::warn("\t%s connect -k secret -i fabrice serverz irc.svz.bar 6667", getprogname());
 }
 
 void helpInvite()
@@ -186,6 +196,7 @@ void helpUserMode()
 
 std::unordered_map<std::string, HelpHandler> helpHandlers {
 	{ "cnotice", 	helpChannelNotice	},
+	{ "connect",	helpConnect		},
 	{ "invite",	helpInvite		},
 	{ "join",	helpJoin		},
 	{ "kick",	helpKick		},
@@ -213,12 +224,9 @@ void handleHelp(Irccdctl *, int argc, char **argv)
 	if (argc < 1)
 		Logger::fatal(1, "help requires 1 argument");
 
-	try
-	{
+	try {
 		helpHandlers.at(argv[0])();
-	}
-	catch (std::out_of_range ex)
-	{
+	} catch (std::out_of_range ex) {
 		Logger::warn("There is no subject named %s", argv[0]);
 	}
 
@@ -234,6 +242,28 @@ void handleChannelNotice(Irccdctl *ctl, int argc, char **argv)
 
 	oss << "CNOTICE " << argv[0] << " " << argv[1];
 	oss << " " << argv[2] << "\n";
+	ctl->sendRaw(oss.str());
+}
+
+void handleConnect(Irccdctl *ctl, int argc, char **argv)
+{
+	std::ostringstream oss;
+
+	if (argc < 3)
+		Logger::fatal(1, "connect requires 3 arguments");
+
+	oss << "CONNECT " << argv[0] << " " << argv[1];
+	oss << " " << argv[2];
+
+	// Identity and password are optional
+	if (ctl->hasArg('i'))
+		oss << " ident:" << ctl->getArg('i');
+	if (ctl->hasArg('k'))
+		oss << " key:" << ctl->getArg('k');
+	if (ctl->hasArg('s'))
+		oss << " ssl:on";
+	oss << "\n";
+	
 	ctl->sendRaw(oss.str());
 }
 
@@ -408,6 +438,7 @@ void handleUserMode(Irccdctl *ctl, int argc, char **argv)
 
 std::unordered_map<std::string, Handler> handlers {
 	{ "cnotice",	handleChannelNotice	},
+	{ "connect",	handleConnect		},
 	{ "help",	handleHelp		},
 	{ "invite",	handleInvite		},
 	{ "join",	handleJoin		},
@@ -461,8 +492,7 @@ void Irccdctl::loadUnix(const Section &section)
 
 void Irccdctl::connectUnix()
 {
-	try
-	{
+	try {
 		char *p;
 		char dir[FILENAME_MAX] = "/tmp/irccdctl-XXXXXXXXX";
 
@@ -480,19 +510,15 @@ void Irccdctl::connectUnix()
 		 * If we can't create a directory we don't wait for a response
 		 * silently.
 		 */
-		if ((p = mkdtemp(dir)) != NULL)
-		{
+		if ((p = mkdtemp(dir)) != NULL) {
 			m_tmpDir = dir;
 			m_tmpPath = std::string(dir) + std::string("/response.sock");
 
 			m_socket.bind(AddressUnix(m_tmpPath));
 			m_removeFiles = true;
-		}
-		else
+		} else
 			m_needResponse = false;
-	}
-	catch (SocketError error)
-	{
+	} catch (SocketError error) {
 		removeUnixFiles();
 		Logger::fatal(1, "irccdctl: failed to connect to %s: %s",
 		    m_unixPath.c_str(), error.what());
@@ -501,8 +527,7 @@ void Irccdctl::connectUnix()
 
 void Irccdctl::removeUnixFiles()
 {
-	if (m_removeFiles)
-	{
+	if (m_removeFiles) {
 		::remove(m_tmpPath.c_str());
 		::remove(m_tmpDir.c_str());
 	}
@@ -528,17 +553,14 @@ void Irccdctl::loadInet(const Section &section)
 
 void Irccdctl::connectInet()
 {
-	try
-	{
+	try {
 		m_socket = Socket(m_domain, m_type, 0);
 
 		if (m_type == SOCK_STREAM)
 			m_socket.connect(ConnectAddressIP(m_host, m_port, m_domain));
 		else
 			m_addr = ConnectAddressIP(m_host, m_port, m_domain, SOCK_DGRAM);
-	}
-	catch (SocketError error)
-	{
+	} catch (SocketError error) {
 		Logger::fatal(1, "irccdctl: failed to connect: %s", error.what());
 	}
 }
@@ -547,8 +569,7 @@ void Irccdctl::readConfig(Parser &config)
 {
 	using std::string;
 
-	try
-	{
+	try {
 		const Section &section= config.getSection("socket");
 		string type;
 		string proto;
@@ -575,9 +596,7 @@ void Irccdctl::readConfig(Parser &config)
 			loadInet(section);
 		else
 			Logger::fatal(1, "socket: invalid socket type %s", type.c_str());
-	}
-	catch (NotFoundException ex)
-	{
+	} catch (NotFoundException ex) {
 		Logger::fatal(1, "socket: missing parameter %s", ex.which().c_str());
 	}
 }
@@ -592,19 +611,14 @@ void Irccdctl::openConfig()
 	 *
 	 * Otherwise, we open the default files.
 	 */
-	if (m_configPath.length() == 0)
-	{
-		try
-		{
+	if (m_configPath.length() == 0) {
+		try {
 			m_configPath = Util::findConfiguration("irccdctl.conf");
 			config = Parser(m_configPath);
-		}
-		catch (Util::ErrorException ex)
-		{
+		} catch (Util::ErrorException ex) {
 			Logger::fatal(1, "%s: %s", getprogname(), ex.what());
 		}
-	}
-	else
+	} else
 		config = Parser(m_configPath);
 
 
@@ -616,15 +630,12 @@ void Irccdctl::openConfig()
 
 void Irccdctl::sendRaw(const std::string &message)
 {
-	try
-	{
+	try {
 		if (m_socket.getType() == SOCK_STREAM)
 			m_socket.send(message.c_str(), message.length());
 		else
 			m_socket.sendto(message.c_str(), message.length(), m_addr);
-	}
-	catch (SocketError ex)
-	{
+	} catch (SocketError ex) {
 		Logger::fatal(1, "irccdctl: failed to send message: %s", ex.what());
 	}
 }
@@ -637,10 +648,8 @@ int Irccdctl::getResponse()
 	int ret = 0;
 
 	listener.add(m_socket);
-	try
-	{
-		while (!finished)
-		{
+	try {
+		while (!finished) {
 			char data[128];
 			unsigned nbread;
 			size_t pos;
@@ -654,8 +663,7 @@ int Irccdctl::getResponse()
 
 			if (nbread == 0)
 				finished = true;
-			else
-			{
+			else {
 				std::string result;
 
 				data[nbread] = '\0';
@@ -666,8 +674,7 @@ int Irccdctl::getResponse()
 					continue;
 
 				result = oss.str().substr(0, pos);
-				if (result != "OK")
-				{
+				if (result != "OK") {
 					Logger::warn("irccdctl: error, server said: %s", result.c_str());
 					ret = 1;
 				}
@@ -675,19 +682,30 @@ int Irccdctl::getResponse()
 				finished = true;
 			}
 		}
-	}
-	catch (SocketError ex)
-	{
+	} catch (SocketError ex) {
 		Logger::warn("irccdctl: error: %s", ex.what());
 		ret = 1;
-	}
-	catch (SocketTimeout)
-	{
+	} catch (SocketTimeout) {
 		Logger::warn("irccdctl: did not get a response from irccd");
 		ret = 1;
 	}
 
 	return ret;
+}
+
+void Irccdctl::addArg(char c, const std::string &arg)
+{
+	m_args[c] = arg;
+}
+
+bool Irccdctl::hasArg(char c)
+{
+	return m_args.count(c) > 0;
+}
+
+const std::string &Irccdctl::getArg(char c)
+{
+	return m_args[c];
 }
 
 void Irccdctl::usage()
@@ -696,6 +714,7 @@ void Irccdctl::usage()
 
 	Logger::warn("Commands supported:");
 	Logger::warn("\tcnotice\t\tSend a channel notice");
+	Logger::warn("\tconnect\t\tConnect to a server");
 	Logger::warn("\thelp\t\tGet this help");
 	Logger::warn("\tinvite\t\tInvite someone to a channel");
 	Logger::warn("\tjoin\t\tJoin a channel");
@@ -771,17 +790,14 @@ int Irccdctl::run(int argc, char **argv)
 		connectUnix();
 #endif
 
-	try
-	{
+	try {
 		std::string cmd = argv[0];
 
 		handlers.at(cmd)(this, --argc, ++argv);
 
 		if (m_needResponse)
 			ret = getResponse();
-	}
-	catch (std::out_of_range ex)
-	{
+	} catch (std::out_of_range ex) {
 		Logger::warn("irccdctl: unknown command %s", argv[0]);
 		return 1;
 	}

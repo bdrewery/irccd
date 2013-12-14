@@ -21,11 +21,9 @@
 #include "LuaPipe.h"
 #include "Pipe.h"
 
-namespace irccd
-{
+namespace irccd {
 
-namespace
-{
+namespace {
 
 const char *PIPE_TYPE	= "Pipe";
 

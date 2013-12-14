@@ -16,29 +16,23 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "Irccd.h"
+#include "Plugin.h"
 #include "LuaPlugin.h"
 
-namespace irccd
-{
+namespace irccd {
 
-namespace
-{
+namespace {
 
 int getName(lua_State *L)
 {
-	Irccd &irccd = Irccd::getInstance();
-
-	lua_pushstring(L, irccd.findPlugin(L)->getName().c_str());
+	lua_pushstring(L, Plugin::find(L)->getName().c_str());
 
 	return 1;
 }
 
 int getHome(lua_State *L)
 {
-	Irccd &irccd = Irccd::getInstance();
-
-	lua_pushstring(L, irccd.findPlugin(L)->getHome().c_str());
+	lua_pushstring(L, Plugin::find(L)->getHome().c_str());
 
 	return 1;
 }

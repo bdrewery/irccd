@@ -22,13 +22,14 @@
 .\" SYNOPSIS
 .Sh SYNOPSIS
 .Nm irccdctl
-.Op Fl v
+.Op Fl sv
+.Op Fl i Ar identity
+.Op Fl k Ar key
 .Op Fl c Ar config
 .Ar command
 .Ar parameters
 .\" CLI SPECIFIED INTERNET
 .Nm irccdctl
-.Op Fl v
 .Fl t Ar internet
 .Fl h Ar hostname
 .Fl T Ar type
@@ -38,7 +39,6 @@
 .Ar parameters
 .\" CLI SPECIFIED UNIX
 .Nm irccdctl
-.Op Fl v
 .Fl t Ar unix
 .Fl T Ar type
 .Fl P Ar path
@@ -49,6 +49,12 @@ This is the list of commands supported by
 .Ns Nm
 utility:
 .Pp
+.\" CONNECT
+.Nm
+.Cm connect
+.Ar name
+.Ar host
+.Ar port
 .\" CNOTICE
 .Nm
 .Cm cnotice
@@ -149,6 +155,12 @@ The following options are available:
 .Bl -tag -width indent
 .It Fl c Ar config
 A path to a config file.
+.It Fl i Ar identity
+Use a specific identity, only used by connect command.
+.It Fl k Ar key
+Use a password, only used by connect command.
+.It Fl s
+Use SSL, only used by connect command.
 .It Fl t Ar domain
 The domain to use, specify internet or unix.
 .It Fl T Ar type
@@ -195,6 +207,19 @@ $ irccdctl -t unix -T tcp -P /tmp/foo.sock join localhost #foo
 .Pp
 .Bd -literal -offset 2n
 $ irccdctl -t internet -T udp -h localhost -p 6667 -6 nick localhost mynick
+.Ed
+.It Sy Example 4 Connect a new IRC server
+.Pp
+.Bd -literal -offset 2n
+$ irccdctl connect local irc.localhost 6667
+.Ed
+.Pp
+It's also possible to specify optional password, ssl or identity. This example
+use SSL, secret as the password, myidentity as the identity.
+.Pp
+It is obviously not mandatory to specify all of them.
+.Bd -literal -offset 2n
+$ irccdctl connect -s -k secret -i myidentity local irc.localhost 6667
 .Ed
 .El
 .\" SEE ALSO

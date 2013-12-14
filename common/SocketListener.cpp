@@ -20,8 +20,7 @@
 
 #include "SocketListener.h"
 
-namespace irccd
-{
+namespace irccd {
 
 const char *SocketTimeout::what() const throw()
 {
@@ -56,8 +55,7 @@ Socket SocketListener::select(int s, int us)
 	int fdmax = m_clients.front().getSocket();
 
 	FD_ZERO(&fds);
-	for (Socket &c : m_clients)
-	{
+	for (Socket &c : m_clients) {
 		FD_SET(c.getSocket(), &fds);
 		if ((int)c.getSocket() > fdmax)
 			fdmax = c.getSocket();

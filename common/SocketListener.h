@@ -23,8 +23,7 @@
 
 #include "Socket.h"
 
-namespace irccd
-{
+namespace irccd {
 
 /**
  * @class SocketTimeout

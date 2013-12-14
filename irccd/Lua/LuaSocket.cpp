@@ -33,11 +33,9 @@
 #define ADDRESS_TYPE		"SocketAddress"
 #define LISTENER_TYPE		"SocketListener"
 
-namespace irccd
-{
+namespace irccd {
 
-namespace
-{
+namespace {
 
 /* ---------------------------------------------------------
  * Enumerations
@@ -216,8 +214,7 @@ void mapToTable(lua_State *L,
 {
 	lua_createtable(L, 0, 0);
 
-	for (auto p : map)
-	{
+	for (auto p : map) {
 		lua_pushinteger(L, p.second);
 		lua_setfield(L, -2, p.first.c_str());
 	}
@@ -247,16 +244,14 @@ int genericReceive(lua_State *L, bool udp)
 	 * Allocate a temporarly buffer for receiveing the data.
 	 */
 	data = static_cast<char *>(std::malloc(requested));
-	if (data == nullptr)
-	{
+	if (data == nullptr) {
 		lua_pushnil(L);
 		lua_pushstring(L, std::strerror(errno));
 
 		return 2;
 	}
 
-	try
-	{
+	try {
 		if (!udp)
 			nbread = s->recv(data, requested);
 		else
@@ -265,9 +260,7 @@ int genericReceive(lua_State *L, bool udp)
 		lua_pushlstring(L, data, nbread);
 
 		nret = 1;
-	}
-	catch (SocketError error)
-	{
+	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
 
@@ -292,15 +285,12 @@ int genericSend(lua_State *L, bool udp)
 	if (udp)
 		sa = Luae::toType<SocketAddress *>(L, 3, ADDRESS_TYPE);
 
-	try
-	{
+	try {
 		if (!udp)
 			nbsent = s->send(msg, strlen(msg));
 		else
 			nbsent = s->sendto(msg, strlen(msg), *sa);
-	}
-	catch (SocketError error)
-	{
+	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
 
@@ -326,12 +316,9 @@ int socketNew(lua_State *L)
 	if (lua_gettop(L) >= 3)
 		protocol = luaL_checkinteger(L, 3);
 
-	try
-	{
+	try {
 		new (L, SOCKET_TYPE) Socket(domain, type, protocol);
-	}
-	catch (SocketError error)
-	{
+	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
 
@@ -346,12 +333,9 @@ int socketBlockMode(lua_State *L)
 	Socket *s	= Luae::toType<Socket *>(L, 1, SOCKET_TYPE);
 	bool mode	= lua_toboolean(L, 2);
 
-	try
-	{
+	try {
 		s->blockMode(mode);
-	}
-	catch (SocketError error)
-	{
+	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
 
@@ -372,20 +356,16 @@ int socketBind(lua_State *L)
 	 * Get nil + error message for chained expression like:
 	 * s:bind(address.bindInet { port = 80, family = 1 })
 	 */
-	if (lua_type(L, 1) == LUA_TNIL && lua_type(L, 2) == LUA_TSTRING)
-	{
+	if (lua_type(L, 1) == LUA_TNIL && lua_type(L, 2) == LUA_TSTRING) {
 		lua_pushnil(L);
 		lua_pushvalue(L, 2);
 
 		return 2;
 	}
 
-	try
-	{
+	try {
 		s->bind(*a);
-	}
-	catch (SocketError error)
-	{
+	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
 
@@ -415,20 +395,16 @@ int socketConnect(lua_State *L)
 	 * Get nil + error message for chained expression like:
 	 * s:bind(address.bindInet { port = 80, family = 1 })
 	 */
-	if (lua_type(L, 1) == LUA_TNIL && lua_type(L, 2) == LUA_TSTRING)
-	{
+	if (lua_type(L, 1) == LUA_TNIL && lua_type(L, 2) == LUA_TSTRING) {
 		lua_pushnil(L);
 		lua_pushvalue(L, 2);
 
 		return 2;
 	}
 
-	try
-	{
+	try {
 		s->connect(*a);
-	}
-	catch (SocketError error)
-	{
+	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
 
@@ -446,14 +422,11 @@ int socketAccept(lua_State *L)
 	Socket client;
 	SocketAddress info;
 
-	try
-	{
+	try {
 		client = s->accept(info);
 		new (L, SOCKET_TYPE) Socket(client);
 		new (L, ADDRESS_TYPE) SocketAddress(info);
-	}
-	catch (SocketError error)
-	{
+	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
@@ -472,12 +445,9 @@ int socketListen(lua_State *L)
 	if (lua_gettop(L) >= 2)
 		max = luaL_checkinteger(L, 2);
 
-	try
-	{
+	try {
 		s->listen(max);
-	}
-	catch (SocketError error)
-	{
+	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
 
@@ -516,8 +486,7 @@ int socketSet(lua_State *L)
 	const char *nm	= luaL_checkstring(L, 3);
 	int nret;
 
-	try
-	{
+	try {
 		OptionBool bvalue;
 		OptionInteger ivalue;
 		void *ptr = nullptr;
@@ -525,8 +494,7 @@ int socketSet(lua_State *L)
 
 		auto o = options.at(lvl).at(nm);
 
-		switch (o.m_argtype)
-		{
+		switch (o.m_argtype) {
 		case ArgType::Boolean:
 			bvalue = lua_toboolean(L, 4);
 			ptr = static_cast<void *>(&bvalue);
@@ -546,22 +514,17 @@ int socketSet(lua_State *L)
 		lua_pushboolean(L, true);
 
 		nret = 1;
-	}
-	catch (std::out_of_range)
-	{
+	} catch (std::out_of_range) {
 		lua_pushnil(L);
 		lua_pushstring(L, "invalid level or option name");
 
 		nret = 2;
-	}
-	catch (SocketError error)
-	{
+	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
 
 		nret = 2;
 	}
-
 
 	return nret;
 }
@@ -631,12 +594,9 @@ int addrConnectInet(lua_State *L)
 	int port		= Luae::requireField<int>(L, 1, "port");
 	int family		= Luae::requireField<int>(L, 1, "family");
 
-	try
-	{
+	try {
 		new (L, ADDRESS_TYPE) ConnectAddressIP(host, port, family);
-	}
-	catch (SocketError error)
-	{
+	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
 
@@ -661,12 +621,9 @@ int addrBindInet(lua_State *L)
 	if (Luae::typeField(L, 1, "address") == LUA_TSTRING)
 		address = Luae::requireField<std::string>(L, 1, "address");
 
-	try
-	{
+	try {
 		new (L, ADDRESS_TYPE) BindAddressIP(address, port, family);
-	}
-	catch (SocketError error)
-	{
+	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
 
@@ -772,22 +729,17 @@ int listenerSelect(lua_State *L)
 	if (lua_gettop(L) >= 3)
 		ms = luaL_checkinteger(L, 3);
 
-	try
-	{
+	try {
 		Socket selected = l->select(seconds, ms);
 		new (L, SOCKET_TYPE) Socket(selected);
 
 		nret = 1;
-	}
-	catch (SocketError error)
-	{
+	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
 
 		nret = 2;
-	}
-	catch (SocketTimeout timeout)
-	{
+	} catch (SocketTimeout timeout) {
 		lua_pushnil(L);
 		lua_pushstring(L, timeout.what());
 

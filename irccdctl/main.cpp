@@ -30,8 +30,7 @@ using namespace std;
 
 void verifyParams(const unordered_map<char, string> &params)
 {
-	try
-	{
+	try {
 		string type;
 		string protocol;
 
@@ -46,29 +45,23 @@ void verifyParams(const unordered_map<char, string> &params)
 		if (protocol != "tcp" && protocol != "udp")
 			throw runtime_error("irccdctl: invalid protocol `" + protocol + "'");
 
-		if (type == "internet")
-		{
+		if (type == "internet") {
 			if (params.find('4') == params.end() && params.find('6') == params.end())
 				throw runtime_error("irccdctl: no family given (-4 or -6)");
 			if (params.find('h') == params.end())
 				throw runtime_error("irccdctl: no hostname given (-h)");
 			if (params.find('p') == params.end())
 				throw runtime_error("irccdctl: no port given (-p)");
-		}
-		else if (type == "unix")
-		{
+		} else if (type == "unix") {
 #if defined(_WIN32)
 			Logger::fatal(1, "irccdctl: unix sockets are not supported on Windows");
 #else
 			if (params.find('P') == params.end())
 				throw runtime_error("irccdctl: no path given (-P)");
 #endif
-		}
-		else
+		} else
 			Logger::fatal(1, "irccdctl: invalid type `%s'", type.c_str());
-	}
-	catch (runtime_error error)
-	{
+	} catch (runtime_error error) {
 		Logger::fatal(1, error.what());
 	}
 }
@@ -81,30 +74,24 @@ void useParams(Irccdctl &ctl, const unordered_map<char, string> &params)
 
 	type = (proto == "tcp") ? SOCK_STREAM : SOCK_DGRAM;
 
-	if (domstr == "internet")
-	{
+	if (domstr == "internet") {
 		if (params.find('4') != params.end())
 			domain = AF_INET;
 		else
 			domain = AF_INET6;
 
-		try
-		{
+		try {
 			ctl.useInternet(
 			    params.at('h'),
 			    stol(params.at('p')),
 			    domain,
 			    type
 			);
-		}
-		catch (...)
-		{
+		} catch (...) {
 			Logger::fatal(1, "socket: invalid port number `%s'",
 			    params.at('p').c_str());
 		}
-	}
-	else
-	{
+	} else {
 #if !defined(_WIN32)
 		ctl.useUnix(params.at('P'), type);
 #endif
@@ -119,8 +106,8 @@ int main(int argc, char **argv)
 
 	setprogname("irccdctl");
 
-	while ((ch = getopt(argc, argv, "46c:h:P:p:T:t:v")) != -1)
-	{
+	opterr = false;
+	while ((ch = getopt(argc, argv, "46c:h:i:k:P:p:sT:t:v")) != -1) {
 		switch (ch)
 		{
 		case '4':
@@ -128,7 +115,14 @@ int main(int argc, char **argv)
 			params[ch] = "1";			// IPv4 or IPv6?
 			break;
 		case 'c':
-			ctl.setConfigPath(string(optarg));
+			ctl.setConfigPath(optarg);
+			break;
+		case 's':					// ssl
+			ctl.addArg(ch, "dummy");
+			break;
+		case 'i':					// identity
+		case 'k':					// key (password)
+			ctl.addArg(ch, optarg);
 			break;
 		case 'h':					// host
 		case 'P':					// unix path
@@ -145,8 +139,7 @@ int main(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	if (params.size() > 0)
-	{
+	if (params.size() > 0) {
 		verifyParams(params);
 		useParams(ctl, params);
 	}

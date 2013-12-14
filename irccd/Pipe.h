@@ -30,8 +30,7 @@
 
 #include "Luae.h"
 
-namespace irccd
-{
+namespace irccd {
 
 /**
  * @class Pipe
@@ -39,8 +38,7 @@ namespace irccd
  *
  * This class is an helper to share data between threads.
  */
-class Pipe
-{
+class Pipe {
 private:
 	using Pipes	= std::unordered_map<
 				std::string,
@@ -85,14 +83,14 @@ public:
 	 *
 	 * @return the first value
 	 */
-	const LuaValue &first();
+	LuaValue first();
 
 	/**
 	 * Get the last value.
 	 *
 	 * @return the last value
 	 */
-	const LuaValue &last();
+	LuaValue last();
 
 	/**
 	 * Completely clear the queue.

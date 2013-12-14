@@ -23,16 +23,13 @@
 #include <ctime>
 #include <string>
 
-namespace irccd
-{
+namespace irccd {
 
-struct Date
-{
+struct Date {
 	time_t m_timestamp;		//! time epoch
 
 	Date();
 	Date(time_t timestamp);
-	~Date();
 
 	/**
 	 * Get the timestamp.

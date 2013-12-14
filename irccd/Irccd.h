@@ -20,33 +20,25 @@
 #define _IRCCD_H_
 
 #include <exception>
-#include <map>
 #include <mutex>
 #include <sstream>
 
 #include <Parser.h>
-#include <Socket.h>
-#include <SocketAddress.h>
-#include <SocketListener.h>
-
 #include <config.h>
 
 #include "Server.h"
 
 #if defined(WITH_LUA)
-#  include "DefCall.h"
 #  include "Plugin.h"
 #endif
 
-namespace irccd
-{
+namespace irccd {
 
 /* --------------------------------------------------------
  * Irccd main class
  * -------------------------------------------------------- */
 
-enum Options
-{
+enum Options {
 	Config		= 'c',
 	Foreground	= 'f',
 	Verbose		= 'v',
@@ -54,83 +46,14 @@ enum Options
 	PluginWanted	= 'P'
 };
 
-class Message
-{
-private:
-	std::ostringstream m_data;
-
-public:
-	/**
-	 * Default constructor.
-	 */
-	Message();
-
-	/**
-	 * Copy constructor.
-	 *
-	 * @param m the old message
-	 */
-	Message(const Message &m);
-
-	/**
-	 * Tell if the client message has finished. A client message
-	 * ends with '\n'.
-	 *
-	 * @param msg the received data
-	 * @param command the final command (if finished)
-	 * @return true if finished
-	 */
-	bool isFinished(const std::string &msg, std::string &command);
-
-	/**
-	 * Copy assignment.
-	 *
-	 * @param m the message
-	 * @return the message
-	 */
-	Message &operator=(const Message &m);
-};
-
-using ServerList	= std::vector<Server::Ptr>;
-using StreamClients	= std::map<Socket, Message>;
-using DatagramClients	= std::map<SocketAddress, Message>;
-
-#if defined(WITH_LUA)
-
-using PluginMap		= std::unordered_map<
-				lua_State *,
-				Plugin::Ptr
-			  >;
-
-using PluginList	= std::vector<
-				Plugin::Ptr
-			  >;
-
 using IdentityList	= std::vector<
 				Server::Identity
 			  >;
 
-using ThreadMap		= std::unordered_map<
-				lua_State *,
-				Plugin::Ptr
-			  >;
-
-using DefCallList	= std::unordered_map<
-				Server::Ptr,
-				std::vector<DefCall>
-			  >;
-
 using Lock		= std::lock_guard<std::mutex>;
 
-#endif
-
-class Irccd
-{
+class Irccd {
 private:
-	using PluginDirs		= std::vector<std::string>;
-	using PluginList		= std::vector<std::string>;
-	using PluginSpecifiedMap	= std::unordered_map<std::string, bool>;
-
 	static Irccd m_instance;			//! unique instance
 
 	// Ignition
@@ -141,100 +64,38 @@ private:
 	std::string m_configPath;			//! config file path
 	std::unordered_map<char, bool> m_overriden;	//! overriden parameters
 
-	// Plugins
-	PluginDirs m_pluginDirs;			//! list of plugin directories
-	PluginList m_pluginWanted;			//! list of wanted modules
-	PluginSpecifiedMap m_pluginSpecified;		//! list of plugin specified by paths
-
-#if defined(WITH_LUA)
-	std::mutex m_pluginLock;			//! lock to add plugin
-
-	PluginMap m_pluginMap;				//! map of plugins loaded
-	ThreadMap m_threadMap;				//! map of threads
-	
-	DefCallList m_deferred;				//! list of deferred call
-#endif
-
-	ServerList m_servers;				//! list of servers
-
-	// Socket clients and listeners
-	std::vector<Socket> m_socketServers;		//! socket servers
-	SocketListener m_listener;			//! socket listener
-
-	StreamClients m_streamClients;			//! tcp based clients
-	DatagramClients m_dgramClients;			//! udp based "clients"
-
 	// Identities
-	IdentityList m_identities;				//! user identities
+	IdentityList m_identities;			//! user identities
 	Server::Identity m_defaultIdentity;		//! default identity
 
 	/*
-	 * These functions are used for TCP clients.
+	 * Plugin specified by commands line that should be
+	 * loaded after initialization.
 	 */
-	void clientAdd(Socket &client);
-	void clientRead(Socket &client);
+	std::vector<std::string> m_wantedPlugins;
 
-	/*
-	 * This function is used for UDP "clients".
-	 */
-	void peerRead(Socket &s);
+	Irccd();
 
-	/**
-	 * Execute a command from a client, if the client
-	 * is a UDP, the info is discarded.
-	 *
-	 * @param cmd the command
-	 * @param s the socket to read
-	 * @param info the info (UDP only)
-	 */
-	void execute(const std::string &cmd,
-		     Socket &s,
-		     const SocketAddress &info = SocketAddress());
-
-	/**
-	 * Send a response to the client.
-	 *
-	 * @param message the message to send
-	 * @param s the socket
-	 * @param info the address
-	 */
-	void notifySocket(const std::string &message,
-			  Socket &s,
-			  const SocketAddress &info);
-
-	bool isPluginLoaded(const std::string &name);
 	bool isOverriden(char c);
 
-	/**
+	/*
 	 * Open will call the below function in the same order they are
 	 * declared, do not change that.
 	 */
 	void openConfig();
+	void readGeneral(const Parser &config);		// [general]
+	void readPlugins(const Parser &config);		// [plugins]
+	void readIdentities(const Parser &config);	// [identity]
 
-	// [general]
-	void openPlugins();
-
-	// [identity]
-	void openIdentities(const Parser &config);
-
-	// [listener]
-	void openListeners(const Parser &config);
+	void readListeners(const Parser &config);
 	void extractInternet(const Section &s, int type);
 
 #if !defined(_WIN32)
 	void extractUnix(const Section &s, int type);
 #endif
 
-	// [server]
-	void openServers(const Parser &config);
+	void readServers(const Parser &config);
 	void extractChannels(const Section &section, Server::Ptr server);
-
-	void handleConnection(const IrcEvent &event);
-	void handleInvite(const IrcEvent &event);
-	void handleKick(const IrcEvent &event);
-
-	// Avoid constructor.
-	Irccd();
 
 public:
 	~Irccd();
@@ -254,98 +115,6 @@ public:
 	void override(char c);
 
 	/**
-	 * Add a plugin path to find other plugins.
-	 *
-	 * @param path the directory path
-	 */
-	void addPluginPath(const std::string &path);
-
-	/**
-	 * Request for loading the plugin. If specified is set to true
-	 * then the name is the full path to the plugin otherwise, it is
-	 * searched.
-	 *
-	 * @param name the plugin name or path
-	 * @param bool is specified by path?
-	 */
-	void addWantedPlugin(const std::string &name, bool specified = false);
-
-	/**
-	 * Load a plugin externally, used for irccdctl.
-	 *
-	 * @param name the plugin name to load
-	 */
-	void loadPlugin(const std::string &name);
-
-	/**
-	 * Unload a plugin.
-	 *
-	 * @param name the plugin name to unload.
-	 */
-	void unloadPlugin(const std::string &name);
-
-	/**
-	 * Reload a plugin, it does not close but calls a specific
-	 * Lua function defined in the file.
-	 *
-	 * @param name the plugin name
-	 */
-	void reloadPlugin(const std::string &name);
-
-#if defined(WITH_LUA)
-	/**
-	 * Find a plugin by it's associated Lua State, so it can
-	 * be retrieved by every Lua bindings.
-	 *
-	 * @param state the Lua state
-	 * @return the plugin
-	 * @throw out_of_range when not found
-	 */
-	Plugin::Ptr findPlugin(lua_State *state);
-
-	/**
-	 * Find a plugin by it's name. It is used by irccdctl
-	 * to load, unload and reload on command.
-	 *
-	 * @param name the plugin name
-	 * @return the plugin
-	 * @throw out_of_range when not found
-	 */
-	Plugin::Ptr findPlugin(const std::string &name);
-
-	/**
-	 * Add a deferred call for a specific server.
-	 *
-	 * @param sever the server that request it
-	 * @param call the plugin to call
-	 */
-	void addDeferred(Server::Ptr server, DefCall call);
-
-	/**
-	 * Register the thread to one plugin so that irccd.plugin
-	 * think that L state is of plugin.
-	 *
-	 * @param L the new Lua state
-	 * @param plugin for which plugin
-	 */
-	void registerThread(lua_State *L, Plugin::Ptr plugin);
-
-	/**
-	 * Remove the attach thread from that Lua state
-	 *
-	 * @param L the Lua state from which thread
-	 */
-	void unregisterThread(lua_State *L);
-#endif
-
-	/**
-	 * Get the servers list
-	 *
-	 * @return the list of servers
-	 */
-	ServerList &getServers();
-
-	/**
 	 * Set the config path to open.
 	 *
 	 * @param path the config file path
@@ -360,12 +129,12 @@ public:
 	void setForeground(bool mode);
 
 	/**
-	 * Find a server by its resource name.
+	 * Only for command line, defer a plugin to be load after the
+	 * configuration file load.
 	 *
-	 * @param name the server's resource name
-	 * @return a server
+	 * @param name the name
 	 */
-	Server::Ptr findServer(const std::string &name);
+	void deferPlugin(const std::string &name);
 
 	/**
 	 * Find an identity.
@@ -386,38 +155,6 @@ public:
 	 * Stop all threads and everything else.
 	 */
 	void stop();
-
-	/* ------------------------------------------------
-	 * IRC Handlers
-	 * ------------------------------------------------ */
-
-	/**
-	 * Global IRC event handler, process the event type and call
-	 * every Lua plugin if Lua is compiled in.
-	 *
-	 * For some event, also call handleConnection
-	 * and handleInvite to do specific things.
-	 *
-	 * @param event the event
-	 */
-	void handleIrcEvent(const IrcEvent &event);
-
-#if defined(WITH_LUA)
-	/**
-	 * Call the plugin function depending on the event.
-	 *
-	 * @param p the current plugin
-	 * @param ev the event
-	 */
-	void callPlugin(std::shared_ptr<Plugin> p, const IrcEvent &ev);
-
-	/**
-	 * Call a deferred function.
-	 *
-	 * @param ev the event
-	 */
-	void callDeferred(const IrcEvent &ev);
-#endif
 };
 
 } // !irccd

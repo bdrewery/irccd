@@ -22,8 +22,7 @@
 
 #include "Logger.h"
 
-namespace irccd
-{
+namespace irccd {
 
 bool Logger::m_verbose = true;
 

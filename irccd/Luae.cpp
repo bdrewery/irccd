@@ -18,8 +18,7 @@
 
 #include "Luae.h"
 
-namespace irccd
-{
+namespace irccd {
 
 LuaState::LuaState()
 {
@@ -54,8 +53,7 @@ LuaValue LuaValue::copy(lua_State *L, int index)
 
 	v.type = lua_type(L, index);
 
-	switch (v.type)
-	{
+	switch (v.type) {
 	case LUA_TBOOLEAN:
 		v.boolean = lua_toboolean(L, index);
 		break;
@@ -90,8 +88,7 @@ LuaValue LuaValue::copy(lua_State *L, int index)
 
 void LuaValue::push(lua_State *L, const LuaValue &value)
 {
-	switch (value.type)
-	{
+	switch (value.type) {
 	case LUA_TBOOLEAN:
 		lua_pushboolean(L, value.boolean);
 		break;
@@ -105,8 +102,7 @@ void LuaValue::push(lua_State *L, const LuaValue &value)
 	{
 		lua_createtable(L, 0, 0);
 
-		for (auto p : value.table)
-		{
+		for (auto p : value.table) {
 			LuaValue::push(L, p.first);
 			LuaValue::push(L, p.second);
 
@@ -207,6 +203,8 @@ void Luae::preload(lua_State *L, const std::string &name, lua_CFunction func)
 
 void Luae::readTable(lua_State *L, int idx, ReadFunction func)
 {
+	LUA_STACK_CHECKBEGIN(L);
+
 	lua_pushnil(L);
 
 	if (idx < 0)
@@ -217,7 +215,7 @@ void Luae::readTable(lua_State *L, int idx, ReadFunction func)
 		lua_pop(L, 1);
 	}
 
-	lua_pop(L, 1);
+	LUA_STACK_CHECKEQUALS(L);
 }
 
 int Luae::referenceField(lua_State *L, int idx, int type, const std::string &name)
@@ -244,6 +242,16 @@ void Luae::require(lua_State *L, const std::string &name, lua_CFunction func, bo
 	lua_pop(L, 1);
 
 	LUA_STACK_CHECKEQUALS(L);
+}
+
+void Luae::initRegistry(lua_State *L)
+{
+	lua_createtable(L, 0, 0);
+	lua_createtable(L, 0, 1);
+	lua_pushstring(L, "v");
+	lua_setfield(L, -2, "__mode");
+	lua_setmetatable(L, -2);
+	lua_setfield(L, LUA_REGISTRYINDEX, "refs");
 }
 
 } // !irccd

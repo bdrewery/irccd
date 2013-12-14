@@ -30,6 +30,10 @@ set(SOURCES
 	Server.h
 	Irccd.cpp
 	Irccd.h
+	Message.cpp
+	Message.h
+	Listener.cpp
+	Listener.h
 	main.cpp
 )
 

@@ -18,15 +18,71 @@
 
 
 #include <sstream>
+#include <unordered_map>
 
 #include "Irccd.h"
+#include "DefCall.h"
 #include "LuaServer.h"
 
-namespace irccd
-{
+namespace irccd {
 
-namespace
+namespace {
+
+void extractChannels(lua_State *L, Server::Info &info)
 {
+	if (Luae::typeField(L, 1, "channels") == LUA_TTABLE) {
+		lua_getfield(L, 1, "channels");
+		Luae::readTable(L, -1, [&] (lua_State *L, int, int tvalue) {
+			Server::Channel c;
+
+			// Standard string channel (no password)
+			if (tvalue == LUA_TSTRING) {
+				c.m_name = lua_tostring(L, -1);
+				info.m_channels.push_back(c);
+			} else if (tvalue == LUA_TTABLE) {
+				// First index is channel name
+				lua_rawgeti(L, -1, 1);
+				if (lua_type(L, -1) == LUA_TSTRING)
+					c.m_name = lua_tostring(L, -1);
+				lua_pop(L, 1);
+
+				// Second index is channel password
+				lua_rawgeti(L, -1, 2);
+				if (lua_type(L, -1) == LUA_TSTRING)
+					c.m_password = lua_tostring(L, -1);
+				lua_pop(L, 1);
+	
+				info.m_channels.push_back(c);
+			}
+		});
+		lua_pop(L, 1);
+	}
+}
+
+void extractIdentity(lua_State *L, Server::Identity &ident)
+{
+	std::unordered_map<std::string, std::string &> table {
+		{ "name",		ident.m_name		},
+		{ "nickname",		ident.m_nickname	},
+		{ "username",		ident.m_username	},
+		{ "realname",		ident.m_realname	},
+	};
+
+	std::string key;
+
+	if (Luae::typeField(L, 1, "identity") == LUA_TTABLE) {
+		lua_getfield(L, 1, "identity");
+		Luae::readTable(L, -1, [&] (lua_State *L, int tkey, int tvalue) {
+			if (tkey == LUA_TSTRING && tvalue == LUA_TSTRING) {
+				key = lua_tostring(L, -2);
+
+				if (table.count(key) > 0)
+					table[key] = lua_tostring(L, -1);
+			}
+		});
+		lua_pop(L, 1);
+	}
+}
 
 int serverGetChannels(lua_State *L)
 {
@@ -38,8 +94,7 @@ int serverGetChannels(lua_State *L)
 	// Create table even if no channels
 	lua_createtable(L, s->getChannels().size(), s->getChannels().size());
 	i = 0;
-	for (auto c : s->getChannels())
-	{
+	for (auto c : s->getChannels()) {
 		lua_pushinteger(L, ++i);
 		lua_pushstring(L, c.m_name.c_str());
 		lua_settable(L, -3);
@@ -192,23 +247,16 @@ int serverNames(lua_State *L)
 
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 
-	try
-	{
-		Plugin::Ptr p = Irccd::getInstance().findPlugin(L);
+	try {
+		Plugin::Ptr p = Plugin::find(L);
 
 		// Get the function reference.
 		lua_pushvalue(L, 3);
 		ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-		Irccd::getInstance().addDeferred(
-		    s, DefCall(IrcEventType::Names, p, ref)
-		);
-
+		Plugin::defer(s, DefCall(IrcEventType::Names, p, ref));
 		s->names(channel);
-	}
-	catch (std::out_of_range)
-	{
-	}
+	} catch (std::out_of_range) { }
 
 	// Deferred call
 	return 0;
@@ -306,23 +354,17 @@ int serverWhois(lua_State *L)
 
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 
-	try
-	{
-		Plugin::Ptr p = Irccd::getInstance().findPlugin(L);
+	try {
+		Plugin::Ptr p = Plugin::find(L);
 
 		// Get the function reference.
 		lua_pushvalue(L, 3);
 		ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-		Irccd::getInstance().addDeferred(
-		    s, DefCall(IrcEventType::Whois, p, ref)
-		);
+		Plugin::defer(s, DefCall(IrcEventType::Whois, p, ref));
 
 		s->whois(target);
-	}
-	catch (std::out_of_range)
-	{
-	}
+	} catch (std::out_of_range) { }
 
 	// Deferred call
 	return 0;
@@ -395,12 +437,66 @@ const luaL_Reg serverMt[] = {
 	{ nullptr,		nullptr				}
 };
 
+int l_find(lua_State *L)
+{
+	std::string name = luaL_checkstring(L, 1);
+	int ret;
+
+	try {
+		Server::Ptr server = Server::get(name);
+
+		Luae::pushShared<Server>(L, server, ServerType);
+
+		ret = 1;
+	} catch (std::out_of_range ex) {
+		lua_pushnil(L);
+		lua_pushstring(L, ex.what());
+
+		ret = 2;
+	}
+
+	return ret;
+}
+
+int l_connect(lua_State *L)
+{
+	Server::Ptr server;
+	Server::Info info;
+	Server::Identity ident;
+	Server::Options options;
+
+	luaL_checktype(L, 1, LUA_TTABLE);
+
+	info.m_name	= Luae::requireField<std::string>(L, 1, "name");
+	info.m_host	= Luae::requireField<std::string>(L, 1, "host");
+	info.m_port	= Luae::requireField<int>(L, 1, "port");
+
+	if (Luae::typeField(L, 1, "password") == LUA_TSTRING)
+		info.m_password = Luae::requireField<std::string>(L, 1, "password");
+
+	extractChannels(L, info);
+	extractIdentity(L, ident);
+
+	server = std::make_shared<Server>(info, ident, options);
+	Server::add(server);
+
+	return 0;
+}
+
+const luaL_Reg functions[] = {
+	{ "find",		l_find				},
+	{ "connect",		l_connect			},
+	{ nullptr,		nullptr				}
+};
+
 }
 
 const char *ServerType = "Server";
 
 int luaopen_server(lua_State *L)
 {
+	luaL_newlib(L, functions);
+
 	// Create the metatable for Server
 	luaL_newmetatable(L, ServerType);
 	luaL_setfuncs(L, serverMt, 0);
@@ -408,7 +504,7 @@ int luaopen_server(lua_State *L)
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 
-	return 0;
+	return 1;
 }
 
 } // !irccd

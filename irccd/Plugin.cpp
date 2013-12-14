@@ -23,6 +23,7 @@
 #include <Logger.h>
 #include <Util.h>
 
+#include "DefCall.h"
 #include "Irccd.h"
 #include "Plugin.h"
 
@@ -36,8 +37,7 @@
 #include "Lua/LuaThread.h"
 #include "Lua/LuaUtil.h"
 
-namespace irccd
-{
+namespace irccd {
 
 /* --------------------------------------------------------
  * list of libraries to load
@@ -75,11 +75,8 @@ const Plugin::Libraries Plugin::irccdLibs = {
  * Plugin exception
  * -------------------------------------------------------- */
 
-Plugin::ErrorException::ErrorException()
-{
-}
-
-Plugin::ErrorException::ErrorException(const std::string &which, const std::string &error)
+Plugin::ErrorException::ErrorException(const std::string &which,
+				       const std::string &error)
 	: m_error(error)
 	, m_which(which)
 {
@@ -99,33 +96,156 @@ const char * Plugin::ErrorException::what() const throw()
  * private methods and members
  * -------------------------------------------------------- */
 
-void Plugin::call(const std::string &func,
-		  Server::Ptr server,
-		  std::vector<std::string> params)
+bool Plugin::isPluginLoaded(const std::string &name)
+{
+	bool ret = true;
+
+	try {
+		(void)find(name);
+	} catch (std::out_of_range ex) {
+		ret = false;
+	}
+
+	return ret;
+}
+
+void Plugin::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
+{
+	switch (ev.m_type) {
+	case IrcEventType::Connection:
+		p->onConnect(ev.m_server);
+		break;
+	case IrcEventType::ChannelNotice:
+		p->onChannelNotice(ev.m_server, ev.m_params[0], ev.m_params[1],
+		    ev.m_params[2]);
+		break;
+	case IrcEventType::Invite:
+		p->onInvite(ev.m_server, ev.m_params[0], ev.m_params[1]);
+		break;
+	case IrcEventType::Join:
+		p->onJoin(ev.m_server, ev.m_params[0], ev.m_params[1]);
+		break;
+	case IrcEventType::Kick:
+		p->onKick(ev.m_server, ev.m_params[0], ev.m_params[1],
+		    ev.m_params[2], ev.m_params[3]);
+		break;
+	case IrcEventType::Message:
+	{
+		std::string cc = ev.m_server->getOptions().m_commandChar;
+		std::string sp = cc + p->getName();
+		std::string msg = ev.m_params[2];
+
+		// handle special commands "!<plugin> command"
+		if (cc.length() > 0 && msg.compare(0, sp.length(), sp) == 0) {
+			std::string plugin = msg.substr(
+			    cc.length(), sp.length() - cc.length());
+
+			if (plugin == p->getName()) {
+				p->onCommand(ev.m_server,
+						ev.m_params[0],
+						ev.m_params[1],
+						msg.substr(sp.length())
+				);
+			}
+		} else
+			p->onMessage(ev.m_server, ev.m_params[0], ev.m_params[1],
+			    ev.m_params[2]);
+	}
+		break;
+	case IrcEventType::Me:
+		p->onMe(ev.m_server, ev.m_params[1], ev.m_params[0], ev.m_params[2]);
+		break;
+	case IrcEventType::Mode:
+		p->onMode(ev.m_server, ev.m_params[0], ev.m_params[1],
+		    ev.m_params[2], ev.m_params[3]);
+		break;
+	case IrcEventType::Nick:
+		p->onNick(ev.m_server, ev.m_params[0], ev.m_params[1]);
+		break;
+	case IrcEventType::Notice:
+		p->onNotice(ev.m_server, ev.m_params[0], ev.m_params[1],
+		    ev.m_params[2]);
+		break;
+	case IrcEventType::Part:
+		p->onPart(ev.m_server, ev.m_params[0], ev.m_params[1],
+		    ev.m_params[2]);
+		break;
+	case IrcEventType::Query:
+		p->onQuery(ev.m_server, ev.m_params[0], ev.m_params[1]);
+		break;
+	case IrcEventType::Topic:
+		p->onTopic(ev.m_server, ev.m_params[0], ev.m_params[1],
+		     ev.m_params[2]);
+		break;
+	case IrcEventType::UserMode:
+		p->onUserMode(ev.m_server, ev.m_params[0], ev.m_params[1]);
+		break;
+	default:
+		break;
+	}
+}
+
+void Plugin::callDeferred(const IrcEvent &ev)
+{
+	// Check if we have deferred call for this server
+	if (deferred.find(ev.m_server) == deferred.end())
+		return;
+
+	std::vector<DefCall>::iterator it = deferred[ev.m_server].begin();
+
+	for (; it != deferred[ev.m_server].end(); ) {
+		bool deleteIt = true;
+
+		if (ev.m_type == it->type()) {
+			switch (it->type()) {
+			case IrcEventType::Names:
+				it->onNames(ev.m_params);
+				break;
+			case IrcEventType::Whois:
+				it->onWhois(ev.m_params);
+				break;
+			default:
+				deleteIt = false;
+				break;
+			}
+		} else
+			deleteIt = false;
+
+		/*
+		 * If found and executed, break the loop if not, we will
+		 * call multiple times for the same event.
+		 */
+		if (deleteIt) {
+			it = deferred[ev.m_server].erase(it);
+			break;
+		} else
+			++it;
+	}
+}
+
+void Plugin::callFunction(const std::string &func,
+			  Server::Ptr server,
+			  std::vector<std::string> params)
 {
 	lua_State *L = m_state;
 
 	lua_getglobal(L, func.c_str());
 	if (lua_type(L, -1) != LUA_TFUNCTION)
 		lua_pop(L, 1);
-	else
-	{
+	else {
 		int np = 0;
 
-		if (server)
-		{
+		if (server) {
 			Luae::pushShared<Server>(L, server, ServerType);
 			++ np;
 		}
 
-		for (const std::string &a : params)
-		{
+		for (const std::string &a : params) {
 			lua_pushstring(L, a.c_str());
 			++ np;
 		}
 
-		if (lua_pcall(L, np, 0, 0) != LUA_OK)
-		{
+		if (lua_pcall(L, np, 0, 0) != LUA_OK) {
 			std::string error = lua_tostring(L, -1);
 			lua_pop(L, 1);
 
@@ -138,8 +258,234 @@ void Plugin::call(const std::string &func,
  * public methods and members
  * -------------------------------------------------------- */
 
-Plugin::Plugin()
+Plugin::Mutex		Plugin::pluginLock;
+Plugin::Dirs		Plugin::pluginDirs;
+Plugin::Map		Plugin::pluginMap;
+Plugin::ThreadMap	Plugin::threadMap;
+Plugin::DefCallList	Plugin::deferred;
+
+void Plugin::addPath(const std::string &path)
 {
+	Lock lk(pluginLock);
+
+	pluginDirs.push_back(path);
+}
+
+void Plugin::load(const std::string &name, bool relative)
+{
+	Lock lk(pluginLock);
+
+	std::ostringstream oss;
+	std::string realname, realpath;
+	bool found = false;
+
+	if (isPluginLoaded(name))
+		return;
+
+	/*
+	 * If the plugin has been specified by path using foo = /path then
+	 * it should contains the .lua extension, otherwise we search
+	 * for it.
+	 */
+	if (relative) {
+		Logger::log("irccd: checking for plugin %s", name.c_str());
+		found = Util::exist(name);
+
+		/*
+		 * Compute the name by removing .lua extension and optional
+		 * directory.
+		 */
+		realpath = name;
+		realname = Util::baseName(realpath);
+
+		auto pos = realname.find(".lua");
+		if (pos != std::string::npos)
+			realname.erase(pos);
+	} else {
+		realname = name;
+
+		// Seek the plugin in the directories.
+		for (auto p : pluginDirs) {
+			oss.str("");
+			oss << p;
+
+			// Add a / or \\ only if needed
+			if (p.length() > 0 && p[p.length() - 1] != Util::DIR_SEP)
+				oss << Util::DIR_SEP;
+
+			oss << name << ".lua";
+
+			realpath = oss.str();
+			Logger::log("irccd: checking for plugin %s", realpath.c_str());
+
+			if (Util::exist(realpath)) {
+				found = true;
+				break;
+			}
+		}
+	}
+
+	if (!found)
+		Logger::warn("irccd: plugin %s not found", realname.c_str());
+	else {
+		/*
+		 * At this step, the open function will open the lua
+		 * script, that script may want to call some bindings
+		 * directly so we need to add it to the registered
+		 * Lua plugins even if it has failed. So we remove
+		 * it only on failure and expect plugins to be well
+		 * coded.
+		 */
+		 
+		Plugin::Ptr p = std::make_shared<Plugin>(realname, realpath);
+		pluginMap[p->getState()] = p;
+
+		if (!p->open()) {
+			Logger::warn("irccd: failed to load plugin %s: %s",
+			    realname.c_str(), p->getError().c_str());
+
+			pluginMap.erase(p->getState());
+		}
+	}
+}
+
+void Plugin::unload(const std::string &name)
+{
+	Lock lk(pluginLock);
+
+	try {
+		auto i = find(name);
+
+		try {
+			i->onUnload();
+		} catch (Plugin::ErrorException ex) {
+			Logger::warn("irccd: error while unloading %s: %s",
+			    name.c_str(), ex.what());
+		}
+
+		pluginMap.erase(i->getState());
+	} catch (std::out_of_range) {
+		Logger::warn("irccd: there is no plugin %s loaded", name.c_str());
+	}
+}
+
+void Plugin::reload(const std::string &name)
+{
+	Lock lk(pluginLock);
+
+	try {
+		find(name)->onReload();
+	} catch (std::out_of_range ex) {
+		Logger::warn("irccd: %s", ex.what());
+	}
+}
+
+Plugin::Ptr Plugin::find(lua_State *state)
+{
+	Lock lk(pluginLock);
+
+	for (auto plugin : pluginMap) {
+		/*
+		 * Test if the current plugin is the one with that
+		 * Lua state.
+		 */
+		if (plugin.first == state)
+			return plugin.second;
+	}
+
+	for (auto plugin : threadMap) {
+		if (plugin.first == state)
+			return plugin.second;
+	}
+
+	throw std::out_of_range("plugin not found");
+}
+
+Plugin::Ptr Plugin::find(const std::string &name)
+{
+	using Type = std::pair<lua_State *, Plugin::Ptr>;
+
+	Lock lk(pluginLock);
+	std::ostringstream oss;
+
+	auto i = std::find_if(pluginMap.begin(), pluginMap.end(),
+	    [&] (Type p) -> bool {
+		return p.second->getName() == name;
+	    }
+	);
+
+	if (i == pluginMap.end()) {
+		oss << "plugin " << name << " not found";
+
+		throw std::out_of_range(oss.str());
+	}
+
+	return (*i).second;
+}
+
+void Plugin::forAll(MapFunc func)
+{
+	Lock lk(pluginLock);
+
+	for (auto p : pluginMap)
+		func(p.second);
+}
+
+void Plugin::defer(Server::Ptr server, DefCall call)
+{
+	Lock lk(pluginLock);
+
+	deferred[server].push_back(call);
+}
+
+void Plugin::registerThread(lua_State *L,
+			    Plugin::Ptr plugin,
+			    Thread::Ptr thrd)
+{
+	Lock lk(pluginLock);
+
+	threadMap[L] = plugin;
+	plugin->m_threads.push_back(thrd);
+}
+
+void Plugin::unregisterThread(lua_State *L)
+{
+	Lock lk(pluginLock);
+
+	threadMap.erase(L);
+}
+
+void Plugin::handleIrcEvent(const IrcEvent &ev)
+{
+	Lock lk(pluginLock);
+
+	/*
+	 * This is the handle of deferred calls, they are not handled in the
+	 * next callPlugin block.
+	 */
+	try {
+		if (ev.m_type == IrcEventType::Names ||
+		    ev.m_type == IrcEventType::Whois)
+			callDeferred(ev);
+	} catch (Plugin::ErrorException ex) {
+		Logger::warn("plugin %s: %s", ex.which().c_str(), ex.what());
+	}
+
+	for (auto p : pluginMap) {
+		/*
+		 * Ignore Lua threads that share the same Plugin
+		 * object.
+		 */
+		if (threadMap.find(p.first) != threadMap.end())
+			continue;
+
+		try {
+			callPlugin(p.second, ev);
+		} catch (Plugin::ErrorException ex) {
+			Logger::warn("plugin %s: %s",
+			    p.second->getName().c_str(), ex.what());
+		}
+	}
 }
 
 Plugin::Plugin(const std::string &name,
@@ -167,7 +513,7 @@ LuaState &Plugin::getState()
 	return m_state;
 }
 
-const std::string & Plugin::getError() const
+const std::string &Plugin::getError() const
 {
 	return m_error;
 }
@@ -186,8 +532,7 @@ bool Plugin::open()
 	// Find the home directory for the plugin
 	m_home = Util::findPluginHome(m_name);
 
-	if (luaL_dofile(m_state, m_path.c_str()) != LUA_OK)
-	{
+	if (luaL_dofile(m_state, m_path.c_str()) != LUA_OK) {
 		m_error = lua_tostring(m_state, -1);
 		lua_pop(m_state, 1);
 
@@ -195,27 +540,14 @@ bool Plugin::open()
 	}
 
 	// Do a initial load
-	try
-	{
+	try {
 		onLoad();
-	}
-	catch (ErrorException ex)
-	{
+	} catch (ErrorException ex) {
 		m_error = ex.what();
 		return false;
 	}
 
 	return true;
-}
-
-void Plugin::addThread(Thread::Ptr th)
-{
-	m_threads.push_back(th);
-}
-
-Plugin::ThreadList &Plugin::getThreads()
-{
-	return m_threads;
 }
 
 void Plugin::onCommand(Server::Ptr server,
@@ -229,12 +561,12 @@ void Plugin::onCommand(Server::Ptr server,
 	params.push_back(who);
 	params.push_back(message);
 
-	call("onCommand", server, params);
+	callFunction("onCommand", server, params);
 }
 
 void Plugin::onConnect(Server::Ptr server)
 {
-	call("onConnect", server);
+	callFunction("onConnect", server);
 }
 
 void Plugin::onChannelNotice(Server::Ptr server,
@@ -248,7 +580,7 @@ void Plugin::onChannelNotice(Server::Ptr server,
 	params.push_back(target);
 	params.push_back(notice);
 
-	call("onChannelNotice", server, params);
+	callFunction("onChannelNotice", server, params);
 }
 
 void Plugin::onInvite(Server::Ptr server,
@@ -260,7 +592,7 @@ void Plugin::onInvite(Server::Ptr server,
 	params.push_back(channel);
 	params.push_back(who);
 
-	call("onInvite", server, params);
+	callFunction("onInvite", server, params);
 }
 
 void Plugin::onJoin(Server::Ptr server,
@@ -272,7 +604,7 @@ void Plugin::onJoin(Server::Ptr server,
 	params.push_back(channel);
 	params.push_back(nickname);
 
-	call("onJoin", server, params);
+	callFunction("onJoin", server, params);
 }
 
 void Plugin::onKick(Server::Ptr server,
@@ -288,12 +620,12 @@ void Plugin::onKick(Server::Ptr server,
 	params.push_back(kicked);
 	params.push_back(reason);
 
-	call("onKick", server, params);
+	callFunction("onKick", server, params);
 }
 
 void Plugin::onLoad()
 {
-	call("onLoad");
+	callFunction("onLoad");
 }
 
 void Plugin::onMessage(Server::Ptr server,
@@ -308,7 +640,7 @@ void Plugin::onMessage(Server::Ptr server,
 	params.push_back(who);
 	params.push_back(message);
 
-	call("onMessage", server, params);
+	callFunction("onMessage", server, params);
 }
 
 void Plugin::onMe(Server::Ptr server,
@@ -323,7 +655,7 @@ void Plugin::onMe(Server::Ptr server,
 	params.push_back(who);
 	params.push_back(message);
 
-	call("onMe", server, params);
+	callFunction("onMe", server, params);
 }
 
 void Plugin::onMode(Server::Ptr server,
@@ -339,7 +671,7 @@ void Plugin::onMode(Server::Ptr server,
 	params.push_back(mode);
 	params.push_back(modeArg);
 
-	call("onMode", server, params);
+	callFunction("onMode", server, params);
 }
 
 void Plugin::onNick(Server::Ptr server,
@@ -351,7 +683,7 @@ void Plugin::onNick(Server::Ptr server,
 	params.push_back(oldnick);
 	params.push_back(newnick);
 
-	call("onNick", server, params);
+	callFunction("onNick", server, params);
 }
 
 void Plugin::onNotice(Server::Ptr server,
@@ -365,7 +697,7 @@ void Plugin::onNotice(Server::Ptr server,
 	params.push_back(target);
 	params.push_back(notice);
 
-	call("onNotice", server, params);
+	callFunction("onNotice", server, params);
 }
 
 void Plugin::onPart(Server::Ptr server,
@@ -379,7 +711,7 @@ void Plugin::onPart(Server::Ptr server,
 	params.push_back(who);
 	params.push_back(reason);
 
-	call("onPart", server, params);
+	callFunction("onPart", server, params);
 }
 
 void Plugin::onQuery(Server::Ptr server,
@@ -391,12 +723,12 @@ void Plugin::onQuery(Server::Ptr server,
 	params.push_back(who);
 	params.push_back(message);
 
-	call("onQuery", server, params);
+	callFunction("onQuery", server, params);
 }
 
 void Plugin::onReload()
 {
-	call("onReload");
+	callFunction("onReload");
 }
 
 void Plugin::onTopic(Server::Ptr server,
@@ -410,7 +742,7 @@ void Plugin::onTopic(Server::Ptr server,
 	params.push_back(who);
 	params.push_back(topic);
 
-	call("onTopic", server, params);
+	callFunction("onTopic", server, params);
 }
 
 void Plugin::onUserMode(Server::Ptr server,
@@ -422,12 +754,12 @@ void Plugin::onUserMode(Server::Ptr server,
 	params.push_back(who);
 	params.push_back(mode);
 
-	call("onUserMode", server, params);
+	callFunction("onUserMode", server, params);
 }
 
 void Plugin::onUnload()
 {
-	call("onUnload");
+	callFunction("onUnload");
 }
 
 } // !irccd

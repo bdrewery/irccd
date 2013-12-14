@@ -21,8 +21,7 @@
 
 #include "Parser.h"
 
-namespace irccd
-{
+namespace irccd {
 
 /* --------------------------------------------------------
  * Option public members
@@ -39,11 +38,7 @@ bool operator==(const Option &o1, const Option &o2)
  * -------------------------------------------------------- */
 
 Section::Section()
-	:m_allowed(true)
-{
-}
-
-Section::~Section()
+	: m_allowed(true)
 {
 }
 
@@ -54,7 +49,7 @@ Section::Section(const Section &s)
 	m_allowed = s.m_allowed;
 }
 
-const std::string Section::findOption(const std::string &name) const
+std::string Section::findOption(const std::string &name) const
 {
 	std::string ret;
 
@@ -87,9 +82,8 @@ template <> int Section::getOption(const std::string &name) const
 {
 	int result = -1;
 
-	if (hasOption(name)) {
+	if (hasOption(name))
 		result = atoi(findOption(name).c_str());
-	}
 
 	return result;
 }
@@ -104,12 +98,12 @@ template <> std::string Section::getOption(const std::string &name) const
 	return result;
 }
 
-const std::string & Section::getName() const
+const std::string &Section::getName() const
 {
 	return m_name;
 }
 
-const std::vector<Option> & Section::getOptions() const
+const std::vector<Option> &Section::getOptions() const
 {
 	return m_options;
 }
@@ -281,7 +275,9 @@ void Parser::readLine(int lineno, const std::string &line)
 const char Parser::DEFAULT_COMMENT_CHAR = '#';
 
 Parser::Parser(const std::string &path, int tuning, char commentToken)
-	:m_path(path), m_tuning(tuning), m_commentChar(commentToken)
+	: m_path(path)
+	, m_tuning(tuning)
+	, m_commentChar(commentToken)
 {
 	Section root;
 
@@ -313,37 +309,29 @@ bool Parser::open()
 	}
 
 	// Avoid use of C getline
-	while (std::getline(file, line)) {
+	while (std::getline(file, line))
 		readLine(lineno++, line);
-	}
 
 	file.close();
 
 	return true;
 }
 
-const std::string & Parser::getError() const
+const std::string &Parser::getError() const
 {
 	return m_error;
 }
 
-const std::vector<Section> & Parser::getSections() const
+const std::vector<Section> &Parser::getSections() const
 {
 	return m_sections;
 }
 
-std::vector<Section> Parser::findSections(const std::string &name) const
+void Parser::findSections(const std::string &name, FindFunc func) const
 {
-	std::vector<Section> list;
-
-	for (const Section &s : m_sections) {
-		if (s.m_name == name) {
-			Section copy = s;
-			list.push_back(copy);
-		}
-	}
-
-	return list;
+	for (const Section &s : m_sections)
+		if (s.m_name == name)
+			func(s);
 }
 
 bool Parser::hasSection(const std::string &name) const
@@ -355,23 +343,13 @@ bool Parser::hasSection(const std::string &name) const
 	return false;
 }
 
-Section Parser::getSection(const std::string &name) const
+const Section &Parser::getSection(const std::string &name) const
 {
-	Section ret;	
-
 	for (const Section &s : m_sections)
 		if (s.m_name == name)
-			ret = s;
+			return s;
 
-	return ret;
-}
-
-Section Parser::requireSection(const std::string &name) const
-{
-	if (!hasSection(name))
-		throw NotFoundException(name);
-
-	return getSection(name);
+	throw NotFoundException(name);
 }
 
 void Parser::log(int number, const std::string &, const std::string &message)

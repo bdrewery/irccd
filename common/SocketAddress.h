@@ -21,8 +21,7 @@
 
 #include "Socket.h"
 
-namespace irccd
-{
+namespace irccd {
 
 /**
  * @class SocketAddress
@@ -35,8 +34,7 @@ namespace irccd
  * @see ConnectAddressIP
  * @see AddressUnix
  */
-class SocketAddress
-{
+class SocketAddress {
 protected:
 	sockaddr_storage m_addr;
 	socklen_t m_addrlen;

@@ -19,8 +19,7 @@
 #include "Irccd.h"
 #include "LuaIrccd.h"
 
-namespace irccd
-{
+namespace irccd {
 
 int luaopen_irccd(lua_State *L)
 {

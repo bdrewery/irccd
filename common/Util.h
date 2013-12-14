@@ -27,14 +27,11 @@
 
 #include <config.h>
 
-namespace irccd
-{
+namespace irccd {
 
-class Util
-{
+class Util {
 public:
-	class ErrorException : public std::exception
-	{
+	class ErrorException : public std::exception {
 	private:
 		std::string m_error;
 
