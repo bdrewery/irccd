@@ -30,7 +30,7 @@ local answers = { }
 
 -- Load every words
 local function loadWords()
-	local path = plugin.getHome() .. "/answers.txt"
+	local path = plugin.info().home .. "/answers.txt"
 	local file, err = io.open(path)
 
 	if file == nil then
@@ -45,7 +45,9 @@ local function loadWords()
 	end
 end
 
-loadWords()
+function onLoad()
+	loadWords()
+end
 
 function onCommand(server, channel, nick, message)
 	local pick = math.random(1, #answers)

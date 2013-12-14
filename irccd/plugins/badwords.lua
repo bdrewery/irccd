@@ -25,7 +25,7 @@ local answer = "Please check your spelling"
 
 -- Reload every words
 function loadWords()
-	local f, err = io.open(plugin.getHome() .. "/words.txt")
+	local f, err = io.open(plugin.info().home .. "/words.txt")
 
 	if (f ~= nil) then
 		for w in f:lines() do
@@ -37,7 +37,7 @@ function loadWords()
 end
 
 function loadConfig()
-	local path = plugin.getHome() .. "/badwords.conf"
+	local path = plugin.info().home .. "/badwords.conf"
 	local parser = parser.new(path, { parser.DisableRedefinition })
 
 	local ret, err = parser:open()
@@ -51,8 +51,10 @@ function loadConfig()
 	end
 end
 
-loadWords()
-loadConfig()
+function onLoad()
+	loadWords()
+	loadConfig()
+end
 
 function onMessage(server, channel, nick, message)
 	local message = message:lower()

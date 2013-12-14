@@ -280,7 +280,7 @@ void handleNumeric(irc_session_t *s,
 	}
 
 	if (event == LIBIRC_RFC_RPL_WHOISUSER) {
-		Server::WhoisInfo info;
+		IrcWhois info;
 
 		info.nick = params[1];
 		info.user = params[2];
@@ -289,13 +289,13 @@ void handleNumeric(irc_session_t *s,
 
 		server->getWhoisLists()[info.nick] = info;
 	} else if (event == LIBIRC_RFC_RPL_WHOISCHANNELS) {
-		Server::WhoisInfo &info = server->getWhoisLists()[params[1]];
+		auto &info = server->getWhoisLists()[params[1]];
 
 		// Add all channels
 		for (unsigned int i = 2; i < c; ++i)
 			info.channels.push_back(params[i]);
 	} else if (event == LIBIRC_RFC_RPL_ENDOFWHOIS) {
-		const Server::WhoisInfo &info = server->getWhoisLists()[params[1]];
+		auto &info = server->getWhoisLists()[params[1]];
 		std::vector<std::string> params;
 
 		// Convert as nick, user, host, realname, chan1, chan2, ... chanN

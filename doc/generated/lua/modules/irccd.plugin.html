@@ -110,12 +110,12 @@
 	<td class="summary">Add a path for searching plugins.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#isLoaded">isLoaded (name)</a></td>
-	<td class="summary">Check if a plugin is loaded.</td>
+	<td class="name" nowrap><a href="#info">info (name)</a></td>
+	<td class="summary">Get plugin information.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#loaded">loaded ()</a></td>
-	<td class="summary">Get a list of loaded plugins.</td>
+	<td class="name" nowrap><a href="#list">list ()</a></td>
+	<td class="summary">Get all loaded plugins.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#load">load (path)</a></td>
@@ -142,7 +142,7 @@
     <strong>getName ()</strong>
     </dt>
     <dd>
-    Get the plugin name.
+    Get the plugin name.  (deprecated)
 
 
     <h3>Returns:</h3>
@@ -152,6 +152,10 @@
     </ol>
 
 
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.plugin.html#info">plugin.info</a>
+    </ul>
 
 
 </dd>
@@ -160,7 +164,7 @@
     <strong>getHome ()</strong>
     </dt>
     <dd>
-    Get the plugin home.
+    Get the plugin home.  (deprecated)
  Returns the home configuration that lives in the user directory. Usually
  ~/.config/irccd/<strong>plugin</strong> where plugin is the plugin's
  name.
@@ -173,6 +177,10 @@
     </ol>
 
 
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.plugin.html#info">plugin.info</a>
+    </ul>
 
 
 </dd>
@@ -197,23 +205,39 @@
 
 </dd>
     <dt>
-    <a name = "isLoaded"></a>
-    <strong>isLoaded (name)</strong>
+    <a name = "info"></a>
+    <strong>info (name)</strong>
     </dt>
     <dd>
-    Check if a plugin is loaded.
+    Get plugin information.
+ Returns a table with the following information:
+ <ul>
+ <li><span class="parameter">name</span>: the plugin name</li>
+ <li><span class="parameter">path</span>: the full path</li>
+ <li><span class="parameter">home</span>: the plugin home directory</li>
+ <li><span class="parameter">author</span>: (optional) the author</li>
+ <li><span class="parameter">comment</span>: (optional) the summary</li>
+ <li><span class="parameter">version</span>: (optional) the version</li>
+ <li><span class="parameter">license</span>: (optional) the license</li>
+ </ul>
+ <br /></p>
+
+<p> Check the return value of nil to test if a plugin is loaded. Call this
+ function without arguments to get the information about the current plugin.
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">name</span>
-         the plugin to check
+         the optional plugin to check, if nil is given returns this plugin information
         </li>
     </ul>
 
     <h3>Returns:</h3>
     <ol>
-
-        true if loaded
+        <li>
+        the info table or nil if not found</li>
+        <li>
+        the error message</li>
     </ol>
 
 
@@ -221,17 +245,19 @@
 
 </dd>
     <dt>
-    <a name = "loaded"></a>
-    <strong>loaded ()</strong>
+    <a name = "list"></a>
+    <strong>list ()</strong>
     </dt>
     <dd>
-    Get a list of loaded plugins.
+    Get all loaded plugins.
+ Returns all loaded plugins in a sequence of strings. Each entry in the
+ sequence is a plugin name.
 
 
     <h3>Returns:</h3>
     <ol>
 
-        a list of loaded plugins
+        a list
     </ol>
 
 

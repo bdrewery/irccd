@@ -57,7 +57,7 @@ local function loadQuakenet(section, backend, server)
 end
 
 local function loadConfig()
-	local path = plugin.getHome() .. "/auth.conf"
+	local path = plugin.info().home .. "/auth.conf"
 	local conf = parser.new(path, { parser.DisableRootSection })
 
 	local ret, err = conf:open()
@@ -123,4 +123,6 @@ function onReload()
 	loadConfig()
 end
 
-loadConfig()
+function onLoad()
+	loadConfig()
+end

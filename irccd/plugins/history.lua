@@ -30,7 +30,7 @@ local format = {
 }
 
 local function loadFormats()
-	local path = plugin.getHome() .. "/history.conf"
+	local path = plugin.info().home .. "/history.conf"
 	local config = parser.new(path, { parser.DisableRedefinition })
 
 	if not config:open() then
@@ -57,7 +57,7 @@ local function loadFormats()
 end
 
 local function openFile(server, channel, mode)
-	local base = plugin.getHome()
+	local base = plugin.info().home
 	local srvdir = base .. "/" .. server:getName()
 
 	-- Test if the directory exists
@@ -219,4 +219,6 @@ function onReload()
 	loadFormats()
 end
 
-loadFormats()
+function onLoad()
+	loadFormats()
+end

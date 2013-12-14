@@ -32,7 +32,7 @@ local format = {
 }
 
 local function loadFormats()
-	local path = plugin.getHome() .. "/roulette.conf"
+	local path = plugin.info().home .. "/roulette.conf"
 	local config = parser.new(path, { parser.DisableRedefinition })
 
 	if not config:open() then
@@ -132,4 +132,6 @@ function onReload()
 	loadFormats()
 end
 
-loadFormats()
+function onLoad()
+	loadFormats()
+end

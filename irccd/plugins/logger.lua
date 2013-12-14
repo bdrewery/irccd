@@ -40,7 +40,7 @@ local format = {
 -- Load the config.
 local function loadConfig()
 	local config = parser.new(
-	    plugin.getHome() .. "/logger.conf",
+	    plugin.info().home .. "/logger.conf",
 	    { parser.DisableRedefinition }
 	)
 
@@ -72,7 +72,9 @@ local function loadConfig()
 	end
 end
 
-loadConfig()
+function onLoad()
+	loadConfig()
+end
 
 -- Formatter, used to convert % and # variables
 local function convert(what, keywords)

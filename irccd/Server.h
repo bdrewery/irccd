@@ -72,6 +72,19 @@ enum class IrcChanNickMode {
 	Voiced		= 'v'				//! voice power
 };
 
+/**
+ * @struct IrcWhois
+ * @brief Describe a whois information
+ */
+struct IrcWhois {
+	bool found = false;				//! if no such nick
+	std::string nick;				//! user's nickname
+	std::string user;				//! user's user
+	std::string host;				//! hostname
+	std::string realname;				//! realname
+	std::vector<std::string> channels;		//! channels
+};
+
 using IrcEventParams	= std::vector<std::string>;
 using IrcPrefixes	= std::map<IrcChanNickMode, char>;
 
@@ -203,15 +216,6 @@ public:
 		}
 	};
 
-	struct WhoisInfo {
-		bool found;				//! if no such nick
-		std::string nick;			//! user's nickname
-		std::string user;			//! user's user
-		std::string host;			//! hostname
-		std::string realname;			//! realname
-		std::vector<std::string> channels;	//! channels
-	};
-
 	struct Identity {
 		std::string m_name;			//! identity name
 		std::string m_nickname;			//! user nickname
@@ -238,7 +242,7 @@ public:
 
 	using WhoisList	= std::unordered_map<
 				std::string,
-				WhoisInfo
+				IrcWhois
 			  >;
 
 	using Ptr	= std::shared_ptr<Server>;

@@ -6,5 +6,16 @@ This is the list of changes that breaks compatibility.
 Between 1.0 and 1.1
 -------------------
 
-* The functions server:whois() and server:names() do not use deferred calls
-  anymore.
+Deprecations:
+
+* The functions plugin.getHome() and plugin.getName() are deprecated. Use
+  plugin.info().home and plugin.info().name.
+* The option [general] plugins is deprecated, users must switch to [plugins]
+  dedicated section.
+
+Breaks:
+
+* The functions server:whois() and server:names() trigger new callbacks
+  onWhois and onNames instead of calling deferred functions.
+* Plugins should not call any Lua irccd function outside callbacks.
+  Use onLoad and onUnload.

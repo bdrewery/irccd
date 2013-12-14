@@ -18,12 +18,42 @@
 
 #include "LuaPlugin.h"
 
+#include "Logger.h"
 #include "Plugin.h"
 #include "Util.h"
 
 namespace irccd {
 
 namespace {
+
+#if defined(COMPAT_1_0)
+
+void warn(lua_State *L, const char *func)
+{
+	auto name = Process::info(L).name;
+
+	Logger::warn("plugin %s: `%s' is deprecated, please use 'plugin.info'", name.c_str(), func);
+}
+
+int l_getName(lua_State *L)
+{
+	warn(L, "plugin.getName");
+
+	lua_pushstring(L, Process::info(L).name.c_str());
+
+	return 1;
+}
+
+int l_getHome(lua_State *L)
+{
+	warn(L, "plugin.getHome");
+
+	lua_pushstring(L, Process::info(L).home.c_str());
+
+	return 1;
+}
+
+#endif
 
 int l_addPath(lua_State *L)
 {
@@ -119,6 +149,15 @@ int l_unload(lua_State *L)
 }
 
 const luaL_Reg functionList[] = {
+/*
+ * DEPRECATION:	1.1-001
+ *
+ * Functions getHome() and getName() are replaced with info().
+ */
+#if defined(COMPAT_1_0)
+	{ "getName",		l_getName		},
+	{ "getHome",		l_getHome		},
+#endif
 	{ "addPath",		l_addPath		},
 	{ "info",		l_info			},
 	{ "list",		l_list			},

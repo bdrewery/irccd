@@ -24,6 +24,8 @@
 #define DOCDIR			"@DOCDIR@"
 #define PREFIX			"@CMAKE_INSTALL_PREFIX@"
 
+#cmakedefine COMPAT_1_0
+
 // Optional Lua support
 #cmakedefine USE_LUA
 

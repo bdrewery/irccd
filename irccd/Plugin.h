@@ -435,7 +435,7 @@ public:
 	 * @param info the whois information
 	 */
 	void onWhois(Server::Ptr,
-		     const Server::WhoisInfo &info);
+		     const IrcWhois &info);
 };
 
 } // !irccd

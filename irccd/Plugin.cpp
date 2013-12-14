@@ -205,7 +205,7 @@ void Plugin::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
 		break;
 	case IrcEventType::Whois:
 	{
-		Server::WhoisInfo info;
+		IrcWhois info;
 
 		info.nick = ev.m_params[0];
 		info.user = ev.m_params[1];
@@ -705,7 +705,7 @@ void Plugin::onUserMode(Server::Ptr server,
 }
 
 void Plugin::onWhois(Server::Ptr server,
-		     const Server::WhoisInfo &info)
+		     const IrcWhois &info)
 {
 	lua_createtable(*m_process, 0, 0);
 

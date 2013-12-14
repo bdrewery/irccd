@@ -60,7 +60,7 @@ local function loadGeneral(general)
 end
 
 local function loadConfig()
-	local path = plugin.getHome() .. "/antiflood.conf"
+	local path = plugin.info().home .. "/antiflood.conf"
 
 	local parser = parser.new(path, { parser.DisableRedefinition })
 	local ret, err = parser:open()
@@ -144,4 +144,6 @@ function onReload()
 	loadConfig()
 end
 
-loadConfig()
+function onLoad()
+	loadConfig()
+end
