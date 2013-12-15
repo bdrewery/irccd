@@ -103,11 +103,39 @@ int l_list(lua_State *L)
 	auto list = Plugin::list();
 	auto i = 0;
 
+	/*
+	 * Iterator function. Users may call in the following way:
+	 *
+	 * for p in plugin.list()
+	 */
+	auto iterator = [] (lua_State *L) -> int {
+		auto i = lua_tointeger(L, lua_upvalueindex(2));
+		auto length = lua_tointeger(L, lua_upvalueindex(3));
+
+		if (i - 1 == length)
+			return 0;
+
+		// Push the current value
+		lua_pushinteger(L, i);
+		lua_gettable(L, lua_upvalueindex(1));
+
+		// Update i
+		lua_pushinteger(L, ++i);
+		lua_replace(L, lua_upvalueindex(2));
+
+		return 1;
+	};
+
+	// Create a Lua table as upvalue to keep the list.
 	lua_createtable(L, list.size(), list.size());
 	for (auto s : list) {
 		lua_pushlstring(L, s.c_str(), s.length());
 		lua_rawseti(L, -2, ++i);
 	}
+
+	lua_pushinteger(L, 1);
+	lua_pushinteger(L, list.size());
+	lua_pushcclosure(L, iterator, 3);
 
 	return 1;
 }

@@ -1,7 +1,7 @@
 --
--- badwords.lua -- module for anti badwords
+-- badwords.lua -- plugin to avoid bad language
 --
--- Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+-- Copyright (c) 2013 David Demelier <markand@malikania.fr>
 --
 -- Permission to use, copy, modify, and/or distribute this software for any
 -- purpose with or without fee is hereby granted, provided that the above
@@ -16,9 +16,15 @@
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --
 
-local plugin = require "irccd.plugin"
-local parser = require "irccd.parser"
-local util = require "irccd.util"
+-- Plugin information
+AUTHOR		= "David Demelier <markand@malikania.fr>"
+VERSION		= "1.1"
+COMMENT		= "Plugin to avoid bad language"
+LICENSE		= "ISC"
+
+local plugin	= require "irccd.plugin"
+local parser	= require "irccd.parser"
+local util	= require "irccd.util"
 
 local words = { }
 local answer = "Please check your spelling"

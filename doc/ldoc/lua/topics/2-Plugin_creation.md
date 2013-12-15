@@ -20,6 +20,28 @@ on Unix systems it is usually *${XDG\_CONFIG\_HOME}/.irccd/plugins*.
 So let start by creating a plugin named **repeater.lua**. On my system the
 file will live as */home/markand/.config/irccd/plugins/repeater.lua*.
 
+### General information
+
+While it's not mandatory, you can provide some information about your plugin.
+These information may be used by other plugins if necessary. To set them, just
+set the following global variables:
+
+<br />
+
+* AUTHOR, the author. Usually in the following form: Names <email>
+* VERSION, the version.
+* LICENSE, the license.
+* COMMENT, a short summary, without the final dot.
+
+<br />
+
+Example:
+
+	AUTHOR = "David Demelier <markand@malikania.fr>"
+	VERSION = "1.0.8"
+	LICENSE = "ISC"
+	COMMENT = "This plugin destroy everything"
+
 ### Register the callback
 
 Remember, plugins are made through the event driven mechanism, so we must

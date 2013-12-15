@@ -115,7 +115,7 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#list">list ()</a></td>
-	<td class="summary">Get all loaded plugins.</td>
+	<td class="summary">Iterate over the loaded plugins.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#load">load (path)</a></td>
@@ -249,19 +249,26 @@
     <strong>list ()</strong>
     </dt>
     <dd>
-    Get all loaded plugins.
- Returns all loaded plugins in a sequence of strings. Each entry in the
- sequence is a plugin name.
+    Iterate over the loaded plugins.
+ This function returns an iterator function which returns a string
+ for each loaded plugin.
 
 
     <h3>Returns:</h3>
     <ol>
 
-        a list
+        the plugin name
     </ol>
 
 
 
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">
+ <span class="keyword">for</span> p <span class="keyword">in</span> plugin.list() <span class="keyword">do</span>
+         <span class="global">print</span>(p)
+ <span class="keyword">end</span></pre>
+    </ul>
 
 </dd>
     <dt>

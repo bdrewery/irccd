@@ -1,7 +1,7 @@
 --
--- logger.lua -- a logger module to log everything
+-- logger.lua -- a logger plugin to log everything
 --
--- Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+-- Copyright (c) 2013 David Demelier <markand@malikania.fr>
 --
 -- Permission to use, copy, modify, and/or distribute this software for any
 -- purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,12 @@
 -- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --
+
+-- Plugin information
+AUTHOR		= "David Demelier <markand@malikania.fr>"
+VERSION		= "1.1"
+COMMENT		= "A logger plugin to log everything"
+LICENSE		= "ISC"
 
 -- Modules
 local parser	= require "irccd.parser"

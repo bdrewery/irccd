@@ -48,10 +48,14 @@ end
 function plugin.info(name)
 end
 
---- Get all loaded plugins.
--- Returns all loaded plugins in a sequence of strings. Each entry in the
--- sequence is a plugin name.
--- @return a list
+--- Iterate over the loaded plugins.
+-- This function returns an iterator function which returns a string
+-- for each loaded plugin.
+-- @return the plugin name
+-- @usage
+-- for p in plugin.list() do
+--         print(p)
+-- end
 function plugin.list()
 end
 

@@ -1,7 +1,7 @@
 --
 -- ask.lua -- crazy module for asking a medium
 --
--- Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+-- Copyright (c) 2013 David Demelier <markand@malikania.fr>
 --
 -- Permission to use, copy, modify, and/or distribute this software for any
 -- purpose with or without fee is hereby granted, provided that the above
@@ -16,10 +16,16 @@
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --
 
+-- Plugin information
+AUTHOR		= "David Demelier <markand@malikania.fr>"
+VERSION		= "1.1"
+COMMENT		= "Crazy module for asking a medium"
+LICENSE		= "ISC"
+
 -- Modules
-local logger = require "irccd.logger"
-local plugin = require "irccd.plugin"
-local util = require "irccd.util"
+local logger	= require "irccd.logger"
+local plugin	= require "irccd.plugin"
+local util	= require "irccd.util"
 
 local default = {
 	"Yes",
