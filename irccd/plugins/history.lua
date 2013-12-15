@@ -186,7 +186,7 @@ function onCommand(server, channel, who, message)
 		-- Convert format
 		local kw = {
 			U = U,
-			c = c
+			c = channel
 		}
 
 		if entry == nil then
