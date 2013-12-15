@@ -177,15 +177,15 @@ void Irccd::readPlugins(const Parser &config)
 	if (config.hasSection("plugins")) {
 		Section section = config.getSection("plugins");
 
-		try {
-			for (auto opt : section.getOptions()) {
+		for (auto opt : section.getOptions()) {
+			try {
 				if (opt.m_value.length() == 0)
 					Plugin::load(opt.m_key);
 				else
 					Plugin::load(opt.m_value, false);
+			} catch (std::runtime_error error) {
+				Logger::warn("irccd: %s", error.what());
 			}
-		} catch (std::runtime_error error) {
-			Logger::warn("irccd: %s", error.what());
 		}
 	}
 }
