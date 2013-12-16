@@ -97,7 +97,7 @@
 </span><span class="comment">-- Say hello in random colors to people that joins.
 </span><span class="comment">--
 </span><span class="keyword">function</span> onJoin(server, channel, who)
-	<span class="keyword">local</span> user = util.splitUser(who)
+	<span class="keyword">local</span> user = util.splituser(who)
 
 	<span class="comment">-- Be sure to say hello to other people
 </span>	<span class="keyword">if</span> user ~= server:getIdentity().nickname <span class="keyword">then</span>

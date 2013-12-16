@@ -92,9 +92,11 @@
 </span><span class="comment">-- This little script wait for someone to come on a channel and
 </span><span class="comment">-- welcome it
 </span>
+<span class="keyword">local</span> util = <span class="global">require</span> <span class="string">"irccd.util"</span>
+
 <span class="comment">-- Welcome someone on a channel
 </span><span class="keyword">function</span> onJoin(server, channel, nickname)
-	server:say(channel, <span class="string">"Welcome "</span> .. nickname .. <span class="string">"!"</span>)
+	server:say(channel, <span class="string">"Welcome "</span> .. util.splituser(nickname) .. <span class="string">"!"</span>)
 <span class="keyword">end</span></pre>
 
 
