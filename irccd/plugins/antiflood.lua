@@ -26,6 +26,7 @@ LICENSE		= "ISC"
 local logger	= require "irccd.logger"
 local parser	= require "irccd.parser"
 local plugin	= require "irccd.plugin"
+local system	= require "irccd.system"
 local util	= require "irccd.util"
 
 -- Table of nicknames to check
@@ -90,7 +91,7 @@ end
 
 local function manage(server, channel, nickname)
 	if conf.action == "kick" then
-		local realNick = util.splitUser(nickname)
+		local realNick = util.splituser(nickname)
 
 		logger.log("kicking " .. nickname .. " from " .. channel)
 		server:kick(realNick, channel, "stop flooding")
@@ -117,7 +118,7 @@ function onConnect(server)
 end
 
 function onMessage(server, channel, who, message)
-	who = util.splitUser(who)
+	who = util.splituser(who)
 
 	if isIgnored(server, channel, who) then
 		return
@@ -125,13 +126,13 @@ function onMessage(server, channel, who, message)
 
 	if nicknames[who] == nil then
 		nicknames[who] = {
-			current		= util.getTicks(),
-			last		= util.getTicks(),
+			current		= system.ticks(),
+			last		= system.ticks(),
 			count		= 0
 		}
 	else
 		-- Spammed
-		nicknames[who].current = util.getTicks()
+		nicknames[who].current = system.ticks()
 		if nicknames[who].current - nicknames[who].last < conf["max-delay"] then
 			nicknames[who].last = nicknames[who].current
 			nicknames[who].count = nicknames[who].count + 1

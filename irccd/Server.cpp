@@ -31,6 +31,7 @@
 #include <libirc_rfcnumeric.h>
 
 #include <Logger.h>
+#include <System.h>
 #include <Util.h>
 
 #include "Irccd.h"
@@ -778,7 +779,7 @@ void Server::shouldContinue()
 		Logger::warn("server %s: retrying in %d seconds...",
 		    m_info.m_name.c_str(),
 		    m_options.m_timeout);
-		Util::usleep(m_options.m_timeout * 1000);
+		System::sleep(m_options.m_timeout);
 	} else {
 		/*
 		 * Here we are in the step that the server should be destroyed.

@@ -40,12 +40,12 @@
   <li><a href="../modules/irccd.fs.html">irccd.fs</a></li>
   <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
   <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
-  <li><strong>irccd.plugin</strong></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
   <li><a href="../modules/irccd.server.html">irccd.server</a></li>
   <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
   <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
   <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
-  <li><a href="../modules/irccd.system.html">irccd.system</a></li>
+  <li><strong>irccd.system</strong></li>
   <li><a href="../modules/irccd.thread.html">irccd.thread</a></li>
   <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
   <li><a href="../modules/irccd.util.html">irccd.util</a></li>
@@ -89,47 +89,45 @@
 
 <div id="content">
 
-<h1>Module <code>irccd.plugin</code></h1>
+<h1>Module <code>irccd.system</code></h1>
 
-<p>Plugin modules.</p>
-<p> This API provides function for the current plugin. Each plugin runs on its
- own Lua state so every of these functions knows which plugin is currently
- calling one of these</p>
+<p>System information.</p>
+<p> Inspect the current operating system.</p>
 
 
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#getName">getName ()</a></td>
-	<td class="summary">Get the plugin name.</td>
+	<td class="name" nowrap><a href="#env">env ()</a></td>
+	<td class="summary">Get a environment variable.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#getHome">getHome ()</a></td>
-	<td class="summary">Get the plugin home.</td>
+	<td class="name" nowrap><a href="#home">home ()</a></td>
+	<td class="summary">Get the home directory.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#addPath">addPath (path)</a></td>
-	<td class="summary">Add a path for searching plugins.</td>
+	<td class="name" nowrap><a href="#name">name ()</a></td>
+	<td class="summary">Get the operating system name.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#info">info (name)</a></td>
-	<td class="summary">Get plugin information.</td>
+	<td class="name" nowrap><a href="#ticks">ticks ()</a></td>
+	<td class="summary">Get the time spent from start.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#list">list ()</a></td>
-	<td class="summary">Iterate over the loaded plugins.</td>
+	<td class="name" nowrap><a href="#sleep">sleep (sec)</a></td>
+	<td class="summary">Sleep for seconds.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#load">load (path)</a></td>
-	<td class="summary">Load a plugin.</td>
+	<td class="name" nowrap><a href="#uptime">uptime ()</a></td>
+	<td class="summary">Get the system uptime.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#reload">reload (name)</a></td>
-	<td class="summary">Reload a plugin.</td>
+	<td class="name" nowrap><a href="#usleep">usleep (msec)</a></td>
+	<td class="summary">Sleep for milliseconds.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#unload">unload (name)</a></td>
-	<td class="summary">Unload a plugin.</td>
+	<td class="name" nowrap><a href="#version">version ()</a></td>
+	<td class="summary">Get the operating system version.</td>
 	</tr>
 </table>
 
@@ -140,17 +138,37 @@
     <h2><a name="Functions"></a>Functions</h2>
     <dl class="function">
     <dt>
-    <a name = "getName"></a>
-    <strong>getName ()</strong>
+    <a name = "env"></a>
+    <strong>env ()</strong>
     </dt>
     <dd>
-    Get the plugin name.  (deprecated)
+    Get a environment variable.
 
 
     <h3>Returns:</h3>
     <ol>
 
-        the current plugin name
+        the variable or an empty string
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "home"></a>
+    <strong>home ()</strong>
+    </dt>
+    <dd>
+    Get the home directory.
+ This function should be used with care, plugin should not use user home to
+ store files.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the user home directory
     </ol>
 
 
@@ -162,84 +180,81 @@
 
 </dd>
     <dt>
-    <a name = "getHome"></a>
-    <strong>getHome ()</strong>
+    <a name = "name"></a>
+    <strong>name ()</strong>
     </dt>
     <dd>
-    Get the plugin home.  (deprecated)
- Returns the home configuration that lives in the user directory. Usually
- ~/.config/irccd/<strong>plugin</strong> where plugin is the plugin's
- name.
+    Get the operating system name.
+ Usually Windows, FreeBSD, Linux and such.
 
 
     <h3>Returns:</h3>
     <ol>
 
-        the plugin home
+        the system name
     </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "ticks"></a>
+    <strong>ticks ()</strong>
+    </dt>
+    <dd>
+    Get the time spent from start.
+ Get how many milliseconds spent since the irccd startup.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the number of seconds
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "sleep"></a>
+    <strong>sleep (sec)</strong>
+    </dt>
+    <dd>
+    Sleep for seconds.
+ Suspend the execution thread.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">sec</span>
+         the number of seconds
+        </li>
+    </ul>
+
 
 
     <h3>See also:</h3>
     <ul>
-         <a href="../modules/irccd.plugin.html#info">plugin.info</a>
+         <a href="../modules/irccd.system.html#sleep">sleep</a>
     </ul>
 
 
 </dd>
     <dt>
-    <a name = "addPath"></a>
-    <strong>addPath (path)</strong>
+    <a name = "uptime"></a>
+    <strong>uptime ()</strong>
     </dt>
     <dd>
-    Add a path for searching plugins.
- This function add paths where irccd can find plugins.
+    Get the system uptime.
+ This function returns the number of seconds elapsed since the system
+ boot up.
 
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">path</span>
-         the path to add
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "info"></a>
-    <strong>info (name)</strong>
-    </dt>
-    <dd>
-    Get plugin information.
- Returns a table with the following information:
- <ul>
- <li><span class="parameter">name</span>: the plugin name</li>
- <li><span class="parameter">path</span>: the full path</li>
- <li><span class="parameter">home</span>: the plugin home directory</li>
- <li><span class="parameter">author</span>: (optional) the author</li>
- <li><span class="parameter">comment</span>: (optional) the summary</li>
- <li><span class="parameter">version</span>: (optional) the version</li>
- <li><span class="parameter">license</span>: (optional) the license</li>
- </ul>
- <br /></p>
-
-<p> Check the return value of nil to test if a plugin is loaded. Call this
- function without arguments to get the information about the current plugin.
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">name</span>
-         the optional plugin to check, if nil is given returns this plugin information
-        </li>
-    </ul>
 
     <h3>Returns:</h3>
     <ol>
-        <li>
-        the info table or nil if not found</li>
-        <li>
-        the error message</li>
+
+        the number of seconds
     </ol>
 
 
@@ -247,93 +262,43 @@
 
 </dd>
     <dt>
-    <a name = "list"></a>
-    <strong>list ()</strong>
+    <a name = "usleep"></a>
+    <strong>usleep (msec)</strong>
     </dt>
     <dd>
-    Iterate over the loaded plugins.
- This function returns an iterator function which returns a string
- for each loaded plugin.
+    Sleep for milliseconds.
+ Suspend the execution thread.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">msec</span>
+         the number of milliseconds
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.system.html#sleep">sleep</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "version"></a>
+    <strong>version ()</strong>
+    </dt>
+    <dd>
+    Get the operating system version.
+ This function is completely system dependent.
 
 
     <h3>Returns:</h3>
     <ol>
 
-        the plugin name
+        the version as a string
     </ol>
-
-
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example">
- <span class="keyword">for</span> p <span class="keyword">in</span> plugin.list() <span class="keyword">do</span>
-         <span class="global">print</span>(p)
- <span class="keyword">end</span></pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "load"></a>
-    <strong>load (path)</strong>
-    </dt>
-    <dd>
-    Load a plugin.
- If the path is relative, the plugin is searched through the standard
- directories, otherwise the absolute path is used.
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">path</span>
-         the path
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-        <li>
-        true on success or nil on failure</li>
-        <li>
-        the error message</li>
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "reload"></a>
-    <strong>reload (name)</strong>
-    </dt>
-    <dd>
-    Reload a plugin.
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">name</span>
-         the plugin to reload
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "unload"></a>
-    <strong>unload (name)</strong>
-    </dt>
-    <dd>
-    Unload a plugin.
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">name</span>
-         the plugin
-        </li>
-    </ul>
-
 
 
 

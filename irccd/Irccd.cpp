@@ -30,6 +30,7 @@
 #include <Parser.h>
 #include <Socket.h>
 #include <SocketAddress.h>
+#include <System.h>
 #include <Util.h>
 
 #include "Irccd.h"
@@ -460,7 +461,7 @@ int Irccd::run()
 		 * precision (i.e badwords).
 		 */
 		if (Listener::count() == 0)
-			Util::usleep(250);
+			System::usleep(250);
 		else
 			Listener::process();
 

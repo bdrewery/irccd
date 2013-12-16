@@ -1,5 +1,5 @@
 /*
- * Date.h -- date and time manipulation
+ * LuaFS.h -- Lua bindings for file dependent operations
  *
  * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
@@ -16,44 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _DATE_H_
-#define _DATE_H_
+#ifndef _LUA_FS_H_
+#define _LUA_FS_H_
 
-#include <cstdint>
-#include <ctime>
-#include <string>
+#include <lua.hpp>
 
 namespace irccd {
 
-class Date {
-private:
-	time_t m_timestamp;		//! time epoch
-
-public:
-	Date();
-	Date(time_t timestamp);
-
-	/**
-	 * Get the timestamp.
-	 *
-	 * @return the timestamp
-	 */
-	time_t getTimestamp() const;
-
-	/**
-	 * Format the current that in the specified format,
-	 * see strftime(3) for patterns.
-	 *
-	 * @param format the format
-	 * @return the date formated
-	 */
-	std::string format(const std::string &format);
-};
-
-bool operator==(const Date &, const Date &);
-
-bool operator<=(const Date &, const Date &);
+int luaopen_fs(lua_State *L);
 
 } // !irccd
 
-#endif // !_DATE_H_
+#endif // !_LUA_FS_H_

@@ -1,0 +1,93 @@
+--- Filesystem support.
+-- Open, read and analyze directories.
+--
+-- @module irccd.fs
+
+--- Get the file name of a full path.
+-- Returns the file name only of a full path. For instance, returns
+-- "foo.lua" when calling with "/usr/local/foo.lua"
+-- @param path the file path
+-- @return the file name
+function fs.basename(path)
+end
+
+--- Get the parent path of a file.
+-- This function may be used to get the parent path of a file. Example:
+-- calling dirname on "/foo/bar/test.txt" will returns "/foo/bar".
+-- @param path the full file path
+-- @return the parent path
+function fs.dirname(path)
+end
+
+--- Check if a file exists.
+-- Tests if a directory or a file exists.
+-- @param path the path to check
+-- @return true if exists
+function fs.exists(path)
+end
+
+--- Create a directory recursively.
+-- This function acts like <code>mkdir -p</code>.
+-- @param path the path
+-- @return true on success or false plus an error
+-- @return the error message
+-- @see fs.mkdir
+function fs.mkdir(path)
+end
+
+--- Open a directory.
+-- Optional boolean skipSpecial may be passed to avoid ".", ".." for being
+-- included.
+-- @param path the path
+-- @param skipSpecial forget "." and "..", default: false
+-- @see Directory
+-- @return a Directory object
+function fs.opendir(path, skipSpecial)
+end
+
+--- Directory
+-- @type Directory
+
+--- Count the number of entries in the directory.
+-- Note that if you didn't passed true to fs.opendir() you will have
+-- "." and ".." included.
+-- @return the number of entries in the directory
+-- @see fs.opendir
+function Directory:count()
+end
+
+--- Iterate over the entries.
+-- This function returns 2 arguments
+-- the entry and a boolean telling if is a directory.
+-- @return the entry name
+-- @return true if it is a directory
+-- @usage
+-- local d = fs.opendir("/")
+--
+-- -- Read the directory "/"
+-- for e, isdir in d:read() do
+--         if isdir then
+--                 print(e .. " is a directory")
+--         else
+--                 print("=>" .. e)
+--         end
+-- end
+function Directory:read()
+end
+
+--- Directory metamethods.
+-- The metamethods available for object Directory.
+-- @section
+
+--- Test equality.
+-- @param other the other directory
+-- @return true if they equals
+function Directory:__eq(other)
+end
+
+--- Convert object to string.
+-- @return a string
+function Directory:__tostring()
+end
+
+-- vim: set syntax=lua nu:

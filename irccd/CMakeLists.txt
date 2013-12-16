@@ -53,6 +53,8 @@ if (WITH_LUA)
 			Lua/LuaIrccd.h
 			Lua/LuaLogger.cpp
 			Lua/LuaLogger.h
+			Lua/LuaFS.cpp
+			Lua/LuaFS.h
 			Lua/LuaParser.cpp
 			Lua/LuaParser.h
 			Lua/LuaPipe.cpp
@@ -63,6 +65,8 @@ if (WITH_LUA)
 			Lua/LuaServer.h
 			Lua/LuaSocket.cpp
 			Lua/LuaSocket.h
+			Lua/LuaSystem.cpp
+			Lua/LuaSystem.h
 			Lua/LuaThread.cpp
 			Lua/LuaThread.h
 			Lua/LuaUtil.cpp

@@ -18,11 +18,13 @@
 
 #include "Lua/LuaIrccd.h"
 #include "Lua/LuaLogger.h"
+#include "Lua/LuaFS.h"
 #include "Lua/LuaParser.h"
 #include "Lua/LuaPipe.h"
 #include "Lua/LuaPlugin.h"
 #include "Lua/LuaServer.h"
 #include "Lua/LuaSocket.h"
+#include "Lua/LuaSystem.h"
 #include "Lua/LuaThread.h"
 #include "Lua/LuaUtil.h"
 
@@ -63,11 +65,13 @@ const Process::Libraries Process::luaLibs = {
 const Process::Libraries Process::irccdLibs = {
 	{ "irccd",			luaopen_irccd		},
 	{ "irccd.logger",		luaopen_logger		},
+	{ "irccd.fs",			luaopen_fs		},
 	{ "irccd.parser",		luaopen_parser		},
 	{ "irccd.plugin",		luaopen_plugin		},
 	{ "irccd.socket",		luaopen_socket		},
 	{ "irccd.socket.address",	luaopen_socket_address	},
 	{ "irccd.socket.listener",	luaopen_socket_listener	},
+	{ "irccd.system",		luaopen_system		},
 	{ "irccd.thread",		luaopen_thread		},
 	{ "irccd.thread.pipe",		luaopen_thread_pipe	},
 	{ "irccd.util",			luaopen_util		}

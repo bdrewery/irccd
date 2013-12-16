@@ -37,11 +37,12 @@ local attribute = {
 	Reverse         = '\x16'	--- Reverse (reverse foreground and background).
 }
 
---- Get the file name of a full path.
+--- Get the file name of a full path. (deprecated)
 -- Returns the file name only of a full path. For instance, returns
 -- "foo.lua" when calling with "/usr/local/foo.lua"
 -- @param path the file path
 -- @return the file name
+-- @see fs.basename
 function util.basename(path)
 end
 
@@ -54,18 +55,20 @@ end
 function util.date(timestamp)
 end
 
---- Get the parent path of a file.
+--- Get the parent path of a file. (deprecated)
 -- This function may be used to get the parent path of a file. Example:
 -- calling dirname on "/foo/bar/test.txt" will returns "/foo/bar".
 -- @param path the full file path
 -- @return the parent path
+-- @see fs.dirname
 function util.dirname(path)
 end
 
---- Check if a file exists.
+--- Check if a file exists. (deprecated)
 -- Tests if a directory or a file exists.
 -- @param path the path to check
 -- @return true if exists
+-- @see fs.exists
 function util.exist(path)
 end
 
@@ -86,44 +89,49 @@ end
 function util.format(text, attrs)
 end
 
---- Get a environment variable.
+--- Get a environment variable. (deprecated)
 -- @return the variable or an empty string
+-- @see system.env
 function util.getEnv()
 end
 
---- Get the home directory.
+--- Get the home directory. (deprecated)
 -- This function should be used with care, plugin should not use user home to
 -- store files.
--- @see plugin.getHome
 -- @return the user home directory
+-- @see plugin.info
+-- @see system.home
 function util.getHome()
 end
 
---- Get the time spent from start.
+--- Get the time spent from start. (deprecated)
 -- Get how many milliseconds spent since the irccd startup.
 -- @return the number of seconds
+-- @see system.ticks
 function util.getTicks()
 end
 
---- Create a directory recursively.
+--- Create a directory recursively. (deprecated)
 -- This function acts like <code>mkdir -p</code>.
 -- @param path the path
 -- @return true on success or false plus an error
 -- @return the error message
+-- @see fs.mkdir
 function util.mkdir(path)
 end
 
---- Open a directory.
+--- Open a directory. (deprecated)
 -- Optional boolean skipSpecial may be passed to avoid ".", ".." for being
 -- included.
 -- @param path the path
 -- @param skipSpecial forget "." and "..", default: false
--- @see Directory
+-- @see irccd.fs.Directory
+-- @see fs.opendir
 -- @return a Directory object
 function util.opendir(path, skipSpecial)
 end
 
---- Split the nickname and host.
+--- Split the nickname and host. (deprecated)
 -- Extract the nickname and host from a user, for instance with
 -- foo!~foo@localhost, foo will be returned as first value, localhost
 -- as second.
@@ -133,9 +141,27 @@ end
 function util.splitUser(user)
 end
 
---- Sleep for milliseconds.
+--- Split the nickname.
+-- Extract the nickname from a user, for instance with
+-- foo!~foo@localhost, foo will be returned.
+-- @param user the user to split
+-- @return the nickname
+function util.splituser(user)
+end
+
+--- Split the hostname.
+-- Extract the hostname from a user, for instance with
+-- foo!~foo@localhost, localhost will be returned.
+-- @param user the user to split
+-- @return the nickname
+function util.splithost(user)
+end
+
+--- Sleep for milliseconds. (deprecated)
 -- Suspend the execution thread.
 -- @param msec the number of milliseconds
+-- @see system.usleep
+-- @see system.sleep
 function util.usleep(msec)
 end
 
@@ -187,51 +213,6 @@ end
 --- Convert object to string.
 -- @return a string
 function Date:__tostring()
-end
-
---- Directory
--- @type Directory
-
---- Count the number of entries in the directory.
--- Note that if you didn't passed true to util.opendir() you will have
--- "." and ".." included.
--- @return the number of entries in the directory
--- @see util.opendir
-function Directory:count()
-end
-
---- Iterate over the entries.
--- This function returns 2 arguments
--- the entry and a boolean telling if is a directory.
--- @return the entry name
--- @return true if it is a directory
--- @usage
--- local d = util.opendir("/")
---
--- -- Read the directory "/"
--- for e, isdir in d:read() do
---         if isdir then
---                 print(e .. " is a directory")
---         else
---                 print("=>" .. e)
---         end
--- end
-function Directory:read()
-end
-
---- Directory metamethods.
--- The metamethods available for object Directory.
--- @section
-
---- Test equality.
--- @param other the other directory
--- @return true if they equals
-function Directory:__eq(other)
-end
-
---- Convert object to string.
--- @return a string
-function Directory:__tostring()
 end
 
 -- vim: set syntax=lua nu:

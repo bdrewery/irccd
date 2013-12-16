@@ -29,7 +29,7 @@ local format	= "%m/%d/%y %H:%M"
 
 function onCommand(server, channel, nick, message)
 	local now = util.date()
-	local who = util.splitUser(nick)
+	local who = util.splituser(nick)
 
 	local userformat = message:gsub("^%s*", "")
 	local fmt = #userformat == 0 and format or userformat

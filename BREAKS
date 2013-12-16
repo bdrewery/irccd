@@ -12,6 +12,7 @@ Deprecations:
   plugin.info().home and plugin.info().name.
 * The option [general] plugins is deprecated, users must switch to [plugins]
   dedicated section.
+* Some functions from irccd.util were moved through irccd.system and irccd.fs.
 
 Breaks:
 
