@@ -167,6 +167,9 @@ public:
 	 */
 	bool isRunning() const;
 
+	/**
+	 * Tells irccd to stop.
+	 */
 	void shutdown();
 
 	/**

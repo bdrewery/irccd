@@ -757,10 +757,12 @@ void Server::tryConnect()
 	if (irc_run(m_session)) {
 		irc_disconnect(m_session);
 
-		Logger::warn("server %s: failed to connect to %s: %s",
-		    m_info.m_name.c_str(),
-		    m_info.m_host.c_str(),
-		    irc_strerror(irc_errno(m_session)));
+		if (Irccd::getInstance().isRunning()) {
+			Logger::warn("server %s: failed to connect to %s: %s",
+			    m_info.m_name.c_str(),
+			    m_info.m_host.c_str(),
+			    irc_strerror(irc_errno(m_session)));
+		}
 	}
 }
 
@@ -780,8 +782,9 @@ void Server::shouldContinue()
 	 * the retry mechanism.
 	 */
 	if (!m_retrying && m_options.m_retry) {
-		Logger::warn("server %s: giving up",
-		    m_info.m_name.c_str());
+		if (Irccd::getInstance().isRunning())
+			Logger::warn("server %s: giving up",
+			    m_info.m_name.c_str());
 	} else if (m_retrying) {
 		Logger::warn("server %s: retrying in %d seconds...",
 		    m_info.m_name.c_str(),
