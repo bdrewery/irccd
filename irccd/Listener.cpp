@@ -145,7 +145,11 @@ void handleKick(const Params &params)
 
 void handleLoad(const Params &params)
 {
+#if defined(WITH_LUA)
 	Plugin::load(params[0]);
+#else
+	(void)params;
+#endif
 }
 
 void handleMe(const Params &params)
@@ -180,7 +184,11 @@ void handlePart(const Params &params)
 
 void handleReload(const Params &params)
 {
+#if defined(WITH_LUA)
 	Plugin::reload(params[0]);
+#else
+	(void)params;
+#endif
 }
 
 void handleTopic(const Params &params)
@@ -190,7 +198,11 @@ void handleTopic(const Params &params)
 
 void handleUnload(const Params &params)
 {
+#if defined(WITH_LUA)
 	Plugin::unload(params[0]);
+#else
+	(void)params;
+#endif
 }
 
 void handleUserMode(const Params &params)

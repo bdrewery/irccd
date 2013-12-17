@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cassert>
 #include <cstring>
 #include <iostream>
 #include <map>
@@ -42,6 +43,12 @@ namespace irccd {
 
 namespace {
 
+#if defined(WITH_LUA)
+#  define handlePlugin(event) Plugin::handleIrcEvent(event)
+#else
+#  define handlePlugin(event)
+#endif
+
 void handleChannel(irc_session_t *s,
 		   const char *,
 		   const char *orig,
@@ -55,7 +62,7 @@ void handleChannel(irc_session_t *s,
 	evparams.push_back((orig == nullptr) ? "" : orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Plugin::handleIrcEvent(
+	handlePlugin(
 	    IrcEvent(IrcEventType::Message, evparams, server)
 	);
 }
@@ -73,7 +80,7 @@ void handleChannelNotice(irc_session_t *s,
 	evparams.push_back(params[0]);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Plugin::handleIrcEvent(
+	handlePlugin(
 	    IrcEvent(IrcEventType::ChannelNotice, evparams, server)
 	);
 }
@@ -98,7 +105,7 @@ void handleConnect(irc_session_t *s,
 		server->join(c.m_name, c.m_password);
 	}
 
-	Plugin::handleIrcEvent(
+	handlePlugin(
 	    IrcEvent(IrcEventType::Connection, evparams, server)
 	);
 
@@ -118,7 +125,7 @@ void handleCtcpAction(irc_session_t *s,
 	evparams.push_back(params[0]);
 	evparams.push_back(params[1]);
 
-	Plugin::handleIrcEvent(
+	handlePlugin(
 	    IrcEvent(IrcEventType::Me, evparams, server)
 	);
 }
@@ -139,7 +146,7 @@ void handleInvite(irc_session_t *s,
 	evparams.push_back(params[1]);
 	evparams.push_back(orig);
 
-	Plugin::handleIrcEvent(
+	handlePlugin(
 	    IrcEvent(IrcEventType::Invite, evparams, server)
 	);
 }
@@ -156,7 +163,7 @@ void handleJoin(irc_session_t *s,
 	evparams.push_back(params[0]);
 	evparams.push_back(orig);
 
-	Plugin::handleIrcEvent(
+	handlePlugin(
 	    IrcEvent(IrcEventType::Join, evparams, server)
 	);
 }
@@ -179,7 +186,7 @@ void handleKick(irc_session_t *s,
 	evparams.push_back(params[1]);
 	evparams.push_back((params[2] == nullptr) ? "" : params[2]);
 
-	Plugin::handleIrcEvent(
+	handlePlugin(
 	    IrcEvent(IrcEventType::Kick, evparams, server)
 	);
 }
@@ -198,7 +205,7 @@ void handleMode(irc_session_t *s,
 	evparams.push_back(params[1]);
 	evparams.push_back((params[2] == nullptr) ? "" : params[2]);
 
-	Plugin::handleIrcEvent(
+	handlePlugin(
 	    IrcEvent(IrcEventType::Mode, evparams, server)
 	);
 }
@@ -219,7 +226,7 @@ void handleNick(irc_session_t *s,
 	evparams.push_back(orig);
 	evparams.push_back(params[0]);
 
-	Plugin::handleIrcEvent(
+	handlePlugin(
 	    IrcEvent(IrcEventType::Nick, evparams, server)
 	);
 }
@@ -237,7 +244,7 @@ void handleNotice(irc_session_t *s,
 	evparams.push_back(params[0]);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Plugin::handleIrcEvent(
+	handlePlugin(
 	    IrcEvent(IrcEventType::Notice, evparams, server)
 	);
 }
@@ -271,7 +278,7 @@ void handleNumeric(irc_session_t *s,
 			// Insert channel name at first position
 			list[params[1]].insert(list[params[1]].begin(), params[1]);
 
-			Plugin::handleIrcEvent(
+			handlePlugin(
 			    IrcEvent(IrcEventType::Names, list[params[1]], server)
 			);
 		}
@@ -308,7 +315,7 @@ void handleNumeric(irc_session_t *s,
 		for (size_t i = 0; i < info.channels.size(); ++i)
 			params.push_back(info.channels[i]);
 
-		Plugin::handleIrcEvent(
+		handlePlugin(
 		    IrcEvent(IrcEventType::Whois, params, server)
 		);
 	}
@@ -346,7 +353,7 @@ void handlePart(irc_session_t *s,
 	evparams.push_back(orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Plugin::handleIrcEvent(
+	handlePlugin(
 	    IrcEvent(IrcEventType::Part, evparams, server)
 	);
 }
@@ -363,7 +370,7 @@ void handleQuery(irc_session_t *s,
 	evparams.push_back(orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Plugin::handleIrcEvent(
+	handlePlugin(
 	    IrcEvent(IrcEventType::Query, evparams, server)
 	);
 }
@@ -381,7 +388,7 @@ void handleTopic(irc_session_t *s,
 	evparams.push_back(orig);
 	evparams.push_back((params[1] == nullptr) ? "" : params[1]);
 
-	Plugin::handleIrcEvent(
+	handlePlugin(
 	    IrcEvent(IrcEventType::Topic, evparams, server)
 	);
 }
@@ -398,7 +405,7 @@ void handleUserMode(irc_session_t *s,
 	evparams.push_back(orig);
 	evparams.push_back(params[0]);
 
-	Plugin::handleIrcEvent(
+	handlePlugin(
 	    IrcEvent(IrcEventType::UserMode, evparams, server)
 	);
 }

@@ -157,11 +157,7 @@ public:
 	 *
 	 * @param ev the event
 	 */
-#if defined(WITH_LUA)
 	static void handleIrcEvent(const IrcEvent &ev);
-#else
-	static void handleIrcEvent(const IrcEvent &ev) { }
-#endif
 
 	/**
 	 * Default constructor. (Forbidden)

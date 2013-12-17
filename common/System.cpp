@@ -20,6 +20,7 @@
 #include <ctime>
 
 #if defined(_WIN32)
+#  include <Windows.h>
 #else
 #  include <cerrno>
 #  include <cstring>
@@ -42,7 +43,7 @@ namespace {
 
 std::string systemName()
 {
-	// TODO
+	return ::GetTicksCount64() / 1000;
 }
 
 void systemUsleep(int milliseconds)

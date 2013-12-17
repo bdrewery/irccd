@@ -24,6 +24,7 @@ project(irccd)
 
 set(MAJOR "1")
 set(MINOR "1")
+set(PATCH "0")
 set(VERSION "${MAJOR}.${MINOR}")
 
 # Compatibility options
