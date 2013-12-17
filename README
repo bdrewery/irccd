@@ -1,5 +1,5 @@
-IRC Client Daemon 1.0.2
-=======================
+IRC Client Daemon 1.1
+=====================
 
 IRC Client Daemon aka irccd is a full featured bot for the IRC protocol. It
 works as a daemon waiting for events. It's also possible to connect to more
@@ -32,3 +32,8 @@ Author
 ======
 
 The irccd application was written by David Demelier <markand@malikania.fr>
+
+Contributors
+============
+
+* Pierre Choffet
