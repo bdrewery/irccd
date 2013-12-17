@@ -37,12 +37,12 @@ void TestParser::openCorrect()
 
 	try
 	{
-		s = config.requireSection("general");
+		s = config.getSection("general");
 
 		CPPUNIT_ASSERT_MESSAGE("Required option verbose not found", s.hasOption("verbose"));
 		CPPUNIT_ASSERT_EQUAL(s.requireOption<bool>("verbose"), true);
 
-		s = config.requireSection("server");
+		s = config.getSection("server");
 
 		CPPUNIT_ASSERT_MESSAGE("Required option name not found", s.hasOption("name"));
 		CPPUNIT_ASSERT_EQUAL(s.requireOption<std::string>("name"), std::string("localhost"));
@@ -65,8 +65,7 @@ void TestParser::openMultiples()
 	CPPUNIT_ASSERT_EQUAL(3, static_cast<int>(config.getSections().size()));
 
 	int count = 0;
-	for (auto s : config.findSections("server"))
-	{
+	config.findSections("server", [&] (const Section &s) {
 		++ count;
 
 		try
@@ -77,7 +76,7 @@ void TestParser::openMultiples()
 		{
 			CPPUNIT_ASSERT_MESSAGE("Require thrown exception on correct section / option", false);
 		}
-	}
+	});
 
 	CPPUNIT_ASSERT_EQUAL(count, 2);
 }
