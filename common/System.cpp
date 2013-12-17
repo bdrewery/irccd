@@ -26,6 +26,10 @@
 #  include <cstring>
 #  include <stdexcept>
 
+#if defined(__linux__)
+#  include <sys/sysinfo.h>
+#endif
+
 #  include <sys/utsname.h>
 #  include <sys/time.h>
 #endif
@@ -94,12 +98,22 @@ std::string systemVersion()
 
 uint64_t systemUptime()
 {
+#if defined(__linux__)
+	struct sysinfo info;
+
+	if (sysinfo(&info) < 0)
+		throw std::runtime_error(strerror(errno));
+
+	return info.uptime;
+
+#else
 	struct timespec ts;
 
 	if (clock_gettime(CLOCK_UPTIME, &ts) < 0)
 		throw std::runtime_error(strerror(errno));
 
 	return ts.tv_sec;
+#endif
 }
 
 void systemUsleep(int milliseconds)
