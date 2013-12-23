@@ -72,7 +72,7 @@ Optional getOptional(const std::string &line)
 	return opt;
 }
 
-void handleConnect(const std::vector<std::string> &params)
+void handleConnect(const Params &params)
 {
 	Server::Info info;
 	Server::Identity ident;
@@ -84,14 +84,14 @@ void handleConnect(const std::vector<std::string> &params)
 	info.m_name = params[0];
 	info.m_host = params[1];
 
+	if (Server::has(info.m_name))
+		throw std::runtime_error("server " + info.m_name + " already connected");
+
 	try {
 		info.m_port = std::stoi(params[2]);
 	} catch (...) {
 		throw std::runtime_error("invalid port");
 	}
-
-	for (auto s : params)
-		printf("PARAM %s\n", s.c_str());
 
 	if (params.size() >= 4) {
 		Optional o;
@@ -110,17 +110,22 @@ void handleConnect(const std::vector<std::string> &params)
 	Server::add(std::make_shared<Server>(info, ident, options));
 }
 
-void handleChannelNotice(const std::vector<std::string> &params)
+void handleChannelNotice(const Params &params)
 {
 	Server::get(params[0])->cnotice(params[1], params[2]);
 }
 
-void handleInvite(const std::vector<std::string> &params)
+void handleDisconnect(const Params &params)
+{
+	Server::get(params[0])->stop();
+}
+
+void handleInvite(const Params &params)
 {
 	Server::get(params[0])->invite(params[1], params[2]);
 }
 
-void handleJoin(const std::vector<std::string> &params)
+void handleJoin(const Params &params)
 {
 	std::string password;
 	if (params.size() == 3)
@@ -129,7 +134,7 @@ void handleJoin(const std::vector<std::string> &params)
 	Server::get(params[0])->join(params[1], password);
 }
 
-void handleKick(const std::vector<std::string> &params)
+void handleKick(const Params &params)
 {
 	std::string reason;
 	if (params.size() == 4)
@@ -138,63 +143,64 @@ void handleKick(const std::vector<std::string> &params)
 	Server::get(params[0])->kick(params[1], params[2], reason);
 }
 
-void handleLoad(const std::vector<std::string> &params)
+void handleLoad(const Params &params)
 {
 	Plugin::load(params[0]);
 }
 
-void handleMe(const std::vector<std::string> &params)
+void handleMe(const Params &params)
 {
 	Server::get(params[0])->me(params[1], params[2]);
 }
 
-void handleMessage(const std::vector<std::string> &params)
+void handleMessage(const Params &params)
 {
 	Server::get(params[0])->say(params[1], params[2]);
 }
 
-void handleMode(const std::vector<std::string> &params)
+void handleMode(const Params &params)
 {
 	Server::get(params[0])->mode(params[1], params[2]);
 }
 
-void handleNick(const std::vector<std::string> &params)
+void handleNick(const Params &params)
 {
 	Server::get(params[0])->nick(params[1]);
 }
 
-void handleNotice(const std::vector<std::string> &params)
+void handleNotice(const Params &params)
 {
 	Server::get(params[0])->notice(params[1], params[2]);
 }
 
-void handlePart(const std::vector<std::string> &params)
+void handlePart(const Params &params)
 {
 	Server::get(params[0])->part(params[1]);
 }
 
-void handleReload(const std::vector<std::string> &params)
+void handleReload(const Params &params)
 {
 	Plugin::reload(params[0]);
 }
 
-void handleTopic(const std::vector<std::string> &params)
+void handleTopic(const Params &params)
 {
 	Server::get(params[0])->topic(params[1], params[2]);
 }
 
-void handleUnload(const std::vector<std::string> &params)
+void handleUnload(const Params &params)
 {
 	Plugin::unload(params[0]);
 }
 
-void handleUserMode(const std::vector<std::string> &params)
+void handleUserMode(const Params &params)
 {
 	Server::get(params[0])->umode(params[1]);
 }
 
 std::unordered_map<std::string, ClientHandler> handlers {
 	{ "CNOTICE",	ClientHandler(3, 3, handleChannelNotice)	},
+	{ "DISCONNECT",	ClientHandler(1, 1, handleDisconnect)		},
 	{ "CONNECT",	ClientHandler(3, 6, handleConnect)		},
 	{ "INVITE",	ClientHandler(3, 3, handleInvite)		},
 	{ "JOIN",	ClientHandler(2, 3, handleJoin)			},
@@ -214,8 +220,8 @@ std::unordered_map<std::string, ClientHandler> handlers {
 
 }
 
-Listener::MasterSockets		Listener::m_socketServers;
 SocketListener			Listener::m_listener;
+Listener::MasterSockets		Listener::m_socketServers;
 Listener::StreamClients		Listener::m_streamClients;
 Listener::DatagramClients	Listener::m_dgramClients;
 
@@ -309,6 +315,7 @@ void Listener::execute(const std::string &cmd,
 		if (handlers.find(cmdName) == handlers.end())
 			Logger::warn("listener: invalid command %s", cmdName.c_str());
 		else {
+			std::string result = "OK\n";
 			auto h = handlers[cmdName];
 
 			try {
@@ -320,35 +327,19 @@ void Listener::execute(const std::string &cmd,
 				 */
 				if (params.size() < static_cast<size_t>(h.m_noargs)) {
 					std::ostringstream oss;
-					std::string error;
 
 					oss << cmdName << " requires at least ";
 					oss << handlers[cmdName].m_noargs << "\n";
-					error = oss.str();
-
-					s.send(error);
-				} else {
-					/*
-					 * Send a response "OK\n" to notify irccdctl.
-					 */
+					result = oss.str();
+				} else
 					h.m_function(params);
-					notifySocket("OK\n", s, addr);
-				}
 			} catch (std::out_of_range ex) {
-				std::ostringstream oss;
-
-				oss << ex.what() << "\n";
-
-				notifySocket(oss.str(), s, addr);
+				result = ex.what() + std::string("\n");
 			} catch (std::runtime_error ex) {
-				std::ostringstream oss;
-
-				oss << ex.what() << "\n";
-
-				notifySocket(oss.str(), s, addr);
-			} catch (SocketError ex) {
-				Logger::warn("listener: failed to send: %s", ex.what());
+				result = ex.what() + std::string("\n");
 			}
+
+			notifySocket(result, s, addr);
 		}
 	}
 }

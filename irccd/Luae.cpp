@@ -23,11 +23,15 @@ namespace irccd {
 LuaState::LuaState()
 {
 	m_state = Ptr(luaL_newstate());
+
+	Luae::initRegistry(m_state.get());
 }
 
 LuaState::LuaState(lua_State *L)
 {
 	m_state = Ptr(L);
+
+	Luae::initRegistry(m_state.get());
 }
 
 LuaState::LuaState(LuaState &&state)
@@ -55,7 +59,7 @@ LuaValue LuaValue::copy(lua_State *L, int index)
 
 	switch (v.type) {
 	case LUA_TBOOLEAN:
-		v.boolean = lua_toboolean(L, index);
+		v.boolean = lua_toboolean(L, index) ? true : false;
 		break;
 	case LUA_TNUMBER:
 		v.number = lua_tonumber(L, index);

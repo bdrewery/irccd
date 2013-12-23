@@ -31,7 +31,7 @@ using namespace std;
 
 static void quit(int)
 {
-	Irccd::getInstance().stop();
+	Irccd::getInstance().shutdown();
 }
 
 static void usage()
@@ -46,6 +46,8 @@ int main(int argc, char **argv)
 	int ch;
 
 	setprogname("irccd");
+
+	irccd.initialize();
 	
 	while ((ch = getopt(argc, argv, "fc:p:P:v")) != -1) {
 		switch (ch) {

@@ -1,7 +1,7 @@
 --
 -- history.lua -- track nickname's history
 --
--- Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+-- Copyright (c) 2013 David Demelier <markand@malikania.fr>
 --
 -- Permission to use, copy, modify, and/or distribute this software for any
 -- purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,12 @@
 -- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --
+
+-- Plugin information
+AUTHOR		= "David Demelier <markand@malikania.fr>"
+VERSION		= "1.1"
+COMMENT		= "Track nickname's history"
+LICENSE		= "ISC"
 
 -- Modules
 local logger	= require "irccd.logger"
@@ -30,7 +36,7 @@ local format = {
 }
 
 local function loadFormats()
-	local path = plugin.getHome() .. "/history.conf"
+	local path = plugin.info().home .. "/history.conf"
 	local config = parser.new(path, { parser.DisableRedefinition })
 
 	if not config:open() then
@@ -57,7 +63,7 @@ local function loadFormats()
 end
 
 local function openFile(server, channel, mode)
-	local base = plugin.getHome()
+	local base = plugin.info().home
 	local srvdir = base .. "/" .. server:getName()
 
 	-- Test if the directory exists
@@ -203,18 +209,11 @@ end
 function onJoin(server, channel, nickname)
 	nickname = util.splitUser(nickname)
 	updateDatabase(server, channel, nickname)
+end
 
-	-- Update all nickname when I join a channel
-	local ident = server:getIdentity()
-	if ident.nickname == nickname then
-		server:names(
-			channel,
-			function (names)
-				for _, n in ipairs(names) do
-					updateDatabase(server, channel, n)
-				end
-			end
-		)
+function onNames(server, channel, names)
+	for _, n in ipairs(names) do
+		updateDatabase(server, channel, n)
 	end
 end
 
@@ -226,4 +225,6 @@ function onReload()
 	loadFormats()
 end
 
-loadFormats()
+function onLoad()
+	loadFormats()
+end

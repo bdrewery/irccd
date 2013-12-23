@@ -28,28 +28,13 @@
   <li><a href="../index.html">Index</a></li>
 </ul>
 
+<h2>Contents</h2>
+<ul>
+<li><a href="#Function">Function </a></li>
+<li><a href="#Parameters">Parameters </a></li>
+</ul>
 
 
-<h2>Examples</h2>
-<ul class="nowrap">
-  <li><a href="../examples/Connect.lua.html">Connect.lua</a></li>
-  <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
-  <li><strong>Welcome.lua</strong></li>
-</ul>
-<h2>Modules</h2>
-<ul class="nowrap">
-  <li><a href="../modules/irccd.html">irccd</a></li>
-  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
-  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
-  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
-  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
-  <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
-  <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
-  <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
-  <li><a href="../modules/irccd.thread.html">irccd.thread</a></li>
-  <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
-  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
-</ul>
 <h2>Topics</h2>
 <ul class="nowrap">
   <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
@@ -76,24 +61,64 @@
   <li><a href="../topics/3-Event-Topic.md.html">3-Event-Topic.md</a></li>
   <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
   <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
-  <li><a href="../topics/3-Event-Whois.md.html">3-Event-Whois.md</a></li>
+  <li><strong>3-Event-Whois.md</strong></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
+  <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
+  <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
+  <li><a href="../modules/irccd.thread.html">irccd.thread</a></li>
+  <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/Connect.lua.html">Connect.lua</a></li>
+  <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
+  <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
 </ul>
 
 </div>
 
 <div id="content">
 
-<h1>Example <code>Welcome.lua</code></h1>
+<h1>Topic <code>3-Event-Whois.md</code></h1>
 
-    <pre>
-<span class="comment">-- Welcome.lua
-</span><span class="comment">-- This little script wait for someone to come on a channel and
-</span><span class="comment">-- welcome it
-</span>
-<span class="comment">-- Welcome someone on a channel
-</span><span class="keyword">function</span> onJoin(server, channel, nickname)
-	server:say(channel, <span class="string">"Welcome "</span> .. nickname .. <span class="string">"!"</span>)
-<span class="keyword">end</span></pre>
+
+<h2>Whois</h2>
+
+<p>This event is triggered when irccd get information from a user.</p>
+
+<p><a name="Function"></a></p>
+<h3>Function</h3>
+
+
+<pre>
+ <span class="keyword">function</span> onWhois(server, info)
+</pre>
+
+<p><a name="Parameters"></a></p>
+<h3>Parameters</h3>
+
+
+<ul>
+<li>server, the current server.</li>
+<li>info, a table with the following information:</li>
+  <ul>
+  <li>nickname, the user nickname.</li>
+  <li>user, the user name.</li>
+  <li>host, the hostname.</li>
+  <li>realname, the real name used.</li>
+  <li>channels, an optional sequences of channels joined.</li>
+  </ul>
+</ul>
+
 
 
 </div> <!-- id="content" -->

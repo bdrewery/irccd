@@ -25,14 +25,20 @@
 #include <mutex>
 
 #include "Luae.h"
+#include "Process.h"
 #include "Server.h"
-#include "Thread.h"
 
 namespace irccd {
 
-class DefCall;
 class IrcEvent;
 
+/**
+ * @class Plugin
+ * @brief Lua plugin
+ *
+ * A plugin is identified by name and can be loaded and unloaded
+ * at runtime.
+ */
 class Plugin {
 public:
 	class ErrorException : public std::exception {
@@ -52,61 +58,60 @@ public:
 		 */
 		std::string which() const;
 
+		/**
+		 * Get the error.
+		 *
+		 * @return the error
+		 */
+		std::string error() const;
+
+		/**
+		 * @copydoc std::exception::what
+		 */
 		virtual const char * what() const throw();
 	};
 
-	using Libraries		= std::unordered_map<const char *, lua_CFunction>;
 	using Ptr		= std::shared_ptr<Plugin>;
 	using Dirs		= std::vector<std::string>;
-	using Map		= std::unordered_map<
-					lua_State *,
-					Plugin::Ptr
-				  >;
-
-	using ThreadList	= std::vector<Thread::Ptr>;
-	using ThreadMap		= std::unordered_map<
-					lua_State *,
-					Plugin::Ptr
-				  >;
-
-	using DefCallList	= std::unordered_map<
-					Server::Ptr,
-					std::vector<DefCall>
-				  >;
-
+	using List		= std::vector<Plugin::Ptr>;
 	using Mutex		= std::recursive_mutex;
-	using Lock		= std::lock_guard<std::recursive_mutex>;
-
-	using MapFunc		= std::function<void (Plugin::Ptr)>;
+	using Lock		= std::lock_guard<Mutex>;
 
 private:
 	static Mutex		pluginLock;	//! lock for managing plugins
 	static Dirs		pluginDirs;	//! list of plugin directories
-	static Map		pluginMap;	//! map of plugins loaded
-	static ThreadMap	threadMap;	//! map of threads
-	static DefCallList	deferred;	//! list of deferred call
+	static List		plugins;	//! map of plugins loaded
 
-	// Plugin identity
-	std::string		m_name;		//! name like "foo"
-	std::string		m_path;		//! path used like "/opt/foo.lua"
-	std::string		m_home;		//! home, usually ~/.config/<name>/
-	std::string		m_error;	//! error message if needed
+	Process::Ptr		m_process;	//! lua_State
+	Process::Info		m_info;		//! plugin information
 
-	// Lua state and its optional threads
-	LuaState		m_state;
-	ThreadList		m_threads;
+	static void callPlugin(Plugin::Ptr p, const IrcEvent &ev);
 
-	static bool isPluginLoaded(const std::string &name);
-	static void callPlugin(std::shared_ptr<Plugin> p, const IrcEvent &ev);
-	static void callDeferred(const IrcEvent &ev);
+	std::string getGlobal(const std::string &name);
 
 	void callFunction(const std::string &func,
 			  Server::Ptr server = Server::Ptr(),
 			  std::vector<std::string> params = std::vector<std::string>());
 
+	void callFunctionNum(const std::string &func,
+			  Server::Ptr server,
+			  int np = 0);
+
 public:
-	static const Libraries luaLibs;
-	static const Libraries irccdLibs;
+	/**
+	 * Check whether a plugin is loaded.
+	 *
+	 * @param name the name
+	 * @return true if loaded
+	 */
+	static bool isLoaded(const std::string &name);
+
+	/**
+	 * Get a list of loaded plugins.
+	 *
+	 * @return the list of loaded plugins
+	 */
+	static std::vector<std::string> list();
 
 	/**
 	 * Add path for finding plugins.
@@ -120,6 +125,7 @@ public:
 	 *
 	 * @param path the full path
 	 * @param relative tell if the path is relative
+	 * @throw std::runtime_error on failure
 	 */
 	static void load(const std::string &path, bool relative = false);
 
@@ -138,15 +144,6 @@ public:
 	static void reload(const std::string &name);
 
 	/**
-	 * Find a plugin or thread by its Lua state.
-	 *
-	 * @param state the Lua state
-	 * @return the plugin
-	 * @throw std::out_of_range if not found
-	 */
-	static Ptr find(lua_State *state);
-
-	/**
 	 * Find a plugin by its name.
 	 *
 	 * @param name the plugin name
@@ -156,49 +153,20 @@ public:
 	static Ptr find(const std::string &name);
 
 	/**
-	 * Call a function for all plugins.
-	 *
-	 * @param func the function called for each plugin
-	 */
-	static void forAll(MapFunc func);
-
-	/**
-	 * Defer a function call.
-	 *
-	 * @param server which server
-	 * @param call the function to be called when needed
-	 */
-	static void defer(Server::Ptr server, DefCall call);
-
-	/**
-	 * Register a thread Lua state for the specific plugin.
-	 *
-	 * @param L the Lua state
-	 * @param plugin the plugin that owns the thread
-	 * @param thread the new plugin children
-	 */
-	static void registerThread(lua_State *L,
-				   Plugin::Ptr plugin,
-				   Thread::Ptr thrd);
-
-	/**
-	 * Get rid of plugin thread.
-	 *
-	 * @param L the Lua state
-	 */
-	static void unregisterThread(lua_State *L);
-
-	/**
-	 * Handle an IRC event and dispatch it to all plugins.
+	 * Handle a IRC event.
 	 *
 	 * @param ev the event
 	 */
+#if defined(WITH_LUA)
 	static void handleIrcEvent(const IrcEvent &ev);
+#else
+	static void handleIrcEvent(const IrcEvent &ev) { }
+#endif
 
 	/**
-	 * Default constructor.
+	 * Default constructor. (Forbidden)
 	 */
-	Plugin() = default;
+	Plugin() = delete;
 
 	/**
 	 * Correct constructor.
@@ -234,21 +202,14 @@ public:
 	 *
 	 * @return the Lua state
 	 */
-	LuaState &getState();
-
-	/**
-	 * Get the error message if something failed.
-	 *
-	 * @return the message
-	 */
-	const std::string &getError() const;
+	lua_State *getState();
 
 	/**
 	 * Open the plugin.
 	 *
-	 * @return true on success
+	 * @throw ErrorException on error
 	 */
-	bool open();
+	void open();
 
 	/* ------------------------------------------------
 	 * IRC commands
@@ -377,6 +338,15 @@ public:
 		    const std::string &modeArg);
 
 	/**
+	 * A Lua function triggered on names list of channel
+	 *
+	 * @param server the server
+	 * @param list the names
+	 */
+	void onNames(Server::Ptr server,
+		     const std::vector<std::string> &list);
+
+	/**
 	 * A Lua function triggered on a nick event.
 	 *
 	 * @param server the server
@@ -457,6 +427,15 @@ public:
 	void onUserMode(Server::Ptr server,
 			const std::string &who,
 			const std::string &mode);
+
+	/**
+	 * A Lua function triggered on a whois information.
+	 *
+	 * @param server the server
+	 * @param info the whois information
+	 */
+	void onWhois(Server::Ptr,
+		     const IrcWhois &info);
 };
 
 } // !irccd

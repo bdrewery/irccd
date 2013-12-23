@@ -23,8 +23,11 @@ cmake_minimum_required(VERSION 2.8)
 project(irccd)
 
 set(MAJOR "1")
-set(MINOR "0")
-set(VERSION "${MAJOR}.${MINOR}.2")
+set(MINOR "1")
+set(VERSION "${MAJOR}.${MINOR}")
+
+# Compatibility options
+option(COMPAT_1_0 "Be compatible with 1.0" On)
 
 # General settings
 if (UNIX)

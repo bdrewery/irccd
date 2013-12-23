@@ -1,7 +1,7 @@
 --
--- badwords.lua -- module for anti badwords
+-- badwords.lua -- plugin to avoid bad language
 --
--- Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+-- Copyright (c) 2013 David Demelier <markand@malikania.fr>
 --
 -- Permission to use, copy, modify, and/or distribute this software for any
 -- purpose with or without fee is hereby granted, provided that the above
@@ -16,16 +16,22 @@
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --
 
-local plugin = require "irccd.plugin"
-local parser = require "irccd.parser"
-local util = require "irccd.util"
+-- Plugin information
+AUTHOR		= "David Demelier <markand@malikania.fr>"
+VERSION		= "1.1"
+COMMENT		= "Plugin to avoid bad language"
+LICENSE		= "ISC"
+
+local plugin	= require "irccd.plugin"
+local parser	= require "irccd.parser"
+local util	= require "irccd.util"
 
 local words = { }
 local answer = "Please check your spelling"
 
 -- Reload every words
 function loadWords()
-	local f, err = io.open(plugin.getHome() .. "/words.txt")
+	local f, err = io.open(plugin.info().home .. "/words.txt")
 
 	if (f ~= nil) then
 		for w in f:lines() do
@@ -37,7 +43,7 @@ function loadWords()
 end
 
 function loadConfig()
-	local path = plugin.getHome() .. "/badwords.conf"
+	local path = plugin.info().home .. "/badwords.conf"
 	local parser = parser.new(path, { parser.DisableRedefinition })
 
 	local ret, err = parser:open()
@@ -51,8 +57,10 @@ function loadConfig()
 	end
 end
 
-loadWords()
-loadConfig()
+function onLoad()
+	loadWords()
+	loadConfig()
+end
 
 function onMessage(server, channel, nick, message)
 	local message = message:lower()

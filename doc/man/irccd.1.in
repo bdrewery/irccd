@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+.\" Copyright (c) 2013 David Demelier <markand@malikania.fr>
 .\"
 .\" Permission to use, copy, modify, and/or distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -80,15 +80,11 @@ section is only for short information.
 .Pp
 For more
 information about all irccd Lua API, see
-.Em @DOCDIR@/lua/index.html .
+.Em @CMAKE_INSTALL_PREFIX@/@DOCDIR@/lua/index.html .
 .\" Action
 .Ss Action
 This event is triggered when someone said a message as a CTCP ACTION, most
 known as /me.
-.Pp
-.Bf -symbolic
-Note: this event is not available yet.
-.Ef
 .Bd -literal -offset indent
 function onMe(server, channel, nickname, message)
 .Ed
@@ -211,6 +207,15 @@ The kicked person.
 .It reason
 An optional reason.
 .El
+.\" Load
+.Ss Load
+This function is called when irccd instance load a plugin. If this function
+raises an error, the script is not loaded.
+.Pp
+There are no IRC events that call this function.
+.Bd -literal -offset indent
+function onLoad()
+.Ed
 .\" Message
 .Ss Message
 This event is triggered when someone said something on a specific channel.
@@ -248,6 +253,22 @@ The person who changed the mode.
 The new mode.
 .It modeArg
 The mode argument, if supported.
+.El
+.\" Names
+.Ss Names
+This event is triggered when a list of names has come.
+.Bd -literal -offset indent
+function onNames(server, channel, list)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+Which channel.
+.It list
+A sequence with all users.
 .El
 .\" Nick
 .Ss Nick
@@ -341,6 +362,14 @@ The person who changed the topic.
 .It topic
 The new topic (may be empty).
 .El
+.\" Unload
+.Ss Unload
+This function is called when irccd instance unload a plugin.
+.Pp
+There are no IRC events that call this function.
+.Bd -literal -offset indent
+function onUnload()
+.Ed
 .\" User mode
 .Ss User mode
 This event is triggered when someone changed your mode.
@@ -356,6 +385,33 @@ The current server.
 The person who changed the mode.
 .It mode
 The new mode.
+.El
+.\" Whois
+.Ss Whois
+This event is triggered when irccd get information from a user.
+.Bd -literal -offset indent
+function onWhois(server, info)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It info
+A table with the following information:
+.Pp
+.Bl -tag -compact
+.It Ar nickname
+The user nickname.
+.It Ar user
+The user name.
+.It Ar host
+The hostname.
+.It Ar realname
+The real name used.
+.It Ar channels
+An optional sequences of channels joined.
+.El
 .El
 .\" TESTING LUA PLUGINS
 .Sh TESTING LUA PLUGINS

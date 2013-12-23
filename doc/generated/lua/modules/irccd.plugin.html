@@ -65,6 +65,7 @@
   <li><a href="../topics/3-Event-Load.md.html">3-Event-Load.md</a></li>
   <li><a href="../topics/3-Event-Message.md.html">3-Event-Message.md</a></li>
   <li><a href="../topics/3-Event-Mode.md.html">3-Event-Mode.md</a></li>
+  <li><a href="../topics/3-Event-Names.md.html">3-Event-Names.md</a></li>
   <li><a href="../topics/3-Event-Nick.md.html">3-Event-Nick.md</a></li>
   <li><a href="../topics/3-Event-Notice.md.html">3-Event-Notice.md</a></li>
   <li><a href="../topics/3-Event-Part.md.html">3-Event-Part.md</a></li>
@@ -73,11 +74,11 @@
   <li><a href="../topics/3-Event-Topic.md.html">3-Event-Topic.md</a></li>
   <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
   <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
+  <li><a href="../topics/3-Event-Whois.md.html">3-Event-Whois.md</a></li>
 </ul>
 <h2>Examples</h2>
 <ul class="nowrap">
   <li><a href="../examples/Connect.lua.html">Connect.lua</a></li>
-  <li><a href="../examples/Deferred.lua.html">Deferred.lua</a></li>
   <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
   <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
 </ul>
@@ -104,6 +105,30 @@
 	<td class="name" nowrap><a href="#getHome">getHome ()</a></td>
 	<td class="summary">Get the plugin home.</td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#addPath">addPath (path)</a></td>
+	<td class="summary">Add a path for searching plugins.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#info">info (name)</a></td>
+	<td class="summary">Get plugin information.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#list">list ()</a></td>
+	<td class="summary">Iterate over the loaded plugins.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#load">load (path)</a></td>
+	<td class="summary">Load a plugin.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#reload">reload (name)</a></td>
+	<td class="summary">Reload a plugin.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#unload">unload (name)</a></td>
+	<td class="summary">Unload a plugin.</td>
+	</tr>
 </table>
 
 <br/>
@@ -117,7 +142,7 @@
     <strong>getName ()</strong>
     </dt>
     <dd>
-    Get the plugin name.
+    Get the plugin name.  (deprecated)
 
 
     <h3>Returns:</h3>
@@ -127,6 +152,10 @@
     </ol>
 
 
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.plugin.html#info">plugin.info</a>
+    </ul>
 
 
 </dd>
@@ -135,7 +164,7 @@
     <strong>getHome ()</strong>
     </dt>
     <dd>
-    Get the plugin home.
+    Get the plugin home.  (deprecated)
  Returns the home configuration that lives in the user directory. Usually
  ~/.config/irccd/<strong>plugin</strong> where plugin is the plugin's
  name.
@@ -146,6 +175,163 @@
 
         the plugin home
     </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.plugin.html#info">plugin.info</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "addPath"></a>
+    <strong>addPath (path)</strong>
+    </dt>
+    <dd>
+    Add a path for searching plugins.
+ This function add paths where irccd can find plugins.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path to add
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "info"></a>
+    <strong>info (name)</strong>
+    </dt>
+    <dd>
+    Get plugin information.
+ Returns a table with the following information:
+ <ul>
+ <li><span class="parameter">name</span>: the plugin name</li>
+ <li><span class="parameter">path</span>: the full path</li>
+ <li><span class="parameter">home</span>: the plugin home directory</li>
+ <li><span class="parameter">author</span>: (optional) the author</li>
+ <li><span class="parameter">comment</span>: (optional) the summary</li>
+ <li><span class="parameter">version</span>: (optional) the version</li>
+ <li><span class="parameter">license</span>: (optional) the license</li>
+ </ul>
+ <br /></p>
+
+<p> Check the return value of nil to test if a plugin is loaded. Call this
+ function without arguments to get the information about the current plugin.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the optional plugin to check, if nil is given returns this plugin information
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the info table or nil if not found</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "list"></a>
+    <strong>list ()</strong>
+    </dt>
+    <dd>
+    Iterate over the loaded plugins.
+ This function returns an iterator function which returns a string
+ for each loaded plugin.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the plugin name
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">
+ <span class="keyword">for</span> p <span class="keyword">in</span> plugin.list() <span class="keyword">do</span>
+         <span class="global">print</span>(p)
+ <span class="keyword">end</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "load"></a>
+    <strong>load (path)</strong>
+    </dt>
+    <dd>
+    Load a plugin.
+ If the path is relative, the plugin is searched through the standard
+ directories, otherwise the absolute path is used.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        true on success or nil on failure</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "reload"></a>
+    <strong>reload (name)</strong>
+    </dt>
+    <dd>
+    Reload a plugin.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the plugin to reload
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "unload"></a>
+    <strong>unload (name)</strong>
+    </dt>
+    <dd>
+    Unload a plugin.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the plugin
+        </li>
+    </ul>
+
 
 
 

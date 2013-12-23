@@ -16,12 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
 #include <sstream>
 #include <unordered_map>
 
 #include "Irccd.h"
-#include "DefCall.h"
 #include "LuaServer.h"
 
 namespace irccd {
@@ -61,11 +59,11 @@ void extractChannels(lua_State *L, Server::Info &info)
 
 void extractIdentity(lua_State *L, Server::Identity &ident)
 {
-	std::unordered_map<std::string, std::string &> table {
-		{ "name",		ident.m_name		},
-		{ "nickname",		ident.m_nickname	},
-		{ "username",		ident.m_username	},
-		{ "realname",		ident.m_realname	},
+	std::unordered_map<std::string, std::string *> table {
+		{ "name",		&ident.m_name		},
+		{ "nickname",		&ident.m_nickname	},
+		{ "username",		&ident.m_username	},
+		{ "realname",		&ident.m_realname	},
 	};
 
 	std::string key;
@@ -77,7 +75,7 @@ void extractIdentity(lua_State *L, Server::Identity &ident)
 				key = lua_tostring(L, -2);
 
 				if (table.count(key) > 0)
-					table[key] = lua_tostring(L, -1);
+					*table[key] = lua_tostring(L, -1);
 			}
 		});
 		lua_pop(L, 1);
@@ -230,7 +228,7 @@ int serverMe(lua_State *L)
 
 int serverMode(lua_State *L)
 {
-	std::shared_ptr<Server> s = Luae::getShared<Server>(L, 1, ServerType);
+	Server::Ptr s = Luae::getShared<Server>(L, 1, ServerType);
 	std::string channel = luaL_checkstring(L, 2);
 	std::string mode = luaL_checkstring(L, 3);
 
@@ -243,20 +241,8 @@ int serverNames(lua_State *L)
 {
 	Server::Ptr s = Luae::getShared<Server>(L, 1, ServerType);
 	std::string channel = luaL_checkstring(L, 2);
-	int ref;
 
-	luaL_checktype(L, 3, LUA_TFUNCTION);
-
-	try {
-		Plugin::Ptr p = Plugin::find(L);
-
-		// Get the function reference.
-		lua_pushvalue(L, 3);
-		ref = luaL_ref(L, LUA_REGISTRYINDEX);
-
-		Plugin::defer(s, DefCall(IrcEventType::Names, p, ref));
-		s->names(channel);
-	} catch (std::out_of_range) { }
+	s->names(channel);
 
 	// Deferred call
 	return 0;
@@ -348,23 +334,10 @@ int serverUmode(lua_State *L)
 
 int serverWhois(lua_State *L)
 {
-	Server::Ptr s = Luae::getShared<Server>(L, 1, ServerType);
-	std::string target = luaL_checkstring(L, 2);
-	int ref;
+	Server::Ptr s		= Luae::getShared<Server>(L, 1, ServerType);
+	std::string target	= luaL_checkstring(L, 2);
 
-	luaL_checktype(L, 3, LUA_TFUNCTION);
-
-	try {
-		Plugin::Ptr p = Plugin::find(L);
-
-		// Get the function reference.
-		lua_pushvalue(L, 3);
-		ref = luaL_ref(L, LUA_REGISTRYINDEX);
-
-		Plugin::defer(s, DefCall(IrcEventType::Whois, p, ref));
-
-		s->whois(target);
-	} catch (std::out_of_range) { }
+	s->whois(target);
 
 	// Deferred call
 	return 0;
@@ -471,6 +444,14 @@ int l_connect(lua_State *L)
 	info.m_host	= Luae::requireField<std::string>(L, 1, "host");
 	info.m_port	= Luae::requireField<int>(L, 1, "port");
 
+	if (Server::has(info.m_name)) {
+		lua_pushboolean(L, false);
+		lua_pushfstring(L, "server %s already connected",
+		    info.m_name.c_str());
+
+		return 2;
+	}
+
 	if (Luae::typeField(L, 1, "password") == LUA_TSTRING)
 		info.m_password = Luae::requireField<std::string>(L, 1, "password");
 
@@ -480,7 +461,9 @@ int l_connect(lua_State *L)
 	server = std::make_shared<Server>(info, ident, options);
 	Server::add(server);
 
-	return 0;
+	lua_pushboolean(L, true);
+
+	return 1;
 }
 
 const luaL_Reg functions[] = {

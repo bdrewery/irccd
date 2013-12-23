@@ -27,6 +27,8 @@ end
 --  </ul>
 -- </ul>
 -- @param params the parameters
+-- @return true on success or false
+-- @return the error message
 -- @see Connect.lua
 function server.connect(params)
 end
@@ -103,22 +105,10 @@ function Server:mode(channel, mode)
 end
 
 --- Get the list of names.
--- This is a deferred call, the function <strong>func</strong> must have the
--- following signature and will be called when irccd get the results.
---
---	function callback(list)
---
--- where <strong>list</strong> is a sequence table with all nicknames.
--- @param channel the channel to check
--- @param func the function
--- @see Deferred.lua
--- @usage server:names(
---	"#test",
---	function (list)
---		-- Play with list sequence
---	end
--- )
-function Server:names(channel, func)
+-- This function will generate the onNames event.
+-- @param channel the channel
+-- @see 3-Event-Names.md
+function Server:names(channel)
 end
 
 --- Change your nickname.
@@ -162,29 +152,10 @@ function Server:umode(mode)
 end
 
 --- Get whois information from a user.
--- This is a deferred call, the function <strong>func</strong> must have the
--- following signature
---
---	function callback(info)
---
--- where <strong>info</strong> is a table with the following fields:
--- <ul>
---   <li><strong>nickname (string)</strong>: the nickname</li>
---   <li><strong>user (string)</strong>: the username</li>
---   <li><strong>host (string)</strong>: user's hostname</li>
---   <li><strong>realname (string)</strong>: the realname</li>
---   <li><strong>channels (table)</strong>: a sequence table of all channels</li>
--- </ul>
--- @param target the nickname target
--- @param func the function
--- @usage server:whois(
---	"test",
---	function (info)
---		-- Play with info
---	end
--- )
--- @see Deferred.lua
-function Server:whois(target, func)
+-- The function will generate the onWhois event.
+-- @param target the target
+-- @see 3-Event-Whois.md
+function Server:whois(target)
 end
 
 --- Server metamethods.

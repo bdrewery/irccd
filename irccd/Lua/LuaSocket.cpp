@@ -331,7 +331,7 @@ int socketNew(lua_State *L)
 int socketBlockMode(lua_State *L)
 {
 	Socket *s	= Luae::toType<Socket *>(L, 1, SOCKET_TYPE);
-	bool mode	= lua_toboolean(L, 2);
+	bool mode	= lua_toboolean(L, 2) ? true : false;
 
 	try {
 		s->blockMode(mode);
@@ -496,7 +496,7 @@ int socketSet(lua_State *L)
 
 		switch (o.m_argtype) {
 		case ArgType::Boolean:
-			bvalue = lua_toboolean(L, 4);
+			bvalue = lua_toboolean(L, 4) ? true : false;
 			ptr = static_cast<void *>(&bvalue);
 			size = sizeof (OptionBool);
 			break;

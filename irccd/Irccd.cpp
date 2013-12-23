@@ -47,6 +47,10 @@ Irccd::Irccd()
 	: m_running(true)
 	, m_foreground(false)
 {
+}
+
+void Irccd::initialize()
+{
 	std::ostringstream oss;
 
 	Socket::init();
@@ -114,8 +118,13 @@ void Irccd::openConfig()
 	readPlugins(config);
 
 	/* Now, we load plugins specified by command line */
-	for (auto s : m_wantedPlugins)
-		Plugin::load(s);
+	for (auto s : m_wantedPlugins) {
+		try {
+			Plugin::load(s);
+		} catch (std::runtime_error error) {
+			Logger::warn("irccd: %s", error.what());
+		}
+	}
 
 	readServers(config);
 }
@@ -129,14 +138,27 @@ void Irccd::readGeneral(const Parser &config)
 		if (general.hasOption("plugin-path"))
 			Plugin::addPath(general.getOption<std::string>("plugin-path"));
 
+#if defined(COMPAT_1_0)
+/*
+ * DEPRECATION:	1.1-002
+ *
+ * This is the old way of loading plugins. Now users are encouraged
+ * to switch to the [plugins] section.
+ */
 		// Old way of loading plugins
 		if (general.hasOption("plugins")) {
-			Logger::warn("irccd: general.plugins option is deprecated, use [plugins]");
+			Logger::warn("irccd: option `general.plugins' option is deprecated, use [plugins]");
 
 			std::string list = general.getOption<std::string>("plugins");
-			for (auto s : Util::split(list, " \t"))
-				Plugin::load(s);
+			for (auto s : Util::split(list, " \t")) {
+				try {
+					Plugin::load(s);
+				} catch (std::runtime_error error) {
+					Logger::warn("irccd: %s", error.what());
+				}
+			}
 		}
+#endif
 
 #if !defined(_WIN32)
 		if (general.hasOption("syslog"))
@@ -155,11 +177,15 @@ void Irccd::readPlugins(const Parser &config)
 	if (config.hasSection("plugins")) {
 		Section section = config.getSection("plugins");
 
-		for (auto opt : section.getOptions()) {
-			if (opt.m_value.length() == 0)
-				Plugin::load(opt.m_key);
-			else
-				Plugin::load(opt.m_value, false);
+		try {
+			for (auto opt : section.getOptions()) {
+				if (opt.m_value.length() == 0)
+					Plugin::load(opt.m_key);
+				else
+					Plugin::load(opt.m_value, false);
+			}
+		} catch (std::runtime_error error) {
+			Logger::warn("irccd: %s", error.what());
 		}
 	}
 }
@@ -349,7 +375,10 @@ void Irccd::readServers(const Parser &config)
 
 			// Extract channels to auto join
 			extractChannels(s, server);
-			Server::add(server);
+			if (Server::has(info.m_name))
+				Logger::warn("server %s: duplicated server", info.m_name.c_str());
+			else
+				Server::add(server);
 		} catch (NotFoundException ex) {
 			Logger::warn("server: missing parameter %s", ex.which().c_str());
 		}
@@ -435,19 +464,29 @@ int Irccd::run()
 		else
 			Listener::process();
 
-		// Remove dead servers
-		Server::flush();
+		if (m_running)
+			Server::flush();
 	}
+
+	stop();
 
 	return 0;
 }
 
-void Irccd::stop()
+bool Irccd::isRunning() const
+{
+	return m_running;
+}
+
+void Irccd::shutdown()
 {
 	m_running = false;
+}
 
+void Irccd::stop()
+{
 	Server::forAll([] (Server::Ptr s) {
-	    s->stopConnection();
+		s->stop();
 	});
 
 	Listener::close();

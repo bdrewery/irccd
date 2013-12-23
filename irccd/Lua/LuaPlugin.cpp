@@ -16,30 +16,182 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "Plugin.h"
 #include "LuaPlugin.h"
+
+#include "Logger.h"
+#include "Plugin.h"
+#include "Util.h"
 
 namespace irccd {
 
 namespace {
 
-int getName(lua_State *L)
+#if defined(COMPAT_1_0)
+
+void warn(lua_State *L, const char *func)
 {
-	lua_pushstring(L, Plugin::find(L)->getName().c_str());
+	auto name = Process::info(L).name;
+
+	Logger::warn("plugin %s: `%s' is deprecated, please use 'plugin.info'", name.c_str(), func);
+}
+
+int l_getName(lua_State *L)
+{
+	warn(L, "plugin.getName");
+
+	lua_pushstring(L, Process::info(L).name.c_str());
 
 	return 1;
 }
 
-int getHome(lua_State *L)
+int l_getHome(lua_State *L)
 {
-	lua_pushstring(L, Plugin::find(L)->getHome().c_str());
+	warn(L, "plugin.getHome");
+
+	lua_pushstring(L, Process::info(L).home.c_str());
 
 	return 1;
+}
+
+#endif
+
+int l_addPath(lua_State *L)
+{
+	Plugin::addPath(luaL_checkstring(L, 1));
+
+	return 0;
+}
+
+int l_info(lua_State *L)
+{
+	std::string name;
+	int ret = 0;
+
+	/*
+	 * If the name is specified, search for a plugin, otherwise use
+	 * ourselve.
+	 */
+	if (lua_gettop(L) >= 1) {
+		name = luaL_checkstring(L, 1);
+
+		try {
+			auto plugin = Plugin::find(name);
+			auto state = plugin->getState();
+
+			lua_getfield(state, LUA_REGISTRYINDEX, Process::FieldInfo);
+			LuaValue::push(L, LuaValue::copy(state, -1));
+			lua_pop(state, 1);
+
+			ret = 1;
+		} catch (std::out_of_range ex) {
+			lua_pushnil(L);
+			lua_pushstring(L, ex.what());
+
+			ret = 2;
+		}
+	} else {
+		lua_getfield(L, LUA_REGISTRYINDEX, Process::FieldInfo);
+
+		ret = 1;
+	}
+
+	return ret;
+}
+
+int l_list(lua_State *L)
+{
+	auto list = Plugin::list();
+	auto i = 0;
+
+	/*
+	 * Iterator function. Users may call in the following way:
+	 *
+	 * for p in plugin.list()
+	 */
+	auto iterator = [] (lua_State *L) -> int {
+		auto i = lua_tointeger(L, lua_upvalueindex(2));
+		auto length = lua_tointeger(L, lua_upvalueindex(3));
+
+		if (i - 1 == length)
+			return 0;
+
+		// Push the current value
+		lua_pushinteger(L, i);
+		lua_gettable(L, lua_upvalueindex(1));
+
+		// Update i
+		lua_pushinteger(L, ++i);
+		lua_replace(L, lua_upvalueindex(2));
+
+		return 1;
+	};
+
+	// Create a Lua table as upvalue to keep the list.
+	lua_createtable(L, list.size(), list.size());
+	for (auto s : list) {
+		lua_pushlstring(L, s.c_str(), s.length());
+		lua_rawseti(L, -2, ++i);
+	}
+
+	lua_pushinteger(L, 1);
+	lua_pushinteger(L, list.size());
+	lua_pushcclosure(L, iterator, 3);
+
+	return 1;
+}
+
+int l_load(lua_State *L)
+{
+	std::string path = luaL_checkstring(L, 1);
+
+	try {
+		Plugin::load(path, Util::isAbsolute(path));
+	} catch (std::runtime_error error) {
+		lua_pushnil(L);
+		lua_pushfstring(L, "plugin: %s", error.what());
+
+		return 2;
+	}
+
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int l_reload(lua_State *L)
+{
+	std::string name = luaL_checkstring(L, 1);
+
+	Plugin::reload(name);
+
+	return 0;
+}
+
+int l_unload(lua_State *L)
+{
+	std::string name = luaL_checkstring(L, 1);
+
+	Plugin::unload(name);
+
+	return 0;
 }
 
 const luaL_Reg functionList[] = {
-	{ "getName",		getName			},
-	{ "getHome",		getHome			},
+/*
+ * DEPRECATION:	1.1-001
+ *
+ * Functions getHome() and getName() are replaced with info().
+ */
+#if defined(COMPAT_1_0)
+	{ "getName",		l_getName		},
+	{ "getHome",		l_getHome		},
+#endif
+	{ "addPath",		l_addPath		},
+	{ "info",		l_info			},
+	{ "list",		l_list			},
+	{ "load",		l_load			},
+	{ "reload",		l_reload		},
+	{ "unload",		l_unload		},
 	{ nullptr,		nullptr			}
 };
 

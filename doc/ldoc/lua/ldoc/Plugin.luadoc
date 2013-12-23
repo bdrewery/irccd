@@ -5,17 +5,77 @@
 --
 -- @module irccd.plugin
 
---- Get the plugin name.
+--- Get the plugin name. (deprecated)
 -- @return the current plugin name
+-- @see plugin.info
 function plugin.getName()
 end
 
---- Get the plugin home.
+--- Get the plugin home. (deprecated)
 -- Returns the home configuration that lives in the user directory. Usually
 -- ~/.config/irccd/<strong>plugin</strong> where plugin is the plugin's
 -- name.
 -- @return the plugin home
+-- @see plugin.info
 function plugin.getHome()
+end
+
+--- Add a path for searching plugins.
+-- This function add paths where irccd can find plugins.
+-- @param path the path to add
+function plugin.addPath(path)
+end
+
+--- Get plugin information.
+-- Returns a table with the following information:
+-- <ul>
+-- <li><span class="parameter">name</span>: the plugin name</li>
+-- <li><span class="parameter">path</span>: the full path</li>
+-- <li><span class="parameter">home</span>: the plugin home directory</li>
+-- <li><span class="parameter">author</span>: (optional) the author</li>
+-- <li><span class="parameter">comment</span>: (optional) the summary</li>
+-- <li><span class="parameter">version</span>: (optional) the version</li>
+-- <li><span class="parameter">license</span>: (optional) the license</li>
+-- </ul>
+-- <br />
+--
+-- Check the return value of nil to test if a plugin is loaded. Call this
+-- function without arguments to get the information about the current plugin.
+--
+-- @param name the optional plugin to check, if nil is given returns this plugin information
+-- @return the info table or nil if not found
+-- @return the error message
+function plugin.info(name)
+end
+
+--- Iterate over the loaded plugins.
+-- This function returns an iterator function which returns a string
+-- for each loaded plugin.
+-- @return the plugin name
+-- @usage
+-- for p in plugin.list() do
+--         print(p)
+-- end
+function plugin.list()
+end
+
+--- Load a plugin.
+-- If the path is relative, the plugin is searched through the standard
+-- directories, otherwise the absolute path is used.
+-- @param path the path
+-- @return true on success or nil on failure
+-- @return the error message
+function plugin.load(path)
+end
+
+--- Reload a plugin.
+-- @param name the plugin to reload
+function plugin.reload(name)
+end
+
+--- Unload a plugin.
+-- @param name the plugin
+function plugin.unload(name)
 end
 
 -- vim: set syntax=lua:

@@ -21,7 +21,10 @@
 
 #define ETCDIR			"@ETCDIR@"
 #define MODDIR			"@MODDIR@"
+#define DOCDIR			"@DOCDIR@"
 #define PREFIX			"@CMAKE_INSTALL_PREFIX@"
+
+#cmakedefine COMPAT_1_0
 
 // Optional Lua support
 #cmakedefine USE_LUA
@@ -45,4 +48,8 @@
 #cmakedefine	HAVE_UNISTD_H	1
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
+#endif
+
+#if defined(_MSC_VER)
+#  define noexcept throw()
 #endif

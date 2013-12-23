@@ -1,7 +1,7 @@
 --
 -- auth.lua -- generic plugin to authenticate to services
 --
--- Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+-- Copyright (c) 2013 David Demelier <markand@malikania.fr>
 --
 -- Permission to use, copy, modify, and/or distribute this software for any
 -- purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,12 @@
 -- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --
+
+-- Plugin information
+AUTHOR		= "David Demelier <markand@malikania.fr>"
+VERSION		= "1.1"
+COMMENT		= "Generic plugin to authenticate to services"
+LICENSE		= "ISC"
 
 -- Modules
 local logger	= require "irccd.logger"
@@ -57,7 +63,7 @@ local function loadQuakenet(section, backend, server)
 end
 
 local function loadConfig()
-	local path = plugin.getHome() .. "/auth.conf"
+	local path = plugin.info().home .. "/auth.conf"
 	local conf = parser.new(path, { parser.DisableRootSection })
 
 	local ret, err = conf:open()
@@ -123,4 +129,6 @@ function onReload()
 	loadConfig()
 end
 
-loadConfig()
+function onLoad()
+	loadConfig()
+end

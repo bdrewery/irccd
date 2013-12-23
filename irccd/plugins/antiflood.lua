@@ -1,7 +1,7 @@
 --
--- antiflood.lua -- crazy module for asking a medium
+-- antiflood.lua -- prevent excess flood on channels
 --
--- Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+-- Copyright (c) 2013 David Demelier <markand@malikania.fr>
 --
 -- Permission to use, copy, modify, and/or distribute this software for any
 -- purpose with or without fee is hereby granted, provided that the above
@@ -16,11 +16,17 @@
 -- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --
 
+-- Plugin information
+AUTHOR		= "David Demelier <markand@malikania.fr>"
+VERSION		= "1.1"
+COMMENT		= "Prevent excess flood on channels"
+LICENSE		= "ISC"
+
 -- Modules
-local logger = require "irccd.logger"
-local parser = require "irccd.parser"
-local plugin = require "irccd.plugin"
-local util = require "irccd.util"
+local logger	= require "irccd.logger"
+local parser	= require "irccd.parser"
+local plugin	= require "irccd.plugin"
+local util	= require "irccd.util"
 
 -- Table of nicknames to check
 local nicknames = { }
@@ -60,7 +66,7 @@ local function loadGeneral(general)
 end
 
 local function loadConfig()
-	local path = plugin.getHome() .. "/antiflood.conf"
+	local path = plugin.info().home .. "/antiflood.conf"
 
 	local parser = parser.new(path, { parser.DisableRedefinition })
 	local ret, err = parser:open()
@@ -144,4 +150,6 @@ function onReload()
 	loadConfig()
 end
 
-loadConfig()
+function onLoad()
+	loadConfig()
+end

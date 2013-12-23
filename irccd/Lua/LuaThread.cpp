@@ -23,6 +23,7 @@
 #include "Luae.h"
 #include "LuaThread.h"
 #include "Plugin.h"
+#include "Thread.h"
 
 namespace irccd {
 
@@ -73,22 +74,10 @@ const char *THREAD_TYPE = "Thread";
  * Functions and metamethods
  * --------------------------------------------------------- */
 
-void threadCallback(lua_State *threadState, lua_State *L, int nparams)
-{
-	if (lua_pcall(threadState, nparams, 0, 0) != LUA_OK) {
-		Logger::warn("plugin %s: %s",
-		    Plugin::find(L)->getName().c_str(),
-		    lua_tostring(threadState, -1));
-		lua_pop(threadState, 1);
-	}
-
-	Plugin::unregisterThread(threadState);
-}
-
 int l_threadNew(lua_State *L)
 {
+	Thread::Ptr thread = Thread::create();
 	Buffer chunk;
-	LuaState threadState;
 	int np;
 
 	luaL_checktype(L, 1, LUA_TFUNCTION);
@@ -98,41 +87,30 @@ int l_threadNew(lua_State *L)
 	lua_dump(L, reinterpret_cast<lua_Writer>(writer), &chunk);
 	lua_pop(L, 1);
 
-	/*
-	 * Load the same libs as a new Plugin.
-	 */
-	Luae::initRegistry(threadState);
+	for (auto l : Process::luaLibs)
+		Luae::require(*thread, l.first, l.second, true);
+	for (auto l : Process::irccdLibs)
+		Luae::preload(*thread, l.first, l.second);
 
-	for (auto l : Plugin::luaLibs)
-		Luae::require(threadState, l.first, l.second, true);
-	for (auto l : Plugin::irccdLibs)
-		Luae::preload(threadState, l.first, l.second);
-
-	lua_load(threadState, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
+	lua_load(*thread, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
 
 	np = 0;
 	for (int i = 2; i <= lua_gettop(L); ++i) {
 		LuaValue v = LuaValue::copy(L, i);
-		LuaValue::push(threadState, v);
+		LuaValue::push(*thread, v);
 		++ np;
 	}
 
 	try {
-		Plugin::Ptr self = Plugin::find(L);
-		Thread::Ptr thread = Thread::create();
+		auto info = Process::info(L);
+		auto process = thread->process();
 
-		Plugin::registerThread(threadState, self, thread);
-	
-		std::thread threadFunc(threadCallback,
-		    static_cast<lua_State *>(threadState),
-		    static_cast<lua_State *>(L),
-		    np);
+		// Set home and name like the plugin
+		Process::initialize(process, info);
 
-		thread->setState(std::move(threadState));
-		thread->setHandle(std::move(threadFunc));
-
-		new (L, THREAD_TYPE) Thread::Ptr(thread);
-
+		// Create the object to push as return value
+		Thread::Ptr *ptr = new (L, THREAD_TYPE) Thread::Ptr(thread);
+		Thread::start(*ptr, np);
 	} catch (std::out_of_range) {
 		Logger::fatal(1, "irccd: could not find plugin from Lua state %p", L);
 	}
@@ -140,20 +118,59 @@ int l_threadNew(lua_State *L)
 	return 1;
 }
 
-int l_threadWait(lua_State *L)
+int l_threadJoin(lua_State *L)
 {
 	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
 
-	(*t)->wait();
+	try {
+		(*t)->join();
+	} catch (std::system_error error) {
+		lua_pushnil(L);
+		lua_pushstring(L, error.what());
 
-	return 0;
+		return 2;
+	}
+
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int l_threadDetach(lua_State *L)
+{
+	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
+
+	try {
+		(*t)->detach();
+	} catch (std::system_error error) {
+		lua_pushnil(L);
+		lua_pushstring(L, error.what());
+
+		return 2;
+	}
+
+	lua_pushboolean(L, true);
+
+	return 1;
 }
 
 int l_threadGc(lua_State *L)
 {
 	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
 
-	(*t)->detach();
+	/*
+	 * At this step, the thread is marked for deletion but may have not
+	 * been join() or detach(). So we detach it to avoid blocking the
+	 * application and throwing an error.
+	 */
+	if (!(*t)->hasJoined()) {
+		Logger::debug("thread: detaching because not joined");
+
+		try {
+			(*t)->detach();
+		} catch (std::system_error) { }
+	}
+
 	(*t).~shared_ptr<Thread>();
 
 	return 0;
@@ -174,7 +191,8 @@ const luaL_Reg functions[] = {
 };
 
 const luaL_Reg threadMethods[] = {
-	{ "wait",		l_threadWait		},
+	{ "join",		l_threadJoin		},
+	{ "detach",		l_threadDetach		},
 	{ nullptr,		nullptr			}
 };
 

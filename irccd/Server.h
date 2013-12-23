@@ -23,6 +23,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <mutex>
 #include <unordered_map>
 #include <vector>
 
@@ -71,6 +72,19 @@ enum class IrcChanNickMode {
 	Voiced		= 'v'				//! voice power
 };
 
+/**
+ * @struct IrcWhois
+ * @brief Describe a whois information
+ */
+struct IrcWhois {
+	bool found = false;				//! if no such nick
+	std::string nick;				//! user's nickname
+	std::string user;				//! user's user
+	std::string host;				//! hostname
+	std::string realname;				//! realname
+	std::vector<std::string> channels;		//! channels
+};
+
 using IrcEventParams	= std::vector<std::string>;
 using IrcPrefixes	= std::map<IrcChanNickMode, char>;
 
@@ -116,6 +130,9 @@ private:
 	Ptr m_handle;
 
 public:
+	/**
+	 * Default constructor forbidden.
+	 */
 	IrcSession() = delete;
 
 	/**
@@ -123,7 +140,22 @@ public:
 	 *
 	 * @param s the irc_session_t initialized
 	 */
-	IrcSession(irc_session_t *s);
+	explicit IrcSession(irc_session_t *s);
+
+	/**
+	 * Move constructor.
+	 *
+	 * @param other the other IrcSession
+	 */
+	IrcSession(IrcSession &&other);
+
+	/**
+	 * Move assignment operator.
+	 *
+	 * @param other the other IrcSession
+	 * @return self
+	 */
+	IrcSession &operator=(IrcSession &&other);
 
 	/**
 	 * Cast to irc_session_t for raw commands.
@@ -184,15 +216,6 @@ public:
 		}
 	};
 
-	struct WhoisInfo {
-		bool found;				//! if no such nick
-		std::string nick;			//! user's nickname
-		std::string user;			//! user's user
-		std::string host;			//! hostname
-		std::string realname;			//! realname
-		std::vector<std::string> channels;	//! channels
-	};
-
 	struct Identity {
 		std::string m_name;			//! identity name
 		std::string m_nickname;			//! user nickname
@@ -219,7 +242,7 @@ public:
 
 	using WhoisList	= std::unordered_map<
 				std::string,
-				WhoisInfo
+				IrcWhois
 			  >;
 
 	using Ptr	= std::shared_ptr<Server>;
@@ -230,34 +253,46 @@ public:
 
 	using ChanList	= std::vector<Channel>;
 	using Mutex	= std::mutex;
+	using Lock	= std::lock_guard<Mutex>;
 	using MapFunc	= std::function<void (Server::Ptr)>;
 
 private:
-	static List servers;			//! all servers
-	static Mutex serverLock;		//! lock for server management
+	static List	servers;		//! all servers
+	static Mutex	serverLock;		//! lock for server management
 
 	// IRC thread
-	irc_callbacks_t m_callbacks;		//! callbacks for libircclient
-	std::thread m_thread;			//! server's thread
-	IrcSession m_session;			//! libircclient session
-	bool m_threadStarted;			//! thread's status
-	bool m_shouldDelete;			//! tells if we must delete the server
+	irc_callbacks_t	m_callbacks;		//! callbacks for libircclient
+	IrcSession	m_session;		//! libircclient session
+	bool		m_shouldDelete;		//! tells if we must delete the server
+
+	// The thread
+	std::thread	m_thread;		//! server's thread
+	bool		m_threadJoined;		//! thread's status
+	bool		m_retrying;		//! tells if we must continue connecting
 
 	// For deferred events
-	NameList m_nameLists;			//! channels names to receive
-	WhoisList m_whoisLists;			//! list of whois
+	NameList	m_nameLists;		//! channels names to receive
+	WhoisList	m_whoisLists;		//! list of whois
 
-	Mutex m_lock;
+	Mutex		m_lock;			//! lock for client operation
 
-	/**
+	/*
 	 * Initialize callbacks.
 	 */
 	void init();
 
+	/*
+	 * Thread functions
+	 */
+	void prepareSession();
+	void tryConnect();
+	void shouldContinue();
+	void routine();
+
 protected:
-	Info m_info;				//! server info
-	Identity m_identity;			//! identity to use
-	Options m_options;			//! some options
+	Info		m_info;			//! server info
+	Identity	m_identity;		//! identity to use
+	Options		m_options;		//! some options
 
 public:
 	/**
@@ -276,6 +311,14 @@ public:
 	 * @throw std::out_of_range if not found
 	 */
 	static Server::Ptr get(const std::string &name);
+
+	/**
+	 * Check if a server exists
+	 *
+	 * @param name the server name
+	 * @return true if the server by this name is loaded
+	 */
+	static bool has(const std::string &name);
 
 	/**
 	 * Call a function for all servers.
@@ -406,13 +449,17 @@ public:
 	 */
 	void removeChannel(const std::string &name);
 
+	/* -------------------------------------------------
+	 * Thread functions
+	 * ------------------------------------------------- */
+
 	/**
 	 * Start listening on that server, this will create a thread that
-	 * can be stopped with stopConnection();
+	 * can be stopped with stop();
 	 *
-	 * @see stopConnection
+	 * @see stop
 	 */
-	void startConnection();
+	void start();
 
 	/**
 	 * Reset the number of retries.
@@ -420,9 +467,14 @@ public:
 	void resetRetries();
 
 	/**
+	 * Join the thread in a safe manner.
+	 */
+	void join();
+
+	/**
 	 * Stop the connection on that server.
 	 */
-	void stopConnection();
+	void stop();
 
 	/* ------------------------------------------------
 	 * IRC commands
