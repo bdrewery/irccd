@@ -30,8 +30,6 @@
 #include "Irccd.h"
 #include "LuaUtil.h"
 
-#define DATE_TYPE	"Date"
-
 #if defined(COMPAT_1_0)
 #  define DIR_TYPE	"Directory"
 #endif

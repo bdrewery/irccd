@@ -21,6 +21,8 @@
 
 #include <lua.hpp>
 
+#define DATE_TYPE	"Date"
+
 namespace irccd {
 
 int luaopen_util(lua_State *L);

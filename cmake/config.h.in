@@ -52,6 +52,19 @@
 #  include <unistd.h>
 #endif
 
+// Tests for sys/stat.h
+#cmakedefine HAVE_STAT_ST_DEV
+#cmakedefine HAVE_STAT_ST_INO
+#cmakedefine HAVE_STAT_ST_NLINK
+#cmakedefine HAVE_STAT_ST_UID
+#cmakedefine HAVE_STAT_ST_GID
+#cmakedefine HAVE_STAT_ST_ATIME
+#cmakedefine HAVE_STAT_ST_MTIME
+#cmakedefine HAVE_STAT_ST_CTIME
+#cmakedefine HAVE_STAT_ST_SIZE
+#cmakedefine HAVE_STAT_ST_BLKSIZE
+#cmakedefine HAVE_STAT_ST_BLOCKS
+
 #if defined(_MSC_VER)
 #  define noexcept throw()
 #endif

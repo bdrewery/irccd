@@ -45,6 +45,40 @@ end
 function fs.opendir(path, skipSpecial)
 end
 
+--- Get file status.
+-- Returns a table with the following information:
+-- <ul>
+-- <li><span class="parameter">device</span>: the device number</li>
+-- <li><span class="parameter">inode</span>: the inode number</li>
+-- <li><span class="parameter">nlink</span>: the number of hard links to the file</li>
+-- <li><span class="parameter">atime</span>: the last time the file was accessed</li>
+-- <li><span class="parameter">mtime</span>: time when file data last modified</li>
+-- <li><span class="parameter">ctime</span>: time when file status was last changed</li>
+-- <li><span class="parameter">size</span>: the file size in bytes</li>
+-- <li><span class="parameter">blocksize</span>: the optional I/O block size</li>
+-- <li><span class="parameter">blocks</span>: the number of blocks for the file</li>
+-- </ul>
+-- <br />
+--
+-- <strong>Note: not all fields are available.</strong><br />
+-- <strong>Note: you must load the irccd.util library for fields atime, ctime and mtime.</strong>
+--
+-- @usage
+-- local fs = require "irccd.fs"
+-- local util = require "irccd.util"
+--
+-- local status = fs.stat("/path/to/file")
+--
+-- if status.mtime then
+--         print(string.format("Last modified on: %s", status.mtime:format("%d %a %y %H:%M:%S")))
+-- end
+-- @param path the path to the file
+-- @return the table or nil
+-- @return the error message
+-- @see irccd.util
+function fs.stat(path)
+end
+
 --- Directory
 -- @type Directory
 

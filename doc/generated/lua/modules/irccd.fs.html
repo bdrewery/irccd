@@ -119,6 +119,10 @@
 	<td class="name" nowrap><a href="#opendir">opendir (path, skipSpecial)</a></td>
 	<td class="summary">Open a directory.</td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#stat">stat (path)</a></td>
+	<td class="summary">Get file status.</td>
+	</tr>
 </table>
 <h2><a href="#Class_Directory">Class Directory </a></h2>
 <table class="function_list">
@@ -288,6 +292,64 @@
          <a href="../modules/irccd.fs.html#Class_Directory">Directory</a>
     </ul>
 
+
+</dd>
+    <dt>
+    <a name = "stat"></a>
+    <strong>stat (path)</strong>
+    </dt>
+    <dd>
+    Get file status.
+ Returns a table with the following information:
+ <ul>
+ <li><span class="parameter">device</span>: the device number</li>
+ <li><span class="parameter">inode</span>: the inode number</li>
+ <li><span class="parameter">nlink</span>: the number of hard links to the file</li>
+ <li><span class="parameter">atime</span>: the last time the file was accessed</li>
+ <li><span class="parameter">mtime</span>: time when file data last modified</li>
+ <li><span class="parameter">ctime</span>: time when file status was last changed</li>
+ <li><span class="parameter">size</span>: the file size in bytes</li>
+ <li><span class="parameter">blocksize</span>: the optional I/O block size</li>
+ <li><span class="parameter">blocks</span>: the number of blocks for the file</li>
+ </ul>
+ <br /></p>
+
+<p> <strong>Note: not all fields are available.</strong><br />
+ <strong>Note: you must load the irccd.util library for fields atime, ctime and mtime.</strong>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path to the file
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the table or nil</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.util.html#">irccd.util</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">
+ <span class="keyword">local</span> fs = <span class="global">require</span> <span class="string">"irccd.fs"</span>
+ <span class="keyword">local</span> util = <span class="global">require</span> <span class="string">"irccd.util"</span>
+
+ <span class="keyword">local</span> status = fs.stat(<span class="string">"/path/to/file"</span>)
+
+ <span class="keyword">if</span> status.mtime <span class="keyword">then</span>
+         <span class="global">print</span>(<span class="global">string</span>.format(<span class="string">"Last modified on: %s"</span>, status.mtime:format(<span class="string">"%d %a %y %H:%M:%S"</span>)))
+ <span class="keyword">end</span></pre>
+    </ul>
 
 </dd>
 </dl>

@@ -16,11 +16,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cerrno>
+#include <cstring>
+#include <unordered_map>
+
+#include <sys/stat.h>
+
+#include <Date.h>
 #include <Directory.h>
 #include <Util.h>
 
 #include "Luae.h"
 #include "LuaFS.h"
+#include "LuaUtil.h"
 
 #define DIR_TYPE "Directory"
 
@@ -103,12 +111,65 @@ int l_dirname(lua_State *L)
 	return 1;
 }
 
+int l_stat(lua_State *L)
+{
+	auto path = luaL_checkstring(L, 1);
+	struct stat st;
+
+	if (stat(path, &st) < 0) {
+		lua_pushnil(L);
+		lua_pushstring(L, std::strerror(errno));
+	}
+
+	lua_createtable(L, 0, 0);
+
+#if defined(HAVE_STAT_ST_DEV)
+	lua_pushinteger(L, st.st_dev);
+	lua_setfield(L, -2, "device");
+#endif
+#if defined(HAVE_STAT_ST_INO)
+	lua_pushinteger(L, st.st_ino);
+	lua_setfield(L, -2, "inode");
+#endif
+#if defined(HAVE_STAT_ST_NLINK)
+	lua_pushinteger(L, st.st_nlink);
+	lua_setfield(L, -2, "nlink");
+#endif
+#if defined(HAVE_STAT_ST_ATIME)
+	new (L, DATE_TYPE) Date(st.st_atime);
+	lua_setfield(L, -2, "atime");
+#endif
+#if defined(HAVE_STAT_ST_MTIME)
+	new (L, DATE_TYPE) Date(st.st_mtime);
+	lua_setfield(L, -2, "mtime");
+#endif
+#if defined(HAVE_STAT_ST_CTIME)
+	new (L, DATE_TYPE) Date(st.st_ctime);
+	lua_setfield(L, -2, "ctime");
+#endif
+#if defined(HAVE_STAT_ST_SIZE)
+	lua_pushinteger(L, st.st_size);
+	lua_setfield(L, -2, "size");
+#endif
+#if defined(HAVE_STAT_ST_BLKSIZE)
+	lua_pushinteger(L, st.st_blksize);
+	lua_setfield(L, -2, "blocksize");
+#endif
+#if defined(HAVE_STAT_ST_BLOCKS)
+	lua_pushinteger(L, st.st_blocks);
+	lua_setfield(L, -2, "blocks");
+#endif
+
+	return 1;
+}
+
 const luaL_Reg functions[] = {
 	{ "mkdir",		l_mkdir		},
 	{ "opendir",		l_opendir	},
 	{ "exists",		l_exists	},
 	{ "basename",		l_basename	},
 	{ "dirname",		l_dirname	},
+	{ "stat",		l_stat		},
 	{ nullptr,		nullptr		}
 };
 
@@ -203,7 +264,7 @@ const luaL_Reg dirMethodsList[] = {
 const luaL_Reg dirMtList[] = {
 	{ "__eq",		dirMt::l_eq		},
 	{ "__gc",		dirMt::l_gc		},
-	{ "__tostring",		dirMt::l_tostring		},
+	{ "__tostring",		dirMt::l_tostring	},
 	{ nullptr,		nullptr			}
 };
 
