@@ -43,45 +43,26 @@ namespace {
 
 typedef std::unordered_map<std::string, int> EnumMap;
 
-EnumMap createSockFamilies()
-{
-	EnumMap map;
-
-	map["Inet"]	= AF_INET;
-	map["Inet6"]	= AF_INET6;
+EnumMap sockFamilies {
+	{ "Inet",	AF_INET		},
+	{ "Inet6",	AF_INET6	},
 
 #if !defined(_WIN32)
-	map["Unix"]	= AF_UNIX;
+	{ "Unix",	AF_UNIX		}
 #endif
+};
 
-	return map;
-}
+EnumMap sockTypes {
+	{ "Stream",	SOCK_STREAM	},
+	{ "Datagram",	SOCK_DGRAM	}
+};
 
-EnumMap createSockTypes()
-{
-	EnumMap map;
-
-	map["Stream"]	= SOCK_STREAM;
-	map["Datagram"]	= SOCK_DGRAM;
-
-	return map;
-}
-
-EnumMap createSockProtocols()
-{
-	EnumMap map;
-
-	map["Tcp"]	= IPPROTO_TCP;
-	map["Udp"]	= IPPROTO_UDP;
-	map["IPv4"]	= IPPROTO_IP;
-	map["IPv6"]	= IPPROTO_IPV6;
-
-	return map;
-}
-
-EnumMap sockFamilies	= createSockFamilies();
-EnumMap sockTypes	= createSockTypes();
-EnumMap sockProtocols	= createSockProtocols();
+EnumMap sockProtocols {
+	{ "Tcp",	IPPROTO_TCP	},
+	{ "Udp",	IPPROTO_UDP	},
+	{ "IPv4",	IPPROTO_IP	},
+	{ "IPv6",	IPPROTO_IPV6	}
+};
 
 /* ---------------------------------------------------------
  * Socket options
@@ -104,15 +85,13 @@ typedef int		OptionInteger;
 
 #endif
 
-enum class ArgType
-{
+enum class ArgType {
 	Invalid,
 	Boolean,
 	Integer
 };
 
-struct Option
-{
+struct Option {
 	int		m_level;
 	int		m_optname;
 	ArgType		m_argtype;
@@ -144,64 +123,46 @@ typedef std::unordered_map<std::string,
  * Socket::set function. It also setup the enumerations to be bound
  * as tables.
  */
-OptionMap mapOfOptions()
-{
-	OptionMap map;
-
-	/*
-	 * Standard sockets options SOL_SOCKET
-	 */
-
+OptionMap options {
+	// "socket" -> SOL_SOCKET
+	{
+		"socket", {
 #if defined(SO_REUSEADDR)
-	map["socket"]["reuse-address"]	= Option(SOL_SOCKET,
-						 SO_REUSEADDR,
-						 ArgType::Boolean);
+			{ "reuse-address", Option(SOL_SOCKET, SO_REUSEADDR, ArgType::Boolean)	},
 #endif
 #if defined(SO_BROADCAST)
-	map["socket"]["broadcast"]	= Option(SOL_SOCKET,
-						 SO_BROADCAST,
-						 ArgType::Boolean);
+			{ "broadcast", Option(SOL_SOCKET, SO_BROADCAST, ArgType::Boolean)	},
 #endif
 #if defined(SO_DEBUG)
-	map["socket"]["debug"]		= Option(SOL_SOCKET,
-						 SO_DEBUG,
-						 ArgType::Boolean);
+			{ "debug", Option(SOL_SOCKET, SO_DEBUG, ArgType::Boolean)		},
 #endif
 #if defined(SO_KEEPALIVE)
-	map["socket"]["keep-alive"]	= Option(SOL_SOCKET,
-						 SO_KEEPALIVE,
-						 ArgType::Boolean);
+			{ "keep-alive", Option(SOL_SOCKET, SO_KEEPALIVE, ArgType::Boolean)	},
 #endif
 #if defined(SO_RCVBUF)
-	map["socket"]["receive-buffer"]	= Option(SOL_SOCKET,
-						 SO_RCVBUF,
-						 ArgType::Integer);
+			{ "receive-buffer", Option(SOL_SOCKET, SO_RCVBUF, ArgType::Integer)	},
 #endif
+		},
+	},
 
-	/*
-	 * TCP socket options
-	 */
-
+	// "tcp" -> IPPROTO_TCP
+	{
+		"tcp", {
 #if defined(TCP_NODELAY)
-	map["tcp"]["no-delay"]		= Option(IPPROTO_TCP,
-						 TCP_NODELAY,
-						 ArgType::Boolean);
+			{ "no-delay", Option(IPPROTO_TCP, TCP_NODELAY, ArgType::Boolean)	},
 #endif
+		},
+	},
 
-	/*
-	 * IPv6 options
-	 */
-
+	// "ipv6" -> IPPROTO_IPV6
+	{
+		"ipv6", {
 #if defined(IPV6_V6ONLY)
-	map["ipv6"]["v6only"]		= Option(IPPROTO_IPV6,
-						 IPV6_V6ONLY,
-						 ArgType::Boolean);
+			{ "v6only", Option(IPPROTO_IPV6, IPV6_V6ONLY, ArgType::Boolean)		},
 #endif
-
-	return map;
-}
-
-OptionMap options = mapOfOptions();
+		},
+	},
+};
 
 /* ---------------------------------------------------------
  * Socket functions

@@ -72,7 +72,7 @@ enum class Attribute {
 	Reverse		= '\x16'
 };
 
-std::unordered_map<std::string, Color> colors = {
+std::unordered_map<std::string, Color> colors {
 	{ "White",		Color::White			},
 	{ "Black",		Color::Black			},
 	{ "Blue",		Color::Blue			},
@@ -91,7 +91,7 @@ std::unordered_map<std::string, Color> colors = {
 	{ "LightGrey",		Color::LightGrey		}
 };
 
-std::unordered_map<std::string, Attribute> attributes = {
+std::unordered_map<std::string, Attribute> attributes {
 	{ "Bold",		Attribute::Bold			},
 	{ "Color",		Attribute::Color		},
 	{ "Italic",		Attribute::Italic		},
