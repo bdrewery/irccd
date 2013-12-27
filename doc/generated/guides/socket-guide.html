@@ -664,17 +664,79 @@ irccd.conf file in sections [server].</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-server         The server.
+<span class="monospaced">server</span>: The server.
 </p>
 </li>
 <li>
 <p>
-nickname       The user nickname target.
+<span class="monospaced">nickname</span>: The user nickname target.
 </p>
 </li>
 <li>
 <p>
-message        The message.
+<span class="monospaced">message</span>: The message.
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_connect">CONNECT</h3>
+<div class="paragraph"><p>This command is used to connect to a server at runtime.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>CONNECT name address port ident:identity key:password ssl:(off|on)\n</pre>
+</div></div>
+<div class="paragraph"><p>Parameters:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">name</span>: The new server name.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">address</span>: The address to connecto to.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">port</span>: The port
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">ident</span>: (Optional) the identity.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">key</span>: (Optional) the server password.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">ssl</span>: (Optional) on or off, enable SSL.
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>CONNECT wanadoo chat.wanadoo.fr 8765 ident:superjean ssl:off</pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_disconnect">DISCONNECT</h3>
+<div class="paragraph"><p>Disconnect from a connected server.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>DISCONNECT server\n</pre>
+</div></div>
+<div class="paragraph"><p>Parameters:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">server</span>: The server name
 </p>
 </li>
 </ul></div>
@@ -691,17 +753,17 @@ with mode +i.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-server         The server.
+<span class="monospaced">server</span>: The server.
 </p>
 </li>
 <li>
 <p>
-target         The target nickname to invite.
+<span class="monospaced">target</span>: The target nickname to invite.
 </p>
 </li>
 <li>
 <p>
-channel        The channel name prepended by a <em>#</em>
+<span class="monospaced">channel</span>: The channel name prepended by a <em>#</em>
 </p>
 </li>
 </ul></div>
@@ -718,17 +780,17 @@ is required in the channel name.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-server         The server.
+<span class="monospaced">server</span>: The server.
 </p>
 </li>
 <li>
 <p>
-channel        The channel name prepended by a <em>#</em>
+<span class="monospaced">channel</span>: The channel name prepended by a <em>#</em>
 </p>
 </li>
 <li>
 <p>
-password       An optional password
+<span class="monospaced">password</span>: An optional password
 </p>
 </li>
 </ul></div>
@@ -745,22 +807,22 @@ channel.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-server         The server.
+<span class="monospaced">server</span>: The server.
 </p>
 </li>
 <li>
 <p>
-nick           The nickname to kick.
+<span class="monospaced">nick</span>: The nickname to kick.
 </p>
 </li>
 <li>
 <p>
-channel        The channel prepended by a <em>#</em> to kick from
+<span class="monospaced">channel</span>: The channel prepended by a <em>#</em> to kick from
 </p>
 </li>
 <li>
 <p>
-reason         An optional reason.
+<span class="monospaced">reason</span>: An optional reason.
 </p>
 </li>
 </ul></div>
@@ -776,7 +838,7 @@ reason         An optional reason.
 <div class="ulist"><ul>
 <li>
 <p>
-name           The plugin name.
+<span class="monospaced">name</span>: The plugin name.
 </p>
 </li>
 </ul></div>
@@ -793,17 +855,17 @@ CTCP ACTION. Usual IRC clients report that like: "* foo is eating a cake."</p></
 <div class="ulist"><ul>
 <li>
 <p>
-server         The server.
+<span class="monospaced">server</span>: The server.
 </p>
 </li>
 <li>
 <p>
-target         A channel or a private query.
+<span class="monospaced">target</span>: A channel or a private query.
 </p>
 </li>
 <li>
 <p>
-message        The message.
+<span class="monospaced">message</span>: The message.
 </p>
 </li>
 </ul></div>
@@ -819,17 +881,17 @@ message        The message.
 <div class="ulist"><ul>
 <li>
 <p>
-server         The server.
+<span class="monospaced">server</span>: The server.
 </p>
 </li>
 <li>
 <p>
-channel        The target channel.
+<span class="monospaced">channel</span>: The target channel.
 </p>
 </li>
 <li>
 <p>
-mode           The new mode.
+<span class="monospaced">mode</span>: The new mode.
 </p>
 </li>
 </ul></div>
@@ -845,17 +907,17 @@ mode           The new mode.
 <div class="ulist"><ul>
 <li>
 <p>
-server         The server.
+<span class="monospaced">server</span>: The server.
 </p>
 </li>
 <li>
 <p>
-target         A channel or a private query.
+<span class="monospaced">target</span>: A channel or a private query.
 </p>
 </li>
 <li>
 <p>
-message        The message.
+<span class="monospaced">message</span>: The message.
 </p>
 </li>
 </ul></div>
@@ -873,12 +935,12 @@ every server defined in irccd.conf(5).</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-server         The server.
+<span class="monospaced">server</span>: The server.
 </p>
 </li>
 <li>
 <p>
-nickname       The new nickname.
+<span class="monospaced">nickname</span>: The new nickname.
 </p>
 </li>
 </ul></div>
@@ -894,17 +956,17 @@ nickname       The new nickname.
 <div class="ulist"><ul>
 <li>
 <p>
-server         The server.
+<span class="monospaced">server</span>: The server.
 </p>
 </li>
 <li>
 <p>
-channel        The channel target.
+<span class="monospaced">channel</span>: The channel target.
 </p>
 </li>
 <li>
 <p>
-message        The message.
+<span class="monospaced">message</span>: The message.
 </p>
 </li>
 </ul></div>
@@ -920,12 +982,12 @@ message        The message.
 <div class="ulist"><ul>
 <li>
 <p>
-server         The server.
+<span class="monospaced">server</span>: The server.
 </p>
 </li>
 <li>
 <p>
-channel        The channel to leave.
+<span class="monospaced">channel</span>: The channel to leave.
 </p>
 </li>
 </ul></div>
@@ -941,17 +1003,17 @@ channel        The channel to leave.
 <div class="ulist"><ul>
 <li>
 <p>
-server         The server.
+<span class="monospaced">server</span>: The server.
 </p>
 </li>
 <li>
 <p>
-target         The target nickname.
+<span class="monospaced">target</span>: The target nickname.
 </p>
 </li>
 <li>
 <p>
-message        The message.
+<span class="monospaced">message</span>: The message.
 </p>
 </li>
 </ul></div>
@@ -967,7 +1029,7 @@ message        The message.
 <div class="ulist"><ul>
 <li>
 <p>
-name           The plugin name.
+<span class="monospaced">name</span>: The plugin name.
 </p>
 </li>
 </ul></div>
@@ -984,17 +1046,17 @@ the rights to do that.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-server         The server.
+<span class="monospaced">server</span>: The server.
 </p>
 </li>
 <li>
 <p>
-channel        The channel.
+<span class="monospaced">channel</span>: The channel.
 </p>
 </li>
 <li>
 <p>
-topic          The new topic.
+<span class="monospaced">topic</span>: The new topic.
 </p>
 </li>
 </ul></div>
@@ -1010,12 +1072,12 @@ topic          The new topic.
 <div class="ulist"><ul>
 <li>
 <p>
-server         The server.
+<span class="monospaced">server</span>: The server.
 </p>
 </li>
 <li>
 <p>
-mode           The new mode.
+<span class="monospaced">mode</span>: The new mode.
 </p>
 </li>
 </ul></div>
@@ -1031,7 +1093,7 @@ mode           The new mode.
 <div class="ulist"><ul>
 <li>
 <p>
-name           The plugin name.
+<span class="monospaced">name</span>: The plugin name.
 </p>
 </li>
 </ul></div>
@@ -1042,7 +1104,7 @@ name           The plugin name.
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-11-14 19:45:15 CET
+Last updated 2013-12-27 15:09:53 CET
 </div>
 </div>
 </body>

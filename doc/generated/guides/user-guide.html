@@ -1585,6 +1585,11 @@ the <a href="#irccdserver">server section</a> with the parameter <span class="mo
 </li>
 <li>
 <p>
+<a href="#irccdctldisconnect">disconnect</a>
+</p>
+</li>
+<li>
+<p>
 <a href="#irccdctlhelp">help</a>
 </p>
 </li>
@@ -1641,6 +1646,11 @@ the <a href="#irccdserver">server section</a> with the parameter <span class="mo
 <li>
 <p>
 <a href="#irccdctlreload">reload</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctltopic">topic</a>
 </p>
 </li>
 <li>
@@ -1706,6 +1716,21 @@ will be notified by.</p></div>
 <pre>$ irccdctl connect wanadoo chat.wanadoo.fr 6667
 $ irccdctl connect -s wanadoo chat.wanadoo.fr 6697
 $ irccdctl connect -k "secret" wanadoo chat.wanadoo.fr 6667</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctldisconnect"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_disconnect">Disconnect</h3>
+<div class="paragraph"><p>Disconnect from a connected server.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl disconnect name</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl disconnect wanadoo</pre>
 </div></div>
 <div class="paragraph"><p><a id="irccdctlhelp"></a></p></div>
 </div>
@@ -1956,7 +1981,7 @@ quotes.</p></div>
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-12-14 11:31:38 CET
+Last updated 2013-12-27 14:57:23 CET
 </div>
 </div>
 </body>

@@ -469,6 +469,28 @@ The user nickname target.
 .It message
 The message.
 .El
+.\" CONNECT
+.Ss CONNECT
+This command is used to connect to a server at runtime.
+.Bd -literal -offset indent
+CONNECT name address port ident:identity key:password ssl:(off|on)\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It name
+The new server name.
+.It address
+The address to connecto to.
+.It port
+The port
+.It ident
+(Optional) the identity.
+.It key
+(Optional) the server password.
+.It ssl
+(Optional) on or off, enable SSL.
+.El
 .\" INVITE
 .Ss INVITE
 This command is used to invite someone on a channel, needed for channels with
