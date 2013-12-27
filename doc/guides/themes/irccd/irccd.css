@@ -14,7 +14,6 @@ body {
 }
 
 a {
-	font-size: 10px;
 	font-weight: bold;
 	color: #214954;
 	text-decoration: none;
@@ -320,9 +319,8 @@ body {
 }
 
 .monospaced, tt, div.listingblock > div.content {
-  font-family:  Consolas, "Andale Mono", "Courier New", monospace;
+  font-family:  Monospace, "Sans Mono";
   color: #004400;
-  background: #f4f4f4;
   line-height: 1.2em;
 }
 

@@ -628,6 +628,7 @@ The following commands are available for irccdctl:
 
 * <<irccdctlcnotice,cnotice>>
 * <<irccdctlconnect,connect>>
+* <<irccdctldisconnect,disconnect>>
 * <<irccdctlhelp,help>>
 * <<irccdctlinvite,invite>>
 * <<irccdctljoin,join>>
@@ -640,6 +641,7 @@ The following commands are available for irccdctl:
 * <<irccdctlnick,nick>>
 * <<irccdctlpart,part>>
 * <<irccdctlreload,reload>>
+* <<irccdctltopic,topic>>
 * <<irccdctlumode,umode>>
 * <<irccdctlunload,unload>>
 
@@ -693,6 +695,22 @@ $ irccdctl [-s] [-i identity] [-k password] connect name host port
 $ irccdctl connect wanadoo chat.wanadoo.fr 6667
 $ irccdctl connect -s wanadoo chat.wanadoo.fr 6697
 $ irccdctl connect -k "secret" wanadoo chat.wanadoo.fr 6667
+----
+
+anchor:irccdctldisconnect[]
+
+=== Disconnect
+
+Disconnect from a connected server.
+
+.Usage
+----
+$ irccdctl disconnect name
+----
+
+.Example
+----
+$ irccdctl disconnect wanadoo
 ----
 
 anchor:irccdctlhelp[]

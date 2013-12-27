@@ -61,6 +61,11 @@ utility:
 .Ar server
 .Ar channel
 .Ar message
+.\" DISCONNECT
+.Nm
+.Cm disconnect
+.Ar disconnect
+.Ar server
 .\" HELP
 .Nm
 .Cm help
