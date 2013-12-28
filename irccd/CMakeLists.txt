@@ -20,11 +20,11 @@
 project(irccd)
 
 # Optional Lua support
-option(WITH_LUA "Build with Lua plugin support" On)
+option(WITH_LUA52 "Build with Lua plugin support" On)
 option(WITH_LUAJIT "Build with LuaJIT plugin support" Off)
 
-if (WITH_LUA AND WITH_LUAJIT)
-	message(FATAL_ERROR "Please select WITH_LUA or WITH_LUAJIT")
+if (WITH_LUA52 AND WITH_LUAJIT)
+	message(FATAL_ERROR "Please select WITH_LUA52 or WITH_LUAJIT")
 endif ()
 
 # Use bundled libircclient or not
@@ -44,8 +44,8 @@ set(SOURCES
 
 set(LUA_SUPPORT "disabled" PARENT_SCOPE)
 
-if (WITH_LUA OR WITH_LUAJIT)
-	if (WITH_LUA)
+if (WITH_LUA52 OR WITH_LUAJIT)
+	if (WITH_LUA52)
 		find_package(Lua52)
 	elseif (WITH_LUAJIT)
 		find_package(LuaJIT)
