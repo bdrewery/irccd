@@ -30,7 +30,7 @@
 #include <lua.hpp>
 
 // Compatibility for LuaJIT or Lua 5.1
-#if defined(WITH_LUAJIT)
+#if LUA_VERSION_NUM <= 501
 
 #define LUA_OK	0
 
