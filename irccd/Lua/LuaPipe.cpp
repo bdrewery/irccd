@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "Luae.h"
 #include "LuaPipe.h"
 #include "Pipe.h"
 

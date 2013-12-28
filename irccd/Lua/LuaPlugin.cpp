@@ -17,7 +17,7 @@
  */
 
 #include "LuaPlugin.h"
-
+#include "Luae.h"
 #include "Logger.h"
 #include "Plugin.h"
 #include "Util.h"

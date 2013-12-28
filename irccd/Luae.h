@@ -25,7 +25,79 @@
 #include <string>
 #include <vector>
 
+#include <config.h>
+
 #include <lua.hpp>
+
+// Compatibility for LuaJIT or Lua 5.1
+#if defined(WITH_LUAJIT)
+
+#define LUA_OK	0
+
+#  define luaL_newlib(L, list) do {					\
+	lua_createtable((L), 0, 0);					\
+	luaL_register((L), nullptr, (list));				\
+} while (/* CONSTCOND */ 0)
+
+#  define luaL_setfuncs(L, list, dummy)					\
+	luaL_register((L), nullptr, (list))
+
+#  define lua_rawgetp(L, index, key) do {				\
+	int __realindex = ((index) < 0) ? (index) - 1 : (index);	\
+	lua_pushlightuserdata((L), (key));				\
+	lua_rawget((L), __realindex);					\
+} while (/* CONSTCOND */ 0)
+
+#  define lua_rawsetp(L, index, key) do {				\
+	int __realindex = ((index) < 0) ? (index) - 1 : (index);	\
+	lua_pushlightuserdata((L), (key));				\
+	lua_insert((L), -2);						\
+	lua_rawset((L), __realindex);					\
+} while (/* CONSTCOND */ 0)
+
+#  define lua_load(L, reader, data, source, dummy)			\
+	(lua_load)((L), (reader), (data), (source))
+
+#  define lua_rawlen(L, index)						\
+	lua_objlen((L), (index))
+
+#  define luaL_setmetatable(L, name) do {				\
+	luaL_getmetatable(L, (name));					\
+	lua_setmetatable(L, -2);					\
+} while (/* CONSTCOND */ 0)
+
+#  define luaL_requiref(L, module, cfunc, glb) do {			\
+	lua_pushcfunction((L), (cfunc));				\
+	lua_pushstring((L), (module));					\
+	lua_call((L), 1, 1);						\
+	luaL_getsubtable((L), LUA_REGISTRYINDEX, "_LOADED");		\
+	lua_pushvalue((L), -2);						\
+	lua_setfield((L), -2, (module));				\
+	lua_pop((L), 1);						\
+									\
+	if ((glb)) {							\
+		lua_pushvalue((L), -1);					\
+		lua_setglobal((L), (module));				\
+	}								\
+} while (/* CONSTCOND */ 0)
+
+int inline luaL_getsubtable(lua_State *L, int index, const char *name)
+{
+	lua_getfield(L, index, name);
+
+	if (lua_istable(L, -1))
+		return 1;
+	else {
+		lua_pop(L, 1);
+		lua_newtable(L);
+		lua_pushvalue(L, -1);
+		lua_setfield(L, (index < 0) ? index - 2 : index, name);
+
+		return 0;
+	}
+}
+
+#endif
 
 namespace irccd {
 

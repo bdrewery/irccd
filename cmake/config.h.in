@@ -28,10 +28,10 @@
 
 #cmakedefine COMPAT_1_0
 
-// Optional Lua support
-#cmakedefine USE_LUA
+#cmakedefine WITH_LUAJIT
+#cmakedefine WITH_LUA52
 
-#if defined(USE_LUA)
+#if defined(WITH_LUA52) || defined(WITH_LUAJIT)
 #  define WITH_LUA
 #endif
 
