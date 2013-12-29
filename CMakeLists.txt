@@ -36,13 +36,13 @@ if (UNIX)
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11")
 endif ()
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	add_definitions("-DDEBUG -D_DEBUG")
-endif ()
-
 if (WIN32)
 	add_definitions("-D_CRT_SECURE_NO_WARNINGS")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
+endif ()
+
+if (CMAKE_BUILD_TYPE MATCHES "Release")
+	add_definitions("-DNDEBUG")
 endif ()
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")			# own modules
@@ -151,6 +151,10 @@ add_subdirectory(irccd)
 # irccd controller
 add_subdirectory(irccdctl)
 
+# Tests
+include(CTest)
+add_subdirectory(tests)
+
 message("Installation directories:")
 message("\tMANDIR\t\t\t${CMAKE_INSTALL_PREFIX}/${MANDIR}")
 message("\tDOCDIR\t\t\t${CMAKE_INSTALL_PREFIX}/${DOCDIR}")
@@ -158,7 +162,9 @@ message("\tMODDIR\t\t\t${CMAKE_INSTALL_PREFIX}/${MODDIR}")
 message("")
 
 message("Compiling irccd with following options:")
+message("\tBuild Type:\t\t${CMAKE_BUILD_TYPE}")
 message("\tLua support:\t\t${LUA_SUPPORT}")
+message("\tTests:\t\t\t${UNIT_TESTS}")
 message("\tirccd config:\t\t${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccd.conf")
 message("\tirccdctl config:\t${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccdctl.conf")
 message("")
@@ -234,9 +240,5 @@ set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
 set(CPACK_SOURCE_IGNORE_FILES ".hg;_build_")
 
 include(CPack)
-
-# Tests
-include(CTest)
-add_subdirectory(tests)
 
 # vim: set syntax=cmake:

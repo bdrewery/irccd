@@ -151,7 +151,7 @@ void Plugin::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
 		break;
 	case IrcEventType::Message:
 	{
-		std::string cc = ev.m_server->getOptions().m_commandChar;
+		std::string cc = ev.m_server->getOptions().commandChar;
 		std::string sp = cc + p->getName();
 		std::string msg = ev.m_params[2];
 

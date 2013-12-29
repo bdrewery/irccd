@@ -36,22 +36,22 @@ void extractChannels(lua_State *L, Server::Info &info)
 
 			// Standard string channel (no password)
 			if (tvalue == LUA_TSTRING) {
-				c.m_name = lua_tostring(L, -1);
-				info.m_channels.push_back(c);
+				c.name = lua_tostring(L, -1);
+				info.channels.push_back(c);
 			} else if (tvalue == LUA_TTABLE) {
 				// First index is channel name
 				lua_rawgeti(L, -1, 1);
 				if (lua_type(L, -1) == LUA_TSTRING)
-					c.m_name = lua_tostring(L, -1);
+					c.name = lua_tostring(L, -1);
 				lua_pop(L, 1);
 
 				// Second index is channel password
 				lua_rawgeti(L, -1, 2);
 				if (lua_type(L, -1) == LUA_TSTRING)
-					c.m_password = lua_tostring(L, -1);
+					c.password = lua_tostring(L, -1);
 				lua_pop(L, 1);
 	
-				info.m_channels.push_back(c);
+				info.channels.push_back(c);
 			}
 		});
 		lua_pop(L, 1);
@@ -61,10 +61,10 @@ void extractChannels(lua_State *L, Server::Info &info)
 void extractIdentity(lua_State *L, Server::Identity &ident)
 {
 	std::unordered_map<std::string, std::string *> table {
-		{ "name",		&ident.m_name		},
-		{ "nickname",		&ident.m_nickname	},
-		{ "username",		&ident.m_username	},
-		{ "realname",		&ident.m_realname	},
+		{ "name",		&ident.name	},
+		{ "nickname",		&ident.nickname	},
+		{ "username",		&ident.username	},
+		{ "realname",		&ident.realname	},
 	};
 
 	std::string key;
@@ -95,7 +95,7 @@ int serverGetChannels(lua_State *L)
 	i = 0;
 	for (auto c : s->getChannels()) {
 		lua_pushinteger(L, ++i);
-		lua_pushstring(L, c.m_name.c_str());
+		lua_pushstring(L, c.name.c_str());
 		lua_settable(L, -3);
 	}
 
@@ -104,22 +104,22 @@ int serverGetChannels(lua_State *L)
 
 int serverGetIdentity(lua_State *L)
 {
-	Server::Ptr s = Luae::getShared<Server>(L, 1, ServerType);
-	const Server::Identity &ident = s->getIdentity();
+	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto &ident = s->getIdentity();
 
 	// Create the identity table result
 	lua_createtable(L, 5, 5);
 
-	lua_pushstring(L, ident.m_name.c_str());
+	lua_pushstring(L, ident.name.c_str());
 	lua_setfield(L, -2, "name");
 
-	lua_pushstring(L, ident.m_nickname.c_str());
+	lua_pushstring(L, ident.nickname.c_str());
 	lua_setfield(L, -2, "nickname");
 
-	lua_pushstring(L, ident.m_username.c_str());
+	lua_pushstring(L, ident.username.c_str());
 	lua_setfield(L, -2, "username");
 
-	lua_pushstring(L, ident.m_realname.c_str());
+	lua_pushstring(L, ident.realname.c_str());
 	lua_setfield(L, -2, "realname");
 
 #if 0
@@ -132,23 +132,23 @@ int serverGetIdentity(lua_State *L)
 
 int serverGetInfo(lua_State *L)
 {
-	Server::Ptr s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = Luae::getShared<Server>(L, 1, ServerType);
 
 	lua_createtable(L, 3, 3);
 
-	lua_pushstring(L, s->getInfo().m_name.c_str());
+	lua_pushstring(L, s->getInfo().name.c_str());
 	lua_setfield(L, -2, "name");
 
-	lua_pushstring(L, s->getInfo().m_host.c_str());
+	lua_pushstring(L, s->getInfo().host.c_str());
 	lua_setfield(L, -2, "hostname");
 
-	lua_pushinteger(L, s->getInfo().m_port);
+	lua_pushinteger(L, s->getInfo().port);
 	lua_setfield(L, -2, "port");
 
-	lua_pushboolean(L, s->getInfo().m_ssl);
+	lua_pushboolean(L, s->getInfo().ssl);
 	lua_setfield(L, -2, "ssl");
 
-	lua_pushboolean(L, s->getInfo().m_sslVerify);
+	lua_pushboolean(L, s->getInfo().sslVerify);
 	lua_setfield(L, -2, "sslVerify");
 
 	return 1;
@@ -156,18 +156,18 @@ int serverGetInfo(lua_State *L)
 
 int serverGetName(lua_State *L)
 {
-	Server::Ptr s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = Luae::getShared<Server>(L, 1, ServerType);
 
-	lua_pushstring(L, s->getInfo().m_name.c_str());
+	lua_pushstring(L, s->getInfo().name.c_str());
 
 	return 1;
 }
 
 int serverCnotice(lua_State *L)
 {
-	Server::Ptr s = Luae::getShared<Server>(L, 1, ServerType);
-	std::string channel = luaL_checkstring(L, 2);
-	std::string notice = luaL_checkstring(L, 3);
+	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto channel = luaL_checkstring(L, 2);
+	auto notice = luaL_checkstring(L, 3);
 
 	s->cnotice(channel, notice);
 
@@ -370,14 +370,13 @@ const luaL_Reg serverMethods[] = {
 
 int serverTostring(lua_State *L)
 {
-	Server::Ptr server;
+	auto server = Luae::getShared<Server>(L, 1, ServerType);
 	std::ostringstream oss;
 
-	server = Luae::getShared<Server>(L, 1, ServerType);
-	oss << "Server " << server->getInfo().m_name;
-	oss << " at " << server->getInfo().m_host;
+	oss << "Server " << server->getInfo().name;
+	oss << " at " << server->getInfo().host;
 
-	if (server->getInfo().m_ssl)
+	if (server->getInfo().ssl)
 		oss << " (using SSL)" << std::endl;
 
 	lua_pushstring(L, oss.str().c_str());
@@ -387,10 +386,8 @@ int serverTostring(lua_State *L)
 
 int serverEquals(lua_State *L)
 {
-	Server::Ptr s1, s2;
-
-	s1 = Luae::getShared<Server>(L, 1, ServerType);
-	s2 = Luae::getShared<Server>(L, 2, ServerType);
+	auto s1 = Luae::getShared<Server>(L, 1, ServerType);
+	auto s2 = Luae::getShared<Server>(L, 2, ServerType);
 
 	lua_pushboolean(L, s1 == s2);
 
@@ -438,28 +435,29 @@ int l_connect(lua_State *L)
 	Server::Info info;
 	Server::Identity ident;
 	Server::Options options;
+	Server::RetryInfo reco;
 
 	luaL_checktype(L, 1, LUA_TTABLE);
 
-	info.m_name	= Luae::requireField<std::string>(L, 1, "name");
-	info.m_host	= Luae::requireField<std::string>(L, 1, "host");
-	info.m_port	= Luae::requireField<int>(L, 1, "port");
+	info.name	= Luae::requireField<std::string>(L, 1, "name");
+	info.host	= Luae::requireField<std::string>(L, 1, "host");
+	info.port	= Luae::requireField<int>(L, 1, "port");
 
-	if (Server::has(info.m_name)) {
+	if (Server::has(info.name)) {
 		lua_pushboolean(L, false);
 		lua_pushfstring(L, "server %s already connected",
-		    info.m_name.c_str());
+		    info.name.c_str());
 
 		return 2;
 	}
 
 	if (Luae::typeField(L, 1, "password") == LUA_TSTRING)
-		info.m_password = Luae::requireField<std::string>(L, 1, "password");
+		info.password = Luae::requireField<std::string>(L, 1, "password");
 
 	extractChannels(L, info);
 	extractIdentity(L, ident);
 
-	server = std::make_shared<Server>(info, ident, options);
+	server = std::make_shared<Server>(info, ident, options, reco);
 	Server::add(server);
 
 	lua_pushboolean(L, true);

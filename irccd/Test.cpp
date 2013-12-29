@@ -39,7 +39,7 @@ using TestFunction	= std::function<void (Plugin::Ptr, Server::Ptr, int, char **)
 class FakeServer : public Server {
 public:
 	FakeServer(const Info &info, const Identity &identity)
-		: Server(info, identity, Options())
+		: Server(info, identity, Options(), RetryInfo())
 	{
 	}
 
@@ -425,9 +425,9 @@ void testPlugin(const char *file, int argc, char **argv)
 	Server::Info info;
 	Server::Identity ident;
 
-	info.m_name = "local";
-	info.m_host = "local";
-	info.m_port = 6667;
+	info.name = "local";
+	info.host = "local";
+	info.port = 6667;
 	std::shared_ptr<FakeServer> server = std::make_shared<FakeServer>(info, ident);
 
 	if (strcmp(argv[0], "help") == 0) {

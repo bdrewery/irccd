@@ -31,6 +31,18 @@ endif ()
 option(WITH_BUNDLE_IRCCLIENT "Build with bundled libircclient" On)
 
 set(SOURCES
+	server/ServerConnecting.cpp
+	server/ServerConnecting.h
+	server/ServerDead.cpp
+	server/ServerDead.h
+	server/ServerDisconnected.cpp
+	server/ServerDisconnected.h
+	server/ServerRunning.cpp
+	server/ServerRunning.h
+	server/ServerState.cpp
+	server/ServerState.h
+	server/ServerUninitialized.cpp
+	server/ServerUninitialized.h
 	Server.cpp
 	Server.h
 	Irccd.cpp
@@ -94,13 +106,6 @@ if (WITH_LUA52 OR WITH_LUAJIT)
 			Thread.h
 		)
 
-		# Optional Lua includes
-		list(
-			APPEND
-			INCLUDES
-			${CMAKE_CURRENT_SOURCE_DIR}
-		)
-
 		if (WITH_LUA52)
 			list(APPEND INCLUDES ${LUA52_INCLUDE_DIR})
 			list(APPEND LIBRARIES ${LUA52_LIBRARIES})
@@ -142,6 +147,7 @@ endif ()
 
 include_directories(
 	${INCLUDES}
+	${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_executable(irccd ${SOURCES})
