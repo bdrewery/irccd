@@ -303,7 +303,6 @@ void Server::stop()
 	try {
 		m_thread.join();
 	} catch (std::system_error error) {
-		Logger::warn("%d vs %d\n", std::this_thread::get_id(), m_thread.get_id());
 		Logger::warn("server %s: %s", m_info.name.c_str(), error.what());
 	}
 }

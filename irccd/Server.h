@@ -34,39 +34,6 @@
 
 namespace irccd {
 
-class Server;
-
-#if 0
-
-/* --------------------------------------------------------
- * IRC Events, used by Server
- * -------------------------------------------------------- */
-
-/**
- * @enum IrcEventType
- * @brief Type of IRC event
- */
-enum class IrcEventType {
-	Connection,					//! when connection
-	ChannelNotice,					//! channel notices
-	Invite,						//! invitation
-	Join,						//! on joins
-	Kick,						//! on kick
-	Message,					//! on channel messages
-	Me,						//! CTCP Action
-	Mode,						//! channel mode
-	Nick,						//! nick change
-	Names,						//! (def) names listing
-	Notice,						//! channel notice
-	Part,						//! channel parts
-	Query,						//! private query
-	Topic,						//! topic change
-	UserMode,					//! user mode change
-	Whois						//! (def) whois response
-};
-
-#endif
-
 /**
  * @enum IrcChanNickMode
  * @brief Prefixes for channels
@@ -391,6 +358,9 @@ public:
 	 */
 	void start();
 
+	/**
+	 * Request for stopping the server.
+	 */
 	void stop();
 
 	/* ------------------------------------------------

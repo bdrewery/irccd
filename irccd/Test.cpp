@@ -324,8 +324,6 @@ void testConnect(Plugin::Ptr p, Server::Ptr s, int, char **)
 
 void testChannelNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
-	for (int i = 0; i < argc; ++i)
-		printf("%d = %s\n", i, argv[i]);
 	if (argc < 3)
 		Logger::warn("test: onChannelNotice requires 3 arguments");
 	else
