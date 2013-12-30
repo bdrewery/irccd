@@ -20,7 +20,10 @@
 #include <ctime>
 
 #if defined(_WIN32)
+#  include <sys/types.h>
+#  include <sys/timeb.h>
 #  include <Windows.h>
+#  include <Shlobj.h>
 #else
 #  include <cerrno>
 #  include <cstring>
@@ -34,10 +37,10 @@
 #  include <sys/time.h>
 #endif
 
-#include "config.h"
-
 #include "Logger.h"
 #include "System.h"
+
+#include "config.h"
 
 namespace irccd {
 
@@ -47,7 +50,22 @@ namespace {
 
 std::string systemName()
 {
-	return ::GetTicksCount64() / 1000;
+	return "Windows";
+}
+
+std::string systemVersion()
+{
+	auto version = GetVersion();
+ 
+	auto major = (DWORD)(LOBYTE(LOWORD(version)));
+	auto minor = (DWORD)(HIBYTE(LOWORD(version)));
+
+	return std::to_string(major) + "." + std::to_string(minor);
+}
+
+uint64_t systemUptime()
+{
+	return ::GetTickCount64() / 1000;
 }
 
 void systemUsleep(int milliseconds)
@@ -55,7 +73,7 @@ void systemUsleep(int milliseconds)
 	::Sleep(milliseconds * 1000);
 }
 
-uint32_t systemTicks()
+uint64_t systemTicks()
 {
 	_timeb tp;
 
@@ -121,7 +139,7 @@ void systemUsleep(int milliseconds)
 	::usleep(milliseconds * 1000);
 }
 
-uint32_t systemTicks()
+uint64_t systemTicks()
 {
         struct timeval tp;
 
@@ -174,7 +192,7 @@ void System::usleep(int milliseconds)
 	return systemUsleep(milliseconds);
 }
 
-uint32_t System::ticks()
+uint64_t System::ticks()
 {
 	return systemTicks();
 }

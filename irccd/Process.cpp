@@ -77,12 +77,12 @@ const Process::Libraries Process::irccdLibs = {
 	{ "irccd.util",			luaopen_util		}
 };
 
-Process::Ptr Process::create() noexcept
+Process::Ptr Process::create()
 {
 	return std::shared_ptr<Process>(new Process);
 }
 
-void Process::initialize(Ptr process, const Info &info) noexcept
+void Process::initialize(Ptr process, const Info &info)
 {
 	auto setField = [&] (const std::string &which, const std::string &name) {
 		lua_pushlstring(*process, which.c_str(), which.length());
@@ -109,7 +109,7 @@ void Process::initialize(Ptr process, const Info &info) noexcept
 	LUA_STACK_CHECKEQUALS(L);
 }
 
-Process::Info Process::info(lua_State *L) noexcept
+Process::Info Process::info(lua_State *L)
 {
 	Process::Info info;
 
@@ -128,7 +128,7 @@ Process::Info Process::info(lua_State *L) noexcept
 	return info;
 }
 
-Process::operator lua_State *() noexcept
+Process::operator lua_State *()
 {
 	return m_state;
 }

@@ -123,46 +123,40 @@ typedef std::unordered_map<std::string,
  * Socket::set function. It also setup the enumerations to be bound
  * as tables.
  */
-OptionMap options {
+OptionMap prepareOptions()
+{
+	OptionMap options;
+
 	// "socket" -> SOL_SOCKET
-	{
-		"socket", {
 #if defined(SO_REUSEADDR)
-			{ "reuse-address", Option(SOL_SOCKET, SO_REUSEADDR, ArgType::Boolean)	},
+	options["socket"]["reuse-address"] = Option(SOL_SOCKET, SO_REUSEADDR, ArgType::Boolean);
 #endif
 #if defined(SO_BROADCAST)
-			{ "broadcast", Option(SOL_SOCKET, SO_BROADCAST, ArgType::Boolean)	},
+	options["socket"]["broadcast"] = Option(SOL_SOCKET, SO_BROADCAST, ArgType::Boolean);
 #endif
 #if defined(SO_DEBUG)
-			{ "debug", Option(SOL_SOCKET, SO_DEBUG, ArgType::Boolean)		},
+	options["socket"]["debug"] = Option(SOL_SOCKET, SO_DEBUG, ArgType::Boolean);
 #endif
 #if defined(SO_KEEPALIVE)
-			{ "keep-alive", Option(SOL_SOCKET, SO_KEEPALIVE, ArgType::Boolean)	},
+	options["socket"]["keep-alive"] = Option(SOL_SOCKET, SO_KEEPALIVE, ArgType::Boolean);
 #endif
 #if defined(SO_RCVBUF)
-			{ "receive-buffer", Option(SOL_SOCKET, SO_RCVBUF, ArgType::Integer)	},
+	options["socket"]["receive-buffer"] = Option(SOL_SOCKET, SO_RCVBUF, ArgType::Integer);
 #endif
-		},
-	},
 
 	// "tcp" -> IPPROTO_TCP
-	{
-		"tcp", {
 #if defined(TCP_NODELAY)
-			{ "no-delay", Option(IPPROTO_TCP, TCP_NODELAY, ArgType::Boolean)	},
+	options["tcp"]["no-delay"] = Option(IPPROTO_TCP, TCP_NODELAY, ArgType::Boolean);
 #endif
-		},
-	},
-
 	// "ipv6" -> IPPROTO_IPV6
-	{
-		"ipv6", {
 #if defined(IPV6_V6ONLY)
-			{ "v6only", Option(IPPROTO_IPV6, IPV6_V6ONLY, ArgType::Boolean)		},
+	options["ipv6"]["v6only"] = Option(IPPROTO_IPV6, IPV6_V6ONLY, ArgType::Boolean);
 #endif
-		},
-	},
-};
+
+	return options;
+}
+
+OptionMap options = prepareOptions();
 
 /* ---------------------------------------------------------
  * Socket functions

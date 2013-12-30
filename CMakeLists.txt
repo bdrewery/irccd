@@ -30,6 +30,11 @@ set(VERSION "${MAJOR}.${MINOR}")
 # Compatibility options
 option(COMPAT_1_0 "Be compatible with 1.0" On)
 
+# Default to Release
+if (NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE "Release")
+endif ()
+
 # General settings
 if (UNIX)
 	set(CMAKE_C_FLAGS "-Wall -Wextra")
