@@ -1,0 +1,324 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Irccd Lua API Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<h1>Navigation</h1>
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Class_Pipe">Class Pipe </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.fs.html">irccd.fs</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
+  <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
+  <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
+  <li><a href="../modules/irccd.system.html">irccd.system</a></li>
+  <li><a href="../modules/irccd.thread.html">irccd.thread</a></li>
+  <li><strong>irccd.thread.pipe</strong></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="nowrap">
+  <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
+  <li><a href="../topics/1.1-Standard-Libraries.md.html">1.1-Standard-Libraries.md</a></li>
+  <li><a href="../topics/2-Plugin_creation.md.html">2-Plugin_creation.md</a></li>
+  <li><a href="../topics/2.1-Using_irccd_test.md.html">2.1-Using_irccd_test.md</a></li>
+  <li><a href="../topics/2.2-List_of_Events.md.html">2.2-List_of_Events.md</a></li>
+  <li><a href="../topics/3-Event-Action.md.html">3-Event-Action.md</a></li>
+  <li><a href="../topics/3-Event-Channel-notice.md.html">3-Event-Channel-notice.md</a></li>
+  <li><a href="../topics/3-Event-Command.md.html">3-Event-Command.md</a></li>
+  <li><a href="../topics/3-Event-Connect.md.html">3-Event-Connect.md</a></li>
+  <li><a href="../topics/3-Event-Invite.md.html">3-Event-Invite.md</a></li>
+  <li><a href="../topics/3-Event-Join.md.html">3-Event-Join.md</a></li>
+  <li><a href="../topics/3-Event-Kick.md.html">3-Event-Kick.md</a></li>
+  <li><a href="../topics/3-Event-Load.md.html">3-Event-Load.md</a></li>
+  <li><a href="../topics/3-Event-Message.md.html">3-Event-Message.md</a></li>
+  <li><a href="../topics/3-Event-Mode.md.html">3-Event-Mode.md</a></li>
+  <li><a href="../topics/3-Event-Names.md.html">3-Event-Names.md</a></li>
+  <li><a href="../topics/3-Event-Nick.md.html">3-Event-Nick.md</a></li>
+  <li><a href="../topics/3-Event-Notice.md.html">3-Event-Notice.md</a></li>
+  <li><a href="../topics/3-Event-Part.md.html">3-Event-Part.md</a></li>
+  <li><a href="../topics/3-Event-Query.md.html">3-Event-Query.md</a></li>
+  <li><a href="../topics/3-Event-Reload.md.html">3-Event-Reload.md</a></li>
+  <li><a href="../topics/3-Event-Topic.md.html">3-Event-Topic.md</a></li>
+  <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
+  <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
+  <li><a href="../topics/3-Event-Whois.md.html">3-Event-Whois.md</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/Connect.lua.html">Connect.lua</a></li>
+  <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
+  <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>irccd.thread.pipe</code></h1>
+
+<p>Pipes.</p>
+<p> <br />
+ <strong>Note: Pipes are very experimental and not widely tested yet.</strong>
+ <br /><br /></p>
+
+<p> This API provides functions to communicate between threads and Lua
+ plugins.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#get">get (name)</a></td>
+	<td class="summary">Get (or create) a new pipe.</td>
+	</tr>
+</table>
+<h2><a href="#Class_Pipe">Class Pipe </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Pipe:push">Pipe:push (data)</a></td>
+	<td class="summary">Push some data to the pipe.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Pipe:first">Pipe:first ()</a></td>
+	<td class="summary">Get the first value.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Pipe:last">Pipe:last ()</a></td>
+	<td class="summary">Get the last value.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Pipe:wait">Pipe:wait (timeout)</a></td>
+	<td class="summary">Wait for data.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Pipe:list">Pipe:list ()</a></td>
+	<td class="summary">Get all the data.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Pipe:clear">Pipe:clear ()</a></td>
+	<td class="summary">Remove all values from the pipe.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Pipe:pop">Pipe:pop ()</a></td>
+	<td class="summary">Remove the first value.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2><a name="Functions"></a>Functions</h2>
+    <dl class="function">
+    <dt>
+    <a name = "get"></a>
+    <strong>get (name)</strong>
+    </dt>
+    <dd>
+    Get (or create) a new pipe.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the name of the pipe
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the created pipe
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2><a name="Class_Pipe"></a>Class Pipe </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "Pipe:push"></a>
+    <strong>Pipe:push (data)</strong>
+    </dt>
+    <dd>
+    Push some data to the pipe.
+ This function also signal availability to waiting threads.</p>
+
+<p> <br />
+ <strong>Note: userdata, function are not supported as parameters.</strong>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">data</span>
+         the data to pass
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Pipe:first"></a>
+    <strong>Pipe:first ()</strong>
+    </dt>
+    <dd>
+    Get the first value.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the first value
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Pipe:last"></a>
+    <strong>Pipe:last ()</strong>
+    </dt>
+    <dd>
+    Get the last value.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the last value
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Pipe:wait"></a>
+    <strong>Pipe:wait (timeout)</strong>
+    </dt>
+    <dd>
+    Wait for data.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">timeout</span>
+         an optional timeout in millisecond, default 0.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        false if the timeout expired.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Pipe:list"></a>
+    <strong>Pipe:list ()</strong>
+    </dt>
+    <dd>
+    Get all the data.
+ The iterator returns one value which may be any type, except
+ function and userdata.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">
+ <span class="comment">-- Get all data
+</span> <span class="keyword">for</span> v <span class="keyword">in</span> p:list() <span class="keyword">do</span>
+	<span class="global">print</span>(<span class="global">tostring</span>(v))
+ <span class="keyword">end</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "Pipe:clear"></a>
+    <strong>Pipe:clear ()</strong>
+    </dt>
+    <dd>
+    Remove all values from the pipe.
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Pipe:pop"></a>
+    <strong>Pipe:pop ()</strong>
+    </dt>
+    <dd>
+    Remove the first value.
+
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.0</a></i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

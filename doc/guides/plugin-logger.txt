@@ -1,0 +1,130 @@
+Plugin logger 1.0
+=================
+:Author: Demelier David
+:Email: demelier.david@gmail.com
+:Date: June, 8 2013
+:toc:
+:icons:
+:iconsdir: icons
+
+== Introduction
+
+The plugin `logger` may be used to log everything you want. It supports the
+following events:
+
+* Channel notice
+* Join
+* Me
+* Message
+* Mode
+* Private notice
+* Part
+* Topic
+* User mode
+
+== Installation
+
+The plugin `logger` is distributed with `irccd`. To enable it add the following
+to your `plugins` section:
+
+----
+[plugins]
+logger =
+----
+
+== Usage
+
+There is nothing to do, except configuring it.
+
+See link:user-guide.html#irccdplugnote[irccd plugin notes].
+
+== Configuration
+
+The plugin `logger` can be configured to format logs.
+
+The `logger.conf` uses link:user-guide.html#irccdsyntax[irccd syntax].
+
+=== Section `general`
+
+This section configures global options.
+
+.Option `directory` (required)
+
+The directory where to store logs.
+
+link:user-guide.html#irccdpatterns[Keywords supported: ~, #s, #c, time, env]
+
+=== Section `formats`
+
+Event log formats. By default all events are logged, if you
+want to disable any of them, set the desired option to "".
+
+.Option `cnotice`
+
+Format for channel notices.
+
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #m, #u, #s, #U, time,
+env]
+
+.Option `join`
+
+Format for channel joins.
+
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #u, #s, #U, time, env]
+
+.Option `me` (CTCP Action)
+
+Format for /me.
+
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #m, #s, #u, #U, time,
+env]
+
+.Option `message`
+
+Format for messages.
+
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #m, #s, #u, #U, time,
+env]
+
+.Option `mode`
+
+Format for channel mode changes.
+
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #m, #M, #s, #u, #U,
+time, env]
+
+[NOTE]
+Keyword *#m* is the mode name such as *+b* and *#M* an optional argument.
+
+.Option `notice`
+
+Format for private notices
+
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #m, #s, #T #u, #U,
+time, env]
+
+[NOTE]
+Keyword *#T* is the targeted nicknamed for the notice, *#u* and *#U* are the
+sender nickname.
+
+.Option `part`
+
+Format for parts.
+
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #m, #s, #u, #U, time,
+env]
+
+.Option `topic`
+
+Format for topic changes.
+
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #s, #t, #u, #U, time,
+env]
+
+.Option `umode`
+
+Format for user mode change. This only affects you.
+
+link:user-guide.html#irccdpatterns[Keywords supported: #m, #s, #T, time, env]
+
+// vim: set syntax=asciidoc:

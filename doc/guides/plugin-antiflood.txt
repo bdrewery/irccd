@@ -1,0 +1,87 @@
+Plugin antiflood 1.0
+====================
+:Author: Demelier David
+:Email: demelier.david@gmail.com
+:Date: June, 8 2013
+:toc:
+:icons:
+:iconsdir: icons
+
+== Introduction
+
+The plugin `antiflood` can avoid people flooding channels. It supports
+banning and kicking.
+
+== Installation
+
+The plugin `antiflood` is distributed with `irccd`. To enable it add the
+following to your `plugins` section:
+
+----
+[plugins]
+antiflood =
+----
+
+== Usage
+
+There is nothing to do, except configuring it.
+
+See link:user-guide.html#irccdplugnote[irccd plugin notes].
+
+== Configuration
+
+The plugin `antiflood` can be configured in the file `antiflood.conf`. It allows
+changing the messages rate, the action to execute and an optional ignore list.
+
+The `antiflood.conf` uses link:user-guide.html#irccdsyntax[irccd syntax].
+
+=== Section `general`
+
+This section configures the general parameters. You may need fine tweaking to
+make it working better on some servers.
+
+.Option `max-messages`
+
+Number of max messages that can be sent in a certain amount of time. Default: 5.
+
+.Option `max-delay`
+
+Number of milliseconds between each messages. Default: 5000.
+
+.Option `action`
+
+The action to execute, can be `kick` or `ban`. Default: kick.
+
+[NOTE]
+Unfortunately, it's not possible to modify the ban mask, only nick bans are
+supported yet.
+
+.Option `reason`
+
+An optional reason, it is used only as `kick` action. Default: "please not
+flood".
+
+=== Section `ignore`
+
+This section let you ignoring nicknames so these users are not tracked as
+possible flooders.
+
+[NOTE]
+Irccd automatically adds itself to the ignore list, there is no need to add the
+bot.
+
+.Option `list`
+
+A space separeted list of nicknames to ignore. Default: empty.
+
+.Example
+[source, ini]
+----
+[general]
+action = "kick"
+reason = "don't write so fast please"
+max-messages = "3"
+max-delay = "4000"
+----
+
+// vim: set syntax=asciidoc:

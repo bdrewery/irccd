@@ -1,0 +1,751 @@
+.\"
+.\" Copyright (c) 2013 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @MONTH@ @DAY@, @YEAR@
+.Dt IRCCD 1
+.Os
+.Sh NAME
+.Nm irccd
+.Nd an IRC client daemon
+.Sh SYNOPSIS
+.Nm
+.Op Fl f
+.Op Fl v
+.Op Fl c Ar config
+.Op Fl p Ar directory
+.Op Fl P Ar plugin
+.Nm
+.Cm test
+.Ar plugin.lua
+.Op Ar command
+.Op Ar parameters...
+.Sh DESCRIPTION
+The irccd program aims to provide an IRC client that acts as a daemon.
+.Pp
+The features are listed below:
+.Bl -bullet
+.It
+Connect to one or more servers,
+.It
+Use different identities for each servers,
+.It
+Manageable by UNIX or Internet sockets (both TCP and UDP),
+.It
+Highly extensible with Lua plugins,
+.El
+.Pp
+The application run as daemon and wait for events in both IRC servers
+or from the irccdctl(1) utility.
+.Pp
+For instance, when IRC events happen, it calls Lua functions from plugins to
+execute specific actions. Example: someone join the channel, the
+.Nm irccd
+daemon will notify all plugins that a specific user joined.
+.Pp
+But it is also possible to use irccdctl(1) to control
+.Nm irccd .
+For instance, you may want at any time to change the nick of the irccd daemon,
+is it possible with one command.
+.Pp
+The following options are available:
+.Bl -tag -width indent
+.It Fl f
+Do not run as a daemon.
+.It Fl c Ar config
+A path to a config file.
+.It Fl p Ar directory
+Add a directory where to find plugins. This option may be passed more than
+one time.
+.It Fl P Ar plugin
+Add a plugin to load.
+.It Fl v
+Be more verbose.
+.El
+.\" LUA INTERFACE
+.Sh LUA INTERFACE
+This expose the Lua function that are called with their parameters. That
+section is only for short information.
+.Pp
+For more
+information about all irccd Lua API, see
+.Em @CMAKE_INSTALL_PREFIX@/@DOCDIR@/lua/index.html .
+.\" Action
+.Ss Action
+This event is triggered when someone said a message as a CTCP ACTION, most
+known as /me.
+.Bd -literal -offset indent
+function onMe(server, channel, nickname, message)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel.
+.It nickname
+The person that said something.
+.It message
+The message sent.
+.El
+.\" Command
+.Ss Command
+This event is not a real IRC event. It is triggered when a special
+command is said on a channel. For instance if someone says on a channel
+"!ask will I be rich?". It will call the function
+.Nm onCommand
+from the plugin "ask.lua".
+The special character is specified in the [server] section, see irccd.conf(5).
+.Bd -literal -offset indent
+function onCommand(server, channel, who, message)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel where the message comes from.
+.It who
+Who invoked the command.
+.It message
+The real message, without the "!<name>" part.
+.El
+.\" Connect
+.Ss Connect
+This event is triggered usually at startup, when
+.Nm irccd
+successfully connected to a server.
+.Bd -literal -offset indent
+function onConnect(server)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.El
+.\" Channel notice
+.Ss Channel notice
+This event is triggered when someone sent a notice to a channel.
+.Bd -literal -offset indent
+function onChannelNotice(server, who, channel, notice)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It who
+The one that sent the notice.
+.It channel
+The target channel.
+.It message
+The notice message.
+.El
+.\" Invite
+.Ss Invite
+This event is triggered when someone is inviting you.
+.Bd -literal -offset indent
+function onInvite(server, channel, who)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+On which channel you are invited to.
+.It who
+Who invited you.
+.El
+.\" Join
+.Ss Join
+This event is triggered when someone has joined a specific channel.
+.Bd -literal -offset indent
+function onJoin(server, channel, nickname)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel the user has joined.
+.It nickname
+The user nickname.
+.El
+.\" Kick
+.Ss Kick
+This event is triggered when someone has been kicked from a channel.
+.Bd -literal -offset indent
+function onKick(server, channel, who, kicked, reason)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel.
+.It who
+Who kicked the person.
+.It kicked
+The kicked person.
+.It reason
+An optional reason.
+.El
+.\" Load
+.Ss Load
+This function is called when irccd instance load a plugin. If this function
+raises an error, the script is not loaded.
+.Pp
+There are no IRC events that call this function.
+.Bd -literal -offset indent
+function onLoad()
+.Ed
+.\" Message
+.Ss Message
+This event is triggered when someone said something on a specific channel.
+.Bd -literal -offset indent
+function onMessage(server, channel, nickname, message)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel.
+.It nickname
+The person that said something.
+.It message
+The message sent.
+.El
+.\" Mode
+.Ss Mode
+This event is triggered when someone changed the channel's mode.
+.Bd -literal -offset indent
+function onMode(server, channel, nickname, mode, modeArg)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel.
+.It nickname
+The person who changed the mode.
+.It mode
+The new mode.
+.It modeArg
+The mode argument, if supported.
+.El
+.\" Names
+.Ss Names
+This event is triggered when a list of names has come.
+.Bd -literal -offset indent
+function onNames(server, channel, list)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+Which channel.
+.It list
+A sequence with all users.
+.El
+.\" Nick
+.Ss Nick
+This event is triggered when someone changed its nickname.
+.Bd -literal -offset indent
+function onNick(server, oldnickname, newnickname)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It oldnickname
+The old nickname.
+.It newnickname
+The new nickname.
+.El
+.\" Notice
+.Ss Notice
+This event is triggered when someone sent a notice to you.
+.Bd -literal -offset indent
+function onNotice(server, who, target, notice)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It who
+The one that sent the notice.
+.It target
+The target nickname.
+.It message
+The notice message.
+.El
+.\" Part
+.Ss Part
+This event is triggered when someone has left a specific channel.
+.Bd -literal -offset indent
+function onPart(server, channel, nickname, reason)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel.
+.It nickname
+The person that left.
+.It reason
+An optional reason.
+.El
+.\" Query
+.Ss Query
+This event is triggered when someone sent a private message to you.
+.Bd -literal -offset indent
+function onQuery(server, who, message)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It who
+The person that said something.
+.It message
+The message sent.
+.El
+.\" Reload
+.Ss Reload
+This event is triggered when someone want to reload a plugin.
+.Bd -literal -offset indent
+function onReload()
+.Ed
+.\" Topic
+.Ss Topic
+This event is triggered when someone changed the channel's topic.
+.Bd -literal -offset indent
+function onTopic(server, channel, who, topic)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It channel
+The channel.
+.It who
+The person who changed the topic.
+.It topic
+The new topic (may be empty).
+.El
+.\" Unload
+.Ss Unload
+This function is called when irccd instance unload a plugin.
+.Pp
+There are no IRC events that call this function.
+.Bd -literal -offset indent
+function onUnload()
+.Ed
+.\" User mode
+.Ss User mode
+This event is triggered when someone changed your mode.
+.Bd -literal -offset indent
+function onUserMode(server, nickname, mode)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It nickname
+The person who changed the mode.
+.It mode
+The new mode.
+.El
+.\" Whois
+.Ss Whois
+This event is triggered when irccd get information from a user.
+.Bd -literal -offset indent
+function onWhois(server, info)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It info
+A table with the following information:
+.Pp
+.Bl -tag -compact
+.It Ar nickname
+The user nickname.
+.It Ar user
+The user name.
+.It Ar host
+The hostname.
+.It Ar realname
+The real name used.
+.It Ar channels
+An optional sequences of channels joined.
+.El
+.El
+.\" TESTING LUA PLUGINS
+.Sh TESTING LUA PLUGINS
+It is possible to test Lua plugins with a special command to avoid flooding a
+real IRC server. This also let you test all IRC events that you may not test
+on IRC servers since you may have not rights to.
+.Pp
+The basic syntax is to call
+.Nm irccd
+with the
+.Ar test
+sub command. The argument
+.Ar command
+is one of the on* functions defined in
+.Sx "LUA INTERFACE" .
+You may pass parameters to the function as it was pass from the server.
+The only one exception is that you do not need to pass a server as parameter,
+a fake local server will be automatically given for you.
+.Pp
+For instance, if you want to do a fake
+.Ar onConnect
+function call, you just need to pass as
+.Ar command
+value "onConnect".
+.Pp
+Please see
+.Sx "EXAMPLES"
+below for more information.
+.\" SUPPORTED SOCKET MESSAGES
+.Sh SUPPORTED SOCKET MESSAGES
+This section explain how to control
+.Nm irccd
+with socket messages. While a lot of people should use irccdctl(1) to control
+.Nm irccd
+sometimes it is useful to connect to it directly.
+.Pp
+Almost all messages require server as first argument, it's one defined in the
+irccd.conf(5) file.
+.Pp
+The syntax of each message is a simple ASCII string that ends with a trailing '\\n'.
+Optional parameters are enclosed betweens brackets.
+.\" CNOTICE
+.Ss CNOTICE
+This command is used to send a message a private notice to a user.
+.Bd -literal -offset indent
+CNOTICE server nickname message\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It nickname
+The user nickname target.
+.It message
+The message.
+.El
+.\" CONNECT
+.Ss CONNECT
+This command is used to connect to a server at runtime.
+.Bd -literal -offset indent
+CONNECT name address port ident:identity key:password ssl:(off|on)\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It name
+The new server name.
+.It address
+The address to connecto to.
+.It port
+The port
+.It ident
+(Optional) the identity.
+.It key
+(Optional) the server password.
+.It ssl
+(Optional) on or off, enable SSL.
+.El
+.\" INVITE
+.Ss INVITE
+This command is used to invite someone on a channel, needed for channels with
+mode +i.
+.Bd -literal -offset indent
+INVITE server target channel\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It target
+The target nickname to invite.
+.It channel
+The channel name prepended by a '#'
+.El
+.\" JOIN
+.Ss JOIN
+This command is used to join a specific channel. Note that a leading '#' is required
+in the channel name.
+.Bd -literal -offset indent
+JOIN server channel [password]\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It channel
+The channel name prepended by a '#'
+.It password
+An optional password
+.El
+.\" KICK
+.Ss KICK
+Kick someone from a channel. You obviously need to have +o mode on that
+channel.
+.Bd -literal -offset indent
+KICK server nick channel [reason]\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It nick
+The nickname to kick.
+.It channel
+The channel prepended by a '#' to kick from
+.It reason
+An optional reason.
+.El
+.\" LOAD
+.Ss LOAD
+Load a plugin. This load for all servers.
+.Bd -literal -offset indent
+LOAD name\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It name
+The plugin name.
+.El
+.\" ME
+.Ss ME
+This command is used to send a message to a global channel or to a private
+as CTCP ACTION. Usual IRC clients report that like: "* foo is eating a cake."
+.Bd -literal -offset indent
+ME server target message\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It target
+A channel or a private query.
+.It message
+The message.
+.El
+.\" MODE
+.Ss MODE
+This command is used to set a channel mode.
+.Bd -literal -offset indent
+MODE server channel mode\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It channel
+The target channel.
+.It mode
+The new mode.
+.El
+.\" MSG
+.Ss MSG
+This command is used to send a message to a global channel or to a private query.
+.Bd -literal -offset indent
+MSG server target message\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It target
+A channel or a private query.
+.It message
+The message.
+.El
+.\" NICK
+.Ss NICK
+This commands is used to change the nickname of the irccd client but only for a
+specific server. If you want to change your nick you must do it for every
+server defined in irccd.conf(5).
+.Bd -literal -offset indent
+NICK server nickname\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It nickname
+The new nickname.
+.El
+.\" NOTICE
+.Ss NOTICE
+This command is used to send a message to a global channel notice.
+.Bd -literal -offset indent
+NOTICE server channel message\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It channel
+The channel target.
+.It message
+The message.
+.El
+.\" PART
+.Ss PART
+This command is used to leave a channel from a specific server.
+.Bd -literal -offset indent
+PART server channel\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It channel
+The channel to leave.
+.El
+.\" QUERY
+.Ss QUERY
+This command to send a private message.
+.Bd -literal -offset indent
+QUERY server target message\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It target
+The target nickname.
+.It message
+The message.
+.El
+.\" RELOAD
+.Ss RELOAD
+Reload a plugin, this will call a specific Lua function.
+.Bd -literal -offset indent
+RELOAD name\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It name
+The plugin name.
+.El
+.\" TOPIC
+.Ss TOPIC
+This command is used to set a channel topic. Note that you obviously need
+the rights to do that.
+.Bd -literal -offset indent
+TOPIC server channel topic\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It channel
+The channel.
+.It topic
+The new topic.
+.El
+.\" UMODE
+.Ss UMODE
+This command is used to set your user mode.
+.Bd -literal -offset indent
+UMODE server mode\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The server.
+.It mode
+The new mode.
+.El
+.\" UNLOAD
+.Ss UNLOAD
+Unload a loaded plugin.
+.Bd -literal -offset indent
+UNLOAD name\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It name
+The plugin name.
+.El
+.\" EXAMPLES
+.Sh EXAMPLES
+.Ss Testing a Lua plugin
+.Pp
+Do a fake connection
+.Bd -literal -offset indent
+irccd test myplugin.lua onConnect
+.Ed
+.Pp
+Do a fake message, john will be the sender on the channel #staff
+and message is the content.
+.Bd -literal -offset indent
+irccd test myplugin.lua onMessage #staff john "Hello World"
+.Ed
+.Pp
+You may also just want to test the Lua API without any fake IRC events. You
+just need to call the plugin without any other parameters.
+.Bd -literal -offset indent
+irccd test myplugin.lua
+.Ed
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccdctl 1 ,
+.Xr irccd.conf 5
+.\" AUTHORS
+.Sh AUTHORS
+irccd was written by David Demelier <markand@malikania.fr>

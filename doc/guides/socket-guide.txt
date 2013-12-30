@@ -1,0 +1,289 @@
+Irccd 1.0 socket guide
+======================
+:Author: Demelier David
+:Email: demelier.david@gmail.com
+:Date: September, 10 2013
+:toc:
+:icons:
+:iconsdir: icons
+
+== Introduction
+
+This guide will help you controlling irccd via sockets.
+
+Currently, irccd supports internet and unix sockets, at least one of them must
+be defined to send messages to irccd.
+
+See the user guide to configure listeners.
+
+=== Syntax
+
+Irccd use a simple text protocol.
+
+The syntax of each message is a simple ASCII string that ends with a
+trailing '\n'.  Optional parameters are enclosed betweens brackets.
+
+== Commands
+
+The following commands are available. Please note that a lot of commands
+require a server as the first argument, it's one of defined in the
+irccd.conf file in sections [server].
+
+=== CNOTICE
+
+This command is used to send a message a private notice to a user.
+
+----
+CNOTICE server nickname message\n
+----
+
+Parameters:
+
+* `server`: The server.
+* `nickname`: The user nickname target.
+* `message`: The message.
+
+=== CONNECT
+
+This command is used to connect to a server at runtime.
+
+----
+CONNECT name address port ident:identity key:password ssl:(off|on)\n
+----
+
+Parameters:
+
+* `name`: The new server name.
+* `address`: The address to connecto to.
+* `port`: The port
+* `ident`: (Optional) the identity.
+* `key`: (Optional) the server password.
+* `ssl`: (Optional) on or off, enable SSL.
+
+.Example
+----
+CONNECT wanadoo chat.wanadoo.fr 8765 ident:superjean ssl:off\n
+----
+
+=== DISCONNECT
+
+Disconnect from a connected server.
+
+----
+DISCONNECT server\n
+----
+
+Parameters:
+
+* `server`: The server name
+
+=== INVITE
+
+This command is used to invite someone on a channel, needed for channels
+with mode +i.
+
+----
+INVITE server target channel\n
+----
+
+Parameters:
+
+* `server`: The server.
+* `target`: The target nickname to invite.
+* `channel`: The channel name prepended by a '#'
+
+=== JOIN
+
+This command is used to join a specific channel. Note that a leading '#'
+is required in the channel name.
+
+----
+JOIN server channel [password]\n
+----
+
+Parameters:
+
+* `server`: The server.
+* `channel`: The channel name prepended by a '#'
+* `password`: An optional password
+
+=== KICK
+
+Kick someone from a channel. You obviously need to have +o mode on that
+channel.
+
+----
+KICK server nick channel [reason]\n
+----
+
+Parameters:
+
+* `server`: The server.
+* `nick`: The nickname to kick.
+* `channel`: The channel prepended by a '#' to kick from
+* `reason`: An optional reason.
+
+=== LOAD
+
+Load a plugin. This load for all servers.
+
+----
+LOAD name\n
+----
+
+Parameters:
+
+* `name`: The plugin name.
+
+=== ME
+
+This command is used to send a message to a global channel or to a private as
+CTCP ACTION. Usual IRC clients report that like: "* foo is eating a cake."
+
+----
+ME server target message\n
+----
+
+Parameters:
+
+* `server`: The server.
+* `target`: A channel or a private query.
+* `message`: The message.
+
+=== MODE
+
+This command is used to set a channel mode.
+
+----
+MODE server channel mode\n
+----
+
+Parameters:
+
+* `server`: The server.
+* `channel`: The target channel.
+* `mode`: The new mode.
+
+=== MSG
+
+This command is used to send a message to a global channel or to a private query.
+
+----
+MSG server target message\n
+----
+
+Parameters:
+
+* `server`: The server.
+* `target`: A channel or a private query.
+* `message`: The message.
+
+=== NICK
+
+This commands is used to change the nickname of the irccd client but only
+for a specific server. If you want to change your nick you must do it for
+every server defined in irccd.conf(5).
+
+----
+NICK server nickname\n
+----
+
+Parameters:
+
+* `server`: The server.
+* `nickname`: The new nickname.
+
+=== NOTICE
+
+This command is used to send a message to a global channel notice.
+
+----
+NOTICE server channel message\n
+----
+
+Parameters:
+
+* `server`: The server.
+* `channel`: The channel target.
+* `message`: The message.
+
+=== PART
+
+This command is used to leave a channel from a specific server.
+
+----
+PART server channel\n
+----
+
+Parameters:
+
+* `server`: The server.
+* `channel`: The channel to leave.
+
+=== QUERY
+
+This command to send a private message.
+
+----
+QUERY server target message\n
+----
+
+Parameters:
+
+* `server`: The server.
+* `target`: The target nickname.
+* `message`: The message.
+
+=== RELOAD
+
+Reload a plugin, this will call a specific Lua function.
+
+----
+RELOAD name\n
+----
+
+Parameters:
+
+* `name`: The plugin name.
+
+=== TOPIC
+
+This command is used to set a channel topic. Note that you obviously need
+the rights to do that.
+
+----
+TOPIC server channel topic\n
+----
+
+Parameters:
+
+* `server`: The server.
+* `channel`: The channel.
+* `topic`: The new topic.
+
+=== UMODE
+
+This command is used to set your user mode.
+
+----
+UMODE server mode\n
+----
+
+Parameters:
+
+* `server`: The server.
+* `mode`: The new mode.
+
+=== UNLOAD
+
+Unload a loaded plugin.
+
+----
+UNLOAD name\n
+----
+
+Parameters:
+
+* `name`: The plugin name.
+
+// vim: set syntax=asciidoc:
