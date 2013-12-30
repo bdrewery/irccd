@@ -64,7 +64,3 @@
 #cmakedefine HAVE_STAT_ST_SIZE
 #cmakedefine HAVE_STAT_ST_BLKSIZE
 #cmakedefine HAVE_STAT_ST_BLOCKS
-
-#if defined(_MSC_VER)
-#  define noexcept throw()
-#endif

@@ -79,7 +79,7 @@ public:
 	 *
 	 * @return the process
 	 */
-	static Ptr create() noexcept;
+	static Ptr create();
 
 	/**
 	 * Initialize the process, adds the name and home
@@ -87,7 +87,7 @@ public:
 	 * @param process the process
 	 * @param info the info
 	 */
-	static void initialize(Ptr process, const Info &info) noexcept;
+	static void initialize(Ptr process, const Info &info);
 
 	/**
 	 * Get the info from the registry. Calls luaL_error if any functions
@@ -96,12 +96,12 @@ public:
 	 * @param L the state to get info from
 	 * @return the info
 	 */
-	static Info info(lua_State *L) noexcept;
+	static Info info(lua_State *L);
 
 	/**
 	 * Convert the process to a C lua_State.
 	 */
-	operator lua_State *() noexcept;
+	operator lua_State *();
 };
 
 } // !irccd

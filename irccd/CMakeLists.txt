@@ -181,11 +181,7 @@ endif ()
 		"${CMAKE_SOURCE_DIR}/extern/libircclient/include"
 	)
 
-	list(
-		APPEND
-		LIBRARIES
-		ircclient
-	)
+	list(APPEND LIBRARIES ircclient)
 #else ()
 #	find_package(Libircclient REQUIRED)
 #
@@ -206,26 +202,17 @@ add_executable(irccd ${SOURCES})
 if (NOT WITH_LUA52 OR NOT WITH_LUAJIT)
 	if (UNIX)
 		set(FLAGS "-Wno-unused-parameter -Wno-unused-variable")
-	else ()
-		set(FLAGS "/w")
 	endif ()
-
-	set_target_properties(
-		irccd
-		PROPERTIES
-		COMPILE_FLAGS "${FLAGS}"
-	)
 endif ()
 
 if (UNIX)
 	list(APPEND LIBRARIES "pthread")
+else ()
+	set(FLAGS "${FLAGS} /wd4996 /wd4244")
 endif ()
 
-target_link_libraries(
-	irccd
-	common
-	${LIBRARIES}
-)
+set_target_properties(irccd PROPERTIES COMPILE_FLAGS "${FLAGS}")
+target_link_libraries(irccd common ${LIBRARIES})
 
 install(TARGETS irccd RUNTIME DESTINATION bin)
 
