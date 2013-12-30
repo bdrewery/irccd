@@ -452,8 +452,9 @@ public:
 	 * Leave a channel.
 	 *
 	 * @param channel the channel to leave
+	 * @param reason an optional reason
 	 */
-	virtual void part(const std::string &channel);
+	virtual void part(const std::string &channel, const std::string &reason = "");
 
 	/**
 	 * Send a query message.

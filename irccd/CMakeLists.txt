@@ -27,8 +27,10 @@ if (WITH_LUA52 AND WITH_LUAJIT)
 	message(FATAL_ERROR "Please select WITH_LUA52 or WITH_LUAJIT")
 endif ()
 
-# Use bundled libircclient or not
-option(WITH_BUNDLE_IRCCLIENT "Build with bundled libircclient" On)
+#
+# External libircclient is temporarly disabled. See below.
+#
+#option(WITH_BUNDLE_IRCCLIENT "Build with bundled libircclient" On)
 
 set(SOURCES
 	server/ServerConnecting.cpp
@@ -160,7 +162,11 @@ if (WITH_LUA52 OR WITH_LUAJIT)
 	endif ()
 endif ()
 
-if (WITH_BUNDLE_IRCCLIENT)
+#
+# Disable external libircclient yet. I modified the libircclient and will not
+# compile using external.
+#
+#if (WITH_BUNDLE_IRCCLIENT)
 	#
 	# Compile libircclient as internal
 	#
@@ -180,12 +186,12 @@ if (WITH_BUNDLE_IRCCLIENT)
 		LIBRARIES
 		ircclient
 	)
-else ()
-	find_package(Libircclient REQUIRED)
-
-	list(APPEND INCLUDES ${LIBIRCCLIENT_INCLUDE_DIR})
-	list(APPEND LIBRARIES ${LIBIRCCLIENT_LIBRARIES})
-endif ()
+#else ()
+#	find_package(Libircclient REQUIRED)
+#
+#	list(APPEND INCLUDES ${LIBIRCCLIENT_INCLUDE_DIR})
+#	list(APPEND LIBRARIES ${LIBIRCCLIENT_LIBRARIES})
+#endif ()
 
 include_directories(
 	${INCLUDES}

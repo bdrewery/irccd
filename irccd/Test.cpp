@@ -110,9 +110,9 @@ public:
 		Logger::log("test: notice: from %s: %s", nickname.c_str(), message.c_str());
 	}
 
-	void part(const std::string &channel)
+	void part(const std::string &channel, const std::string &reason)
 	{
-		Logger::log("test: part: leaving channel %s", channel.c_str());
+		Logger::log("test: part: leaving channel %s [%s]", channel.c_str(), reason.c_str());
 	}
 
 	void query(const std::string &who, const std::string &message)

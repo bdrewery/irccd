@@ -125,7 +125,8 @@ end
 --- Leave a channel.
 -- At the moment, is it not possible to leave a channel with a quit message.
 -- @param channel the channel to leave
-function Server:part(channel)
+-- @param reason an optional reason
+function Server:part(channel, reason)
 end
 
 --- Send a private message to the specified target.
