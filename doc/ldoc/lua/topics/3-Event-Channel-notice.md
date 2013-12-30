@@ -4,7 +4,7 @@ This callback is called when someone sent a notice on a channel.
 
 ### Function
 
-	function onNotice(server, who, channel, notice)
+	function onChannelNotice(server, who, channel, notice)
 
 ### Parameters
 

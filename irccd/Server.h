@@ -27,15 +27,16 @@
 #include <unordered_map>
 #include <vector>
 
-#include <libircclient.h>
-
 #include <config.h>
 
+#include "IrcSession.h"
 #include "server/ServerState.h"
 
 namespace irccd {
 
 class Server;
+
+#if 0
 
 /* --------------------------------------------------------
  * IRC Events, used by Server
@@ -64,6 +65,8 @@ enum class IrcEventType {
 	Whois						//! (def) whois response
 };
 
+#endif
+
 /**
  * @enum IrcChanNickMode
  * @brief Prefixes for channels
@@ -91,76 +94,6 @@ struct IrcWhois {
 
 using IrcEventParams	= std::vector<std::string>;
 using IrcPrefixes	= std::map<IrcChanNickMode, char>;
-
-/**
- * @class IrcEvent
- * @brief An IRC event
- */
-class IrcEvent {
-public:
-	IrcEventType m_type;				//! event type
-	IrcEventParams m_params;			//! parameters
-	std::shared_ptr<Server> m_server;		//! on which server
-
-	/**
-	 * Better constructor.
-	 *
-	 * @param type the event type
-	 * @param params eventual parameters
-	 * @param server which server
-	 */
-	IrcEvent(IrcEventType type,
-		 IrcEventParams params,
-		 std::shared_ptr<Server> server);
-};
-
-/**
- * @class IrcDeleter
- * @brief Delete the irc_session_t
- */
-class IrcDeleter {
-public:
-	void operator()(irc_session_t *s);
-};
-
-/**
- * @class IrcSession
- * @brief Wrapper for irc_session_t
- */
-class IrcSession {
-private:
-	using Ptr	= std::unique_ptr<irc_session_t, IrcDeleter>;
-
-	Ptr m_handle;
-
-public:
-	/**
-	 * Default constructor.
-	 */
-	IrcSession();
-
-	/**
-	 * Move constructor.
-	 *
-	 * @param other the other IrcSession
-	 */
-	IrcSession(IrcSession &&other);
-
-	/**
-	 * Move assignment operator.
-	 *
-	 * @param other the other IrcSession
-	 * @return self
-	 */
-	IrcSession &operator=(IrcSession &&other);
-
-	/**
-	 * Cast to irc_session_t for raw commands.
-	 *
-	 * @return the irc_session_t
-	 */
-	operator irc_session_t *();
-};
 
 /**
  * @class Server

@@ -116,9 +116,5 @@ int main(int argc, char **argv)
 	signal(SIGQUIT, quit);
 #endif
 
-	try {
-		return irccd.run();
-	} catch (std::system_error error) {
-		printf("FAILURE FATAL : %s\n", error.what());
-	}
+	return irccd.run();
 }

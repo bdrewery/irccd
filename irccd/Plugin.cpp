@@ -23,9 +23,14 @@
 #include <Logger.h>
 #include <Util.h>
 
+#include "event/IrcEventLoad.h"
+#include "event/IrcEventReload.h"
+#include "event/IrcEventUnload.h"
+
 #include "Lua/LuaServer.h"
 
 #include "Irccd.h"
+#include "IrcEvent.h"
 #include "Plugin.h"
 
 namespace irccd {
@@ -70,157 +75,6 @@ std::string Plugin::getGlobal(const std::string &name)
 	lua_pop(*m_process, 1);
 
 	return result;
-}
-
-void Plugin::callFunction(const std::string &func,
-			  Server::Ptr server,
-			  std::vector<std::string> params)
-{
-	lua_State *L = *m_process;
-
-	lua_getglobal(L, func.c_str());
-	if (lua_type(L, -1) != LUA_TFUNCTION)
-		lua_pop(L, 1);
-	else {
-		int np = 0;
-
-		if (server) {
-			Luae::pushShared<Server>(L, server, ServerType);
-			++ np;
-		}
-
-		for (const std::string &a : params) {
-			lua_pushstring(L, a.c_str());
-			++ np;
-		}
-
-		if (lua_pcall(L, np, 0, 0) != LUA_OK) {
-			auto error = lua_tostring(L, -1);
-			lua_pop(L, 1);
-
-			throw Plugin::ErrorException(m_info.name, error);
-		}
-	}
-}
-
-void Plugin::callFunctionNum(const std::string &func, Server::Ptr server, int np)
-{
-	lua_State *L = *m_process;
-
-	lua_getglobal(L, func.c_str());
-	if (lua_type(L, -1) != LUA_TFUNCTION)
-		lua_pop(L, 1);
-	else {
-		// Move the function
-		lua_insert(L, 1);
-
-		// Push a server an optional arguments
-		if (server) {
-			Luae::pushShared<Server>(L, server, ServerType);
-			lua_insert(L, lua_gettop(L) - np++);
-		}
-
-		if (lua_pcall(L, np, 0, 0) != LUA_OK) {
-			std::string error = lua_tostring(L, -1);
-			lua_pop(L, 1);
-
-			throw Plugin::ErrorException(m_info.name, error);
-		}
-	}
-}
-
-void Plugin::callPlugin(Plugin::Ptr p, const IrcEvent &ev)
-{
-	switch (ev.m_type) {
-	case IrcEventType::Connection:
-		p->onConnect(ev.m_server);
-		break;
-	case IrcEventType::ChannelNotice:
-		p->onChannelNotice(ev.m_server, ev.m_params[0], ev.m_params[1],
-		    ev.m_params[2]);
-		break;
-	case IrcEventType::Invite:
-		p->onInvite(ev.m_server, ev.m_params[0], ev.m_params[1]);
-		break;
-	case IrcEventType::Join:
-		p->onJoin(ev.m_server, ev.m_params[0], ev.m_params[1]);
-		break;
-	case IrcEventType::Kick:
-		p->onKick(ev.m_server, ev.m_params[0], ev.m_params[1],
-		    ev.m_params[2], ev.m_params[3]);
-		break;
-	case IrcEventType::Message:
-	{
-		std::string cc = ev.m_server->getOptions().commandChar;
-		std::string sp = cc + p->getName();
-		std::string msg = ev.m_params[2];
-
-		// handle special commands "!<plugin> command"
-		if (cc.length() > 0 && msg.compare(0, sp.length(), sp) == 0) {
-			std::string plugin = msg.substr(
-			    cc.length(), sp.length() - cc.length());
-
-			if (plugin == p->getName()) {
-				p->onCommand(ev.m_server,
-						ev.m_params[0],
-						ev.m_params[1],
-						msg.substr(sp.length())
-				);
-			}
-		} else
-			p->onMessage(ev.m_server, ev.m_params[0], ev.m_params[1],
-			    ev.m_params[2]);
-	}
-		break;
-	case IrcEventType::Me:
-		p->onMe(ev.m_server, ev.m_params[1], ev.m_params[0], ev.m_params[2]);
-		break;
-	case IrcEventType::Mode:
-		p->onMode(ev.m_server, ev.m_params[0], ev.m_params[1],
-		    ev.m_params[2], ev.m_params[3]);
-		break;
-	case IrcEventType::Names:
-		p->onNames(ev.m_server, ev.m_params);
-		break;
-	case IrcEventType::Nick:
-		p->onNick(ev.m_server, ev.m_params[0], ev.m_params[1]);
-		break;
-	case IrcEventType::Notice:
-		p->onNotice(ev.m_server, ev.m_params[0], ev.m_params[1],
-		    ev.m_params[2]);
-		break;
-	case IrcEventType::Part:
-		p->onPart(ev.m_server, ev.m_params[0], ev.m_params[1],
-		    ev.m_params[2]);
-		break;
-	case IrcEventType::Query:
-		p->onQuery(ev.m_server, ev.m_params[0], ev.m_params[1]);
-		break;
-	case IrcEventType::Topic:
-		p->onTopic(ev.m_server, ev.m_params[0], ev.m_params[1],
-		     ev.m_params[2]);
-		break;
-	case IrcEventType::UserMode:
-		p->onUserMode(ev.m_server, ev.m_params[0], ev.m_params[1]);
-		break;
-	case IrcEventType::Whois:
-	{
-		IrcWhois info;
-
-		info.nick = ev.m_params[0];
-		info.user = ev.m_params[1];
-		info.host = ev.m_params[2];
-		info.realname = ev.m_params[3];
-
-		for (size_t i = 4; i < ev.m_params.size(); ++i)
-			info.channels.push_back(ev.m_params[i]);
-
-		p->onWhois(ev.m_server, info);
-	}
-		break;
-	default:
-		break;
-	}
 }
 
 /* --------------------------------------------------------
@@ -352,7 +206,7 @@ void Plugin::unload(const std::string &name)
 		auto i = find(name);
 
 		try {
-			i->onUnload();
+			i->handleIrcEvent(IrcEventUnload());
 		} catch (Plugin::ErrorException ex) {
 			Logger::warn("irccd: error while unloading %s: %s",
 			    name.c_str(), ex.what());
@@ -372,7 +226,7 @@ void Plugin::reload(const std::string &name)
 	Lock lk(pluginLock);
 
 	try {
-		find(name)->onReload();
+		find(name)->handleIrcEvent(IrcEventReload());
 	} catch (std::out_of_range ex) {
 		Logger::warn("irccd: %s", ex.what());
 	}
@@ -402,9 +256,13 @@ void Plugin::handleIrcEvent(const IrcEvent &ev)
 {
 	Lock lk(pluginLock);
 
+	/*
+	 * We use an index based loop because if the handle
+	 * load a plugin, the for range will getting invalid.
+	 */
 	for (size_t i = 0; i < plugins.size(); ++i) {
 		try {
-			callPlugin(plugins[i], ev);
+			ev.action(plugins[i]->getState());
 		} catch (Plugin::ErrorException ex) {
 			Logger::warn("plugin: %s", ex.what());
 		}
@@ -472,267 +330,7 @@ void Plugin::open()
 	Process::initialize(m_process, m_info);
 
 	// Do a initial load
-	onLoad();
-}
-
-void Plugin::onCommand(Server::Ptr server,
-		       const std::string &channel,
-		       const std::string &who,
-		       const std::string &message)
-{
-	std::vector<std::string> params;
-
-	params.push_back(channel);
-	params.push_back(who);
-	params.push_back(message);
-
-	callFunction("onCommand", server, params);
-}
-
-void Plugin::onConnect(Server::Ptr server)
-{
-	callFunction("onConnect", server);
-}
-
-void Plugin::onChannelNotice(Server::Ptr server,
-			     const std::string &nick,
-			     const std::string &target,
-			     const std::string &notice)
-{
-	std::vector<std::string> params;
-
-	params.push_back(nick);
-	params.push_back(target);
-	params.push_back(notice);
-
-	callFunction("onChannelNotice", server, params);
-}
-
-void Plugin::onInvite(Server::Ptr server,
-		      const std::string &channel,
-		      const std::string &who)
-{
-	std::vector<std::string> params;
-
-	params.push_back(channel);
-	params.push_back(who);
-
-	callFunction("onInvite", server, params);
-}
-
-void Plugin::onJoin(Server::Ptr server,
-		    const std::string &channel,
-		    const std::string &nickname)
-{
-	std::vector<std::string> params;
-
-	params.push_back(channel);
-	params.push_back(nickname);
-
-	callFunction("onJoin", server, params);
-}
-
-void Plugin::onKick(Server::Ptr server,
-		    const std::string &channel,
-		    const std::string &who,
-		    const std::string &kicked,
-		    const std::string &reason)
-{
-	std::vector<std::string> params;
-
-	params.push_back(channel);
-	params.push_back(who);
-	params.push_back(kicked);
-	params.push_back(reason);
-
-	callFunction("onKick", server, params);
-}
-
-void Plugin::onLoad()
-{
-	callFunction("onLoad");
-}
-
-void Plugin::onMessage(Server::Ptr server,
-		       const std::string &channel,
-		       const std::string &who,
-		       const std::string &message)
-
-{
-	std::vector<std::string> params;
-
-	params.push_back(channel);
-	params.push_back(who);
-	params.push_back(message);
-
-	callFunction("onMessage", server, params);
-}
-
-void Plugin::onMe(Server::Ptr server,
-		  const std::string &channel,
-		  const std::string &who,
-		  const std::string &message)
-
-{
-	std::vector<std::string> params;
-
-	params.push_back(channel);
-	params.push_back(who);
-	params.push_back(message);
-
-	callFunction("onMe", server, params);
-}
-
-void Plugin::onMode(Server::Ptr server,
-		    const std::string &channel,
-		    const std::string &who,
-		    const std::string &mode,
-		    const std::string &modeArg)
-{
-	std::vector<std::string> params;
-
-	params.push_back(channel);
-	params.push_back(who);
-	params.push_back(mode);
-	params.push_back(modeArg);
-
-	callFunction("onMode", server, params);
-}
-
-void Plugin::onNames(Server::Ptr server,
-		     const std::vector<std::string> &names)
-{
-	// 1. Push the channel name
-	lua_pushlstring(*m_process, names[0].c_str(), names[0].length());
-
-	// 2. Push the users
-	lua_createtable(*m_process, 0, 0);
-
-	for (size_t i = 1; i < names.size(); ++i) {
-		lua_pushlstring(*m_process, names[i].c_str(), names[i].length());
-		lua_rawseti(*m_process, -2, i);
-	}
-
-	callFunctionNum("onNames", server, 2);
-}
-
-void Plugin::onNick(Server::Ptr server,
-		    const std::string &oldnick,
-		    const std::string &newnick)
-{
-	std::vector<std::string> params;
-
-	params.push_back(oldnick);
-	params.push_back(newnick);
-
-	callFunction("onNick", server, params);
-}
-
-void Plugin::onNotice(Server::Ptr server,
-		      const std::string &nick,
-		      const std::string &target,
-		      const std::string &notice)
-{
-	std::vector<std::string> params;
-
-	params.push_back(nick);
-	params.push_back(target);
-	params.push_back(notice);
-
-	callFunction("onNotice", server, params);
-}
-
-void Plugin::onPart(Server::Ptr server,
-		    const std::string &channel,
-		    const std::string &who,
-		    const std::string &reason)
-{
-	std::vector<std::string> params;
-	
-	params.push_back(channel);
-	params.push_back(who);
-	params.push_back(reason);
-
-	callFunction("onPart", server, params);
-}
-
-void Plugin::onQuery(Server::Ptr server,
-		     const std::string &who,
-		     const std::string &message)
-{
-	std::vector<std::string> params;
-
-	params.push_back(who);
-	params.push_back(message);
-
-	callFunction("onQuery", server, params);
-}
-
-void Plugin::onReload()
-{
-	callFunction("onReload");
-}
-
-void Plugin::onTopic(Server::Ptr server,
-		     const std::string &channel,
-		     const std::string &who,
-		     const std::string &topic)
-{
-	std::vector<std::string> params;
-
-	params.push_back(channel);
-	params.push_back(who);
-	params.push_back(topic);
-
-	callFunction("onTopic", server, params);
-}
-
-void Plugin::onUnload()
-{
-	callFunction("onUnload");
-}
-
-void Plugin::onUserMode(Server::Ptr server,
-			const std::string &who,
-			const std::string &mode)
-{
-	std::vector<std::string> params;
-
-	params.push_back(who);
-	params.push_back(mode);
-
-	callFunction("onUserMode", server, params);
-}
-
-void Plugin::onWhois(Server::Ptr server,
-		     const IrcWhois &info)
-{
-	lua_createtable(*m_process, 0, 0);
-
-	lua_pushlstring(*m_process, info.nick.c_str(), info.nick.length());
-	lua_setfield(*m_process, -2, "nickname");
-
-	lua_pushlstring(*m_process, info.user.c_str(), info.user.length());
-	lua_setfield(*m_process, -2, "user");
-
-	lua_pushlstring(*m_process, info.host.c_str(), info.host.length());
-	lua_setfield(*m_process, -2, "host");
-
-	lua_pushlstring(*m_process, info.realname.c_str(), info.realname.length());
-	lua_setfield(*m_process, -2, "realname");
-
-	if (info.channels.size() >= 4) {
-		lua_createtable(*m_process, 0, 0);
-
-		for (size_t i = 4; i < info.channels.size(); ++i) {
-			lua_pushstring(*m_process, info.channels[i].c_str());
-			lua_rawseti(*m_process, -2, i - 3);
-		}
-
-		lua_setfield(*m_process, -2, "channels");
-	}
-
-	callFunctionNum("onWhois", server, 1);
+	handleIrcEvent(IrcEventLoad());
 }
 
 } // !irccd

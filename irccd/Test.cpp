@@ -24,6 +24,25 @@
 #include <Logger.h>
 #include <Util.h>
 
+#if defined(WITH_LUA)
+#  include "event/IrcEventChannelMode.h"
+#  include "event/IrcEventChannelNotice.h"
+#  include "event/IrcEventConnect.h"
+#  include "event/IrcEventInvite.h"
+#  include "event/IrcEventJoin.h"
+#  include "event/IrcEventKick.h"
+#  include "event/IrcEventMe.h"
+#  include "event/IrcEventMessage.h"
+#  include "event/IrcEventMode.h"
+#  include "event/IrcEventNames.h"
+#  include "event/IrcEventNick.h"
+#  include "event/IrcEventNotice.h"
+#  include "event/IrcEventPart.h"
+#  include "event/IrcEventQuery.h"
+#  include "event/IrcEventTopic.h"
+#  include "event/IrcEventWhois.h"
+#endif
+
 #include "Irccd.h"
 #include "Plugin.h"
 #include "Server.h"
@@ -124,7 +143,7 @@ static void helpCommand()
 	Logger::warn("require to specify a plugin name, it will use the tested one.\n");
 
 	Logger::warn("Example:");
-	Logger::warn("\t%s test file onCommand #staff markand will I be rich?", getprogname());
+	Logger::warn("\t%s test file onCommand #staff markand \"will I be rich?\"", getprogname());
 }
 
 static void helpConnect()
@@ -138,9 +157,8 @@ static void helpConnect()
 
 static void helpChannelNotice()
 {
-	Logger::warn("usage: %s test file onChannelNotice nick target notice\n", getprogname());
-	Logger::warn("Send a private notice to the specified target. Nick parameter");
-	Logger::warn("is the one who sends the notice.\n");
+	Logger::warn("usage: %s test file onChannelNotice nick channel notice\n", getprogname());
+	Logger::warn("Send a notice to the specified channel.\n");
 
 	Logger::warn("Example:");
 	Logger::warn("\t%s test file onNotice mick #staff \"#staff is not #offtopic\"", getprogname());
@@ -173,6 +191,16 @@ static void helpKick()
 	Logger::warn("Example:");
 	Logger::warn("\t%s test file onKick #staff markand julia");
 	Logger::warn("\t%s test file onKick #staff francis markand \"You're not nice with her\"");
+}
+
+static void helpMe()
+{
+	Logger::warn("usage: %s test file onMe channel who message\n", getprogname());
+	Logger::warn("Send a CTCP Action to the channel. It is usually rendered like this:\n");
+	Logger::warn("\t* jean is eating an apple.\n");
+
+	Logger::warn("Example:");
+	Logger::warn("\t%s test file onMe #staff francis \"like that\"", getprogname());
 }
 
 static void helpMessage()
@@ -260,6 +288,7 @@ std::unordered_map<std::string, HelpFunction> helpCommands {
 	{ "onInvite",		helpInvite		},
 	{ "onJoin",		helpJoin		},
 	{ "onKick",		helpKick		},
+	{ "onMe",		helpMe			},
 	{ "onMessage",		helpMessage		},
 	{ "onMode",		helpMode		},
 	{ "onNick",		helpNick		},
@@ -278,21 +307,29 @@ void testCommand(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onCommand requires 3 arguments");
-	else
-		p->onCommand(s, argv[0], argv[1], argv[2]);
+	else {
+		/*
+		 * Fake a !<plugin> command
+		 */
+		auto command = "!" + Process::info(p->getState()).name + " " + std::string(argv[2]);
+
+		IrcEventMessage(s, argv[0], argv[1], command).action(p->getState());
+	}
 }
 
 void testConnect(Plugin::Ptr p, Server::Ptr s, int, char **)
 {
-	p->onConnect(s);
+	IrcEventConnect(s).action(p->getState());
 }
 
 void testChannelNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 {
+	for (int i = 0; i < argc; ++i)
+		printf("%d = %s\n", i, argv[i]);
 	if (argc < 3)
 		Logger::warn("test: onChannelNotice requires 3 arguments");
 	else
-		p->onChannelNotice(s, argv[0], argv[1], argv[2]);
+		IrcEventChannelNotice(s, argv[1], argv[0], argv[2]).action(p->getState());
 }
 
 void testInvite(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -300,7 +337,7 @@ void testInvite(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 2)
 		Logger::warn("test: onInvite requires 2 arguments");
 	else
-		p->onInvite(s, argv[0], argv[1]);
+		IrcEventInvite(s, argv[1], argv[0]).action(p->getState());
 }
 
 void testJoin(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -308,7 +345,7 @@ void testJoin(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 2)
 		Logger::warn("test: onJoin requires 2 arguments");
 	else
-		p->onJoin(s, argv[0], argv[1]);
+		IrcEventJoin(s, argv[1], argv[0]).action(p->getState());
 }
 
 void testKick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -318,11 +355,19 @@ void testKick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 3)
 		Logger::warn("test: onKick requires at least 3 arguments");
 	else {
-		if (argc > 4)
+		if (argc >= 4)
 			reason = argv[3];
 
-		p->onKick(s, argv[0], argv[1], argv[2], reason);
+		IrcEventKick(s, argv[1], argv[0], argv[2], reason).action(p->getState());
 	}
+}
+
+void testMe(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+{
+	if (argc < 3)
+		Logger::warn("test: onMessage requires 3 arguments");
+	else
+		IrcEventMe(s, argv[0], argv[1], argv[2]).action(p->getState());
 }
 
 void testMessage(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -330,7 +375,7 @@ void testMessage(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 3)
 		Logger::warn("test: onMessage requires 3 arguments");
 	else
-		p->onMessage(s, argv[0], argv[1], argv[2]);
+		IrcEventMessage(s, argv[0], argv[1], argv[2]).action(p->getState());
 }
 
 void testMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -343,7 +388,7 @@ void testMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		if (argc >= 4)
 			modeArg = argv[3];
 
-		p->onMode(s, argv[0], argv[1], argv[2], modeArg);
+		IrcEventChannelMode(s, argv[1], argv[0], argv[2], modeArg).action(p->getState());
 	}
 }
 
@@ -352,7 +397,7 @@ void testNick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 2)
 		Logger::warn("test: onNick requires 2 arguments");
 	else
-		p->onNick(s, argv[0], argv[1]);
+		IrcEventNick(s, argv[0], argv[1]).action(p->getState());
 }
 
 void testNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -360,7 +405,7 @@ void testNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 3)
 		Logger::warn("test: onNotice requires 3 arguments");
 	else
-		p->onNotice(s, argv[0], argv[1], argv[2]);
+		IrcEventNotice(s, argv[0], argv[1], argv[2]).action(p->getState());
 }
 
 void testPart(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -373,7 +418,7 @@ void testPart(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		if (argc >= 3)
 			reason = argv[2];
 
-		p->onPart(s, argv[0], argv[1], reason);
+		IrcEventPart(s, argv[1], argv[0], reason).action(p->getState());
 	}
 }
 
@@ -382,7 +427,7 @@ void testQuery(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 2)
 		Logger::warn("test: onQuery requires 2 arguments");
 	else
-		p->onQuery(s, argv[0], argv[1]);
+		IrcEventQuery(s, argv[0], argv[1]).action(p->getState());
 }
 
 void testTopic(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -390,7 +435,7 @@ void testTopic(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 3)
 		Logger::warn("test: onTopic requires 3 arguments");
 	else
-		p->onTopic(s, argv[0], argv[1], argv[2]);
+		IrcEventTopic(s, argv[1], argv[0], argv[2]).action(p->getState());
 }
 
 void testUserMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -398,7 +443,7 @@ void testUserMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 2)
 		Logger::warn("test: onUserMode requires 2 arguments");
 	else
-		p->onUserMode(s, argv[0], argv[1]);
+		IrcEventMode(s, argv[0], argv[1]).action(p->getState());
 }
 
 std::unordered_map<std::string, TestFunction> testCommands {
@@ -408,6 +453,7 @@ std::unordered_map<std::string, TestFunction> testCommands {
 	{ "onInvite",		testInvite		},
 	{ "onJoin",		testJoin		},
 	{ "onKick",		testKick		},
+	{ "onMe",		testMe			},
 	{ "onMessage",		testMessage		},
 	{ "onMode",		testMode		},
 	{ "onNick",		testNick		},
@@ -453,7 +499,7 @@ void testPlugin(const char *file, int argc, char **argv)
 	try {
 		plugin->open();
 	} catch (Plugin::ErrorException ex) {
-		Logger::warn("Failed to open plugin: %s", ex.what());
+		Logger::fatal(1, "Failed to open plugin: %s", ex.what());
 	}
 
 	// Simulate handler is optional
@@ -461,9 +507,9 @@ void testPlugin(const char *file, int argc, char **argv)
 		try {
 			testCommands.at(argv[1])(plugin, server, argc - 2, argv + 2);
 		} catch (std::out_of_range ex) {
-			Logger::warn("Unknown test command named %s", argv[1]);
+			Logger::fatal(1, "Unknown test command named %s", argv[1]);
 		} catch (Plugin::ErrorException ex) {
-			Logger::warn("Error in script %s", ex.what());
+			Logger::fatal(1, "Error in script %s", ex.what());
 		}
 	}
 }

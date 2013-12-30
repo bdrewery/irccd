@@ -47,6 +47,8 @@ set(SOURCES
 	Server.h
 	Irccd.cpp
 	Irccd.h
+	IrcSession.cpp
+	IrcSession.h
 	Message.cpp
 	Message.h
 	Listener.cpp
@@ -70,6 +72,46 @@ if (WITH_LUA52 OR WITH_LUAJIT)
 		list(
 			APPEND
 			SOURCES
+			event/IrcEventChannelMode.cpp
+			event/IrcEventChannelMode.h
+			event/IrcEventChannelNotice.cpp
+			event/IrcEventChannelNotice.h
+			event/IrcEventConnect.cpp
+			event/IrcEventConnect.h
+			event/IrcEventInvite.cpp
+			event/IrcEventInvite.h
+			event/IrcEventJoin.cpp
+			event/IrcEventJoin.h
+			event/IrcEventKick.cpp
+			event/IrcEventKick.h
+			event/IrcEventLoad.cpp
+			event/IrcEventLoad.h
+			event/IrcEventMe.cpp
+			event/IrcEventMe.h
+			event/IrcEventMessage.cpp
+			event/IrcEventMessage.h
+			event/IrcEventMode.cpp
+			event/IrcEventMode.h
+			event/IrcEventNames.cpp
+			event/IrcEventNames.h
+			event/IrcEventNick.cpp
+			event/IrcEventNick.h
+			event/IrcEventNotice.cpp
+			event/IrcEventNotice.h
+			event/IrcEventPart.cpp
+			event/IrcEventPart.h
+			event/IrcEventQuery.cpp
+			event/IrcEventQuery.h
+			event/IrcEventReload.cpp
+			event/IrcEventReload.h
+			event/IrcEventTopic.cpp
+			event/IrcEventTopic.h
+			event/IrcEventUnload.cpp
+			event/IrcEventUnload.h
+			event/IrcEventWhois.cpp
+			event/IrcEventWhois.h
+			IrcEvent.cpp
+			IrcEvent.h
 			Lua/LuaIrccd.cpp
 			Lua/LuaIrccd.h
 			Lua/LuaLogger.cpp
@@ -151,6 +193,23 @@ include_directories(
 )
 
 add_executable(irccd ${SOURCES})
+
+#
+# When Lua is disabled, a lot of variables are unused, disable warnings.
+#
+if (NOT WITH_LUA52 OR NOT WITH_LUAJIT)
+	if (UNIX)
+		set(FLAGS "-Wno-unused-parameter -Wno-unused-variable")
+	else ()
+		set(FLAGS "/w")
+	endif ()
+
+	set_target_properties(
+		irccd
+		PROPERTIES
+		COMPILE_FLAGS "${FLAGS}"
+	)
+endif ()
 
 if (UNIX)
 	list(APPEND LIBRARIES "pthread")

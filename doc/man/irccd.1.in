@@ -288,7 +288,7 @@ The new nickname.
 .El
 .\" Notice
 .Ss Notice
-This event is triggered when someone sent a notice someone.
+This event is triggered when someone sent a notice to you.
 .Bd -literal -offset indent
 function onNotice(server, who, target, notice)
 .Ed
