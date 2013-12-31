@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -25,6 +25,11 @@ option(WITH_TESTS "Enable unit testing" Off)
 # Set globally so message() can get it
 set(UNIT_TESTS "disabled" PARENT_SCOPE)
 
+# cppunit generate some warnings
+if (UNIX)
+	set(FLAGS "-Wno-unused-parameter")
+endif ()
+
 # Function to create a test
 function(create_test name sources)
 	include_directories(
@@ -33,6 +38,7 @@ function(create_test name sources)
 	)
 
 	add_executable(${name} ${sources})
+	set_target_properties(${name} PROPERTIES COMPILE_FLAGS ${FLAGS})
 
 	add_test(
 		NAME ${name}
