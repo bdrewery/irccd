@@ -29,7 +29,6 @@
 
 #  define _MKDIR(p, x)	::_mkdir(p)
 #else
-#  include <sys/time.h>
 #  include <libgen.h>
 
 // This is libxdg-basedir
@@ -294,37 +293,6 @@ bool Util::hasAccess(const std::string &path)
 	return ret;
 }
 
-std::string Util::getHome()
-{
-#if defined(_WIN32)
-	char path[MAX_PATH];
-
-	if (SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path) != S_OK)
-		return "";
-
-	return std::string(path);
-#else
-	return std::string(getenv("HOME"));
-#endif
-}
-
-uint64_t Util::getTicks()
-{
-#if defined(_WIN32) || defined(_MSC_VER)
-	_timeb tp;
-
-	_ftime(&tp);
-
-	return tp.time * 1000LL + tp.millitm;
-#else
-        struct timeval tp;
-
-        gettimeofday(&tp, NULL);
-
-        return tp.tv_sec * 1000LL + tp.tv_usec / 1000;
-#endif
-}
-
 void Util::mkdir(const std::string &dir, int mode)
 {
 	std::ostringstream oss;
@@ -380,15 +348,6 @@ std::vector<std::string> Util::split(const std::string &list,
 	} while (!finished);
 
 	return result;
-}
-
-void Util::usleep(int msec)
-{
-#if defined(_WIN32)
-	Sleep(msec);
-#else
-	::usleep(msec * 1000);
-#endif
 }
 
 } // !irccd

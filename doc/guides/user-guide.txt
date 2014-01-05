@@ -1,4 +1,4 @@
-Irccd 1.0 user guide
+Irccd 1.1 user guide
 ====================
 :Author: Demelier David
 :Email: demelier.david@gmail.com
@@ -36,6 +36,7 @@ To build from sources, you need the following installed on your system:
   1.7 or higher for SSL support.
 * libxdg-basedir, https://github.com/devnev/libxdg-basedir. On Unix only.
 * Lua 5.2, http://lua.org (optional).
+* LuaJIT, http://luajit.org (optional).
 * C++11 support.
 
 [NOTE]
@@ -49,21 +50,28 @@ replaced with the current version. Go to that directory, then type the
 following commands:
 
 ----
-markand@localhost [irccd-1.0] $ mkdir _build_
-markand@localhost [irccd-1.0] $ cd _build_
-markand@localhost [irccd-1.0/_build_] $ cmake ..
-markand@localhost [irccd-1.0/_build_] $ make
-markand@localhost [irccd-1.0/_build_] $ sudo make install
+markand@localhost [irccd-1.1] $ mkdir _build_
+markand@localhost [irccd-1.1] $ cd _build_
+markand@localhost [irccd-1.1/_build_] $ cmake ..
+markand@localhost [irccd-1.1/_build_] $ make
+markand@localhost [irccd-1.1/_build_] $ sudo make install
 ----
 
 This is the quick way of compiling and installing. It's also possible to set
 some options to customize the build.
 
+.Switching to LuaJIT
+You can use LuaJIT instead of vanilla Lua 5.2
+
+----
+markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_LUA52=Off -DWITH_LUAJIT=On
+----
+
 .Disabling Lua
 You can disable Lua support.
 
 ----
-markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_LUA=Off
+markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_LUA52=Off -DWITH_LUAJIT=Off
 ----
 
 When disabling Lua, the IRC bot can still be used as a message relayer, so you
@@ -77,21 +85,21 @@ you plan to use Lua, do the above command and switch Off to On.
 If you don't want to install Lua API documentation, use the following command.
 
 ----
-markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_LDOC=Off
+markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_LDOC=Off
 ----
 
 .Disable user guides
 You can disable installation of user guides.
 
 ----
-markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_DOC=Off
+markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_DOC=Off
 ----
 
 .Disable manual pages
 On Windows, man pages are not really useful, you can also disable them
 
 ----
-markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_MAN=Off
+markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_MAN=Off
 ----
 
 .Changing the default installation path
@@ -102,7 +110,7 @@ specify the prefix where to install files. On unix systems, it's usually
 To change this, use the following:
 
 ----
-markand@localhost [irccd-1.0/_build_] $ cmake .. -DCMAKE_INSTALL_PREFIX=/opt/some/directory
+markand@localhost [irccd-1.1/_build_] $ cmake .. -DCMAKE_INSTALL_PREFIX=/opt/some/directory
 ----
 
 .Changing the man paths
@@ -112,7 +120,7 @@ different one.
 For example, on FreeBSD the typical use would be:
 
 ----
-markand@localhost [irccd-1.0/_build_] $ cmake .. -DMANDIR=/usr/local/man
+markand@localhost [irccd-1.1/_build_] $ cmake .. -DMANDIR=/usr/local/man
 ----
 
 == Configuring irccd
@@ -628,6 +636,7 @@ The following commands are available for irccdctl:
 
 * <<irccdctlcnotice,cnotice>>
 * <<irccdctlconnect,connect>>
+* <<irccdctldisconnect,disconnect>>
 * <<irccdctlhelp,help>>
 * <<irccdctlinvite,invite>>
 * <<irccdctljoin,join>>
@@ -640,6 +649,7 @@ The following commands are available for irccdctl:
 * <<irccdctlnick,nick>>
 * <<irccdctlpart,part>>
 * <<irccdctlreload,reload>>
+* <<irccdctltopic,topic>>
 * <<irccdctlumode,umode>>
 * <<irccdctlunload,unload>>
 
@@ -693,6 +703,22 @@ $ irccdctl [-s] [-i identity] [-k password] connect name host port
 $ irccdctl connect wanadoo chat.wanadoo.fr 6667
 $ irccdctl connect -s wanadoo chat.wanadoo.fr 6697
 $ irccdctl connect -k "secret" wanadoo chat.wanadoo.fr 6667
+----
+
+anchor:irccdctldisconnect[]
+
+=== Disconnect
+
+Disconnect from a connected server.
+
+.Usage
+----
+$ irccdctl disconnect name
+----
+
+.Example
+----
+$ irccdctl disconnect wanadoo
 ----
 
 anchor:irccdctlhelp[]

@@ -7,7 +7,7 @@ local util = require "irccd.util"
 -- Say hello in random colors to people that joins.
 --
 function onJoin(server, channel, who)
-	local user = util.splitUser(who)
+	local user = util.splituser(who)
 
 	-- Be sure to say hello to other people
 	if user ~= server:getIdentity().nickname then

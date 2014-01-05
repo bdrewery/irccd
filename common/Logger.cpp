@@ -102,7 +102,7 @@ void Logger::fatal(int code, std::string fmt, ...)
 
 void Logger::debug(std::string fmt, ...)
 {
-#if defined(DEBUG)
+#if !defined(NDEBUG)
 	va_list ap;
 
 	va_start(ap, fmt);

@@ -25,9 +25,11 @@
 
 namespace irccd {
 
-struct Date {
+class Date {
+private:
 	time_t m_timestamp;		//! time epoch
 
+public:
 	Date();
 	Date(time_t timestamp);
 

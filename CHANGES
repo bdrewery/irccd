@@ -14,7 +14,9 @@ CURRENT
   * Added new way to load plugin by paths,
   * Server:whois and server:names generate a new events instead of callback,
   * Support of connecting and disconnecting at runtime,
-  * Plugin has more information, getHome() and getName() are deprecated.
+  * Plugin has more information, getHome() and getName() are deprecated,
+  * Split irccd.util into irccd.fs and irccd.system,
+  * Added support for LuaJIT.
 
 1.0.2 November 1, 2013
 ---------------------------------------

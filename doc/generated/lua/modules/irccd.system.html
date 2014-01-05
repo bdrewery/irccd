@@ -1,0 +1,317 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Irccd Lua API Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<h1>Navigation</h1>
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.fs.html">irccd.fs</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
+  <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
+  <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
+  <li><strong>irccd.system</strong></li>
+  <li><a href="../modules/irccd.thread.html">irccd.thread</a></li>
+  <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="nowrap">
+  <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
+  <li><a href="../topics/1.1-Standard-Libraries.md.html">1.1-Standard-Libraries.md</a></li>
+  <li><a href="../topics/2-Plugin_creation.md.html">2-Plugin_creation.md</a></li>
+  <li><a href="../topics/2.1-Using_irccd_test.md.html">2.1-Using_irccd_test.md</a></li>
+  <li><a href="../topics/2.2-List_of_Events.md.html">2.2-List_of_Events.md</a></li>
+  <li><a href="../topics/3-Event-Action.md.html">3-Event-Action.md</a></li>
+  <li><a href="../topics/3-Event-Channel-notice.md.html">3-Event-Channel-notice.md</a></li>
+  <li><a href="../topics/3-Event-Command.md.html">3-Event-Command.md</a></li>
+  <li><a href="../topics/3-Event-Connect.md.html">3-Event-Connect.md</a></li>
+  <li><a href="../topics/3-Event-Invite.md.html">3-Event-Invite.md</a></li>
+  <li><a href="../topics/3-Event-Join.md.html">3-Event-Join.md</a></li>
+  <li><a href="../topics/3-Event-Kick.md.html">3-Event-Kick.md</a></li>
+  <li><a href="../topics/3-Event-Load.md.html">3-Event-Load.md</a></li>
+  <li><a href="../topics/3-Event-Message.md.html">3-Event-Message.md</a></li>
+  <li><a href="../topics/3-Event-Mode.md.html">3-Event-Mode.md</a></li>
+  <li><a href="../topics/3-Event-Names.md.html">3-Event-Names.md</a></li>
+  <li><a href="../topics/3-Event-Nick.md.html">3-Event-Nick.md</a></li>
+  <li><a href="../topics/3-Event-Notice.md.html">3-Event-Notice.md</a></li>
+  <li><a href="../topics/3-Event-Part.md.html">3-Event-Part.md</a></li>
+  <li><a href="../topics/3-Event-Query.md.html">3-Event-Query.md</a></li>
+  <li><a href="../topics/3-Event-Reload.md.html">3-Event-Reload.md</a></li>
+  <li><a href="../topics/3-Event-Topic.md.html">3-Event-Topic.md</a></li>
+  <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
+  <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
+  <li><a href="../topics/3-Event-Whois.md.html">3-Event-Whois.md</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/Connect.lua.html">Connect.lua</a></li>
+  <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
+  <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>irccd.system</code></h1>
+
+<p>System information.</p>
+<p> Inspect the current operating system.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#env">env ()</a></td>
+	<td class="summary">Get a environment variable.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#home">home ()</a></td>
+	<td class="summary">Get the home directory.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#name">name ()</a></td>
+	<td class="summary">Get the operating system name.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#ticks">ticks ()</a></td>
+	<td class="summary">Get the time spent from start.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#sleep">sleep (sec)</a></td>
+	<td class="summary">Sleep for seconds.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#uptime">uptime ()</a></td>
+	<td class="summary">Get the system uptime.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#usleep">usleep (msec)</a></td>
+	<td class="summary">Sleep for milliseconds.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#version">version ()</a></td>
+	<td class="summary">Get the operating system version.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2><a name="Functions"></a>Functions</h2>
+    <dl class="function">
+    <dt>
+    <a name = "env"></a>
+    <strong>env ()</strong>
+    </dt>
+    <dd>
+    Get a environment variable.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the variable or an empty string
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "home"></a>
+    <strong>home ()</strong>
+    </dt>
+    <dd>
+    Get the home directory.
+ This function should be used with care, plugin should not use user home to
+ store files.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the user home directory
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.plugin.html#info">plugin.info</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "name"></a>
+    <strong>name ()</strong>
+    </dt>
+    <dd>
+    Get the operating system name.
+ Usually Windows, FreeBSD, Linux and such.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the system name
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "ticks"></a>
+    <strong>ticks ()</strong>
+    </dt>
+    <dd>
+    Get the time spent from start.
+ Get how many milliseconds spent since the irccd startup.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the number of seconds
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "sleep"></a>
+    <strong>sleep (sec)</strong>
+    </dt>
+    <dd>
+    Sleep for seconds.
+ Suspend the execution thread.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">sec</span>
+         the number of seconds
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.system.html#sleep">sleep</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "uptime"></a>
+    <strong>uptime ()</strong>
+    </dt>
+    <dd>
+    Get the system uptime.
+ This function returns the number of seconds elapsed since the system
+ boot up.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the number of seconds
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "usleep"></a>
+    <strong>usleep (msec)</strong>
+    </dt>
+    <dd>
+    Sleep for milliseconds.
+ Suspend the execution thread.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">msec</span>
+         the number of milliseconds
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.system.html#sleep">sleep</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "version"></a>
+    <strong>version ()</strong>
+    </dt>
+    <dd>
+    Get the operating system version.
+ This function is completely system dependent.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the version as a string
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.0</a></i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

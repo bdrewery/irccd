@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="generator" content="AsciiDoc 8.6.8">
-<title>Irccd 1.0 user guide</title>
+<meta name="generator" content="AsciiDoc 8.6.9">
+<title>Irccd 1.1 user guide</title>
 <style type="text/css">
 /*
  * AsciiDoc 'volnitsky' theme for xhtml11 and html5 backends.
@@ -21,7 +21,6 @@ body {
 }
 
 a {
-	font-size: 10px;
 	font-weight: bold;
 	color: #214954;
 	text-decoration: none;
@@ -327,9 +326,8 @@ body {
 }
 
 .monospaced, tt, div.listingblock > div.content {
-  font-family:  Consolas, "Andale Mono", "Courier New", monospace;
+  font-family:  Monospace, "Sans Mono";
   color: #004400;
-  background: #f4f4f4;
   line-height: 1.2em;
 }
 
@@ -624,7 +622,7 @@ asciidoc.install(2);
 </head>
 <body class="article">
 <div id="header">
-<h1>Irccd 1.0 user guide</h1>
+<h1>Irccd 1.1 user guide</h1>
 <span id="author">Demelier David</span><br>
 <span id="email" class="monospaced">&lt;<a href="mailto:demelier.david@gmail.com">demelier.david@gmail.com</a>&gt;</span><br>
 <span id="revdate">June, 8 2013</span>
@@ -680,6 +678,11 @@ Lua 5.2, <a href="http://lua.org">http://lua.org</a> (optional).
 </li>
 <li>
 <p>
+LuaJIT, <a href="http://luajit.org">http://luajit.org</a> (optional).
+</p>
+</li>
+<li>
+<p>
 C++11 support.
 </p>
 </li>
@@ -701,18 +704,23 @@ replaced with the current version. Go to that directory, then type the
 following commands:</p></div>
 <div class="listingblock">
 <div class="content monospaced">
-<pre>markand@localhost [irccd-1.0] $ mkdir _build_
-markand@localhost [irccd-1.0] $ cd _build_
-markand@localhost [irccd-1.0/_build_] $ cmake ..
-markand@localhost [irccd-1.0/_build_] $ make
-markand@localhost [irccd-1.0/_build_] $ sudo make install</pre>
+<pre>markand@localhost [irccd-1.1] $ mkdir _build_
+markand@localhost [irccd-1.1] $ cd _build_
+markand@localhost [irccd-1.1/_build_] $ cmake ..
+markand@localhost [irccd-1.1/_build_] $ make
+markand@localhost [irccd-1.1/_build_] $ sudo make install</pre>
 </div></div>
 <div class="paragraph"><p>This is the quick way of compiling and installing. It&#8217;s also possible to set
 some options to customize the build.</p></div>
+<div class="paragraph"><div class="title">Switching to LuaJIT</div><p>You can use LuaJIT instead of vanilla Lua 5.2</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_LUA52=Off -DWITH_LUAJIT=On</pre>
+</div></div>
 <div class="paragraph"><div class="title">Disabling Lua</div><p>You can disable Lua support.</p></div>
 <div class="listingblock">
 <div class="content monospaced">
-<pre>markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_LUA=Off</pre>
+<pre>markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_LUA52=Off -DWITH_LUAJIT=Off</pre>
 </div></div>
 <div class="paragraph"><p>When disabling Lua, the IRC bot can still be used as a message relayer, so you
 can still use <a href="#irccdctl">irccdctl</a> to manage irccd.</p></div>
@@ -728,17 +736,17 @@ you plan to use Lua, do the above command and switch Off to On.</td>
 <div class="paragraph"><div class="title">Disable Lua documentation</div><p>If you don&#8217;t want to install Lua API documentation, use the following command.</p></div>
 <div class="listingblock">
 <div class="content monospaced">
-<pre>markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_LDOC=Off</pre>
+<pre>markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_LDOC=Off</pre>
 </div></div>
 <div class="paragraph"><div class="title">Disable user guides</div><p>You can disable installation of user guides.</p></div>
 <div class="listingblock">
 <div class="content monospaced">
-<pre>markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_DOC=Off</pre>
+<pre>markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_DOC=Off</pre>
 </div></div>
 <div class="paragraph"><div class="title">Disable manual pages</div><p>On Windows, man pages are not really useful, you can also disable them</p></div>
 <div class="listingblock">
 <div class="content monospaced">
-<pre>markand@localhost [irccd-1.0/_build_] $ cmake .. -DWITH_MAN=Off</pre>
+<pre>markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_MAN=Off</pre>
 </div></div>
 <div class="paragraph"><div class="title">Changing the default installation path</div><p>Sometimes, you may need to install irccd over other place, for that, you can
 specify the prefix where to install files. On unix systems, it&#8217;s usually
@@ -746,14 +754,14 @@ specify the prefix where to install files. On unix systems, it&#8217;s usually
 <div class="paragraph"><p>To change this, use the following:</p></div>
 <div class="listingblock">
 <div class="content monospaced">
-<pre>markand@localhost [irccd-1.0/_build_] $ cmake .. -DCMAKE_INSTALL_PREFIX=/opt/some/directory</pre>
+<pre>markand@localhost [irccd-1.1/_build_] $ cmake .. -DCMAKE_INSTALL_PREFIX=/opt/some/directory</pre>
 </div></div>
 <div class="paragraph"><div class="title">Changing the man paths</div><p>By default, irccd use ${PREFIX}/share/man for manual pages. Some systems use
 different one.</p></div>
 <div class="paragraph"><p>For example, on FreeBSD the typical use would be:</p></div>
 <div class="listingblock">
 <div class="content monospaced">
-<pre>markand@localhost [irccd-1.0/_build_] $ cmake .. -DMANDIR=/usr/local/man</pre>
+<pre>markand@localhost [irccd-1.1/_build_] $ cmake .. -DMANDIR=/usr/local/man</pre>
 </div></div>
 </div>
 </div>
@@ -1587,6 +1595,11 @@ the <a href="#irccdserver">server section</a> with the parameter <span class="mo
 </li>
 <li>
 <p>
+<a href="#irccdctldisconnect">disconnect</a>
+</p>
+</li>
+<li>
+<p>
 <a href="#irccdctlhelp">help</a>
 </p>
 </li>
@@ -1643,6 +1656,11 @@ the <a href="#irccdserver">server section</a> with the parameter <span class="mo
 <li>
 <p>
 <a href="#irccdctlreload">reload</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctltopic">topic</a>
 </p>
 </li>
 <li>
@@ -1708,6 +1726,21 @@ will be notified by.</p></div>
 <pre>$ irccdctl connect wanadoo chat.wanadoo.fr 6667
 $ irccdctl connect -s wanadoo chat.wanadoo.fr 6697
 $ irccdctl connect -k "secret" wanadoo chat.wanadoo.fr 6667</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctldisconnect"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_disconnect">Disconnect</h3>
+<div class="paragraph"><p>Disconnect from a connected server.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl disconnect name</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl disconnect wanadoo</pre>
 </div></div>
 <div class="paragraph"><p><a id="irccdctlhelp"></a></p></div>
 </div>
@@ -1958,7 +1991,7 @@ quotes.</p></div>
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-11-27 10:45:25 CET
+Last updated 2013-12-28 19:43:20 CET
 </div>
 </div>
 </body>

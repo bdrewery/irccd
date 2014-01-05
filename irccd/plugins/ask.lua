@@ -57,7 +57,7 @@ end
 
 function onCommand(server, channel, nick, message)
 	local pick = math.random(1, #answers)
-	local nick = util.splitUser(nick)
+	local nick = util.splituser(nick)
 	server:say(channel, nick .. ": " .. answers[pick])
 end
 

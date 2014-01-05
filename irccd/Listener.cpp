@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <algorithm>
 #include <utility>
 
 #include <Logger.h>
@@ -145,7 +146,11 @@ void handleKick(const Params &params)
 
 void handleLoad(const Params &params)
 {
+#if defined(WITH_LUA)
 	Plugin::load(params[0]);
+#else
+	(void)params;
+#endif
 }
 
 void handleMe(const Params &params)
@@ -180,7 +185,11 @@ void handlePart(const Params &params)
 
 void handleReload(const Params &params)
 {
+#if defined(WITH_LUA)
 	Plugin::reload(params[0]);
+#else
+	(void)params;
+#endif
 }
 
 void handleTopic(const Params &params)
@@ -190,7 +199,11 @@ void handleTopic(const Params &params)
 
 void handleUnload(const Params &params)
 {
+#if defined(WITH_LUA)
 	Plugin::unload(params[0]);
+#else
+	(void)params;
+#endif
 }
 
 void handleUserMode(const Params &params)
@@ -376,14 +389,17 @@ void Listener::process()
 		 * otherwise, read the UDP socket and try to execute it.
 		 */
 		if (s.getType() == SOCK_STREAM) {
-			if (find(m_socketServers.begin(), m_socketServers.end(), s) != m_socketServers.end())
+			auto i = std::find(m_socketServers.begin(), m_socketServers.end(), s);
+
+			if (i != m_socketServers.end())
 				clientAdd(s);
 			else
 				clientRead(s);
 		} else
 			peerRead(s);
 	} catch (SocketError er) {
-		Logger::warn("listener: socket error %s", er.what());
+		if (Irccd::getInstance().isRunning())
+			Logger::warn("listener: socket error %s", er.what());
 	} catch (SocketTimeout) { }
 }
 

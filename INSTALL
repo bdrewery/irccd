@@ -27,6 +27,8 @@ Optional:
 
 * Lua 5.2 or higher (http://lua.org). This library is needed in order to use
   irccd plugins.
+* LuaJIT 2.0 or higher (http://luajit.org). This library can be used as the
+  Lua 5.2 alternative.
 
 Developer requirements
 ======================
@@ -101,7 +103,7 @@ Disabling Lua
 
 If you want to build irccd without Lua, use this CMake argument:
 
-$ cmake .. -DWITH_LUA=Off
+$ cmake .. -DWITH_LUA52=Off -DWITH_LUAJIT=Off
 
 Disabling Lua documentation
 ---------------------------

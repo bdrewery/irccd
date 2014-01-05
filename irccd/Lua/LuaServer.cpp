@@ -20,6 +20,7 @@
 #include <unordered_map>
 
 #include "Irccd.h"
+#include "Luae.h"
 #include "LuaServer.h"
 
 namespace irccd {

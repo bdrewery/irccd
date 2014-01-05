@@ -39,9 +39,43 @@ CNOTICE server nickname message\n
 
 Parameters:
 
-* server         The server.
-* nickname       The user nickname target.
-* message        The message.
+* `server`: The server.
+* `nickname`: The user nickname target.
+* `message`: The message.
+
+=== CONNECT
+
+This command is used to connect to a server at runtime.
+
+----
+CONNECT name address port ident:identity key:password ssl:(off|on)\n
+----
+
+Parameters:
+
+* `name`: The new server name.
+* `address`: The address to connecto to.
+* `port`: The port
+* `ident`: (Optional) the identity.
+* `key`: (Optional) the server password.
+* `ssl`: (Optional) on or off, enable SSL.
+
+.Example
+----
+CONNECT wanadoo chat.wanadoo.fr 8765 ident:superjean ssl:off\n
+----
+
+=== DISCONNECT
+
+Disconnect from a connected server.
+
+----
+DISCONNECT server\n
+----
+
+Parameters:
+
+* `server`: The server name
 
 === INVITE
 
@@ -54,9 +88,9 @@ INVITE server target channel\n
 
 Parameters:
 
-* server         The server.
-* target         The target nickname to invite.
-* channel        The channel name prepended by a '#'
+* `server`: The server.
+* `target`: The target nickname to invite.
+* `channel`: The channel name prepended by a '#'
 
 === JOIN
 
@@ -69,9 +103,9 @@ JOIN server channel [password]\n
 
 Parameters:
 
-* server         The server.
-* channel        The channel name prepended by a '#'
-* password       An optional password
+* `server`: The server.
+* `channel`: The channel name prepended by a '#'
+* `password`: An optional password
 
 === KICK
 
@@ -84,10 +118,10 @@ KICK server nick channel [reason]\n
 
 Parameters:
 
-* server         The server.
-* nick           The nickname to kick.
-* channel        The channel prepended by a '#' to kick from
-* reason         An optional reason.
+* `server`: The server.
+* `nick`: The nickname to kick.
+* `channel`: The channel prepended by a '#' to kick from
+* `reason`: An optional reason.
 
 === LOAD
 
@@ -99,7 +133,7 @@ LOAD name\n
 
 Parameters:
 
-* name           The plugin name.
+* `name`: The plugin name.
 
 === ME
 
@@ -112,9 +146,9 @@ ME server target message\n
 
 Parameters:
 
-* server         The server.
-* target         A channel or a private query.
-* message        The message.
+* `server`: The server.
+* `target`: A channel or a private query.
+* `message`: The message.
 
 === MODE
 
@@ -126,9 +160,9 @@ MODE server channel mode\n
 
 Parameters:
 
-* server         The server.
-* channel        The target channel.
-* mode           The new mode.
+* `server`: The server.
+* `channel`: The target channel.
+* `mode`: The new mode.
 
 === MSG
 
@@ -140,9 +174,9 @@ MSG server target message\n
 
 Parameters:
 
-* server         The server.
-* target         A channel or a private query.
-* message        The message.
+* `server`: The server.
+* `target`: A channel or a private query.
+* `message`: The message.
 
 === NICK
 
@@ -156,8 +190,8 @@ NICK server nickname\n
 
 Parameters:
 
-* server         The server.
-* nickname       The new nickname.
+* `server`: The server.
+* `nickname`: The new nickname.
 
 === NOTICE
 
@@ -169,9 +203,9 @@ NOTICE server channel message\n
 
 Parameters:
 
-* server         The server.
-* channel        The channel target.
-* message        The message.
+* `server`: The server.
+* `channel`: The channel target.
+* `message`: The message.
 
 === PART
 
@@ -183,8 +217,8 @@ PART server channel\n
 
 Parameters:
 
-* server         The server.
-* channel        The channel to leave.
+* `server`: The server.
+* `channel`: The channel to leave.
 
 === QUERY
 
@@ -196,9 +230,9 @@ QUERY server target message\n
 
 Parameters:
 
-* server         The server.
-* target         The target nickname.
-* message        The message.
+* `server`: The server.
+* `target`: The target nickname.
+* `message`: The message.
 
 === RELOAD
 
@@ -210,7 +244,7 @@ RELOAD name\n
 
 Parameters:
 
-* name           The plugin name.
+* `name`: The plugin name.
 
 === TOPIC
 
@@ -223,9 +257,9 @@ TOPIC server channel topic\n
 
 Parameters:
 
-* server         The server.
-* channel        The channel.
-* topic          The new topic.
+* `server`: The server.
+* `channel`: The channel.
+* `topic`: The new topic.
 
 === UMODE
 
@@ -237,8 +271,8 @@ UMODE server mode\n
 
 Parameters:
 
-* server         The server.
-* mode           The new mode.
+* `server`: The server.
+* `mode`: The new mode.
 
 === UNLOAD
 
@@ -250,6 +284,6 @@ UNLOAD name\n
 
 Parameters:
 
-* name           The plugin name.
+* `name`: The plugin name.
 
 // vim: set syntax=asciidoc:

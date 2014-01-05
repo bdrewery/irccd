@@ -16,9 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define DATE_TYPE	"DateType"
-#define DIR_TYPE	"DirectoryType"
-
 #include <cstring>
 #include <initializer_list>
 #include <unordered_map>
@@ -26,10 +23,16 @@
 
 #include <Date.h>
 #include <Directory.h>
+#include <Logger.h>
+#include <System.h>
 #include <Util.h>
 
 #include "Irccd.h"
 #include "LuaUtil.h"
+
+#if defined(COMPAT_1_0)
+#  define DIR_TYPE	"Directory"
+#endif
 
 namespace irccd {
 
@@ -69,7 +72,7 @@ enum class Attribute {
 	Reverse		= '\x16'
 };
 
-std::unordered_map<std::string, Color> colors = {
+std::unordered_map<std::string, Color> colors {
 	{ "White",		Color::White			},
 	{ "Black",		Color::Black			},
 	{ "Blue",		Color::Blue			},
@@ -88,7 +91,7 @@ std::unordered_map<std::string, Color> colors = {
 	{ "LightGrey",		Color::LightGrey		}
 };
 
-std::unordered_map<std::string, Attribute> attributes = {
+std::unordered_map<std::string, Attribute> attributes {
 	{ "Bold",		Attribute::Bold			},
 	{ "Color",		Attribute::Color		},
 	{ "Italic",		Attribute::Italic		},
@@ -99,16 +102,6 @@ std::unordered_map<std::string, Attribute> attributes = {
 	{ "Reverse",		Attribute::Reverse		}
 };
 
-int basename(lua_State *L)
-{
-	std::string path = luaL_checkstring(L, 1);
-	std::string ret = Util::baseName(path);
-
-	lua_pushstring(L, ret.c_str());
-
-	return 1;
-}
-
 int date(lua_State *L)
 {
 	if (lua_gettop(L) >= 1) {
@@ -116,26 +109,6 @@ int date(lua_State *L)
 		new (L, DATE_TYPE) Date(tm);
 	} else
 		new (L, DATE_TYPE) Date();
-
-	return 1;
-}
-
-int dirname(lua_State *L)
-{
-	std::string path = luaL_checkstring(L, 1);
-	std::string ret = Util::dirName(path);
-
-	lua_pushstring(L, ret.c_str());
-
-	return 1;
-}
-
-int exist(lua_State *L)
-{
-	std::string path = luaL_checkstring(L, 1);
-	bool ret = Util::exist(path);
-
-	lua_pushboolean(L, ret);
 
 	return 1;
 }
@@ -187,8 +160,84 @@ int format(lua_State *L)
 	return 1;
 }
 
+int splituser(lua_State *L)
+{
+	auto target = luaL_checkstring(L, 1);
+	char nick[32];
+
+	std::memset(nick, 0, sizeof (nick));
+
+	irc_target_get_nick(target, nick, sizeof (nick) -1);
+	lua_pushstring(L, nick);
+
+	return 1;
+}
+
+int splithost(lua_State *L)
+{
+	auto target = luaL_checkstring(L, 1);
+	char host[32];
+
+	std::memset(host, 0, sizeof (host));
+
+	irc_target_get_host(target, host, sizeof (host) -1);
+	lua_pushstring(L, host);
+
+	printf("HOST = %s\n", host);
+
+	return 1;
+}
+
+#if defined(COMPAT_1_0)
+
+void warn(lua_State *L, const char *func, const char *repl)
+{
+	auto name = Process::info(L).name;
+
+	Logger::warn("plugin %s: `%s' is deprecated, please use `%s'",
+		     name.c_str(), func, repl);
+}
+
+int basename(lua_State *L)
+{
+	warn(L, "util.basename", "fs.basename");
+
+	std::string path = luaL_checkstring(L, 1);
+	std::string ret = Util::baseName(path);
+
+	lua_pushstring(L, ret.c_str());
+
+	return 1;
+}
+
+int dirname(lua_State *L)
+{
+	warn(L, "util.dirname", "fs.dirname");
+
+	std::string path = luaL_checkstring(L, 1);
+	std::string ret = Util::dirName(path);
+
+	lua_pushstring(L, ret.c_str());
+
+	return 1;
+}
+
+int exist(lua_State *L)
+{
+	warn(L, "util.exist", "fs.exists");
+
+	std::string path = luaL_checkstring(L, 1);
+	bool ret = Util::exist(path);
+
+	lua_pushboolean(L, ret);
+
+	return 1;
+}
+
 int getEnv(lua_State *L)
 {
+	warn(L, "util.getEnv", "system.env");
+
 	std::string var = luaL_checkstring(L, 1);
 	char *value;
 
@@ -202,20 +251,26 @@ int getEnv(lua_State *L)
 
 int getHome(lua_State *L)
 {
-	lua_pushstring(L, Util::getHome().c_str());
+	warn(L, "util.getHome", "system.home");
+
+	lua_pushstring(L, System::home().c_str());
 
 	return 1;
 }
 
 int getTicks(lua_State *L)
 {
-	lua_pushinteger(L, static_cast<int>(Util::getTicks()));
+	warn(L, "util.getTicks", "system.ticks");
+
+	lua_pushinteger(L, static_cast<int>(System::ticks()));
 
 	return 1;
 }
 
 int mkdir(lua_State *L)
 {
+	warn(L, "util.mkdir", "fs.mkdir");
+
 	int mode = 0700;
 	std::string path;
 
@@ -239,6 +294,8 @@ int mkdir(lua_State *L)
 
 int opendir(lua_State *L)
 {
+	warn(L, "util.mkdir", "fs.opendir");
+
 	std::string path;
 	bool skipParents = false;
 
@@ -265,6 +322,8 @@ int opendir(lua_State *L)
 
 int splitUser(lua_State *L)
 {
+	warn(L, "util.splitUser", "util.splituser");
+
 	char nick[64], host[128];
 	const char* nickname;
 
@@ -284,28 +343,41 @@ int splitUser(lua_State *L)
 
 int usleep(lua_State *L)
 {
+	warn(L, "util.usleep", "system.usleep");
+
 	int msec = lua_tointeger(L, 1);
 
-	Util::usleep(msec);
+	System::usleep(msec);
 
 	return 0;
 }
 
+#endif
+
 } // !util
 
 const luaL_Reg functions[] = {
-	{ "basename",		util::basename		},
-	{ "date",		util::date		},
-	{ "dirname",		util::dirname		},
-	{ "exist",		util::exist		},
-	{ "format",		util::format		},
+/*
+ * DEPRECATION:	1.1-002
+ *
+ * All the following functions have been moved to the irccd.system.
+ */
+#if defined(COMPAT_1_0)
 	{ "getEnv",		util::getEnv		},
 	{ "getTicks",		util::getTicks		},
 	{ "getHome",		util::getHome		},
+	{ "basename",		util::basename		},
+	{ "dirname",		util::dirname		},
+	{ "exist",		util::exist		},
 	{ "mkdir",		util::mkdir		},
 	{ "opendir",		util::opendir		},
 	{ "splitUser",		util::splitUser		},
 	{ "usleep",		util::usleep		},
+#endif
+	{ "date",		util::date		},
+	{ "format",		util::format		},
+	{ "splituser",		util::splituser		},
+	{ "splithost",		util::splithost		},
 	{ nullptr,		nullptr			}
 };
 
@@ -422,6 +494,24 @@ int tostring(lua_State *L)
 
 } // !dateMt
 
+const luaL_Reg dateMethodsList[] = {
+	{ "calendar",		date::calendar		},
+	{ "format",		date::format		},
+	{ "timestamp",		date::timestamp		},
+	{ nullptr,		nullptr			}
+};
+
+const luaL_Reg dateMtList[] = {
+	{ "__eq",		dateMt::equals		},
+	{ "__gc",		dateMt::gc		},
+	{ "__le",		dateMt::le		},
+	{ "__tostring",		dateMt::tostring	},
+	{ nullptr,		nullptr			}
+};
+
+
+#if defined(COMPAT_1_0)
+
 /* --------------------------------------------------------
  * Directory methods
  * -------------------------------------------------------- */
@@ -513,21 +603,6 @@ int tostring(lua_State *L)
 
 } // !dirMt
 
-const luaL_Reg dateMethodsList[] = {
-	{ "calendar",		date::calendar		},
-	{ "format",		date::format		},
-	{ "timestamp",		date::timestamp		},
-	{ nullptr,		nullptr			}
-};
-
-const luaL_Reg dateMtList[] = {
-	{ "__eq",		dateMt::equals		},
-	{ "__gc",		dateMt::gc		},
-	{ "__le",		dateMt::le		},
-	{ "__tostring",		dateMt::tostring	},
-	{ nullptr,		nullptr			}
-};
-
 const luaL_Reg dirMethodsList[] = {
 	{ "count",		dir::count		},
 	{ "read",		dir::read		},
@@ -541,6 +616,8 @@ const luaL_Reg dirMtList[] = {
 	{ nullptr,		nullptr			}
 };
 
+#endif
+
 int luaopen_util(lua_State *L)
 {
 	// Util library
@@ -553,12 +630,14 @@ int luaopen_util(lua_State *L)
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 
+#if defined(COMPAT_1_0)
 	// Directory type
 	luaL_newmetatable(L, DIR_TYPE);
 	luaL_setfuncs(L, dirMtList, 0);
 	luaL_newlib(L, dirMethodsList);
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
+#endif
 
 	// Colors
 	lua_createtable(L, 0, 0);

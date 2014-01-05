@@ -23,8 +23,10 @@ COMMENT		= "A logger plugin to log everything"
 LICENSE		= "ISC"
 
 -- Modules
+local fs	= require "irccd.fs"
 local parser	= require "irccd.parser"
 local plugin	= require "irccd.plugin"
+local system	= require "irccd.system"
 local util	= require "irccd.util"
 
 -- Logger configuration
@@ -89,10 +91,10 @@ local function convert(what, keywords)
 	local line = date:format(what)
 
 	-- Remove ~ if found.
-	line = line:gsub("~", util.getHome())
+	line = line:gsub("~", system.home)
 	
 	-- Add environment variable.
-	line = line:gsub("%${(%w+)}", util.getEnv)
+	line = line:gsub("%${(%w+)}", system.env)
 
 	-- Now convert the # with gsub.
 	return line:gsub("#(.)", keywords)
@@ -104,10 +106,10 @@ local function open(keywords)
 	local path = convert(configuration.home, keywords)
 
 	-- Test if parent directory exists
-	local parent = util.dirname(path)
+	local parent = fs.dirname(path)
 
-	if not util.exist(parent) then
-		local ret, err = util.mkdir(parent)
+	if not fs.exists(parent) then
+		local ret, err = fs.mkdir(parent)
 		if not ret then
 			error(err)
 		end
@@ -138,7 +140,7 @@ function onChannelNotice(server, who, channel, notice)
 		m = notice,
 		s = server:getName(),
 		u = who,
-		U = util.splitUser(who)
+		U = util.splituser(who)
 	}
 
 	write(format.cnotice, keywords)
@@ -149,7 +151,7 @@ function onJoin(server, channel, nickname)
 		c = channel,
 		s = server:getName(),
 		u = nickname,
-		U = util.splitUser(nickname)
+		U = util.splituser(nickname)
 	}
 
 	write(format.join, keywords)
@@ -161,7 +163,7 @@ function onKick(server, channel, who, target, reason)
 		s = server:getName(),
 		t = target,
 		u = who,
-		U = util.splitUser(who),
+		U = util.splituser(who),
 		m = reason
 	}
 
@@ -174,7 +176,7 @@ function onMe(server, channel, who, message)
 		s = server:getName(),
 		m = message,
 		u = who,
-		U = util.splitUser(who)
+		U = util.splituser(who)
 	}
 
 	write(format.me, keywords)
@@ -186,7 +188,7 @@ function onMessage(server, channel, who, message)
 		s = server:getName(),
 		m = message,
 		u = who,
-		U = util.splitUser(who)
+		U = util.splituser(who)
 	}
 
 	write(format.message, keywords)
@@ -199,7 +201,7 @@ function onMode(server, channel, who, mode, modeArg)
 		m = mode,
 		M = modeArg,
 		u = who,
-		U = util.splitUser(who)
+		U = util.splituser(who)
 	}
 
 	write(format.mode, keywords)
@@ -212,7 +214,7 @@ function onNotice(server, who, target, notice)
 		s = server:getName(),
 		T = target,
 		u = who,
-		U = util.splitUser(who)
+		U = util.splituser(who)
 	}
 
 	write(format.notice, keywords)
@@ -224,7 +226,7 @@ function onPart(server, channel, nickname, reason)
 		s = server:getName(),
 		m = reason,
 		u = who,
-		U = util.splitUser(nickname)
+		U = util.splituser(nickname)
 	}
 
 	write(format.part, keywords)
@@ -240,7 +242,7 @@ function onTopic(server, channel, who, topic)
 		s = server:getName(),
 		t = topic,
 		u = who,
-		U = util.splitUser(who)
+		U = util.splituser(who)
 	}
 
 	write(format.topic, keywords)

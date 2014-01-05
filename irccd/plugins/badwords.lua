@@ -67,7 +67,7 @@ function onMessage(server, channel, nick, message)
 
 	for _, w in pairs(words) do
 		if message:find("%f[%a]" .. w:lower() .. "%f[%A]") then
-			server:say(channel, util.splitUser(nick) .. ": " .. answer)
+			server:say(channel, util.splituser(nick) .. ": " .. answer)
 
 			-- do not multiple
 			break;

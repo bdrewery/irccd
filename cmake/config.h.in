@@ -19,6 +19,8 @@
 #cmakedefine01 MAJOR
 #cmakedefine01 MINOR
 
+#cmakedefine VERSION "@VERSION@"
+
 #define ETCDIR			"@ETCDIR@"
 #define MODDIR			"@MODDIR@"
 #define DOCDIR			"@DOCDIR@"
@@ -26,10 +28,10 @@
 
 #cmakedefine COMPAT_1_0
 
-// Optional Lua support
-#cmakedefine USE_LUA
+#cmakedefine WITH_LUAJIT
+#cmakedefine WITH_LUA52
 
-#if defined(USE_LUA)
+#if defined(WITH_LUA52) || defined(WITH_LUAJIT)
 #  define WITH_LUA
 #endif
 
@@ -49,6 +51,19 @@
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
+
+// Tests for sys/stat.h
+#cmakedefine HAVE_STAT_ST_DEV
+#cmakedefine HAVE_STAT_ST_INO
+#cmakedefine HAVE_STAT_ST_NLINK
+#cmakedefine HAVE_STAT_ST_UID
+#cmakedefine HAVE_STAT_ST_GID
+#cmakedefine HAVE_STAT_ST_ATIME
+#cmakedefine HAVE_STAT_ST_MTIME
+#cmakedefine HAVE_STAT_ST_CTIME
+#cmakedefine HAVE_STAT_ST_SIZE
+#cmakedefine HAVE_STAT_ST_BLKSIZE
+#cmakedefine HAVE_STAT_ST_BLOCKS
 
 #if defined(_MSC_VER)
 #  define noexcept throw()

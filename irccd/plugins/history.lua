@@ -23,9 +23,11 @@ COMMENT		= "Track nickname's history"
 LICENSE		= "ISC"
 
 -- Modules
+local fs	= require "irccd.fs"
 local logger	= require "irccd.logger"
 local parser	= require "irccd.parser"
 local plugin	= require "irccd.plugin"
+local system	= require "irccd.system"
 local util	= require "irccd.util"
 
 local format = {
@@ -67,10 +69,10 @@ local function openFile(server, channel, mode)
 	local srvdir = base .. "/" .. server:getName()
 
 	-- Test if the directory exists
-	if not util.exist(srvdir) then
+	if not fs.exists(srvdir) then
 		logger.log(srvdir .. " does not exists, creating it")
 
-		local r, err = util.mkdir(srvdir)
+		local r, err = fs.mkdir(srvdir)
 
 		if not r then
 			return nil, err
@@ -119,10 +121,10 @@ local function convert(what, keywords, date)
 	end
 
 	-- Remove ~ if found.
-	line = line:gsub("~", util.getHome())
+	line = line:gsub("~", system.home)
 
 	-- Add environment variable.
-	line = line:gsub("%${(%w+)}", util.getEnv)
+	line = line:gsub("%${(%w+)}", system.env)
 
 	-- Now convert the # with gsub.
 	return line:gsub("#(.)", keywords)
@@ -174,7 +176,7 @@ end
 
 function onCommand(server, channel, who, message)
 	local f = openFile(server, channel, "r")
-	who = util.splitUser(who)
+	who = util.splituser(who)
 
 	if f == nil then
 		server:say(channel, who .. ", " .. format.error)
@@ -186,7 +188,7 @@ function onCommand(server, channel, who, message)
 		-- Convert format
 		local kw = {
 			U = U,
-			c = c
+			c = channel
 		}
 
 		if entry == nil then
@@ -207,7 +209,7 @@ function onCommand(server, channel, who, message)
 end
 
 function onJoin(server, channel, nickname)
-	nickname = util.splitUser(nickname)
+	nickname = util.splituser(nickname)
 	updateDatabase(server, channel, nickname)
 end
 
@@ -218,7 +220,7 @@ function onNames(server, channel, names)
 end
 
 function onMessage(server, channel, nickname, message)
-	updateDatabase(server, channel, util.splitUser(nickname), message)
+	updateDatabase(server, channel, util.splituser(nickname), message)
 end
 
 function onReload()

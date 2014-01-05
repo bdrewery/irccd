@@ -30,6 +30,7 @@
 #include <Parser.h>
 #include <Socket.h>
 #include <SocketAddress.h>
+#include <System.h>
 #include <Util.h>
 
 #include "Irccd.h"
@@ -56,6 +57,7 @@ void Irccd::initialize()
 	Socket::init();
 	Logger::setVerbose(false);
 
+#if defined(WITH_LUA)
 	// Add user's path
 	oss << Util::pathUser() << "plugins/";
 	Plugin::addPath(oss.str());
@@ -67,6 +69,7 @@ void Irccd::initialize()
 
 	oss << MODDIR << Util::DIR_SEP;
 	Plugin::addPath(oss.str());
+#endif
 }
 
 bool Irccd::isOverriden(char c)
@@ -117,6 +120,7 @@ void Irccd::openConfig()
 	readListeners(config);
 	readPlugins(config);
 
+#if defined(WITH_LUA)
 	/* Now, we load plugins specified by command line */
 	for (auto s : m_wantedPlugins) {
 		try {
@@ -125,6 +129,7 @@ void Irccd::openConfig()
 			Logger::warn("irccd: %s", error.what());
 		}
 	}
+#endif
 
 	readServers(config);
 }
@@ -134,9 +139,11 @@ void Irccd::readGeneral(const Parser &config)
 	if (config.hasSection("general")) {
 		Section general = config.getSection("general");
 
+#if defined(WITH_LUA)
 		// Extract parameters that are needed for the next
 		if (general.hasOption("plugin-path"))
 			Plugin::addPath(general.getOption<std::string>("plugin-path"));
+#endif
 
 #if defined(COMPAT_1_0)
 /*
@@ -175,18 +182,22 @@ void Irccd::readPlugins(const Parser &config)
 {
 	// New way of loading plugins
 	if (config.hasSection("plugins")) {
+#if defined(WITH_LUA)
 		Section section = config.getSection("plugins");
 
-		try {
-			for (auto opt : section.getOptions()) {
+		for (auto opt : section.getOptions()) {
+			try {
 				if (opt.m_value.length() == 0)
 					Plugin::load(opt.m_key);
 				else
 					Plugin::load(opt.m_value, false);
+			} catch (std::runtime_error error) {
+				Logger::warn("irccd: %s", error.what());
 			}
-		} catch (std::runtime_error error) {
-			Logger::warn("irccd: %s", error.what());
 		}
+#else
+		Logger::warn("irccd: ignoring plugins, Lua support is disabled");
+#endif
 	}
 }
 
@@ -426,7 +437,11 @@ void Irccd::setForeground(bool mode)
 
 void Irccd::deferPlugin(const std::string &name)
 {
+#if defined(WITH_LUA)
 	m_wantedPlugins.push_back(name);
+#else
+	(void)name;
+#endif
 }
 
 const Server::Identity &Irccd::findIdentity(const std::string &name)
@@ -460,7 +475,7 @@ int Irccd::run()
 		 * precision (i.e badwords).
 		 */
 		if (Listener::count() == 0)
-			Util::usleep(250);
+			System::usleep(250);
 		else
 			Listener::process();
 

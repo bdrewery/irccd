@@ -141,21 +141,6 @@ public:
 	static bool hasAccess(const std::string &path);
 
 	/**
-	 * Get home directory usually /home/foo
-	 *
-	 * @return the home directory
-	 */
-	static std::string getHome();
-
-	/**
-	 * Get the milliseconds elapsed since the application
-	 * startup.
-	 *
-	 * @return the milliseconds
-	 */
-	static uint64_t getTicks();
-
-	/**
 	 * Create a directory.
 	 *
 	 * @param dir the directory path
@@ -174,13 +159,6 @@ public:
 	static std::vector<std::string> split(const std::string &list,
 					      const std::string &delimiter,
 					      int max = -1);
-
-	/**
-	 * Sleep for milli seconds.
-	 *
-	 * @param msec the number of milli seconds
-	 */
-	static void usleep(int msec);
 };
 
 } // !irccd

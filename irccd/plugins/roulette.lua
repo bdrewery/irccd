@@ -109,7 +109,7 @@ local function shot(s, c, who)
 	init(s, c)
 
 	local keywords = {
-		U = util.splitUser(who),
+		U = util.splituser(who),
 		u = who,
 		i = instances[s:getName()][c].count
 	}

@@ -20,7 +20,12 @@
 project(irccd)
 
 # Optional Lua support
-option(WITH_LUA "Build with Lua plugin support" On)
+option(WITH_LUA52 "Build with Lua plugin support" On)
+option(WITH_LUAJIT "Build with LuaJIT plugin support" Off)
+
+if (WITH_LUA52 AND WITH_LUAJIT)
+	message(FATAL_ERROR "Please select WITH_LUA52 or WITH_LUAJIT")
+endif ()
 
 # Use bundled libircclient or not
 option(WITH_BUNDLE_IRCCLIENT "Build with bundled libircclient" On)
@@ -39,10 +44,14 @@ set(SOURCES
 
 set(LUA_SUPPORT "disabled" PARENT_SCOPE)
 
-if (WITH_LUA)
-	find_package(Lua52)
+if (WITH_LUA52 OR WITH_LUAJIT)
+	if (WITH_LUA52)
+		find_package(Lua52)
+	elseif (WITH_LUAJIT)
+		find_package(LuaJIT)
+	endif ()
 
-	if (LUA52_FOUND)
+	if (LUA52_FOUND OR LUAJIT_FOUND)
 		add_subdirectory(plugins)
 
 		# Optional Lua sources
@@ -53,6 +62,8 @@ if (WITH_LUA)
 			Lua/LuaIrccd.h
 			Lua/LuaLogger.cpp
 			Lua/LuaLogger.h
+			Lua/LuaFS.cpp
+			Lua/LuaFS.h
 			Lua/LuaParser.cpp
 			Lua/LuaParser.h
 			Lua/LuaPipe.cpp
@@ -63,6 +74,8 @@ if (WITH_LUA)
 			Lua/LuaServer.h
 			Lua/LuaSocket.cpp
 			Lua/LuaSocket.h
+			Lua/LuaSystem.cpp
+			Lua/LuaSystem.h
 			Lua/LuaThread.cpp
 			Lua/LuaThread.h
 			Lua/LuaUtil.cpp
@@ -85,21 +98,19 @@ if (WITH_LUA)
 		list(
 			APPEND
 			INCLUDES
-			${LUA_INCLUDE_DIR}
 			${CMAKE_CURRENT_SOURCE_DIR}
 		)
 
-		# Optional Lua libraries
-		list(
-			APPEND
-			LIBRARIES
-			${LUA_LIBRARIES}
-		)
-
-		set(LUA_SUPPORT "enabled" PARENT_SCOPE)
-		set(USE_LUA 1 PARENT_SCOPE)		# for config.h
+		if (WITH_LUA52)
+			list(APPEND INCLUDES ${LUA52_INCLUDE_DIR})
+			list(APPEND LIBRARIES ${LUA52_LIBRARIES})
+			set(LUA_SUPPORT "enabled (Lua 5.2)" PARENT_SCOPE)
+		elseif (WITH_LUAJIT)
+			list(APPEND INCLUDES ${LUAJIT_INCLUDE_DIR})
+			list(APPEND LIBRARIES ${LUAJIT_LIBRARIES})
+			set(LUA_SUPPORT "enabled (LuaJIT)" PARENT_SCOPE)
+		endif ()
 	endif ()
-
 endif ()
 
 if (WITH_BUNDLE_IRCCLIENT)
