@@ -78,18 +78,16 @@ void handleConnect(const Params &params)
 	Server::Info info;
 	Server::Identity ident;
 	Server::Options options;
+	Server::RetryInfo reco;
 
-	// Set a max retry count to avoid forever loop
-	options.m_maxretries = 5;
+	info.name = params[0];
+	info.host = params[1];
 
-	info.m_name = params[0];
-	info.m_host = params[1];
-
-	if (Server::has(info.m_name))
-		throw std::runtime_error("server " + info.m_name + " already connected");
+	if (Server::has(info.name))
+		throw std::runtime_error("server " + info.name + " already connected");
 
 	try {
-		info.m_port = std::stoi(params[2]);
+		info.port = std::stoi(params[2]);
 	} catch (...) {
 		throw std::runtime_error("invalid port");
 	}
@@ -100,15 +98,15 @@ void handleConnect(const Params &params)
 		for (size_t i = 3; i < params.size(); ++i) {
 			o = getOptional(params[i]);
 			if (o.first == "key")
-				info.m_password = o.second;
+				info.password = o.second;
 			if (o.first == "ssl")
-				info.m_ssl = true;
+				info.ssl = true;
 			if (o.first == "ident")
 				ident = Irccd::getInstance().findIdentity(o.second);
 		}
 	}
 
-	Server::add(std::make_shared<Server>(info, ident, options));
+	Server::add(std::make_shared<Server>(info, ident, options, reco));
 }
 
 void handleChannelNotice(const Params &params)

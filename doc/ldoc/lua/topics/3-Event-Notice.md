@@ -1,6 +1,6 @@
 ## Notice
 
-This event is triggered when someone sent a notice someone.
+This event is triggered when someone sent a notice to you.
 
 ### Function
 

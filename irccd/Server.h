@@ -27,11 +27,16 @@
 #include <unordered_map>
 #include <vector>
 
-#include <libircclient.h>
+#include <config.h>
+
+#include "IrcSession.h"
+#include "server/ServerState.h"
 
 namespace irccd {
 
 class Server;
+
+#if 0
 
 /* --------------------------------------------------------
  * IRC Events, used by Server
@@ -59,6 +64,8 @@ enum class IrcEventType {
 	UserMode,					//! user mode change
 	Whois						//! (def) whois response
 };
+
+#endif
 
 /**
  * @enum IrcChanNickMode
@@ -89,83 +96,6 @@ using IrcEventParams	= std::vector<std::string>;
 using IrcPrefixes	= std::map<IrcChanNickMode, char>;
 
 /**
- * @class IrcEvent
- * @brief An IRC event
- */
-class IrcEvent {
-public:
-	IrcEventType m_type;				//! event type
-	IrcEventParams m_params;			//! parameters
-	std::shared_ptr<Server> m_server;		//! on which server
-
-	/**
-	 * Better constructor.
-	 *
-	 * @param type the event type
-	 * @param params eventual parameters
-	 * @param server which server
-	 */
-	IrcEvent(IrcEventType type,
-		 IrcEventParams params,
-		 std::shared_ptr<Server> server);
-};
-
-/**
- * @class IrcDeleter
- * @brief Delete the irc_session_t
- */
-class IrcDeleter {
-public:
-	void operator()(irc_session_t *s);
-};
-
-/**
- * @class IrcSession
- * @brief Wrapper for irc_session_t
- */
-class IrcSession {
-private:
-	using Ptr	= std::unique_ptr<irc_session_t, IrcDeleter>;
-
-	Ptr m_handle;
-
-public:
-	/**
-	 * Default constructor forbidden.
-	 */
-	IrcSession() = delete;
-
-	/**
-	 * Constructor with irc_session_state.
-	 *
-	 * @param s the irc_session_t initialized
-	 */
-	explicit IrcSession(irc_session_t *s);
-
-	/**
-	 * Move constructor.
-	 *
-	 * @param other the other IrcSession
-	 */
-	IrcSession(IrcSession &&other);
-
-	/**
-	 * Move assignment operator.
-	 *
-	 * @param other the other IrcSession
-	 * @return self
-	 */
-	IrcSession &operator=(IrcSession &&other);
-
-	/**
-	 * Cast to irc_session_t for raw commands.
-	 *
-	 * @return the irc_session_t
-	 */
-	operator irc_session_t *();
-};
-
-/**
  * @class Server
  * @brief Connect to an IRC server
  *
@@ -174,65 +104,66 @@ public:
  */
 class Server : public std::enable_shared_from_this<Server> {
 public:
+	/**
+	 * @struct Channel
+	 * @brief A channel joined or to join
+	 */
 	struct Channel {
-		std::string m_name;			//! channel name
-		std::string m_password;			//! channel optional password
+		std::string	name;			//! channel name
+		std::string	password;		//! channel optional password
 	};
 
+	using ChanList	= std::vector<Channel>;
+
+	/**
+	 * @struct RetryInfo
+	 * @brief The reconnection mechanism
+	 */
+	struct RetryInfo {
+		bool		enabled = true;		//! enable the reconnection mechanism
+		int		maxretries = 0;		//! max number of test (0 = forever)
+		int		noretried = 0;		//! current number of test
+		int		timeout = 30;		//! seconds to wait before testing
+	};
+
+	/**
+	 * @struct Options
+	 * @brief Options for the server
+	 */
 	struct Options {
-		std::string m_commandChar;		//! command token
-		bool m_joinInvite;			//! auto join on invites
-		unsigned m_maxretries;			//! number of connection retries
-		unsigned m_curretries;			//! current number of retries
-		unsigned m_timeout;			//! number of seconds to wait
-		bool m_retry;				//! for reconnecting
-
-		Options()
-			: m_commandChar("!")
-			, m_joinInvite(false)
-			, m_maxretries(0)
-			, m_curretries(0)
-			, m_timeout(30)
-			, m_retry(true)
-		{
-		}
+		std::string	commandChar = "!";	//! command token
+		bool		joinInvite = true;	//! auto join on invites
 	};
 
+	/**
+	 * @struct Info
+	 * @brief Server information
+	 */
 	struct Info {
-		std::string m_name;			//! server's name
-		std::string m_host;			//! hostname
-		unsigned m_port;			//! server's port
-		std::string m_password;			//! optional server password
-		bool m_ssl;				//! SSL usage
-		bool m_sslVerify;			//! SSL verification
-		std::vector<Channel> m_channels;	//! list of channels
-		IrcPrefixes m_prefixes;			//! comes with event 5
-
-		Info()
-			: m_port(0)
-			, m_ssl(false)
-			, m_sslVerify(true)
-		{
-		}
+		std::string	name;			//! server's name
+		std::string	host;			//! hostname
+		std::string	password;		//! optional server password
+		ChanList	channels;		//! list of channels
+		IrcPrefixes	prefixes;		//! comes with event 5
+		unsigned	port = 0;		//! server's port
+		bool		ssl = false;		//! SSL usage
+		bool		sslVerify = true;	//! SSL verification
 	};
 
+	/**
+	 * @struct Identity
+	 * @brief An identity used for the server
+	 */
 	struct Identity {
-		std::string m_name;			//! identity name
-		std::string m_nickname;			//! user nickname
-		std::string m_username;			//! IRC client user
-		std::string m_realname;			//! user real name
-		std::string m_ctcpVersion;		//! CTCP version
-		bool m_ctcpReply;			//! auto reply CTCP
+		std::string	name = "__irccd__";	//! identity name
+		std::string	nickname = "irccd";	//! user nickname
+		std::string	username = "irccd";	//! IRC client user
 
-		Identity()
-		{
-			m_name = "__irccd__";
-			m_nickname = "irccd";
-			m_username = "irccd";
-			m_realname = "IRC Client Daemon";
-			m_ctcpVersion = "IRC Client Daemon";
-			m_ctcpReply = true;
-		}
+		//! The realname
+		std::string	realname = "IRC Client Daemon";
+
+		//! The CTCP version response
+		std::string	ctcpVersion = "Irccd " VERSION;
 	};
 
 	using NameList	= std::unordered_map<
@@ -251,8 +182,8 @@ public:
 				Server::Ptr
 			  >;
 
-	using ChanList	= std::vector<Channel>;
-	using Mutex	= std::mutex;
+
+	using Mutex	= std::recursive_mutex;
 	using Lock	= std::lock_guard<Mutex>;
 	using MapFunc	= std::function<void (Server::Ptr)>;
 
@@ -260,39 +191,22 @@ private:
 	static List	servers;		//! all servers
 	static Mutex	serverLock;		//! lock for server management
 
-	// IRC thread
-	irc_callbacks_t	m_callbacks;		//! callbacks for libircclient
-	IrcSession	m_session;		//! libircclient session
-	bool		m_shouldDelete;		//! tells if we must delete the server
-
-	// The thread
-	std::thread	m_thread;		//! server's thread
-	bool		m_threadJoined;		//! thread's status
-	bool		m_retrying;		//! tells if we must continue connecting
-
 	// For deferred events
 	NameList	m_nameLists;		//! channels names to receive
 	WhoisList	m_whoisLists;		//! list of whois
 
 	Mutex		m_lock;			//! lock for client operation
+	IrcSession	m_session;		//! the current session
 
-	/*
-	 * Initialize callbacks.
-	 */
-	void init();
-
-	/*
-	 * Thread functions
-	 */
-	void prepareSession();
-	void tryConnect();
-	void shouldContinue();
-	void routine();
+	// State
+	ServerState::Ptr m_state;		//! the current state
+	std::thread	m_thread;		//! the thread
 
 protected:
 	Info		m_info;			//! server info
 	Identity	m_identity;		//! identity to use
 	Options		m_options;		//! some options
+	RetryInfo	m_reco;			//! reconnection settings
 
 public:
 	/**
@@ -301,7 +215,14 @@ public:
 	 *
 	 * @param server the server to add
 	 */
-	static void add(Server::Ptr server);
+	static void add(Ptr server);
+
+	/**
+	 * Remove the server from the registry.
+	 *
+	 * @param server
+	 */
+	static void remove(Ptr server);
 
 	/**
 	 * Get an existing server.
@@ -328,7 +249,7 @@ public:
 	static void forAll(MapFunc func);
 
 	/**
-	 * Remove all dead servers.
+	 * Remove dead servers.
 	 */
 	static void flush();
 
@@ -358,10 +279,12 @@ public:
 	 * @param info the host info
 	 * @param identity the identity
 	 * @param options some options
+	 * @param reco the reconnection options
 	 */
 	Server(const Info &info,
 	       const Identity &identity,
-	       const Options &options);
+	       const Options &options,
+	       const RetryInfo &reco);
 
 	/**
 	 * Default destructor.
@@ -412,6 +335,20 @@ public:
 	Options &getOptions();
 
 	/**
+	 * Get the reconnection settings.
+	 *
+	 * @return the reconnection settings
+	 */
+	RetryInfo &getRecoInfo();
+
+	/**
+	 * Get the current IrcSession.
+	 *
+	 * @return the session
+	 */
+	IrcSession &getSession();
+
+	/**
 	 * Get all channels that will be auto joined
 	 *
 	 * @return the list of channels
@@ -449,31 +386,11 @@ public:
 	 */
 	void removeChannel(const std::string &name);
 
-	/* -------------------------------------------------
-	 * Thread functions
-	 * ------------------------------------------------- */
-
 	/**
-	 * Start listening on that server, this will create a thread that
-	 * can be stopped with stop();
-	 *
-	 * @see stop
+	 * Start the server thread and state machine.
 	 */
 	void start();
 
-	/**
-	 * Reset the number of retries.
-	 */
-	void resetRetries();
-
-	/**
-	 * Join the thread in a safe manner.
-	 */
-	void join();
-
-	/**
-	 * Stop the connection on that server.
-	 */
 	void stop();
 
 	/* ------------------------------------------------

@@ -36,6 +36,10 @@
 #include "Irccd.h"
 #include "Listener.h"
 
+#include "server/ServerDead.h"
+#include "server/ServerDisconnected.h"
+#include "server/ServerRunning.h"
+
 #if defined(WITH_LUA)
 #  include "Plugin.h"
 #endif
@@ -143,9 +147,8 @@ void Irccd::readGeneral(const Parser &config)
 		// Extract parameters that are needed for the next
 		if (general.hasOption("plugin-path"))
 			Plugin::addPath(general.getOption<std::string>("plugin-path"));
-#endif
 
-#if defined(COMPAT_1_0)
+#  if defined(COMPAT_1_0)
 /*
  * DEPRECATION:	1.1-002
  *
@@ -165,6 +168,7 @@ void Irccd::readGeneral(const Parser &config)
 				}
 			}
 		}
+#  endif
 #endif
 
 #if !defined(_WIN32)
@@ -207,23 +211,21 @@ void Irccd::readIdentities(const Parser &config)
 		Server::Identity identity;
 
 		try {
-			identity.m_name = s.requireOption<std::string>("name");
+			identity.name = s.requireOption<std::string>("name");
 
 			if (s.hasOption("nickname"))
-				identity.m_nickname = s.getOption<std::string>("nickname");
+				identity.nickname = s.getOption<std::string>("nickname");
 			if (s.hasOption("username"))
-				identity.m_username = s.getOption<std::string>("username");
+				identity.username = s.getOption<std::string>("username");
 			if (s.hasOption("realname"))
-				identity.m_realname = s.getOption<std::string>("realname");
+				identity.realname = s.getOption<std::string>("realname");
 			if (s.hasOption("ctcp-version"))
-				identity.m_ctcpVersion = s.getOption<std::string>("ctcp-version");
-			if (s.hasOption("ctcp-autoreply"))
-				identity.m_ctcpReply = s.getOption<bool>("ctcp-autoreply");
+				identity.ctcpVersion = s.getOption<std::string>("ctcp-version");
 
 			Logger::log("identity: found identity %s (%s, %s, \"%s\")",
-			    identity.m_name.c_str(),
-			    identity.m_nickname.c_str(), identity.m_username.c_str(),
-			    identity.m_realname.c_str());
+			    identity.name.c_str(),
+			    identity.nickname.c_str(), identity.username.c_str(),
+			    identity.realname.c_str());
 
 			m_identities.push_back(identity);
 		} catch (NotFoundException ex) {
@@ -352,17 +354,18 @@ void Irccd::readServers(const Parser &config)
 			Server::Info info;
 			Server::Options options;
 			Server::Identity identity;
+			Server::RetryInfo reco;
 
 			// Server information
-			info.m_name = s.requireOption<std::string>("name");
-			info.m_host = s.requireOption<std::string>("host");
-			info.m_port = s.requireOption<int>("port");
+			info.name = s.requireOption<std::string>("name");
+			info.host = s.requireOption<std::string>("host");
+			info.port = s.requireOption<int>("port");
 			if (s.hasOption("ssl"))
-				info.m_ssl = s.getOption<bool>("ssl");
+				info.ssl = s.getOption<bool>("ssl");
 			if (s.hasOption("ssl-verify"))
-				info.m_sslVerify = s.getOption<bool>("ssl-verify");
+				info.sslVerify = s.getOption<bool>("ssl-verify");
 			if (s.hasOption("password"))
-				info.m_password = s.getOption<std::string>("password");
+				info.password = s.getOption<std::string>("password");
 
 			// Identity
 			if (s.hasOption("identity"))
@@ -370,24 +373,24 @@ void Irccd::readServers(const Parser &config)
 
 			// Some options
 			if (s.hasOption("command-char"))
-				options.m_commandChar = s.getOption<std::string>("command-char");
+				options.commandChar = s.getOption<std::string>("command-char");
 			if (s.hasOption("join-invite"))
-				options.m_joinInvite = s.getOption<bool>("join-invite");
+				options.joinInvite = s.getOption<bool>("join-invite");
 
 			// Reconnection settings
 			if (s.hasOption("reconnect"))
-				options.m_retry = s.getOption<bool>("reconnect");
+				reco.enabled = s.getOption<bool>("reconnect");
 			if (s.hasOption("reconnect-tries"))
-				options.m_maxretries = s.getOption<int>("reconnect-tries");
+				reco.maxretries = s.getOption<int>("reconnect-tries");
 			if (s.hasOption("reconnect-timeout"))
-				options.m_timeout = s.getOption<int>("reconnect-timeout");
+				reco.timeout = s.getOption<int>("reconnect-timeout");
 
-			Server::Ptr server = std::make_shared<Server>(info, identity, options);
+			Server::Ptr server = std::make_shared<Server>(info, identity, options, reco);
 
 			// Extract channels to auto join
 			extractChannels(s, server);
-			if (Server::has(info.m_name))
-				Logger::warn("server %s: duplicated server", info.m_name.c_str());
+			if (Server::has(info.name))
+				Logger::warn("server %s: duplicated server", info.name.c_str());
 			else
 				Server::add(server);
 		} catch (NotFoundException ex) {
@@ -455,7 +458,7 @@ const Server::Identity &Irccd::findIdentity(const std::string &name)
 		return m_defaultIdentity;
 
 	for (const Server::Identity &i : m_identities)
-		if (i.m_name == name)
+		if (i.name == name)
 			return i;
 
 	Logger::warn("identity: %s not found", name.c_str());
@@ -479,8 +482,7 @@ int Irccd::run()
 		else
 			Listener::process();
 
-		if (m_running)
-			Server::flush();
+		Server::flush();
 	}
 
 	stop();
@@ -505,6 +507,7 @@ void Irccd::stop()
 	});
 
 	Listener::close();
+	Server::flush();
 }
 
 } // !irccd

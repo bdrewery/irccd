@@ -85,7 +85,7 @@ public:
 	/**
 	 * Write a message used as debugging, messages will
 	 * only be shown if the application has been build with
-	 * DEBUG macro set.
+	 * without NDEBUG macro set.
 	 *
 	 * @param fmt format
 	 * @param ... arguments

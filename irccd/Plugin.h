@@ -210,6 +210,7 @@ public:
 	/* ------------------------------------------------
 	 * IRC commands
 	 * ------------------------------------------------ */
+#if 0
 
 	/**
 	 * A lua function triggered on a special command, this is a channel
@@ -432,6 +433,7 @@ public:
 	 */
 	void onWhois(Server::Ptr,
 		     const IrcWhois &info);
+#endif
 };
 
 } // !irccd

@@ -183,8 +183,6 @@ int splithost(lua_State *L)
 	irc_target_get_host(target, host, sizeof (host) -1);
 	lua_pushstring(L, host);
 
-	printf("HOST = %s\n", host);
-
 	return 1;
 }
 
