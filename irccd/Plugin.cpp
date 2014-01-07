@@ -27,7 +27,7 @@
 #include "event/IrcEventReload.h"
 #include "event/IrcEventUnload.h"
 
-#include "Lua/LuaServer.h"
+#include "lua/LuaServer.h"
 
 #include "Irccd.h"
 #include "IrcEvent.h"

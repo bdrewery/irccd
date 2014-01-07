@@ -114,28 +114,28 @@ if (WITH_LUA52 OR WITH_LUAJIT)
 			event/IrcEventWhois.h
 			IrcEvent.cpp
 			IrcEvent.h
-			Lua/LuaIrccd.cpp
-			Lua/LuaIrccd.h
-			Lua/LuaLogger.cpp
-			Lua/LuaLogger.h
-			Lua/LuaFS.cpp
-			Lua/LuaFS.h
-			Lua/LuaParser.cpp
-			Lua/LuaParser.h
-			Lua/LuaPipe.cpp
-			Lua/LuaPipe.h
-			Lua/LuaPlugin.cpp
-			Lua/LuaPlugin.h
-			Lua/LuaServer.cpp
-			Lua/LuaServer.h
-			Lua/LuaSocket.cpp
-			Lua/LuaSocket.h
-			Lua/LuaSystem.cpp
-			Lua/LuaSystem.h
-			Lua/LuaThread.cpp
-			Lua/LuaThread.h
-			Lua/LuaUtil.cpp
-			Lua/LuaUtil.h
+			lua/LuaIrccd.cpp
+			lua/LuaIrccd.h
+			lua/LuaLogger.cpp
+			lua/LuaLogger.h
+			lua/LuaFS.cpp
+			lua/LuaFS.h
+			lua/LuaParser.cpp
+			lua/LuaParser.h
+			lua/LuaPipe.cpp
+			lua/LuaPipe.h
+			lua/LuaPlugin.cpp
+			lua/LuaPlugin.h
+			lua/LuaServer.cpp
+			lua/LuaServer.h
+			lua/LuaSocket.cpp
+			lua/LuaSocket.h
+			lua/LuaSystem.cpp
+			lua/LuaSystem.h
+			lua/LuaThread.cpp
+			lua/LuaThread.h
+			lua/LuaUtil.cpp
+			lua/LuaUtil.h
 			Luae.cpp
 			Luae.h
 			Pipe.cpp

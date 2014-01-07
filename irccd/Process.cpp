@@ -16,17 +16,17 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "Lua/LuaIrccd.h"
-#include "Lua/LuaLogger.h"
-#include "Lua/LuaFS.h"
-#include "Lua/LuaParser.h"
-#include "Lua/LuaPipe.h"
-#include "Lua/LuaPlugin.h"
-#include "Lua/LuaServer.h"
-#include "Lua/LuaSocket.h"
-#include "Lua/LuaSystem.h"
-#include "Lua/LuaThread.h"
-#include "Lua/LuaUtil.h"
+#include "lua/LuaIrccd.h"
+#include "lua/LuaLogger.h"
+#include "lua/LuaFS.h"
+#include "lua/LuaParser.h"
+#include "lua/LuaPipe.h"
+#include "lua/LuaPlugin.h"
+#include "lua/LuaServer.h"
+#include "lua/LuaSocket.h"
+#include "lua/LuaSystem.h"
+#include "lua/LuaThread.h"
+#include "lua/LuaUtil.h"
 
 #include "Plugin.h"
 #include "Process.h"
