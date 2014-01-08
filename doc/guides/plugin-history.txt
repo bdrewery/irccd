@@ -1,4 +1,4 @@
-Plugin history 1.0
+Plugin history 1.1
 ==================
 :Author: Demelier David
 :Email: demelier.david@gmail.com
