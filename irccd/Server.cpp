@@ -283,6 +283,16 @@ void Server::start()
 	});
 }
 
+void Server::restart()
+{
+	Lock lk(m_lock);
+
+	if (m_state->which() == "Running") {
+		m_reco.restarting = true;
+		irc_disconnect(m_session);
+	}
+}
+
 void Server::stop()
 {
 	/*

@@ -91,6 +91,7 @@ public:
 		int		maxretries = 0;		//! max number of test (0 = forever)
 		int		noretried = 0;		//! current number of test
 		int		timeout = 30;		//! seconds to wait before testing
+		bool		restarting = false;	//! tells if we are restarting
 	};
 
 	/**
@@ -357,6 +358,11 @@ public:
 	 * Start the server thread and state machine.
 	 */
 	void start();
+
+	/**
+	 * Restart a connection if it is running.
+	 */
+	void restart();
 
 	/**
 	 * Request for stopping the server.

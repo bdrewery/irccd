@@ -190,6 +190,16 @@ void handleReload(const Params &params)
 #endif
 }
 
+void handleRestart(const Params &params)
+{
+	if (params[0] == "__ALL__") {
+		Server::forAll([] (Server::Ptr s) {
+			s->restart();
+		});
+	} else
+		Server::get(params[0])->restart();
+}
+
 void handleTopic(const Params &params)
 {
 	Server::get(params[0])->topic(params[1], params[2]);
@@ -224,6 +234,7 @@ std::unordered_map<std::string, ClientHandler> handlers {
 	{ "NOTICE",	ClientHandler(3, 3, handleNotice)		},
 	{ "PART",	ClientHandler(2, 2, handlePart)			},
 	{ "RELOAD",	ClientHandler(1, 1, handleReload)		},
+	{ "RESTART",	ClientHandler(1, 1, handleRestart)		},
 	{ "TOPIC",	ClientHandler(3, 3, handleTopic)		},
 	{ "UMODE",	ClientHandler(2, 2, handleUserMode)		},
 	{ "UNLOAD",	ClientHandler(1, 1, handleUnload)		}

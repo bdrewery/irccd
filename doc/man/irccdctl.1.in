@@ -131,6 +131,10 @@ utility:
 .Nm
 .Cm reload
 .Ar name
+.\" RESTART
+.Nm
+.Cm restart
+.Op Ar name
 .\" TOPIC
 .Nm
 .Cm topic
