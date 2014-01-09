@@ -473,12 +473,10 @@ int Irccd::run()
 	while (m_running) {
 		/*
 		 * If no listeners is enabled, we must wait a bit to avoid
-		 * CPU usage exhaustion. But we only wait for 250 millisecond
-		 * because some plugins are time specific and requires
-		 * precision (i.e badwords).
+		 * CPU usage exhaustion.
 		 */
 		if (Listener::count() == 0)
-			System::usleep(250);
+			System::sleep(1);
 		else
 			Listener::process();
 
