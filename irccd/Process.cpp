@@ -105,12 +105,12 @@ void Process::initialize(Ptr process, const Info &info)
 	setField(info.license, "license");
 
 	lua_setfield(L, LUA_REGISTRYINDEX, FieldInfo);
-
 	LUA_STACK_CHECKEQUALS(L);
 }
 
 Process::Info Process::info(lua_State *L)
 {
+	LUAE_STACK_CHECKBEGIN(L);
 	Process::Info info;
 
 	lua_getfield(L, LUA_REGISTRYINDEX, FieldInfo);
@@ -124,6 +124,9 @@ Process::Info Process::info(lua_State *L)
 	info.comment = Luae::requireField<std::string>(L, -1, "comment");
 	info.version = Luae::requireField<std::string>(L, -1, "version");
 	info.license = Luae::requireField<std::string>(L, -1, "license");
+
+	lua_pop(L, 1);
+	LUAE_STACK_CHECKEQUALS(L);
 
 	return info;
 }

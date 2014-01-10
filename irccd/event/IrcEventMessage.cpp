@@ -33,9 +33,9 @@ IrcEventMessage::IrcEventMessage(Server::Ptr server,
 
 void IrcEventMessage::action(lua_State *L) const
 {
-	const auto &cc = m_server->getOptions().commandChar;
-	const auto &name = Process::info(L).name;
-	const auto &msg = m_message;
+	auto cc = m_server->getOptions().commandChar;
+	auto name = Process::info(L).name;
+	auto msg = m_message;
 
 	// handle special commands "!<plugin> command"
 	if (cc.length() > 0) {
