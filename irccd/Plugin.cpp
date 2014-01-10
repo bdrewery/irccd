@@ -206,7 +206,7 @@ void Plugin::unload(const std::string &name)
 		auto i = find(name);
 
 		try {
-			i->handleIrcEvent(IrcEventUnload());
+			IrcEventUnload().action(*i->m_process);
 		} catch (Plugin::ErrorException ex) {
 			Logger::warn("irccd: error while unloading %s: %s",
 			    name.c_str(), ex.what());
@@ -226,7 +226,9 @@ void Plugin::reload(const std::string &name)
 	Lock lk(pluginLock);
 
 	try {
-		find(name)->handleIrcEvent(IrcEventReload());
+		auto i = find(name);
+
+		IrcEventReload().action(*i->m_process);
 	} catch (std::out_of_range ex) {
 		Logger::warn("irccd: %s", ex.what());
 	}
@@ -330,7 +332,7 @@ void Plugin::open()
 	Process::initialize(m_process, m_info);
 
 	// Do a initial load
-	handleIrcEvent(IrcEventLoad());
+	IrcEventLoad().action(L);
 }
 
 } // !irccd
