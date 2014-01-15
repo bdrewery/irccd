@@ -1,0 +1,719 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Irccd Lua API Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<h1>Navigation</h1>
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Class_Server">Class Server </a></li>
+<li><a href="#Server_metamethods">Server metamethods </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.fs.html">irccd.fs</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><strong>irccd.server</strong></li>
+  <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
+  <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
+  <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
+  <li><a href="../modules/irccd.system.html">irccd.system</a></li>
+  <li><a href="../modules/irccd.thread.html">irccd.thread</a></li>
+  <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="nowrap">
+  <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
+  <li><a href="../topics/1.1-Standard-Libraries.md.html">1.1-Standard-Libraries.md</a></li>
+  <li><a href="../topics/2-Plugin_creation.md.html">2-Plugin_creation.md</a></li>
+  <li><a href="../topics/2.1-Using_irccd_test.md.html">2.1-Using_irccd_test.md</a></li>
+  <li><a href="../topics/2.2-List_of_Events.md.html">2.2-List_of_Events.md</a></li>
+  <li><a href="../topics/3-Event-Action.md.html">3-Event-Action.md</a></li>
+  <li><a href="../topics/3-Event-Channel-notice.md.html">3-Event-Channel-notice.md</a></li>
+  <li><a href="../topics/3-Event-Command.md.html">3-Event-Command.md</a></li>
+  <li><a href="../topics/3-Event-Connect.md.html">3-Event-Connect.md</a></li>
+  <li><a href="../topics/3-Event-Invite.md.html">3-Event-Invite.md</a></li>
+  <li><a href="../topics/3-Event-Join.md.html">3-Event-Join.md</a></li>
+  <li><a href="../topics/3-Event-Kick.md.html">3-Event-Kick.md</a></li>
+  <li><a href="../topics/3-Event-Load.md.html">3-Event-Load.md</a></li>
+  <li><a href="../topics/3-Event-Message.md.html">3-Event-Message.md</a></li>
+  <li><a href="../topics/3-Event-Mode.md.html">3-Event-Mode.md</a></li>
+  <li><a href="../topics/3-Event-Names.md.html">3-Event-Names.md</a></li>
+  <li><a href="../topics/3-Event-Nick.md.html">3-Event-Nick.md</a></li>
+  <li><a href="../topics/3-Event-Notice.md.html">3-Event-Notice.md</a></li>
+  <li><a href="../topics/3-Event-Part.md.html">3-Event-Part.md</a></li>
+  <li><a href="../topics/3-Event-Query.md.html">3-Event-Query.md</a></li>
+  <li><a href="../topics/3-Event-Reload.md.html">3-Event-Reload.md</a></li>
+  <li><a href="../topics/3-Event-Topic.md.html">3-Event-Topic.md</a></li>
+  <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
+  <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
+  <li><a href="../topics/3-Event-Whois.md.html">3-Event-Whois.md</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/Connect.lua.html">Connect.lua</a></li>
+  <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
+  <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>irccd.server</code></h1>
+
+<p>Server class.</p>
+<p> The server class is usually passed through every Lua callbacks, on IRC
+ events.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#find">find (name)</a></td>
+	<td class="summary">Find an existing server by name.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#connect">connect (params)</a></td>
+	<td class="summary">Connect to a server.</td>
+	</tr>
+</table>
+<h2><a href="#Class_Server">Class Server </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Server:getIdentity">Server:getIdentity ()</a></td>
+	<td class="summary">Get the identity used for this server.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:getName">Server:getName ()</a></td>
+	<td class="summary">Get the server name id.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:getInfo">Server:getInfo ()</a></td>
+	<td class="summary">Get the server information.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:cnotice">Server:cnotice (channel, message)</a></td>
+	<td class="summary">Send a public notice on a channel.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:join">Server:join (channel, password)</a></td>
+	<td class="summary">Join a channel.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:kick">Server:kick (nickname, channel, reason)</a></td>
+	<td class="summary">Kick someone from a channel.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:me">Server:me (target, message)</a></td>
+	<td class="summary">Invoke a CTCP Action.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:mode">Server:mode (channel, mode)</a></td>
+	<td class="summary">Change the channel mode.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:names">Server:names (channel)</a></td>
+	<td class="summary">Get the list of names.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:nick">Server:nick (nickname)</a></td>
+	<td class="summary">Change your nickname.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:notice">Server:notice (nickname, message)</a></td>
+	<td class="summary">Send a private notice to a user.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:part">Server:part (channel, reason)</a></td>
+	<td class="summary">Leave a channel.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:query">Server:query (nickname, message)</a></td>
+	<td class="summary">Send a private message to the specified target.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:say">Server:say (target, message)</a></td>
+	<td class="summary">Send a message to a channel or a nickname.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:topic">Server:topic (channel, topic)</a></td>
+	<td class="summary">Change the topic on the specified channel.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:umode">Server:umode (mode)</a></td>
+	<td class="summary">Change your own user mode.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:whois">Server:whois (target)</a></td>
+	<td class="summary">Get whois information from a user.</td>
+	</tr>
+</table>
+<h2><a href="#Server_metamethods">Server metamethods </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Server:__eq">Server:__eq (other)</a></td>
+	<td class="summary">Test equality.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Server:__tostring">Server:__tostring ()</a></td>
+	<td class="summary">Convert object to string.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2><a name="Functions"></a>Functions</h2>
+    <dl class="function">
+    <dt>
+    <a name = "find"></a>
+    <strong>find (name)</strong>
+    </dt>
+    <dd>
+    Find an existing server by name.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         the server's resource name
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the server or nil if not found</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "connect"></a>
+    <strong>connect (params)</strong>
+    </dt>
+    <dd>
+    Connect to a server.
+ <ul>
+ <li><strong>name (string)</strong>: required, the server name</li>
+ <li><strong>host (string)</strong>: required, the hostname</li>
+ <li><strong>port (int)</strong>: required, the port number</li>
+ <li><strong>password (string)</strong>: an optional password for the IRC server</li>
+ <li><strong>channels (table)</strong>: list of string or name, password pairs of channels to join</li>
+ <li><strong>identity (table)</strong>: an identity to use with fields:
+  <ul>
+  <li><strong>name (string)</strong>: the identity name</li>
+  <li><strong>nickname (string)</strong>: the nickname to use</li>
+  <li><strong>username (string)</strong>: the username</li>
+  <li><strong>realname (string)</strong>: the full name</li>
+  </ul>
+ </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">params</span>
+         the parameters
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        true on success or false</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../examples/Connect.lua.html#">Connect.lua</a>
+    </ul>
+
+
+</dd>
+</dl>
+    <h2><a name="Class_Server"></a>Class Server </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "Server:getIdentity"></a>
+    <strong>Server:getIdentity ()</strong>
+    </dt>
+    <dd>
+    Get the identity used for this server.
+ Returns a table with the following fields:
+ <ul>
+ <li><strong>name (string)</strong>: the identity name</li>
+ <li><strong>nickname (string)</strong>: the nickname currently in use</li>
+ <li><strong>username (string)</strong>: the username</li>
+ <li><strong>realname (string)</strong>: the full name</li>
+ <li><strong>ctcpversion (string)</strong>: the CTCP Version reply</li>
+ </ul>
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an identity table
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:getName"></a>
+    <strong>Server:getName ()</strong>
+    </dt>
+    <dd>
+    Get the server name id.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">the</span></span>
+        name id
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:getInfo"></a>
+    <strong>Server:getInfo ()</strong>
+    </dt>
+    <dd>
+    Get the server information.
+ Returns a table with the server connection information with
+ the following fields:
+ <ul>
+   <li><strong>name (string)</strong>: the server ident</li>
+   <li><strong>hostname (string)</strong>: the hostname</li>
+   <li><strong>port (int)</strong>: the port</li>
+   <li><strong>ssl (bool)</strong>: true if using SSL</li>
+   <li><strong>sslVerify (bool)</strong>: true if using SSL verification</strong>
+ </ul>
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the information table
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:cnotice"></a>
+    <strong>Server:cnotice (channel, message)</strong>
+    </dt>
+    <dd>
+    Send a public notice on a channel.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channel</span>
+         the target channel
+        </li>
+        <li><span class="parameter">message</span>
+         the message
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:join"></a>
+    <strong>Server:join (channel, password)</strong>
+    </dt>
+    <dd>
+    Join a channel.
+ Note: the channel must starts with a hash '#'.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channel</span>
+         the channel to join
+        </li>
+        <li><span class="parameter">password</span>
+         an optional password
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:kick"></a>
+    <strong>Server:kick (nickname, channel, reason)</strong>
+    </dt>
+    <dd>
+    Kick someone from a channel.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">nickname</span>
+         the person to kick
+        </li>
+        <li><span class="parameter">channel</span>
+         from which channel
+        </li>
+        <li><span class="parameter">reason</span>
+         an optional reason
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:me"></a>
+    <strong>Server:me (target, message)</strong>
+    </dt>
+    <dd>
+    Invoke a CTCP Action.
+ Send a message as known as /me. The target may be a nick
+ or a channel.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">target</span>
+         a nick or a channel
+        </li>
+        <li><span class="parameter">message</span>
+         the message to send
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:mode"></a>
+    <strong>Server:mode (channel, mode)</strong>
+    </dt>
+    <dd>
+    Change the channel mode.
+ Mode can contains additional parameters
+ if supported, such as: "+k secret".
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channel</span>
+         the channel target
+        </li>
+        <li><span class="parameter">mode</span>
+         the mode
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:names"></a>
+    <strong>Server:names (channel)</strong>
+    </dt>
+    <dd>
+    Get the list of names.
+ This function will generate the onNames event.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channel</span>
+         the channel
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../topics/3-Event-Names.md.html#">3-Event-Names.md</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "Server:nick"></a>
+    <strong>Server:nick (nickname)</strong>
+    </dt>
+    <dd>
+    Change your nickname.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">nickname</span>
+         the new nickname
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:notice"></a>
+    <strong>Server:notice (nickname, message)</strong>
+    </dt>
+    <dd>
+    Send a private notice to a user.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">nickname</span>
+         the target nickname
+        </li>
+        <li><span class="parameter">message</span>
+         the notice message
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:part"></a>
+    <strong>Server:part (channel, reason)</strong>
+    </dt>
+    <dd>
+    Leave a channel.
+ At the moment, is it not possible to leave a channel with a quit message.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channel</span>
+         the channel to leave
+        </li>
+        <li><span class="parameter">reason</span>
+         an optional reason
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:query"></a>
+    <strong>Server:query (nickname, message)</strong>
+    </dt>
+    <dd>
+    Send a private message to the specified target.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">nickname</span>
+         the target
+        </li>
+        <li><span class="parameter">message</span>
+         the message
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:say"></a>
+    <strong>Server:say (target, message)</strong>
+    </dt>
+    <dd>
+    Send a message to a channel or a nickname.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">target</span>
+         a nick or a channel
+        </li>
+        <li><span class="parameter">message</span>
+         the message to send
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:topic"></a>
+    <strong>Server:topic (channel, topic)</strong>
+    </dt>
+    <dd>
+    Change the topic on the specified channel.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channel</span>
+         the channel
+        </li>
+        <li><span class="parameter">topic</span>
+         the new topic
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:umode"></a>
+    <strong>Server:umode (mode)</strong>
+    </dt>
+    <dd>
+    Change your own user mode.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">mode</span>
+         the new mode
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:whois"></a>
+    <strong>Server:whois (target)</strong>
+    </dt>
+    <dd>
+    Get whois information from a user.
+ The function will generate the onWhois event.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">target</span>
+         the target
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../topics/3-Event-Whois.md.html#">3-Event-Whois.md</a>
+    </ul>
+
+
+</dd>
+</dl>
+    <h2><a name="Server_metamethods"></a>Server metamethods </h2>
+
+ The metamethods available for object Server.
+    <dl class="function">
+    <dt>
+    <a name = "Server:__eq"></a>
+    <strong>Server:__eq (other)</strong>
+    </dt>
+    <dd>
+    Test equality.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other date
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if they equals
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Server:__tostring"></a>
+    <strong>Server:__tostring ()</strong>
+    </dt>
+    <dd>
+    Convert object to string.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.0</a></i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

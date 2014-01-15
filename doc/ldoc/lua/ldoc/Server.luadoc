@@ -1,0 +1,177 @@
+--- Server class.
+-- The server class is usually passed through every Lua callbacks, on IRC
+-- events.
+--
+-- @module irccd.server
+
+--- Find an existing server by name.
+-- @param name the server's resource name
+-- @return the server or nil if not found
+-- @return the error message
+function server.find(name)
+end
+
+--- Connect to a server.
+-- <ul>
+-- <li><strong>name (string)</strong>: required, the server name</li>
+-- <li><strong>host (string)</strong>: required, the hostname</li>
+-- <li><strong>port (int)</strong>: required, the port number</li>
+-- <li><strong>password (string)</strong>: an optional password for the IRC server</li>
+-- <li><strong>channels (table)</strong>: list of string or name, password pairs of channels to join</li>
+-- <li><strong>identity (table)</strong>: an identity to use with fields:
+--  <ul>
+--  <li><strong>name (string)</strong>: the identity name</li>
+--  <li><strong>nickname (string)</strong>: the nickname to use</li>
+--  <li><strong>username (string)</strong>: the username</li>
+--  <li><strong>realname (string)</strong>: the full name</li>
+--  </ul>
+-- </ul>
+-- @param params the parameters
+-- @return true on success or false
+-- @return the error message
+-- @see Connect.lua
+function server.connect(params)
+end
+
+--- Server
+-- @type Server
+
+--- Get the identity used for this server.
+-- Returns a table with the following fields:
+-- <ul>
+-- <li><strong>name (string)</strong>: the identity name</li>
+-- <li><strong>nickname (string)</strong>: the nickname currently in use</li>
+-- <li><strong>username (string)</strong>: the username</li>
+-- <li><strong>realname (string)</strong>: the full name</li>
+-- <li><strong>ctcpversion (string)</strong>: the CTCP Version reply</li>
+-- </ul>
+-- @return an identity table
+function Server:getIdentity()
+end
+
+--- Get the server name id.
+-- @treturn the name id
+function Server:getName()
+end
+
+--- Get the server information.
+-- Returns a table with the server connection information with
+-- the following fields:
+-- <ul>
+--   <li><strong>name (string)</strong>: the server ident</li>
+--   <li><strong>hostname (string)</strong>: the hostname</li>
+--   <li><strong>port (int)</strong>: the port</li>
+--   <li><strong>ssl (bool)</strong>: true if using SSL</li>
+--   <li><strong>sslVerify (bool)</strong>: true if using SSL verification</strong>
+-- </ul>
+-- @return the information table
+function Server:getInfo()
+end
+
+--- Send a public notice on a channel.
+-- @param channel the target channel
+-- @param message the message
+function Server:cnotice(channel, message)
+end
+
+--- Join a channel.
+-- Note: the channel must starts with a hash '#'.
+-- @param channel the channel to join
+-- @param password an optional password
+function Server:join(channel, password)
+end
+
+--- Kick someone from a channel.
+-- @param nickname the person to kick
+-- @param channel from which channel
+-- @param reason an optional reason
+function Server:kick(nickname, channel, reason)
+end
+
+--- Invoke a CTCP Action.
+-- Send a message as known as /me. The target may be a nick
+-- or a channel.
+-- @param target a nick or a channel
+-- @param message the message to send
+function Server:me(target, message)
+end
+
+--- Change the channel mode.
+-- Mode can contains additional parameters
+-- if supported, such as: "+k secret".
+-- @param channel the channel target
+-- @param mode the mode
+function Server:mode(channel, mode)
+end
+
+--- Get the list of names.
+-- This function will generate the onNames event.
+-- @param channel the channel
+-- @see 3-Event-Names.md
+function Server:names(channel)
+end
+
+--- Change your nickname.
+-- @param nickname the new nickname
+function Server:nick(nickname)
+end
+
+--- Send a private notice to a user.
+-- @param nickname the target nickname
+-- @param message the notice message
+function Server:notice(nickname, message)
+end
+
+--- Leave a channel.
+-- At the moment, is it not possible to leave a channel with a quit message.
+-- @param channel the channel to leave
+-- @param reason an optional reason
+function Server:part(channel, reason)
+end
+
+--- Send a private message to the specified target.
+-- @param nickname the target
+-- @param message the message
+function Server:query(nickname, message)
+end
+
+--- Send a message to a channel or a nickname.
+-- @param target a nick or a channel
+-- @param message the message to send
+function Server:say(target, message)
+end
+
+--- Change the topic on the specified channel.
+-- @param channel the channel
+-- @param topic the new topic
+function Server:topic(channel, topic)
+end
+
+--- Change your own user mode.
+-- @param mode the new mode
+function Server:umode(mode)
+end
+
+--- Get whois information from a user.
+-- The function will generate the onWhois event.
+-- @param target the target
+-- @see 3-Event-Whois.md
+function Server:whois(target)
+end
+
+--- Server metamethods.
+-- The metamethods available for object Server.
+-- @section
+
+--- Test equality.
+-- @param other the other date
+-- @return true if they equals
+function Server:__eq(other)
+end
+
+--- Convert object to string.
+-- @return a string
+function Server:__tostring()
+end
+
+-- vim: set syntax=lua:

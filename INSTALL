@@ -1,0 +1,150 @@
+IRC Client Daemon INSTALL
+=========================
+
+This guide will help you to install irccd on your computer. For a better guide
+with more details see:
+	
+	http://projects.malikania.fr/irccd/doc/guides/user-guide.html
+
+Requirements
+============
+
+* C++11 compiler, you need a compiler that support C++11. For Windows,
+  Visual Studio 2012 or superior is known to work. On Unix, clang 3.2 or
+  superior also work.
+
+* libircclient (http://www.ulduzsoft.com/linux/libircclient). This library
+  is mandatory. You need version 1.6 or higher and 1.7 or higher for SSL
+  support.
+
+* libxdg-basedir (https://github.com/devnev/libxdg-basedir). This library
+  is needed on Unix only.
+
+* cmake (http://www.cmake.org). Version 2.8.11 recommended. This tool is
+  required to build irccd.
+
+Optional:
+
+* Lua 5.2 or higher (http://lua.org). This library is needed in order to use
+  irccd plugins.
+* LuaJIT 2.0 or higher (http://luajit.org). This library can be used as the
+  Lua 5.2 alternative.
+
+Developer requirements
+======================
+
+If you plan to develop irccd to add new feature or to fix something, some of
+there tools and libraries may help you.
+
+* asciidoc (http://www.methods.co.nz/asciidoc/). This is used as the user
+  guide generator.
+
+  When found, CMake automatically generate a new target `generate-doc' that
+  automatically update user guides directly in the doc/guides.
+
+* LDoc (https://github.com/stevedonovan/LDoc). This tool is used to create the
+  Lua API.
+
+  When found, CMake automatically generate a new target `generate-ldoc' that
+  automatically update Lua API HTML file in doc/ldoc/lua.
+
+* cppunit (http://sourceforge.net/apps/mediawiki/cppunit/). This tool is used
+  for unit tests in tests/ directory.
+
+  Note: currently there are no tests for this release. It will be added in 1.1.
+
+Basic installation
+==================
+
+This is the quick way to install irccd.
+
+$ tar xvzf irccd-x.y.tar.gz
+$ cd irccd-x.y
+$ mkdir _build_
+$ cd _build_
+$ cmake .. -DCMAKE_BUILD_TYPE=Release
+$ make
+# make install
+
+Do not forget to adapt x.y with the current version.
+
+FreeBSD note
+------------
+
+On FreeBSD, the C++11 support is not available by default prior to
+version 10.0.
+
+You need to enable the LLVM libc++ in order to build irccd, you can use
+this guide to enable C++11 entirely:
+
+	https://wiki.freebsd.org/NewC%2B%2BStack
+
+Or the quickest way is to do the following:
+
+# make -C /usr/src/lib/libcxxrt all install
+# make CXX=clang -C /usr/src/lib/libc++ all install
+
+Then use the following cmake invokation :
+
+$ CXX=clang++ CC=clang cmake .. \ 
+	-DCMAKE_CXX_FLAGS_RELEASE="-std=c++11 -stdlib=libc++"
+	-DMANDIR=man
+
+And you can continue the installation as above.
+
+Tweaking installation
+=====================
+
+If you want to disable or change some component, you need to adjust one of
+the following CMake variable.
+
+Disabling Lua
+-------------
+
+If you want to build irccd without Lua, use this CMake argument:
+
+$ cmake .. -DWITH_LUA52=Off -DWITH_LUAJIT=Off
+
+Disabling Lua documentation
+---------------------------
+
+If you don't want Lua API documentation, use this:
+
+$ cmake .. -DWITH_LDOC=Off
+
+Disabling user guides
+---------------------
+
+This switch disable HTMl user guides.
+
+$ cmake .. -DWITH_DOC=Off
+
+Disabling manuals
+-----------------
+
+This disable manual pages, it's already the default on Windows.
+
+$ cmake .. -WITH_MAN=Off
+
+Directories
+===========
+
+It's also possible to set different directories for irccd components.
+
+Adjusting the installation directory
+------------------------------------
+
+By default, irccd will usually use /usr/local as the prefix for
+installation. To change this, use the following:
+
+$ cmake .. -DCMAKE_INSTALL_PREFIX=/new/directory
+
+Manual directories
+------------------
+
+By default, irccd use ${PREFIX}/share/man for manual pages. Some systems use
+different one.
+
+For example, on FreeBSD the typical use would be:
+
+$ cmake .. -DMANDIR=/usr/local/man
