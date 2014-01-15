@@ -1660,6 +1660,11 @@ the <a href="#irccdserver">server section</a> with the parameter <span class="mo
 </li>
 <li>
 <p>
+<a href="#irccdctlrestart">restart</a>
+</p>
+</li>
+<li>
+<p>
 <a href="#irccdctltopic">topic</a>
 </p>
 </li>
@@ -1938,6 +1943,31 @@ The plugin needs to be loaded.</p></div>
 <div class="content monospaced">
 <pre>$ irccdctl reload logger</pre>
 </div></div>
+<div class="paragraph"><p><a id="irccdctlrestart"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_restart_a_server">Restart a server</h3>
+<div class="paragraph"><p>Sometimes it is needed to force a reload by hand. This even more true when
+a server died, irccd has no way to detect that. This command force a
+reconnection even if it is not enabled in the config.</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img src="icons/note.png" alt="Note">
+</td>
+<td class="content">If the parameter name is not given, all servers are restarted.</td>
+</tr></table>
+</div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl restart [name]</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl restart</pre>
+</div></div>
 <div class="paragraph"><p><a id="irccdctltopic"></a></p></div>
 </div>
 <div class="sect2">
@@ -1991,7 +2021,7 @@ quotes.</p></div>
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-12-28 19:43:20 CET
+Last updated 2014-01-08 13:33:37 CET
 </div>
 </div>
 </body>

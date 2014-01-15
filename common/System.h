@@ -67,7 +67,7 @@ public:
 	 *
 	 * @return the milliseconds
 	 */
-	static uint32_t ticks();
+	static uint64_t ticks();
 
 	/**
 	 * Get an environment variable.

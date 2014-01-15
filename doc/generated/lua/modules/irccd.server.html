@@ -156,7 +156,7 @@
 	<td class="summary">Send a private notice to a user.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Server:part">Server:part (channel)</a></td>
+	<td class="name" nowrap><a href="#Server:part">Server:part (channel, reason)</a></td>
 	<td class="summary">Leave a channel.</td>
 	</tr>
 	<tr>
@@ -529,7 +529,7 @@
 </dd>
     <dt>
     <a name = "Server:part"></a>
-    <strong>Server:part (channel)</strong>
+    <strong>Server:part (channel, reason)</strong>
     </dt>
     <dd>
     Leave a channel.
@@ -539,6 +539,9 @@
     <ul>
         <li><span class="parameter">channel</span>
          the channel to leave
+        </li>
+        <li><span class="parameter">reason</span>
+         an optional reason
         </li>
     </ul>
 

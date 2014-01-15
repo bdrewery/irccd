@@ -16,31 +16,19 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Libircclient bundled
-project(extern-libircclient)
+project(contrib)
 
-find_package(OpenSSL REQUIRED)
+option(WITH_SYSTEMD "Install systemd service" Off)
 
-include_directories(
-	include
-	${OPENSSL_INCLUDE_DIR}
-)
+#
+# File for systemd
+#
+if (WITH_SYSTEMD)
+	# Directory for systemd
+	set(SYSTEMDDIR "/usr/lib/systemd/system"
+	    CACHE STRING "Absolute path where to install systemd files")
 
-add_library(
-	ircclient
-	STATIC
-	src/libircclient.c
-)
-
-set_target_properties(
-	ircclient
-	PROPERTIES
-	COMPILE_FLAGS "-DENABLE_IPV6 -DENABLE_SSL -DENABLE_THREADS"
-)
-
-target_link_libraries(
-	ircclient
-	${OPENSSL_LIBRARIES}
-)
+	install(FILES irccd.service DESTINATION ${SYSTEMDDIR})
+endif ()
 
 # vim: set syntax=cmake:

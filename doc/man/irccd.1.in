@@ -679,6 +679,18 @@ Parameters:
 .It name
 The plugin name.
 .El
+.\" RESTART
+.Ss RESTART
+Restart one or all servers.
+.Bd -literal -offset indent
+RESTART name\\n
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It name
+The server name, pass __ALL__ to restart all.
+.El
 .\" TOPIC
 .Ss TOPIC
 This command is used to set a channel topic. Note that you obviously need

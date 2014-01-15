@@ -175,6 +175,18 @@ void helpReload()
 	Logger::warn("\t %s reload logger", getprogname());
 }
 
+void helpRestart()
+{
+	Logger::warn("usage: %s restart [name]\n", getprogname());
+	Logger::warn("Force a server restart. If no name parameter is given all");
+	Logger::warn("servers are restarted.\n");
+
+
+	Logger::warn("Example:");
+	Logger::warn("\t %s restart", getprogname());
+	Logger::warn("\t %s restart wanadoo", getprogname());
+}
+
 void helpTopic()
 {
 	Logger::warn("usage: %s topic server channel topic\n", getprogname());
@@ -218,6 +230,7 @@ std::unordered_map<std::string, HelpHandler> helpHandlers {
 	{ "nick",	helpNick		},
 	{ "part",	helpPart		},
 	{ "reload",	helpReload		},
+	{ "restart",	helpRestart		},
 	{ "topic",	helpTopic		},
 	{ "umode",	helpUserMode		},
 	{ "unload",	helpUnload		}
@@ -423,6 +436,17 @@ void handleReload(Irccdctl *ctl, int argc, char **argv)
 	ctl->sendRaw(oss.str());
 }
 
+void handleRestart(Irccdctl *ctl, int argc, char **argv)
+{
+	std::ostringstream oss;
+
+	oss << "RESTART ";
+	oss << ((argc < 1) ? "__ALL__" : argv[0]);
+	oss << "\n";
+
+	ctl->sendRaw(oss.str());
+}
+
 void handleTopic(Irccdctl *ctl, int argc, char **argv)
 {
 	std::ostringstream oss;
@@ -473,6 +497,7 @@ std::unordered_map<std::string, Handler> handlers {
 	{ "notice",	handleNotice		},
 	{ "part",	handlePart		},
 	{ "reload",	handleReload		},
+	{ "restart",	handleRestart		},
 	{ "topic",	handleTopic		},
 	{ "umode",	handleUserMode		},
 	{ "unload",	handleUnload		}
@@ -750,6 +775,7 @@ void Irccdctl::usage()
 	Logger::warn("\tnick\t\tChange your nickname");
 	Logger::warn("\tpart\t\tLeave a channel");
 	Logger::warn("\treload\t\tReload a Lua plugin");
+	Logger::warn("\trestart\t\tRestart one or all servers");
 	Logger::warn("\ttopic\t\tChange a channel topic");
 	Logger::warn("\tumode\t\tChange a user mode");
 	Logger::warn("\tunload\t\tUnload a Lua plugin");

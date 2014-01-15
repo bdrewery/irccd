@@ -38,6 +38,7 @@ ServerConnecting::ServerConnecting()
 ServerState::Ptr ServerConnecting::exec(Server::Ptr server)
 {
 	auto &session = server->getSession();
+	session = IrcSession();
 
 	/*
 	 * This is needed if irccd is started before DHCP or if

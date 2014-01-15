@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -29,6 +29,11 @@ set(VERSION "${MAJOR}.${MINOR}")
 
 # Compatibility options
 option(COMPAT_1_0 "Be compatible with 1.0" On)
+
+# Default to Release
+if (NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE "Release")
+endif ()
 
 # General settings
 if (UNIX)
@@ -70,7 +75,6 @@ else ()
 	set(ETCDIR "etc"
 	    CACHE STRING "Configuration directory")
 endif ()
-
 
 # Include path to common
 include_directories(
@@ -151,6 +155,9 @@ add_subdirectory(irccd)
 # irccd controller
 add_subdirectory(irccdctl)
 
+# Contributions
+add_subdirectory(contrib)
+
 # Tests
 include(CTest)
 add_subdirectory(tests)
@@ -229,8 +236,6 @@ if (WIN32)
 	set(CPACK_PACKAGE_NAME "Irccd")
 	set(CPACK_NSIS_WELCOME_BITMAP "${CMAKE_CURRENT_SOURCE_DIR}/win32/left.bmp")
 	set(CPACK_NSIS_HEADER_BITMAP "${CMAKE_CURRENT_SOURCE_DIR}/win32/top.bmp")
-
-
 else ()
 	set(CPACK_GENERATOR "TGZ")
 endif ()

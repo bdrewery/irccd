@@ -1,4 +1,4 @@
-Irccd 1.0 socket guide
+Irccd 1.1 socket guide
 ======================
 :Author: Demelier David
 :Email: demelier.david@gmail.com
@@ -245,6 +245,16 @@ RELOAD name\n
 Parameters:
 
 * `name`: The plugin name.
+
+=== RESTART
+
+Restart one or all servers.
+
+----
+RESTART name\n
+----
+
+* `name`: The server name, pass *\_\_ALL__* to restart all
 
 === TOPIC
 

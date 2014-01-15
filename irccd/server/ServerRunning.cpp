@@ -19,6 +19,7 @@
 #include "Irccd.h"
 #include "Logger.h"
 #include "Server.h"
+#include "ServerConnecting.h"
 #include "ServerRunning.h"
 #include "ServerDisconnected.h"
 
@@ -37,6 +38,11 @@ ServerState::Ptr ServerRunning::exec(Server::Ptr server)
 
 	m_server = server;
 	irc_run(server->getSession());
+
+	if (reco.restarting) {
+		reco.restarting = false;
+		return ServerState::Ptr(new ServerConnecting);
+	}
 
 	return ServerState::Ptr(new ServerDisconnected);
 }

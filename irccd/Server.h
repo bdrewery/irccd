@@ -34,39 +34,6 @@
 
 namespace irccd {
 
-class Server;
-
-#if 0
-
-/* --------------------------------------------------------
- * IRC Events, used by Server
- * -------------------------------------------------------- */
-
-/**
- * @enum IrcEventType
- * @brief Type of IRC event
- */
-enum class IrcEventType {
-	Connection,					//! when connection
-	ChannelNotice,					//! channel notices
-	Invite,						//! invitation
-	Join,						//! on joins
-	Kick,						//! on kick
-	Message,					//! on channel messages
-	Me,						//! CTCP Action
-	Mode,						//! channel mode
-	Nick,						//! nick change
-	Names,						//! (def) names listing
-	Notice,						//! channel notice
-	Part,						//! channel parts
-	Query,						//! private query
-	Topic,						//! topic change
-	UserMode,					//! user mode change
-	Whois						//! (def) whois response
-};
-
-#endif
-
 /**
  * @enum IrcChanNickMode
  * @brief Prefixes for channels
@@ -124,6 +91,7 @@ public:
 		int		maxretries = 0;		//! max number of test (0 = forever)
 		int		noretried = 0;		//! current number of test
 		int		timeout = 30;		//! seconds to wait before testing
+		bool		restarting = false;	//! tells if we are restarting
 	};
 
 	/**
@@ -391,6 +359,14 @@ public:
 	 */
 	void start();
 
+	/**
+	 * Restart a connection if it is running.
+	 */
+	void restart();
+
+	/**
+	 * Request for stopping the server.
+	 */
 	void stop();
 
 	/* ------------------------------------------------
@@ -482,8 +458,9 @@ public:
 	 * Leave a channel.
 	 *
 	 * @param channel the channel to leave
+	 * @param reason an optional reason
 	 */
-	virtual void part(const std::string &channel);
+	virtual void part(const std::string &channel, const std::string &reason = "");
 
 	/**
 	 * Send a query message.

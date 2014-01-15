@@ -993,6 +993,21 @@ int irc_cmd_part (irc_session_t * session, const char * channel)
 }
 
 
+int irc_cmd_part_v2(irc_session_t * session, const char * channel, const char * message)
+{
+	if ( !channel )
+	{
+		session->lasterror = LIBIRC_ERR_STATE;
+		return 1;
+	}
+
+	if ( !message )
+		return irc_cmd_part (session, channel);
+
+	return irc_send_raw (session, "PART %s :%s", channel, message);
+}
+
+
 int irc_cmd_topic (irc_session_t * session, const char * channel, const char * topic)
 {
 	if ( !channel )

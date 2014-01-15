@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -27,8 +27,10 @@ if (WITH_LUA52 AND WITH_LUAJIT)
 	message(FATAL_ERROR "Please select WITH_LUA52 or WITH_LUAJIT")
 endif ()
 
-# Use bundled libircclient or not
-option(WITH_BUNDLE_IRCCLIENT "Build with bundled libircclient" On)
+#
+# External libircclient is temporarly disabled. See below.
+#
+#option(WITH_BUNDLE_IRCCLIENT "Build with bundled libircclient" On)
 
 set(SOURCES
 	server/ServerConnecting.cpp
@@ -112,28 +114,28 @@ if (WITH_LUA52 OR WITH_LUAJIT)
 			event/IrcEventWhois.h
 			IrcEvent.cpp
 			IrcEvent.h
-			Lua/LuaIrccd.cpp
-			Lua/LuaIrccd.h
-			Lua/LuaLogger.cpp
-			Lua/LuaLogger.h
-			Lua/LuaFS.cpp
-			Lua/LuaFS.h
-			Lua/LuaParser.cpp
-			Lua/LuaParser.h
-			Lua/LuaPipe.cpp
-			Lua/LuaPipe.h
-			Lua/LuaPlugin.cpp
-			Lua/LuaPlugin.h
-			Lua/LuaServer.cpp
-			Lua/LuaServer.h
-			Lua/LuaSocket.cpp
-			Lua/LuaSocket.h
-			Lua/LuaSystem.cpp
-			Lua/LuaSystem.h
-			Lua/LuaThread.cpp
-			Lua/LuaThread.h
-			Lua/LuaUtil.cpp
-			Lua/LuaUtil.h
+			lua/LuaIrccd.cpp
+			lua/LuaIrccd.h
+			lua/LuaLogger.cpp
+			lua/LuaLogger.h
+			lua/LuaFS.cpp
+			lua/LuaFS.h
+			lua/LuaParser.cpp
+			lua/LuaParser.h
+			lua/LuaPipe.cpp
+			lua/LuaPipe.h
+			lua/LuaPlugin.cpp
+			lua/LuaPlugin.h
+			lua/LuaServer.cpp
+			lua/LuaServer.h
+			lua/LuaSocket.cpp
+			lua/LuaSocket.h
+			lua/LuaSystem.cpp
+			lua/LuaSystem.h
+			lua/LuaThread.cpp
+			lua/LuaThread.h
+			lua/LuaUtil.cpp
+			lua/LuaUtil.h
 			Luae.cpp
 			Luae.h
 			Pipe.cpp
@@ -160,7 +162,11 @@ if (WITH_LUA52 OR WITH_LUAJIT)
 	endif ()
 endif ()
 
-if (WITH_BUNDLE_IRCCLIENT)
+#
+# Disable external libircclient yet. I modified the libircclient and will not
+# compile using external.
+#
+#if (WITH_BUNDLE_IRCCLIENT)
 	#
 	# Compile libircclient as internal
 	#
@@ -175,17 +181,13 @@ if (WITH_BUNDLE_IRCCLIENT)
 		"${CMAKE_SOURCE_DIR}/extern/libircclient/include"
 	)
 
-	list(
-		APPEND
-		LIBRARIES
-		ircclient
-	)
-else ()
-	find_package(Libircclient REQUIRED)
-
-	list(APPEND INCLUDES ${LIBIRCCLIENT_INCLUDE_DIR})
-	list(APPEND LIBRARIES ${LIBIRCCLIENT_LIBRARIES})
-endif ()
+	list(APPEND LIBRARIES ircclient)
+#else ()
+#	find_package(Libircclient REQUIRED)
+#
+#	list(APPEND INCLUDES ${LIBIRCCLIENT_INCLUDE_DIR})
+#	list(APPEND LIBRARIES ${LIBIRCCLIENT_LIBRARIES})
+#endif ()
 
 include_directories(
 	${INCLUDES}
@@ -200,26 +202,17 @@ add_executable(irccd ${SOURCES})
 if (NOT WITH_LUA52 OR NOT WITH_LUAJIT)
 	if (UNIX)
 		set(FLAGS "-Wno-unused-parameter -Wno-unused-variable")
-	else ()
-		set(FLAGS "/w")
 	endif ()
-
-	set_target_properties(
-		irccd
-		PROPERTIES
-		COMPILE_FLAGS "${FLAGS}"
-	)
 endif ()
 
 if (UNIX)
 	list(APPEND LIBRARIES "pthread")
+else ()
+	set(FLAGS "${FLAGS} /wd4996 /wd4244")
 endif ()
 
-target_link_libraries(
-	irccd
-	common
-	${LIBRARIES}
-)
+set_target_properties(irccd PROPERTIES COMPILE_FLAGS "${FLAGS}")
+target_link_libraries(irccd common ${LIBRARIES})
 
 install(TARGETS irccd RUNTIME DESTINATION bin)
 

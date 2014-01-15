@@ -37,10 +37,6 @@ ServerState::Ptr ServerDisconnected::exec(Server::Ptr server)
 	auto &reco = server->getRecoInfo();
 	auto running = Irccd::getInstance().isRunning();
 
-	// Destroy the session
-	auto &session = server->getSession();
-	session = IrcSession();
-
 	Logger::log("server %s: disconnected", info.name.c_str());
 
 	if (running && reco.enabled) {

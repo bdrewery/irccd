@@ -649,6 +649,7 @@ The following commands are available for irccdctl:
 * <<irccdctlnick,nick>>
 * <<irccdctlpart,part>>
 * <<irccdctlreload,reload>>
+* <<irccdctlrestart,restart>>
 * <<irccdctltopic,topic>>
 * <<irccdctlumode,umode>>
 * <<irccdctlunload,unload>>
@@ -922,6 +923,27 @@ $ irccdctl reload name
 .Example
 ----
 $ irccdctl reload logger
+----
+
+anchor:irccdctlrestart[]
+
+=== Restart a server
+
+Sometimes it is needed to force a reload by hand. This even more true when
+a server died, irccd has no way to detect that. This command force a
+reconnection even if it is not enabled in the config.
+
+[NOTE]
+If the parameter name is not given, all servers are restarted.
+
+.Usage
+----
+$ irccdctl restart [name]
+----
+
+.Example
+----
+$ irccdctl restart
 ----
 
 anchor:irccdctltopic[]

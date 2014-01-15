@@ -19,7 +19,7 @@
 #include <vector>
 #include <string>
 
-#include "Lua/LuaServer.h"
+#include "lua/LuaServer.h"
 
 #include "IrcEvent.h"
 #include "Luae.h"

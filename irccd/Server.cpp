@@ -283,6 +283,16 @@ void Server::start()
 	});
 }
 
+void Server::restart()
+{
+	Lock lk(m_lock);
+
+	if (m_state->which() == "Running") {
+		m_reco.restarting = true;
+		irc_disconnect(m_session);
+	}
+}
+
 void Server::stop()
 {
 	/*
@@ -303,7 +313,6 @@ void Server::stop()
 	try {
 		m_thread.join();
 	} catch (std::system_error error) {
-		Logger::warn("%d vs %d\n", std::this_thread::get_id(), m_thread.get_id());
 		Logger::warn("server %s: %s", m_info.name.c_str(), error.what());
 	}
 }
@@ -381,12 +390,15 @@ void Server::notice(const std::string &nickname, const std::string &message)
 		irc_cmd_notice(m_session, nickname.c_str(), message.c_str());
 }
 
-void Server::part(const std::string &channel)
+void Server::part(const std::string &channel, const std::string &reason)
 {
 	Lock lk(m_lock);
 
-	if (m_state->which() == "Running")
-		irc_cmd_part(m_session, channel.c_str());
+	if (m_state->which() == "Running") {
+		const char *r = (reason.length() == 0) ? nullptr : reason.c_str();
+
+		irc_cmd_part_v2(m_session,channel.c_str(), r);
+	}
 }
 
 void Server::query(const std::string &who, const std::string &message)

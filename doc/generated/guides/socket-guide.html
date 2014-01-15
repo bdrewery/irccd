@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="generator" content="AsciiDoc 8.6.9">
-<title>Irccd 1.0 socket guide</title>
+<title>Irccd 1.1 socket guide</title>
 <style type="text/css">
 /*
  * AsciiDoc 'volnitsky' theme for xhtml11 and html5 backends.
@@ -622,7 +622,7 @@ asciidoc.install(2);
 </head>
 <body class="article">
 <div id="header">
-<h1>Irccd 1.0 socket guide</h1>
+<h1>Irccd 1.1 socket guide</h1>
 <span id="author">Demelier David</span><br>
 <span id="email" class="monospaced">&lt;<a href="mailto:demelier.david@gmail.com">demelier.david@gmail.com</a>&gt;</span><br>
 <span id="revdate">September, 10 2013</span>
@@ -1035,6 +1035,21 @@ every server defined in irccd.conf(5).</p></div>
 </ul></div>
 </div>
 <div class="sect2">
+<h3 id="_restart">RESTART</h3>
+<div class="paragraph"><p>Restart one or all servers.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>RESTART name\n</pre>
+</div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">name</span>: The server name, pass <strong>__ALL__</strong> to restart all
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
 <h3 id="_topic">TOPIC</h3>
 <div class="paragraph"><p>This command is used to set a channel topic. Note that you obviously need
 the rights to do that.</p></div>
@@ -1104,7 +1119,7 @@ the rights to do that.</p></div>
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2013-12-27 15:11:14 CET
+Last updated 2014-01-08 13:48:19 CET
 </div>
 </div>
 </body>

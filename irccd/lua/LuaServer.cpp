@@ -274,8 +274,12 @@ int serverPart(lua_State *L)
 {
 	Server::Ptr s = Luae::getShared<Server>(L, 1, ServerType);
 	std::string channel = luaL_checkstring(L, 2);
+	std::string reason;
 
-	s->part(channel);
+	if (lua_gettop(L) >= 3)
+		reason = luaL_checkstring(L, 3);
+
+	s->part(channel, reason);
 
 	return 0;
 }
