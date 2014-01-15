@@ -110,7 +110,7 @@ void Irccd::openConfig()
 #if !defined(_WIN32)
 	if (!m_foreground) {
 		Logger::log("irccd: forking to background...");
-		daemon(0, 0);
+		(void)daemon(0, 0);
 	}
 #endif
 
