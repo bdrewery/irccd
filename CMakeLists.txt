@@ -37,17 +37,16 @@ endif ()
 
 # General settings
 if (UNIX)
-	set(CMAKE_C_FLAGS "-Wall -Wextra")
-	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++11")
-endif ()
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=c++11")
 
-if (WIN32)
+	# FreeBSD use clang
+	if (${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+	endif ()
+elseif (WIN32)
 	add_definitions("-D_CRT_SECURE_NO_WARNINGS")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
-endif ()
-
-if (CMAKE_BUILD_TYPE MATCHES "Release")
-	add_definitions("-DNDEBUG")
 endif ()
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")			# own modules

@@ -395,9 +395,10 @@ void Server::part(const std::string &channel, const std::string &reason)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running") {
-		const char *r = (reason.length() == 0) ? nullptr : reason.c_str();
-
-		irc_cmd_part_v2(m_session,channel.c_str(), r);
+		if (reason.length() > 0)
+			irc_send_raw(m_session, "PART %s :%s", channel.c_str(), reason.c_str());
+		else
+			irc_cmd_part(m_session,channel.c_str());
 	}
 }
 

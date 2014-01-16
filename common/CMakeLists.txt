@@ -19,7 +19,7 @@
 project(common)
 
 # Use bundled xdg-basedir or not
-option(WITH_BUNDLE_XDGBASEDIR "Build with bundled libxdg-basedir" On)
+option(WITH_BUNDLE_XDGBASEDIR "Build with bundled libxdg-basedir" Off)
 
 set(SOURCES
 	Date.cpp
