@@ -37,7 +37,7 @@ local attribute = {
 	Reverse         = '\x16'	--- Reverse (reverse foreground and background).
 }
 
---- Get the file name of a full path. (deprecated)
+--- Get the file name of a full path. <span class="deprecated">(deprecated)</span>
 -- Returns the file name only of a full path. For instance, returns
 -- "foo.lua" when calling with "/usr/local/foo.lua"
 -- @param path the file path
@@ -55,7 +55,7 @@ end
 function util.date(timestamp)
 end
 
---- Get the parent path of a file. (deprecated)
+--- Get the parent path of a file. <span class="deprecated">(deprecated)</span>
 -- This function may be used to get the parent path of a file. Example:
 -- calling dirname on "/foo/bar/test.txt" will returns "/foo/bar".
 -- @param path the full file path
@@ -64,7 +64,7 @@ end
 function util.dirname(path)
 end
 
---- Check if a file exists. (deprecated)
+--- Check if a file exists. <span class="deprecated">(deprecated)</span>
 -- Tests if a directory or a file exists.
 -- @param path the path to check
 -- @return true if exists
@@ -89,13 +89,13 @@ end
 function util.format(text, attrs)
 end
 
---- Get a environment variable. (deprecated)
+--- Get a environment variable. <span class="deprecated">(deprecated)</span>
 -- @return the variable or an empty string
 -- @see system.env
 function util.getEnv()
 end
 
---- Get the home directory. (deprecated)
+--- Get the home directory. <span class="deprecated">(deprecated)</span>
 -- This function should be used with care, plugin should not use user home to
 -- store files.
 -- @return the user home directory
@@ -104,14 +104,14 @@ end
 function util.getHome()
 end
 
---- Get the time spent from start. (deprecated)
+--- Get the time spent from start. <span class="deprecated">(deprecated)</span>
 -- Get how many milliseconds spent since the irccd startup.
 -- @return the number of seconds
 -- @see system.ticks
 function util.getTicks()
 end
 
---- Create a directory recursively. (deprecated)
+--- Create a directory recursively. <span class="deprecated">(deprecated)</span>
 -- This function acts like <code>mkdir -p</code>.
 -- @param path the path
 -- @return true on success or false plus an error
@@ -120,7 +120,7 @@ end
 function util.mkdir(path)
 end
 
---- Open a directory. (deprecated)
+--- Open a directory. <span class="deprecated">(deprecated)</span>
 -- Optional boolean skipSpecial may be passed to avoid ".", ".." for being
 -- included.
 -- @param path the path
@@ -131,7 +131,7 @@ end
 function util.opendir(path, skipSpecial)
 end
 
---- Split the nickname and host. (deprecated)
+--- Split the nickname and host. <span class="deprecated">(deprecated)</span>
 -- Extract the nickname and host from a user, for instance with
 -- foo!~foo@localhost, foo will be returned as first value, localhost
 -- as second.
@@ -157,7 +157,7 @@ end
 function util.splithost(user)
 end
 
---- Sleep for milliseconds. (deprecated)
+--- Sleep for milliseconds. <span class="deprecated">(deprecated)</span>
 -- Suspend the execution thread.
 -- @param msec the number of milliseconds
 -- @see system.usleep

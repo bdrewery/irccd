@@ -5,13 +5,13 @@
 --
 -- @module irccd.plugin
 
---- Get the plugin name. (deprecated)
+--- Get the plugin name. <span class="deprecated">(deprecated)</span>
 -- @return the current plugin name
 -- @see plugin.info
 function plugin.getName()
 end
 
---- Get the plugin home. (deprecated)
+--- Get the plugin home. <span class="deprecated">(deprecated)</span>
 -- Returns the home configuration that lives in the user directory. Usually
 -- ~/.config/irccd/<strong>plugin</strong> where plugin is the plugin's
 -- name.
