@@ -25,6 +25,8 @@ find_library(XDG_LIBRARY NAMES xdg-basedir)
 
 # handle the QUIETLY and REQUIRED arguments and set XDG_FOUND to TRUE if all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(XDG DEFAULT_MSG XDG_INCLUDE_DIR XDG_LIBRARY)
+find_package_handle_standard_args(
+	XDG
+	REQUIRED_VARS XDG_LIBRARY XDG_INCLUDE_DIR)
 
 mark_as_advanced(XDG_INCLUDE_DIR XDG_LIBRARY)
