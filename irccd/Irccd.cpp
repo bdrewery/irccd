@@ -194,7 +194,7 @@ void Irccd::readPlugins(const Parser &config)
 				if (opt.m_value.length() == 0)
 					Plugin::load(opt.m_key);
 				else
-					Plugin::load(opt.m_value, false);
+					Plugin::load(opt.m_value, true);
 			} catch (std::runtime_error error) {
 				Logger::warn("irccd: %s", error.what());
 			}
