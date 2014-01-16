@@ -15,7 +15,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
 
-find_path (XDG_INCLUDE_DIR
+find_path(XDG_INCLUDE_DIR
           NAMES "basedir.h"
           PATH_SUFFIXES "xdg"
           DOC "The XDG include directory"
@@ -25,6 +25,6 @@ find_library(XDG_LIBRARY NAMES xdg-basedir)
 
 # handle the QUIETLY and REQUIRED arguments and set XDG_FOUND to TRUE if all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(XDG DEFAULT_MSG XDG_INCLUDE_DIR XDG_LIBRARY)
+find_package_handle_standard_args(XDG DEFAULT_MSG XDG_INCLUDE_DIR XDG_LIBRARY)
 
 mark_as_advanced(XDG_INCLUDE_DIR XDG_LIBRARY)
