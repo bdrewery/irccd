@@ -101,6 +101,11 @@ void irc_destroy_session (irc_session_t * session)
 	libirc_mutex_destroy (&session->mutex_session);
 #endif
 
+#if defined (ENABLE_SSL)
+	if ( session->ssl )
+		SSL_free( session->ssl );
+#endif
+	
 	/* 
 	 * delete DCC data 
 	 * libirc_remove_dcc_session removes the DCC session from the list.
@@ -686,9 +691,9 @@ static void libirc_process_incoming_data (irc_session_t * session, size_t proces
 					memcpy (ctcp_buf, params[1] + 1, msglen);
 					ctcp_buf[msglen] = '\0';
 
-					if ( !strncasecmp(ctcp_buf, "DCC ", msglen) )
+					if ( !strncasecmp(ctcp_buf, "DCC ", 4) )
 						libirc_dcc_request (session, prefix, ctcp_buf);
-					else if ( !strncasecmp( ctcp_buf, "ACTION ", msglen)
+					else if ( !strncasecmp( ctcp_buf, "ACTION ", 7)
 					&& session->callbacks.event_ctcp_action )
 					{
 						params[1] = ctcp_buf + 7; // the length of "ACTION "
@@ -850,7 +855,10 @@ int irc_process_select_descriptors (irc_session_t * session, fd_set *in_set, fd_
 	}
 
 	if ( session->state != LIBIRC_STATE_CONNECTED )
+	{
+		session->lasterror = LIBIRC_ERR_STATE;
 		return 1;
+	}
 
 	// Hey, we've got something to read!
 	if ( FD_ISSET (session->sock, in_set) )
