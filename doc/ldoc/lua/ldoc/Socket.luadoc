@@ -1,6 +1,6 @@
 --- Sockets.
 -- This API provides support for low level sockets. It currently
--- suports AF_INET, AF_INET6 and AF_LOCAL (on Unix only).
+-- suports AF\_INET, AF\_INET6 and AF_LOCAL (on Unix only).
 --
 -- @module irccd.socket
 
@@ -61,7 +61,7 @@ end
 function Socket:blockMode(mode)
 end
 
---- Close the sockets.
+--- Close the socket.
 -- This function is required when you have finished using the socket,
 -- the __gc metamethod will not close the socket.
 function Socket:close()
@@ -189,6 +189,8 @@ end
 -- @param arg the argument (depend on above)
 -- @return true on success or nil
 -- @return the error message
+-- @usage
+-- s:set("socket", "reuse-address", true)
 function Socket:set(level, name, arg)
 end
 
