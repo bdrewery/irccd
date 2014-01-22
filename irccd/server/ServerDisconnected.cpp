@@ -33,23 +33,43 @@ ServerDisconnected::ServerDisconnected()
 
 ServerState::Ptr ServerDisconnected::exec(Server::Ptr server)
 {
-	auto &info = server->getInfo();
-	auto &reco = server->getRecoInfo();
-	auto running = Irccd::getInstance().isRunning();
+	auto &info(server->getInfo());
+	auto &reco(server->getRecoInfo());
+	int tosleep(reco.timeout);
+	bool done(false);
+	bool printed(false);
 
 	Logger::log("server %s: disconnected", info.name.c_str());
 
-	if (running && reco.enabled) {
-		if (reco.maxretries <= 0 ||
-		    (reco.maxretries >= 1 && ++reco.noretried <= reco.maxretries)) {
-			Logger::log("server %s: retrying in %d seconds", info.name.c_str(), reco.timeout);
-			System::sleep(reco.timeout);
+	while (!done && reco.enabled) {
+		done = reco.restarting || reco.stopping;
 
-			return ServerState::Ptr(new ServerConnecting);
+		if (!Irccd::getInstance().isRunning() || tosleep <= 0)
+			done = true;
+		if (reco.maxretries >= 1 && reco.noretried >= reco.maxretries)
+			done = true;
+
+		if (done)
+			continue;
+
+		if (!printed) {
+			Logger::log("server %s: retrying in %d seconds", info.name.c_str(), reco.timeout);
+			printed = true;
 		}
 
-		Logger::log("server %s: giving up", info.name.c_str());
+		/*
+		 * We do a fake sleep of the timeout to allow restarting or
+		 * stopping from irccdctl.
+		 */
+		System::sleep(1);
+		tosleep = (tosleep - 1 <= 0) ? 0 : tosleep - 1;
 	}
+
+	if (reco.restarting || (reco.enabled && ++reco.noretried <= reco.maxretries))
+		return ServerState::Ptr(new ServerConnecting);
+
+	if (reco.enabled)
+		Logger::log("server %s: giving up", info.name.c_str());
 
 	return ServerState::Ptr(new ServerDead);
 }

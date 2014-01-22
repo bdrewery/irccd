@@ -287,10 +287,8 @@ void Server::restart()
 {
 	Lock lk(m_lock);
 
-	if (m_state->which() == "Running") {
-		m_reco.restarting = true;
-		irc_disconnect(m_session);
-	}
+	m_reco.restarting = true;
+	irc_disconnect(m_session);
 }
 
 void Server::stop()
@@ -301,13 +299,10 @@ void Server::stop()
 	{
 		Lock lk(m_lock);
 
-		if (m_state->which() == "Running") {
-			// Be sure that it won't try again
-			m_reco.enabled = false;
-			irc_disconnect(m_session);
-		}
-
-		m_state = ServerState::Ptr(new ServerDead);
+		// Be sure that it won't try again
+		m_reco.enabled = false;
+		m_reco.stopping = true;
+		irc_disconnect(m_session);
 	}
 
 	try {
