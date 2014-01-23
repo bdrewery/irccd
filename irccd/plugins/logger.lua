@@ -209,7 +209,7 @@ end
 
 function onNotice(server, who, target, notice)
 	local keywords = {
-		c = who,			-- for file loggin like channel
+		c = util.splituser(who),	-- for file logging like channel
 		m = notice,
 		s = server:getName(),
 		T = target,

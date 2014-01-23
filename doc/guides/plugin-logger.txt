@@ -14,6 +14,7 @@ following events:
 
 * Channel notice
 * Join
+* Kick
 * Me
 * Message
 * Mode
@@ -71,6 +72,15 @@ env]
 Format for channel joins.
 
 link:user-guide.html#irccdpatterns[Keywords supported: #c, #u, #s, #U, time, env]
+
+.Option `kick`
+
+Format for kicks.
+
+link:user-guide.html#irccdpatterns[Keywords supported: #c, #s, #t, #u, #U, #m]
+
+[NOTE]
+Keyword *#m* is an optional reason, *#t* is the kicked target.
 
 .Option `me` (CTCP Action)
 
