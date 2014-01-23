@@ -13,7 +13,9 @@
 -- you like to the thread just after the function itself.
 --
 -- <br />
--- <strong>Note: userdata, function are not supported as parameters.</strong>
+-- <strong>Note: userdata and functions are not supported as parameters.</strong>
+-- <br />
+-- <br />
 --
 -- You may discard the return value, the thread will automatically be deleted
 -- when its execution has finished
@@ -30,16 +32,28 @@ end
 --- Wait the thread to finish.
 -- This function blocks until the thread finishes its execution. Be
 -- careful using this function as it may block other plugins.
-function Thread:wait()
+-- @return true on success or nil
+-- @return an error message
+function Thread:join()
 end
+
+--- Permit the detached execution of a thread.
+-- You usually do not need to call this function, the __gc function
+-- automatically do it.
+--
+-- <br />
+-- <strong>Note: it's not a good practice to detach threads.</strong>
+-- @return true on success or nil
+-- @return an error message
+function Thread:detach()
 
 --- Thread metamethods.
 -- The metamethods available for object Thread.
 -- @section
 
 --- Thread destructor.
--- This function is only called when the thread has finished its
--- execution.
+-- Destructor for a thread, if the thread has not been joined or detached,
+-- it is detached by this function.
 function Thread:__gc()
 end
 

@@ -83,6 +83,7 @@
 <ul class="nowrap">
   <li><a href="../examples/Connect.lua.html">Connect.lua</a></li>
   <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
+  <li><a href="../examples/Server.lua.html">Server.lua</a></li>
   <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
 </ul>
 
@@ -203,6 +204,7 @@
     </dt>
     <dd>
     Get the first value.
+ This function does not remove the value from the pipe.
 
 
     <h3>Returns:</h3>
@@ -221,6 +223,7 @@
     </dt>
     <dd>
     Get the last value.
+ This function does not remove the value from the pipe.
 
 
     <h3>Returns:</h3>
@@ -264,7 +267,7 @@
     <dd>
     Get all the data.
  The iterator returns one value which may be any type, except
- function and userdata.
+ function and userdata. It removes all values from the pipe.
 
 
     <h3>Returns:</h3>

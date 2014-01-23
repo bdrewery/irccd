@@ -25,56 +25,56 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(LUAJIT_INCLUDE_DIR luajit.h
-  HINTS
-  $ENV{LUA_DIR}
-  PATH_SUFFIXES include/luajit-2.0 include
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
-  /opt
+find_path(LUAJIT_INCLUDE_DIR luajit.h
+	HINTS
+	$ENV{LUA_DIR}
+	PATH_SUFFIXES include/luajit-2.0 include
+	PATHS
+	~/Library/Frameworks
+	/Library/Frameworks
+	/sw # Fink
+	/opt/local # DarwinPorts
+	/opt/csw # Blastwave
+	/opt
 )
 
-FIND_LIBRARY(LUAJIT_LIBRARY
-  NAMES luajit luajit-5.1
-  HINTS
-  $ENV{LUA_DIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
+find_library(LUAJIT_LIBRARY
+	NAMES luajit luajit-5.1
+	HINTS
+	$ENV{LUA_DIR}
+	PATH_SUFFIXES lib64 lib
+	PATHS
+	~/Library/Frameworks
+	/Library/Frameworks
+	/sw
+	/opt/local
+	/opt/csw
+	/opt
 )
 
-IF(LUAJIT_LIBRARY)
-  # include the math library for Unix
-  IF(UNIX AND NOT APPLE)
-    FIND_LIBRARY(LUAJIT_MATH_LIBRARY m)
-    SET(LUAJIT_LIBRARIES "${LUAJIT_LIBRARY};${LUAJIT_MATH_LIBRARY}" CACHE STRING "Lua Libraries")
-  # For Windows and Mac, don't need to explicitly include the math library
-  ELSE(UNIX AND NOT APPLE)
-    SET(LUAJIT_LIBRARIES "${LUAJIT_LIBRARY}" CACHE STRING "Lua Libraries")
-  ENDIF(UNIX AND NOT APPLE)
-ENDIF()
+if (LUAJIT_LIBRARY)
+	# include the math library for Unix
+	if (UNIX AND NOT APPLE)
+		find_library(LUAJIT_MATH_LIBRARY m)
+		set(LUAJIT_LIBRARIES "${LUAJIT_LIBRARY};${LUAJIT_MATH_LIBRARY}" CACHE STRING "Lua Libraries")
+	# For Windows and Mac, don't need to explicitly include the math library
+	else ()
+	  set(LUAJIT_LIBRARIES "${LUAJIT_LIBRARY}" CACHE STRING "Lua Libraries")
+	endif ()
+endif ()
 
-IF(LUAJIT_INCLUDE_DIR AND EXISTS "${LUAJIT_INCLUDE_DIR}/lua.h")
-  FILE(STRINGS "${LUAJIT_INCLUDE_DIR}/lua.h" luajit_version_str REGEX "^#define[ \t]+LUA_RELEASE[ \t]+\"Lua .+\"")
+if(LUAJIT_INCLUDE_DIR AND EXISTS "${LUAJIT_INCLUDE_DIR}/lua.h")
+	file(STRINGS "${LUAJIT_INCLUDE_DIR}/lua.h" luajit_version_str REGEX "^#define[ \t]+LUA_RELEASE[ \t]+\"Lua .+\"")
 
-  STRING(REGEX REPLACE "^#define[ \t]+LUA_RELEASE[ \t]+\"Lua ([^\"]+)\".*" "\\1" LUAJIT_VERSION_STRING "${luajit_version_str}")
-  UNSET(luajit_version_str)
-ENDIF()
+	string(REGEX REPLACE "^#define[ \t]+LUA_RELEASE[ \t]+\"Lua ([^\"]+)\".*" "\\1" LUAJIT_VERSION_STRING "${luajit_version_str}")
+	unset(luajit_version_str)
+endif()
 
-INCLUDE(FindPackageHandleStandardArgs)
+include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set LUAJIT_FOUND to TRUE if 
 # all listed variables are TRUE
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LuaJIT
+find_package_handle_standard_args(LuaJIT
                                   REQUIRED_VARS LUAJIT_LIBRARIES LUAJIT_INCLUDE_DIR
                                   VERSION_VAR LUAJIT_VERSION_STRING)
 
-MARK_AS_ADVANCED(LUAJIT_INCLUDE_DIR LUAJIT_LIBRARIES LUAJIT_LIBRARY LUAJIT_MATH_LIBRARY)
+mark_as_advanced(LUAJIT_INCLUDE_DIR LUAJIT_LIBRARIES LUAJIT_LIBRARY LUAJIT_MATH_LIBRARY)

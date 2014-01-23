@@ -84,6 +84,7 @@
 <ul class="nowrap">
   <li><a href="../examples/Connect.lua.html">Connect.lua</a></li>
   <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
+  <li><a href="../examples/Server.lua.html">Server.lua</a></li>
   <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
 </ul>
 
@@ -95,7 +96,7 @@
 
 <p>Sockets.</p>
 <p> This API provides support for low level sockets. It currently
- suports AF<em>INET, AF</em>INET6 and AF_LOCAL (on Unix only).</p>
+ suports AF_INET, AF_INET6 and AF_LOCAL (on Unix only).</p>
 
 
 <h2><a href="#Functions">Functions</a></h2>
@@ -136,7 +137,7 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Socket:close">Socket:close ()</a></td>
-	<td class="summary">Close the sockets.</td>
+	<td class="summary">Close the socket.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Socket:connect">Socket:connect (address)</a></td>
@@ -374,7 +375,7 @@
     <strong>Socket:close ()</strong>
     </dt>
     <dd>
-    Close the sockets.
+    Close the socket.
  This function is required when you have finished using the socket,
  the __gc metamethod will not close the socket.
 
@@ -657,6 +658,10 @@
 
 
 
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">s:set(<span class="string">"socket"</span>, <span class="string">"reuse-address"</span>, <span class="keyword">true</span>)</pre>
+    </ul>
 
 </dd>
 </dl>

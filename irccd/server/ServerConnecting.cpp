@@ -80,7 +80,7 @@ ServerState::Ptr ServerConnecting::exec(Server::Ptr server)
 	if (info.password.length() > 0)
 		password = info.password.c_str();
 
-	irc_connect(
+	auto res = irc_connect(
 	    session,
 	    info.host.c_str(),
 	    info.port,
@@ -88,6 +88,9 @@ ServerState::Ptr ServerConnecting::exec(Server::Ptr server)
 	    identity.nickname.c_str(),
 	    identity.username.c_str(),
 	    identity.realname.c_str());
+
+	if (res == 0)
+		server->getRecoInfo().noretried = 0;
 
 	return ServerState::Ptr(new ServerRunning);
 }

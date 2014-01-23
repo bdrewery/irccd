@@ -34,18 +34,36 @@ IrcEventMessage::IrcEventMessage(Server::Ptr server,
 void IrcEventMessage::action(lua_State *L) const
 {
 	auto cc = m_server->getOptions().commandChar;
-	auto sp = cc + Process::info(L).name;
+	auto name = Process::info(L).name;
+	auto msg = m_message;
+	bool iscommand(false);
 
 	// handle special commands "!<plugin> command"
-	if (cc.length() > 0 && m_message.compare(0, sp.length(), sp) == 0) {
-		auto plugin = m_message.substr(cc.length(), sp.length() - cc.length());
+	if (cc.length() > 0) {
+		auto pos = msg.find_first_of(" \t");
 
-		if (plugin == Process::info(L).name) {
-			call(L, "onCommand", m_server, m_channel, m_who, m_message.substr(sp.length() + 1));
+		/*
+		 * If the message that comes is "!foo" without spaces we
+		 * compare the command char + the plugin name. If there
+		 * is a space, we check until we find a space, if not
+		 * typing "!foo123123" will trigger foo plugin.
+		 */
+
+		if (pos == std::string::npos) {
+			iscommand = msg.compare(cc.length(), name.length(), name) == 0 &&
+			    msg.length() == cc.length() + name.length();
+		} else {
+			iscommand = msg.compare(cc.length(), pos - 1, name) == 0;
 		}
-	} else {
-		call(L, "onMessage", m_server, m_channel, m_who, m_message);
+
+		if (iscommand)
+			msg = m_message.substr(pos + 1);
 	}
+
+	if (iscommand)
+		call(L, "onCommand", m_server, m_channel, m_who, msg);
+	else
+		call(L, "onMessage", m_server, m_channel, m_who, msg);
 }
 
 } // !irccd

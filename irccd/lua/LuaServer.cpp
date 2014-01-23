@@ -151,6 +151,9 @@ int serverGetInfo(lua_State *L)
 	lua_pushboolean(L, s->getInfo().sslVerify);
 	lua_setfield(L, -2, "sslVerify");
 
+	lua_pushstring(L, s->getOptions().commandChar.c_str());
+	lua_setfield(L, -2, "commandChar");
+
 	return 1;
 }
 
@@ -245,7 +248,6 @@ int serverNames(lua_State *L)
 
 	s->names(channel);
 
-	// Deferred call
 	return 0;
 }
 
@@ -344,7 +346,6 @@ int serverWhois(lua_State *L)
 
 	s->whois(target);
 
-	// Deferred call
 	return 0;
 }
 

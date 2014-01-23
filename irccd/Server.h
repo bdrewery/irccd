@@ -91,7 +91,15 @@ public:
 		int		maxretries = 0;		//! max number of test (0 = forever)
 		int		noretried = 0;		//! current number of test
 		int		timeout = 30;		//! seconds to wait before testing
+
+		/*
+		 * The following variables are only used in the
+		 * ServerDisconnected state. Because it waits for the timeout
+		 * we check if the irccdctl wanted to stop / restart
+		 * the server.
+		 */
 		bool		restarting = false;	//! tells if we are restarting
+		bool		stopping = false;	//! tells that we want to stop
 	};
 
 	/**

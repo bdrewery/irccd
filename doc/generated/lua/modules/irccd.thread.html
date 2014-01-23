@@ -84,6 +84,7 @@
 <ul class="nowrap">
   <li><a href="../examples/Connect.lua.html">Connect.lua</a></li>
   <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
+  <li><a href="../examples/Server.lua.html">Server.lua</a></li>
   <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
 </ul>
 
@@ -112,8 +113,12 @@
 <h2><a href="#Class_Thread">Class Thread </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#Thread:wait">Thread:wait ()</a></td>
+	<td class="name" nowrap><a href="#Thread:join">Thread:join ()</a></td>
 	<td class="summary">Wait the thread to finish.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Thread:detach">Thread:detach ()</a></td>
+	<td class="summary">Permit the detached execution of a thread.</td>
 	</tr>
 </table>
 <h2><a href="#Thread_metamethods">Thread metamethods </a></h2>
@@ -144,7 +149,9 @@
  you like to the thread just after the function itself.</p>
 
 <p> <br />
- <strong>Note: userdata, function are not supported as parameters.</strong></p>
+ <strong>Note: userdata and functions are not supported as parameters.</strong>
+ <br />
+ <br /></p>
 
 <p> You may discard the return value, the thread will automatically be deleted
  when its execution has finished
@@ -174,8 +181,8 @@
 
     <dl class="function">
     <dt>
-    <a name = "Thread:wait"></a>
-    <strong>Thread:wait ()</strong>
+    <a name = "Thread:join"></a>
+    <strong>Thread:join ()</strong>
     </dt>
     <dd>
     Wait the thread to finish.
@@ -183,6 +190,38 @@
  careful using this function as it may block other plugins.
 
 
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        true on success or nil</li>
+        <li>
+        an error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Thread:detach"></a>
+    <strong>Thread:detach ()</strong>
+    </dt>
+    <dd>
+    Permit the detached execution of a thread.
+ You usually do not need to call this function, the __gc function
+ automatically do it.</p>
+
+<p> <br />
+ <strong>Note: it's not a good practice to detach threads.</strong>
+
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        true on success or nil</li>
+        <li>
+        an error message</li>
+    </ol>
 
 
 
@@ -199,8 +238,8 @@
     </dt>
     <dd>
     Thread destructor.
- This function is only called when the thread has finished its
- execution.
+ Destructor for a thread, if the thread has not been joined or detached,
+ it is detached by this function.
 
 
 

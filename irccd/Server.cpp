@@ -287,10 +287,8 @@ void Server::restart()
 {
 	Lock lk(m_lock);
 
-	if (m_state->which() == "Running") {
-		m_reco.restarting = true;
-		irc_disconnect(m_session);
-	}
+	m_reco.restarting = true;
+	irc_disconnect(m_session);
 }
 
 void Server::stop()
@@ -301,13 +299,10 @@ void Server::stop()
 	{
 		Lock lk(m_lock);
 
-		if (m_state->which() == "Running") {
-			// Be sure that it won't try again
-			m_reco.enabled = false;
-			irc_disconnect(m_session);
-		}
-
-		m_state = ServerState::Ptr(new ServerDead);
+		// Be sure that it won't try again
+		m_reco.enabled = false;
+		m_reco.stopping = true;
+		irc_disconnect(m_session);
 	}
 
 	try {
@@ -395,9 +390,10 @@ void Server::part(const std::string &channel, const std::string &reason)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running") {
-		const char *r = (reason.length() == 0) ? nullptr : reason.c_str();
-
-		irc_cmd_part_v2(m_session,channel.c_str(), r);
+		if (reason.length() > 0)
+			irc_send_raw(m_session, "PART %s :%s", channel.c_str(), reason.c_str());
+		else
+			irc_cmd_part(m_session,channel.c_str());
 	}
 }
 

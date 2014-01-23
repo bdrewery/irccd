@@ -163,7 +163,7 @@ end
 
 --- Convert object to string.
 -- @return a string
-function Sectio:__tostring()
+function Section:__tostring()
 end
 
 -- vim: set syntax=lua:

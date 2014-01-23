@@ -32,9 +32,7 @@ ServerRunning::ServerRunning()
 
 ServerState::Ptr ServerRunning::exec(Server::Ptr server)
 {
-	// Reinit the counter on success
 	auto &reco = server->getRecoInfo();
-	reco.noretried = 0;
 
 	m_server = server;
 	irc_run(server->getSession());

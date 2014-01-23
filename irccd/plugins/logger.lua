@@ -68,8 +68,8 @@ local function loadConfig()
 	local formats = config:getSection("formats")
 	if formats ~= nil then
 		for k, _ in pairs(format) do
-			if general:hasOption(k) then
-				format[k] = general:getOption(k)
+			if formats:hasOption(k) then
+				format[k] = formats:getOption(k)
 		
 				-- Set to nil means no log, so in config is ""
 				if #format[k] <= 0 then
@@ -209,7 +209,7 @@ end
 
 function onNotice(server, who, target, notice)
 	local keywords = {
-		c = who,			-- for file loggin like channel
+		c = util.splituser(who),	-- for file logging like channel
 		m = notice,
 		s = server:getName(),
 		T = target,

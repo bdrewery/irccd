@@ -486,20 +486,6 @@ int irc_cmd_part (irc_session_t * session, const char * channel);
 
 
 /*!
- * \fn int irc_cmd_part_v2 (irc_session_t * session, const char *channel, const char * message);
- * \brief Leaves the IRC channel with an optional part message.
- *
- * \param session An initiated and connected session.
- * \param channel A channel name to leave. Must not be NULL.
- * \param message An optional part message. May be NULL.
- *
- * \return Return the same value as irc_cmd_part
- * \see irc_cmd_part
- */
-int irc_cmd_part_v2 (irc_session_t *session, const char * channel, const char * message);
-
-
-/*!
  * \fn int irc_cmd_invite (irc_session_t * session, const char * nick, const char * channel)
  * \brief Invites a user to invite-only channel.
  *

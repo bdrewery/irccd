@@ -2,6 +2,10 @@
 -- The server class is usually passed through every Lua callbacks, on IRC
 -- events.
 --
+-- <br />
+-- The server object will always use the same reference, you can use the server
+-- as table key.
+--
 -- @module irccd.server
 
 --- Find an existing server by name.

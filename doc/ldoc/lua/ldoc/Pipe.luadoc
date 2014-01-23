@@ -28,11 +28,13 @@ function Pipe:push(data)
 end
 
 --- Get the first value.
+-- This function does not remove the value from the pipe.
 -- @return the first value
 function Pipe:first()
 end
 
 --- Get the last value.
+-- This function does not remove the value from the pipe.
 -- @return the last value
 function Pipe:last()
 end
@@ -45,7 +47,7 @@ end
 
 --- Get all the data.
 -- The iterator returns one value which may be any type, except
--- function and userdata.
+-- function and userdata. It removes all values from the pipe.
 --
 -- @return an iterator
 -- @usage
