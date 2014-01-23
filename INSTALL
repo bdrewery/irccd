@@ -10,12 +10,8 @@ Requirements
 ============
 
 * C++11 compiler, you need a compiler that support C++11. For Windows,
-  Visual Studio 2012 or superior is known to work. On Unix, clang 3.2 or
+  Visual Studio 2013 or superior is required. On Unix, clang 3.2 or
   superior also work.
-
-* libircclient (http://www.ulduzsoft.com/linux/libircclient). This library
-  is mandatory. You need version 1.6 or higher and 1.7 or higher for SSL
-  support.
 
 * libxdg-basedir (https://github.com/devnev/libxdg-basedir). This library
   is needed on Unix only.
@@ -50,8 +46,6 @@ there tools and libraries may help you.
 
 * cppunit (http://sourceforge.net/apps/mediawiki/cppunit/). This tool is used
   for unit tests in tests/ directory.
-
-  Note: currently there are no tests for this release. It will be added in 1.1.
 
 Basic installation
 ==================
@@ -98,6 +92,13 @@ Tweaking installation
 If you want to disable or change some component, you need to adjust one of
 the following CMake variable.
 
+Switching to LuaJIT
+---------------------------
+
+You can use LuaJIT instead of vanilla Lua 5.2
+
+$ cmake .. -DWITH_LUA52=Off -DWITH_LUAJIT=On
+
 Disabling Lua
 -------------
 
@@ -115,7 +116,7 @@ $ cmake .. -DWITH_LDOC=Off
 Disabling user guides
 ---------------------
 
-This switch disable HTMl user guides.
+This switch disable HTML user guides.
 
 $ cmake .. -DWITH_DOC=Off
 

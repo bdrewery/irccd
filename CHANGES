@@ -1,8 +1,8 @@
 IRC Client Daemon CHANGES
 =========================
 
-CURRENT
--------
+1.1 January 30, 2014
+---------------------------------------
   * Added support for UDP sockets,
   * Added a plugin for authentication,
   * Windows irccd's home is now the irccd.exe parent directory,
