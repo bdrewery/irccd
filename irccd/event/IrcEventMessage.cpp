@@ -48,16 +48,23 @@ void IrcEventMessage::action(lua_State *L) const
 		 * is a space, we check until we find a space, if not
 		 * typing "!foo123123" will trigger foo plugin.
 		 */
-
 		if (pos == std::string::npos) {
-			iscommand = msg.compare(cc.length(), name.length(), name) == 0 &&
-			    msg.length() == cc.length() + name.length();
+			iscommand = msg.length() == cc.length() + name.length() &&
+			    msg.compare(cc.length(), name.length(), name) == 0;
 		} else {
 			iscommand = msg.compare(cc.length(), pos - 1, name) == 0;
 		}
 
-		if (iscommand)
-			msg = m_message.substr(pos + 1);
+		if (iscommand) {
+			/*
+			 * If no space is found we just set the message to "" otherwise
+			 * the plugin name will be passed through onCommand
+			 */
+			if (pos == std::string::npos)
+				msg = "";
+			else
+				msg = m_message.substr(pos + 1);
+		}
 	}
 
 	if (iscommand)
