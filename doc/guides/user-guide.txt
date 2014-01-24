@@ -193,7 +193,6 @@ application.
 The options available:
 
 * `foreground`: (bool) Keep irccd to foreground, default: false.
-* `plugins`: (DEPRECATED) (string list) A list of plugins to load, default: empty.
 * `plugin-path`: (string) A path to local plugins, default: empty.
 * `syslog`: (bool) If enabled, use syslog instead of standard output, default: false.
 * `verbose`: (bool) Enable verbose message, default: false.
