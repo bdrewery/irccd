@@ -1,0 +1,66 @@
+/*
+ * config.h.in -- configuration for irccd
+ *
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#cmakedefine01 MAJOR
+#cmakedefine01 MINOR
+
+#cmakedefine VERSION "@VERSION@"
+
+#define ETCDIR			"@ETCDIR@"
+#define MODDIR			"@MODDIR@"
+#define DOCDIR			"@DOCDIR@"
+#define PREFIX			"@CMAKE_INSTALL_PREFIX@"
+
+#cmakedefine COMPAT_1_0
+
+#cmakedefine WITH_LUAJIT
+#cmakedefine WITH_LUA52
+
+#if defined(WITH_LUA52) || defined(WITH_LUAJIT)
+#  define WITH_LUA
+#endif
+
+// Some non portable code
+#cmakedefine	HAVE_GETOPT	1
+#ifndef HAVE_GETOPT
+#  include <getopt.h>
+#endif
+
+#cmakedefine	HAVE_SETPROGNAME 1
+#ifndef HAVE_SETPROGNAME
+#  include <setprogname.h>
+#endif
+
+// Some includes
+#cmakedefine	HAVE_UNISTD_H	1
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+
+// Tests for sys/stat.h
+#cmakedefine HAVE_STAT_ST_DEV
+#cmakedefine HAVE_STAT_ST_INO
+#cmakedefine HAVE_STAT_ST_NLINK
+#cmakedefine HAVE_STAT_ST_UID
+#cmakedefine HAVE_STAT_ST_GID
+#cmakedefine HAVE_STAT_ST_ATIME
+#cmakedefine HAVE_STAT_ST_MTIME
+#cmakedefine HAVE_STAT_ST_CTIME
+#cmakedefine HAVE_STAT_ST_SIZE
+#cmakedefine HAVE_STAT_ST_BLKSIZE
+#cmakedefine HAVE_STAT_ST_BLOCKS
