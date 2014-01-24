@@ -20,82 +20,51 @@
 #define _PARSER_H_
 
 #include <cstdlib>
-#include <exception>
 #include <functional>
-#include <iostream>
+#include <stdexcept>
 #include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace irccd {
 
 /**
- * Thrown when a section or an option is not found.
- */
-class NotFoundException : public std::exception {
-private:
-	std::string m_key;
-
-public:
-	NotFoundException(const std::string &key)
-		: m_key(key)
-	{
-	}
-
-	const std::string &which() const
-	{
-		return m_key;
-	}
-
-	virtual const char *what() const throw()
-	{
-		return "Property not found";
-	}
-};
-
-/**
- * An option referenced by a key and a value.
- */
-struct Option {
-	std::string m_key;		/*! option name */
-	std::string m_value;		/*! option value */
-};
-
-bool operator==(const Option &o1, const Option &o2);
-
-/**
+ * @class Section
+ * @brief The option container
+ *
  * A list of section found in the file. If root
  * options are allowed (default behavior), the root
  * section is "".
  */
 class Section {
+public:
+	using Map = std::unordered_map<std::string, std::string>;
+
+	friend class Parser;
+
 private:
-	std::string findOption(const std::string &name) const;
+	std::string	m_name;		/*! name of section */
+	Map		m_options;	/*! list of options inside */
+	bool		m_allowed;	/*! is authorized to push */
 
 public:
-	std::string m_name;		/*! name of section */
-	std::vector<Option> m_options;	/*! list of options inside */
-	bool m_allowed;			/*! is authorized to push */
+	template <typename T>
+	struct Converter {
+		static const bool supported = false;
+	};
 
+	/**
+	 * Default constructor.
+	 */
 	Section();
 
 	/**
-	 * Copy constructor
-	 */
-	Section(const Section &s);
-
-	/**
-	 * Get the section name
+	 * Named constructor.
 	 *
-	 * @return the section name
+	 * @param name the section name
 	 */
-	const std::string &getName() const;
-
-	/**
-	 * Get all options from that section.
-	 *
-	 * @return the list of options
-	 */
-	const std::vector<Option> &getOptions() const;
+	Section(const std::string &name);
 
 	/**
 	 * Tells if that section has the specified option name.
@@ -106,13 +75,57 @@ public:
 	bool hasOption(const std::string &name) const;
 
 	/**
+	 * Get the section name
+	 *
+	 * @return the section name
+	 */
+	const std::string &getName() const;
+
+	/**
+	 * Return an iterator to the beginning.
+	 *
+	 * @return the iterator.
+	 */
+	Map::iterator begin();
+
+	/**
+	 * Return a const iterator to the beginning.
+	 *
+	 * @return the iterator.
+	 */
+	Map::const_iterator cbegin() const;
+
+	/**
+	 * Return an iterator to the end.
+	 *
+	 * @return the iterator.
+	 */
+	Map::iterator end();
+	
+	/**
+	 * Return a const iterator to the end.
+	 *
+	 * @return the iterator.
+	 */
+	Map::const_iterator cend() const;
+
+	/**
 	 * Template all functions for retrieving options value.
 	 *
 	 * @param name the option name
 	 * @return the value if found
 	 */
 	template <typename T>
-	T getOption(const std::string &name) const;
+	T getOption(const std::string &name) const
+	{
+		try {
+			return requireOption<T>(name);
+		} catch (...) {
+			// Catch any conversion error.
+		}
+
+		return T();
+	}
 
 	/**
 	 * Requires an option, this works like getOption except
@@ -120,31 +133,84 @@ public:
 	 * thrown.
 	 *
 	 * @param name the name
-	 * @throw NotFoundException if not found
 	 * @return the value
+	 * @throw std::out_of_range if not found
+	 * @throw std::invalid_argument on conversion failures
 	 */
 	template <typename T>
 	T requireOption(const std::string &name) const
 	{
-		if (!hasOption(name))
-			throw NotFoundException(name);
+		static_assert(Converter<T>::supported, "invalid type requested");
 
-		return getOption<T>(name);
+		return Converter<T>::convert(m_options.at(name));
 	}
 
-	friend std::ostream &operator<<(std::ostream & stream, const Section &section)
+	friend bool operator==(const Section &s1, const Section &s2);
+};
+
+template <>
+struct Section::Converter<bool> {
+	static const bool supported = true;
+
+	static bool convert(const std::string &value)
 	{
-		stream << "[" << section.getName() << "]" << std::endl;
+		bool result(false);
 
-		for (auto p : section.getOptions())
-			stream << p.m_key << "=" << p.m_value << std::endl;
+		if (value == "yes" || value == "true"|| value == "1")
+			result = true;
+		else if (value == "no" || value == "false" || value == "0")
+			result = false;
 
-		return stream;
+		return result;
 	}
 };
 
-bool operator==(const Section &s1, const Section &s2);
+template <>
+struct Section::Converter<int> {
+	static const bool supported = true;
 
+	static int convert(const std::string &value)
+	{
+		return std::stoi(value);
+	}
+};
+
+template <>
+struct Section::Converter<float> {
+	static const bool supported = true;
+
+	static float convert(const std::string &value)
+	{
+		return std::stof(value);
+	}
+};
+
+template <>
+struct Section::Converter<double> {
+	static const bool supported = true;
+
+	static double convert(const std::string &value)
+	{
+		return std::stod(value);
+	}
+};
+
+template <>
+struct Section::Converter<std::string> {
+	static const bool supported = true;
+
+	static std::string convert(const std::string &value)
+	{
+		return value;
+	}
+};
+
+/**
+ * @class Parser
+ * @brief Config file parser
+ *
+ * Open and read .ini files.
+ */
 class Parser {
 public:
 	/**
@@ -156,14 +222,14 @@ public:
 		DisableVerbosity	= 4	/*! be verbose by method */
 	};
 
-	typedef std::function<void (const Section &)> FindFunc;
+	using FindFunc	= std::function<void (const Section &)>;
+	using List	= std::vector<Section>;
 
 private:
-	std::vector<Section> m_sections;	/*! list of sections found */
-	std::string m_error;			/*! if an error occured */
-	std::string m_path;			/*! path file */
-	int m_tuning;				/*! options for parsing */
-	char m_commentChar;			/*! the comment token default (#) */
+	List		m_sections;		/*! list of sections found */
+	std::string	m_path;			/*! path file */
+	int		m_tuning;		/*! options for parsing */
+	char		m_commentChar;		/*! the comment token default (#) */
 
 	void addSection(const std::string &name);
 	void addOption(const std::string &key, const std::string &value);
@@ -172,6 +238,8 @@ private:
 	void readOption(int lineno, const std::string &line);
 
 	void readLine(int lineno, const std::string &line);
+
+	void open();
 
 public:
 	static const char DEFAULT_COMMENT_CHAR;
@@ -183,11 +251,10 @@ public:
 	 * @param path the file path
 	 * @param tuning optional tuning flags
 	 * @param commentToken an optional comment delimiter
+	 * @throw std::runtime_error on errors
 	 * @see Tuning
 	 */
-	Parser(const std::string &path,
-	       int tuning = 0,
-	       char commentToken = Parser::DEFAULT_COMMENT_CHAR);
+	Parser(const std::string &path, int tuning = 0, char commentToken = Parser::DEFAULT_COMMENT_CHAR);
 
 	/**
 	 * Default constructor.
@@ -200,31 +267,39 @@ public:
 	virtual ~Parser();
 
 	/**
-	 * Open the config file.
+	 * Return an iterator to the beginning.
 	 *
-	 * @return true on success
+	 * @return the iterator.
 	 */
-	bool open();
+	List::iterator begin();
 
 	/**
-	 * Get the error message if any
+	 * Return a const iterator to the beginning.
 	 *
-	 * @return the error message
+	 * @return the iterator.
 	 */
-	const std::string &getError() const;
+	List::const_iterator cbegin() const;
 
 	/**
-	 * Get all sections found
+	 * Return an iterator to the end.
 	 *
-	 * @return all sections
+	 * @return the iterator.
 	 */
-	const std::vector<Section> &getSections() const;
+	List::iterator end();
+	
+	/**
+	 * Return a const iterator to the end.
+	 *
+	 * @return the iterator.
+	 */
+	List::const_iterator cend() const;
 
 	/**
-	 * Find all sections matching this name
+	 * Find all sections matching the name.
 	 *
 	 * @param name the sections name
-	 * @param func the function
+	 * @param func the function 
+	 * @return a list of section with the options
 	 */
 	void findSections(const std::string &name, FindFunc func) const;
 
@@ -240,7 +315,7 @@ public:
 	 *
 	 * @param name the section name
 	 * @return a section
-	 * @throw NotFoundException if not found
+	 * @throw std::out_of_range if not found
 	 */
 	const Section &getSection(const std::string &name) const;
 
@@ -254,41 +329,9 @@ public:
 	 * @param section the current section worked on
 	 * @param message the message
 	 */
-	virtual void log(int number,
-			 const std::string &section,
-			 const std::string &message);
+	virtual void log(int number, const std::string &section, const std::string &message);
 
-	/**
-	 * Dump all sections and options.
-	 */
-	void dump();
-
-	/**
-	 * Dump function used in the dump() method. This default method
-	 * only print the section name like:
-	 * Section foo
-	 *
-	 * @param section the current section
-	 * @see dump
-	 */
-	virtual void dumpSection(const Section &section);
-
-	/**
-	 * Dump the option. The default method only print the option name
-	 * and value.
-	 *
-	 * @param option the current option
-	 * @see dump
-	 */
-	virtual void dumpOption(const Option &option);
-
-	friend std::ostream & operator<<(std::ostream & stream, const Parser &parser)
-	{
-		for (auto s : parser.m_sections)
-			stream << s;;
-
-		return stream;
-	}
+	friend bool operator==(const Parser &p1, const Parser &p2);
 };
 
 } // !irccd

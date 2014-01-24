@@ -27,10 +27,15 @@ namespace irccd
 
 void TestParser::openCorrect()
 {
-	Parser config("parser/configs/Correct.conf");
+	Parser config;
+
+	try {
+		config = Parser("parser/configs/Correct.conf");
+	} catch (std::runtime_error) {
+		CPPUNIT_ASSERT_MESSAGE("Exception thrown", false);
+	}
 	Section s;
 
-	CPPUNIT_ASSERT_EQUAL(config.open(), true);
 	CPPUNIT_ASSERT_MESSAGE("Required section general not found", config.hasSection("general"));
 	CPPUNIT_ASSERT_MESSAGE("Required section server not found", config.hasSection("server"));
 	CPPUNIT_ASSERT_MESSAGE("Function hasSection said there is foo section but it should not", !config.hasSection("foo"));
@@ -47,7 +52,7 @@ void TestParser::openCorrect()
 		CPPUNIT_ASSERT_MESSAGE("Required option name not found", s.hasOption("name"));
 		CPPUNIT_ASSERT_EQUAL(s.requireOption<std::string>("name"), std::string("localhost"));
 	}
-	catch (NotFoundException ex)
+	catch (std::out_of_range ex)
 	{
 		CPPUNIT_ASSERT_MESSAGE("Require thrown exception on correct section / option", false);
 	}
@@ -55,14 +60,13 @@ void TestParser::openCorrect()
 
 void TestParser::openMultiples()
 {
-	Parser config("parser/configs/Multiple.conf");
+	Parser config;
 
-	CPPUNIT_ASSERT_EQUAL(config.open(), true);
-
-	/*
-	 * The real number if 3, don't forget there is a default root section.
-	 */
-	CPPUNIT_ASSERT_EQUAL(3, static_cast<int>(config.getSections().size()));
+	try {
+		config = Parser("parser/configs/Multiple.conf");
+	} catch (std::runtime_error) {
+		CPPUNIT_ASSERT_MESSAGE("Exception thrown", false);
+	}
 
 	int count = 0;
 	config.findSections("server", [&] (const Section &s) {
@@ -72,7 +76,7 @@ void TestParser::openMultiples()
 		{
 			CPPUNIT_ASSERT_EQUAL(s.requireOption<std::string>("name"), std::to_string(count));
 		}
-		catch (NotFoundException ex)
+		catch (std::out_of_range ex)
 		{
 			CPPUNIT_ASSERT_MESSAGE("Require thrown exception on correct section / option", false);
 		}

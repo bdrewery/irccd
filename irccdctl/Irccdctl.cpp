@@ -643,8 +643,8 @@ void Irccdctl::readConfig(Parser &config)
 			loadInet(section);
 		else
 			Logger::fatal(1, "socket: invalid socket type %s", type.c_str());
-	} catch (NotFoundException ex) {
-		Logger::fatal(1, "socket: missing parameter %s", ex.which().c_str());
+	} catch (std::out_of_range ex) {
+		Logger::fatal(1, "socket: missing parameter %s", ex.what());
 	}
 }
 
@@ -658,6 +658,7 @@ void Irccdctl::openConfig()
 	 *
 	 * Otherwise, we open the default files.
 	 */
+	try {
 	if (m_configPath.length() == 0) {
 		try {
 			m_configPath = Util::findConfiguration("irccdctl.conf");
@@ -667,10 +668,9 @@ void Irccdctl::openConfig()
 		}
 	} else
 		config = Parser(m_configPath);
-
-
-	if (!config.open())
+	} catch (std::runtime_error) {
 		Logger::fatal(1, "irccdctl: could not open %s, exiting", m_configPath.c_str());
+	}
 
 	readConfig(config);
 }
