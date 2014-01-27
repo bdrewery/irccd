@@ -39,8 +39,20 @@ ServerState::Ptr ServerDisconnected::exec(Server::Ptr server)
 	bool done(false);
 	bool printed(false);
 
+	/*
+	 * First, check that we requested to quit or stopping the server.
+	 */
+	if (!Irccd::getInstance().isRunning() || reco.stopping)
+		return ServerState::Ptr(new ServerDead);
+
 	Logger::log("server %s: disconnected", info.name.c_str());
 
+	/*
+	 * Do a fake sleep loop. We wait until the timeout goes through 0, we
+	 * only sleep 1 second so that we can check that irccd may has been
+	 * request to quit or to stop the server. That allows the usage of
+	 * irccdctl even if a timeout is of 2 minutes.
+	 */
 	while (!done && reco.enabled) {
 		done = reco.restarting || reco.stopping;
 
@@ -57,15 +69,15 @@ ServerState::Ptr ServerDisconnected::exec(Server::Ptr server)
 			printed = true;
 		}
 
-		/*
-		 * We do a fake sleep of the timeout to allow restarting or
-		 * stopping from irccdctl.
-		 */
 		System::sleep(1);
 		tosleep = (tosleep - 1 <= 0) ? 0 : tosleep - 1;
 	}
 
-	if (reco.restarting || (reco.enabled && ++reco.noretried <= reco.maxretries))
+	/*
+	 * If maxretries is set to 0, we retry for ever.
+	 */
+	if (reco.restarting || reco.maxretries == 0 ||
+	    (reco.enabled && ++reco.noretried <= reco.maxretries))
 		return ServerState::Ptr(new ServerConnecting);
 
 	if (reco.enabled)
