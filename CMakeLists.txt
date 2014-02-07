@@ -22,6 +22,30 @@ cmake_minimum_required(VERSION 2.8)
 # Project
 project(irccd)
 
+# ---------------------------------------------------------
+# Irccd project version
+# ---------------------------------------------------------
+
+set(MAJOR "1")
+set(MINOR "2")
+set(PATCH "0")
+set(VERSION "${MAJOR}.${MINOR}-dev")
+
+# ---------------------------------------------------------
+# Package name
+# ---------------------------------------------------------
+
+#
+# The following settings are used for the doc/ directory and CPack.
+#
+if (WIN32)
+	if (CMAKE_CL_64)
+		set(IRCCD_PACKAGE_NAME "Irccd (x64)")
+	else ()
+		set(IRCCD_PACKAGE_NAME "Irccd")
+	endif ()
+endif ()
+
 add_subdirectory(cmake)
 
 # Compatibility options
@@ -29,9 +53,6 @@ add_subdirectory(cmake)
 
 # Some non portable code
 set(EXTERNDIR "${CMAKE_SOURCE_DIR}/extern")
-
-# For documentation and man pages
-add_subdirectory(doc)
 
 # Common code (static library)
 add_subdirectory(common)
@@ -44,6 +65,9 @@ add_subdirectory(irccdctl)
 
 # Contributions
 add_subdirectory(contrib)
+
+# For documentation and man pages
+add_subdirectory(doc)
 
 # Tests
 include(CTest)
@@ -62,3 +86,7 @@ message("\tTests:\t\t\t${UNIT_TESTS}")
 message("\tirccd config:\t\t${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccd.conf")
 message("\tirccdctl config:\t${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccdctl.conf")
 message("")
+
+# CPack
+include(cmake/CPackConfig.cmake)
+include(CPack)

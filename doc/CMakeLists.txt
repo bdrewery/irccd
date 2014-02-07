@@ -114,15 +114,11 @@ if(WITH_LDOC)
 	# Add documentation to installation
 	#
 	if(WIN32)
-		list(
-			APPEND
-			EXTRA_INSTALL_COMMANDS
+		add_nsis_install(
 			"CreateShortCut \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Lua API.lnk\\\" \\\"$INSTDIR\\\\doc\\\\lua\\\\index.html\\\""
 		)
 
-		list(
-			APPEND
-			EXTRA_UNINSTALL_COMMANDS
+		add_nsis_uninstall(
 			"Delete \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Lua API.lnk\\\""
 		)
 	endif ()
@@ -131,18 +127,11 @@ endif()
 #
 # Delete the documentation from startup menu after the objects
 #
-list(
-	APPEND
-	EXTRA_UNINSTALL_COMMANDS
-	"
-	  RMDir \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\"
-	  RMDir \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\"
-	"
-)
-
-# Set them to parent scope so NSIS can generate well
-string(REPLACE ";" "\n" EXTRA_INSTALL_COMMANDS "${EXTRA_INSTALL_COMMANDS}")
-string(REPLACE ";" "\n" EXTRA_UNINSTALL_COMMANDS "${EXTRA_UNINSTALL_COMMANDS}")
-
-set(EXTRA_INSTALL_COMMANDS ${EXTRA_INSTALL_COMMANDS} PARENT_SCOPE)
-set(EXTRA_UNINSTALL_COMMANDS ${EXTRA_UNINSTALL_COMMANDS} PARENT_SCOPE)
+if(WIN32)
+	add_nsis_uninstall(
+		"
+		  RMDir \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\"
+		  RMDir \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\"
+		"
+	)
+endif()

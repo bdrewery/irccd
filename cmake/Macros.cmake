@@ -42,6 +42,19 @@ function(apply_flags target flags)
 	if(${flags})
 		target_compile_definitions(${target} PRIVATE ${${flags}})
 	endif()
+
+	# Remove Windows useless warnings
+	if(WIN32)
+		target_compile_definitions(
+			${target}
+			PRIVATE "_CRT_SECURE_NO_WARNINGS"
+		)
+
+		target_compile_options(
+			${target}
+			PRIVATE /wd4996 /wd4244 /wd4267 /wd4133
+		)
+	endif()
 endfunction()
 
 function(apply_libraries target libs)
@@ -51,20 +64,38 @@ function(apply_libraries target libs)
 endfunction()
 
 function(asciidoc_file file)
-	string(REGEX REPLACE "(.*)\\.txt$" "\\1" output ${file})
+	if(ASCIIDOC)
+		string(REGEX REPLACE "(.*)\\.txt$" "\\1" output ${file})
 
-	add_custom_target(${file}
-		COMMENT "Generating asciidoc html from ${file}"
-		WORKING_DIRECTORY ${doc_SOURCE_DIR}
-		COMMAND ${ASCIIDOC}
-		-b html5
-		-a themedir="${doc_SOURCE_DIR}/guides/themes/irccd"
-		-a theme=irccd
-		-o "${GENERATED_DIRECTORY}/guides/${output}.html"
-		   "${doc_SOURCE_DIR}/guides/${file}"
+		add_custom_target(${file}
+			COMMENT "Generating asciidoc html from ${file}"
+			WORKING_DIRECTORY ${doc_SOURCE_DIR}
+			COMMAND ${ASCIIDOC}
+			-b html5
+			-a themedir="${doc_SOURCE_DIR}/guides/themes/irccd"
+			-a theme=irccd
+			-o "${GENERATED_DIRECTORY}/guides/${output}.html"
+			   "${doc_SOURCE_DIR}/guides/${file}"
+		)
+
+		add_dependencies(generate-doc ${file})
+	endif()
+endfunction()
+
+function(add_nsis_install command)
+	file(
+		APPEND
+		${CMAKE_BINARY_DIR}/nsis_extra_install.txt
+		${command}\n
 	)
+endfunction()
 
-	add_dependencies(generate-doc ${file})
+function(add_nsis_uninstall command)
+	file(
+		APPEND
+		${CMAKE_BINARY_DIR}/nsis_extra_uninstall.txt
+		${command}\n
+	)
 endfunction()
 
 # ---------------------------------------------------------
@@ -118,6 +149,14 @@ function(define_executable)
 	apply_flags(${EXE_TARGET} EXE_FLAGS)
 	apply_libraries(${EXE_TARGET} EXE_LIBRARIES)
 
+	if(WIN32)
+		set_target_properties(
+			${EXE_TARGET}
+			PROPERTIES
+			LINK_FLAGS /SAFESEH:NO
+		)
+	endif()
+	
 	# Install the target
 	if(EXE_INSTALL_RUNTIME)
 		install(
@@ -158,16 +197,12 @@ macro(define_plugin name file description default)
 		endif()
 
 		if(WIN32)
-			list(
-				APPEND
-				EXTRA_INSTALL_COMMANDS
-				"CreateShortCut \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\\${name}.lnk\\\" \\\"$INSTDIR\\\\doc\\\\guides\\\\plugin-${file}.html\\\""
+			add_nsis_install(
+				"CreateShortCut \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\\Plugin ${file}.lnk\\\" \\\"$INSTDIR\\\\doc\\\\guides\\\\plugin-${file}.html\\\""
 			)
 
-			list(
-				APPEND
-				EXTRA_UNINSTALL_COMMANDS
-				"Delete \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\\${name}.lnk\\\""
+			add_nsis_uninstall(
+				"Delete \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\\Plugin ${file}.lnk\\\""
 			)
 		endif()
 	endif()
@@ -194,15 +229,11 @@ macro(define_guide file name)
 	endif()
 
 	if(WIN32)
-		list(
-			APPEND
-			EXTRA_INSTALL_COMMANDS
-			"CreateShortCut \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\${name}.lnk\\\" \\\"$INSTDIR\\\\doc\\\\guides\\\\plugin-${file}.html\\\""
+		add_nsis_install(
+			"CreateShortCut \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\${name}.lnk\\\" \\\"$INSTDIR\\\\doc\\\\guides\\\\${file}.html\\\""
 		)
 
-		list(
-			APPEND
-			EXTRA_UNINSTALL_COMMANDS
+		add_nsis_uninstall(
 			"Delete \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\${name}.lnk\\\""
 		)
 	endif()

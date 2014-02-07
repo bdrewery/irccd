@@ -16,6 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+set(EXTERNDIR ${CMAKE_SOURCE_DIR}/extern)
+
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CheckStructHasMember)
@@ -28,8 +30,14 @@ if(NOT HAVE_GETOPT)
 	list(
 		APPEND
 		EXTSOURCES
-		"${EXTERNDIR}/getopt/getopt.c"
-		"${EXTERNDIR}/getopt/getopt.h"
+		${EXTERNDIR}/getopt/getopt.c
+		${EXTERNDIR}/getopt/getopt.h
+	)
+
+	list(
+		APPEND
+		EXTINCLUDES
+		${EXTERNDIR}/getopt
 	)
 endif()
 
@@ -40,8 +48,14 @@ if(NOT HAVE_SETPROGNAME)
 	list(
 		APPEND
 		EXTSOURCES
-		"${EXTERNDIR}/setprogname/setprogname.c"
-		"${EXTERNDIR}/setprogname/setprogname.h"
+		${EXTERNDIR}/setprogname/setprogname.c
+		${EXTERNDIR}/setprogname/setprogname.h
+	)
+
+	list(
+		APPEND
+		EXTINCLUDES
+		${EXTERNDIR}/setprogname
 	)
 endif()
 
@@ -62,6 +76,7 @@ check_struct_has_member("struct stat" st_blksize sys/stat.h HAVE_STAT_ST_BLKSIZE
 check_struct_has_member("struct stat" st_blocks sys/stat.h HAVE_STAT_ST_BLOCKS)
 
 set(EXTSOURCES ${EXTSOURCES} PARENT_SCOPE)
+set(EXTINCLUDES ${EXTINCLUDES} PARENT_SCOPE)
 
 #
 # Compile libircclient as internal

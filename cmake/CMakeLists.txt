@@ -18,6 +18,24 @@
 
 project(cmake)
 
+if (WIN32)
+	#
+	# First remove NSis extra commands
+	#
+	file(REMOVE ${CMAKE_BINARY_DIR}/nsis_extra_install.txt)
+	file(REMOVE ${CMAKE_BINARY_DIR}/nsis_extra_uninstall.txt)
+
+
+	file(
+		APPEND
+		${CMAKE_BINARY_DIR}/nsis_extra_install.txt 
+		"
+		  CreateDirectory \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\"
+		  CreateDirectory \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\"
+		"
+	)
+endif()
+
 set(CMAKE_MODULE_PATH ${cmake_SOURCE_DIR} PARENT_SCOPE)
 
 include(CMakeParseArguments)
@@ -26,7 +44,6 @@ include(Config.cmake)
 include(Options.cmake)
 include(Macros.cmake)
 include(Extern.cmake)
-include(CPackConfig.cmake)
 
 configure_file(
 	"${CMAKE_SOURCE_DIR}/cmake/config.h.in"
