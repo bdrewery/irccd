@@ -16,22 +16,11 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Shortcut for installing modules
-function(define_plugin name file description default)
-	option(${name} ${description} ${default})
-
-	if (${name})
-		install(FILES ${file} DESTINATION ${MODDIR})
-	endif()
-endfunction()
-
-define_plugin(MOD_ANTIFLOOD antiflood.lua "Avoid flood on channel" On)
-define_plugin(MOD_ASK ask.lua "Ask sage irccd about something" On)
-define_plugin(MOD_AUTH auth.lua "Generic authentication plugin" On)
-define_plugin(MOD_BADWORDS badwords.lua "Anti bad words modules" On)
-define_plugin(MOD_DATE date.lua "Date plugin" On)
-define_plugin(MOD_HISTORY history.lua "Check for nickname history" On)
-define_plugin(MOD_LOGGER logger.lua "A simple server logger" On)
-define_plugin(MOD_ROULETTE roulette.lua "A harmless russian roulette" On)
-
-# vim: set syntax=cmake:
+define_plugin(ANTIFLOOD antiflood "Avoid flood on channel" On)
+define_plugin(ASK ask "Ask sage irccd about something" On)
+define_plugin(AUTH auth "Generic authentication plugin" On)
+define_plugin(BADWORDS badwords "Anti bad words modules" On)
+define_plugin(DATE date "Date plugin" On)
+define_plugin(HISTORY history "Check for nickname history" On)
+define_plugin(LOGGER logger "A simple server logger" On)
+define_plugin(ROULETTE roulette "A harmless russian roulette" On)

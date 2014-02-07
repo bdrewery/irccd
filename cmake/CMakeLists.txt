@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -16,11 +16,42 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Libxdg-basedir bundled
-project(extern-libxdg-basedir)
+project(cmake)
 
-define_library(
-	TARGET xdg-basedir
-	SOURCES src/basedir.c
-	PUBLIC_INCLUDES "${extern-libxdg-basedir_SOURCE_DIR}/include"
+set(CMAKE_MODULE_PATH ${cmake_SOURCE_DIR} PARENT_SCOPE)
+
+include(CMakeParseArguments)
+
+include(Config.cmake)
+include(Options.cmake)
+include(Macros.cmake)
+include(Extern.cmake)
+include(CPackConfig.cmake)
+
+configure_file(
+	"${CMAKE_SOURCE_DIR}/cmake/config.h.in"
+	"${CMAKE_BINARY_DIR}/config.h"
+)
+
+set(
+	FILES
+	FindLuaJIT.cmake
+	Config.cmake
+	config.h.in
+	CPackConfig.cmake
+	Extern.cmake
+	FindCppunit.cmake
+	FindLibircclient.cmake
+	FindLua52.cmake
+	FindXDG.cmake
+	Macros.cmake
+	NSIS.InstallOptions.ini.in
+	NSIS.template.in
+	Options.cmake
+)
+
+add_custom_target(
+	cmake
+	COMMENT "General CMake files for malikania"
+	SOURCES ${FILES}
 )

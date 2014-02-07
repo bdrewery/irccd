@@ -82,5 +82,3 @@ if (WITH_TESTS)
 		create_test(TestSocket sockets/TestSockets.cpp)
 	endif ()
 endif ()
-
-# vim: set syntax=cmake:

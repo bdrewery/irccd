@@ -294,8 +294,6 @@ int l_parserGc(lua_State *L)
 int l_parserPairs(lua_State *L)
 {
 	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
-	auto begin = p->begin();
-	auto end = p->end();
 
 	new (L) ParserIterator(p->begin(), p->end());
 	lua_pushcclosure(L, [] (lua_State *L) -> int {

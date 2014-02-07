@@ -19,28 +19,27 @@
 # Libircclient bundled
 project(extern-libircclient)
 
-find_package(OpenSSL REQUIRED)
+set(FLAGS "ENABLE_THREADS")
 
-include_directories(
-	include
-	${OPENSSL_INCLUDE_DIR}
+# SSL is optional
+if (WITH_SSL)
+	find_package(OpenSSL REQUIRED)
+
+	list(APPEND INCLUDES ${OPENSSL_INCLUDE_DIR})
+	list(APPEND LIBRARIES ${OPENSSL_LIBRARIES})
+	list(APPEND FLAGS "ENABLE_SSL")
+endif ()
+
+# Enable or disable IPv6
+if (WITH_IPV6)
+	list(APPEND FLAGS "ENABLE_IPV6")
+endif ()
+
+define_library(
+	TARGET ircclient
+	SOURCES src/libircclient.c
+	FLAGS ${FLAGS}
+	LIBRARIES ${LIBRARIES}
+	PUBLIC_INCLUDES "${extern-libircclient_SOURCE_DIR}/include"
+	LOCAL_INCLUDES ${INCLUDES}
 )
-
-add_library(
-	ircclient
-	STATIC
-	src/libircclient.c
-)
-
-set_target_properties(
-	ircclient
-	PROPERTIES
-	COMPILE_FLAGS "-DENABLE_IPV6 -DENABLE_SSL -DENABLE_THREADS"
-)
-
-target_link_libraries(
-	ircclient
-	${OPENSSL_LIBRARIES}
-)
-
-# vim: set syntax=cmake:
