@@ -16,6 +16,18 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+#
+# Delete the documentation from startup menu after the objects
+#
+if(WIN32)
+	add_nsis_uninstall(
+		"
+		  RMDir \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\"
+		  RMDir \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\"
+		"
+	)
+endif()
+
 if (WIN32)
 	message("${IRCCD_PACKAGE_NAME}")
 	set(CPACK_NSIS_PACKAGE_NAME ${IRCCD_PACKAGE_NAME})
