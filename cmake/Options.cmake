@@ -34,11 +34,11 @@ option(WITH_LDOC "Install Lua API documentation" On)
 option(WITH_DOC "Install user guides" On)
 
 # Manual pages on Windows are pretty useless
-if (WIN32)
+if(WIN32)
 	set(USE_MAN "No")
-else ()
+else()
 	set(USE_MAN "Yes")
-endif ()
+endif()
 
 option(WITH_MAN "Install man pages" ${USE_MAN})
 

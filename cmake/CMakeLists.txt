@@ -18,7 +18,7 @@
 
 project(cmake)
 
-if (WIN32)
+if(WIN32)
 	#
 	# First remove NSis extra commands
 	#

@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -22,18 +22,18 @@ project(extern-libircclient)
 set(FLAGS "ENABLE_THREADS")
 
 # SSL is optional
-if (WITH_SSL)
+if(WITH_SSL)
 	find_package(OpenSSL REQUIRED)
 
 	list(APPEND INCLUDES ${OPENSSL_INCLUDE_DIR})
 	list(APPEND LIBRARIES ${OPENSSL_LIBRARIES})
 	list(APPEND FLAGS "ENABLE_SSL")
-endif ()
+endif()
 
 # Enable or disable IPv6
-if (WITH_IPV6)
+if(WITH_IPV6)
 	list(APPEND FLAGS "ENABLE_IPV6")
-endif ()
+endif()
 
 define_library(
 	TARGET ircclient
