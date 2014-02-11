@@ -2,7 +2,7 @@ Irccd 1.1 user guide
 ====================
 :Author: Demelier David
 :Email: demelier.david@gmail.com
-:Date: June, 8 2013
+:Date: January, 30 2014
 :toc:
 :icons:
 :iconsdir: icons

@@ -64,6 +64,26 @@ const char *loader(lua_State *, Buffer *buffer, size_t *size)
 	return buffer->array.data();
 }
 
+void loadfunction(Thread::Ptr thread, lua_State *owner)
+{
+	Buffer chunk;
+
+	lua_pushvalue(owner, 1);
+	lua_dump(owner, reinterpret_cast<lua_Writer>(writer), &chunk);
+	lua_pop(owner, 1);
+	lua_load(*thread, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
+}
+
+void loadfile(Thread::Ptr thread, const char *path)
+{
+	if (luaL_loadfile(*thread, path) != LUA_OK) {
+		auto error = lua_tostring(*thread, -1);
+		lua_pop(*thread, 1);
+
+		throw std::runtime_error(error);
+	}
+}
+
 /* ---------------------------------------------------------
  * Thread management
  * --------------------------------------------------------- */
@@ -77,22 +97,26 @@ const char *THREAD_TYPE = "Thread";
 int l_threadNew(lua_State *L)
 {
 	Thread::Ptr thread = Thread::create();
-	Buffer chunk;
 	int np;
-
-	luaL_checktype(L, 1, LUA_TFUNCTION);
-
-	// Dump the function
-	lua_pushvalue(L, 1);
-	lua_dump(L, reinterpret_cast<lua_Writer>(writer), &chunk);
-	lua_pop(L, 1);
 
 	for (auto l : Process::luaLibs)
 		Luae::require(*thread, l.first, l.second, true);
 	for (auto l : Process::irccdLibs)
 		Luae::preload(*thread, l.first, l.second);
 
-	lua_load(*thread, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
+	try {
+		if (lua_type(L, 1) == LUA_TFUNCTION)
+			loadfunction(thread, L);
+		else if (lua_type(L, 1) == LUA_TSTRING)
+			loadfile(thread, lua_tostring(L, 1));
+		else
+			return luaL_error(L, "expected a function or a file path");
+	} catch (std::runtime_error err) {
+		lua_pushnil(L);
+		lua_pushstring(L, err.what());
+
+		return 2;
+	}
 
 	np = 0;
 	for (int i = 2; i <= lua_gettop(L); ++i) {

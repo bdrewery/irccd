@@ -41,6 +41,7 @@ void IrcEventMessage::action(lua_State *L) const
 	// handle special commands "!<plugin> command"
 	if (cc.length() > 0) {
 		auto pos = msg.find_first_of(" \t");
+		auto fullcommand = cc + name;
 
 		/*
 		 * If the message that comes is "!foo" without spaces we
@@ -49,10 +50,10 @@ void IrcEventMessage::action(lua_State *L) const
 		 * typing "!foo123123" will trigger foo plugin.
 		 */
 		if (pos == std::string::npos) {
-			iscommand = msg.length() == cc.length() + name.length() &&
-			    msg.compare(cc.length(), name.length(), name) == 0;
+			iscommand = msg == fullcommand;
 		} else {
-			iscommand = msg.compare(cc.length(), pos - 1, name) == 0;
+			iscommand = msg.length() >= fullcommand.length() &&
+			    msg.compare(0, fullcommand.length(), fullcommand) == 0;
 		}
 
 		if (iscommand) {

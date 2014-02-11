@@ -1,6 +1,10 @@
 IRC Client Daemon CHANGES
 =========================
 
+CURRENT
+---------------------------------------
+  * The function thread.new can now take a file path as argument.
+
 1.1 January 30, 2014
 ---------------------------------------
   * Added support for UDP sockets,
