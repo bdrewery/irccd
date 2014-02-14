@@ -114,10 +114,11 @@ end
 --- Create a directory recursively. <span class="deprecated">(deprecated)</span>
 -- This function acts like <code>mkdir -p</code>.
 -- @param path the path
+-- @param mode an optional octal mode
 -- @return true on success or false plus an error
 -- @return the error message
 -- @see fs.mkdir
-function util.mkdir(path)
+function util.mkdir(path, mode)
 end
 
 --- Open a directory. <span class="deprecated">(deprecated)</span>
