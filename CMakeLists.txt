@@ -49,7 +49,7 @@ endif()
 add_subdirectory(cmake)
 
 # Compatibility options
-#option(COMPAT_1_0 "Be compatible with 1.0" On)
+option(COMPAT_1_1 "Be compatible with 1.1" On)
 
 # Some non portable code
 set(EXTERNDIR "${CMAKE_SOURCE_DIR}/extern")

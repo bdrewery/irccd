@@ -309,7 +309,7 @@ int l_parserGc(lua_State *L)
 {
 	auto p = Luae::toType<ParserWrapper *>(L, 1, ParserType);
 
-	if (p->m_parser->getLogRef() != LUA_REFNIL)
+	if (p->m_parser.getLogRef() != LUA_REFNIL)
 		luaL_unref(L, LUA_REGISTRYINDEX, p->m_parser.getLogRef());
 
 	p->m_parser.~LuaParser();

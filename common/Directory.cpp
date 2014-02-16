@@ -1,7 +1,7 @@
 /*
- * Directory.cpp -- open and scan directories
+ * Directory.cpp -- open and read directories
  *
- * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,111 +16,177 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cerrno>
-#include <cstring>
-
-#if defined(_WIN32)
 #include <sstream>
-#include <windows.h>
-#else
-#include <dirent.h>
-#endif
 
 #include "Directory.h"
 
+#if defined(_MSC_VER)
+#  include <Windows.h>
+#else
+#  include <cstring>
+#  include <cerrno>
+
+#  include <sys/types.h>
+#  include <dirent.h>
+#endif
+
 namespace irccd {
 
-Directory::Directory(const std::string &path)
+#if defined(_MSC_VER)
+
+namespace {
+
+std::string systemError()
 {
-	m_path = path;
+	LPSTR error = nullptr;
+	std::string errmsg = "Unknown error";
+
+	FormatMessageA(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+		NULL,
+		GetLastError(),
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPSTR)&error, 0, NULL);
+
+	if (error) {
+		errmsg = std::string(error);
+		LocalFree(error);
+	}
+
+	return errmsg;
 }
 
-bool Directory::open(bool skipParents)
+}
+
+void Directory::systemLoad(const std::string &path, int flags)
 {
-#if defined(_WIN32)
 	std::ostringstream oss;
+	HANDLE handle;
 	WIN32_FIND_DATA fdata;
-	HANDLE hd;
 
-	oss << m_path;
-	oss << "\\*";
+	oss << path << "\\*";
+	handle = FindFirstFile(oss.str().c_str(), &fdata);
 
-	hd = FindFirstFile(oss.str().c_str(), &fdata);
-	if (hd == INVALID_HANDLE_VALUE) {
-		m_error = "Could not open directory " + m_path;
-		return false;
-	}
+	if (handle == nullptr)
+		throw std::runtime_error(systemError());
 
 	do {
 		Entry entry;
 
-		if (skipParents &&
-		    (strcmp(fdata.cFileName, ".") == 0 || strcmp(fdata.cFileName, "..") == 0))
+		entry.name = fdata.cFileName;
+		if ((flags & Directory::NotDot) && entry.name == ".")
+			continue;
+		if ((flags & Directory::NotDotDot) && entry.name == "..")
 			continue;
 
-		entry.m_isDirectory = (fdata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? true : false;
-		entry.m_name = fdata.cFileName;
+		switch (fdata.dwFileAttributes) {
+		case FILE_ATTRIBUTE_DIRECTORY:
+			entry.type = Dir;
+			break;
+		case FILE_ATTRIBUTE_NORMAL:
+			entry.type = File;
+			break;
+		case FILE_ATTRIBUTE_REPARSE_POINT:
+			entry.type = Link;
+			break;
+		default:
+			break;
+		}
 
-		m_entries.push_back(entry);
-	} while (FindNextFile(hd, &fdata) != 0);
+		m_list.push_back(entry);
+	} while (FindNextFile(handle, &fdata) != 0);
 
-	FindClose(hd);
+	FindClose(handle);
+}
 
-	return true;
-	
 #else
-	DIR *dir;
-	struct dirent *dp;
 
-	if ((dir = opendir(m_path.c_str())) == nullptr) {
-		m_error = strerror(errno);
-		return false;
-	}
+void Directory::systemLoad(const std::string &path, int flags)
+{
+	DIR *dp;
+	struct dirent *ent;
 
-	while ((dp = readdir(dir)) != nullptr) {
+	if ((dp = opendir(path.c_str())) == nullptr)
+		throw std::runtime_error(strerror(errno));
+
+	while ((ent = readdir(dp)) != nullptr) {
 		Entry entry;
 
-		if (skipParents &&
-		    (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0))
+		entry.name = ent->d_name;
+		if ((flags & Directory::NotDot) && entry.name == ".")
+			continue;
+		if ((flags & Directory::NotDotDot) && entry.name == "..")
 			continue;
 
-		entry.m_name = dp->d_name;
-		entry.m_isDirectory = (dp->d_type == DT_DIR);
+		switch (ent->d_type) {
+		case DT_DIR:
+			entry.type = Dir;
+			break;
+		case DT_REG:
+			entry.type = File;
+			break;
+		case DT_LNK:
+			entry.type = Link;
+			break;
+		default:
+			break;
+		}
 
-		m_entries.push_back(entry);
+		m_list.push_back(entry);
 	}
 
-	closedir(dir);
+	closedir(dp);
+}
 
-	return true;
 #endif
+
+Directory::Entry::Entry()
+	: type(Unknown)
+{
 }
 
-const std::string & Directory::getPath() const
+bool operator==(const Directory::Entry &e1, const Directory::Entry &e2)
 {
-	return m_path;
+	return e1.name == e2.name && e1.type == e2.type;
 }
 
-const std::string & Directory::getError() const
+Directory::Directory()
 {
-	return m_error;
 }
 
-const std::vector<Entry> & Directory::getEntries() const
+Directory::Directory(const std::string &path, int flags)
 {
-	return m_entries;
+	systemLoad(path, flags);
 }
 
-bool operator==(const Entry &e1, const Entry &e2)
+Directory::List::iterator Directory::begin()
 {
-	return e1.m_name == e2.m_name &&
-	    e1.m_isDirectory == e2.m_isDirectory;
+	return m_list.begin();
+}
+
+Directory::List::const_iterator Directory::cbegin() const
+{
+	return m_list.cbegin();
+}
+
+Directory::List::iterator Directory::end()
+{
+	return m_list.end();
+}
+
+Directory::List::const_iterator Directory::cend() const
+{
+	return m_list.cend();
+}
+
+int Directory::count() const
+{
+	return m_list.size();
 }
 
 bool operator==(const Directory &d1, const Directory &d2)
 {
-	return d1.getPath() == d2.getPath() &&
-	    d1.getEntries() == d2.getEntries();
+	return d1.m_list == d2.m_list;
 }
 
 } // !irccd
