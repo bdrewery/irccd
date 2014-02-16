@@ -1,0 +1,57 @@
+--- System information.
+-- Inspect the current operating system.
+--
+-- @module irccd.system
+
+--- Get a environment variable.
+-- @return the variable or an empty string
+function system.env()
+end
+
+--- Get the home directory.
+-- This function should be used with care, plugin should not use user home to
+-- store files.
+-- @return the user home directory
+-- @see plugin.info
+function system.home()
+end
+
+--- Get the operating system name.
+-- Usually Windows, FreeBSD, Linux and such.
+-- @return the system name
+function system.name()
+
+--- Get the time spent from start.
+-- Get how many milliseconds spent since the irccd startup.
+-- @return the number of seconds
+function system.ticks()
+end
+
+--- Sleep for seconds.
+-- Suspend the execution thread.
+-- @param sec the number of seconds
+-- @see sleep
+function system.sleep(sec)
+end
+
+--- Get the system uptime.
+-- This function returns the number of seconds elapsed since the system
+-- boot up.
+-- @return the number of seconds
+function system.uptime()
+end
+
+--- Sleep for milliseconds.
+-- Suspend the execution thread.
+-- @param msec the number of milliseconds
+-- @see sleep
+function system.usleep(msec)
+end
+
+--- Get the operating system version.
+-- This function is completely system dependent.
+-- @return the version as a string
+function system.version()
+end
+
+-- vim: set syntax=lua nu:

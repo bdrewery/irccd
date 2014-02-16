@@ -1,0 +1,41 @@
+--- Address for Sockets.
+-- This API provides addresses for binding, connecting to sockets.
+--
+-- @module irccd.socket.address
+
+--- Create a Unix family address.
+-- This function is not available on Windows.
+-- @param path the path
+-- @param remove set to true to remove the file, default: false
+-- @return a new SocketAddress or nil
+-- @return the error message
+function address.unix(path, remove)
+end
+
+--- Bind to a IP address.
+-- The parameters are:
+-- <ul>
+-- <li>port: required, the port</li>
+-- <li>family: required, the family</li>
+-- <li>address: optional, "\*" for any or the address. Default: "\*"</li>
+-- </ul>
+-- @param params the table of parameters
+-- @return a new SocketAddress or nil
+-- @return the error message
+function address.bindInet(params)
+end
+
+--- Create an address for connecting.
+-- The parameters are:
+-- <ul>
+-- <li>port: required, the port</li>
+-- <li>family: required, the family</li>
+-- <li>host: required, the hostname</li>
+-- </ul>
+-- @param params the table of parameters
+-- @return a new SocketAddress or nil
+-- @return the error message
+function address.connectInet(params)
+end
+
+-- vim: set syntax=lua nu:
