@@ -10,6 +10,9 @@ VERSION = 1.0,
 VERSION_MAJOR = 1,
 
 --- The major number, i.e 0
-VERSION_MINOR = 0,
+VERSION_MINOR = 1,
+
+--- The patch number, i.e 1
+VERSION_PATCH = 1,
 
 -- vim: set syntax=lua nu:

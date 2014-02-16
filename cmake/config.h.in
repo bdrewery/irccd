@@ -18,6 +18,7 @@
 
 #cmakedefine01 MAJOR
 #cmakedefine01 MINOR
+#cmakedefine01 PATCH
 
 #cmakedefine VERSION "@VERSION@"
 
