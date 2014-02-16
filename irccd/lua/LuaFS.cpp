@@ -48,7 +48,7 @@ int l_mkdir(lua_State *L)
 		Util::mkdir(path, mode);
 	} catch (Util::ErrorException ex) {
 		lua_pushboolean(L, false);
-		lua_pushstring(L, "");
+		lua_pushstring(L, ex.what());
 
 		return 2;
 	}

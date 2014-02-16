@@ -212,6 +212,24 @@ public:
 	using ReadFunction = std::function<void(lua_State *L, int tkey, int tvalue)>;
 
 	/**
+	 * @struct Iterator
+	 * @brief Class used for iterating containers in Lua
+	 */
+	template <typename T>
+	struct Iterator {
+		T begin;
+		T end;
+		T current;
+
+		Iterator(T begin, T end)
+			: begin(begin)
+			, end(end)
+			, current(begin)
+		{
+		}
+	};
+
+	/**
 	 * Adds a warning from Lua about a deprecated function.
 	 *
 	 * @param L the Lua state
@@ -328,6 +346,40 @@ public:
 	 * @param L the Lua state
 	 */
 	static void initRegistry(lua_State *L);
+
+	/**
+	 * Push an automatic __pairs metamethod for STD containers. The
+	 * type T must have the following requirements:
+	 *
+	 *	const_iterator		- The const iterator type
+	 *	value_type		- The type to push
+	 *	cbegin()		- The const iterator to the begin
+	 *	cend()			- The const iterator to the end
+	 *
+	 * @param L the Lua state
+	 * @param name the metatable name
+	 * @param container the container
+	 */
+	template <typename T>
+	static void pushPairs(lua_State *L, const char *name, const T &container)
+	{
+		using IteratorType	= typename T::const_iterator;
+		using ValueType		= typename T::value_type;
+
+		new (L) Iterator<IteratorType>(container.cbegin(), container.cend());
+		lua_pushstring(L, name);
+		lua_pushcclosure(L, [] (lua_State *L) -> int {
+			auto it = Luae::toType<Iterator<IteratorType> *>(L, lua_upvalueindex(1));
+			auto name = lua_tostring(L, lua_upvalueindex(2));
+
+			if (it->current == it->end)
+				return 0;
+
+			new (L, name) ValueType(*(it->current++));
+
+			return 1;
+		}, 2);
+	}
 
 	/**
 	 * Push a shared object to Lua, it also push it to the "refs"

@@ -148,28 +148,6 @@ void Irccd::readGeneral(const Parser &config)
 		// Extract parameters that are needed for the next
 		if (general.hasOption("plugin-path"))
 			Plugin::addPath(general.getOption<std::string>("plugin-path"));
-
-#  if defined(COMPAT_1_0)
-/*
- * DEPRECATION:	1.1-002
- *
- * This is the old way of loading plugins. Now users are encouraged
- * to switch to the [plugins] section.
- */
-		// Old way of loading plugins
-		if (general.hasOption("plugins")) {
-			Logger::warn("irccd: option `general.plugins' option is deprecated, use [plugins]");
-
-			std::string list = general.getOption<std::string>("plugins");
-			for (auto s : Util::split(list, " \t")) {
-				try {
-					Plugin::load(s);
-				} catch (std::runtime_error error) {
-					Logger::warn("irccd: %s", error.what());
-				}
-			}
-		}
-#  endif
 #endif
 
 #if !defined(_WIN32)

@@ -29,10 +29,10 @@ end
 --- Create a directory recursively.
 -- This function acts like <code>mkdir -p</code>.
 -- @param path the path
+-- @param mode an optional octal mode
 -- @return true on success or false plus an error
 -- @return the error message
--- @see fs.mkdir
-function fs.mkdir(path)
+function fs.mkdir(path, mode)
 end
 
 --- Open a directory.

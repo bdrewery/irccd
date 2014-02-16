@@ -56,8 +56,6 @@ This section covers general options.
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
 .It foreground
 (bool) Keep irccd to foreground, default: false.
-.It plugins
-(DEPRECATED) (string list) A list of plugins to load, default: empty.
 .It plugin-path
 (string) A path to local plugins, default: empty.
 .It syslog

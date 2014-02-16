@@ -128,27 +128,6 @@ public:
  * Helpers
  * -------------------------------------------------------- */
 
-/**
- * @struct Iterator
- * @brief Class used for iterating containers in Lua
- */
-template <typename T>
-struct Iterator {
-	T begin;
-	T end;
-	T current;	
-
-	Iterator(T begin, T end)
-		: begin(begin)
-		, end(end)
-		, current(begin)
-	{
-	}
-};
-
-using ParserIterator		= Iterator<Parser::List::iterator>;
-using SectionIterator		= Iterator<Section::Map::iterator>;
-
 const char *SectionType		= "Section";
 const char *ParserType		= "Parser";
 
@@ -330,7 +309,8 @@ int l_parserGc(lua_State *L)
 {
 	auto p = Luae::toType<ParserWrapper *>(L, 1, ParserType);
 
-	luaL_unref(L, LUA_REGISTRYINDEX, p->m_parser.getLogRef());
+	if (p->m_parser->getLogRef() != LUA_REFNIL)
+		luaL_unref(L, LUA_REGISTRYINDEX, p->m_parser.getLogRef());
 
 	p->m_parser.~LuaParser();
 
@@ -341,17 +321,7 @@ int l_parserPairs(lua_State *L)
 {
 	auto p = Luae::toType<ParserWrapper *>(L, 1, ParserType);
 
-	new (L) ParserIterator(p->m_parser.begin(), p->m_parser.end());
-	lua_pushcclosure(L, [] (lua_State *L) -> int {
-		auto it = Luae::toType<ParserIterator *>(L, lua_upvalueindex(1));
-
-		if (it->current == it->end)
-			return 0;
-
-		new (L, SectionType) Section(*(it->current++));
-
-		return 1;
-	}, 1);
+	Luae::pushPairs(L, SectionType, p->m_parser);
 
 	return 1;
 }
@@ -511,8 +481,14 @@ int l_sectionGc(lua_State *L)
 
 int l_sectionPairs(lua_State *L)
 {
+	using SectionIterator = Luae::Iterator<Section::const_iterator>;
+
 	auto s = Luae::toType<Section *>(L, 1, SectionType);
 
+	/*
+	 * Do not use Luae::pushPairs because we want to push the value
+	 * and the key directly.
+	 */
 	new (L) SectionIterator(s->begin(), s->end());
 	lua_pushcclosure(L, [] (lua_State *L) -> int {
 		auto it = Luae::toType<SectionIterator *>(L, lua_upvalueindex(1));

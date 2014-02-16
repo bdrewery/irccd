@@ -18,6 +18,7 @@
 
 #cmakedefine01 MAJOR
 #cmakedefine01 MINOR
+#cmakedefine01 PATCH
 
 #define ETCDIR			"@ETCDIR@"
 #define MODDIR			"@MODDIR@"

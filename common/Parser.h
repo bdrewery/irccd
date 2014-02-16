@@ -39,9 +39,14 @@ namespace irccd {
  */
 class Section {
 public:
+	friend class Parser;
+
 	using Map = std::unordered_map<std::string, std::string>;
 
-	friend class Parser;
+	// C++ Container compatibility
+	using value_type	= Map::value_type;
+	using iterator		= Map::iterator;
+	using const_iterator	= Map::const_iterator;
 
 private:
 	std::string	m_name;		/*! name of section */
@@ -224,6 +229,11 @@ public:
 
 	using FindFunc	= std::function<void (const Section &)>;
 	using List	= std::vector<Section>;
+
+	// C++ Container compatibility
+	using value_type	= List::value_type;
+	using iterator		= List::iterator;
+	using const_iterator	= List::const_iterator;
 
 private:
 	List		m_sections;		/*! list of sections found */
