@@ -4,7 +4,8 @@ IRC Client Daemon CHANGES
 1.1.1 Saturday 15, 2014
 ---------------------------------------
   * Fix fs.mkdir that didn't return an error,
-  * Add missing optional mode parameter in fs.mkdir documentation.
+  * Add missing optional mode parameter in fs.mkdir documentation
+  * Also add irccd.VERSION_PATCH.
 
 1.1 January 30, 2014
 ---------------------------------------

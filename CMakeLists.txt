@@ -24,8 +24,8 @@ project(irccd)
 
 set(MAJOR "1")
 set(MINOR "1")
-set(PATCH "0")
-set(VERSION "${MAJOR}.${MINOR}")
+set(PATCH "1")
+set(VERSION "${MAJOR}.${MINOR}.${PATCH}")
 
 # Compatibility options
 option(COMPAT_1_0 "Be compatible with 1.0" On)

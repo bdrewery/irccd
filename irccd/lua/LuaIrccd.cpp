@@ -31,6 +31,9 @@ int luaopen_irccd(lua_State *L)
 	lua_pushinteger(L, MINOR);
 	lua_setfield(L, -2, "VERSION_MINOR");
 
+	lua_pushinteger(L, PATCH);
+	lua_setfield(L, -2, "VERSION_PATCH");
+
 	lua_pushfstring(L, "%d.%d", MAJOR, MINOR);
 	lua_setfield(L, -2, "VERSION");
 
