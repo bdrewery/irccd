@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -26,9 +26,9 @@ option(WITH_TESTS "Enable unit testing" Off)
 set(UNIT_TESTS "disabled" PARENT_SCOPE)
 
 # cppunit generate some warnings
-if (UNIX)
+if(UNIX)
 	set(FLAGS "-Wno-unused-parameter")
-endif ()
+endif()
 
 # Function to create a test
 function(create_test name sources)
@@ -68,10 +68,10 @@ function(create_dir target dirname)
 	)
 endfunction()
 
-if (WITH_TESTS)
+if(WITH_TESTS)
 	find_package(Cppunit QUIET)
 
-	if (CPPUNIT_FOUND)	
+	if(CPPUNIT_FOUND)
 		set(UNIT_TESTS "enabled" PARENT_SCOPE)
 
 		# Parser tests
@@ -80,7 +80,5 @@ if (WITH_TESTS)
 
 		# Sockets
 		create_test(TestSocket sockets/TestSockets.cpp)
-	endif ()
-endif ()
-
-# vim: set syntax=cmake:
+	endif()
+endif()

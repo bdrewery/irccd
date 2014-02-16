@@ -1,7 +1,7 @@
 /*
  * main.cpp -- irccd main file
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -93,7 +93,7 @@ int main(int argc, char **argv)
 		if (strcmp(argv[0], "version") == 0) {
 			Logger::setVerbose(true);
 			Logger::log("irccd version %s", VERSION);
-			Logger::log("Copyright (c) 2013 David Demelier <markand@malikania.fr>");
+			Logger::log("Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>");
 			Logger::log("");
 			Logger::log("Irccd is a customizable IRC bot daemon compatible with Lua plugins");
 			Logger::log("to fit your needs.");

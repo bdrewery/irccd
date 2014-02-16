@@ -1,5 +1,5 @@
 #
-# CMakeLists.txt -- CMake build system for irccd
+# Options.cmake -- CMake build system for irccd
 #
 # Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 #
@@ -16,30 +16,33 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Libircclient bundled
-project(extern-libircclient)
+option(WITH_IPV6 "Enable IPv6" On)
+option(WITH_SSL "Enable SSL" On)
 
-set(FLAGS "ENABLE_THREADS")
+# Use bundled xdg-basedir or not
+option(WITH_BUNDLE_XDGBASEDIR "Build with bundled libxdg-basedir" Off)
 
-# SSL is optional
-if(WITH_SSL)
-	find_package(OpenSSL REQUIRED)
+# Optional Lua support
+option(WITH_LUA52 "Build with Lua plugin support" On)
+option(WITH_LUAJIT "Build with LuaJIT plugin support" Off)
 
-	list(APPEND INCLUDES ${OPENSSL_INCLUDE_DIR})
-	list(APPEND LIBRARIES ${OPENSSL_LIBRARIES})
-	list(APPEND FLAGS "ENABLE_SSL")
+if(WITH_LUA52 AND WITH_LUAJIT)
+	message(FATAL_ERROR "Please select WITH_LUA52 or WITH_LUAJIT")
 endif()
 
-# Enable or disable IPv6
-if(WITH_IPV6)
-	list(APPEND FLAGS "ENABLE_IPV6")
+option(WITH_LDOC "Install Lua API documentation" On)
+option(WITH_DOC "Install user guides" On)
+
+# Manual pages on Windows are pretty useless
+if(WIN32)
+	set(USE_MAN "No")
+else()
+	set(USE_MAN "Yes")
 endif()
 
-define_library(
-	TARGET ircclient
-	SOURCES src/libircclient.c
-	FLAGS ${FLAGS}
-	LIBRARIES ${LIBRARIES}
-	PUBLIC_INCLUDES "${extern-libircclient_SOURCE_DIR}/include"
-	LOCAL_INCLUDES ${INCLUDES}
-)
+option(WITH_MAN "Install man pages" ${USE_MAN})
+
+#
+# Additional contributions, not always tested!
+#
+option(WITH_SYSTEMD "Install systemd service" Off)

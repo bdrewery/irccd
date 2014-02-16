@@ -1,7 +1,7 @@
 /*
  * LuaParser.cpp -- Lua bindings for class Parser
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -294,8 +294,6 @@ int l_parserGc(lua_State *L)
 int l_parserPairs(lua_State *L)
 {
 	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
-	auto begin = p->begin();
-	auto end = p->end();
 
 	new (L) ParserIterator(p->begin(), p->end());
 	lua_pushcclosure(L, [] (lua_State *L) -> int {

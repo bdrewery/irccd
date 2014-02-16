@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,14 +18,6 @@
 
 # Project
 project(irccd)
-
-# Optional Lua support
-option(WITH_LUA52 "Build with Lua plugin support" On)
-option(WITH_LUAJIT "Build with LuaJIT plugin support" Off)
-
-if (WITH_LUA52 AND WITH_LUAJIT)
-	message(FATAL_ERROR "Please select WITH_LUA52 or WITH_LUAJIT")
-endif ()
 
 set(SOURCES
 	server/ServerConnecting.cpp
@@ -53,14 +45,25 @@ set(SOURCES
 	main.cpp
 )
 
+set(
+	LIBRARIES
+	ircclient
+	common
+)
+
+set(
+	INCLUDES
+	${irccd_SOURCE_DIR}
+)
+
 set(LUA_SUPPORT "disabled" PARENT_SCOPE)
 
-if (WITH_LUA52 OR WITH_LUAJIT)
-	if (WITH_LUA52)
+if(WITH_LUA52 OR WITH_LUAJIT)
+	if(WITH_LUA52)
 		find_package(Lua52)
-	elseif (WITH_LUAJIT)
+	elseif(WITH_LUAJIT)
 		find_package(LuaJIT)
-	endif ()
+	endif()
 
 	if (LUA52_FOUND OR LUAJIT_FOUND)
 		add_subdirectory(plugins)
@@ -145,65 +148,46 @@ if (WITH_LUA52 OR WITH_LUAJIT)
 			Thread.h
 		)
 
-		if (WITH_LUA52)
+		list(
+			APPEND
+			SOURCES
+			plugins/antiflood.lua
+			plugins/ask.lua
+			plugins/auth.lua
+			plugins/badwords.lua
+			plugins/date.lua
+			plugins/history.lua
+			plugins/logger.lua
+			plugins/roulette.lua
+		)
+
+		if(WITH_LUA52)
 			list(APPEND INCLUDES ${LUA52_INCLUDE_DIR})
 			list(APPEND LIBRARIES ${LUA52_LIBRARIES})
 			set(LUA_SUPPORT "enabled (Lua 5.2)" PARENT_SCOPE)
-		elseif (WITH_LUAJIT)
+		elseif(WITH_LUAJIT)
 			list(APPEND INCLUDES ${LUAJIT_INCLUDE_DIR})
 			list(APPEND LIBRARIES ${LUAJIT_LIBRARIES})
 			set(LUA_SUPPORT "enabled (LuaJIT)" PARENT_SCOPE)
-		endif ()
-	endif ()
-endif ()
+		endif()
+	endif()
+endif()
 
-#
-# Compile libircclient as internal
-#
-add_subdirectory(
-	"${CMAKE_SOURCE_DIR}/extern/libircclient"
-	"${CMAKE_BINARY_DIR}/libircclient"
-)
-
-list(
-	APPEND
-	INCLUDES
-	"${CMAKE_SOURCE_DIR}/extern/libircclient/include"
-)
-
-list(APPEND LIBRARIES ircclient)
-
-include_directories(
-	${INCLUDES}
-	${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-add_executable(irccd ${SOURCES})
-
-#
-# When Lua is disabled, a lot of variables are unused, disable warnings.
-#
-if (NOT WITH_LUA52 OR NOT WITH_LUAJIT)
-	if (UNIX)
-		set(FLAGS "-Wno-unused-parameter -Wno-unused-variable")
-	endif ()
-endif ()
-
-if (UNIX)
+if(UNIX)
 	list(APPEND LIBRARIES "pthread")
-else ()
-	set(FLAGS "${FLAGS} /wd4996 /wd4244")
-endif ()
+endif()
 
-set_target_properties(irccd PROPERTIES COMPILE_FLAGS "${FLAGS}")
-target_link_libraries(irccd common ${LIBRARIES})
-
-install(TARGETS irccd RUNTIME DESTINATION bin)
+define_executable(
+	TARGET irccd
+	SOURCES ${SOURCES}
+	FLAGS ${FLAGS}
+	INCLUDES ${INCLUDES}
+	LIBRARIES ${LIBRARIES}
+	INSTALL_RUNTIME bin/
+)
 
 install(
 	FILES "${CMAKE_SOURCE_DIR}/doc/examples/irccd.conf"
 	DESTINATION "${ETCDIR}"
 	RENAME "irccd.conf.sample"
 )
-
-# vim: set syntax=cmake:
