@@ -50,47 +50,7 @@ ServerState::Ptr ServerConnecting::exec(Server::Ptr server)
 	(void)res_init();
 #endif
 
-	unsigned int major, minor;
-
-	irc_set_ctx(session, new Server::Ptr(server));
-	irc_get_version(&major, &minor);
-
-	auto &info = server->getInfo();
-	auto &identity = server->getIdentity();
-
-	/*
-	 * After some discuss with George, SSL has been fixed in newer version
-	 * of libircclient. > 1.6 is needed for SSL.
-	 */
-	if (major >= 1 && minor > 6) {
-		// SSL needs to add # front of host
-		if (info.ssl)
-			info.host.insert(0, 1, '#');
-
-		if (!info.sslVerify)
-			irc_option_set(session, LIBIRC_OPTION_SSL_NO_VERIFY);
-	} else {
-		if (info.ssl)
-			Logger::log("server %s: SSL is only supported with libircclient > 1.6",
-			    info.name.c_str());
-	}
-
-	const char *password = nullptr;
-
-	if (info.password.length() > 0)
-		password = info.password.c_str();
-
-	auto res = irc_connect(
-	    session,
-	    info.host.c_str(),
-	    info.port,
-	    password,
-	    identity.nickname.c_str(),
-	    identity.username.c_str(),
-	    identity.realname.c_str());
-
-	if (res == 0)
-		server->getRecoInfo().noretried = 0;
+	session.connect(server);
 
 	return ServerState::Ptr(new ServerRunning);
 }

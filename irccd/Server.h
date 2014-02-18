@@ -21,15 +21,18 @@
 
 #include <map>
 #include <memory>
-#include <string>
-#include <thread>
 #include <mutex>
+#include <sstream>
+#include <string>
+#include <stdexcept>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
 #include <config.h>
 
 #include "IrcSession.h"
+
 #include "server/ServerState.h"
 
 namespace irccd {
@@ -184,6 +187,40 @@ protected:
 	Options		m_options;		//! some options
 	RetryInfo	m_reco;			//! reconnection settings
 
+	void prepare(std::ostringstream &oss, const char *fmt)
+	{
+		while (*fmt) {
+			if (*fmt == '%') {
+				if (fmt[1] == '%')
+					++fmt;
+				else
+				    throw std::runtime_error("invalid format string: missing arguments");
+			}
+			
+			oss << *fmt++;
+		}
+	}
+
+	template<typename T, typename... Args>
+	void prepare(std::ostringstream &oss, const char *fmt, const T &value, Args... args)
+	{
+		while (*fmt) {
+			if (*fmt == '%') {
+				if (fmt[1] == '%')
+					++fmt;
+				else {
+					oss << value;
+					prepare(oss, fmt + 1, args...);
+					return;
+				}
+			}
+
+			oss << *fmt++;
+		}
+		
+		throw std::runtime_error("extra arguments provided to printf");
+	}
+
 public:
 	/**
 	 * Add a new server to the registry. It also start the server
@@ -228,14 +265,6 @@ public:
 	 * Remove dead servers.
 	 */
 	static void flush();
-
-	/**
-	 * Convert the s context to a shared_ptr<Server>.
-	 *
-	 * @param s the session
-	 * @return the shared_ptr.
-	 */
-	static Ptr toServer(irc_session_t *s);
 
 	/**
 	 * Convert a channel line to Channel. The line must be in the
@@ -377,144 +406,126 @@ public:
 	 */
 	void stop();
 
+	/**
+	 * Send a raw message with a kind of printf(3) arguments. Just specify
+	 * where you want to pass a parameter with %. Two %% write one %.
+	 *
+	 * This function effectively call send afterwards.
+	 *
+	 * @param fmt the format
+	 * @param args the arguments
+	 * @throw std::runtime_error on parameter errors
+	 * @see send
+	 */
+	template <typename... Args>
+	void send(const char *fmt, Args&&... args)
+	{
+		std::ostringstream oss;
+
+		prepare(oss, fmt, std::forward<Args>(args)...);
+
+		send(oss.str());
+	}
+
 	/* ------------------------------------------------
 	 * IRC commands
 	 * ------------------------------------------------ */
 
+	/*
+	 * The following functions are just wrappers around the IrcSession
+	 * so it becomes thread safe and any change in IrcSession or
+	 * libircclient library does not impact this class.
+	 */
+
 	/**
-	 * Send a notice to a public channel.
-	 *
-	 * @param channel the target channel
-	 * @param message the message to send
+	 * @copydoc IrcSession::cnotice
 	 */
 	virtual void cnotice(const std::string &channel,
 			     const std::string &message);
 
 	/**
-	 * Invite someone to a channel.
-	 *
-	 * @param target the target nickname
-	 * @param channel the channel
+	 * @copydoc IrcSession::invite
 	 */
 	virtual void invite(const std::string &target,
 			    const std::string &channel);
 
 	/**
-	 * Join a channel.
-	 *
-	 * @param channel the channel name
-	 * @param password an optional password
+	 * @copydoc IrcSession::join
 	 */
 	virtual void join(const std::string &name,
 			  const std::string &password = "");
 
 	/**
-	 * Kick someone from a channel.
-	 *
-	 * @param name the nick name
-	 * @param channel the channel from
-	 * @param reason an optional reason
+	 * @copydoc IrcSession::kick
 	 */
 	virtual void kick(const std::string &name,
 			  const std::string &channel,
 			  const std::string &reason = "");
 
 	/**
-	 * Send a CTCP ACTION known as /me.
-	 *
-	 * @param target the nickname or channel
-	 * @param message the message to send
+	 * @copydoc IrcSession::me
 	 */
 	virtual void me(const std::string &target,
 			const std::string &message);
 
 	/**
-	 * Change the channel mode.
-	 *
-	 * @param channel the target channel
-	 * @param mode the mode
+	 * @copydoc IrcSession::mode
 	 */
 	virtual void mode(const std::string &channel,
 			  const std::string &mode);
 
 	/**
-	 * Get the list of names as a deferred call.
-	 *
-	 * @param channel which channel
-	 * @param plugin the plugin to call on end of list
-	 * @param ref the function reference
+	 * @copydoc IrcSession::names
 	 */
 	virtual void names(const std::string &channel);
 
 	/**
-	 * Change your nickname.
-	 *
-	 * @param nick the new nickname
+	 * @copydoc IrcSession::nick
 	 */
 	virtual void nick(const std::string &nick);
 
 	/**
-	 * Send a notice to someone.
-	 *
-	 * @param nickname the target nickname
-	 * @param message the message
+	 * @copydoc IrcSession::notice
 	 */
 	virtual void notice(const std::string &nickname,
 			    const std::string &message);
 
 	/**
-	 * Leave a channel.
-	 *
-	 * @param channel the channel to leave
-	 * @param reason an optional reason
+	 * @copydoc IrcSession::part
 	 */
-	virtual void part(const std::string &channel, const std::string &reason = "");
+	virtual void part(const std::string &channel,
+			  const std::string &reason = "");
 
 	/**
-	 * Send a query message.
-	 *
-	 * @param who the target nickname
-	 * @param message the message
+	 * @copydoc IrcSession::query
 	 */
 	virtual void query(const std::string &who,
 			   const std::string &message);
 
 	/**
-	 * Say something to a channel or to a nickname.
-	 *
-	 * @param target the nickname or channel
-	 * @param message the message to send
+	 * @copydoc IrcSession::say
 	 */
 	virtual void say(const std::string &target,
 			 const std::string &message);
 
 	/**
-	 * Send a raw message to the server.
-	 *
-	 * @param message the message
+	 * @copydoc IrcSession::send
 	 */
-	virtual void sendRaw(const std::string &msg);
+	virtual void send(const std::string &msg);
 
 	/**
-	 * Change a channel topic.
-	 *
-	 * @param channel the channel target
-	 * @param topic the new topic
+	 * @copydoc IrcSession::topic
 	 */
 	virtual void topic(const std::string &channel,
 			   const std::string &topic);
 
 	/**
-	 * Change your own user mode.
-	 *
-	 * @param mode the mode
+	 * @copydoc IrcSession::umode
 	 */
 	virtual void umode(const std::string &mode);
 
 	/**
-	 * Get the whois information from a user.
-	 *
-	 * @param target the nickname target
+	 * @copydoc IrcSession::whois
 	 */
 	virtual void whois(const std::string &target);
 };
