@@ -57,6 +57,9 @@ set(EXTERNDIR "${CMAKE_SOURCE_DIR}/extern")
 # Common code (static library)
 add_subdirectory(common)
 
+# For documentation and man pages
+add_subdirectory(doc)
+
 # irccd main application
 add_subdirectory(irccd)
 
@@ -65,9 +68,6 @@ add_subdirectory(irccdctl)
 
 # Contributions
 add_subdirectory(contrib)
-
-# For documentation and man pages
-add_subdirectory(doc)
 
 # Tests
 include(CTest)

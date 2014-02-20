@@ -123,15 +123,3 @@ if(WITH_LDOC)
 		)
 	endif ()
 endif()
-
-#
-# Delete the documentation from startup menu after the objects
-#
-if(WIN32)
-	add_nsis_uninstall(
-		"
-		  RMDir \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\"
-		  RMDir \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\"
-		"
-	)
-endif()
