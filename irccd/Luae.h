@@ -238,7 +238,7 @@ public:
 	 */
 	static void deprecate(lua_State *L,
 			      const std::string &old,
-			      const std::string &repl);
+			      const std::string &repl = "");
 
 	/**
 	 * Get a field of a specific type from a table. Specialized for the

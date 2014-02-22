@@ -69,7 +69,7 @@ const Process::Libraries Process::irccdLibs = {
 	{ "irccd.parser",		luaopen_parser		},
 	{ "irccd.plugin",		luaopen_plugin		},
 	{ "irccd.socket",		luaopen_socket		},
-#if 0
+#if defined(COMPAT_1_1)
 	{ "irccd.socket.address",	luaopen_socket_address	},
 #endif
 	{ "irccd.socket.listener",	luaopen_socket_listener	},

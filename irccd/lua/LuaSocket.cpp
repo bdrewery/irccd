@@ -234,6 +234,7 @@ void storeAddressData(lua_State *L, int index, const SocketAddress &sa)
  * The table must have the following fields:
  *
  *	path	- (string) Required, the path to the socket
+ *	remove	- (bool) Optional, tell to remove the file before usage
  *
  * @param L the Lua state
  * @param index the table index
@@ -245,10 +246,14 @@ SocketAddressPtr checkUnix(lua_State *L, int index, const Socket &)
 	LUA_STACK_CHECKBEGIN(L);
 
 	auto path = Luae::requireField<std::string>(L, index, "path");
+	auto rm = false;
+
+	if (Luae::typeField(L, index, "remove") != LUA_TNIL)
+		rm = lua_toboolean(L, index);
 
 	LUA_STACK_CHECKEQUALS(L);
 
-	return SocketAddressPtr(new AddressUnix(path));
+	return SocketAddressPtr(new AddressUnix(path, rm));
 }
 
 #endif
@@ -776,6 +781,13 @@ int l_set(lua_State *L)
 
 int l_send(lua_State *L)
 {
+#if defined(COMPAT_1_1)
+	if (lua_gettop(L) >= 2 && lua_type(L, 2) == LUA_TUSERDATA) {
+		Luae::deprecate(L, "send(data, address", "sendto(data, address");
+		return genericSend(L, true);
+	}
+#endif
+
 	return genericSend(L, false);
 }
 
@@ -820,30 +832,49 @@ int l_gc(lua_State *L)
 	return 0;
 }
 
+#if defined(COMPAT_1_1)
+
+int l_receive(lua_State *L)
+{
+	Luae::deprecate(L, "receive", "recv");
+
+	return genericReceive(L, false);
+}
+
+int l_receiveFrom(lua_State *L)
+{
+	Luae::deprecate(L, "receiveFrom", "recvfrom");
+
+	return genericReceive(L, true);
+}
+
+#endif
+
 const luaL_Reg sockFunctions[] = {
 	{ "new",		l_new				},
 	{ nullptr,		nullptr				}
 };
 
 const luaL_Reg sockMethods[] = {
+/*
+ * DEPRECATION:	1.2-002
+ *
+ * These functions have been renamed to match closer the C API.
+ */
+#if defined(COMPAT_1_1)
+	{ "receive",		l_receive			},
+	{ "receiveFrom",	l_receiveFrom			},
+#endif
 	{ "blockMode",		l_blockMode			},
 	{ "bind",		l_bind				},
 	{ "close",		l_close				},
 	{ "connect",		l_connect			},
 	{ "accept",		l_accept			},
 	{ "listen",		l_listen			},
-#if 0
-	{ "receive",		socketReceive		},
-	{ "receiveFrom",	socketReceiveFrom	},
-#endif
 	{ "send",		l_send				},
 	{ "sendto",		l_sendto			},
 	{ "recv",		l_recv				},
 	{ "recvfrom",		l_recvfrom			},
-#if 0
-	{ "send",		socketSend			},
-	{ "sendTo",		socketSendTo			},
-#endif
 	{ "set",		l_set				},
 	{ nullptr,		nullptr				}
 };
@@ -854,6 +885,125 @@ const luaL_Reg sockMeta[] = {
 	{ "__gc",		l_gc				},
 	{ nullptr,		nullptr				}
 };
+
+/* ---------------------------------------------------------
+ * Socket address deprecated functions
+ * --------------------------------------------------------- */
+
+#if defined(COMPAT_1_1)
+
+int l_unix(lua_State *L)
+{
+#if defined(WIN32)
+	lua_pushnil(L);
+	lua_pushstring(L, "Unix address are unsupported on Windows");
+
+	return 2;
+#else
+	Luae::deprecate(L, "unix");
+
+	auto path = luaL_checkstring(L, 1);
+	auto rm = false;
+
+	if (lua_gettop(L) >= 2)
+		rm = lua_toboolean(L, 2);
+
+	lua_createtable(L, 0, 2);
+	lua_pushstring(L, path);
+	lua_setfield(L, -2, "path");
+	lua_pushboolean(L, rm);
+	lua_setfield(L, -2, "remove");
+
+	return 1;
+#endif
+}
+
+int l_bindInet(lua_State *L)
+{
+	Luae::deprecate(L, "bindInet");
+
+	luaL_checktype(L, 1, LUA_TTABLE);
+
+	auto port = Luae::requireField<int>(L, 1, "port");
+	auto family = Luae::requireField<int>(L, 1, "family");
+	auto address = std::string("*");
+
+	if (Luae::typeField(L, 1, "address") == LUA_TSTRING)
+		address = Luae::requireField<std::string>(L, 1, "address");
+
+	lua_createtable(L, 0, 0);
+
+	try {
+		auto sa = BindAddressIP(address, port, family);
+
+		storeAddressData(L, -1, sa);
+	} catch (SocketError error) {
+		// Remove the table created just before
+		lua_pop(L, 1);
+		lua_pushnil(L);
+		lua_pushstring(L, error.what());
+
+		return 2;
+	}
+
+	lua_createtable(L, 0, 3);
+	lua_pushstring(L, address.c_str());
+	lua_setfield(L, -2, "address");
+	lua_pushinteger(L, port);
+	lua_setfield(L, -2, "port");
+	lua_pushinteger(L, family);
+	lua_setfield(L, -2, "family");
+
+	return 1;
+}
+
+int l_connectInet(lua_State *L)
+{
+	Luae::deprecate(L, "connectInet");
+
+	luaL_checktype(L, 1, LUA_TTABLE);
+
+	auto port = Luae::requireField<int>(L, 1, "port");
+	auto family = Luae::requireField<int>(L, 1, "family");
+	auto host = Luae::requireField<std::string>(L, 1, "host");
+	auto type = SOCK_STREAM;
+
+	lua_createtable(L, 0, 0);
+
+	try {
+		auto sa = ConnectAddressIP(host, port, family, type);
+
+		storeAddressData(L, -1, sa);
+	} catch (SocketError error) {
+		// Remove the table created just before
+		lua_pop(L, 1);
+		lua_pushnil(L);
+		lua_pushstring(L, error.what());
+
+		return 2;
+	}
+
+	lua_createtable(L, 0, 3);
+	lua_pushstring(L, host.c_str());
+	lua_setfield(L, -2, "host");
+	lua_pushinteger(L, port);
+	lua_setfield(L, -2, "port");
+	lua_pushinteger(L, family);
+	lua_setfield(L, -2, "family");
+	lua_pushinteger(L, type);
+	lua_setfield(L, -2, "type");
+
+	return 1;
+}
+
+const luaL_Reg addressFunctions[] = {
+	{ "unix",		l_unix				},
+	{ "bindInet",		l_bindInet			},
+	{ "connectInet",	l_connectInet			},
+	{ nullptr,		nullptr				}
+};
+
+#endif
 
 /* ---------------------------------------------------------
  * Socket listener functions
@@ -990,6 +1140,17 @@ int luaopen_socket(lua_State *L)
 
 	return 1;
 }
+
+#if defined(COMPAT_1_1)
+
+int luaopen_socket_address(lua_State *L)
+{
+	luaL_newlib(L, addressFunctions);
+
+	return 1;
+}
+
+#endif
 
 int luaopen_socket_listener(lua_State *L)
 {

@@ -27,6 +27,12 @@ namespace irccd
 int luaopen_socket(lua_State *L);
 int luaopen_socket_listener(lua_State *L);
 
+#if defined(COMPAT_1_1)
+
+int luaopen_socket_address(lua_State *L);
+
+#endif
+
 } // !irccd
 
 #endif // !_LUA_SOCKET_H_
