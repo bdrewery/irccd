@@ -783,7 +783,7 @@ int l_send(lua_State *L)
 {
 #if defined(COMPAT_1_1)
 	if (lua_gettop(L) >= 2 && lua_type(L, 2) == LUA_TUSERDATA) {
-		Luae::deprecate(L, "send(data, address", "sendto(data, address");
+		Luae::deprecate(L, "send(data, address)", "sendto(data, address)");
 		return genericSend(L, true);
 	}
 #endif
@@ -896,7 +896,7 @@ int l_unix(lua_State *L)
 {
 #if defined(WIN32)
 	lua_pushnil(L);
-	lua_pushstring(L, "Unix address are unsupported on Windows");
+	lua_pushstring(L, "Unix address are not supported on Windows");
 
 	return 2;
 #else
@@ -1104,9 +1104,6 @@ const luaL_Reg listenerMethods[] = {
 
 const luaL_Reg listenerMeta[] = {
 	{ "__tostring",			l_listenerToStr		},
-#if 0
-	{ "__pairs",			l_listenerPairs	},
-#endif
 	{ "__gc",			l_listenerGc		},
 	{ nullptr,			nullptr			}
 };
