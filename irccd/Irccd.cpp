@@ -42,6 +42,7 @@
 
 #if defined(WITH_LUA)
 #  include "Plugin.h"
+#  include "IrcEvent.h"
 #endif
 
 namespace irccd {
@@ -62,6 +63,9 @@ void Irccd::initialize()
 	Logger::setVerbose(false);
 
 #if defined(WITH_LUA)
+	// Start the IrcEvent thread
+	IrcEvent::start();
+
 	// Add user's path
 	oss << Util::pathUser() << "plugins/";
 	Plugin::addPath(oss.str());
@@ -485,6 +489,10 @@ void Irccd::stop()
 
 	Listener::close();
 	Server::flush();
+
+#if defined(WITH_LUA)
+	IrcEvent::stop();
+#endif
 }
 
 } // !irccd

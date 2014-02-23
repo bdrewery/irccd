@@ -101,6 +101,9 @@ void Server::flush()
 
 	for (auto it = servers.cbegin(); it != servers.cend(); ) {
 		if (it->second->m_state->which() == "Dead") {
+			it->second->m_session = IrcSession();
+			it->second->m_state = ServerState::Ptr();
+
 			Logger::debug("server: removing %s from registry",
 			    it->second->getInfo().name.c_str());
 			servers.erase(it++);
@@ -283,7 +286,7 @@ void Server::restart()
 	Lock lk(m_lock);
 
 	m_reco.restarting = true;
-	irc_disconnect(m_session);
+	m_session.disconnect();
 }
 
 void Server::stop()
