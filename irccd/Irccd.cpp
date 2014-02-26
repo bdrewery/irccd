@@ -1,7 +1,7 @@
 /*
  * Irccd.cpp -- main irccd class
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,6 +42,7 @@
 
 #if defined(WITH_LUA)
 #  include "Plugin.h"
+#  include "IrcEvent.h"
 #endif
 
 namespace irccd {
@@ -208,7 +209,7 @@ void Irccd::readIdentities(const Parser &config)
 
 			m_identities.push_back(identity);
 		} catch (std::out_of_range ex) {
-			Logger::log("identity: missing parameter %s", ex.what());
+			Logger::log("identity: parameter %s", ex.what());
 		}
 	});
 }
@@ -242,7 +243,7 @@ void Irccd::readListeners(const Parser &config)
 			} else
 				Logger::warn("listener: unknown listener type `%s'", type.c_str());
 		} catch (std::out_of_range ex) {
-			Logger::warn("listener: missing parameter %s", ex.what());
+			Logger::warn("listener: parameter %s", ex.what());
 		}
 	});
 }
@@ -373,7 +374,7 @@ void Irccd::readServers(const Parser &config)
 			else
 				Server::add(server);
 		} catch (std::out_of_range ex) {
-			Logger::warn("server: missing parameter %s", ex.what());
+			Logger::warn("server: parameter %s", ex.what());
 		}
 	});
 }
@@ -447,6 +448,11 @@ const Server::Identity &Irccd::findIdentity(const std::string &name)
 
 int Irccd::run()
 {
+#if defined(WITH_LUA)
+	// Start the IrcEvent thread
+	IrcEvent::start();
+#endif
+
 	openConfig();
 
 	while (m_running) {
@@ -485,6 +491,10 @@ void Irccd::stop()
 
 	Listener::close();
 	Server::flush();
+
+#if defined(WITH_LUA)
+	IrcEvent::stop();
+#endif
 }
 
 } // !irccd

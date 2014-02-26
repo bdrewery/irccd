@@ -1,7 +1,7 @@
 /*
  * Parser.h -- config file parser
  *
- * Copyright (c) 2011, 2012, 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -217,7 +217,7 @@ void Parser::open()
 
 	file.open(m_path.c_str());
 	if (!file.is_open())
-		throw std::runtime_error(m_path + std::string(std::strerror(errno)));
+		throw std::runtime_error(m_path + ": " + std::string(std::strerror(errno)));
 
 	while (std::getline(file, line))
 		readLine(lineno++, line);

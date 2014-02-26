@@ -1,7 +1,7 @@
 /*
  * config.h.in -- configuration for irccd
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,9 +26,7 @@
 #define VERSION			"@VERSION@"
 #define PREFIX			"@CMAKE_INSTALL_PREFIX@"
 
-#if 0
-#cmakedefine COMPAT_1_0
-#endif
+#cmakedefine COMPAT_1_1
 
 #cmakedefine WITH_LUAJIT
 #cmakedefine WITH_LUA52

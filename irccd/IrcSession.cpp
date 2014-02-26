@@ -1,7 +1,7 @@
 /*
  * IrcSession.cpp -- libircclient wrapper
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -48,12 +48,6 @@ namespace irccd {
 
 namespace {
 
-#if defined(WITH_LUA)
-#  define handlePlugin(event) Plugin::handleIrcEvent(event)
-#else
-#  define handlePlugin(event)
-#endif
-
 inline bool isMe(Server::Ptr s, const std::string &target)
 {
 	char tmp[32];
@@ -71,11 +65,17 @@ void handleChannel(irc_session_t *session,
 		   const char **params,
 		   unsigned int)
 {
-	auto s = Server::toServer(session);
+#if defined(WITH_LUA)
+	auto s = IrcSession::toServer(session);
 
-	handlePlugin(
-	    IrcEventMessage(s, params[0], orig, (!params[1]) ? "" : params[1])
-	);
+	IrcEvent::add(IrcEvent::Ptr(
+	    new IrcEventMessage(s, params[0], orig, (!params[1]) ? "" : params[1])
+	));
+#else
+	(void)session;
+	(void)orig;
+	(void)params;
+#endif
 }
 
 void handleChannelNotice(irc_session_t *session,
@@ -84,11 +84,17 @@ void handleChannelNotice(irc_session_t *session,
 			 const char **params,
 			 unsigned int)
 {
-	auto s = Server::toServer(session);
+#if defined(WITH_LUA)
+	auto s = IrcSession::toServer(session);
 
-	handlePlugin(
-	    IrcEventChannelNotice(s, params[0], orig, (!params[1]) ? "" : params[1])
-	);
+	IrcEvent::add(IrcEvent::Ptr(
+	    new IrcEventChannelNotice(s, params[0], orig, (!params[1]) ? "" : params[1])
+	));
+#else
+	(void)session;
+	(void)orig;
+	(void)params;
+#endif
 }
 
 void handleConnect(irc_session_t *session,
@@ -97,7 +103,7 @@ void handleConnect(irc_session_t *session,
 		   const char **,
 		   unsigned int)
 {
-	auto s = Server::toServer(session);
+	auto s = IrcSession::toServer(session);
 	const auto &info = s->getInfo();
 
 	Logger::log("server %s: successfully connected", info.name.c_str());
@@ -110,7 +116,9 @@ void handleConnect(irc_session_t *session,
 		s->join(c.name, c.password);
 	}
 
-	handlePlugin(IrcEventConnect(s));
+#if defined(WITH_LUA)
+	IrcEvent::add(IrcEvent::Ptr(new IrcEventConnect(s)));
+#endif
 }
 
 void handleCtcpAction(irc_session_t *session,
@@ -119,11 +127,17 @@ void handleCtcpAction(irc_session_t *session,
 		      const char **params,
 		      unsigned int)
 {
-	auto s = Server::toServer(session);
+#if defined(WITH_LUA)
+	auto s = IrcSession::toServer(session);
 
-	handlePlugin(
-	    IrcEventMe(s, params[0], orig, (!params[1]) ? "" : params[1])
-	);
+	IrcEvent::add(IrcEvent::Ptr(
+	    new IrcEventMe(s, params[0], orig, (!params[1]) ? "" : params[1])
+	));
+#else
+	(void)session;
+	(void)orig;
+	(void)params;
+#endif
 }
 
 void handleInvite(irc_session_t *session,
@@ -132,15 +146,19 @@ void handleInvite(irc_session_t *session,
 		  const char **params,
 		  unsigned int)
 {
-	auto s = Server::toServer(session);
+	auto s = IrcSession::toServer(session);
 
 	// if join-invite is set to true join it
 	if (s->getOptions().joinInvite)
 		s->join(params[0], "");
 
-	handlePlugin(
-	    IrcEventInvite(s, orig, params[0])
-	);
+#if defined(WITH_LUA)
+	IrcEvent::add(IrcEvent::Ptr(
+	    new IrcEventInvite(s, orig, params[0])
+	));
+#else
+	(void)orig;
+#endif
 }
 
 void handleJoin(irc_session_t *session,
@@ -149,11 +167,17 @@ void handleJoin(irc_session_t *session,
 		const char **params,
 		unsigned int)
 {
-	auto s = Server::toServer(session);
+#if defined(WITH_LUA)
+	auto s = IrcSession::toServer(session);
 
-	handlePlugin(
-	    IrcEventJoin(s, orig, params[0])
-	);
+	IrcEvent::add(IrcEvent::Ptr(
+	    new IrcEventJoin(s, orig, params[0])
+	));
+#else
+	(void)session;
+	(void)orig;
+	(void)params;
+#endif
 }
 
 void handleKick(irc_session_t *session,
@@ -162,15 +186,19 @@ void handleKick(irc_session_t *session,
 		const char **params,
 		unsigned int)
 {
-	auto s = Server::toServer(session);
+	auto s = IrcSession::toServer(session);
 
 	// If I was kicked, I need to remove the channel list
 	if (isMe(s, params[1]))
 		s->removeChannel(params[0]);
 
-	handlePlugin(
-	    IrcEventKick(s, orig, params[0], params[1], (!params[2]) ? "" : params[2])
-	);
+#if defined(WITH_LUA)
+	IrcEvent::add(IrcEvent::Ptr(
+	    new IrcEventKick(s, orig, params[0], params[1], (!params[2]) ? "" : params[2])
+	));
+#else
+	(void)orig;
+#endif
 }
 
 void handleMode(irc_session_t *session,
@@ -179,11 +207,17 @@ void handleMode(irc_session_t *session,
 		const char **params,
 		unsigned int)
 {
-	auto s = Server::toServer(session);
+#if defined(WITH_LUA)
+	auto s = IrcSession::toServer(session);
 
-	handlePlugin(
-	    IrcEventChannelMode(s, orig, params[0], params[1], (!params[2]) ? "" : params[2])
-	);
+	IrcEvent::add(IrcEvent::Ptr(
+	    new IrcEventChannelMode(s, orig, params[0], params[1], (!params[2]) ? "" : params[2])
+	));
+#else
+	(void)session;
+	(void)orig;
+	(void)params;
+#endif
 }
 
 void handleNick(irc_session_t *session,
@@ -192,16 +226,20 @@ void handleNick(irc_session_t *session,
 		const char **params,
 		unsigned int)
 {
-	auto s = Server::toServer(session);
+	auto s = IrcSession::toServer(session);
 	auto &id = s->getIdentity();
 	auto nick = std::string(orig);
 
 	if (isMe(s, nick))
 		id.nickname = nick;
 
-	handlePlugin(
-	    IrcEventNick(s, orig, params[0])
-	);
+#if defined(WITH_LUA)
+	IrcEvent::add(IrcEvent::Ptr(
+	    new IrcEventNick(s, orig, params[0])
+	));
+#else
+	(void)params;
+#endif
 }
 
 void handleNotice(irc_session_t *session,
@@ -210,11 +248,17 @@ void handleNotice(irc_session_t *session,
 		  const char **params,
 		  unsigned int)
 {
-	auto s = Server::toServer(session);
+#if defined(WITH_LUA)
+	auto s = IrcSession::toServer(session);
 
-	handlePlugin(
-	    IrcEventNotice(s, orig, params[0], (!params[1]) ? "" : params[1])
-	);
+	IrcEvent::add(IrcEvent::Ptr(
+	    new IrcEventNotice(s, orig, params[0], (!params[1]) ? "" : params[1])
+	));
+#else
+	(void)session;
+	(void)orig;
+	(void)params;
+#endif
 }
 
 void handleNumeric(irc_session_t *session,
@@ -223,16 +267,17 @@ void handleNumeric(irc_session_t *session,
 		   const char **params,
 		   unsigned int c)
 {
-	auto s = Server::toServer(session);
+#if defined(WITH_LUA)
+	auto s = IrcSession::toServer(session);
 
 	if (event == LIBIRC_RFC_RPL_NAMREPLY) {
 		Server::NameList &list = s->getNameLists();
 
 		if (params[3] != nullptr && params[2] != nullptr) {
-			std::vector<std::string> users = Util::split(params[3], " \t");
+			auto users = Util::split(params[3], " \t");
 
 			// The listing may add some prefixes, remove them if needed
-			for (std::string u : users) {
+			for (auto &u : users) {
 				if (s->hasPrefix(u))
 					u.erase(0, 1);
 
@@ -240,10 +285,12 @@ void handleNumeric(irc_session_t *session,
 			}
 		}
 	} else if (event == LIBIRC_RFC_RPL_ENDOFNAMES) {
-		Server::NameList &list = s->getNameLists();
+		auto &list = s->getNameLists();
 
 		if (params[1] != nullptr) {
-			handlePlugin(IrcEventNames(s, list[params[1]], params[1]));
+			IrcEvent::add(IrcEvent::Ptr(
+			    new IrcEventNames(s, list[params[1]], params[1])
+			));
 		}
 
 		// Don't forget to remove the list
@@ -268,14 +315,9 @@ void handleNumeric(irc_session_t *session,
 	} else if (event == LIBIRC_RFC_RPL_ENDOFWHOIS) {
 		auto &info = s->getWhoisLists()[params[1]];
 
-		handlePlugin(IrcEventWhois(s, info));
+		IrcEvent::add(IrcEvent::Ptr(new IrcEventWhois(s, info)));
 	}
 
-	/*
-	 * The event 5 is usually RPL_BOUNCE, but it does not match what I'm
-	 * seeing here, if someone could give me an explanation. I've also read
-	 * somewhere that the event 5 is ISUPPORT. So?
-	 */
 	if (event == 5) {
 		for (unsigned int i = 0; i < c; ++i) {
 			if (strncmp(params[i], "PREFIX", 6) == 0) {
@@ -284,6 +326,11 @@ void handleNumeric(irc_session_t *session,
 			}
 		}
 	}
+#else
+	(void)session;
+	(void)orig;
+	(void)params;
+#endif
 }
 
 void handlePart(irc_session_t *session,
@@ -292,14 +339,16 @@ void handlePart(irc_session_t *session,
 		const char **params,
 		unsigned int)
 {
-	auto s = Server::toServer(session);
+	auto s = IrcSession::toServer(session);
 
 	if (isMe(s, orig))
 		s->removeChannel(params[0]);
 
-	handlePlugin(
-	    IrcEventPart(s, orig, params[0], (!params[1]) ? "" : params[1])
-	);
+#if defined(WITH_LUA)
+	IrcEvent::add(IrcEvent::Ptr(
+	    new IrcEventPart(s, orig, params[0], (!params[1]) ? "" : params[1])
+	));
+#endif
 }
 
 void handleQuery(irc_session_t *session,
@@ -308,11 +357,17 @@ void handleQuery(irc_session_t *session,
 		 const char **params,
 		 unsigned int)
 {
-	auto s = Server::toServer(session);
+#if defined(WITH_LUA)
+	auto s = IrcSession::toServer(session);
 
-	handlePlugin(
-	    IrcEventQuery(s, orig, (!params[1]) ? "" : params[1])
-	);
+	IrcEvent::add(IrcEvent::Ptr(
+	    new IrcEventQuery(s, orig, (!params[1]) ? "" : params[1])
+	));
+#else
+	(void)session;
+	(void)orig;
+	(void)params;
+#endif
 }
 
 void handleTopic(irc_session_t *session,
@@ -321,11 +376,17 @@ void handleTopic(irc_session_t *session,
 		 const char **params,
 		 unsigned int)
 {
-	auto s = Server::toServer(session);
+#if defined(WITH_LUA)
+	auto s = IrcSession::toServer(session);
 
-	handlePlugin(
-	    IrcEventTopic(s, orig, params[0], (!params[1]) ? "" : params[1])
-	);
+	IrcEvent::add(IrcEvent::Ptr(
+	    new IrcEventTopic(s, orig, params[0], (!params[1]) ? "" : params[1])
+	));
+#else
+	(void)session;
+	(void)orig;
+	(void)params;
+#endif
 }
 
 void handleUserMode(irc_session_t *session,
@@ -334,11 +395,17 @@ void handleUserMode(irc_session_t *session,
 		    const char **params,
 		    unsigned int)
 {
-	auto s = Server::toServer(session);
+#if defined(WITH_LUA)
+	auto s = IrcSession::toServer(session);
 
-	handlePlugin(
-	    IrcEventMode(s, orig, params[0])
-	);
+	IrcEvent::add(IrcEvent::Ptr(
+	    new IrcEventMode(s, orig, params[0])
+	));
+#else
+	(void)session;
+	(void)orig;
+	(void)params;
+#endif
 }
 
 irc_callbacks_t createHandlers()
@@ -399,6 +466,168 @@ IrcSession &IrcSession::operator=(IrcSession &&other)
 IrcSession::operator irc_session_t *()
 {
 	return m_handle.get();
+}
+
+Server::Ptr IrcSession::toServer(irc_session_t *s)
+{
+	return *reinterpret_cast<Server::Ptr *>(irc_get_ctx(s));
+}
+
+void IrcSession::connect(Server::Ptr server)
+{
+	unsigned int major, minor;
+
+	irc_set_ctx(m_handle.get(), new Server::Ptr(server));
+	irc_get_version(&major, &minor);
+
+	auto &info = server->getInfo();
+	auto &identity = server->getIdentity();
+
+	/*
+	 * After some discuss with George, SSL has been fixed in newer version
+	 * of libircclient. > 1.6 is needed for SSL.
+	 */
+	if (major >= 1 && minor > 6) {
+		// SSL needs to add # front of host
+		if (info.ssl)
+			info.host.insert(0, 1, '#');
+
+		if (!info.sslVerify)
+			irc_option_set(m_handle.get(), LIBIRC_OPTION_SSL_NO_VERIFY);
+	} else {
+		if (info.ssl)
+			Logger::log("server %s: SSL is only supported with libircclient > 1.6",
+			    info.name.c_str());
+	}
+
+	const char *password = nullptr;
+
+	if (info.password.length() > 0)
+		password = info.password.c_str();
+
+	auto res = irc_connect(
+	    m_handle.get(),
+	    info.host.c_str(),
+	    info.port,
+	    password,
+	    identity.nickname.c_str(),
+	    identity.username.c_str(),
+	    identity.realname.c_str());
+
+	if (res == 0)
+		server->getRecoInfo().noretried = 0;
+}
+
+void IrcSession::run()
+{
+	irc_run(m_handle.get());
+}
+
+void IrcSession::cnotice(const std::string &channel,
+			 const std::string &message)
+{
+	if (channel[0] == '#')
+		irc_cmd_notice(m_handle.get(), channel.c_str(), message.c_str());
+}
+
+void IrcSession::invite(const std::string &target,
+			const std::string &channel)
+{
+	irc_cmd_invite(m_handle.get(), target.c_str(), channel.c_str());
+}
+
+void IrcSession::join(const std::string &channel,
+		      const std::string &password)
+{
+	irc_cmd_join(m_handle.get(), channel.c_str(), password.c_str());
+}
+
+void IrcSession::kick(const std::string &name,
+		      const std::string &channel,
+		      const std::string &reason)
+{
+	const char *r = (reason.length() == 0) ? nullptr : reason.c_str();
+
+	irc_cmd_kick(m_handle.get(), name.c_str(), channel.c_str(), r);
+}
+
+void IrcSession::me(const std::string &target,
+		    const std::string &message)
+{
+	irc_cmd_me(m_handle.get(), target.c_str(), message.c_str());
+}
+
+void IrcSession::mode(const std::string &channel,
+		      const std::string &mode)
+{
+	irc_cmd_channel_mode(m_handle.get(), channel.c_str(), mode.c_str());
+}
+
+void IrcSession::names(const std::string &channel)
+{
+	irc_cmd_names(m_handle.get(), channel.c_str());
+}
+
+void IrcSession::nick(const std::string &newnick)
+{
+	irc_cmd_nick(m_handle.get(), newnick.c_str());
+}
+
+void IrcSession::notice(const std::string &target,
+			const std::string &message)
+{
+	if (target[0] != '#')
+		irc_cmd_notice(m_handle.get(), target.c_str(), message.c_str());
+}
+
+void IrcSession::part(const std::string &channel,
+		      const std::string &reason)
+{
+	if (reason.length() > 0) {
+		auto str = "PART " + channel + ":" + reason;
+
+		send(str);
+	} else {
+		irc_cmd_part(m_handle.get(), channel.c_str());
+	}
+}
+
+void IrcSession::query(const std::string &target,
+		       const std::string &message)
+{
+	irc_cmd_msg(m_handle.get(), target.c_str(), message.c_str());
+}
+
+void IrcSession::say(const std::string &channel,
+		     const std::string &message)
+{
+	irc_cmd_msg(m_handle.get(), channel.c_str(), message.c_str());
+}
+
+void IrcSession::topic(const std::string &channel,
+		       const std::string &topic)
+{
+	irc_cmd_topic(m_handle.get(), channel.c_str(), topic.c_str());
+}
+
+void IrcSession::umode(const std::string &mode)
+{
+	irc_cmd_user_mode(m_handle.get(), mode.c_str());
+}
+
+void IrcSession::whois(const std::string &target)
+{
+	irc_cmd_whois(m_handle.get(), target.c_str());
+}
+
+void IrcSession::send(const std::string &raw)
+{
+	irc_send_raw(m_handle.get(), "%s", raw.c_str());
+}
+
+void IrcSession::disconnect()
+{
+	irc_disconnect(m_handle.get());
 }
 
 } // !irccd

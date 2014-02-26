@@ -28,7 +28,7 @@ if(WIN32)
 	)
 endif()
 
-if (WIN32)
+if(WIN32)
 	message("${IRCCD_PACKAGE_NAME}")
 	set(CPACK_NSIS_PACKAGE_NAME ${IRCCD_PACKAGE_NAME})
 
@@ -41,18 +41,18 @@ if (WIN32)
 	endif()
 
 	# This determine the *target* architecture
-	if (CMAKE_SIZEOF_VOID_P MATCHES "8")
+	if(CMAKE_SIZEOF_VOID_P MATCHES "8")
 		set(WINARCH "amd64")
-	else ()
+	else()
 		set(WINARCH "x86")
-	endif ()
+	endif()
 
 	# Embed Visual C++ 2012 redistributable
-	if (${WINARCH} MATCHES "amd64")
+	if(${WINARCH} MATCHES "amd64")
 		set(REDIST_FILE "vcredist_x64.exe")
-	else ()
+	else()
 		set(REDIST_FILE "vcredist_x86.exe")
-	endif ()
+	endif()
 
 	install(
 		PROGRAMS
@@ -96,9 +96,9 @@ if (WIN32)
 	set(CPACK_PACKAGE_NAME "Irccd")
 	set(CPACK_NSIS_WELCOME_BITMAP "${CMAKE_SOURCE_DIR}/win32/left.bmp")
 	set(CPACK_NSIS_HEADER_BITMAP "${CMAKE_SOURCE_DIR}/win32/top.bmp")
-else ()
+else()
 	set(CPACK_GENERATOR "TGZ")
-endif ()
+endif()
 
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "irccd-${VERSION}-source")
 set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")

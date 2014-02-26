@@ -1,7 +1,7 @@
 /*
  * Irccdctl.cpp -- irccd controller class
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -617,7 +617,7 @@ void Irccdctl::readConfig(Parser &config)
 	using std::string;
 
 	try {
-		const Section &section= config.getSection("socket");
+		const Section &section = config.getSection("socket");
 		string type;
 		string proto;
 
@@ -644,7 +644,7 @@ void Irccdctl::readConfig(Parser &config)
 		else
 			Logger::fatal(1, "socket: invalid socket type %s", type.c_str());
 	} catch (std::out_of_range ex) {
-		Logger::fatal(1, "socket: missing parameter %s", ex.what());
+		Logger::fatal(1, "socket: parameter %s", ex.what());
 	}
 }
 

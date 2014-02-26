@@ -1,5 +1,5 @@
 /*
- * Directory.h -- open and scan directories
+ * Directory.h -- open and read directories
  *
  * Copyright (c) 2013 David Demelier <markand@malikania.fr>
  *
@@ -19,58 +19,116 @@
 #ifndef _DIRECTORY_H_
 #define _DIRECTORY_H_
 
+#include <cstddef>
 #include <string>
 #include <vector>
 
 namespace irccd {
 
-struct Entry {
-	std::string m_name;
-	bool m_isDirectory;
-};
-
+/**
+ * @class Directory
+ * @brief class to manipulate directories
+ *
+ * This class allow the user to iterate directories in a for range based
+ * loop using iterators.
+ */
 class Directory {
+public:
+	/**
+	 * @enum Flags
+	 * @brief optional flags to read directories
+	 */
+	enum Flags {
+		NotDot		= (1 << 0),
+		NotDotDot	= (1 << 1)
+	};
+
+	/**
+	 * @enum Type
+	 * @brief Describe the type of an entry
+	 */
+	enum Type {
+		Unknown		= 0,
+		File,
+		Dir,
+		Link
+	};
+
+	/**
+	 * @struct Entry
+	 * @brief entry in the directory list
+	 */
+	struct Entry {
+		std::string	name;		//! name of entry (base name)
+		Type		type;		//! type of file
+
+		Entry();
+
+		friend bool operator==(const Entry &e1, const Entry &e2);
+	};
+
+	using List = std::vector<Entry>;
+
+	// C++ Container compatibility
+	using value_type	= List::value_type;
+	using iterator		= List::iterator;
+	using const_iterator	= List::const_iterator;
+
 private:
-	std::string m_path;
-	std::string m_error;
-	std::vector<Entry> m_entries;
+	List m_list;
+
+	void systemLoad(const std::string &path, int flags);
 
 public:
-	Directory(const std::string &path);
+	/**
+	 * Default constructor, does nothing.
+	 */
+	Directory();
 
 	/**
-	 * Open the directory.
-	 *
-	 * @param skipParents skip "." and ".."
-	 * @return true on success
+	 * Open a directory and read all its content.
+	 * @param path the path
+	 * @param flags the optional flags
 	 */
-	bool open(bool skipParents = false);
+	Directory(const std::string &path, int flags = 0);
 
 	/**
-	 * Get the directory path
+	 * Return an iterator the beginning.
 	 *
-	 * @return the path
+	 * @return the iterator
 	 */
-	const std::string & getPath() const;
+	List::iterator begin();
 
 	/**
-	 * Get the error
+	 * Return a const iterator the beginning.
 	 *
-	 * @return the error
+	 * @return the iterator
 	 */
-	const std::string & getError() const;
+	List::const_iterator cbegin() const;
 
 	/**
-	 * Get the list of entries found.
+	 * Return an iterator to past the end.
 	 *
-	 * @return the list
+	 * @return the iterator
 	 */
-	const std::vector<Entry> & getEntries() const;
+	List::iterator end();
+
+	/**
+	 * Return a const iterator to past the end.
+	 *
+	 * @return the iterator
+	 */
+	List::const_iterator cend() const;
+
+	/**
+	 * Get the number of entries in the directory.
+	 *
+	 * @return the number
+	 */
+	int count() const;
+
+	friend bool operator==(const Directory &d1, const Directory &d2);
 };
-
-bool operator==(const Entry &e1, const Entry &e2);
-
-bool operator==(const Directory &d1, const Directory &d2);
 
 } // !irccd
 

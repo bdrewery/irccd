@@ -1,7 +1,7 @@
 /*
  * Server.cpp -- a IRC server to connect to
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -101,6 +101,9 @@ void Server::flush()
 
 	for (auto it = servers.cbegin(); it != servers.cend(); ) {
 		if (it->second->m_state->which() == "Dead") {
+			it->second->m_session = IrcSession();
+			it->second->m_state = ServerState::Ptr();
+
 			Logger::debug("server: removing %s from registry",
 			    it->second->getInfo().name.c_str());
 			servers.erase(it++);
@@ -108,11 +111,6 @@ void Server::flush()
 			++it;
 		}
 	}
-}
-
-Server::Ptr Server::toServer(irc_session_t *s)
-{
-	return *reinterpret_cast<Server::Ptr *>(irc_get_ctx(s));
 }
 
 Server::Channel Server::toChannel(const std::string &line)
@@ -148,6 +146,9 @@ Server::Server(const Info &info,
 
 Server::~Server()
 {
+	if (m_thread.joinable())
+		m_thread.join();
+
 	Logger::debug("server %s: destroyed", m_info.name.c_str());
 }
 
@@ -288,7 +289,7 @@ void Server::restart()
 	Lock lk(m_lock);
 
 	m_reco.restarting = true;
-	irc_disconnect(m_session);
+	m_session.disconnect();
 }
 
 void Server::stop()
@@ -302,13 +303,7 @@ void Server::stop()
 		// Be sure that it won't try again
 		m_reco.enabled = false;
 		m_reco.stopping = true;
-		irc_disconnect(m_session);
-	}
-
-	try {
-		m_thread.join();
-	} catch (std::system_error error) {
-		Logger::warn("server %s: %s", m_info.name.c_str(), error.what());
+		m_session.disconnect();
 	}
 }
 
@@ -316,8 +311,8 @@ void Server::cnotice(const std::string &channel, const std::string &message)
 {
 	Lock lk(m_lock);
 
-	if (m_state->which() == "Running" && channel[0] == '#')
-		irc_cmd_notice(m_session, channel.c_str(), message.c_str());
+	if (m_state->which() == "Running")
+		m_session.cnotice(channel, message);
 }
 
 void Server::invite(const std::string &target, const std::string &channel)
@@ -325,7 +320,7 @@ void Server::invite(const std::string &target, const std::string &channel)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		irc_cmd_invite(m_session, target.c_str(), channel.c_str());
+		m_session.invite(target, channel);
 }
 
 void Server::join(const std::string &name, const std::string &password)
@@ -333,7 +328,7 @@ void Server::join(const std::string &name, const std::string &password)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		irc_cmd_join(m_session, name.c_str(), password.c_str());
+		m_session.join(name, password);
 }
 
 void Server::kick(const std::string &name, const std::string &channel, const std::string &reason)
@@ -341,8 +336,7 @@ void Server::kick(const std::string &name, const std::string &channel, const std
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		irc_cmd_kick(m_session, name.c_str(), channel.c_str(),
-		    (reason.length() == 0) ? nullptr : reason.c_str());
+		m_session.kick(name, channel, reason);
 }
 
 void Server::me(const std::string &target, const std::string &message)
@@ -350,7 +344,7 @@ void Server::me(const std::string &target, const std::string &message)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		irc_cmd_me(m_session, target.c_str(), message.c_str());
+		m_session.me(target, message);
 }
 
 void Server::mode(const std::string &channel, const std::string &mode)
@@ -358,7 +352,7 @@ void Server::mode(const std::string &channel, const std::string &mode)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		irc_cmd_channel_mode(m_session, channel.c_str(), mode.c_str());
+		m_session.mode(channel, mode);
 }
 
 void Server::names(const std::string &channel)
@@ -366,7 +360,7 @@ void Server::names(const std::string &channel)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		irc_cmd_names(m_session, channel.c_str());
+		m_session.names(channel);
 }
 
 void Server::nick(const std::string &nick)
@@ -374,7 +368,7 @@ void Server::nick(const std::string &nick)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		irc_cmd_nick(m_session, nick.c_str());
+		m_session.nick(nick);
 }
 
 void Server::notice(const std::string &nickname, const std::string &message)
@@ -382,19 +376,15 @@ void Server::notice(const std::string &nickname, const std::string &message)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running" && nickname[0] != '#')
-		irc_cmd_notice(m_session, nickname.c_str(), message.c_str());
+		m_session.notice(nickname, message);
 }
 
 void Server::part(const std::string &channel, const std::string &reason)
 {
 	Lock lk(m_lock);
 
-	if (m_state->which() == "Running") {
-		if (reason.length() > 0)
-			irc_send_raw(m_session, "PART %s :%s", channel.c_str(), reason.c_str());
-		else
-			irc_cmd_part(m_session,channel.c_str());
-	}
+	if (m_state->which() == "Running")
+		m_session.part(channel, reason);
 }
 
 void Server::query(const std::string &who, const std::string &message)
@@ -403,7 +393,7 @@ void Server::query(const std::string &who, const std::string &message)
 
 	// Do not write to public channel
 	if (m_state->which() == "Running" && who[0] != '#')
-		irc_cmd_msg(m_session, who.c_str(), message.c_str());
+		m_session.query(who, message);
 }
 
 void Server::say(const std::string &target, const std::string &message)
@@ -411,15 +401,15 @@ void Server::say(const std::string &target, const std::string &message)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		irc_cmd_msg(m_session, target.c_str(), message.c_str());
+		m_session.say(target, message);
 }
 
-void Server::sendRaw(const std::string &msg)
+void Server::send(const std::string &msg)
 {
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		irc_send_raw(m_session, "%s", msg.c_str());
+		m_session.send(msg);
 }
 
 void Server::topic(const std::string &channel, const std::string &topic)
@@ -427,7 +417,7 @@ void Server::topic(const std::string &channel, const std::string &topic)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		irc_cmd_topic(m_session, channel.c_str(), topic.c_str());
+		m_session.topic(channel, topic);
 }
 
 void Server::umode(const std::string &mode)
@@ -435,7 +425,7 @@ void Server::umode(const std::string &mode)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		irc_cmd_user_mode(m_session, mode.c_str());
+		m_session.umode(mode);
 }
 
 void Server::whois(const std::string &target)
@@ -443,7 +433,7 @@ void Server::whois(const std::string &target)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		irc_cmd_whois(m_session, target.c_str());
+		m_session.whois(target);
 }
 
 } // !irccd

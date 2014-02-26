@@ -1,7 +1,7 @@
 /*
  * Plugin.h -- irccd Lua plugin interface
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -76,6 +76,7 @@ public:
 	using List		= std::vector<Plugin::Ptr>;
 	using Mutex		= std::recursive_mutex;
 	using Lock		= std::lock_guard<Mutex>;
+	using MapFunc		= std::function<void (Ptr &ptr)>;
 
 private:
 	static Mutex		pluginLock;	//! lock for managing plugins
@@ -153,11 +154,11 @@ public:
 	static Ptr find(const std::string &name);
 
 	/**
-	 * Handle a IRC event.
+	 * Iterate over all plugins.
 	 *
-	 * @param ev the event
+	 * @param func the function to call
 	 */
-	static void handleIrcEvent(const IrcEvent &ev);
+	static void forAll(MapFunc func);
 
 	/**
 	 * Default constructor. (Forbidden)

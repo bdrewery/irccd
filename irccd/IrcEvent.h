@@ -1,7 +1,7 @@
 /*
  * IrcEvent.cpp -- IRC event passed through plugins
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,7 +19,11 @@
 #ifndef _IRC_EVENT_H_
 #define _IRC_EVENT_H_
 
+#include <condition_variable>
+#include <mutex>
+#include <queue>
 #include <string>
+#include <thread>
 
 #include <lua.hpp>
 
@@ -31,9 +35,29 @@ namespace irccd {
 /**
  * @class IrcEvent
  * @brief An event passed through Lua
+ *
+ * This class also handle IRC Event 
  */
 class IrcEvent {
+public:
+	using Ptr	= std::unique_ptr<IrcEvent>;
+	using Queue	= std::queue<Ptr>;
+	using Thread	= std::thread;
+	using Mutex	= std::mutex;
+	using Lock	= std::unique_lock<Mutex>;
+	using Cond	= std::condition_variable;
+
 private:
+	static Thread	m_thread;
+	static Queue	m_queue;
+	static Mutex	m_mutex;
+	static Cond	m_cv;
+
+	/*
+	 * Thread routine for event management.
+	 */
+	static void routine();
+
 	void pushObjects(lua_State *) const
 	{
 		// Dummy, stop recursion
@@ -92,9 +116,28 @@ protected:
 
 public:
 	/**
+	 * Start the event management thread.
+	 */
+	static void start();
+
+	/**
+	 * Add an event to the queue. This event will be called on every plugin
+	 * so IrcEventLoad, IrcEventReload and IrcEventUnload must not be
+	 * pushed.
+	 *
+	 * @param event the event
+	 */
+	static void add(Ptr&& event);
+
+	/**
+	 * Stop the thread, it ignore every event still in the queue.
+	 */
+	static void stop();
+	
+	/**
 	 * Virtual destructor for child.
 	 */
-	~IrcEvent();
+	virtual ~IrcEvent();
 
 	/**
 	 * Action to execute for the plugin.

@@ -1,7 +1,7 @@
 /*
  * Plugin.cpp -- irccd Lua plugin interface
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -183,7 +183,7 @@ void Plugin::load(const std::string &name, bool relative)
 	 * coded.
 	 */
 
-	Plugin::Ptr p = std::make_shared<Plugin>(realname, realpath);
+	auto p = std::make_shared<Plugin>(realname, realpath);
 	plugins.push_back(p);
 
 	try {
@@ -228,7 +228,12 @@ void Plugin::reload(const std::string &name)
 	try {
 		auto i = find(name);
 
-		IrcEventReload().action(*i->m_process);
+		try {
+			IrcEventReload().action(*i->m_process);
+		} catch (Plugin::ErrorException ex) {
+			Logger::warn("plugin %s: %s",
+			    ex.which().c_str(), ex.error().c_str());
+		}
 	} catch (std::out_of_range ex) {
 		Logger::warn("irccd: %s", ex.what());
 	}
@@ -254,7 +259,7 @@ Plugin::Ptr Plugin::find(const std::string &name)
 	return *i;
 }
 
-void Plugin::handleIrcEvent(const IrcEvent &ev)
+void Plugin::forAll(MapFunc func)
 {
 	Lock lk(pluginLock);
 
@@ -262,17 +267,12 @@ void Plugin::handleIrcEvent(const IrcEvent &ev)
 	 * We use an index based loop because if the handle
 	 * load a plugin, the for range will getting invalid.
 	 */
-	for (size_t i = 0; i < plugins.size(); ++i) {
-		try {
-			ev.action(plugins[i]->getState());
-		} catch (Plugin::ErrorException ex) {
-			Logger::warn("plugin: %s", ex.what());
-		}
-	}
+	for (size_t i = 0; i < plugins.size(); ++i)
+		func(plugins[i]);
 }
 
 /* --------------------------------------------------------
- * public methods
+ * Public methods
  * -------------------------------------------------------- */
 
 Plugin::Plugin(const std::string &name,

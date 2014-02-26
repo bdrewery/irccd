@@ -1,7 +1,7 @@
 /*
  * Parser.h -- config file parser
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -39,9 +39,14 @@ namespace irccd {
  */
 class Section {
 public:
+	friend class Parser;
+
 	using Map = std::unordered_map<std::string, std::string>;
 
-	friend class Parser;
+	// C++ Container compatibility
+	using value_type	= Map::value_type;
+	using iterator		= Map::iterator;
+	using const_iterator	= Map::const_iterator;
 
 private:
 	std::string	m_name;		/*! name of section */
@@ -142,6 +147,9 @@ public:
 	{
 		static_assert(Converter<T>::supported, "invalid type requested");
 
+		if (!hasOption(name))
+			throw std::out_of_range(name + " not found");
+
 		return Converter<T>::convert(m_options.at(name));
 	}
 
@@ -224,6 +232,11 @@ public:
 
 	using FindFunc	= std::function<void (const Section &)>;
 	using List	= std::vector<Section>;
+
+	// C++ Container compatibility
+	using value_type	= List::value_type;
+	using iterator		= List::iterator;
+	using const_iterator	= List::const_iterator;
 
 private:
 	List		m_sections;		/*! list of sections found */

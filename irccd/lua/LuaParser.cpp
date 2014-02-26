@@ -1,7 +1,7 @@
 /*
  * LuaParser.cpp -- Lua bindings for class Parser
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -57,6 +57,8 @@ LuaParser::LuaParser(const std::string &path, int tuning, char commentToken)
 }
 
 LuaParser::LuaParser()
+	: m_state(nullptr)
+	, m_logRef(LUA_NOREF)
 {
 }
 
@@ -95,29 +97,36 @@ void LuaParser::log(int number, const std::string &section, const std::string &m
 }
 
 /* --------------------------------------------------------
- * Helpers
+ * ParserWrapper
  * -------------------------------------------------------- */
 
 /**
- * @struct Iterator
- * @brief Class used for iterating containers in Lua
+ * @class ParserWrapper
+ * @brief Backward compatibility
+ *
+ * This class is used to wrap the parser and its parameters
+ * because the class Parser now throw an exception in the constructor
+ * but the Lua API expect that .new return and object and .open
+ * returns the error. So we only create the parser at .open method.
  */
-template <typename T>
-struct Iterator {
-	T begin;
-	T end;
-	T current;	
+class ParserWrapper {
+public:
+	LuaParser	m_parser;
+	std::string	m_path;
+	int		m_flags;
+	char		m_comment;
 
-	Iterator(T begin, T end)
-		: begin(begin)
-		, end(end)
-		, current(begin)
+	ParserWrapper(const std::string &path, int flags, char comment)
+		: m_path(path)
+		, m_flags(flags)
+		, m_comment(comment)
 	{
 	}
 };
 
-using ParserIterator		= Iterator<Parser::List::iterator>;
-using SectionIterator		= Iterator<Section::Map::iterator>;
+/* --------------------------------------------------------
+ * Helpers
+ * -------------------------------------------------------- */
 
 const char *SectionType		= "Section";
 const char *ParserType		= "Parser";
@@ -130,7 +139,6 @@ namespace {
 
 int l_new(lua_State *L)
 {
-	LuaParser *p;
 	std::string path;
 	int tuning = 0, ch = LuaParser::DEFAULT_COMMENT_CHAR;
 
@@ -145,16 +153,15 @@ int l_new(lua_State *L)
 		ch = luaL_checkstring(L, 1)[0];
 		
 	try {
-		p = new (L, ParserType) LuaParser(path, tuning, ch);
+		auto p = new (L, ParserType) ParserWrapper(path, tuning, ch);
+
+		p->m_parser.setState(L);
 	} catch (std::runtime_error er) {
 		lua_pushnil(L);
 		lua_pushstring(L, er.what());
 
 		return 2;
 	}
-
-	// Copy the state so I can call log() function
-	p->setState(L);
 
 	return 1;
 }
@@ -163,6 +170,24 @@ const luaL_Reg functionList[] = {
 	{ "new",		l_new			},
 	{ nullptr,		nullptr			}
 };
+
+int l_parserOpen(lua_State *L)
+{
+	auto p = Luae::toType<ParserWrapper *>(L, 1, ParserType);
+
+	try {
+		p->m_parser = LuaParser(p->m_path, p->m_flags, p->m_comment);
+	} catch (std::runtime_error error) {
+		lua_pushnil(L);
+		lua_pushstring(L, error.what());
+
+		return 2;
+	}
+
+	lua_pushboolean(L, true);
+
+	return 1;
+}
 
 int l_parserIterator(lua_State *L)
 {
@@ -184,11 +209,11 @@ int l_parserIterator(lua_State *L)
 
 int l_parserFindSections(lua_State *L)
 {
-	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
+	auto p = Luae::toType<ParserWrapper *>(L, 1, ParserType);
 	auto name = luaL_checkstring(L, 2);
 	std::vector<Section> sections;
 
-	p->findSections(name, [&] (const Section &s) {
+	p->m_parser.findSections(name, [&] (const Section &s) {
 		sections.push_back(s);
 	});
 
@@ -214,22 +239,22 @@ int l_parserFindSections(lua_State *L)
 
 int l_parserHasSection(lua_State *L)
 {
-	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
+	auto p = Luae::toType<ParserWrapper *>(L, 1, ParserType);
 	auto name = luaL_checkstring(L, 2);
 
-	lua_pushboolean(L, p->hasSection(name));
+	lua_pushboolean(L, p->m_parser.hasSection(name));
 
 	return 1;
 }
 
 int l_parserGetSection(lua_State *L)
 {
-	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
+	auto p = Luae::toType<ParserWrapper *>(L, 1, ParserType);
 	auto name = luaL_checkstring(L, 2);
 	int ret = 0;
 
 	try {
-		new (L, SectionType) Section(p->getSection(name));
+		new (L, SectionType) Section(p->m_parser.getSection(name));
 
 		ret = 1;
 	} catch (std::out_of_range ex) {
@@ -244,80 +269,71 @@ int l_parserGetSection(lua_State *L)
 
 int l_parserRequireSection(lua_State *L)
 {
-	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
+	auto p = Luae::toType<ParserWrapper *>(L, 1, ParserType);
 	auto name = luaL_checkstring(L, 2);
 
-	if (!p->hasSection(name))
+	if (!p->m_parser.hasSection(name))
 		return luaL_error(L, "section %s not found", name);
 
 	// Copy the section
-	new (L, SectionType) Section(p->getSection(name));
+	new (L, SectionType) Section(p->m_parser.getSection(name));
 
 	return 1;
 }
 
 int l_parserOnLog(lua_State *L)
 {
-	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
+	auto p = Luae::toType<ParserWrapper *>(L, 1, ParserType);
 
 	// Must be a function
 	luaL_checktype(L, 2, LUA_TFUNCTION);
 
 	// luaL_ref needs at the top of the stack so put a copy
 	lua_pushvalue(L, 2);
-	p->setLogRef(luaL_ref(L, LUA_REGISTRYINDEX));
+	p->m_parser.setLogRef(luaL_ref(L, LUA_REGISTRYINDEX));
 
 	return 0;
 }
 
 int l_parserEq(lua_State *L)
 {
-	auto p1 = Luae::toType<LuaParser *>(L, 1, ParserType);
-	auto p2 = Luae::toType<LuaParser *>(L, 2, ParserType);
+	auto p1 = Luae::toType<ParserWrapper *>(L, 1, ParserType);
+	auto p2 = Luae::toType<ParserWrapper *>(L, 2, ParserType);
 
-	lua_pushboolean(L, *p1 == *p2);
+	lua_pushboolean(L, p1->m_parser == p2->m_parser);
 
 	return 1;
 }
 
 int l_parserGc(lua_State *L)
 {
-	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
+	auto p = Luae::toType<ParserWrapper *>(L, 1, ParserType);
 
-	luaL_unref(L, LUA_REGISTRYINDEX, p->getLogRef());
+	if (p->m_parser.getLogRef() != LUA_REFNIL)
+		luaL_unref(L, LUA_REGISTRYINDEX, p->m_parser.getLogRef());
 
-	p->~LuaParser();
+	p->m_parser.~LuaParser();
 
 	return 0;
 }
 
 int l_parserPairs(lua_State *L)
 {
-	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
+	auto p = Luae::toType<ParserWrapper *>(L, 1, ParserType);
 
-	new (L) ParserIterator(p->begin(), p->end());
-	lua_pushcclosure(L, [] (lua_State *L) -> int {
-		auto it = Luae::toType<ParserIterator *>(L, lua_upvalueindex(1));
-
-		if (it->current == it->end)
-			return 0;
-
-		new (L, SectionType) Section(*(it->current++));
-
-		return 1;
-	}, 1);
+	Luae::pushPairs(L, SectionType, p->m_parser);
 
 	return 1;
 }
 
 int l_parserTostring(lua_State *L)
 {
-	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
+	auto p = Luae::toType<ParserWrapper *>(L, 1, ParserType);
 	std::ostringstream oss;
 	std::string str;
 
 	oss << "sections: [";
-	for (const auto &s : *p) {
+	for (const auto &s : p->m_parser) {
 		// We don't add root, it always added
 		if (s.getName().length() >= 1)
 			oss << " " << s.getName();
@@ -331,6 +347,7 @@ int l_parserTostring(lua_State *L)
 }
 
 const luaL_Reg parserMethods[] = {
+	{ "open",		l_parserOpen			},
 	{ "findSections",	l_parserFindSections		},
 	{ "hasSection",		l_parserHasSection		},
 	{ "getSection",		l_parserGetSection		},
@@ -426,6 +443,25 @@ int l_sectionRequireOption(lua_State *L)
 	return pushOption(L, *s, name, type);
 }
 
+#if defined(COMPAT_1_1)
+
+int l_sectionGetOptions(lua_State *L)
+{
+	Luae::deprecate(L, "getOptions", "pairs");
+
+	auto s = Luae::toType<Section *>(L, 1, SectionType);
+
+	lua_createtable(L, 0, 0);
+	for (const auto &o : *s) {
+		lua_pushstring(L, o.second.c_str());
+		lua_setfield(L, -2, o.first.c_str());
+	}
+
+	return 1;
+}
+
+#endif
+
 int l_sectionEquals(lua_State *L)
 {
 	auto s1 = Luae::toType<Section *>(L, 1, SectionType);
@@ -445,8 +481,14 @@ int l_sectionGc(lua_State *L)
 
 int l_sectionPairs(lua_State *L)
 {
+	using SectionIterator = Luae::Iterator<Section::const_iterator>;
+
 	auto s = Luae::toType<Section *>(L, 1, SectionType);
 
+	/*
+	 * Do not use Luae::pushPairs because we want to push the value
+	 * and the key directly.
+	 */
 	new (L) SectionIterator(s->begin(), s->end());
 	lua_pushcclosure(L, [] (lua_State *L) -> int {
 		auto it = Luae::toType<SectionIterator *>(L, lua_upvalueindex(1));
@@ -486,6 +528,14 @@ const luaL_Reg sectionMethods[] = {
 	{ "getName",		l_sectionName			},
 	{ "hasOption",		l_sectionHasOption		},
 	{ "getOption",		l_sectionGetOption		},
+/*
+ * DEPRECATION:	1.2-001
+ *
+ * All the following functions have been moved to the irccd.system.
+ */
+#if defined(COMPAT_1_1)
+	{ "getOptions",		l_sectionGetOptions		},
+#endif
 	{ "requireOption",	l_sectionRequireOption		},
 	{ nullptr,		nullptr				}
 };

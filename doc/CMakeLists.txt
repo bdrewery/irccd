@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -36,7 +36,7 @@ define_man(man/irccdctl.conf.5.in man5)
 # Create a target for building Lua API documentation
 # ---------------------------------------------------------
 
-if (LDOC)
+if(LDOC)
 	add_custom_target(
 		generate-ldoc
 		COMMENT "Generating Lua API documentation"
@@ -49,7 +49,7 @@ if (LDOC)
 			"${CMAKE_CURRENT_SOURCE_DIR}/ldoc/style/robot.png"
 			"${CMAKE_CURRENT_SOURCE_DIR}/generated/lua/"
 	)
-endif ()
+endif()
 
 # ---------------------------------------------------------
 # Create asciidoc files and guides
@@ -59,7 +59,7 @@ endif ()
 # Create an empty target that we will fill with more dependencies with
 # the define_guide function
 #
-if (ASCIIDOC)
+if(ASCIIDOC)
 	add_custom_target(
 		generate-doc
 		COMMENT "Generated .html files from .txt"
@@ -71,7 +71,7 @@ if (ASCIIDOC)
 			"${CMAKE_CURRENT_SOURCE_DIR}/guides/icons/"
 			"${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/icons/"
 	)
-endif ()
+endif()
 
 define_guide(user-guide "User guide")
 define_guide(socket-guide "Socket guide")
@@ -121,5 +121,5 @@ if(WITH_LDOC)
 		add_nsis_uninstall(
 			"Delete \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Lua API.lnk\\\""
 		)
-	endif ()
+	endif()
 endif()

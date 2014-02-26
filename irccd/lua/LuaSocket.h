@@ -1,7 +1,7 @@
 /*
  * LuaSocket.h -- Lua bindings for sockets
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -25,8 +25,13 @@ namespace irccd
 {
 
 int luaopen_socket(lua_State *L);
-int luaopen_socket_address(lua_State *L);
 int luaopen_socket_listener(lua_State *L);
+
+#if defined(COMPAT_1_1)
+
+int luaopen_socket_address(lua_State *L);
+
+#endif
 
 } // !irccd
 

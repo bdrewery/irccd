@@ -1,7 +1,7 @@
 /*
  * LuaFS.cpp -- Lua bindings for file dependent operations
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,8 @@
 #include <unordered_map>
 
 #include <sys/stat.h>
+
+#include <config.h>
 
 #include <Date.h>
 #include <Directory.h>
@@ -61,23 +63,20 @@ int l_mkdir(lua_State *L)
 int l_opendir(lua_State *L)
 {
 	auto path = luaL_checkstring(L, 1);
-	auto skipParents = false;
+	auto flags = 0;
 
 	// Optional boolean
-	if (lua_gettop(L) >= 2) {
-		luaL_checktype(L, 2, LUA_TBOOLEAN);
-		skipParents = (lua_toboolean(L, 2) != 0);
-	}
+	if (lua_gettop(L) >= 2 && lua_toboolean(L, 2))
+		flags |= Directory::NotDot | Directory::NotDotDot;
 
-	Directory d(path);
-	if (!d.open(skipParents)) {
+	try {
+		new (L, DIR_TYPE) Directory(path, flags);
+	} catch (std::runtime_error error) {
 		lua_pushnil(L);
-		lua_pushstring(L, d.getError().c_str());
+		lua_pushstring(L, error.what());
 
 		return 2;
 	}
-
-	new (L, DIR_TYPE) Directory(d);
 
 	return 1;
 }
@@ -177,60 +176,54 @@ const luaL_Reg functions[] = {
  * Directory methods
  * -------------------------------------------------------- */
 
-namespace dir {
-
-int l_count(lua_State *L)
-{
-	Directory *d;
-
-	d = Luae::toType<Directory *>(L, 1, DIR_TYPE);
-	lua_pushinteger(L, d->getEntries().size());
-
-	return 1;
-}
+#if defined(COMPAT_1_1)
 
 int l_read(lua_State *L)
 {
-	auto d = Luae::toType<Directory *>(L, 1, DIR_TYPE);
-	auto iterator = [] (lua_State *L) -> int {
-		auto d = reinterpret_cast<const Directory *>(lua_topointer(L, lua_upvalueindex(1)));
-		auto idx = lua_tointeger(L, lua_upvalueindex(2));
+	using DirectoryIterator = Luae::Iterator<Directory::const_iterator>;
 
-		// End
-		if (static_cast<size_t>(idx) >= d->getEntries().size())
+	Luae::deprecate(L, "read", "pairs");
+
+	auto d = Luae::toType<Directory *>(L, 1, DIR_TYPE);
+
+	new (L) DirectoryIterator(d->cbegin(), d->cend());
+	lua_pushcclosure(L, [] (lua_State *L) -> int {
+		auto it = Luae::toType<DirectoryIterator *>(L, lua_upvalueindex(1));
+
+		if (it->current == it->end)
 			return 0;
 
-		// Push name + isDirectory
-		lua_pushstring(L, d->getEntries()[idx].m_name.c_str());
-		lua_pushboolean(L, d->getEntries()[idx].m_isDirectory);
+		auto value = it->current++;
 
-		lua_pushinteger(L, ++idx);
-		lua_replace(L, lua_upvalueindex(2));
+		// Push name + isDirectory
+		lua_pushstring(L, value->name.c_str());
+		lua_pushboolean(L, value->type == Directory::Dir);
 
 		return 2;
-	};
-
-	lua_pushlightuserdata(L, d);
-	lua_pushinteger(L, 0);
-	lua_pushcclosure(L, iterator, 2);
+	}, 1);
 
 	return 1;
 }
 
-} // !dir
+#endif
+
+int l_count(lua_State *L)
+{
+	auto d = Luae::toType<Directory *>(L, 1, DIR_TYPE);
+
+	lua_pushinteger(L, d->count());
+
+	return 1;
+}
 
 /* --------------------------------------------------------
  * Directory metamethods
  * -------------------------------------------------------- */
 
-namespace dirMt {
-
 int l_eq(lua_State *L)
 {
-	Directory *d1, *d2;
-
-	d1 = Luae::toType<Directory *>(L, 1, DIR_TYPE);
-	d2 = Luae::toType<Directory *>(L, 2, DIR_TYPE);
+	auto d1 = Luae::toType<Directory *>(L, 1, DIR_TYPE);
+	auto d2 = Luae::toType<Directory *>(L, 2, DIR_TYPE);
 
 	lua_pushboolean(L, *d1 == *d2);
 
@@ -247,25 +240,56 @@ int l_gc(lua_State *L)
 int l_tostring(lua_State *L)
 {
 	auto d = Luae::toType<Directory *>(L, 1, DIR_TYPE);
-	lua_pushfstring(L, "Directory %s has %d entries", d->getPath().c_str(),
-	    d->getEntries().size());
+
+	lua_pushfstring(L, "Directory with %d entries", d->count());
 
 	return 1;
 }
 
-} // !dirMt
+int l_pairs(lua_State *L)
+{
+	using DirectoryIterator = Luae::Iterator<Directory::const_iterator>;
+
+	auto d = Luae::toType<Directory *>(L, 1, DIR_TYPE);
+
+	new (L) DirectoryIterator(d->cbegin(), d->cend());
+	lua_pushcclosure(L, [] (lua_State *L) -> int {
+		auto it = Luae::toType<DirectoryIterator *>(L, lua_upvalueindex(1));
+
+		if (it->current == it->end)
+			return 0;
+
+		auto value = it->current++;
+
+		// Push name + isDirectory
+		lua_pushstring(L, value->name.c_str());
+		lua_pushboolean(L, value->type == Directory::Dir);
+
+		return 2;
+	}, 1);
+
+	return 1;
+}
 
 const luaL_Reg dirMethodsList[] = {
-	{ "count",		dir::l_count		},
-	{ "read",		dir::l_read		},
-	{ nullptr,		nullptr			}
+	{ "count",		l_count		},
+/*
+ * DEPRECATION:	1.2-002
+ *
+ * All the following functions have been moved to the irccd.system.
+ */
+#if defined(COMPAT_1_1)
+	{ "read",		l_read		},
+#endif
+	{ nullptr,		nullptr		}
 };
 
 const luaL_Reg dirMtList[] = {
-	{ "__eq",		dirMt::l_eq		},
-	{ "__gc",		dirMt::l_gc		},
-	{ "__tostring",		dirMt::l_tostring	},
-	{ nullptr,		nullptr			}
+	{ "__eq",		l_eq		},
+	{ "__gc",		l_gc		},
+	{ "__tostring",		l_tostring	},
+	{ "__pairs",		l_pairs		},
+	{ nullptr,		nullptr		}
 };
 
 }

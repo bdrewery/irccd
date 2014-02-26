@@ -1,7 +1,7 @@
 /*
  * Lua.cpp -- Lua helpers and such
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,8 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <sstream>
+
 #include <config.h>
 
+#include "Logger.h"
 #include "Luae.h"
 
 namespace irccd {
@@ -125,6 +128,29 @@ void LuaValue::push(lua_State *L, const LuaValue &value)
 LuaValue::LuaValue()
 	: type(LUA_TNIL)
 {
+}
+
+void Luae::deprecate(lua_State *L,
+		     const std::string &old,
+		     const std::string &repl)
+{
+	LUA_STACK_CHECKBEGIN(L);
+
+	std::ostringstream oss;
+
+	luaL_where(L, 1);
+	auto where = lua_tostring(L, -1);
+	lua_pop(L, 1);
+
+	oss << where << ": warning, usage of deprecated function `";
+	oss << old << "'";
+
+	if (repl.length() > 0)
+		oss << ", please use `" << repl << "'";
+
+	Logger::warn(oss.str());
+
+	LUA_STACK_CHECKEQUALS(L);
 }
 
 template <>

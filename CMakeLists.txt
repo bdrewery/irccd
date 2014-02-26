@@ -38,18 +38,18 @@ set(VERSION "${MAJOR}.${MINOR}-dev")
 #
 # The following settings are used for the doc/ directory and CPack.
 #
-if (WIN32)
-	if (CMAKE_CL_64)
+if(WIN32)
+	if(CMAKE_CL_64)
 		set(IRCCD_PACKAGE_NAME "Irccd (x64)")
-	else ()
+	else()
 		set(IRCCD_PACKAGE_NAME "Irccd")
-	endif ()
-endif ()
+	endif()
+endif()
 
 add_subdirectory(cmake)
 
 # Compatibility options
-#option(COMPAT_1_0 "Be compatible with 1.0" On)
+option(COMPAT_1_1 "Be compatible with 1.1" On)
 
 # Some non portable code
 set(EXTERNDIR "${CMAKE_SOURCE_DIR}/extern")
