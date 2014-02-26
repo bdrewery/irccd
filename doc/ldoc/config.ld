@@ -1,0 +1,11 @@
+project = 'Irccd'
+description = 'Irccd'
+full_description = 'Irccd Lua API Documentation'
+title = 'Irccd Lua API Documentation'
+dir = "../generated/lua"
+format = "markdown"
+style = "style"
+template = "template"
+file = "lua/ldoc"
+examples = "lua/examples"
+topics = "lua/topics"
