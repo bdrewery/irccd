@@ -18,17 +18,13 @@
 
 project(contrib)
 
-option(WITH_SYSTEMD "Install systemd service" Off)
-
 #
 # File for systemd
 #
-if (WITH_SYSTEMD)
+if(WITH_SYSTEMD)
 	# Directory for systemd
-	set(SYSTEMDDIR "/usr/lib/systemd/system"
+	set(WITH_SYSTEMDDIR "/usr/lib/systemd/system"
 	    CACHE STRING "Absolute path where to install systemd files")
 
-	install(FILES irccd.service DESTINATION ${SYSTEMDDIR})
-endif ()
-
-# vim: set syntax=cmake:
+	install(FILES irccd.service DESTINATION ${WITH_SYSTEMDDIR})
+endif()

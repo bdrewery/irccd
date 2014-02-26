@@ -19,13 +19,8 @@
 # Libxdg-basedir bundled
 project(extern-libxdg-basedir)
 
-include_directories(include)
-
-add_library(
-	xdg-basedir
-	STATIC
-	src/basedir.c
+define_library(
+	TARGET xdg-basedir
+	SOURCES src/basedir.c
+	PUBLIC_INCLUDES "${extern-libxdg-basedir_SOURCE_DIR}/include"
 )
-
-# vim: set syntax=cmake:
-

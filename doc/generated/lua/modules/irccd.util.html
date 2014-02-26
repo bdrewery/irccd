@@ -102,48 +102,12 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#basename">basename (path)</a></td>
-	<td class="summary">Get the file name of a full path.</td>
-	</tr>
-	<tr>
 	<td class="name" nowrap><a href="#date">date (timestamp)</a></td>
 	<td class="summary">Create a Date object.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#dirname">dirname (path)</a></td>
-	<td class="summary">Get the parent path of a file.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#exist">exist (path)</a></td>
-	<td class="summary">Check if a file exists.</td>
-	</tr>
-	<tr>
 	<td class="name" nowrap><a href="#format">format (text, attrs)</a></td>
 	<td class="summary">Format text with colors and attributes.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#getEnv">getEnv ()</a></td>
-	<td class="summary">Get a environment variable.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#getHome">getHome ()</a></td>
-	<td class="summary">Get the home directory.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#getTicks">getTicks ()</a></td>
-	<td class="summary">Get the time spent from start.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#mkdir">mkdir (path, mode)</a></td>
-	<td class="summary">Create a directory recursively.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#opendir">opendir (path, skipSpecial)</a></td>
-	<td class="summary">Open a directory.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#splitUser">splitUser (user)</a></td>
-	<td class="summary">Split the nickname and host.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#splituser">splituser (user)</a></td>
@@ -152,10 +116,6 @@
 	<tr>
 	<td class="name" nowrap><a href="#splithost">splithost (user)</a></td>
 	<td class="summary">Split the hostname.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#usleep">usleep (msec)</a></td>
-	<td class="summary">Sleep for milliseconds.</td>
 	</tr>
 </table>
 <h2><a href="#Tables">Tables</a></h2>
@@ -207,36 +167,6 @@
     <h2><a name="Functions"></a>Functions</h2>
     <dl class="function">
     <dt>
-    <a name = "basename"></a>
-    <strong>basename (path)</strong>
-    </dt>
-    <dd>
-    Get the file name of a full path.  <span class="deprecated">(deprecated)</span>
- Returns the file name only of a full path. For instance, returns
- "foo.lua" when calling with "/usr/local/foo.lua"
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">path</span>
-         the file path
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        the file name
-    </ol>
-
-
-    <h3>See also:</h3>
-    <ul>
-         <a href="../modules/irccd.fs.html#basename">fs.basename</a>
-    </ul>
-
-
-</dd>
-    <dt>
     <a name = "date"></a>
     <strong>date (timestamp)</strong>
     </dt>
@@ -262,65 +192,6 @@
     <h3>See also:</h3>
     <ul>
          <a href="../modules/irccd.util.html#Class_Date">Date</a>
-    </ul>
-
-
-</dd>
-    <dt>
-    <a name = "dirname"></a>
-    <strong>dirname (path)</strong>
-    </dt>
-    <dd>
-    Get the parent path of a file.  <span class="deprecated">(deprecated)</span>
- This function may be used to get the parent path of a file. Example:
- calling dirname on "/foo/bar/test.txt" will returns "/foo/bar".
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">path</span>
-         the full file path
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        the parent path
-    </ol>
-
-
-    <h3>See also:</h3>
-    <ul>
-         <a href="../modules/irccd.fs.html#dirname">fs.dirname</a>
-    </ul>
-
-
-</dd>
-    <dt>
-    <a name = "exist"></a>
-    <strong>exist (path)</strong>
-    </dt>
-    <dd>
-    Check if a file exists.  <span class="deprecated">(deprecated)</span>
- Tests if a directory or a file exists.
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">path</span>
-         the path to check
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        true if exists
-    </ol>
-
-
-    <h3>See also:</h3>
-    <ul>
-         <a href="../modules/irccd.fs.html#exists">fs.exists</a>
     </ul>
 
 
@@ -362,173 +233,6 @@
     <ul>
          <a href="../examples/Formatting.lua.html#">Formatting.lua</a>
     </ul>
-
-
-</dd>
-    <dt>
-    <a name = "getEnv"></a>
-    <strong>getEnv ()</strong>
-    </dt>
-    <dd>
-    Get a environment variable.  <span class="deprecated">(deprecated)</span>
-
-
-    <h3>Returns:</h3>
-    <ol>
-
-        the variable or an empty string
-    </ol>
-
-
-    <h3>See also:</h3>
-    <ul>
-         <a href="../modules/irccd.system.html#env">system.env</a>
-    </ul>
-
-
-</dd>
-    <dt>
-    <a name = "getHome"></a>
-    <strong>getHome ()</strong>
-    </dt>
-    <dd>
-    Get the home directory.  <span class="deprecated">(deprecated)</span>
- This function should be used with care, plugin should not use user home to
- store files.
-
-
-    <h3>Returns:</h3>
-    <ol>
-
-        the user home directory
-    </ol>
-
-
-    <h3>See also:</h3>
-    <ul>
-         <li><a href="../modules/irccd.plugin.html#info">plugin.info</a></li>
-         <li><a href="../modules/irccd.system.html#home">system.home</a></li>
-    </ul>
-
-
-</dd>
-    <dt>
-    <a name = "getTicks"></a>
-    <strong>getTicks ()</strong>
-    </dt>
-    <dd>
-    Get the time spent from start.  <span class="deprecated">(deprecated)</span>
- Get how many milliseconds spent since the irccd startup.
-
-
-    <h3>Returns:</h3>
-    <ol>
-
-        the number of seconds
-    </ol>
-
-
-    <h3>See also:</h3>
-    <ul>
-         <a href="../modules/irccd.system.html#ticks">system.ticks</a>
-    </ul>
-
-
-</dd>
-    <dt>
-    <a name = "mkdir"></a>
-    <strong>mkdir (path, mode)</strong>
-    </dt>
-    <dd>
-    Create a directory recursively.  <span class="deprecated">(deprecated)</span>
- This function acts like <code>mkdir -p</code>.
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">path</span>
-         the path
-        </li>
-        <li><span class="parameter">mode</span>
-         an optional octal mode
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-        <li>
-        true on success or false plus an error</li>
-        <li>
-        the error message</li>
-    </ol>
-
-
-    <h3>See also:</h3>
-    <ul>
-         <a href="../modules/irccd.fs.html#mkdir">fs.mkdir</a>
-    </ul>
-
-
-</dd>
-    <dt>
-    <a name = "opendir"></a>
-    <strong>opendir (path, skipSpecial)</strong>
-    </dt>
-    <dd>
-    Open a directory.  <span class="deprecated">(deprecated)</span>
- Optional boolean skipSpecial may be passed to avoid ".", ".." for being
- included.
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">path</span>
-         the path
-        </li>
-        <li><span class="parameter">skipSpecial</span>
-         forget "." and "..", default: false
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        a Directory object
-    </ol>
-
-
-    <h3>See also:</h3>
-    <ul>
-         <li><a href="../modules/irccd.fs.html#Class_Directory">irccd.fs.Directory</a></li>
-         <li><a href="../modules/irccd.fs.html#opendir">fs.opendir</a></li>
-    </ul>
-
-
-</dd>
-    <dt>
-    <a name = "splitUser"></a>
-    <strong>splitUser (user)</strong>
-    </dt>
-    <dd>
-    Split the nickname and host.  <span class="deprecated">(deprecated)</span>
- Extract the nickname and host from a user, for instance with
- foo!~foo@localhost, foo will be returned as first value, localhost
- as second.
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">user</span>
-         the user to split
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-        <li>
-        the nickname</li>
-        <li>
-        the hostname</li>
-    </ol>
-
-
 
 
 </dd>
@@ -581,31 +285,6 @@
     </ol>
 
 
-
-
-</dd>
-    <dt>
-    <a name = "usleep"></a>
-    <strong>usleep (msec)</strong>
-    </dt>
-    <dd>
-    Sleep for milliseconds.  <span class="deprecated">(deprecated)</span>
- Suspend the execution thread.
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">msec</span>
-         the number of milliseconds
-        </li>
-    </ul>
-
-
-
-    <h3>See also:</h3>
-    <ul>
-         <li><a href="../modules/irccd.system.html#usleep">system.usleep</a></li>
-         <li><a href="../modules/irccd.system.html#sleep">system.sleep</a></li>
-    </ul>
 
 
 </dd>

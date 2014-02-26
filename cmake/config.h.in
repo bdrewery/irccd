@@ -20,14 +20,15 @@
 #cmakedefine01 MINOR
 #cmakedefine01 PATCH
 
-#cmakedefine VERSION "@VERSION@"
-
 #define ETCDIR			"@ETCDIR@"
 #define MODDIR			"@MODDIR@"
 #define DOCDIR			"@DOCDIR@"
+#define VERSION			"@VERSION@"
 #define PREFIX			"@CMAKE_INSTALL_PREFIX@"
 
+#if 0
 #cmakedefine COMPAT_1_0
+#endif
 
 #cmakedefine WITH_LUAJIT
 #cmakedefine WITH_LUA52

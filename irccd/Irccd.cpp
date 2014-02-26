@@ -92,18 +92,19 @@ void Irccd::openConfig()
 	Parser config;
 
 	// Open requested file by command line or default
-	if (!isOverriden(Options::Config)) {
-		try {
-			m_configPath = Util::findConfiguration("irccd.conf");
+	try {
+		if (!isOverriden(Options::Config)) {
+			try {
+				m_configPath = Util::findConfiguration("irccd.conf");
+				config = Parser(m_configPath);
+			} catch (Util::ErrorException ex) {
+				Logger::fatal(1, "irccd: %s", ex.what());
+			}
+		} else
 			config = Parser(m_configPath);
-		} catch (Util::ErrorException ex) {
-			Logger::fatal(1, "%s: %s", getprogname(), ex.what());
-		}
-	} else
-		config = Parser(m_configPath);
-
-	if (!config.open())
+	} catch (std::runtime_error ex) {
 		Logger::fatal(1, "irccd: could not open %s, exiting", m_configPath.c_str());
+	}
 
 	Logger::log("irccd: using configuration %s", m_configPath.c_str());
 
@@ -147,28 +148,6 @@ void Irccd::readGeneral(const Parser &config)
 		// Extract parameters that are needed for the next
 		if (general.hasOption("plugin-path"))
 			Plugin::addPath(general.getOption<std::string>("plugin-path"));
-
-#  if defined(COMPAT_1_0)
-/*
- * DEPRECATION:	1.1-002
- *
- * This is the old way of loading plugins. Now users are encouraged
- * to switch to the [plugins] section.
- */
-		// Old way of loading plugins
-		if (general.hasOption("plugins")) {
-			Logger::warn("irccd: option `general.plugins' option is deprecated, use [plugins]");
-
-			std::string list = general.getOption<std::string>("plugins");
-			for (auto s : Util::split(list, " \t")) {
-				try {
-					Plugin::load(s);
-				} catch (std::runtime_error error) {
-					Logger::warn("irccd: %s", error.what());
-				}
-			}
-		}
-#  endif
 #endif
 
 #if !defined(_WIN32)
@@ -189,12 +168,12 @@ void Irccd::readPlugins(const Parser &config)
 #if defined(WITH_LUA)
 		Section section = config.getSection("plugins");
 
-		for (auto opt : section.getOptions()) {
+		for (auto opt : section) {
 			try {
-				if (opt.m_value.length() == 0)
-					Plugin::load(opt.m_key);
+				if (opt.second.length() == 0)
+					Plugin::load(opt.first);
 				else
-					Plugin::load(opt.m_value, true);
+					Plugin::load(opt.second, true);
 			} catch (std::runtime_error error) {
 				Logger::warn("irccd: %s", error.what());
 			}
@@ -228,8 +207,8 @@ void Irccd::readIdentities(const Parser &config)
 			    identity.realname.c_str());
 
 			m_identities.push_back(identity);
-		} catch (NotFoundException ex) {
-			Logger::log("identity: missing parameter %s", ex.which().c_str());
+		} catch (std::out_of_range ex) {
+			Logger::log("identity: missing parameter %s", ex.what());
 		}
 	});
 }
@@ -262,8 +241,8 @@ void Irccd::readListeners(const Parser &config)
 #endif
 			} else
 				Logger::warn("listener: unknown listener type `%s'", type.c_str());
-		} catch (NotFoundException ex) {
-			Logger::warn("listener: missing parameter %s", ex.which().c_str());
+		} catch (std::out_of_range ex) {
+			Logger::warn("listener: missing parameter %s", ex.what());
 		}
 	});
 }
@@ -393,8 +372,8 @@ void Irccd::readServers(const Parser &config)
 				Logger::warn("server %s: duplicated server", info.name.c_str());
 			else
 				Server::add(server);
-		} catch (NotFoundException ex) {
-			Logger::warn("server: missing parameter %s", ex.which().c_str());
+		} catch (std::out_of_range ex) {
+			Logger::warn("server: missing parameter %s", ex.what());
 		}
 	});
 }

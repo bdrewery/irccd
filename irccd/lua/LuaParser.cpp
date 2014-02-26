@@ -16,15 +16,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define PARSER_TYPE	"ParserType"
-#define SECTION_TYPE	"SectionType"
-
 #include <sstream>
 
 #include "Irccd.h"
 #include "LuaParser.h"
 
 namespace irccd {
+
+/* --------------------------------------------------------
+ * LuaParser implementation
+ * -------------------------------------------------------- */
 
 int LuaParser::readTuning(lua_State *L, int idx)
 {
@@ -93,17 +94,45 @@ void LuaParser::log(int number, const std::string &section, const std::string &m
 	}
 }
 
-namespace
-{
+/* --------------------------------------------------------
+ * Helpers
+ * -------------------------------------------------------- */
 
-int create(lua_State *L)
+/**
+ * @struct Iterator
+ * @brief Class used for iterating containers in Lua
+ */
+template <typename T>
+struct Iterator {
+	T begin;
+	T end;
+	T current;	
+
+	Iterator(T begin, T end)
+		: begin(begin)
+		, end(end)
+		, current(begin)
+	{
+	}
+};
+
+using ParserIterator		= Iterator<Parser::List::iterator>;
+using SectionIterator		= Iterator<Section::Map::iterator>;
+
+const char *SectionType		= "Section";
+const char *ParserType		= "Parser";
+
+/* --------------------------------------------------------
+ * Parser functions
+ * -------------------------------------------------------- */
+
+namespace {
+
+int l_new(lua_State *L)
 {
 	LuaParser *p;
 	std::string path;
 	int tuning = 0, ch = LuaParser::DEFAULT_COMMENT_CHAR;
-
-	if (lua_gettop(L) < 1)
-		return luaL_error(L, "open() requires at least 1 argument");
 
 	// Get the flags
 	path = luaL_checkstring(L, 1);
@@ -115,7 +144,14 @@ int create(lua_State *L)
 	if (lua_gettop(L) >= 3)
 		ch = luaL_checkstring(L, 1)[0];
 		
-	p = new (L, PARSER_TYPE) LuaParser(path, tuning, ch);
+	try {
+		p = new (L, ParserType) LuaParser(path, tuning, ch);
+	} catch (std::runtime_error er) {
+		lua_pushnil(L);
+		lua_pushstring(L, er.what());
+
+		return 2;
+	}
 
 	// Copy the state so I can call log() function
 	p->setState(L);
@@ -124,11 +160,11 @@ int create(lua_State *L)
 }
 
 const luaL_Reg functionList[] = {
-	{ "new",		create			},
+	{ "new",		l_new			},
 	{ nullptr,		nullptr			}
 };
 
-int sectionIterator(lua_State *L)
+int l_parserIterator(lua_State *L)
 {
 	std::vector<Section> *array = Luae::toType<std::vector<Section> *>(L, lua_upvalueindex(1));
 	int idx = lua_tointeger(L, lua_upvalueindex(2));
@@ -137,7 +173,7 @@ int sectionIterator(lua_State *L)
 		return 0;
 
 	// Push the current section.
-	new (L, SECTION_TYPE) Section((*array)[idx]);
+	new (L, SectionType) Section((*array)[idx]);
 
 	// Update the index for the next call
 	lua_pushinteger(L, ++idx);
@@ -146,31 +182,11 @@ int sectionIterator(lua_State *L)
 	return 1;
 }
 
-int parserOpen(lua_State *L)
+int l_parserFindSections(lua_State *L)
 {
-	LuaParser *p = Luae::toType<LuaParser *>(L, 1, PARSER_TYPE);
-
-	if (!p->open()) {
-		lua_pushboolean(L, false);
-		lua_pushstring(L, p->getError().c_str());
-
-		return 2;
-	}
-
-	lua_pushboolean(L, true);
-
-	return 1;
-}
-
-int parserFindSections(lua_State *L)
-{
-	LuaParser *p;
-	std::string name;
+	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
+	auto name = luaL_checkstring(L, 2);
 	std::vector<Section> sections;
-
-	// Get the parameters for that functions
-	p = Luae::toType<LuaParser *>(L, 1, PARSER_TYPE);
-	name = luaL_checkstring(L, 2);
 
 	p->findSections(name, [&] (const Section &s) {
 		sections.push_back(s);
@@ -178,38 +194,47 @@ int parserFindSections(lua_State *L)
 
 	// Push the list of array and the current index to iterate one
 	new (L) std::vector<Section>(sections);
+
+	// Add a special __gc function for deleting the table
+	lua_createtable(L, 0, 0);
+	lua_pushcfunction(L, [] (lua_State *L) -> int {
+		Luae::toType<std::vector<Section> *>(L, 1)->~vector<Section>();
+
+		return 0;
+	});
+	lua_setfield(L, -2, "__gc");
+	lua_setmetatable(L, -2);
+
+	// Push upvalue and the iterator function
 	lua_pushinteger(L, 0);
-	lua_pushcclosure(L, sectionIterator, 2);
+	lua_pushcclosure(L, l_parserIterator, 2);
 
 	return 1;
 }
 
-int parserHasSection(lua_State *L)
+int l_parserHasSection(lua_State *L)
 {
-	LuaParser *p;
-	std::string name;
-
-	p = Luae::toType<LuaParser *>(L, 1, PARSER_TYPE);
-	name = luaL_checkstring(L, 2);
+	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
+	auto name = luaL_checkstring(L, 2);
 
 	lua_pushboolean(L, p->hasSection(name));
 
 	return 1;
 }
 
-int parserGetSection(lua_State *L)
+int l_parserGetSection(lua_State *L)
 {
-	LuaParser *p = Luae::toType<LuaParser *>(L, 1, PARSER_TYPE);
-	std::string name = luaL_checkstring(L, 2);
+	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
+	auto name = luaL_checkstring(L, 2);
 	int ret = 0;
 
 	try {
-		new (L, SECTION_TYPE) Section(p->getSection(name));
+		new (L, SectionType) Section(p->getSection(name));
 
 		ret = 1;
-	} catch (NotFoundException ex) {
+	} catch (std::out_of_range ex) {
 		lua_pushnil(L);
-		lua_pushfstring(L, "section %s not found", name.c_str());
+		lua_pushfstring(L, ex.what());
 
 		ret = 2;
 	}
@@ -217,26 +242,23 @@ int parserGetSection(lua_State *L)
 	return ret;
 }
 
-int parserRequireSection(lua_State *L)
+int l_parserRequireSection(lua_State *L)
 {
-	LuaParser *p;
-	std::string name;
-
-	p = Luae::toType<LuaParser *>(L, 1, PARSER_TYPE);
-	name = luaL_checkstring(L, 2);
+	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
+	auto name = luaL_checkstring(L, 2);
 
 	if (!p->hasSection(name))
-		return luaL_error(L, "Section %s not found", name.c_str());
+		return luaL_error(L, "section %s not found", name);
 
 	// Copy the section
-	new (L, SECTION_TYPE) Section(p->getSection(name));
+	new (L, SectionType) Section(p->getSection(name));
 
 	return 1;
 }
 
-int parserOnLog(lua_State *L)
+int l_parserOnLog(lua_State *L)
 {
-	LuaParser *p = Luae::toType<LuaParser *>(L, 1, PARSER_TYPE);
+	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
 
 	// Must be a function
 	luaL_checktype(L, 2, LUA_TFUNCTION);
@@ -248,19 +270,19 @@ int parserOnLog(lua_State *L)
 	return 0;
 }
 
-const luaL_Reg parserMethodList[] = {
-	{ "open",		parserOpen			},
-	{ "findSections",	parserFindSections		},
-	{ "hasSection",		parserHasSection		},
-	{ "getSection",		parserGetSection		},
-	{ "requireSection",	parserRequireSection		},
-	{ "onLog",		parserOnLog			},
-	{ nullptr,		nullptr				}
-};
-
-int gc(lua_State *L)
+int l_parserEq(lua_State *L)
 {
-	LuaParser *p = Luae::toType<LuaParser *>(L, 1, PARSER_TYPE);
+	auto p1 = Luae::toType<LuaParser *>(L, 1, ParserType);
+	auto p2 = Luae::toType<LuaParser *>(L, 2, ParserType);
+
+	lua_pushboolean(L, *p1 == *p2);
+
+	return 1;
+}
+
+int l_parserGc(lua_State *L)
+{
+	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
 
 	luaL_unref(L, LUA_REGISTRYINDEX, p->getLogRef());
 
@@ -269,122 +291,210 @@ int gc(lua_State *L)
 	return 0;
 }
 
-int tostring(lua_State *L)
+int l_parserPairs(lua_State *L)
 {
-	LuaParser *p = Luae::toType<LuaParser *>(L, 1, PARSER_TYPE);
-	std::ostringstream oss;
+	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
 
-	oss << *p;
+	new (L) ParserIterator(p->begin(), p->end());
+	lua_pushcclosure(L, [] (lua_State *L) -> int {
+		auto it = Luae::toType<ParserIterator *>(L, lua_upvalueindex(1));
 
-	lua_pushstring(L, oss.str().c_str());
+		if (it->current == it->end)
+			return 0;
+
+		new (L, SectionType) Section(*(it->current++));
+
+		return 1;
+	}, 1);
 
 	return 1;
 }
 
-const luaL_Reg parserMtList[] = {
-	{ "__gc",		gc				},
-	{ "__tostring",		tostring			},
+int l_parserTostring(lua_State *L)
+{
+	auto p = Luae::toType<LuaParser *>(L, 1, ParserType);
+	std::ostringstream oss;
+	std::string str;
+
+	oss << "sections: [";
+	for (const auto &s : *p) {
+		// We don't add root, it always added
+		if (s.getName().length() >= 1)
+			oss << " " << s.getName();
+	}
+	oss << " ]";
+
+	str = oss.str();
+	lua_pushlstring(L, str.c_str(), str.length());
+
+	return 1;
+}
+
+const luaL_Reg parserMethods[] = {
+	{ "findSections",	l_parserFindSections		},
+	{ "hasSection",		l_parserHasSection		},
+	{ "getSection",		l_parserGetSection		},
+	{ "requireSection",	l_parserRequireSection		},
+	{ "onLog",		l_parserOnLog			},
 	{ nullptr,		nullptr				}
 };
 
-int sectionHasOption(lua_State *L)
+const luaL_Reg parserMeta[] = {
+	{ "__eq",		l_parserEq			},
+	{ "__gc",		l_parserGc			},
+	{ "__pairs",		l_parserPairs			},
+	{ "__tostring",		l_parserTostring		},
+	{ nullptr,		nullptr				}
+};
+
+/* --------------------------------------------------------
+ * Section methods
+ * -------------------------------------------------------- */
+
+int pushOption(lua_State *L,
+	       const Section &s,
+	       const std::string &name,
+	       const std::string &type)
 {
-	Section *s = Luae::toType<Section *>(L, 1, SECTION_TYPE);
-	std::string name = luaL_checkstring(L, 2);
+	if (type == "string")
+		lua_pushstring(L, s.getOption<std::string>(name).c_str());
+	else if (type == "number")
+		lua_pushnumber(L, s.getOption<double>(name));
+	else if (type == "boolean")
+		lua_pushboolean(L, s.getOption<bool>(name));
+	else {
+		lua_pushnil(L);
+		lua_pushstring(L, "invalid type requested");
+
+		return 2;
+	}
+
+	return 1;
+}
+
+int l_sectionName(lua_State *L)
+{
+	auto s = Luae::toType<Section *>(L, 1, SectionType);
+	auto name = s->getName();
+
+	lua_pushlstring(L, name.c_str(), name.length());
+
+	return 1;
+}
+
+int l_sectionHasOption(lua_State *L)
+{
+	auto s = Luae::toType<Section *>(L, 1, SectionType);
+	auto name = luaL_checkstring(L, 2);
 
 	lua_pushboolean(L, s->hasOption(name));
 
 	return 1;
 }
 
-int sectionGetOption(lua_State *L)
+int l_sectionGetOption(lua_State *L)
 {
-	Section *s = Luae::toType<Section *>(L, 1, SECTION_TYPE);
-	std::string name = luaL_checkstring(L, 2);
+	auto s = Luae::toType<Section *>(L, 1, SectionType);
+	auto name = luaL_checkstring(L, 2);
+	auto type = "string";
+
+	if (lua_gettop(L) >= 3)
+		type = luaL_checkstring(L, 3);
 
 	if (!s->hasOption(name)) {
 		lua_pushnil(L);
-		lua_pushfstring(L, "option %s not found", name.c_str());
+		lua_pushfstring(L, "option %s not found", name);
 
 		return 2;
 	}
 
-	lua_pushstring(L, s->getOption<std::string>(name).c_str());
-
-	return 1;
+	return pushOption(L, *s, name, type);
 }
 
-int sectionRequireOption(lua_State *L)
+int l_sectionRequireOption(lua_State *L)
 {
-	Section *s = Luae::toType<Section *>(L, 1, SECTION_TYPE);
-	std::string name = luaL_checkstring(L, 2);
-	std::string value;
+	auto s = Luae::toType<Section *>(L, 1, SectionType);
+	auto name = luaL_checkstring(L, 2);
+	auto type = "string";
 
-	try {
-		lua_pushstring(L, s->requireOption<std::string>(name).c_str());
-	} catch (NotFoundException ex) {
-		return luaL_error(L, "required option %s not found", ex.which().c_str());
-	}
+	if (lua_gettop(L) >= 3)
+		type = luaL_checkstring(L, 3);
 
-	return 1;
+	if (!s->hasOption(name))
+		return luaL_error(L, "option %s not found", name);
+
+	return pushOption(L, *s, name, type);
 }
 
-int sectionGetOptions(lua_State *L)
+int l_sectionEquals(lua_State *L)
 {
-	Section *s = Luae::toType<Section *>(L, 1, SECTION_TYPE);
-
-	lua_createtable(L, s->getOptions().size(), s->getOptions().size());
-	for (const Option &o : s->getOptions()) {
-		lua_pushstring(L, o.m_key.c_str());
-		lua_setfield(L, -2, o.m_value.c_str());
-	}
-
-	return 1;
-}
-
-const luaL_Reg sectionMethodList[] = {
-	{ "hasOption",		sectionHasOption		},
-	{ "getOption",		sectionGetOption		},
-	{ "requireOption",	sectionRequireOption		},
-	{ "getOptions",		sectionGetOptions		},
-	{ nullptr,		nullptr				}
-};
-
-int sectionEq(lua_State *L)
-{
-	Section *s1, *s2;
-
-	s1 = Luae::toType<Section *>(L, 1, SECTION_TYPE);
-	s2 = Luae::toType<Section *>(L, 2, SECTION_TYPE);
+	auto s1 = Luae::toType<Section *>(L, 1, SectionType);
+	auto s2 = Luae::toType<Section *>(L, 2, SectionType);
 
 	lua_pushboolean(L, *s1 == *s2);
 
 	return 1;
 }
 
-int sectionGc(lua_State *L)
+int l_sectionGc(lua_State *L)
 {
-	Luae::toType<Section *>(L, 1, SECTION_TYPE)->~Section();
+	Luae::toType<Section *>(L, 1, SectionType)->~Section();
 
 	return 0;
 }
 
-int sectionTostring(lua_State *L)
+int l_sectionPairs(lua_State *L)
 {
-	Section *s = Luae::toType<Section *>(L, 1, SECTION_TYPE);
-	std::ostringstream oss;
+	auto s = Luae::toType<Section *>(L, 1, SectionType);
 
-	oss << *s;
+	new (L) SectionIterator(s->begin(), s->end());
+	lua_pushcclosure(L, [] (lua_State *L) -> int {
+		auto it = Luae::toType<SectionIterator *>(L, lua_upvalueindex(1));
 
-	lua_pushstring(L, oss.str().c_str());
+		if (it->current == it->end)
+			return 0;
+
+		auto value = it->current++;
+
+		lua_pushlstring(L, value->first.c_str(), value->first.length());
+		lua_pushlstring(L, value->second.c_str(), value->second.length());
+
+		return 2;
+	}, 1);
 
 	return 1;
 }
 
-const luaL_Reg sectionMtList[] = {
-	{ "__eq",		sectionEq			},
-	{ "__gc",		sectionGc			},
-	{ "__tostring",		sectionTostring			},
+int l_sectionTostring(lua_State *L)
+{
+	auto s = Luae::toType<Section *>(L, 1, SectionType);
+	std::ostringstream oss;
+	std::string str;
+
+	oss << s->getName() << ": [";
+	for (const auto &o : *s)
+		oss << " " << o.first << " = " << o.second;
+	oss << " ]";
+
+	str = oss.str();
+	lua_pushlstring(L, str.c_str(), str.length());
+
+	return 1;
+}
+
+const luaL_Reg sectionMethods[] = {
+	{ "getName",		l_sectionName			},
+	{ "hasOption",		l_sectionHasOption		},
+	{ "getOption",		l_sectionGetOption		},
+	{ "requireOption",	l_sectionRequireOption		},
+	{ nullptr,		nullptr				}
+};
+
+const luaL_Reg sectionMeta[] = {
+	{ "__eq",		l_sectionEquals			},
+	{ "__gc",		l_sectionGc			},
+	{ "__pairs",		l_sectionPairs			},
+	{ "__tostring",		l_sectionTostring		},
 	{ nullptr,		nullptr				}
 };
 
@@ -405,16 +515,16 @@ int luaopen_parser(lua_State *L)
 	lua_setfield(L, -2, "DisableVerbosity");
 
 	// Create Parser type
-	luaL_newmetatable(L, PARSER_TYPE);
-	luaL_setfuncs(L, parserMtList, 0);
-	luaL_newlib(L, parserMethodList);
+	luaL_newmetatable(L, ParserType);
+	luaL_setfuncs(L, parserMeta, 0);
+	luaL_newlib(L, parserMethods);
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 
 	// Create Section type
-	luaL_newmetatable(L, SECTION_TYPE);
-	luaL_setfuncs(L, sectionMtList, 0);
-	luaL_newlib(L, sectionMethodList);
+	luaL_newmetatable(L, SectionType);
+	luaL_setfuncs(L, sectionMeta, 0);
+	luaL_newlib(L, sectionMethods);
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
 

@@ -396,6 +396,13 @@ int irc_connect6 (irc_session_t * session,
     session->flags = 0; // reset in case of reconnect
 	return 0;
 #else
+	(void)server;
+	(void)port;
+	(void)server_password;
+	(void)nick;
+	(void)username;
+	(void)realname;
+
 	session->lasterror = LIBIRC_ERR_NOIPV6;
 	return 1;
 #endif	
