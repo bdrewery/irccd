@@ -53,7 +53,7 @@ void IrcEventMessage::action(lua_State *L) const
 			iscommand = msg == fullcommand;
 		} else {
 			iscommand = msg.length() >= fullcommand.length() &&
-			    msg.compare(0, fullcommand.length(), fullcommand) == 0;
+			    msg.compare(0, pos, fullcommand) == 0;
 		}
 
 		if (iscommand) {

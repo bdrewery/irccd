@@ -32,6 +32,7 @@ markand: !roulette
 irccd: markand, you're lucky this time [1/6]
 markand: !roulette
 irccd: markand, you're lucky this time [2/6]
+markand: !roulette
 markand was kicked by irccd [markand HEADSHOT]
 ----
 
