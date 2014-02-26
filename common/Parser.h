@@ -147,6 +147,9 @@ public:
 	{
 		static_assert(Converter<T>::supported, "invalid type requested");
 
+		if (!hasOption(name))
+			throw std::out_of_range(name + " not found");
+
 		return Converter<T>::convert(m_options.at(name));
 	}
 

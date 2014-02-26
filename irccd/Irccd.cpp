@@ -212,7 +212,7 @@ void Irccd::readIdentities(const Parser &config)
 
 			m_identities.push_back(identity);
 		} catch (std::out_of_range ex) {
-			Logger::log("identity: missing parameter %s", ex.what());
+			Logger::log("identity: parameter %s", ex.what());
 		}
 	});
 }
@@ -246,7 +246,7 @@ void Irccd::readListeners(const Parser &config)
 			} else
 				Logger::warn("listener: unknown listener type `%s'", type.c_str());
 		} catch (std::out_of_range ex) {
-			Logger::warn("listener: missing parameter %s", ex.what());
+			Logger::warn("listener: parameter %s", ex.what());
 		}
 	});
 }
@@ -377,7 +377,7 @@ void Irccd::readServers(const Parser &config)
 			else
 				Server::add(server);
 		} catch (std::out_of_range ex) {
-			Logger::warn("server: missing parameter %s", ex.what());
+			Logger::warn("server: parameter %s", ex.what());
 		}
 	});
 }
