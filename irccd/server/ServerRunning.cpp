@@ -33,9 +33,10 @@ ServerRunning::ServerRunning()
 ServerState::Ptr ServerRunning::exec(Server::Ptr server)
 {
 	auto &reco = server->getRecoInfo();
+	auto &session = server->getSession();
 
 	m_server = server;
-	irc_run(server->getSession());
+	session.run();
 
 	if (reco.restarting) {
 		reco.restarting = false;
