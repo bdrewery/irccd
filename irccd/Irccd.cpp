@@ -63,9 +63,6 @@ void Irccd::initialize()
 	Logger::setVerbose(false);
 
 #if defined(WITH_LUA)
-	// Start the IrcEvent thread
-	IrcEvent::start();
-
 	// Add user's path
 	oss << Util::pathUser() << "plugins/";
 	Plugin::addPath(oss.str());
@@ -451,6 +448,11 @@ const Server::Identity &Irccd::findIdentity(const std::string &name)
 
 int Irccd::run()
 {
+#if defined(WITH_LUA)
+	// Start the IrcEvent thread
+	IrcEvent::start();
+#endif
+
 	openConfig();
 
 	while (m_running) {
