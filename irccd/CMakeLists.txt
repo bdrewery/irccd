@@ -20,6 +20,8 @@
 project(irccd)
 
 set(SOURCES
+	CommandQueue.cpp
+	CommandQueue.h
 	server/ServerConnecting.cpp
 	server/ServerConnecting.h
 	server/ServerDead.cpp

@@ -47,6 +47,26 @@ private:
 
 	Ptr m_handle;
 
+	/**
+	 * Call a libircclient function with its parameters, if the function
+	 * returns an error, we check if the event queue is fulled, in that
+	 * case we return false.
+	 *
+	 * @param func the function
+	 * @param args the arguments
+	 * @return true if the message was sent
+	 */
+	template <typename Func, typename... Args>
+	bool call(Func func, Args&&... args)
+	{
+		int ret = func(m_handle.get(), std::forward<Args>(args)...);
+
+		if (ret != 0 && irc_errno(m_handle.get()) == LIBIRC_ERR_NOMEM)
+			return false;
+
+		return true;
+	}
+
 public:
 	/**
 	 * Convert the s context to a shared_ptr<Server>.
@@ -100,8 +120,9 @@ public:
 	 *
 	 * @param channel the target channel
 	 * @param message the message to send
+	 * @return true if the message was sent
 	 */
-	void cnotice(const std::string &channel,
+	bool cnotice(const std::string &channel,
 		     const std::string &message);
 
 	/**
@@ -109,8 +130,9 @@ public:
 	 *
 	 * @param target the target nickname
 	 * @param channel the channel
+	 * @return true if the message was sent
 	 */
-	void invite(const std::string &target,
+	bool invite(const std::string &target,
 		    const std::string &channel);
 
 	/**
@@ -118,8 +140,9 @@ public:
 	 *
 	 * @param channel the channel name
 	 * @param password an optional password
+	 * @return true if the message was sent
 	 */
-	void join(const std::string &channel,
+	bool join(const std::string &channel,
 		  const std::string &password);
 
 	/**
@@ -128,8 +151,9 @@ public:
 	 * @param name the nick name
 	 * @param channel the channel from
 	 * @param reason an optional reason
+	 * @return true if the message was sent
 	 */
-	void kick(const std::string &name,
+	bool kick(const std::string &name,
 		  const std::string &channel,
 		  const std::string &reason);
 
@@ -138,8 +162,9 @@ public:
 	 *
 	 * @param target the nickname or channel
 	 * @param message the message to send
+	 * @return true if the message was sent
 	 */
-	void me(const std::string &target,
+	bool me(const std::string &target,
 		const std::string &message);
 
 	/**
@@ -147,8 +172,9 @@ public:
 	 *
 	 * @param channel the target channel
 	 * @param mode the mode
+	 * @return true if the message was sent
 	 */
-	void mode(const std::string &channel,
+	bool mode(const std::string &channel,
 		  const std::string &mode);
 
 	/**
@@ -156,24 +182,26 @@ public:
 	 *
 	 * @param channel which channel
 	 * @param plugin the plugin to call on end of list
-	 * @param ref the function reference
+	 * @return true if the message was sent
 	 */
-	void names(const std::string &channel);
+	bool names(const std::string &channel);
 
 	/**
 	 * Change your nickname.
 	 *
 	 * @param nick the new nickname
+	 * @return true if the message was sent
 	 */
-	void nick(const std::string &newnick);
+	bool nick(const std::string &newnick);
 
 	/**
 	 * Send a notice to someone.
 	 *
 	 * @param nickname the target nickname
 	 * @param message the message
+	 * @return true if the message was sent
 	 */
-	void notice(const std::string &target,
+	bool notice(const std::string &target,
 		    const std::string &message);
 
 	/**
@@ -181,26 +209,19 @@ public:
 	 *
 	 * @param channel the channel to leave
 	 * @param reason an optional reason
+	 * @return true if the message was sent
 	 */
-	void part(const std::string &channel,
+	bool part(const std::string &channel,
 		  const std::string &reason);
-
-	/**
-	 * Send a query message.
-	 *
-	 * @param who the target nickname
-	 * @param message the message
-	 */
-	void query(const std::string &target,
-		   const std::string &message);
 
 	/**
 	 * Say something to a channel or to a nickname.
 	 *
 	 * @param target the nickname or channel
 	 * @param message the message to send
+	 * @return true if the message was sent
 	 */
-	void say(const std::string &channel,
+	bool say(const std::string &target,
 		 const std::string &message);
 
 	/**
@@ -208,31 +229,38 @@ public:
 	 *
 	 * @param channel the channel target
 	 * @param topic the new topic
+	 * @return true if the message was sent
 	 */
-	void topic(const std::string &channel,
+	bool topic(const std::string &channel,
 		   const std::string &topic);
 
 	/**
 	 * Change your own user mode.
 	 *
 	 * @param mode the mode
+	 * @return true if the message was sent
 	 */
-	void umode(const std::string &mode);
+	bool umode(const std::string &mode);
 
 	/**
 	 * Get the whois information from a user.
 	 *
 	 * @param target the nickname target
+	 * @return true if the message was sent
 	 */
-	void whois(const std::string &target);
+	bool whois(const std::string &target);
 
 	/**
 	 * Send a raw message, no need to finish with \r\n.
 	 *
 	 * @param raw the raw message
+	 * @return true if the message was sent
 	 */
-	void send(const std::string &raw);
+	bool send(const std::string &raw);
 
+	/**
+	 * Disconnect the session.
+	 */
 	void disconnect();
 };
 

@@ -523,106 +523,104 @@ void IrcSession::run()
 	irc_run(m_handle.get());
 }
 
-void IrcSession::cnotice(const std::string &channel,
+bool IrcSession::cnotice(const std::string &channel,
 			 const std::string &message)
 {
 	if (channel[0] == '#')
-		irc_cmd_notice(m_handle.get(), channel.c_str(), message.c_str());
+		return call(irc_cmd_notice, channel.c_str(), message.c_str());
+
+	return true;
 }
 
-void IrcSession::invite(const std::string &target,
+bool IrcSession::invite(const std::string &target,
 			const std::string &channel)
 {
-	irc_cmd_invite(m_handle.get(), target.c_str(), channel.c_str());
+	return call(irc_cmd_invite, target.c_str(), channel.c_str());
 }
 
-void IrcSession::join(const std::string &channel,
+bool IrcSession::join(const std::string &channel,
 		      const std::string &password)
 {
-	irc_cmd_join(m_handle.get(), channel.c_str(), password.c_str());
+	return call(irc_cmd_join, channel.c_str(), password.c_str());
 }
 
-void IrcSession::kick(const std::string &name,
+bool IrcSession::kick(const std::string &name,
 		      const std::string &channel,
 		      const std::string &reason)
 {
 	const char *r = (reason.length() == 0) ? nullptr : reason.c_str();
 
-	irc_cmd_kick(m_handle.get(), name.c_str(), channel.c_str(), r);
+	return call(irc_cmd_kick, name.c_str(), channel.c_str(), r);
 }
 
-void IrcSession::me(const std::string &target,
+bool IrcSession::me(const std::string &target,
 		    const std::string &message)
 {
-	irc_cmd_me(m_handle.get(), target.c_str(), message.c_str());
+	return call(irc_cmd_me, target.c_str(), message.c_str());
 }
 
-void IrcSession::mode(const std::string &channel,
+bool IrcSession::mode(const std::string &channel,
 		      const std::string &mode)
 {
-	irc_cmd_channel_mode(m_handle.get(), channel.c_str(), mode.c_str());
+	return call(irc_cmd_channel_mode, channel.c_str(), mode.c_str());
 }
 
-void IrcSession::names(const std::string &channel)
+bool IrcSession::names(const std::string &channel)
 {
-	irc_cmd_names(m_handle.get(), channel.c_str());
+	return call(irc_cmd_names, channel.c_str());
 }
 
-void IrcSession::nick(const std::string &newnick)
+bool IrcSession::nick(const std::string &newnick)
 {
-	irc_cmd_nick(m_handle.get(), newnick.c_str());
+	return call(irc_cmd_nick, newnick.c_str());
 }
 
-void IrcSession::notice(const std::string &target,
+bool IrcSession::notice(const std::string &target,
 			const std::string &message)
 {
 	if (target[0] != '#')
-		irc_cmd_notice(m_handle.get(), target.c_str(), message.c_str());
+		return call(irc_cmd_notice, target.c_str(), message.c_str());
+
+	return true;
 }
 
-void IrcSession::part(const std::string &channel,
+bool IrcSession::part(const std::string &channel,
 		      const std::string &reason)
 {
 	if (reason.length() > 0) {
 		auto str = "PART " + channel + ":" + reason;
 
-		send(str);
-	} else {
-		irc_cmd_part(m_handle.get(), channel.c_str());
+		return send(str);
 	}
+
+	return call(irc_cmd_part, channel.c_str());
 }
 
-void IrcSession::query(const std::string &target,
-		       const std::string &message)
-{
-	irc_cmd_msg(m_handle.get(), target.c_str(), message.c_str());
-}
-
-void IrcSession::say(const std::string &channel,
+bool IrcSession::say(const std::string &target,
 		     const std::string &message)
 {
-	irc_cmd_msg(m_handle.get(), channel.c_str(), message.c_str());
+	return call(irc_cmd_msg, target.c_str(), message.c_str());
 }
 
-void IrcSession::topic(const std::string &channel,
+bool IrcSession::topic(const std::string &channel,
 		       const std::string &topic)
 {
-	irc_cmd_topic(m_handle.get(), channel.c_str(), topic.c_str());
+	return call(irc_cmd_topic, channel.c_str(), topic.c_str());
 }
 
-void IrcSession::umode(const std::string &mode)
+bool IrcSession::umode(const std::string &mode)
 {
-	irc_cmd_user_mode(m_handle.get(), mode.c_str());
+	return call(irc_cmd_user_mode, mode.c_str());
 }
 
-void IrcSession::whois(const std::string &target)
+bool IrcSession::whois(const std::string &target)
 {
-	irc_cmd_whois(m_handle.get(), target.c_str());
+	return call(irc_cmd_whois, target.c_str());
 }
 
-void IrcSession::send(const std::string &raw)
+bool IrcSession::send(const std::string &raw)
 {
-	irc_send_raw(m_handle.get(), "%s", raw.c_str());
+	return call(irc_send_raw, "%s", raw.c_str());
 }
 
 void IrcSession::disconnect()

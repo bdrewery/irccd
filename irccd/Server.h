@@ -31,6 +31,7 @@
 
 #include <config.h>
 
+#include "CommandQueue.h"
 #include "IrcSession.h"
 
 #include "server/ServerState.h"
@@ -176,6 +177,7 @@ private:
 
 	Mutex		m_lock;			//! lock for client operation
 	IrcSession	m_session;		//! the current session
+	CommandQueue	m_queue;		//! command queue
 
 	// State
 	ServerState::Ptr m_state;		//! the current state
