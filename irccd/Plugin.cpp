@@ -23,14 +23,7 @@
 #include <Logger.h>
 #include <Util.h>
 
-#include "event/IrcEventLoad.h"
-#include "event/IrcEventReload.h"
-#include "event/IrcEventUnload.h"
-
-#include "lua/LuaServer.h"
-
 #include "Irccd.h"
-#include "IrcEvent.h"
 #include "Plugin.h"
 
 namespace irccd {
@@ -69,10 +62,10 @@ std::string Plugin::getGlobal(const std::string &name)
 {
 	std::string result;
 
-	lua_getglobal(*m_process, name.c_str());
-	if (lua_type(*m_process, -1) == LUA_TSTRING)
-		result = lua_tostring(*m_process, -1);
-	lua_pop(*m_process, 1);
+	Luae::getglobal(*m_process, name);
+	if (Luae::type(*m_process, -1) == LUA_TSTRING)
+		result = Luae::get<std::string>(*m_process, -1);
+	Luae::pop(*m_process, 1);
 
 	return result;
 }
@@ -206,7 +199,7 @@ void Plugin::unload(const std::string &name)
 		auto i = find(name);
 
 		try {
-			IrcEventUnload().action(*i->m_process);
+			i->call("onUnload");
 		} catch (Plugin::ErrorException ex) {
 			Logger::warn("irccd: error while unloading %s: %s",
 			    name.c_str(), ex.what());
@@ -229,7 +222,7 @@ void Plugin::reload(const std::string &name)
 		auto i = find(name);
 
 		try {
-			IrcEventReload().action(*i->m_process);
+			i->call("onReload");
 		} catch (Plugin::ErrorException ex) {
 			Logger::warn("plugin %s: %s",
 			    ex.which().c_str(), ex.error().c_str());
@@ -301,7 +294,7 @@ lua_State *Plugin::getState()
 
 void Plugin::open()
 {
-	lua_State *L = static_cast<lua_State *>(*m_process);
+	auto L = static_cast<lua_State *>(*m_process);
 
 	// Load default library as it was done by require.
 	for (auto l : Process::luaLibs)
@@ -312,11 +305,10 @@ void Plugin::open()
 	for (auto l : Process::irccdLibs)
 		Luae::preload(L, l.first, l.second);
 
-	if (luaL_dofile(L, m_info.path.c_str()) != LUA_OK) {
-		auto error = lua_tostring(L, -1);
-		lua_pop(L, 1);
-
-		throw ErrorException(m_info.name, error);
+	try {
+		Luae::dofile(L, m_info.path);
+	} catch (std::runtime_error error) {
+		throw ErrorException(m_info.name, error.what());
 	}
 
 	// Find the home directory for the plugin
@@ -332,7 +324,183 @@ void Plugin::open()
 	Process::initialize(m_process, m_info);
 
 	// Do a initial load
-	IrcEventLoad().action(L);
+	call("onLoad");
+}
+
+/* --------------------------------------------------------
+ * Plugin callbacks
+ * -------------------------------------------------------- */
+
+void Plugin::onConnect(const Server::Ptr &server)
+{
+	call("onConnect", server);
+}
+
+void Plugin::onChannelNotice(const Server::Ptr &server,
+			     const std::string &who,
+			     const std::string &channel,
+			     const std::string &notice)
+{
+	call("onChannelNotice", server, who, channel, notice);
+}
+
+void Plugin::onInvite(const Server::Ptr &server,
+		      const std::string &channel,
+		      const std::string &who)
+{
+	call("onInvite", server, channel, who);
+}
+
+void Plugin::onJoin(const Server::Ptr &server,
+		    const std::string &channel,
+		    const std::string &nickname)
+{
+	call("onJoin", server, channel, nickname);
+}
+
+void Plugin::onKick(const Server::Ptr &server,
+		    const std::string &channel,
+		    const std::string &who,
+		    const std::string &kicked,
+		    const std::string &reason)
+{
+	call("onKick", server, channel, who, kicked, reason);
+}
+
+void Plugin::onLoad()
+{
+	call("onLoad");
+}
+
+void Plugin::onMessage(const Server::Ptr &server,
+		       const std::string &channel,
+		       const std::string &nick,
+		       const std::string &message)
+{
+	auto cc = server->getOptions().commandChar;
+	auto name = m_info.name;
+	auto msg = message;
+	bool iscommand(false);
+
+	// handle special commands "!<plugin> command"
+	if (cc.length() > 0) {
+		auto pos = msg.find_first_of(" \t");
+		auto fullcommand = cc + name;
+
+		/*
+		 * If the message that comes is "!foo" without spaces we
+		 * compare the command char + the plugin name. If there
+		 * is a space, we check until we find a space, if not
+		 * typing "!foo123123" will trigger foo plugin.
+		 */
+		if (pos == std::string::npos) {
+			iscommand = msg == fullcommand;
+		} else {
+			iscommand = msg.length() >= fullcommand.length() &&
+			    msg.compare(0, pos, fullcommand) == 0;
+		}
+
+		if (iscommand) {
+			/*
+			 * If no space is found we just set the message to "" otherwise
+			 * the plugin name will be passed through onCommand
+			 */
+			if (pos == std::string::npos)
+				msg = "";
+			else
+				msg = message.substr(pos + 1);
+		}
+	}
+
+	if (iscommand)
+		call("onCommand", server, channel, nick, msg);
+	else
+		call("onMessage", server, channel, nick, msg);
+}
+
+void Plugin::onMe(const Server::Ptr &server,
+		  const std::string &channel,
+		  const std::string &nick,
+		  const std::string &message)
+{
+	call("onMe", server, channel, nick, message);
+}
+
+void Plugin::onMode(const Server::Ptr &server,
+		    const std::string &channel,
+		    const std::string &nickname,
+		    const std::string &mode,
+		    const std::string &arg)
+{
+	call("onMode", server, channel, nickname, mode, arg);
+}
+
+void Plugin::onNames(const Server::Ptr &server,
+		     const std::string &channel,
+		     const std::vector<std::string> &list)
+{
+	call("onNames", server, channel, list);
+}
+
+void Plugin::onNick(const Server::Ptr &server,
+		    const std::string &oldnick,
+		    const std::string &newnick)
+{
+	call("onNick", server, oldnick, newnick);
+}
+
+void Plugin::onNotice(const Server::Ptr &server,
+		      const std::string &who,
+		      const std::string &target,
+		      const std::string &notice)
+{
+	call("onNotice", server, who, target, notice);
+}
+
+void Plugin::onPart(const Server::Ptr &server,
+		    const std::string &channel,
+		    const std::string &nickname,
+		    const std::string &reason)
+{
+	call("onPart", server, channel, nickname, reason);
+}
+
+void Plugin::onQuery(const Server::Ptr &server,
+		     const std::string &who,
+		     const std::string &message)
+{
+	call("onQuery", server, who, message);
+}
+
+void Plugin::onReload()
+{
+	call("onReload");
+}
+
+void Plugin::onTopic(const Server::Ptr &server,
+		     const std::string &channel,
+		     const std::string &who,
+		     const std::string &topic)
+{
+	call("onTopic", server, channel, who, topic);
+}
+
+void Plugin::onUnload()
+{
+	call("onUnload");
+}
+
+void Plugin::onUserMode(const Server::Ptr &server,
+			const std::string &who,
+			const std::string &mode)
+{
+	call("onUserMode", server, who, mode);
+}
+
+void Plugin::onWhois(const Server::Ptr &server,
+		     const IrcWhois &info)
+{
+	call("onWhois", server, info);
 }
 
 } // !irccd

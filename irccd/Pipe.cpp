@@ -52,7 +52,7 @@ Pipe::~Pipe()
 	Logger::debug("pipe %s: destroyed", m_name.c_str());
 }
 
-void Pipe::push(const LuaValue &value)
+void Pipe::push(const LuaeValue &value)
 {
 	Lock lk(m_mutex);
 
@@ -60,10 +60,10 @@ void Pipe::push(const LuaValue &value)
 	m_cond.notify_all();
 }
 
-LuaValue Pipe::first()
+LuaeValue Pipe::first()
 {
 	Lock lk(m_mutex);
-	LuaValue v;
+	LuaeValue v;
 
 	if (m_queue.size() > 0)
 		return m_queue.front();
@@ -71,10 +71,10 @@ LuaValue Pipe::first()
 	return v;
 }
 
-LuaValue Pipe::last()
+LuaeValue Pipe::last()
 {
 	Lock lk(m_mutex);
-	LuaValue v;
+	LuaeValue v;
 
 	if (m_queue.size() > 0)
 		return m_queue.back();

@@ -28,8 +28,6 @@
 
 namespace irccd {
 
-class IrcSession;
-
 /**
  * @class CommandQueue
  * @brief Queue of client events

@@ -121,14 +121,14 @@ int format(lua_State *L)
 	 * escape code and then the background or the foreground
 	 * without testing.
 	 */
-	if (Luae::typeField(L, 2, "fg") != LUA_TNIL ||
-	    Luae::typeField(L, 2, "bg") != LUA_TNIL)
+	if (LuaeTable::type(L, 2, "fg") != LUA_TNIL ||
+	    LuaeTable::type(L, 2, "bg") != LUA_TNIL)
 		oss << static_cast<char>(Attribute::Color);
 
-	if (Luae::typeField(L, 2, "fg") != LUA_TNIL)
-		oss << Luae::getField<int>(L, 2, "fg");
-	if (Luae::typeField(L, 2, "bg") != LUA_TNIL)
-		oss << ',' << Luae::getField<int>(L, 2, "bg");
+	if (LuaeTable::type(L, 2, "fg") != LUA_TNIL)
+		oss << LuaeTable::get<int>(L, 2, "fg");
+	if (LuaeTable::type(L, 2, "bg") != LUA_TNIL)
+		oss << ',' << LuaeTable::get<int>(L, 2, "bg");
 
 	/*
 	 * Attributes can be a table or a single attribute. If it's a table

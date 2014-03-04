@@ -110,7 +110,7 @@ protected:
 			pushObjects(L, std::forward<Args>(args)...);
 			after = lua_gettop(L);
 
-			callFunction(L, after - before);
+			//callFunction(L, after - before);
 		}
 	}
 

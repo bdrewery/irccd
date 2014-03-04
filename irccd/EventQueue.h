@@ -1,5 +1,5 @@
 /*
- * IrcEventTopic.h -- on channel topic changes
+ * EventQueue.h -- plugin event queue
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
@@ -16,35 +16,40 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRC_EVENT_TOPIC_H_
-#define _IRC_EVENT_TOPIC_H_
+#ifndef _EVENT_QUEUE_H_
+#define _EVENT_QUEUE_H_
 
-#include <string>
-
-#include "IrcEvent.h"
-#include "Server.h"
+#include "Plugin.h"
 
 namespace irccd {
 
-class IrcEventTopic : public IrcEvent {
+class EventQueue {
+public:
+	using Function	= std::function<void (Plugin::Ptr)>;
+	using Cond	= std::condition_variable;
+	using Mutex	= std::mutex;
+	using Lock	= std::unique_lock<Mutex>;
+	using Queue	= std::queue<Function>;
+	using Thread	= std::thread;
+	using Atomic	= std::atomic_bool;
+
 private:
-	Server::Ptr	m_server;
-	std::string	m_who;
-	std::string	m_channel;
-	std::string	m_topic;
+	static Atomic	alive;
+	static Mutex	mutex;
+	static Cond	cond;
+	static Queue	queue;
+	static Thread	thread;
+
+	static void routine();
 
 public:
-	IrcEventTopic(Server::Ptr server,
-		      const std::string &who,
-		      const std::string &channel,
-		      const std::string &topic);
+	static void start();
 
-	/**
-	 * @copydoc IrcEvent::action
-	 */
-	virtual void action(lua_State *L) const;
+	static void stop();
+
+	static void add(const Function &event);
 };
 
 } // !irccd
 
-#endif // !_IRC_EVENT_TOPIC_H_
+#endif // !_EVENT_QUEUE_H_

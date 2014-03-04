@@ -111,7 +111,7 @@ void IrcEvent::push<std::vector<std::string>>(lua_State *L,
 template <>
 void IrcEvent::push<Server::Ptr>(lua_State *L, const Server::Ptr &server) const
 {
-	Luae::pushShared<Server>(L, server, ServerType);
+	//Luae::pushShared<Server>(L, server, ServerType);
 }
 
 void IrcEvent::callFunction(lua_State *L, int np) const
