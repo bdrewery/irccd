@@ -1,0 +1,874 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Irccd Lua API Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<h1>Navigation</h1>
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+<li><a href="#Class_Date">Class Date </a></li>
+<li><a href="#Date_metamethods">Date metamethods </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.fs.html">irccd.fs</a></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
+  <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
+  <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
+  <li><a href="../modules/irccd.system.html">irccd.system</a></li>
+  <li><a href="../modules/irccd.thread.html">irccd.thread</a></li>
+  <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
+  <li><strong>irccd.util</strong></li>
+</ul>
+<h2>Topics</h2>
+<ul class="nowrap">
+  <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
+  <li><a href="../topics/1.1-Standard-Libraries.md.html">1.1-Standard-Libraries.md</a></li>
+  <li><a href="../topics/2-Plugin_creation.md.html">2-Plugin_creation.md</a></li>
+  <li><a href="../topics/2.1-Using_irccd_test.md.html">2.1-Using_irccd_test.md</a></li>
+  <li><a href="../topics/2.2-List_of_Events.md.html">2.2-List_of_Events.md</a></li>
+  <li><a href="../topics/3-Event-Action.md.html">3-Event-Action.md</a></li>
+  <li><a href="../topics/3-Event-Channel-notice.md.html">3-Event-Channel-notice.md</a></li>
+  <li><a href="../topics/3-Event-Command.md.html">3-Event-Command.md</a></li>
+  <li><a href="../topics/3-Event-Connect.md.html">3-Event-Connect.md</a></li>
+  <li><a href="../topics/3-Event-Invite.md.html">3-Event-Invite.md</a></li>
+  <li><a href="../topics/3-Event-Join.md.html">3-Event-Join.md</a></li>
+  <li><a href="../topics/3-Event-Kick.md.html">3-Event-Kick.md</a></li>
+  <li><a href="../topics/3-Event-Load.md.html">3-Event-Load.md</a></li>
+  <li><a href="../topics/3-Event-Message.md.html">3-Event-Message.md</a></li>
+  <li><a href="../topics/3-Event-Mode.md.html">3-Event-Mode.md</a></li>
+  <li><a href="../topics/3-Event-Names.md.html">3-Event-Names.md</a></li>
+  <li><a href="../topics/3-Event-Nick.md.html">3-Event-Nick.md</a></li>
+  <li><a href="../topics/3-Event-Notice.md.html">3-Event-Notice.md</a></li>
+  <li><a href="../topics/3-Event-Part.md.html">3-Event-Part.md</a></li>
+  <li><a href="../topics/3-Event-Query.md.html">3-Event-Query.md</a></li>
+  <li><a href="../topics/3-Event-Reload.md.html">3-Event-Reload.md</a></li>
+  <li><a href="../topics/3-Event-Topic.md.html">3-Event-Topic.md</a></li>
+  <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
+  <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
+  <li><a href="../topics/3-Event-Whois.md.html">3-Event-Whois.md</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/Connect.lua.html">Connect.lua</a></li>
+  <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
+  <li><a href="../examples/Server.lua.html">Server.lua</a></li>
+  <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>irccd.util</code></h1>
+
+<p>Utilitities.</p>
+<p> Some utilities.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#basename">basename (path)</a></td>
+	<td class="summary">Get the file name of a full path.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#date">date (timestamp)</a></td>
+	<td class="summary">Create a Date object.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#dirname">dirname (path)</a></td>
+	<td class="summary">Get the parent path of a file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#exist">exist (path)</a></td>
+	<td class="summary">Check if a file exists.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#format">format (text, attrs)</a></td>
+	<td class="summary">Format text with colors and attributes.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getEnv">getEnv ()</a></td>
+	<td class="summary">Get a environment variable.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getHome">getHome ()</a></td>
+	<td class="summary">Get the home directory.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getTicks">getTicks ()</a></td>
+	<td class="summary">Get the time spent from start.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mkdir">mkdir (path, mode)</a></td>
+	<td class="summary">Create a directory recursively.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#opendir">opendir (path, skipSpecial)</a></td>
+	<td class="summary">Open a directory.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#splitUser">splitUser (user)</a></td>
+	<td class="summary">Split the nickname and host.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#splituser">splituser (user)</a></td>
+	<td class="summary">Split the nickname.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#splithost">splithost (user)</a></td>
+	<td class="summary">Split the hostname.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#usleep">usleep (msec)</a></td>
+	<td class="summary">Sleep for milliseconds.</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#color">color</a></td>
+	<td class="summary">Colors</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#attribute">attribute</a></td>
+	<td class="summary">Attributes</td>
+	</tr>
+</table>
+<h2><a href="#Class_Date">Class Date </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Date:calendar">Date:calendar ()</a></td>
+	<td class="summary">Get a calendar.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Date:format">Date:format (format)</a></td>
+	<td class="summary">Format a date with a format.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Date:timestamp">Date:timestamp ()</a></td>
+	<td class="summary">Return the timestamp.</td>
+	</tr>
+</table>
+<h2><a href="#Date_metamethods">Date metamethods </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Date:__eq">Date:__eq (other)</a></td>
+	<td class="summary">Test equality.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Date:__le">Date:__le (other)</a></td>
+	<td class="summary">Test inferiority</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Date:__tostring">Date:__tostring ()</a></td>
+	<td class="summary">Convert object to string.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2><a name="Functions"></a>Functions</h2>
+    <dl class="function">
+    <dt>
+    <a name = "basename"></a>
+    <strong>basename (path)</strong>
+    </dt>
+    <dd>
+    Get the file name of a full path.  <span class="deprecated">(deprecated)</span>
+ Returns the file name only of a full path. For instance, returns
+ "foo.lua" when calling with "/usr/local/foo.lua"
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the file path
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the file name
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.fs.html#basename">fs.basename</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "date"></a>
+    <strong>date (timestamp)</strong>
+    </dt>
+    <dd>
+    Create a Date object.
+ This function returns a date object with a specific time from the
+ system. If no timestamp is provided, it use the current date.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">timestamp</span>
+         an optional timestamp
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Date object
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.util.html#Class_Date">Date</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "dirname"></a>
+    <strong>dirname (path)</strong>
+    </dt>
+    <dd>
+    Get the parent path of a file.  <span class="deprecated">(deprecated)</span>
+ This function may be used to get the parent path of a file. Example:
+ calling dirname on "/foo/bar/test.txt" will returns "/foo/bar".
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the full file path
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the parent path
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.fs.html#dirname">fs.dirname</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "exist"></a>
+    <strong>exist (path)</strong>
+    </dt>
+    <dd>
+    Check if a file exists.  <span class="deprecated">(deprecated)</span>
+ Tests if a directory or a file exists.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path to check
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if exists
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.fs.html#exists">fs.exists</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "format"></a>
+    <strong>format (text, attrs)</strong>
+    </dt>
+    <dd>
+    Format text with colors and attributes.
+ The table attrs may have the following fields:
+ <ul>
+ <li><strong>fg (int)</strong>: the foreground color</li>
+ <li><strong>bg (int)</strong>: the background color</li>
+ <li><strong>attrs (table or int)</strong>: may be a sequence or one attribute</li>
+ </ul>
+ <br />
+ <strong>Note: some attributes are not available on all IRC servers and
+ colours are based on mIRC, nothing standard.</strong>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">text</span>
+         the text to format
+        </li>
+        <li><span class="parameter">attrs</span>
+         the parameters, see above
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string ready to be sent
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../examples/Formatting.lua.html#">Formatting.lua</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "getEnv"></a>
+    <strong>getEnv ()</strong>
+    </dt>
+    <dd>
+    Get a environment variable.  <span class="deprecated">(deprecated)</span>
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the variable or an empty string
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.system.html#env">system.env</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "getHome"></a>
+    <strong>getHome ()</strong>
+    </dt>
+    <dd>
+    Get the home directory.  <span class="deprecated">(deprecated)</span>
+ This function should be used with care, plugin should not use user home to
+ store files.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the user home directory
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <li><a href="../modules/irccd.plugin.html#info">plugin.info</a></li>
+         <li><a href="../modules/irccd.system.html#home">system.home</a></li>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "getTicks"></a>
+    <strong>getTicks ()</strong>
+    </dt>
+    <dd>
+    Get the time spent from start.  <span class="deprecated">(deprecated)</span>
+ Get how many milliseconds spent since the irccd startup.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the number of seconds
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.system.html#ticks">system.ticks</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "mkdir"></a>
+    <strong>mkdir (path, mode)</strong>
+    </dt>
+    <dd>
+    Create a directory recursively.  <span class="deprecated">(deprecated)</span>
+ This function acts like <code>mkdir -p</code>.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path
+        </li>
+        <li><span class="parameter">mode</span>
+         an optional octal mode
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        true on success or false plus an error</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.fs.html#mkdir">fs.mkdir</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "opendir"></a>
+    <strong>opendir (path, skipSpecial)</strong>
+    </dt>
+    <dd>
+    Open a directory.  <span class="deprecated">(deprecated)</span>
+ Optional boolean skipSpecial may be passed to avoid ".", ".." for being
+ included.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path
+        </li>
+        <li><span class="parameter">skipSpecial</span>
+         forget "." and "..", default: false
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Directory object
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <li><a href="../modules/irccd.fs.html#Class_Directory">irccd.fs.Directory</a></li>
+         <li><a href="../modules/irccd.fs.html#opendir">fs.opendir</a></li>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "splitUser"></a>
+    <strong>splitUser (user)</strong>
+    </dt>
+    <dd>
+    Split the nickname and host.  <span class="deprecated">(deprecated)</span>
+ Extract the nickname and host from a user, for instance with
+ foo!~foo@localhost, foo will be returned as first value, localhost
+ as second.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">user</span>
+         the user to split
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the nickname</li>
+        <li>
+        the hostname</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "splituser"></a>
+    <strong>splituser (user)</strong>
+    </dt>
+    <dd>
+    Split the nickname.
+ Extract the nickname from a user, for instance with
+ foo!~foo@localhost, foo will be returned.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">user</span>
+         the user to split
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the nickname
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "splithost"></a>
+    <strong>splithost (user)</strong>
+    </dt>
+    <dd>
+    Split the hostname.
+ Extract the hostname from a user, for instance with
+ foo!~foo@localhost, localhost will be returned.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">user</span>
+         the user to split
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the nickname
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "usleep"></a>
+    <strong>usleep (msec)</strong>
+    </dt>
+    <dd>
+    Sleep for milliseconds.  <span class="deprecated">(deprecated)</span>
+ Suspend the execution thread.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">msec</span>
+         the number of milliseconds
+        </li>
+    </ul>
+
+
+
+    <h3>See also:</h3>
+    <ul>
+         <li><a href="../modules/irccd.system.html#usleep">system.usleep</a></li>
+         <li><a href="../modules/irccd.system.html#sleep">system.sleep</a></li>
+    </ul>
+
+
+</dd>
+</dl>
+    <h2><a name="Tables"></a>Tables</h2>
+    <dl class="function">
+    <dt>
+    <a name = "color"></a>
+    <strong>color</strong>
+    </dt>
+    <dd>
+    Colors
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">White</span>
+        White.
+        </li>
+        <li><span class="parameter">Black</span>
+        Black.
+        </li>
+        <li><span class="parameter">Blue</span>
+        Blue.
+        </li>
+        <li><span class="parameter">Green</span>
+        Green.
+        </li>
+        <li><span class="parameter">Red</span>
+        Red.
+        </li>
+        <li><span class="parameter">Brown</span>
+        Brown.
+        </li>
+        <li><span class="parameter">Purple</span>
+        Purple.
+        </li>
+        <li><span class="parameter">Orange</span>
+        Orange.
+        </li>
+        <li><span class="parameter">Yellow</span>
+        Yellow.
+        </li>
+        <li><span class="parameter">LightGreen</span>
+        LightGreen.
+        </li>
+        <li><span class="parameter">Cyan</span>
+        Cyan.
+        </li>
+        <li><span class="parameter">LightCyan</span>
+        LightCyan.
+        </li>
+        <li><span class="parameter">LightBlue</span>
+        LightBlue.
+        </li>
+        <li><span class="parameter">Pink</span>
+        Pink.
+        </li>
+        <li><span class="parameter">Grey</span>
+        Grey.
+        </li>
+        <li><span class="parameter">LightGrey</span>
+        LightGrey.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "attribute"></a>
+    <strong>attribute</strong>
+    </dt>
+    <dd>
+    Attributes
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">Bold</span>
+        Bold.
+        </li>
+        <li><span class="parameter">Color</span>
+        Color (start a color sequence).
+        </li>
+        <li><span class="parameter">Italic</span>
+        Italic.
+        </li>
+        <li><span class="parameter">StrikeThrough</span>
+        StrikeThrough.
+        </li>
+        <li><span class="parameter">Reset</span>
+        Reset (remove all formatting).
+        </li>
+        <li><span class="parameter">Underline</span>
+        Underline1.
+        </li>
+        <li><span class="parameter">Underline2</span>
+        Underline2.
+        </li>
+        <li><span class="parameter">Reverse</span>
+        Reverse (reverse foreground and background).
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2><a name="Class_Date"></a>Class Date </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "Date:calendar"></a>
+    <strong>Date:calendar ()</strong>
+    </dt>
+    <dd>
+    Get a calendar.
+ Return a table with the following fields:
+ <ul>
+ <li><strong>seconds (int)</strong>: seconds elapsed [0-60]</li>
+ <li><strong>minutes (int)</strong>: minutes elapsed [0-59]</li>
+ <li><strong>hours (int)</strong>: hours elapsed [0-23]</li>
+ <li><strong>month (int)</strong>: number of month [1-12]</li>
+ <li><strong>year (int)</strong>: the real year</li>
+ </ul>
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a table
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Date:format"></a>
+    <strong>Date:format (format)</strong>
+    </dt>
+    <dd>
+    Format a date with a format.
+ See the manual strftime(3) for keywords.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">format</span>
+         the format
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the date formatted
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Date:timestamp"></a>
+    <strong>Date:timestamp ()</strong>
+    </dt>
+    <dd>
+    Return the timestamp.
+ Get the timestamp from the epoch (aka time_t).
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a timestamp
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2><a name="Date_metamethods"></a>Date metamethods </h2>
+
+ The metamethods available for object Date.
+    <dl class="function">
+    <dt>
+    <a name = "Date:__eq"></a>
+    <strong>Date:__eq (other)</strong>
+    </dt>
+    <dd>
+    Test equality.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other date
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if they equals
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Date:__le"></a>
+    <strong>Date:__le (other)</strong>
+    </dt>
+    <dd>
+    Test inferiority
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other date
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        self &lt;= other comparison
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Date:__tostring"></a>
+    <strong>Date:__tostring ()</strong>
+    </dt>
+    <dd>
+    Convert object to string.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.0</a></i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
