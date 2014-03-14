@@ -7,12 +7,12 @@ CURRENT
   * New address system for irccd.socket,
   * Add new irccd.util.convert.
 
-1.1.2 Wednesday 26, 2014
+1.1.2 February 26, 2014
 ---------------------------------------
  * Fix the example in roulette documentation,
  * Fix command parsing for onCommand event.
 
-1.1.1 Saturday 15, 2014
+1.1.1 February 15, 2014
 ---------------------------------------
   * Fix fs.mkdir that didn't return an error,
   * Add missing optional mode parameter in fs.mkdir documentation,
