@@ -39,7 +39,7 @@ using TestFunction	= std::function<void (Plugin::Ptr, Server::Ptr, int, char **)
 class FakeServer : public Server {
 public:
 	FakeServer(const Info &info, const Identity &identity)
-		: Server(info, identity, Options(), RetryInfo())
+		: Server(info, identity, RetryInfo())
 	{
 	}
 

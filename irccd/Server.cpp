@@ -155,14 +155,13 @@ Server::Channel Server::toChannel(const std::string &line)
 
 Server::Server(const Info &info,
 	       const Identity &identity,
-	       const Options &options,
-	       const RetryInfo &reco)
+	       const RetryInfo &reco,
+	       unsigned options)
 	: m_state(ServerState::Ptr(new ServerUninitialized))
 	, m_info(info)
 	, m_identity(identity)
-	, m_options(options)
 	, m_reco(reco)
-
+	, m_options(options)
 {
 }
 
@@ -223,11 +222,6 @@ Server::Info &Server::getInfo()
 Server::Identity &Server::getIdentity()
 {
 	return m_identity;
-}
-
-Server::Options &Server::getOptions()
-{
-	return m_options;
 }
 
 Server::RetryInfo &Server::getRecoInfo()

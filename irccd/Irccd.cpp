@@ -332,30 +332,34 @@ void Irccd::readServers(const Parser &config)
 	config.findSections("server", [&] (const Section &s) {
 		try {
 			Server::Info info;
-			Server::Options options;
 			Server::Identity identity;
 			Server::RetryInfo reco;
+			unsigned options = 0;
 
 			// Server information
 			info.name = s.requireOption<std::string>("name");
 			info.host = s.requireOption<std::string>("host");
 			info.port = s.requireOption<int>("port");
-			if (s.hasOption("ssl"))
-				info.ssl = s.getOption<bool>("ssl");
-			if (s.hasOption("ssl-verify"))
-				info.sslVerify = s.getOption<bool>("ssl-verify");
+
+			if (s.hasOption("command-char"))
+				info.command = s.getOption<std::string>("command-char");
+
+			// Some boolean options
+			if (s.hasOption("ssl") && s.getOption<bool>("ssl"))
+				options |= Server::OptionSsl;
+			if (s.hasOption("ssl-verify") && !s.getOption<bool>("ssl-verify"))
+				options |= Server::OptionSslNoVerify;
+			if (s.hasOption("join-invite") && s.getOption<bool>("join-invite"))
+				options |= Server::OptionJoinInvite;
+			if (s.hasOption("auto-rejoin") && s.getOption<bool>("auto-rejoin"))
+				options |= Server::OptionAutoRejoin;
+
 			if (s.hasOption("password"))
 				info.password = s.getOption<std::string>("password");
 
 			// Identity
 			if (s.hasOption("identity"))
 				identity = findIdentity(s.getOption<std::string>("identity"));
-
-			// Some options
-			if (s.hasOption("command-char"))
-				options.commandChar = s.getOption<std::string>("command-char");
-			if (s.hasOption("join-invite"))
-				options.joinInvite = s.getOption<bool>("join-invite");
 
 			// Reconnection settings
 			if (s.hasOption("reconnect"))
@@ -365,7 +369,7 @@ void Irccd::readServers(const Parser &config)
 			if (s.hasOption("reconnect-timeout"))
 				reco.timeout = s.getOption<int>("reconnect-timeout");
 
-			Server::Ptr server = std::make_shared<Server>(info, identity, options, reco);
+			Server::Ptr server = std::make_shared<Server>(info, identity, reco, options);
 
 			// Extract channels to auto join
 			extractChannels(s, server);

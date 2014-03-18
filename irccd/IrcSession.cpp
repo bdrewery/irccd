@@ -96,6 +96,9 @@ void handleConnect(irc_session_t *session,
 	auto s = IrcSession::toServer(session);
 	const auto &info = s->getInfo();
 
+	// Reset the noretried counter
+	s->getRecoInfo().noretried = 0;
+
 	Logger::log("server %s: successfully connected", info.name.c_str());
 
 	// Auto join channels
@@ -138,7 +141,7 @@ void handleInvite(irc_session_t *session,
 	auto s = IrcSession::toServer(session);
 
 	// if join-invite is set to true join it
-	if (s->getOptions().joinInvite)
+	if (s->options() & Server::OptionSsl)
 		s->join(params[0], "");
 
 #if defined(WITH_LUA)
@@ -461,13 +464,13 @@ void IrcSession::connect(Server::Ptr server)
 	 */
 	if (major >= 1 && minor > 6) {
 		// SSL needs to add # front of host
-		if (info.ssl)
+		if (server->options() & Server::OptionSsl)
 			info.host.insert(0, 1, '#');
 
-		if (!info.sslVerify)
+		if (server->options() & Server::OptionSslNoVerify)
 			irc_option_set(m_handle.get(), LIBIRC_OPTION_SSL_NO_VERIFY);
 	} else {
-		if (info.ssl)
+		if (server->options() & Server::OptionSsl)
 			Logger::log("server %s: SSL is only supported with libircclient > 1.6",
 			    info.name.c_str());
 	}

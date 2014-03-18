@@ -117,7 +117,7 @@ void pushIdentity(lua_State *L, const Server::Identity &ident)
 	LUAE_STACK_CHECKEND(L, - 1);
 }
 
-void pushGeneralInfo(lua_State *L, const Server::Info &info, const Server::Options &options)
+void pushGeneralInfo(lua_State *L, const Server::Info &info, unsigned options)
 {
 	LUAE_STACK_CHECKBEGIN(L);
 
@@ -130,13 +130,13 @@ void pushGeneralInfo(lua_State *L, const Server::Info &info, const Server::Optio
 	lua_pushinteger(L, info.port);
 	lua_setfield(L, -2, "port");
 
-	lua_pushboolean(L, info.ssl);
+	lua_pushboolean(L, (options & Server::OptionSsl));
 	lua_setfield(L, -2, "ssl");
 
-	lua_pushboolean(L, info.sslVerify);
+	lua_pushboolean(L, !(options & Server::OptionSslNoVerify));
 	lua_setfield(L, -2, "sslVerify");
 
-	lua_pushlstring(L, options.commandChar.c_str(), options.commandChar.length());
+	lua_pushlstring(L, info.command.c_str(), info.command.length());
 	lua_setfield(L, -2, "commandChar");
 
 	LUAE_STACK_CHECKEQUALS(L);
@@ -191,7 +191,7 @@ int l_getInfo(lua_State *L)
 {
 	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto &info = s->getInfo();
-	auto &options = s->getOptions();
+	auto options = s->options();
 
 	Luae::deprecate(L, "getInfo", "info");
 	lua_createtable(L, 0, 0);
@@ -232,7 +232,7 @@ int l_info(lua_State *L)
 	lua_newtable(L);
 
 	// Store the following fields
-	pushGeneralInfo(L, s->getInfo(), s->getOptions());
+	pushGeneralInfo(L, s->getInfo(), s->options());
 
 	// Table for channels
 	pushChannels(L, s->getChannels());
@@ -427,7 +427,7 @@ int l_tostring(lua_State *L)
 	oss << "Server " << server->getInfo().name;
 	oss << " at " << server->getInfo().host;
 
-	if (server->getInfo().ssl)
+	if (server->options() & Server::OptionSsl)
 		oss << " (using SSL)" << std::endl;
 
 	lua_pushstring(L, oss.str().c_str());
@@ -518,8 +518,8 @@ int l_connect(lua_State *L)
 	Server::Ptr server;
 	Server::Info info;
 	Server::Identity ident;
-	Server::Options options;
 	Server::RetryInfo reco;
+	unsigned options = 0;
 
 	luaL_checktype(L, 1, LUA_TTABLE);
 
@@ -541,7 +541,7 @@ int l_connect(lua_State *L)
 	extractChannels(L, info);
 	extractIdentity(L, ident);
 
-	server = std::make_shared<Server>(info, ident, options, reco);
+	server = std::make_shared<Server>(info, ident, reco, options);
 	Server::add(server);
 
 	lua_pushboolean(L, true);

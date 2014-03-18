@@ -77,8 +77,8 @@ void handleConnect(const Params &params)
 {
 	Server::Info info;
 	Server::Identity ident;
-	Server::Options options;
 	Server::RetryInfo reco;
+	unsigned options = 0;
 
 	info.name = params[0];
 	info.host = params[1];
@@ -99,14 +99,14 @@ void handleConnect(const Params &params)
 			o = getOptional(params[i]);
 			if (o.first == "key")
 				info.password = o.second;
-			if (o.first == "ssl")
-				info.ssl = true;
 			if (o.first == "ident")
 				ident = Irccd::getInstance().findIdentity(o.second);
+			if (o.first == "ssl")
+				options |= Server::OptionSsl;
 		}
 	}
 
-	Server::add(std::make_shared<Server>(info, ident, options, reco));
+	Server::add(std::make_shared<Server>(info, ident, reco, options));
 }
 
 void handleChannelNotice(const Params &params)

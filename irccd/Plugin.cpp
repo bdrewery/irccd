@@ -385,7 +385,7 @@ void Plugin::onMessage(const Server::Ptr &server,
 		       const std::string &nick,
 		       const std::string &message)
 {
-	auto cc = server->getOptions().commandChar;
+	auto cc = server->getInfo().command;
 	auto name = m_info.name;
 	auto msg = message;
 	bool iscommand(false);

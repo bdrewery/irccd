@@ -63,7 +63,6 @@ struct IrcWhois {
 	std::vector<std::string> channels;		//! channels
 };
 
-using IrcEventParams	= std::vector<std::string>;
 using IrcPrefixes	= std::map<IrcChanNickMode, char>;
 
 /**
@@ -107,15 +106,6 @@ public:
 	};
 
 	/**
-	 * @struct Options
-	 * @brief Options for the server
-	 */
-	struct Options {
-		std::string	commandChar = "!";	//! command token
-		bool		joinInvite = true;	//! auto join on invites
-	};
-
-	/**
 	 * @struct Info
 	 * @brief Server information
 	 */
@@ -123,11 +113,10 @@ public:
 		std::string	name;			//! server's name
 		std::string	host;			//! hostname
 		std::string	password;		//! optional server password
+		std::string	command;		//! the command character
 		ChanList	channels;		//! list of channels
 		IrcPrefixes	prefixes;		//! comes with event 5
 		unsigned	port = 0;		//! server's port
-		bool		ssl = false;		//! SSL usage
-		bool		sslVerify = true;	//! SSL verification
 	};
 
 	/**
@@ -146,14 +135,12 @@ public:
 		std::string	ctcpVersion = "Irccd " VERSION;
 	};
 
-#if 0
 	enum Options {
 		OptionJoinInvite	= (1 << 0),
 		OptionAutoRejoin	= (1 << 1),
 		OptionSsl		= (1 << 2),
-		OptionSslVerify		= (1 << 3)
+		OptionSslNoVerify	= (1 << 3)
 	};
-#endif
 
 	using NameList	= std::unordered_map<
 				std::string,
@@ -192,8 +179,8 @@ private:
 protected:
 	Info		m_info;			//! server info
 	Identity	m_identity;		//! identity to use
-	Options		m_options;		//! some options
 	RetryInfo	m_reco;			//! reconnection settings
+	unsigned	m_options;		//! the options
 
 public:
 	/**
@@ -257,13 +244,13 @@ public:
 	 *
 	 * @param info the host info
 	 * @param identity the identity
-	 * @param options some options
 	 * @param reco the reconnection options
+	 * @param options some options
 	 */
 	Server(const Info &info,
 	       const Identity &identity,
-	       const Options &options,
-	       const RetryInfo &reco);
+	       const RetryInfo &reco,
+	       unsigned options = 0);
 
 	/**
 	 * Default destructor.
@@ -307,13 +294,6 @@ public:
 	Identity &getIdentity();
 
 	/**
-	 * Get the server options.
-	 *
-	 * @return the options
-	 */
-	Options &getOptions();
-
-	/**
 	 * Get the reconnection settings.
 	 *
 	 * @return the reconnection settings
@@ -326,6 +306,11 @@ public:
 	 * @return the session
 	 */
 	IrcSession &getSession();
+
+	unsigned options() const
+	{
+		return m_options;
+	}
 
 	/**
 	 * Get all channels that will be auto joined
