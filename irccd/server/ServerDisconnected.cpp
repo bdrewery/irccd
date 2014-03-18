@@ -35,9 +35,12 @@ ServerState::Ptr ServerDisconnected::exec(Server::Ptr server)
 {
 	auto &info(server->getInfo());
 	auto &reco(server->getRecoInfo());
+	auto &session(server->getSession());
 	int tosleep(reco.timeout);
 	bool done(false);
 	bool printed(false);
+
+	session = IrcSession();
 
 	/*
 	 * First, check that we requested to quit or stopping the server.

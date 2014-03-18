@@ -465,7 +465,7 @@ int Irccd::run()
 		else
 			Listener::process();
 
-		Server::flush();
+		//Server::flush();
 	}
 
 	stop();
@@ -486,11 +486,11 @@ void Irccd::shutdown()
 void Irccd::stop()
 {
 	Server::forAll([] (Server::Ptr s) {
-		s->stop();
+		s->kill();
 	});
 
 	Listener::close();
-	Server::flush();
+	Server::clearThreads();
 
 #if defined(WITH_LUA)
 	EventQueue::stop();

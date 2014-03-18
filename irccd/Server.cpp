@@ -33,37 +33,69 @@
 #include "server/ServerConnecting.h"
 #include "server/ServerUninitialized.h"
 
+#if defined(WITH_LUA)
+#  include "Plugin.h"
+#endif
+
 namespace irccd {
 
 /* --------------------------------------------------------
  * Server
  * -------------------------------------------------------- */
 
-Server::List Server::servers;
-Server::Mutex Server::serverLock;
+Server::Map	Server::servers;
+Server::Threads	Server::threads;
+Server::Mutex	Server::serverLock;
 
 void Server::add(Server::Ptr server)
 {
-	auto &info = server->getInfo();
-
-	assert(!Server::has(info.name));
-
 	Lock lk(serverLock);
 
-	Logger::log("server %s: connecting...", info.name.c_str());
+	auto info = server->getInfo();
+
+	assert(!has(info.name));
+
+	/*
+	 * If a stale thread was here from an old dead server, join the
+	 * thread before adding a new one.
+	 */
+	if (threads.count(info.name) > 0) {
+		Logger::debug("server %s: removing stale thread", info.name.c_str());
+
+		try {
+			threads[info.name].join();
+		} catch (...) { }
+	}
 
 	servers[info.name] = server;
-	server->start();
+
+	auto thread = std::thread([=] () {
+		while (server->m_state) {
+			auto next = server->m_state->exec(server);
+
+			Lock lk(server->m_lock);
+			server->m_state = std::move(next);
+		}
+	});
+
+	threads[info.name] = std::move(thread);
 }
 
 void Server::remove(Server::Ptr server)
 {
-	auto info = server->getInfo();
-
-	assert(Server::has(info.name));
-
 	Lock lk(serverLock);
+
+	auto &info = server->getInfo();
+
 	servers.erase(info.name);
+
+#if defined(WITH_LUA)
+	/*
+	 * Some server objects may still live in the Lua registry. Remove them
+	 * now.
+	 */
+	Plugin::collectGarbage();
+#endif
 }
 
 bool Server::has(const std::string &name)
@@ -91,25 +123,15 @@ void Server::forAll(MapFunc func)
 {
 	Lock lk(serverLock);
 
-	for (auto s : servers)
+	for (auto &s : servers)
 		func(s.second);
 }
 
-void Server::flush()
+void Server::clearThreads()
 {
-	Lock lk(serverLock);
-
-	for (auto it = servers.cbegin(); it != servers.cend(); ) {
-		if (it->second->m_state->which() == "Dead") {
-			it->second->m_session = IrcSession();
-			it->second->m_state = ServerState::Ptr();
-
-			Logger::debug("server: removing %s from registry",
-			    it->second->getInfo().name.c_str());
-			servers.erase(it++);
-		} else {
-			++it;
-		}
+	for (auto &it : threads) {
+		Logger::debug("server %s: joining thread", it.first.c_str());
+		it.second.join();
 	}
 }
 
@@ -146,9 +168,6 @@ Server::Server(const Info &info,
 
 Server::~Server()
 {
-	if (m_thread.joinable())
-		m_thread.join();
-
 	Logger::debug("server %s: destroyed", m_info.name.c_str());
 }
 
@@ -272,19 +291,7 @@ void Server::removeChannel(const std::string &name)
 		m_info.channels.erase(iter);
 }
 
-void Server::start()
-{
-	m_thread = std::thread([=] () {
-		while (m_state->which() != "Dead") {
-			auto state = m_state->exec(shared_from_this());
-
-			Lock lk(m_lock);
-			m_state = std::move(state);
-		}
-	});
-}
-
-void Server::restart()
+void Server::reconnect()
 {
 	Lock lk(m_lock);
 
@@ -292,7 +299,7 @@ void Server::restart()
 	m_session.disconnect();
 }
 
-void Server::stop()
+void Server::kill()
 {
 	/*
 	 * Notify the thread that we are stopping the server.
@@ -305,6 +312,11 @@ void Server::stop()
 		m_reco.stopping = true;
 		m_session.disconnect();
 	}
+}
+
+void Server::clearCommands()
+{
+	m_queue.clear();
 }
 
 void Server::cnotice(const std::string &channel, const std::string &message)

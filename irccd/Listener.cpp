@@ -116,7 +116,7 @@ void handleChannelNotice(const Params &params)
 
 void handleDisconnect(const Params &params)
 {
-	Server::get(params[0])->stop();
+	Server::get(params[0])->kill();
 }
 
 void handleInvite(const Params &params)
@@ -194,10 +194,10 @@ void handleRestart(const Params &params)
 {
 	if (params[0] == "__ALL__") {
 		Server::forAll([] (Server::Ptr s) {
-			s->restart();
+			s->reconnect();
 		});
 	} else
-		Server::get(params[0])->restart();
+		Server::get(params[0])->reconnect();
 }
 
 void handleTopic(const Params &params)

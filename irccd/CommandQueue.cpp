@@ -70,4 +70,12 @@ void CommandQueue::add(Function command)
 	m_cond.notify_one();
 }
 
+void CommandQueue::clear()
+{
+	Lock lock(m_mutex);
+
+	while (!m_cmds.empty())
+		m_cmds.pop();
+}
+
 } // !irccd

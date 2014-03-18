@@ -57,12 +57,12 @@ private:
 
 public:
 	/**
-	 * Initialize the command queue.
+	 * Create a command queue with its thread.
 	 */
 	CommandQueue();
 
 	/**
-	 * Destroy the queue and the thread.
+	 * Destroy the command queue and its thread.
 	 */
 	~CommandQueue();
 
@@ -72,6 +72,11 @@ public:
 	 * @param command the command
 	 */
 	void add(Function command);
+
+	/**
+	 * Clear all commands.
+	 */
+	void clear();
 };
 
 } // !irccd

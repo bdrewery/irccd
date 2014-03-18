@@ -477,7 +477,7 @@ void IrcSession::connect(Server::Ptr server)
 	if (info.password.length() > 0)
 		password = info.password.c_str();
 
-	auto res = irc_connect(
+	irc_connect(
 	    m_handle.get(),
 	    info.host.c_str(),
 	    info.port,
@@ -485,9 +485,6 @@ void IrcSession::connect(Server::Ptr server)
 	    identity.nickname.c_str(),
 	    identity.username.c_str(),
 	    identity.realname.c_str());
-
-	if (res == 0)
-		server->getRecoInfo().noretried = 0;
 }
 
 void IrcSession::run()

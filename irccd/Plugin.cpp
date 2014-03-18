@@ -264,6 +264,14 @@ void Plugin::forAll(MapFunc func)
 		func(plugins[i]);
 }
 
+void Plugin::collectGarbage()
+{
+	Lock lk(pluginLock);
+
+	for (auto p : plugins)
+		lua_gc(p->getState(), LUA_GCCOLLECT, 0);
+}
+
 /* --------------------------------------------------------
  * Public methods
  * -------------------------------------------------------- */

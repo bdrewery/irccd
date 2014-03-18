@@ -250,6 +250,11 @@ public:
 	static void forAll(MapFunc func);
 
 	/**
+	 * Collect garbage for all plugins.
+	 */
+	static void collectGarbage();
+
+	/**
 	 * Default constructor. (Forbidden)
 	 */
 	Plugin() = delete;

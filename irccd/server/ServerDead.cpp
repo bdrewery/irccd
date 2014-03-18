@@ -27,8 +27,12 @@ ServerDead::ServerDead()
 	Logger::debug("server: switching to state \"Dead\"");
 }
 
-ServerState::Ptr ServerDead::exec(Server::Ptr)
+ServerState::Ptr ServerDead::exec(Server::Ptr server)
 {
+	server->clearCommands();
+
+	Server::remove(server);
+
 	return ServerState::Ptr();
 }
 

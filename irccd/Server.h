@@ -146,6 +146,15 @@ public:
 		std::string	ctcpVersion = "Irccd " VERSION;
 	};
 
+#if 0
+	enum Options {
+		OptionJoinInvite	= (1 << 0),
+		OptionAutoRejoin	= (1 << 1),
+		OptionSsl		= (1 << 2),
+		OptionSslVerify		= (1 << 3)
+	};
+#endif
+
 	using NameList	= std::unordered_map<
 				std::string,
 				std::vector<std::string>
@@ -157,18 +166,16 @@ public:
 			  >;
 
 	using Ptr	= std::shared_ptr<Server>;
-	using List	= std::unordered_map<
-				std::string,
-				Server::Ptr
-			  >;
-
+	using Map	= std::unordered_map<std::string, Ptr>;
+	using Threads	= std::unordered_map<std::string, std::thread>;
 
 	using Mutex	= std::recursive_mutex;
 	using Lock	= std::lock_guard<Mutex>;
 	using MapFunc	= std::function<void (Server::Ptr)>;
 
 private:
-	static List	servers;		//! all servers
+	static Map	servers;		//! all servers
+	static Threads	threads;		//! all threads
 	static Mutex	serverLock;		//! lock for server management
 
 	// For deferred events
@@ -181,7 +188,6 @@ private:
 
 	// State
 	ServerState::Ptr m_state;		//! the current state
-	std::thread	m_thread;		//! the thread
 
 protected:
 	Info		m_info;			//! server info
@@ -230,9 +236,9 @@ public:
 	static void forAll(MapFunc func);
 
 	/**
-	 * Remove dead servers.
+	 * Clear all threads.
 	 */
-	static void flush();
+	static void clearThreads();
 
 	/**
 	 * Convert a channel line to Channel. The line must be in the
@@ -360,19 +366,19 @@ public:
 	void removeChannel(const std::string &name);
 
 	/**
-	 * Start the server thread and state machine.
+	 * Kill the server.
 	 */
-	void start();
+	void kill();
 
 	/**
-	 * Restart a connection if it is running.
+	 * Force a reconnection.
 	 */
-	void restart();
+	void reconnect();
 
 	/**
-	 * Request for stopping the server.
+	 * Clear the command queue. Only used in ServerDead state.
 	 */
-	void stop();
+	void clearCommands();
 
 	/* ------------------------------------------------
 	 * IRC commands

@@ -34,7 +34,7 @@ bool Message::isFinished(const std::string &data, std::string &ret)
 	if ((pos = tmp.find_first_of("\n")) == std::string::npos)
 		return false;
 
-	// Remove the '\n'	
+	// Remove the '\n'
 	tmp.erase(pos);
 	ret = tmp;
 
