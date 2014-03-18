@@ -113,7 +113,7 @@ public:
 		std::string	name;			//! server's name
 		std::string	host;			//! hostname
 		std::string	password;		//! optional server password
-		std::string	command;		//! the command character
+		std::string	command = "!";		//! the command character
 		ChanList	channels;		//! list of channels
 		IrcPrefixes	prefixes;		//! comes with event 5
 		unsigned	port = 0;		//! server's port
