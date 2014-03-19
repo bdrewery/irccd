@@ -33,6 +33,31 @@ define_man(man/irccdctl.1.in man1)
 define_man(man/irccdctl.conf.5.in man5)
 
 # ---------------------------------------------------------
+# Create a target for doxygen
+# ---------------------------------------------------------
+
+find_package(Doxygen QUIET)
+
+if(DOXYGEN_FOUND)
+	set(DOXYGEN_INPUT ${CMAKE_SOURCE_DIR})
+	set(DOXYGEN_OUTPUT ${doc_SOURCE_DIR}/generated/doxygen)
+
+	configure_file(
+		"${doc_SOURCE_DIR}/doxygen/Doxyfile.in"
+		"${doc_BINARY_DIR}/Doxyfile"
+	)
+
+	add_custom_target(
+		generate-doxygen
+		COMMENT "Generating doxygen documentation"
+		COMMAND
+			${DOXYGEN_EXECUTABLE} ${doc_BINARY_DIR}/Doxyfile
+		WORKING_DIRECTORY
+			${CMAKE_SOURCE_DIR}
+	)
+endif()
+
+# ---------------------------------------------------------
 # Create a target for building Lua API documentation
 # ---------------------------------------------------------
 

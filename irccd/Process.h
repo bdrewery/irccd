@@ -19,6 +19,11 @@
 #ifndef _PROCESS_H_
 #define _PROCESS_H_
 
+/**
+ * @file Process.h
+ * @brief Lua process (thread or plugin)
+ */
+
 #include <unordered_map>
 
 #include "config.h"
@@ -35,7 +40,14 @@ class Plugin;
  */
 class Process {
 public:
+	/**
+	 * The smart pointer for \ref Process
+	 */
 	using Ptr	= std::shared_ptr<Process>;
+
+	/**
+	 * The libraries
+	 */
 	using Libraries	= std::unordered_map<const char *, lua_CFunction>;
 
 	/**
@@ -46,13 +58,13 @@ public:
 	 * process, thus it's possible to get it from any Lua C function.
 	 */
 	struct Info {
-		std::string	name;		//! name like "foo"
-		std::string	path;		//! the full path
-		std::string	home;		//! plugin's home
-		std::string	author;		//! the author (optional)
-		std::string	comment;	//! a summary (optional)
-		std::string	version;	//! a version (optional)
-		std::string	license;	//! a license (optional)
+		std::string	name;		//!< name like "foo"
+		std::string	path;		//!< the full path
+		std::string	home;		//!< plugin's home
+		std::string	author;		//!< the author (optional)
+		std::string	comment;	//!< a summary (optional)
+		std::string	version;	//!< a version (optional)
+		std::string	license;	//!< a license (optional)
 	};
 
 private:
@@ -61,17 +73,20 @@ private:
 	Process() = default;
 
 public:
-	/*
+	/**
 	 * The following fields are store in the lua_State * registry
 	 * and may be retrieved at any time from any Lua API.
 	 */
 	static const char *	FieldInfo;
 
-	/*
-	 * The following tables are libraries to load, luaLibs are
-	 * required and irccdLibs are preloaded.
+	/**
+	 * The standard Lua libraries.
 	 */
 	static const Libraries luaLibs;
+
+	/**
+	 * The irccd libraries.
+	 */
 	static const Libraries irccdLibs;
 
 	/**

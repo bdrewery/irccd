@@ -19,10 +19,21 @@
 #ifndef _LUA_IRCCD_H_
 #define _LUA_IRCCD_H_
 
+/**
+ * @file LuaIrccd.h
+ * @brief Lua bindings for Irccd
+ */
+
 #include <lua.hpp>
 
 namespace irccd {
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_irccd(lua_State *L);
 	
 } // !irccd

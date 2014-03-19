@@ -19,6 +19,11 @@
 #include <cerrno>
 #include <cstring>
 
+#if !defined(WIN32)
+#  define INVALID_SOCKET	-1
+#  define SOCKET_ERROR		-1
+#endif
+
 #include "Socket.h"
 #include "SocketAddress.h"
 
@@ -275,7 +280,11 @@ unsigned Socket::sendto(const std::string &message, const SocketAddress &info)
 
 void Socket::close()
 {
-	(void)closesocket(m_socket);
+#if defined(WIN32)
+	(void)::closesocket(m_socket);
+#else
+	(void)::close(m_socket);
+#endif
 }
 
 bool operator==(const Socket &s1, const Socket &s2)

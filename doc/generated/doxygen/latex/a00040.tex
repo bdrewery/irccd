@@ -1,0 +1,568 @@
+\hypertarget{a00040}{\section{irccd\-:\-:Luae Class Reference}
+\label{a00040}\index{irccd\-::\-Luae@{irccd\-::\-Luae}}
+}
+
+
+Add lot of convenience for Lua.  
+
+
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{a00007}{Convert}
+\begin{DoxyCompactList}\small\item\em Push or get values. \end{DoxyCompactList}\item 
+struct \hyperlink{a00008}{Convert$<$ bool $>$}
+\begin{DoxyCompactList}\small\item\em Overload for booleans. \end{DoxyCompactList}\item 
+struct \hyperlink{a00009}{Convert$<$ const char $\ast$ $>$}
+\begin{DoxyCompactList}\small\item\em Overload for const char $\ast$. \end{DoxyCompactList}\item 
+struct \hyperlink{a00010}{Convert$<$ double $>$}
+\begin{DoxyCompactList}\small\item\em Overload for doubles. \end{DoxyCompactList}\item 
+struct \hyperlink{a00011}{Convert$<$ int $>$}
+\begin{DoxyCompactList}\small\item\em Overload for integers. \end{DoxyCompactList}\item 
+struct \hyperlink{a00012}{Convert$<$ Irc\-Whois $>$}
+\begin{DoxyCompactList}\small\item\em Overload for \hyperlink{a00036}{Irc\-Whois}. \end{DoxyCompactList}\item 
+struct \hyperlink{a00013}{Convert$<$ Section $>$}
+\begin{DoxyCompactList}\small\item\em Overload for parser \hyperlink{a00054}{Section}. \end{DoxyCompactList}\item 
+struct \hyperlink{a00014}{Convert$<$ Server\-::\-Ptr $>$}
+\begin{DoxyCompactList}\small\item\em Overload for \hyperlink{a00055}{Server}. \end{DoxyCompactList}\item 
+struct \hyperlink{a00015}{Convert$<$ std\-::string $>$}
+\begin{DoxyCompactList}\small\item\em Overload for std\-::string. \end{DoxyCompactList}\item 
+struct \hyperlink{a00016}{Convert$<$ std\-::vector$<$ std\-::string $>$ $>$}
+\begin{DoxyCompactList}\small\item\em Overload for string list. \end{DoxyCompactList}\item 
+struct \hyperlink{a00037}{Iterator}
+\begin{DoxyCompactList}\small\item\em Wrap S\-T\-L containers. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{a00040_a9eb8ef593142ef0426333ccc27123389}{preload} (lua\-\_\-\-State $\ast$L, const std\-::string \&name, lua\-\_\-\-C\-Function func)
+\item 
+static void \hyperlink{a00040_acff64921d4606b5d748667e628fcf826}{getglobal} (lua\-\_\-\-State $\ast$L, const std\-::string \&name)
+\item 
+static void \hyperlink{a00040_a2b2890895bec345ace801de2cb264570}{openlibs} (lua\-\_\-\-State $\ast$L)
+\item 
+static void \hyperlink{a00040_ab5aa9585473675b41051dfccd381a17f}{setglobal} (lua\-\_\-\-State $\ast$L, const std\-::string \&name)
+\item 
+static void \hyperlink{a00040_a956117e4506cb18ca82eeea6dc60bccd}{pushfunction} (lua\-\_\-\-State $\ast$L, lua\-\_\-\-C\-Function func, int nup=0)
+\item 
+static void \hyperlink{a00040_a333d4e204180f5a56121a541bf8b0cd5}{insert} (lua\-\_\-\-State $\ast$L, int index)
+\item 
+static void \hyperlink{a00040_a85f60ff6c338e4be4711117d083205c1}{replace} (lua\-\_\-\-State $\ast$L, int index)
+\item 
+static void \hyperlink{a00040_a86e448fd744d2f03497fbb6910fbeef4}{remove} (lua\-\_\-\-State $\ast$L, int index)
+\item 
+static void \hyperlink{a00040_aab7ca5e15dddf31aa5289868f6ec43da}{pcall} (lua\-\_\-\-State $\ast$L, int np, int nr, int error=0)
+\item 
+static int \hyperlink{a00040_a45fbc62bc87b144ae1ff6635e3d29c4e}{ref} (lua\-\_\-\-State $\ast$L, int index)
+\item 
+static void \hyperlink{a00040_a18fd156d92363044f9946d435f26e5b8}{require} (lua\-\_\-\-State $\ast$L, const std\-::string \&name, lua\-\_\-\-C\-Function func, bool global)
+\item 
+static void \hyperlink{a00040_a651af5503c346f3513066418463105b5}{dofile} (lua\-\_\-\-State $\ast$L, const std\-::string \&path)
+\item 
+static void \hyperlink{a00040_ae80084c0495225f2d86bb11f6e060c6a}{dostring} (lua\-\_\-\-State $\ast$L, const std\-::string \&data)
+\item 
+static int \hyperlink{a00040_a3169e5668debd4dfb3c3618cb0bec056}{type} (lua\-\_\-\-State $\ast$L, int index)
+\item 
+{\footnotesize template$<$typename T $>$ }\\static void \hyperlink{a00040_a249530d9870ce9f6e44eb4abaa755b08}{push} (lua\-\_\-\-State $\ast$L, const T \&value)
+\item 
+{\footnotesize template$<$size\-\_\-t N$>$ }\\static void \hyperlink{a00040_a2439cfdbb71f9a1d5fd89d1fea0f181a}{push} (lua\-\_\-\-State $\ast$L, const char(\&s)\mbox{[}N\mbox{]})
+\item 
+static void \hyperlink{a00040_a6edfb4eb5ca54a7acbad38f84efc27fc}{checktype} (lua\-\_\-\-State $\ast$L, int index, int \hyperlink{a00040_a3169e5668debd4dfb3c3618cb0bec056}{type})
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T \hyperlink{a00040_a12e4832511a25ade1557d10a05e1ef76}{get} (lua\-\_\-\-State $\ast$L, int index)
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T \hyperlink{a00040_a74b3f48a2970c646574eb85c777cbf63}{check} (lua\-\_\-\-State $\ast$L, int index)
+\item 
+{\footnotesize template$<$typename Container , typename Converter  = Convert$<$typename Container\-::value\-\_\-type$>$$>$ }\\static int \hyperlink{a00040_a7929d6a74e7c75e4646100bbe36b9ae9}{push\-Iterator} (lua\-\_\-\-State $\ast$L, const Container \&container)
+\item 
+static void \hyperlink{a00040_a395066480c860d8c71ca145755663eef}{deprecate} (lua\-\_\-\-State $\ast$L, const std\-::string \&name, const std\-::string \&repl=\char`\"{}\char`\"{})
+\item 
+{\footnotesize template$<$class T $>$ }\\static T \hyperlink{a00040_a754171d47fe864fd2f405899c1915e24}{to\-Type} (lua\-\_\-\-State $\ast$L, int idx)
+\item 
+{\footnotesize template$<$class T $>$ }\\static T \hyperlink{a00040_add7351291ed87d1460fe1e11ebe0039e}{to\-Type} (lua\-\_\-\-State $\ast$L, int idx, const char $\ast$meta)
+\item 
+static void \hyperlink{a00040_a0de148ecf204e369e71466d78ff198a6}{pop} (lua\-\_\-\-State $\ast$L, int count)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Add lot of convenience for Lua. 
+
+This class adds lot of functions for Lua and C++. 
+
+\subsection{Member Function Documentation}
+\hypertarget{a00040_a74b3f48a2970c646574eb85c777cbf63}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!check@{check}}
+\index{check@{check}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{check}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ static T irccd\-::\-Luae\-::check (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{index}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a74b3f48a2970c646574eb85c777cbf63}
+Get the value at the index, raise a Lua error on failures.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em index} & the value index \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the value 
+\end{DoxyReturn}
+\hypertarget{a00040_a6edfb4eb5ca54a7acbad38f84efc27fc}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!checktype@{checktype}}
+\index{checktype@{checktype}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{checktype}]{\setlength{\rightskip}{0pt plus 5cm}static void irccd\-::\-Luae\-::checktype (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{index, }
+\item[{int}]{type}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a6edfb4eb5ca54a7acbad38f84efc27fc}
+Check the type at the given index. Calls lua\-L\-\_\-error on bad type.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em index} & the the index \\
+\hline
+{\em type} & the type to check \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00040_a395066480c860d8c71ca145755663eef}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!deprecate@{deprecate}}
+\index{deprecate@{deprecate}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{deprecate}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Luae\-::deprecate (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{const std\-::string \&}]{name, }
+\item[{const std\-::string \&}]{repl = {\ttfamily \char`\"{}\char`\"{}}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00040_a395066480c860d8c71ca145755663eef}
+Write a warning about a deprecated feature.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em name} & the name \\
+\hline
+{\em repl} & the optional replacement \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00040_a651af5503c346f3513066418463105b5}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!dofile@{dofile}}
+\index{dofile@{dofile}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{dofile}]{\setlength{\rightskip}{0pt plus 5cm}static void irccd\-::\-Luae\-::dofile (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{const std\-::string \&}]{path}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a651af5503c346f3513066418463105b5}
+Load and execute a file.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em path} & the the path \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std\-::runtime\-\_\-error} & on error \\
+\hline
+\end{DoxyExceptions}
+\hypertarget{a00040_ae80084c0495225f2d86bb11f6e060c6a}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!dostring@{dostring}}
+\index{dostring@{dostring}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{dostring}]{\setlength{\rightskip}{0pt plus 5cm}static void irccd\-::\-Luae\-::dostring (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{const std\-::string \&}]{data}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_ae80084c0495225f2d86bb11f6e060c6a}
+Load and execute a string.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em data} & the data \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std\-::runtime\-\_\-error} & on error \\
+\hline
+\end{DoxyExceptions}
+\hypertarget{a00040_a12e4832511a25ade1557d10a05e1ef76}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!get@{get}}
+\index{get@{get}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{get}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ static T irccd\-::\-Luae\-::get (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{index}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a12e4832511a25ade1557d10a05e1ef76}
+Get a value from Lua. The type are not checked
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em index} & the value index \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the value 
+\end{DoxyReturn}
+\hypertarget{a00040_acff64921d4606b5d748667e628fcf826}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!getglobal@{getglobal}}
+\index{getglobal@{getglobal}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{getglobal}]{\setlength{\rightskip}{0pt plus 5cm}static void irccd\-::\-Luae\-::getglobal (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_acff64921d4606b5d748667e628fcf826}
+Get a global value from Lua.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em name} & the value name \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00040_a333d4e204180f5a56121a541bf8b0cd5}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!insert@{insert}}
+\index{insert@{insert}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{insert}]{\setlength{\rightskip}{0pt plus 5cm}static void irccd\-::\-Luae\-::insert (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{index}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a333d4e204180f5a56121a541bf8b0cd5}
+Move the top element at the given index.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em index} & the new index \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00040_a2b2890895bec345ace801de2cb264570}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!openlibs@{openlibs}}
+\index{openlibs@{openlibs}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{openlibs}]{\setlength{\rightskip}{0pt plus 5cm}static void irccd\-::\-Luae\-::openlibs (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a2b2890895bec345ace801de2cb264570}
+Load all Lua libraries.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00040_aab7ca5e15dddf31aa5289868f6ec43da}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!pcall@{pcall}}
+\index{pcall@{pcall}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{pcall}]{\setlength{\rightskip}{0pt plus 5cm}static void irccd\-::\-Luae\-::pcall (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{np, }
+\item[{int}]{nr, }
+\item[{int}]{error = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_aab7ca5e15dddf31aa5289868f6ec43da}
+Wrapper around pcall, throw instead of returning an error code.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em np} & the number of parameters \\
+\hline
+{\em nr} & the number of return value \\
+\hline
+{\em error} & the message handler \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00040_a0de148ecf204e369e71466d78ff198a6}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!pop@{pop}}
+\index{pop@{pop}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{pop}]{\setlength{\rightskip}{0pt plus 5cm}static void irccd\-::\-Luae\-::pop (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{count}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a0de148ecf204e369e71466d78ff198a6}
+Pop arguments from the stack.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em count} & the number of values to pop \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00040_a9eb8ef593142ef0426333ccc27123389}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!preload@{preload}}
+\index{preload@{preload}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{preload}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Luae\-::preload (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{const std\-::string \&}]{name, }
+\item[{lua\-\_\-\-C\-Function}]{func}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00040_a9eb8ef593142ef0426333ccc27123389}
+Preload a library, it will be added to package.\-preload so the user can successfully call require \char`\"{}name\char`\"{}. In order to work, you need to open luaopen\-\_\-package and luaopen\-\_\-base first.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em name} & the module name \\
+\hline
+{\em func} & the opening library \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See Also}
+\hyperlink{a00040_a18fd156d92363044f9946d435f26e5b8}{require} 
+\end{DoxySeeAlso}
+\hypertarget{a00040_a249530d9870ce9f6e44eb4abaa755b08}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!push@{push}}
+\index{push@{push}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{push}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ static void irccd\-::\-Luae\-::push (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{const T \&}]{value}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a249530d9870ce9f6e44eb4abaa755b08}
+Push a value to Lua.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em value} & the value \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00040_a2439cfdbb71f9a1d5fd89d1fea0f181a}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!push@{push}}
+\index{push@{push}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{push}]{\setlength{\rightskip}{0pt plus 5cm}template$<$size\-\_\-t N$>$ static void irccd\-::\-Luae\-::push (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{const char(\&)}]{s\mbox{[}\-N\mbox{]}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a2439cfdbb71f9a1d5fd89d1fea0f181a}
+Overload for string literals.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em s} & the string \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00040_a956117e4506cb18ca82eeea6dc60bccd}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!pushfunction@{pushfunction}}
+\index{pushfunction@{pushfunction}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{pushfunction}]{\setlength{\rightskip}{0pt plus 5cm}static void irccd\-::\-Luae\-::pushfunction (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{lua\-\_\-\-C\-Function}]{func, }
+\item[{int}]{nup = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a956117e4506cb18ca82eeea6dc60bccd}
+Push a function with an optional number of upvalues.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em func} & the function \\
+\hline
+{\em nup} & the number of up values \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00040_a7929d6a74e7c75e4646100bbe36b9ae9}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!push\-Iterator@{push\-Iterator}}
+\index{push\-Iterator@{push\-Iterator}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{push\-Iterator}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename Container , typename Converter  = Convert$<$typename Container\-::value\-\_\-type$>$$>$ static int irccd\-::\-Luae\-::push\-Iterator (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{const Container \&}]{container}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a7929d6a74e7c75e4646100bbe36b9ae9}
+Push an iterator function onto the stack. May be used by functions calls or directly with \-\_\-\-\_\-pairs.
+
+The container must at least have\-: value\-\_\-type, const\-\_\-iterator
+
+The value of the container must also be pushable with \hyperlink{a00007}{Luae\-::\-Convert}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em container} & the container \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+1 
+\end{DoxyReturn}
+\hypertarget{a00040_a45fbc62bc87b144ae1ff6635e3d29c4e}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!ref@{ref}}
+\index{ref@{ref}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{ref}]{\setlength{\rightskip}{0pt plus 5cm}static int irccd\-::\-Luae\-::ref (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{index}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a45fbc62bc87b144ae1ff6635e3d29c4e}
+Create a unique reference to the table at the given index.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em index} & the table index \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the reference 
+\end{DoxyReturn}
+\hypertarget{a00040_a86e448fd744d2f03497fbb6910fbeef4}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!remove@{remove}}
+\index{remove@{remove}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{remove}]{\setlength{\rightskip}{0pt plus 5cm}static void irccd\-::\-Luae\-::remove (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{index}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a86e448fd744d2f03497fbb6910fbeef4}
+Remove the element at the given index.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em index} & the table index \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00040_a85f60ff6c338e4be4711117d083205c1}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!replace@{replace}}
+\index{replace@{replace}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{replace}]{\setlength{\rightskip}{0pt plus 5cm}static void irccd\-::\-Luae\-::replace (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{index}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a85f60ff6c338e4be4711117d083205c1}
+Replace the element at the given index by the one at the top.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em index} & the new index \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00040_a18fd156d92363044f9946d435f26e5b8}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!require@{require}}
+\index{require@{require}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{require}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Luae\-::require (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{const std\-::string \&}]{name, }
+\item[{lua\-\_\-\-C\-Function}]{func, }
+\item[{bool}]{global}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00040_a18fd156d92363044f9946d435f26e5b8}
+Load a library just like it was loaded with require.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em name} & the module name \\
+\hline
+{\em func} & the function \\
+\hline
+{\em global} & store as global \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00040_ab5aa9585473675b41051dfccd381a17f}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!setglobal@{setglobal}}
+\index{setglobal@{setglobal}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{setglobal}]{\setlength{\rightskip}{0pt plus 5cm}static void irccd\-::\-Luae\-::setglobal (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_ab5aa9585473675b41051dfccd381a17f}
+Set a global.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em name} & the name \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00040_a754171d47fe864fd2f405899c1915e24}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!to\-Type@{to\-Type}}
+\index{to\-Type@{to\-Type}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{to\-Type}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ static T irccd\-::\-Luae\-::to\-Type (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{idx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a754171d47fe864fd2f405899c1915e24}
+\hyperlink{a00007}{Convert} a new placement made object, without testing if its a real object.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em idx} & the object index \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the converted object 
+\end{DoxyReturn}
+\hypertarget{a00040_add7351291ed87d1460fe1e11ebe0039e}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!to\-Type@{to\-Type}}
+\index{to\-Type@{to\-Type}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{to\-Type}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ static T irccd\-::\-Luae\-::to\-Type (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{idx, }
+\item[{const char $\ast$}]{meta}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_add7351291ed87d1460fe1e11ebe0039e}
+Check for a userdata from the stack but without checking if it's a real \hyperlink{a00041}{Luae\-Class} one.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em idx} & the index \\
+\hline
+{\em meta} & the metatable name \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the object 
+\end{DoxyReturn}
+\hypertarget{a00040_a3169e5668debd4dfb3c3618cb0bec056}{\index{irccd\-::\-Luae@{irccd\-::\-Luae}!type@{type}}
+\index{type@{type}!irccd::Luae@{irccd\-::\-Luae}}
+\subsubsection[{type}]{\setlength{\rightskip}{0pt plus 5cm}static int irccd\-::\-Luae\-::type (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{index}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00040_a3169e5668debd4dfb3c3618cb0bec056}
+Get the type at the given index.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em index} & the value index \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the type 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00089}{Luae.\-h}\item 
+Luae.\-cpp\end{DoxyCompactItemize}

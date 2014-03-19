@@ -1,0 +1,193 @@
+\hypertarget{a00089}{\section{Luae.\-h File Reference}
+\label{a00089}\index{Luae.\-h@{Luae.\-h}}
+}
+
+
+Lua C++ extended A\-P\-I.  
+
+
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{a00040}{irccd\-::\-Luae}
+\begin{DoxyCompactList}\small\item\em Add lot of convenience for Lua. \end{DoxyCompactList}\item 
+struct \hyperlink{a00007}{irccd\-::\-Luae\-::\-Convert$<$ T $>$}
+\begin{DoxyCompactList}\small\item\em Push or get values. \end{DoxyCompactList}\item 
+struct \hyperlink{a00037}{irccd\-::\-Luae\-::\-Iterator$<$ Type $>$}
+\begin{DoxyCompactList}\small\item\em Wrap S\-T\-L containers. \end{DoxyCompactList}\item 
+struct \hyperlink{a00008}{irccd\-::\-Luae\-::\-Convert$<$ bool $>$}
+\begin{DoxyCompactList}\small\item\em Overload for booleans. \end{DoxyCompactList}\item 
+struct \hyperlink{a00011}{irccd\-::\-Luae\-::\-Convert$<$ int $>$}
+\begin{DoxyCompactList}\small\item\em Overload for integers. \end{DoxyCompactList}\item 
+struct \hyperlink{a00010}{irccd\-::\-Luae\-::\-Convert$<$ double $>$}
+\begin{DoxyCompactList}\small\item\em Overload for doubles. \end{DoxyCompactList}\item 
+struct \hyperlink{a00015}{irccd\-::\-Luae\-::\-Convert$<$ std\-::string $>$}
+\begin{DoxyCompactList}\small\item\em Overload for std\-::string. \end{DoxyCompactList}\item 
+struct \hyperlink{a00009}{irccd\-::\-Luae\-::\-Convert$<$ const char $\ast$ $>$}
+\begin{DoxyCompactList}\small\item\em Overload for const char $\ast$. \end{DoxyCompactList}\item 
+class \hyperlink{a00043}{irccd\-::\-Luae\-State}
+\begin{DoxyCompactList}\small\item\em Wrapper for lua\-\_\-\-State. \end{DoxyCompactList}\item 
+class \hyperlink{a00045}{irccd\-::\-Luae\-Value}
+\begin{DoxyCompactList}\small\item\em A fake variant for Lua values. \end{DoxyCompactList}\item 
+class \hyperlink{a00041}{irccd\-::\-Luae\-Class}
+\begin{DoxyCompactList}\small\item\em Support for object oriented programming between C++ and Lua. \end{DoxyCompactList}\item 
+struct \hyperlink{a00024}{irccd\-::\-Luae\-Class\-::\-Def}
+\begin{DoxyCompactList}\small\item\em Definition of a class. \end{DoxyCompactList}\item 
+class \hyperlink{a00044}{irccd\-::\-Luae\-Table}
+\begin{DoxyCompactList}\small\item\em Some function for table manipulation. \end{DoxyCompactList}\item 
+class \hyperlink{a00042}{irccd\-::\-Luae\-Enum}
+\begin{DoxyCompactList}\small\item\em Binds and get enumeration. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{a00089_a796ba54c8d36c5d2ed9b54011e04e1b9}{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-B\-E\-G\-I\-N}(L)~int \-\_\-\-\_\-topstack = lua\-\_\-gettop((L))
+\item 
+\#define \hyperlink{a00089_affc41007cf13d87258012968a34f895f}{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-E\-Q\-U\-A\-L\-S}(L)~assert(lua\-\_\-gettop((L)) == \-\_\-\-\_\-topstack)
+\item 
+\#define \hyperlink{a00089_afba7ed6f302e884895a6e96ab51672d7}{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-E\-N\-D}(L, cond)~assert(lua\-\_\-gettop((L)) cond == \-\_\-\-\_\-topstack)
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void $\ast$ \hyperlink{a00089_a5c81701d045f0eb587348084f7835dde}{operator new} (size\-\_\-t size, lua\-\_\-\-State $\ast$L)
+\item 
+void $\ast$ \hyperlink{a00089_a029e475dd3fce699e42804e5b2dac6b4}{operator new} (size\-\_\-t size, lua\-\_\-\-State $\ast$L, const char $\ast$metaname)
+\item 
+void \hyperlink{a00089_a0f52681693eff2700fac6f23061b1fce}{operator delete} (void $\ast$ptr, lua\-\_\-\-State $\ast$L)
+\item 
+void \hyperlink{a00089_a0df50030fd773d076e9e4579e14fe6a4}{operator delete} (void $\ast$ptr, lua\-\_\-\-State $\ast$L, const char $\ast$metaname)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Lua C++ extended A\-P\-I. 
+
+\subsection{Macro Definition Documentation}
+\hypertarget{a00089_a796ba54c8d36c5d2ed9b54011e04e1b9}{\index{Luae.\-h@{Luae.\-h}!L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-B\-E\-G\-I\-N@{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-B\-E\-G\-I\-N}}
+\index{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-B\-E\-G\-I\-N@{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-B\-E\-G\-I\-N}!Luae.h@{Luae.\-h}}
+\subsubsection[{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-B\-E\-G\-I\-N}]{\setlength{\rightskip}{0pt plus 5cm}\#define L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-B\-E\-G\-I\-N(
+\begin{DoxyParamCaption}
+\item[{}]{L}
+\end{DoxyParamCaption}
+)~int \-\_\-\-\_\-topstack = lua\-\_\-gettop((L))}}\label{a00089_a796ba54c8d36c5d2ed9b54011e04e1b9}
+Store the current stack size. Should be called at the beginning of a function.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00089_afba7ed6f302e884895a6e96ab51672d7}{\index{Luae.\-h@{Luae.\-h}!L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-E\-N\-D@{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-E\-N\-D}}
+\index{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-E\-N\-D@{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-E\-N\-D}!Luae.h@{Luae.\-h}}
+\subsubsection[{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-E\-N\-D}]{\setlength{\rightskip}{0pt plus 5cm}\#define L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-E\-N\-D(
+\begin{DoxyParamCaption}
+\item[{}]{L, }
+\item[{}]{cond}
+\end{DoxyParamCaption}
+)~assert(lua\-\_\-gettop((L)) cond == \-\_\-\-\_\-topstack)}}\label{a00089_afba7ed6f302e884895a6e96ab51672d7}
+Check if the current stack size match the condition. L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-B\-E\-G\-I\-N must have been called.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em cond} & the condition \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00089_affc41007cf13d87258012968a34f895f}{\index{Luae.\-h@{Luae.\-h}!L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-E\-Q\-U\-A\-L\-S@{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-E\-Q\-U\-A\-L\-S}}
+\index{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-E\-Q\-U\-A\-L\-S@{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-E\-Q\-U\-A\-L\-S}!Luae.h@{Luae.\-h}}
+\subsubsection[{L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-E\-Q\-U\-A\-L\-S}]{\setlength{\rightskip}{0pt plus 5cm}\#define L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-E\-Q\-U\-A\-L\-S(
+\begin{DoxyParamCaption}
+\item[{}]{L}
+\end{DoxyParamCaption}
+)~assert(lua\-\_\-gettop((L)) == \-\_\-\-\_\-topstack)}}\label{a00089_affc41007cf13d87258012968a34f895f}
+Check if the current stack size match the beginning. L\-U\-A\-E\-\_\-\-S\-T\-A\-C\-K\-\_\-\-C\-H\-E\-C\-K\-B\-E\-G\-I\-N must have been called.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Function Documentation}
+\hypertarget{a00089_a0f52681693eff2700fac6f23061b1fce}{\index{Luae.\-h@{Luae.\-h}!operator delete@{operator delete}}
+\index{operator delete@{operator delete}!Luae.h@{Luae.\-h}}
+\subsubsection[{operator delete}]{\setlength{\rightskip}{0pt plus 5cm}void operator delete (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{ptr, }
+\item[{lua\-\_\-\-State $\ast$}]{L}
+\end{DoxyParamCaption}
+)}}\label{a00089_a0f52681693eff2700fac6f23061b1fce}
+Delete the Lua userdata.
+
+
+\begin{DoxyParams}{Parameters}
+{\em ptr} & the data \\
+\hline
+{\em L} & the Lua state \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00089_a0df50030fd773d076e9e4579e14fe6a4}{\index{Luae.\-h@{Luae.\-h}!operator delete@{operator delete}}
+\index{operator delete@{operator delete}!Luae.h@{Luae.\-h}}
+\subsubsection[{operator delete}]{\setlength{\rightskip}{0pt plus 5cm}void operator delete (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{ptr, }
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{const char $\ast$}]{metaname}
+\end{DoxyParamCaption}
+)}}\label{a00089_a0df50030fd773d076e9e4579e14fe6a4}
+Delete the Lua userdata.
+
+
+\begin{DoxyParams}{Parameters}
+{\em ptr} & the data \\
+\hline
+{\em L} & the Lua state \\
+\hline
+{\em metaname} & the metatable name \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00089_a5c81701d045f0eb587348084f7835dde}{\index{Luae.\-h@{Luae.\-h}!operator new@{operator new}}
+\index{operator new@{operator new}!Luae.h@{Luae.\-h}}
+\subsubsection[{operator new}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ operator new (
+\begin{DoxyParamCaption}
+\item[{size\-\_\-t}]{size, }
+\item[{lua\-\_\-\-State $\ast$}]{L}
+\end{DoxyParamCaption}
+)}}\label{a00089_a5c81701d045f0eb587348084f7835dde}
+Push a Lua userdata.
+
+
+\begin{DoxyParams}{Parameters}
+{\em size} & the object size \\
+\hline
+{\em L} & the Lua state \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the allocated data 
+\end{DoxyReturn}
+\hypertarget{a00089_a029e475dd3fce699e42804e5b2dac6b4}{\index{Luae.\-h@{Luae.\-h}!operator new@{operator new}}
+\index{operator new@{operator new}!Luae.h@{Luae.\-h}}
+\subsubsection[{operator new}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ operator new (
+\begin{DoxyParamCaption}
+\item[{size\-\_\-t}]{size, }
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{const char $\ast$}]{metaname}
+\end{DoxyParamCaption}
+)}}\label{a00089_a029e475dd3fce699e42804e5b2dac6b4}
+Push a Lua userdata with a metatable.
+
+
+\begin{DoxyParams}{Parameters}
+{\em size} & the object size \\
+\hline
+{\em L} & the Lua state \\
+\hline
+{\em metaname} & the metatable name \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the allocated data 
+\end{DoxyReturn}

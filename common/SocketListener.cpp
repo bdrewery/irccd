@@ -18,6 +18,11 @@
 
 #include <algorithm>
 
+#if !defined(WIN32)
+#  define INVALID_SOCKET	-1
+#  define SOCKET_ERROR		-1
+#endif
+
 #include "SocketListener.h"
 
 namespace irccd {

@@ -1,0 +1,61 @@
+\hypertarget{a00049}{\section{irccd\-:\-:Parser\-Wrapper Class Reference}
+\label{a00049}\index{irccd\-::\-Parser\-Wrapper@{irccd\-::\-Parser\-Wrapper}}
+}
+
+
+Backward compatibility.  
+
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00049_a3d7a27594b4b190d75cc946142a16333}{Parser\-Wrapper} (const std\-::string \&path, int flags, char comment)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{a00049_a0bd7eca485096593cf1318cbdaa7ad54}{\hyperlink{a00046}{Lua\-Parser} \hyperlink{a00049_a0bd7eca485096593cf1318cbdaa7ad54}{m\-\_\-parser}}\label{a00049_a0bd7eca485096593cf1318cbdaa7ad54}
+
+\begin{DoxyCompactList}\small\item\em the parser object \end{DoxyCompactList}\item 
+\hypertarget{a00049_a75c74e23c9ea4404dfc97187f9a6047c}{std\-::string \hyperlink{a00049_a75c74e23c9ea4404dfc97187f9a6047c}{m\-\_\-path}}\label{a00049_a75c74e23c9ea4404dfc97187f9a6047c}
+
+\begin{DoxyCompactList}\small\item\em the path \end{DoxyCompactList}\item 
+\hypertarget{a00049_ab1553aa8f33ab181b1d0a5e467d48ad3}{int \hyperlink{a00049_ab1553aa8f33ab181b1d0a5e467d48ad3}{m\-\_\-flags}}\label{a00049_ab1553aa8f33ab181b1d0a5e467d48ad3}
+
+\begin{DoxyCompactList}\small\item\em the flags \end{DoxyCompactList}\item 
+\hypertarget{a00049_ac83f9ea5f426fcf0794c670253992a19}{char \hyperlink{a00049_ac83f9ea5f426fcf0794c670253992a19}{m\-\_\-comment}}\label{a00049_ac83f9ea5f426fcf0794c670253992a19}
+
+\begin{DoxyCompactList}\small\item\em the comment character \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Backward compatibility. 
+
+This class is used to wrap the parser and its parameters because the class \hyperlink{a00048}{Parser} now throw an exception in the constructor but the Lua A\-P\-I expect that .new return and object and .open returns the error. So we only create the parser at .open method. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00049_a3d7a27594b4b190d75cc946142a16333}{\index{irccd\-::\-Parser\-Wrapper@{irccd\-::\-Parser\-Wrapper}!Parser\-Wrapper@{Parser\-Wrapper}}
+\index{Parser\-Wrapper@{Parser\-Wrapper}!irccd::ParserWrapper@{irccd\-::\-Parser\-Wrapper}}
+\subsubsection[{Parser\-Wrapper}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Parser\-Wrapper\-::\-Parser\-Wrapper (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{path, }
+\item[{int}]{flags, }
+\item[{char}]{comment}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00049_a3d7a27594b4b190d75cc946142a16333}
+Create the wrapper.
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & the path \\
+\hline
+{\em flags} & the flags \\
+\hline
+{\em comment} & the comment character \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Lua\-Parser.\-cpp\end{DoxyCompactItemize}

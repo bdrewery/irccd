@@ -19,6 +19,11 @@
 #ifndef _SERVER_STATE_H_
 #define _SERVER_STATE_H_
 
+/**
+ * @file ServerState.h
+ * @brief Server state
+ */
+
 #include <memory>
 #include <string>
 
@@ -35,6 +40,9 @@ class Server;
  */
 class ServerState {
 public:
+	/**
+	 * The unique pointer for \ref ServerState
+	 */
 	using Ptr = std::unique_ptr<ServerState>;
 
 	/**

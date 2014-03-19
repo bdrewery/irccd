@@ -1,0 +1,208 @@
+\hypertarget{a00033}{\section{irccd\-:\-:Irccdctl Class Reference}
+\label{a00033}\index{irccd\-::\-Irccdctl@{irccd\-::\-Irccdctl}}
+}
+
+
+Main irccdctl class.  
+
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{a00033_a3247a5f97528c8c744441ec8266b8ae0}{set\-Config\-Path} (const std\-::string \&path)
+\item 
+void \hyperlink{a00033_a52b1fbed5eed25a2f1c991470e1c8d26}{use\-Internet} (const std\-::string \&host, int port, int domain, int type)
+\item 
+void \hyperlink{a00033_a1880ad8764eb2126005ac94e0cfe29f3}{use\-Unix} (const std\-::string \&path, int type)
+\item 
+void \hyperlink{a00033_a457a45aa77120354f0d7292c0b351e60}{set\-Verbosity} (bool verbose)
+\item 
+void \hyperlink{a00033_a6bd6abf4e1d3089b2758bc19452076c4}{send\-Raw} (const std\-::string \&message)
+\item 
+int \hyperlink{a00033_a3a24c190f16cfee4e5430d4dc76bf329}{get\-Response} ()
+\item 
+void \hyperlink{a00033_a4f741f6b14fe129ab400c9042cc536c6}{add\-Arg} (char c, const std\-::string \&arg)
+\item 
+bool \hyperlink{a00033_a923c616805d7262f9eafc008cae8828a}{has\-Arg} (char c)
+\item 
+const std\-::string \& \hyperlink{a00033_a214f3beae1ec4e90d2ed5c31916862b1}{get\-Arg} (char c)
+\item 
+int \hyperlink{a00033_a03e02da4571194c2937a26d184ae323f}{run} (int argc, char $\ast$$\ast$argv)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Main irccdctl class. 
+
+\subsection{Member Function Documentation}
+\hypertarget{a00033_a4f741f6b14fe129ab400c9042cc536c6}{\index{irccd\-::\-Irccdctl@{irccd\-::\-Irccdctl}!add\-Arg@{add\-Arg}}
+\index{add\-Arg@{add\-Arg}!irccd::Irccdctl@{irccd\-::\-Irccdctl}}
+\subsubsection[{add\-Arg}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irccdctl\-::add\-Arg (
+\begin{DoxyParamCaption}
+\item[{char}]{c, }
+\item[{const std\-::string \&}]{arg}
+\end{DoxyParamCaption}
+)}}\label{a00033_a4f741f6b14fe129ab400c9042cc536c6}
+Add an optional argument
+
+
+\begin{DoxyParams}{Parameters}
+{\em c} & the character used \\
+\hline
+{\em arg} & the value \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00033_a214f3beae1ec4e90d2ed5c31916862b1}{\index{irccd\-::\-Irccdctl@{irccd\-::\-Irccdctl}!get\-Arg@{get\-Arg}}
+\index{get\-Arg@{get\-Arg}!irccd::Irccdctl@{irccd\-::\-Irccdctl}}
+\subsubsection[{get\-Arg}]{\setlength{\rightskip}{0pt plus 5cm}const std\-::string \& irccd\-::\-Irccdctl\-::get\-Arg (
+\begin{DoxyParamCaption}
+\item[{char}]{c}
+\end{DoxyParamCaption}
+)}}\label{a00033_a214f3beae1ec4e90d2ed5c31916862b1}
+Get the argument value.
+
+
+\begin{DoxyParams}{Parameters}
+{\em c} & the option \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the value 
+\end{DoxyReturn}
+\hypertarget{a00033_a3a24c190f16cfee4e5430d4dc76bf329}{\index{irccd\-::\-Irccdctl@{irccd\-::\-Irccdctl}!get\-Response@{get\-Response}}
+\index{get\-Response@{get\-Response}!irccd::Irccdctl@{irccd\-::\-Irccdctl}}
+\subsubsection[{get\-Response}]{\setlength{\rightskip}{0pt plus 5cm}int irccd\-::\-Irccdctl\-::get\-Response (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00033_a3a24c190f16cfee4e5430d4dc76bf329}
+Get the server response.
+
+\begin{DoxyReturn}{Returns}
+the code to return to main 
+\end{DoxyReturn}
+\hypertarget{a00033_a923c616805d7262f9eafc008cae8828a}{\index{irccd\-::\-Irccdctl@{irccd\-::\-Irccdctl}!has\-Arg@{has\-Arg}}
+\index{has\-Arg@{has\-Arg}!irccd::Irccdctl@{irccd\-::\-Irccdctl}}
+\subsubsection[{has\-Arg}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irccdctl\-::has\-Arg (
+\begin{DoxyParamCaption}
+\item[{char}]{c}
+\end{DoxyParamCaption}
+)}}\label{a00033_a923c616805d7262f9eafc008cae8828a}
+Check if argument is set.
+
+
+\begin{DoxyParams}{Parameters}
+{\em c} & the option \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if set 
+\end{DoxyReturn}
+\hypertarget{a00033_a03e02da4571194c2937a26d184ae323f}{\index{irccd\-::\-Irccdctl@{irccd\-::\-Irccdctl}!run@{run}}
+\index{run@{run}!irccd::Irccdctl@{irccd\-::\-Irccdctl}}
+\subsubsection[{run}]{\setlength{\rightskip}{0pt plus 5cm}int irccd\-::\-Irccdctl\-::run (
+\begin{DoxyParamCaption}
+\item[{int}]{argc, }
+\item[{char $\ast$$\ast$}]{argv}
+\end{DoxyParamCaption}
+)}}\label{a00033_a03e02da4571194c2937a26d184ae323f}
+Run the application with the arguments.
+
+
+\begin{DoxyParams}{Parameters}
+{\em argc} & main argc \\
+\hline
+{\em argv} & main argv \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the return code to exit with 
+\end{DoxyReturn}
+\hypertarget{a00033_a6bd6abf4e1d3089b2758bc19452076c4}{\index{irccd\-::\-Irccdctl@{irccd\-::\-Irccdctl}!send\-Raw@{send\-Raw}}
+\index{send\-Raw@{send\-Raw}!irccd::Irccdctl@{irccd\-::\-Irccdctl}}
+\subsubsection[{send\-Raw}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irccdctl\-::send\-Raw (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{message}
+\end{DoxyParamCaption}
+)}}\label{a00033_a6bd6abf4e1d3089b2758bc19452076c4}
+Send a raw message to irccd.
+
+
+\begin{DoxyParams}{Parameters}
+{\em message} & the message \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00033_a3247a5f97528c8c744441ec8266b8ae0}{\index{irccd\-::\-Irccdctl@{irccd\-::\-Irccdctl}!set\-Config\-Path@{set\-Config\-Path}}
+\index{set\-Config\-Path@{set\-Config\-Path}!irccd::Irccdctl@{irccd\-::\-Irccdctl}}
+\subsubsection[{set\-Config\-Path}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irccdctl\-::set\-Config\-Path (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{path}
+\end{DoxyParamCaption}
+)}}\label{a00033_a3247a5f97528c8c744441ec8266b8ae0}
+Set the config path to open.
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & the config file path \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00033_a457a45aa77120354f0d7292c0b351e60}{\index{irccd\-::\-Irccdctl@{irccd\-::\-Irccdctl}!set\-Verbosity@{set\-Verbosity}}
+\index{set\-Verbosity@{set\-Verbosity}!irccd::Irccdctl@{irccd\-::\-Irccdctl}}
+\subsubsection[{set\-Verbosity}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irccdctl\-::set\-Verbosity (
+\begin{DoxyParamCaption}
+\item[{bool}]{verbose}
+\end{DoxyParamCaption}
+)}}\label{a00033_a457a45aa77120354f0d7292c0b351e60}
+Set the verbosity.
+
+
+\begin{DoxyParams}{Parameters}
+{\em verbose} & true means more verbose \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00033_a52b1fbed5eed25a2f1c991470e1c8d26}{\index{irccd\-::\-Irccdctl@{irccd\-::\-Irccdctl}!use\-Internet@{use\-Internet}}
+\index{use\-Internet@{use\-Internet}!irccd::Irccdctl@{irccd\-::\-Irccdctl}}
+\subsubsection[{use\-Internet}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irccdctl\-::use\-Internet (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{host, }
+\item[{int}]{port, }
+\item[{int}]{domain, }
+\item[{int}]{type}
+\end{DoxyParamCaption}
+)}}\label{a00033_a52b1fbed5eed25a2f1c991470e1c8d26}
+Specify a socket by command line for A\-F\-\_\-\-I\-N\-E\-T\mbox{[}6\mbox{]}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em host} & the hostname \\
+\hline
+{\em port} & the port number \\
+\hline
+{\em domain} & the domain A\-F\-\_\-\-I\-N\-E\-T or A\-F\-\_\-\-I\-N\-E\-T6 \\
+\hline
+{\em type} & the type S\-O\-C\-K\-\_\-\-S\-T\-R\-E\-A\-M or S\-O\-C\-K\-\_\-\-D\-G\-R\-A\-M \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00033_a1880ad8764eb2126005ac94e0cfe29f3}{\index{irccd\-::\-Irccdctl@{irccd\-::\-Irccdctl}!use\-Unix@{use\-Unix}}
+\index{use\-Unix@{use\-Unix}!irccd::Irccdctl@{irccd\-::\-Irccdctl}}
+\subsubsection[{use\-Unix}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irccdctl\-::use\-Unix (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{path, }
+\item[{int}]{type}
+\end{DoxyParamCaption}
+)}}\label{a00033_a1880ad8764eb2126005ac94e0cfe29f3}
+Specify a socket by command line for Unix.
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & the path \\
+\hline
+{\em type} & the type S\-O\-C\-K\-\_\-\-S\-T\-R\-E\-A\-M or S\-O\-C\-K\-\_\-\-D\-G\-R\-A\-M \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00081}{Irccdctl.\-h}\item 
+Irccdctl.\-cpp\end{DoxyCompactItemize}

@@ -19,8 +19,19 @@
 #ifndef _TEST_H_
 #define _TEST_H_
 
+/**
+ * @file Test.h
+ * @brief Irccd test interface
+ */
+
 namespace irccd {
 
+/**
+ * Test the command.
+ *
+ * @param argc the argument count
+ * @param argv the arguments
+ */
 void test(int argc, char **argv);
 
 } // !irccd

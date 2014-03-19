@@ -19,12 +19,26 @@
 #ifndef _LUA_UTIL_H_
 #define _LUA_UTIL_H_
 
+/**
+ * @file LuaUtil.h
+ * @brief Lua bindings for class Util
+ */
+
 #include <lua.hpp>
 
+/**
+ * The date type.
+ */
 #define DATE_TYPE	"Date"
 
 namespace irccd {
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_util(lua_State *L);
 
 } // !irccd

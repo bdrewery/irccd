@@ -20,6 +20,14 @@
 #include <cstdio>
 #include <cstring>
 
+#if !defined(WIN32)
+#  include <sys/un.h>
+
+#  define gai_strerrorA(s)	gai_strerror(s)
+#  define INVALID_SOCKET	-1
+#  define SOCKET_ERROR		-1
+#endif
+
 #include "SocketAddress.h"
 
 namespace irccd {
@@ -88,8 +96,6 @@ ConnectAddressIP::ConnectAddressIP(const std::string &host, unsigned port, int f
  * -------------------------------------------------------- */
 
 #if !defined(_WIN32)
-
-#include <sys/un.h>
 
 AddressUnix::AddressUnix(const std::string &path, bool rm)
 {

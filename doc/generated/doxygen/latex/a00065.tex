@@ -1,0 +1,107 @@
+\hypertarget{a00065}{\section{irccd\-:\-:Socket\-Listener Class Reference}
+\label{a00065}\index{irccd\-::\-Socket\-Listener@{irccd\-::\-Socket\-Listener}}
+}
+
+
+A select(2) wrapper.  
+
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{a00065_ac6443c3f09a6f6bb64cdf38154597dc7}{add} (\hyperlink{a00062}{Socket} s)
+\item 
+long \hyperlink{a00065_a0716c812307492f7b387f00cb23e7234}{size} () const 
+\item 
+void \hyperlink{a00065_ab0a978def1e474e6bd6084e34cf18754}{remove} (\hyperlink{a00062}{Socket} s)
+\item 
+void \hyperlink{a00065_ab354fc8077f23a0f4a82d22377a842f2}{clear} ()
+\item 
+\hyperlink{a00062}{Socket} \hyperlink{a00065_ab9270d02648e64eca76bdf00b2127a1b}{select} (int s=0, int us=0)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A select(2) wrapper. 
+
+\subsection{Member Function Documentation}
+\hypertarget{a00065_ac6443c3f09a6f6bb64cdf38154597dc7}{\index{irccd\-::\-Socket\-Listener@{irccd\-::\-Socket\-Listener}!add@{add}}
+\index{add@{add}!irccd::SocketListener@{irccd\-::\-Socket\-Listener}}
+\subsubsection[{add}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Socket\-Listener\-::add (
+\begin{DoxyParamCaption}
+\item[{{\bf Socket}}]{s}
+\end{DoxyParamCaption}
+)}}\label{a00065_ac6443c3f09a6f6bb64cdf38154597dc7}
+Add a socket to listen to.
+
+
+\begin{DoxyParams}{Parameters}
+{\em s} & the socket \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00065_ab354fc8077f23a0f4a82d22377a842f2}{\index{irccd\-::\-Socket\-Listener@{irccd\-::\-Socket\-Listener}!clear@{clear}}
+\index{clear@{clear}!irccd::SocketListener@{irccd\-::\-Socket\-Listener}}
+\subsubsection[{clear}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Socket\-Listener\-::clear (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{a00065_ab354fc8077f23a0f4a82d22377a842f2}
+Remove every sockets in the listener. \hypertarget{a00065_ab0a978def1e474e6bd6084e34cf18754}{\index{irccd\-::\-Socket\-Listener@{irccd\-::\-Socket\-Listener}!remove@{remove}}
+\index{remove@{remove}!irccd::SocketListener@{irccd\-::\-Socket\-Listener}}
+\subsubsection[{remove}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Socket\-Listener\-::remove (
+\begin{DoxyParamCaption}
+\item[{{\bf Socket}}]{s}
+\end{DoxyParamCaption}
+)}}\label{a00065_ab0a978def1e474e6bd6084e34cf18754}
+Remove a socket from the list.
+
+
+\begin{DoxyParams}{Parameters}
+{\em s} & the socket \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00065_ab9270d02648e64eca76bdf00b2127a1b}{\index{irccd\-::\-Socket\-Listener@{irccd\-::\-Socket\-Listener}!select@{select}}
+\index{select@{select}!irccd::SocketListener@{irccd\-::\-Socket\-Listener}}
+\subsubsection[{select}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Socket} irccd\-::\-Socket\-Listener\-::select (
+\begin{DoxyParamCaption}
+\item[{int}]{s = {\ttfamily 0}, }
+\item[{int}]{us = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}}\label{a00065_ab9270d02648e64eca76bdf00b2127a1b}
+Wait for an event in the socket list. If both s and us are set to 0 then it waits indefinitely.
+
+
+\begin{DoxyParams}{Parameters}
+{\em s} & the timeout in seconds \\
+\hline
+{\em us} & the timeout in milliseconds \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the socket ready 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em \hyperlink{a00064}{Socket\-Error}} & on error \\
+\hline
+{\em \hyperlink{a00066}{Socket\-Timeout}} & on timeout \\
+\hline
+\end{DoxyExceptions}
+\hypertarget{a00065_a0716c812307492f7b387f00cb23e7234}{\index{irccd\-::\-Socket\-Listener@{irccd\-::\-Socket\-Listener}!size@{size}}
+\index{size@{size}!irccd::SocketListener@{irccd\-::\-Socket\-Listener}}
+\subsubsection[{size}]{\setlength{\rightskip}{0pt plus 5cm}long irccd\-::\-Socket\-Listener\-::size (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00065_a0716c812307492f7b387f00cb23e7234}
+Get the number of client in the listener.
+
+\begin{DoxyReturn}{Returns}
+the number 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00143}{Socket\-Listener.\-h}\item 
+Socket\-Listener.\-cpp\end{DoxyCompactItemize}

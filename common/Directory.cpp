@@ -140,11 +140,6 @@ void Directory::systemLoad(const std::string &path, int flags)
 
 #endif
 
-Directory::Entry::Entry()
-	: type(Unknown)
-{
-}
-
 bool operator==(const Directory::Entry &e1, const Directory::Entry &e2)
 {
 	return e1.name == e2.name && e1.type == e2.type;

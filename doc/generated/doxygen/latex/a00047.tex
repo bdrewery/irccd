@@ -1,0 +1,95 @@
+\hypertarget{a00047}{\section{Message Class Reference}
+\label{a00047}\index{Message@{Message}}
+}
+
+
+\hyperlink{a00047}{Message} handler for clients.  
+
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00047_a4e0c3e0a2be25186519ba075d7851b71}{Message} ()=default
+\item 
+\hyperlink{a00047_aefb60a79384d8c6b77091f9d7da8bdd3}{Message} (const \hyperlink{a00047}{Message} \&m)
+\item 
+bool \hyperlink{a00047_a393c6cca6618009609fda8d0e663a61d}{is\-Finished} (const std\-::string \&msg, std\-::string \&command)
+\item 
+\hyperlink{a00047}{Message} \& \hyperlink{a00047_a3b3a0da486b51f003f818f2faa5db9f5}{operator=} (const \hyperlink{a00047}{Message} \&m)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\hyperlink{a00047}{Message} handler for clients. 
+
+This class handles incoming data from clients and tells when a data is finished. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00047_a4e0c3e0a2be25186519ba075d7851b71}{\index{Message@{Message}!Message@{Message}}
+\index{Message@{Message}!Message@{Message}}
+\subsubsection[{Message}]{\setlength{\rightskip}{0pt plus 5cm}Message\-::\-Message (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [default]}}}\label{a00047_a4e0c3e0a2be25186519ba075d7851b71}
+Default constructor. \hypertarget{a00047_aefb60a79384d8c6b77091f9d7da8bdd3}{\index{Message@{Message}!Message@{Message}}
+\index{Message@{Message}!Message@{Message}}
+\subsubsection[{Message}]{\setlength{\rightskip}{0pt plus 5cm}Message\-::\-Message (
+\begin{DoxyParamCaption}
+\item[{const {\bf Message} \&}]{m}
+\end{DoxyParamCaption}
+)}}\label{a00047_aefb60a79384d8c6b77091f9d7da8bdd3}
+Copy constructor.
+
+
+\begin{DoxyParams}{Parameters}
+{\em m} & the old message \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00047_a393c6cca6618009609fda8d0e663a61d}{\index{Message@{Message}!is\-Finished@{is\-Finished}}
+\index{is\-Finished@{is\-Finished}!Message@{Message}}
+\subsubsection[{is\-Finished}]{\setlength{\rightskip}{0pt plus 5cm}bool Message\-::is\-Finished (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{msg, }
+\item[{std\-::string \&}]{command}
+\end{DoxyParamCaption}
+)}}\label{a00047_a393c6cca6618009609fda8d0e663a61d}
+Tell if the client message has finished. A client message ends with '\par
+'.
+
+
+\begin{DoxyParams}{Parameters}
+{\em msg} & the received data \\
+\hline
+{\em command} & the final command (if finished) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if finished 
+\end{DoxyReturn}
+\hypertarget{a00047_a3b3a0da486b51f003f818f2faa5db9f5}{\index{Message@{Message}!operator=@{operator=}}
+\index{operator=@{operator=}!Message@{Message}}
+\subsubsection[{operator=}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Message} \& Message\-::operator= (
+\begin{DoxyParamCaption}
+\item[{const {\bf Message} \&}]{m}
+\end{DoxyParamCaption}
+)}}\label{a00047_a3b3a0da486b51f003f818f2faa5db9f5}
+Copy assignment.
+
+
+\begin{DoxyParams}{Parameters}
+{\em m} & the message \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the message 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00115}{Message.\-h}\item 
+Message.\-cpp\end{DoxyCompactItemize}

@@ -19,14 +19,28 @@
 #ifndef _LUA_SERVER_H_
 #define _LUA_SERVER_H_
 
+/**
+ * @file LuaServer.h
+ * @brief Lua bindings for class Server
+ */
+
 #include <lua.hpp>
 
 #include "Server.h"
 
 namespace irccd {
 
+/**
+ * The server name object.
+ */
 extern const char *ServerType;
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_server(lua_State *L);
 
 } // !irccd

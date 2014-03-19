@@ -46,28 +46,6 @@
 namespace irccd {
 
 /* --------------------------------------------------------
- * ErrorException class
- * -------------------------------------------------------- */
-
-Util::ErrorException::ErrorException()
-{
-}
-
-Util::ErrorException::ErrorException(const std::string &error)
-	: m_error(error)
-{
-}
-
-Util::ErrorException::~ErrorException() throw()
-{
-}
-
-const char * Util::ErrorException::what() const throw()
-{
-	return m_error.c_str();
-}
-
-/* --------------------------------------------------------
  * Util class (private functions)
  * -------------------------------------------------------- */
 
@@ -207,7 +185,7 @@ std::string Util::findConfiguration(const std::string &filename)
 	oss.str("");
 	oss << "could not find configuration file for " << filename;
 
-	throw ErrorException(oss.str());
+	throw std::runtime_error(oss.str());
 }
 
 std::string Util::findPluginHome(const std::string &name)
@@ -309,14 +287,14 @@ void Util::mkdir(const std::string &dir, int mode)
 
 		if (_MKDIR(part.c_str(), mode) == -1) {
 			oss << part << ": " << strerror(errno);
-			throw Util::ErrorException(oss.str());
+			throw std::runtime_error(oss.str());
 		}
 	}
 
 	// Last part
 	if (_MKDIR(dir.c_str(), mode) == -1) {
 		oss << dir << ": " << strerror(errno);
-		throw Util::ErrorException(oss.str());
+		throw std::runtime_error(oss.str());
 	}
 }
 

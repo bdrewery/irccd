@@ -19,6 +19,11 @@
 #ifndef _SERVER_CONNECTING_H_
 #define _SERVER_CONNECTING_H_
 
+/**
+ * @file ServerConnecting.h
+ * @brief Server is connecting
+ */
+
 #include "ServerState.h"
 
 namespace irccd {

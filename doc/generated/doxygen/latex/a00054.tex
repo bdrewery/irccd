@@ -1,0 +1,259 @@
+\hypertarget{a00054}{\section{irccd\-:\-:Section Class Reference}
+\label{a00054}\index{irccd\-::\-Section@{irccd\-::\-Section}}
+}
+
+
+The option container.  
+
+
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{a00017}{Converter}
+\item 
+struct \hyperlink{a00018}{Converter$<$ bool $>$}
+\begin{DoxyCompactList}\small\item\em Overload for booleans. \end{DoxyCompactList}\item 
+struct \hyperlink{a00019}{Converter$<$ double $>$}
+\begin{DoxyCompactList}\small\item\em Overload for double. \end{DoxyCompactList}\item 
+struct \hyperlink{a00020}{Converter$<$ float $>$}
+\begin{DoxyCompactList}\small\item\em Overload for floats. \end{DoxyCompactList}\item 
+struct \hyperlink{a00021}{Converter$<$ int $>$}
+\begin{DoxyCompactList}\small\item\em Overload for integers. \end{DoxyCompactList}\item 
+struct \hyperlink{a00022}{Converter$<$ std\-::string $>$}
+\begin{DoxyCompactList}\small\item\em Overload for std\-::string. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+using \hyperlink{a00054_a3f77be6ee20c34fda18e7db4c469bd82}{Map} = std\-::unordered\-\_\-map$<$ std\-::string, std\-::string $>$
+\item 
+using \hyperlink{a00054_a020828c80a755d59714cf700be3e842d}{value\-\_\-type} = Map\-::value\-\_\-type
+\item 
+using \hyperlink{a00054_a3ae2d0c993b178753a34ccd3970e0e9f}{iterator} = Map\-::iterator
+\item 
+using \hyperlink{a00054_a3199836dc245a8bd94aeaab5ba11dd1d}{const\-\_\-iterator} = Map\-::const\-\_\-iterator
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00054_a46d86e76bd25b62b655cae19f6d88924}{Section} ()
+\item 
+\hyperlink{a00054_a567da2532772049403aeabbfe7f6853f}{Section} (const std\-::string \&name)
+\item 
+bool \hyperlink{a00054_afbbb4e4e55e5757b00ee65f8081c6850}{has\-Option} (const std\-::string \&name) const 
+\item 
+const std\-::string \& \hyperlink{a00054_a009a772027ebc917d9bc3f3ed195647a}{get\-Name} () const 
+\item 
+Map\-::iterator \hyperlink{a00054_a00c31fc20d740aae28b11d5cc6b0a229}{begin} ()
+\item 
+Map\-::const\-\_\-iterator \hyperlink{a00054_a0cb0176b34def84839e150c87716e8a6}{cbegin} () const 
+\item 
+Map\-::iterator \hyperlink{a00054_aee03a3481b8b066dfbefcb090b7b00d7}{end} ()
+\item 
+Map\-::const\-\_\-iterator \hyperlink{a00054_a16f0cb0d3253a1f877cf9c4dffda33b3}{cend} () const 
+\item 
+{\footnotesize template$<$typename T $>$ }\\T \hyperlink{a00054_ad6881999e7896fb3f77da955d9b18bed}{get\-Option} (const std\-::string \&name) const 
+\item 
+{\footnotesize template$<$typename T $>$ }\\T \hyperlink{a00054_add315aec8dec70a3b65b953206a565be}{require\-Option} (const std\-::string \&name) const 
+\end{DoxyCompactItemize}
+\subsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{a00054_ab80291af9c262f63b83fa9c16f12014d}{class {\bfseries Parser}}\label{a00054_ab80291af9c262f63b83fa9c16f12014d}
+
+\item 
+bool \hyperlink{a00054_a53346e53f62ea0419f6103d037f1b050}{operator==} (const \hyperlink{a00054}{Section} \&s1, const \hyperlink{a00054}{Section} \&s2)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+The option container. 
+
+A list of section found in the file. If root options are allowed (default behavior), the root section is \char`\"{}\char`\"{}. 
+
+\subsection{Member Typedef Documentation}
+\hypertarget{a00054_a3199836dc245a8bd94aeaab5ba11dd1d}{\index{irccd\-::\-Section@{irccd\-::\-Section}!const\-\_\-iterator@{const\-\_\-iterator}}
+\index{const\-\_\-iterator@{const\-\_\-iterator}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{const\-\_\-iterator}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf irccd\-::\-Section\-::const\-\_\-iterator} =  Map\-::const\-\_\-iterator}}\label{a00054_a3199836dc245a8bd94aeaab5ba11dd1d}
+The const iterator object. \hypertarget{a00054_a3ae2d0c993b178753a34ccd3970e0e9f}{\index{irccd\-::\-Section@{irccd\-::\-Section}!iterator@{iterator}}
+\index{iterator@{iterator}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{iterator}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf irccd\-::\-Section\-::iterator} =  Map\-::iterator}}\label{a00054_a3ae2d0c993b178753a34ccd3970e0e9f}
+The iterator object. \hypertarget{a00054_a3f77be6ee20c34fda18e7db4c469bd82}{\index{irccd\-::\-Section@{irccd\-::\-Section}!Map@{Map}}
+\index{Map@{Map}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{Map}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf irccd\-::\-Section\-::\-Map} =  std\-::unordered\-\_\-map$<$std\-::string, std\-::string$>$}}\label{a00054_a3f77be6ee20c34fda18e7db4c469bd82}
+The map from key to values. \hypertarget{a00054_a020828c80a755d59714cf700be3e842d}{\index{irccd\-::\-Section@{irccd\-::\-Section}!value\-\_\-type@{value\-\_\-type}}
+\index{value\-\_\-type@{value\-\_\-type}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{value\-\_\-type}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf irccd\-::\-Section\-::value\-\_\-type} =  Map\-::value\-\_\-type}}\label{a00054_a020828c80a755d59714cf700be3e842d}
+The type of value. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00054_a46d86e76bd25b62b655cae19f6d88924}{\index{irccd\-::\-Section@{irccd\-::\-Section}!Section@{Section}}
+\index{Section@{Section}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{Section}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Section\-::\-Section (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00054_a46d86e76bd25b62b655cae19f6d88924}
+Default constructor. \hypertarget{a00054_a567da2532772049403aeabbfe7f6853f}{\index{irccd\-::\-Section@{irccd\-::\-Section}!Section@{Section}}
+\index{Section@{Section}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{Section}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Section\-::\-Section (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)}}\label{a00054_a567da2532772049403aeabbfe7f6853f}
+Named constructor.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & the section name \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00054_a00c31fc20d740aae28b11d5cc6b0a229}{\index{irccd\-::\-Section@{irccd\-::\-Section}!begin@{begin}}
+\index{begin@{begin}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{begin}]{\setlength{\rightskip}{0pt plus 5cm}Section\-::\-Map\-::iterator irccd\-::\-Section\-::begin (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00054_a00c31fc20d740aae28b11d5cc6b0a229}
+Return an iterator to the beginning.
+
+\begin{DoxyReturn}{Returns}
+the iterator. 
+\end{DoxyReturn}
+\hypertarget{a00054_a0cb0176b34def84839e150c87716e8a6}{\index{irccd\-::\-Section@{irccd\-::\-Section}!cbegin@{cbegin}}
+\index{cbegin@{cbegin}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{cbegin}]{\setlength{\rightskip}{0pt plus 5cm}Section\-::\-Map\-::const\-\_\-iterator irccd\-::\-Section\-::cbegin (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00054_a0cb0176b34def84839e150c87716e8a6}
+Return a const iterator to the beginning.
+
+\begin{DoxyReturn}{Returns}
+the iterator. 
+\end{DoxyReturn}
+\hypertarget{a00054_a16f0cb0d3253a1f877cf9c4dffda33b3}{\index{irccd\-::\-Section@{irccd\-::\-Section}!cend@{cend}}
+\index{cend@{cend}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{cend}]{\setlength{\rightskip}{0pt plus 5cm}Section\-::\-Map\-::const\-\_\-iterator irccd\-::\-Section\-::cend (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00054_a16f0cb0d3253a1f877cf9c4dffda33b3}
+Return a const iterator to the end.
+
+\begin{DoxyReturn}{Returns}
+the iterator. 
+\end{DoxyReturn}
+\hypertarget{a00054_aee03a3481b8b066dfbefcb090b7b00d7}{\index{irccd\-::\-Section@{irccd\-::\-Section}!end@{end}}
+\index{end@{end}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{end}]{\setlength{\rightskip}{0pt plus 5cm}Section\-::\-Map\-::iterator irccd\-::\-Section\-::end (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00054_aee03a3481b8b066dfbefcb090b7b00d7}
+Return an iterator to the end.
+
+\begin{DoxyReturn}{Returns}
+the iterator. 
+\end{DoxyReturn}
+\hypertarget{a00054_a009a772027ebc917d9bc3f3ed195647a}{\index{irccd\-::\-Section@{irccd\-::\-Section}!get\-Name@{get\-Name}}
+\index{get\-Name@{get\-Name}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{get\-Name}]{\setlength{\rightskip}{0pt plus 5cm}const std\-::string \& irccd\-::\-Section\-::get\-Name (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00054_a009a772027ebc917d9bc3f3ed195647a}
+Get the section name
+
+\begin{DoxyReturn}{Returns}
+the section name 
+\end{DoxyReturn}
+\hypertarget{a00054_ad6881999e7896fb3f77da955d9b18bed}{\index{irccd\-::\-Section@{irccd\-::\-Section}!get\-Option@{get\-Option}}
+\index{get\-Option@{get\-Option}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{get\-Option}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ T irccd\-::\-Section\-::get\-Option (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00054_ad6881999e7896fb3f77da955d9b18bed}
+Template all functions for retrieving options value.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & the option name \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the value if found 
+\end{DoxyReturn}
+\hypertarget{a00054_afbbb4e4e55e5757b00ee65f8081c6850}{\index{irccd\-::\-Section@{irccd\-::\-Section}!has\-Option@{has\-Option}}
+\index{has\-Option@{has\-Option}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{has\-Option}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Section\-::has\-Option (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+) const}}\label{a00054_afbbb4e4e55e5757b00ee65f8081c6850}
+Tells if that section has the specified option name.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & the option name \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if has 
+\end{DoxyReturn}
+\hypertarget{a00054_add315aec8dec70a3b65b953206a565be}{\index{irccd\-::\-Section@{irccd\-::\-Section}!require\-Option@{require\-Option}}
+\index{require\-Option@{require\-Option}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{require\-Option}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ T irccd\-::\-Section\-::require\-Option (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00054_add315aec8dec70a3b65b953206a565be}
+Requires an option, this works like get\-Option except that if an option is not found, an exception is thrown.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & the name \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the value 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std\-::out\-\_\-of\-\_\-range} & if not found \\
+\hline
+{\em std\-::invalid\-\_\-argument} & on conversion failures \\
+\hline
+\end{DoxyExceptions}
+
+
+\subsection{Friends And Related Function Documentation}
+\hypertarget{a00054_a53346e53f62ea0419f6103d037f1b050}{\index{irccd\-::\-Section@{irccd\-::\-Section}!operator==@{operator==}}
+\index{operator==@{operator==}!irccd::Section@{irccd\-::\-Section}}
+\subsubsection[{operator==}]{\setlength{\rightskip}{0pt plus 5cm}bool operator== (
+\begin{DoxyParamCaption}
+\item[{const {\bf Section} \&}]{s1, }
+\item[{const {\bf Section} \&}]{s2}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [friend]}}}\label{a00054_a53346e53f62ea0419f6103d037f1b050}
+Test equality.
+
+
+\begin{DoxyParams}{Parameters}
+{\em s1} & the first section \\
+\hline
+{\em s2} & the second section \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if equals 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00117}{Parser.\-h}\item 
+Parser.\-cpp\end{DoxyCompactItemize}

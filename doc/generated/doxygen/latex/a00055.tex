@@ -1,0 +1,884 @@
+\hypertarget{a00055}{\section{irccd\-:\-:Server Class Reference}
+\label{a00055}\index{irccd\-::\-Server@{irccd\-::\-Server}}
+}
+
+
+Connect to an I\-R\-C server.  
+
+
+Inheritance diagram for irccd\-:\-:Server\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{a00055}
+\end{center}
+\end{figure}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{a00004}{Channel}
+\begin{DoxyCompactList}\small\item\em A channel joined or to join. \end{DoxyCompactList}\item 
+struct \hyperlink{a00029}{Identity}
+\begin{DoxyCompactList}\small\item\em An identity used for the server. \end{DoxyCompactList}\item 
+struct \hyperlink{a00031}{Info}
+\begin{DoxyCompactList}\small\item\em \hyperlink{a00055}{Server} information. \end{DoxyCompactList}\item 
+struct \hyperlink{a00053}{Retry\-Info}
+\begin{DoxyCompactList}\small\item\em The reconnection mechanism. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{a00055_ae9b6c4babf5e31a565b9dc684e6a3483}{Options} \{ {\bfseries Option\-Join\-Invite} = (1 $<$$<$ 0), 
+{\bfseries Option\-Auto\-Rejoin} = (1 $<$$<$ 1), 
+{\bfseries Option\-Ssl} = (1 $<$$<$ 2), 
+{\bfseries Option\-Ssl\-No\-Verify} = (1 $<$$<$ 3)
+ \}
+\begin{DoxyCompactList}\small\item\em Some options for the server. \end{DoxyCompactList}\item 
+using \hyperlink{a00055_aa6c9af0cbeeb89dc0b4ea278ffacaecf}{Channel\-List} = std\-::vector$<$ \hyperlink{a00004}{Channel} $>$
+\item 
+using \hyperlink{a00055_ada7323736e755db49c77793a3aa768a3}{Name\-List} = std\-::unordered\-\_\-map$<$ std\-::string, std\-::vector$<$ std\-::string $>$ $>$
+\item 
+using \hyperlink{a00055_afddae57f2e12d80ef49128c82c5aca97}{Whois\-List} = std\-::unordered\-\_\-map$<$ std\-::string, \hyperlink{a00036}{Irc\-Whois} $>$
+\item 
+using \hyperlink{a00055_aea3f9694df81348b909814ac6f84f874}{Ptr} = std\-::shared\-\_\-ptr$<$ \hyperlink{a00055}{Server} $>$
+\item 
+using \hyperlink{a00055_a1f98346943a3940d8ef973d4816a6b46}{Map\-Func} = std\-::function$<$ void(\hyperlink{a00055_aea3f9694df81348b909814ac6f84f874}{Server\-::\-Ptr})$>$
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00055_abe1b8204e9bebb1cbcc4bd6dfe372039}{Server} (const \hyperlink{a00031}{Info} \&\hyperlink{a00055_aea4180762745265bef4c2e42cb4e1002}{info}, const \hyperlink{a00029}{Identity} \&\hyperlink{a00055_a98da01d2140cc50b1b1e35ce7199a671}{identity}, const \hyperlink{a00053}{Retry\-Info} \&\hyperlink{a00055_a3d68352d6a7fe013fc6724c32dbb24fe}{reco}, unsigned \hyperlink{a00055_afdfc8ae96b7409c9a5f7ab8c7b43321c}{options}=0)
+\item 
+virtual \hyperlink{a00055_a9edb9cd52031a7fa2f05394a7a01e449}{$\sim$\-Server} ()
+\item 
+void \hyperlink{a00055_a40ed41b3938f400eacf99116aef583c6}{extract\-Prefixes} (const std\-::string \&line)
+\item 
+\hyperlink{a00055_ada7323736e755db49c77793a3aa768a3}{Name\-List} \& \hyperlink{a00055_a23c3cd7318dd4a7b125539e081d62e87}{name\-Lists} ()
+\item 
+\hyperlink{a00055_afddae57f2e12d80ef49128c82c5aca97}{Whois\-List} \& \hyperlink{a00055_ab15f99bd20dbdb244452caa7b0e78728}{whois\-Lists} ()
+\item 
+\hyperlink{a00031}{Info} \& \hyperlink{a00055_aea4180762745265bef4c2e42cb4e1002}{info} ()
+\item 
+\hyperlink{a00029}{Identity} \& \hyperlink{a00055_a98da01d2140cc50b1b1e35ce7199a671}{identity} ()
+\item 
+\hyperlink{a00053}{Retry\-Info} \& \hyperlink{a00055_a3d68352d6a7fe013fc6724c32dbb24fe}{reco} ()
+\item 
+\hyperlink{a00035}{Irc\-Session} \& \hyperlink{a00055_a08ce98f2608a3ad086d1be21d85b68ed}{session} ()
+\item 
+unsigned \hyperlink{a00055_afdfc8ae96b7409c9a5f7ab8c7b43321c}{options} () const 
+\item 
+const \hyperlink{a00055_aa6c9af0cbeeb89dc0b4ea278ffacaecf}{Channel\-List} \& \hyperlink{a00055_a1bace74c6731ce1ebb148b6637cfa3e4}{channels} () const 
+\item 
+void \hyperlink{a00055_a2be191ad3ade87278a8faff8ebbf9b09}{add\-Channel} (const \hyperlink{a00004}{Channel} \&channel)
+\item 
+bool \hyperlink{a00055_a101c1253a60e12997d82b6cd1f2404b3}{has\-Channel} (const std\-::string \&name)
+\item 
+bool \hyperlink{a00055_acdc3b932d6c9df76bdcc3a020919dcf1}{has\-Prefix} (const std\-::string \&\hyperlink{a00055_acfc30a5f0f0311efbc0c9feda8b7e2ba}{nick}) const 
+\item 
+void \hyperlink{a00055_a3a686504aa39b910b5bae1bca8b3cd25}{remove\-Channel} (const std\-::string \&name)
+\item 
+void \hyperlink{a00055_ae7164401432131b17a5830e94c138382}{kill} ()
+\item 
+void \hyperlink{a00055_a1b2c09f194db19145f45c32883bf6192}{reconnect} ()
+\item 
+void \hyperlink{a00055_a26e87fcc00d9aeb65dab4ae971a0373a}{clear\-Commands} ()
+\item 
+virtual void \hyperlink{a00055_adb055098d74e98ddefc0426d1744c489}{cnotice} (const std\-::string \&channel, const std\-::string \&message)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_a0ffc5a5969f67c6b4308efbb93d6ecfb}{invite} (const std\-::string \&target, const std\-::string \&channel)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_a17241b2e9ed6d2ec4e91224f1da46fb9}{join} (const std\-::string \&channel, const std\-::string \&password=\char`\"{}\char`\"{})
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_a233d503d78d1002ecf1cbdb06ff85cc5}{kick} (const std\-::string \&name, const std\-::string \&channel, const std\-::string \&reason=\char`\"{}\char`\"{})
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_adb3abea7918638f87e6f32b5017e80cb}{me} (const std\-::string \&target, const std\-::string \&message)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_ae3b4e6d84d6590785570686067052fbb}{mode} (const std\-::string \&channel, const std\-::string \&mode)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_a3a6231edd3de2ef098b097cd78f8bbdc}{names} (const std\-::string \&channel)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_acfc30a5f0f0311efbc0c9feda8b7e2ba}{nick} (const std\-::string \&newnick)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_a8ace179cbc990a66435f7c9b6ed3ad37}{notice} (const std\-::string \&target, const std\-::string \&message)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_a0dc67bc7c8b1f714618e3ef6c2f4022f}{part} (const std\-::string \&channel, const std\-::string \&reason=\char`\"{}\char`\"{})
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_a1280f2bf5a344b7ae007e5dcbcce6a69}{query} (const std\-::string \&target, const std\-::string \&message)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_ad53352232e2072725293300d1b7edef1}{say} (const std\-::string \&target, const std\-::string \&message)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_ab973bf213fb6451a4ca4212f69a6481c}{send} (const std\-::string \&raw)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_ab160b7973bb72bd5d415d9b8bc2120d5}{topic} (const std\-::string \&channel, const std\-::string \&topic)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_a3c09948011f3a16e511959f4413007ac}{umode} (const std\-::string \&\hyperlink{a00055_ae3b4e6d84d6590785570686067052fbb}{mode})
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{a00055_a15a0f221b7a66ffcb08d849e9a7593bf}{whois} (const std\-::string \&target)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{a00055_a2f9c9ee30b3008c921d72541536c4554}{add} (\hyperlink{a00055_aea3f9694df81348b909814ac6f84f874}{Ptr} server)
+\item 
+static void \hyperlink{a00055_a75ae92b856b2afe8d690eefca601c02a}{remove} (\hyperlink{a00055_aea3f9694df81348b909814ac6f84f874}{Ptr} server)
+\item 
+static \hyperlink{a00055_aea3f9694df81348b909814ac6f84f874}{Server\-::\-Ptr} \hyperlink{a00055_ad0490913aa99c4f2d8632c623ae2af77}{get} (const std\-::string \&name)
+\item 
+static bool \hyperlink{a00055_a38ef2a7786ff1dbc648f91177311b879}{has} (const std\-::string \&name)
+\item 
+static void \hyperlink{a00055_a5721b5e8cd9f441f888274ac67509491}{for\-All} (\hyperlink{a00055_a1f98346943a3940d8ef973d4816a6b46}{Map\-Func} func)
+\item 
+static void \hyperlink{a00055_a7201e07b0828b7af3856d91e2a46c2be}{clear\-Threads} ()
+\item 
+static \hyperlink{a00004}{Channel} \hyperlink{a00055_ab2c3eb4497b80fb7dbd24ef0975bc493}{to\-Channel} (const std\-::string \&line)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{a00055_a2924cfdf489bbab61d07af072bf0e4c2}{\hyperlink{a00031}{Info} \hyperlink{a00055_a2924cfdf489bbab61d07af072bf0e4c2}{m\-\_\-info}}\label{a00055_a2924cfdf489bbab61d07af072bf0e4c2}
+
+\begin{DoxyCompactList}\small\item\em server info \end{DoxyCompactList}\item 
+\hypertarget{a00055_a2559b7f5887c23fe50fa9c85e352ff4f}{\hyperlink{a00029}{Identity} \hyperlink{a00055_a2559b7f5887c23fe50fa9c85e352ff4f}{m\-\_\-identity}}\label{a00055_a2559b7f5887c23fe50fa9c85e352ff4f}
+
+\begin{DoxyCompactList}\small\item\em identity to use \end{DoxyCompactList}\item 
+\hypertarget{a00055_a6d1f044c785d56b9d582fd915951d31a}{\hyperlink{a00053}{Retry\-Info} \hyperlink{a00055_a6d1f044c785d56b9d582fd915951d31a}{m\-\_\-reco}}\label{a00055_a6d1f044c785d56b9d582fd915951d31a}
+
+\begin{DoxyCompactList}\small\item\em reconnection settings \end{DoxyCompactList}\item 
+\hypertarget{a00055_acb63efaaf97d387e5b7ebde67e4922c2}{unsigned \hyperlink{a00055_acb63efaaf97d387e5b7ebde67e4922c2}{m\-\_\-options}}\label{a00055_acb63efaaf97d387e5b7ebde67e4922c2}
+
+\begin{DoxyCompactList}\small\item\em the options \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Connect to an I\-R\-C server. 
+
+\hyperlink{a00055}{Server} class, each class define a server that irccd can connect to 
+
+\subsection{Member Typedef Documentation}
+\hypertarget{a00055_aa6c9af0cbeeb89dc0b4ea278ffacaecf}{\index{irccd\-::\-Server@{irccd\-::\-Server}!Channel\-List@{Channel\-List}}
+\index{Channel\-List@{Channel\-List}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{Channel\-List}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf irccd\-::\-Server\-::\-Channel\-List} =  std\-::vector$<${\bf Channel}$>$}}\label{a00055_aa6c9af0cbeeb89dc0b4ea278ffacaecf}
+List of channels. \hypertarget{a00055_a1f98346943a3940d8ef973d4816a6b46}{\index{irccd\-::\-Server@{irccd\-::\-Server}!Map\-Func@{Map\-Func}}
+\index{Map\-Func@{Map\-Func}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{Map\-Func}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf irccd\-::\-Server\-::\-Map\-Func} =  std\-::function$<$void ({\bf Server\-::\-Ptr})$>$}}\label{a00055_a1f98346943a3940d8ef973d4816a6b46}
+The map function for function \hyperlink{a00055_a5721b5e8cd9f441f888274ac67509491}{for\-All}. \hypertarget{a00055_ada7323736e755db49c77793a3aa768a3}{\index{irccd\-::\-Server@{irccd\-::\-Server}!Name\-List@{Name\-List}}
+\index{Name\-List@{Name\-List}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{Name\-List}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf irccd\-::\-Server\-::\-Name\-List} =  std\-::unordered\-\_\-map$<$ std\-::string, std\-::vector$<$std\-::string$>$ $>$}}\label{a00055_ada7323736e755db49c77793a3aa768a3}
+List of N\-A\-M\-E\-S being built. \hypertarget{a00055_aea3f9694df81348b909814ac6f84f874}{\index{irccd\-::\-Server@{irccd\-::\-Server}!Ptr@{Ptr}}
+\index{Ptr@{Ptr}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{Ptr}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf irccd\-::\-Server\-::\-Ptr} =  std\-::shared\-\_\-ptr$<${\bf Server}$>$}}\label{a00055_aea3f9694df81348b909814ac6f84f874}
+Smart pointer for \hyperlink{a00055}{Server}. \hypertarget{a00055_afddae57f2e12d80ef49128c82c5aca97}{\index{irccd\-::\-Server@{irccd\-::\-Server}!Whois\-List@{Whois\-List}}
+\index{Whois\-List@{Whois\-List}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{Whois\-List}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf irccd\-::\-Server\-::\-Whois\-List} =  std\-::unordered\-\_\-map$<$ std\-::string, {\bf Irc\-Whois} $>$}}\label{a00055_afddae57f2e12d80ef49128c82c5aca97}
+List of W\-H\-O\-I\-S being built. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00055_abe1b8204e9bebb1cbcc4bd6dfe372039}{\index{irccd\-::\-Server@{irccd\-::\-Server}!Server@{Server}}
+\index{Server@{Server}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{Server}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Server\-::\-Server (
+\begin{DoxyParamCaption}
+\item[{const {\bf Info} \&}]{info, }
+\item[{const {\bf Identity} \&}]{identity, }
+\item[{const {\bf Retry\-Info} \&}]{reco, }
+\item[{unsigned}]{options = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}}\label{a00055_abe1b8204e9bebb1cbcc4bd6dfe372039}
+Better constructor with information and options.
+
+
+\begin{DoxyParams}{Parameters}
+{\em info} & the host info \\
+\hline
+{\em identity} & the identity \\
+\hline
+{\em reco} & the reconnection options \\
+\hline
+{\em options} & some options \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00055_a9edb9cd52031a7fa2f05394a7a01e449}{\index{irccd\-::\-Server@{irccd\-::\-Server}!$\sim$\-Server@{$\sim$\-Server}}
+\index{$\sim$\-Server@{$\sim$\-Server}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{$\sim$\-Server}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Server\-::$\sim$\-Server (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_a9edb9cd52031a7fa2f05394a7a01e449}
+Default destructor. 
+
+\subsection{Member Function Documentation}
+\hypertarget{a00055_a2f9c9ee30b3008c921d72541536c4554}{\index{irccd\-::\-Server@{irccd\-::\-Server}!add@{add}}
+\index{add@{add}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{add}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::add (
+\begin{DoxyParamCaption}
+\item[{{\bf Server\-::\-Ptr}}]{server}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00055_a2f9c9ee30b3008c921d72541536c4554}
+Add a new server to the registry. It also start the server immediately.
+
+
+\begin{DoxyParams}{Parameters}
+{\em server} & the server to add \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00055_a2be191ad3ade87278a8faff8ebbf9b09}{\index{irccd\-::\-Server@{irccd\-::\-Server}!add\-Channel@{add\-Channel}}
+\index{add\-Channel@{add\-Channel}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{add\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::add\-Channel (
+\begin{DoxyParamCaption}
+\item[{const {\bf Channel} \&}]{channel}
+\end{DoxyParamCaption}
+)}}\label{a00055_a2be191ad3ade87278a8faff8ebbf9b09}
+Add a channel that the server will connect to when the connection is complete.
+
+
+\begin{DoxyParams}{Parameters}
+{\em channel} & the channel to add \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00055_a1bace74c6731ce1ebb148b6637cfa3e4}{\index{irccd\-::\-Server@{irccd\-::\-Server}!channels@{channels}}
+\index{channels@{channels}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{channels}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Server\-::\-Channel\-List} \& irccd\-::\-Server\-::channels (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00055_a1bace74c6731ce1ebb148b6637cfa3e4}
+Get all channels that will be auto joined
+
+\begin{DoxyReturn}{Returns}
+the list of channels 
+\end{DoxyReturn}
+\hypertarget{a00055_a26e87fcc00d9aeb65dab4ae971a0373a}{\index{irccd\-::\-Server@{irccd\-::\-Server}!clear\-Commands@{clear\-Commands}}
+\index{clear\-Commands@{clear\-Commands}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{clear\-Commands}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::clear\-Commands (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00055_a26e87fcc00d9aeb65dab4ae971a0373a}
+Clear the command queue. Only used in \hyperlink{a00057}{Server\-Dead} state. \hypertarget{a00055_a7201e07b0828b7af3856d91e2a46c2be}{\index{irccd\-::\-Server@{irccd\-::\-Server}!clear\-Threads@{clear\-Threads}}
+\index{clear\-Threads@{clear\-Threads}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{clear\-Threads}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::clear\-Threads (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00055_a7201e07b0828b7af3856d91e2a46c2be}
+Clear all threads. \hypertarget{a00055_adb055098d74e98ddefc0426d1744c489}{\index{irccd\-::\-Server@{irccd\-::\-Server}!cnotice@{cnotice}}
+\index{cnotice@{cnotice}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{cnotice}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::cnotice (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{channel, }
+\item[{const std\-::string \&}]{message}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_adb055098d74e98ddefc0426d1744c489}
+
+
+
+
+Send a notice to a public channel.
+
+
+\begin{DoxyParams}{Parameters}
+{\em channel} & the target channel \\
+\hline
+{\em message} & the message to send \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_a40ed41b3938f400eacf99116aef583c6}{\index{irccd\-::\-Server@{irccd\-::\-Server}!extract\-Prefixes@{extract\-Prefixes}}
+\index{extract\-Prefixes@{extract\-Prefixes}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{extract\-Prefixes}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::extract\-Prefixes (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{line}
+\end{DoxyParamCaption}
+)}}\label{a00055_a40ed41b3938f400eacf99116aef583c6}
+Extract the prefixes from the server.
+
+
+\begin{DoxyParams}{Parameters}
+{\em line} & the line like P\-R\-E\-F\-I\-X=(ovh)@+\& \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00055_a5721b5e8cd9f441f888274ac67509491}{\index{irccd\-::\-Server@{irccd\-::\-Server}!for\-All@{for\-All}}
+\index{for\-All@{for\-All}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{for\-All}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::for\-All (
+\begin{DoxyParamCaption}
+\item[{{\bf Map\-Func}}]{func}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00055_a5721b5e8cd9f441f888274ac67509491}
+Call a function for all servers.
+
+
+\begin{DoxyParams}{Parameters}
+{\em func} & the function \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00055_ad0490913aa99c4f2d8632c623ae2af77}{\index{irccd\-::\-Server@{irccd\-::\-Server}!get@{get}}
+\index{get@{get}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{get}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Server\-::\-Ptr} irccd\-::\-Server\-::get (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00055_ad0490913aa99c4f2d8632c623ae2af77}
+Get an existing server.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & the server name \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the server 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std\-::out\-\_\-of\-\_\-range} & if not found \\
+\hline
+\end{DoxyExceptions}
+\hypertarget{a00055_a38ef2a7786ff1dbc648f91177311b879}{\index{irccd\-::\-Server@{irccd\-::\-Server}!has@{has}}
+\index{has@{has}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{has}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Server\-::has (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00055_a38ef2a7786ff1dbc648f91177311b879}
+Check if a server exists
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & the server name \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the server by this name is loaded 
+\end{DoxyReturn}
+\hypertarget{a00055_a101c1253a60e12997d82b6cd1f2404b3}{\index{irccd\-::\-Server@{irccd\-::\-Server}!has\-Channel@{has\-Channel}}
+\index{has\-Channel@{has\-Channel}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{has\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Server\-::has\-Channel (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)}}\label{a00055_a101c1253a60e12997d82b6cd1f2404b3}
+Tells if we already have a channel in the list.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & the channel to test \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if has 
+\end{DoxyReturn}
+\hypertarget{a00055_acdc3b932d6c9df76bdcc3a020919dcf1}{\index{irccd\-::\-Server@{irccd\-::\-Server}!has\-Prefix@{has\-Prefix}}
+\index{has\-Prefix@{has\-Prefix}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{has\-Prefix}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Server\-::has\-Prefix (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{nick}
+\end{DoxyParamCaption}
+) const}}\label{a00055_acdc3b932d6c9df76bdcc3a020919dcf1}
+Check if the nick has a prefix or not according to this server.
+
+
+\begin{DoxyParams}{Parameters}
+{\em nick} & the nickname \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if has 
+\end{DoxyReturn}
+\hypertarget{a00055_a98da01d2140cc50b1b1e35ce7199a671}{\index{irccd\-::\-Server@{irccd\-::\-Server}!identity@{identity}}
+\index{identity@{identity}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{identity}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Server\-::\-Identity} \& irccd\-::\-Server\-::identity (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00055_a98da01d2140cc50b1b1e35ce7199a671}
+Get the identity used for that server
+
+\begin{DoxyReturn}{Returns}
+the identity 
+\end{DoxyReturn}
+\hypertarget{a00055_aea4180762745265bef4c2e42cb4e1002}{\index{irccd\-::\-Server@{irccd\-::\-Server}!info@{info}}
+\index{info@{info}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{info}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Server\-::\-Info} \& irccd\-::\-Server\-::info (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00055_aea4180762745265bef4c2e42cb4e1002}
+Get the server information.
+
+\begin{DoxyReturn}{Returns}
+the server information 
+\end{DoxyReturn}
+\hypertarget{a00055_a0ffc5a5969f67c6b4308efbb93d6ecfb}{\index{irccd\-::\-Server@{irccd\-::\-Server}!invite@{invite}}
+\index{invite@{invite}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{invite}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::invite (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{target, }
+\item[{const std\-::string \&}]{channel}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_a0ffc5a5969f67c6b4308efbb93d6ecfb}
+
+
+
+
+Invite someone to a channel.
+
+
+\begin{DoxyParams}{Parameters}
+{\em target} & the target nickname \\
+\hline
+{\em channel} & the channel \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_a17241b2e9ed6d2ec4e91224f1da46fb9}{\index{irccd\-::\-Server@{irccd\-::\-Server}!join@{join}}
+\index{join@{join}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{join}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::join (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{channel, }
+\item[{const std\-::string \&}]{password = {\ttfamily \char`\"{}\char`\"{}}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_a17241b2e9ed6d2ec4e91224f1da46fb9}
+
+
+
+
+Join a channel.
+
+
+\begin{DoxyParams}{Parameters}
+{\em channel} & the channel name \\
+\hline
+{\em password} & an optional password \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_a233d503d78d1002ecf1cbdb06ff85cc5}{\index{irccd\-::\-Server@{irccd\-::\-Server}!kick@{kick}}
+\index{kick@{kick}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{kick}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::kick (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{name, }
+\item[{const std\-::string \&}]{channel, }
+\item[{const std\-::string \&}]{reason = {\ttfamily \char`\"{}\char`\"{}}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_a233d503d78d1002ecf1cbdb06ff85cc5}
+
+
+
+
+Kick someone from a channel.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & the nick name \\
+\hline
+{\em channel} & the channel from \\
+\hline
+{\em reason} & an optional reason \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_ae7164401432131b17a5830e94c138382}{\index{irccd\-::\-Server@{irccd\-::\-Server}!kill@{kill}}
+\index{kill@{kill}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{kill}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::kill (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00055_ae7164401432131b17a5830e94c138382}
+Kill the server. \hypertarget{a00055_adb3abea7918638f87e6f32b5017e80cb}{\index{irccd\-::\-Server@{irccd\-::\-Server}!me@{me}}
+\index{me@{me}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{me}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::me (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{target, }
+\item[{const std\-::string \&}]{message}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_adb3abea7918638f87e6f32b5017e80cb}
+
+
+
+
+Send a C\-T\-C\-P A\-C\-T\-I\-O\-N known as /me.
+
+
+\begin{DoxyParams}{Parameters}
+{\em target} & the nickname or channel \\
+\hline
+{\em message} & the message to send \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_ae3b4e6d84d6590785570686067052fbb}{\index{irccd\-::\-Server@{irccd\-::\-Server}!mode@{mode}}
+\index{mode@{mode}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{mode}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::mode (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{channel, }
+\item[{const std\-::string \&}]{mode}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_ae3b4e6d84d6590785570686067052fbb}
+
+
+
+
+Change the channel mode.
+
+
+\begin{DoxyParams}{Parameters}
+{\em channel} & the target channel \\
+\hline
+{\em mode} & the mode \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_a23c3cd7318dd4a7b125539e081d62e87}{\index{irccd\-::\-Server@{irccd\-::\-Server}!name\-Lists@{name\-Lists}}
+\index{name\-Lists@{name\-Lists}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{name\-Lists}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Server\-::\-Name\-List} \& irccd\-::\-Server\-::name\-Lists (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00055_a23c3cd7318dd4a7b125539e081d62e87}
+Get the name list being build for /names reporting.
+
+\begin{DoxyReturn}{Returns}
+the current list 
+\end{DoxyReturn}
+\hypertarget{a00055_a3a6231edd3de2ef098b097cd78f8bbdc}{\index{irccd\-::\-Server@{irccd\-::\-Server}!names@{names}}
+\index{names@{names}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{names}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::names (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{channel}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_a3a6231edd3de2ef098b097cd78f8bbdc}
+
+
+
+
+Get the list of names as a deferred call.
+
+
+\begin{DoxyParams}{Parameters}
+{\em channel} & which channel \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_acfc30a5f0f0311efbc0c9feda8b7e2ba}{\index{irccd\-::\-Server@{irccd\-::\-Server}!nick@{nick}}
+\index{nick@{nick}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{nick}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::nick (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{newnick}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_acfc30a5f0f0311efbc0c9feda8b7e2ba}
+
+
+
+
+Change your nickname.
+
+
+\begin{DoxyParams}{Parameters}
+{\em newnick} & the new nickname \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_a8ace179cbc990a66435f7c9b6ed3ad37}{\index{irccd\-::\-Server@{irccd\-::\-Server}!notice@{notice}}
+\index{notice@{notice}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{notice}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::notice (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{target, }
+\item[{const std\-::string \&}]{message}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_a8ace179cbc990a66435f7c9b6ed3ad37}
+
+
+
+
+Send a notice to someone.
+
+
+\begin{DoxyParams}{Parameters}
+{\em target} & the target nickname \\
+\hline
+{\em message} & the message \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_afdfc8ae96b7409c9a5f7ab8c7b43321c}{\index{irccd\-::\-Server@{irccd\-::\-Server}!options@{options}}
+\index{options@{options}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{options}]{\setlength{\rightskip}{0pt plus 5cm}unsigned irccd\-::\-Server\-::options (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00055_afdfc8ae96b7409c9a5f7ab8c7b43321c}
+Get options.
+
+\begin{DoxyReturn}{Returns}
+the options 
+\end{DoxyReturn}
+\hypertarget{a00055_a0dc67bc7c8b1f714618e3ef6c2f4022f}{\index{irccd\-::\-Server@{irccd\-::\-Server}!part@{part}}
+\index{part@{part}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{part}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::part (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{channel, }
+\item[{const std\-::string \&}]{reason = {\ttfamily \char`\"{}\char`\"{}}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_a0dc67bc7c8b1f714618e3ef6c2f4022f}
+
+
+
+
+Leave a channel.
+
+
+\begin{DoxyParams}{Parameters}
+{\em channel} & the channel to leave \\
+\hline
+{\em reason} & an optional reason \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_a1280f2bf5a344b7ae007e5dcbcce6a69}{\index{irccd\-::\-Server@{irccd\-::\-Server}!query@{query}}
+\index{query@{query}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{query}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::query (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{target, }
+\item[{const std\-::string \&}]{message}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_a1280f2bf5a344b7ae007e5dcbcce6a69}
+
+
+
+
+Say something to a channel or to a nickname.
+
+
+\begin{DoxyParams}{Parameters}
+{\em target} & the nickname or channel \\
+\hline
+{\em message} & the message to send \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_a3d68352d6a7fe013fc6724c32dbb24fe}{\index{irccd\-::\-Server@{irccd\-::\-Server}!reco@{reco}}
+\index{reco@{reco}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{reco}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Server\-::\-Retry\-Info} \& irccd\-::\-Server\-::reco (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00055_a3d68352d6a7fe013fc6724c32dbb24fe}
+Get the reconnection settings.
+
+\begin{DoxyReturn}{Returns}
+the reconnection settings 
+\end{DoxyReturn}
+\hypertarget{a00055_a1b2c09f194db19145f45c32883bf6192}{\index{irccd\-::\-Server@{irccd\-::\-Server}!reconnect@{reconnect}}
+\index{reconnect@{reconnect}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{reconnect}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::reconnect (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00055_a1b2c09f194db19145f45c32883bf6192}
+Force a reconnection. \hypertarget{a00055_a75ae92b856b2afe8d690eefca601c02a}{\index{irccd\-::\-Server@{irccd\-::\-Server}!remove@{remove}}
+\index{remove@{remove}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{remove}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::remove (
+\begin{DoxyParamCaption}
+\item[{{\bf Server\-::\-Ptr}}]{server}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00055_a75ae92b856b2afe8d690eefca601c02a}
+Remove the server from the registry.
+
+
+\begin{DoxyParams}{Parameters}
+{\em server} & \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00055_a3a686504aa39b910b5bae1bca8b3cd25}{\index{irccd\-::\-Server@{irccd\-::\-Server}!remove\-Channel@{remove\-Channel}}
+\index{remove\-Channel@{remove\-Channel}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{remove\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::remove\-Channel (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)}}\label{a00055_a3a686504aa39b910b5bae1bca8b3cd25}
+Remove a channel from the server list.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & the channel name \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00055_ad53352232e2072725293300d1b7edef1}{\index{irccd\-::\-Server@{irccd\-::\-Server}!say@{say}}
+\index{say@{say}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{say}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::say (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{target, }
+\item[{const std\-::string \&}]{message}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_ad53352232e2072725293300d1b7edef1}
+
+
+
+
+Say something to a channel or to a nickname.
+
+
+\begin{DoxyParams}{Parameters}
+{\em target} & the nickname or channel \\
+\hline
+{\em message} & the message to send \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_ab973bf213fb6451a4ca4212f69a6481c}{\index{irccd\-::\-Server@{irccd\-::\-Server}!send@{send}}
+\index{send@{send}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{send}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::send (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{raw}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_ab973bf213fb6451a4ca4212f69a6481c}
+
+
+
+
+Send a raw message, no need to finish with \textbackslash{}r\textbackslash{}n.
+
+
+\begin{DoxyParams}{Parameters}
+{\em raw} & the raw message \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_a08ce98f2608a3ad086d1be21d85b68ed}{\index{irccd\-::\-Server@{irccd\-::\-Server}!session@{session}}
+\index{session@{session}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{session}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Irc\-Session} \& irccd\-::\-Server\-::session (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00055_a08ce98f2608a3ad086d1be21d85b68ed}
+Get the current \hyperlink{a00035}{Irc\-Session}.
+
+\begin{DoxyReturn}{Returns}
+the session 
+\end{DoxyReturn}
+\hypertarget{a00055_ab2c3eb4497b80fb7dbd24ef0975bc493}{\index{irccd\-::\-Server@{irccd\-::\-Server}!to\-Channel@{to\-Channel}}
+\index{to\-Channel@{to\-Channel}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{to\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Server\-::\-Channel} irccd\-::\-Server\-::to\-Channel (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{line}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00055_ab2c3eb4497b80fb7dbd24ef0975bc493}
+Convert a channel line to \hyperlink{a00004}{Channel}. The line must be in the following form\-: \#channel\-:password
+
+Password is optional and \-: must be removed.
+
+
+\begin{DoxyParams}{Parameters}
+{\em line} & the line to convert \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a channel 
+\end{DoxyReturn}
+\hypertarget{a00055_ab160b7973bb72bd5d415d9b8bc2120d5}{\index{irccd\-::\-Server@{irccd\-::\-Server}!topic@{topic}}
+\index{topic@{topic}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{topic}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::topic (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{channel, }
+\item[{const std\-::string \&}]{topic}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_ab160b7973bb72bd5d415d9b8bc2120d5}
+
+
+
+
+Change a channel topic.
+
+
+\begin{DoxyParams}{Parameters}
+{\em channel} & the channel target \\
+\hline
+{\em topic} & the new topic \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_a3c09948011f3a16e511959f4413007ac}{\index{irccd\-::\-Server@{irccd\-::\-Server}!umode@{umode}}
+\index{umode@{umode}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{umode}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::umode (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{mode}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_a3c09948011f3a16e511959f4413007ac}
+
+
+
+
+Change your own user mode.
+
+
+\begin{DoxyParams}{Parameters}
+{\em mode} & the mode \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_a15a0f221b7a66ffcb08d849e9a7593bf}{\index{irccd\-::\-Server@{irccd\-::\-Server}!whois@{whois}}
+\index{whois@{whois}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{whois}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Server\-::whois (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{target}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00055_a15a0f221b7a66ffcb08d849e9a7593bf}
+
+
+
+
+Get the whois information from a user.
+
+
+\begin{DoxyParams}{Parameters}
+{\em target} & the nickname target \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00055_ab15f99bd20dbdb244452caa7b0e78728}{\index{irccd\-::\-Server@{irccd\-::\-Server}!whois\-Lists@{whois\-Lists}}
+\index{whois\-Lists@{whois\-Lists}!irccd::Server@{irccd\-::\-Server}}
+\subsubsection[{whois\-Lists}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Server\-::\-Whois\-List} \& irccd\-::\-Server\-::whois\-Lists (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00055_ab15f99bd20dbdb244452caa7b0e78728}
+Get the whois lists to build /whois reporting.
+
+\begin{DoxyReturn}{Returns}
+the current list 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00125}{Server.\-h}\item 
+Server.\-cpp\end{DoxyCompactItemize}

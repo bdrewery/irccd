@@ -33,12 +33,12 @@ ServerDisconnected::ServerDisconnected()
 
 ServerState::Ptr ServerDisconnected::exec(Server::Ptr server)
 {
-	auto &info(server->getInfo());
-	auto &reco(server->getRecoInfo());
-	auto &session(server->getSession());
+	auto &info = server->info();
+	auto &reco = server->reco();
+	auto &session = server->session();
 	int tosleep(reco.timeout);
-	bool done(false);
-	bool printed(false);
+	bool done = false;
+	bool printed = false;
 
 	session = IrcSession();
 

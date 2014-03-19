@@ -19,13 +19,28 @@
 #ifndef _EVENT_QUEUE_H_
 #define _EVENT_QUEUE_H_
 
+/**
+ * @file EventQueue.h
+ * @brief Plugin event queue
+ */
+
 #include "Plugin.h"
 
 namespace irccd {
 
+/**
+ * @class EventQueue
+ * @brief The Lua event queue
+ */
 class EventQueue {
 public:
+	/**
+	 * The function to add in the event queue. It takes the plugin
+	 * as parameter for the current plugin.
+	 */
 	using Function	= std::function<void (Plugin::Ptr)>;
+
+private:
 	using Cond	= std::condition_variable;
 	using Mutex	= std::mutex;
 	using Lock	= std::unique_lock<Mutex>;
@@ -43,10 +58,21 @@ private:
 	static void routine();
 
 public:
+	/**
+	 * Start the event queue.
+	 */
 	static void start();
 
+	/**
+	 * Stop the event queue.
+	 */
 	static void stop();
 
+	/**
+	 * Add a function to the event queue.
+	 *
+	 * @param event the event function
+	 */
 	static void add(const Function &event);
 };
 

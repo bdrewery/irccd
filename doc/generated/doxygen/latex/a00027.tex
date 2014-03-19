@@ -1,0 +1,102 @@
+\hypertarget{a00027}{\section{irccd\-:\-:Plugin\-:\-:Error\-Exception Class Reference}
+\label{a00027}\index{irccd\-::\-Plugin\-::\-Error\-Exception@{irccd\-::\-Plugin\-::\-Error\-Exception}}
+}
+
+
+Error in plugins.  
+
+
+Inheritance diagram for irccd\-:\-:Plugin\-:\-:Error\-Exception\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{a00027}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00027_a8058a7e729626a7d493229289510df58}{Error\-Exception} ()=default
+\item 
+\hyperlink{a00027_acd214ef534f5be7610b14767bd4047d2}{Error\-Exception} (const std\-::string \&\hyperlink{a00027_ad0393095907915c201b25e8644d3697c}{which}, const std\-::string \&\hyperlink{a00027_a9450d24147677c302d13221d01c86db1}{error})
+\item 
+std\-::string \hyperlink{a00027_ad0393095907915c201b25e8644d3697c}{which} () const 
+\item 
+std\-::string \hyperlink{a00027_a9450d24147677c302d13221d01c86db1}{error} () const 
+\item 
+virtual const char $\ast$ \hyperlink{a00027_af9e51fd0f4b4a50cc4aba81f44dd4f9f}{what} () const   throw ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Error in plugins. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00027_a8058a7e729626a7d493229289510df58}{\index{irccd\-::\-Plugin\-::\-Error\-Exception@{irccd\-::\-Plugin\-::\-Error\-Exception}!Error\-Exception@{Error\-Exception}}
+\index{Error\-Exception@{Error\-Exception}!irccd::Plugin::ErrorException@{irccd\-::\-Plugin\-::\-Error\-Exception}}
+\subsubsection[{Error\-Exception}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Plugin\-::\-Error\-Exception\-::\-Error\-Exception (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [default]}}}\label{a00027_a8058a7e729626a7d493229289510df58}
+Default constructor. \hypertarget{a00027_acd214ef534f5be7610b14767bd4047d2}{\index{irccd\-::\-Plugin\-::\-Error\-Exception@{irccd\-::\-Plugin\-::\-Error\-Exception}!Error\-Exception@{Error\-Exception}}
+\index{Error\-Exception@{Error\-Exception}!irccd::Plugin::ErrorException@{irccd\-::\-Plugin\-::\-Error\-Exception}}
+\subsubsection[{Error\-Exception}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Plugin\-::\-Error\-Exception\-::\-Error\-Exception (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{which, }
+\item[{const std\-::string \&}]{error}
+\end{DoxyParamCaption}
+)}}\label{a00027_acd214ef534f5be7610b14767bd4047d2}
+Construct an error.
+
+
+\begin{DoxyParams}{Parameters}
+{\em which} & the plugin name \\
+\hline
+{\em error} & the error \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00027_a9450d24147677c302d13221d01c86db1}{\index{irccd\-::\-Plugin\-::\-Error\-Exception@{irccd\-::\-Plugin\-::\-Error\-Exception}!error@{error}}
+\index{error@{error}!irccd::Plugin::ErrorException@{irccd\-::\-Plugin\-::\-Error\-Exception}}
+\subsubsection[{error}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string irccd\-::\-Plugin\-::\-Error\-Exception\-::error (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00027_a9450d24147677c302d13221d01c86db1}
+Get the error.
+
+\begin{DoxyReturn}{Returns}
+the error 
+\end{DoxyReturn}
+\hypertarget{a00027_af9e51fd0f4b4a50cc4aba81f44dd4f9f}{\index{irccd\-::\-Plugin\-::\-Error\-Exception@{irccd\-::\-Plugin\-::\-Error\-Exception}!what@{what}}
+\index{what@{what}!irccd::Plugin::ErrorException@{irccd\-::\-Plugin\-::\-Error\-Exception}}
+\subsubsection[{what}]{\setlength{\rightskip}{0pt plus 5cm}const char $\ast$ irccd\-::\-Plugin\-::\-Error\-Exception\-::what (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const  throw ()\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00027_af9e51fd0f4b4a50cc4aba81f44dd4f9f}
+Get the error.
+
+\begin{DoxyReturn}{Returns}
+the error 
+\end{DoxyReturn}
+\hypertarget{a00027_ad0393095907915c201b25e8644d3697c}{\index{irccd\-::\-Plugin\-::\-Error\-Exception@{irccd\-::\-Plugin\-::\-Error\-Exception}!which@{which}}
+\index{which@{which}!irccd::Plugin::ErrorException@{irccd\-::\-Plugin\-::\-Error\-Exception}}
+\subsubsection[{which}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string irccd\-::\-Plugin\-::\-Error\-Exception\-::which (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00027_ad0393095907915c201b25e8644d3697c}
+Tells which plugin name has failed.
+
+\begin{DoxyReturn}{Returns}
+the plugin name 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00121}{Plugin.\-h}\item 
+Plugin.\-cpp\end{DoxyCompactItemize}

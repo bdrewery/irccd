@@ -98,7 +98,7 @@ void Irccd::openConfig()
 			try {
 				m_configPath = Util::findConfiguration("irccd.conf");
 				config = Parser(m_configPath);
-			} catch (Util::ErrorException ex) {
+			} catch (std::runtime_error ex) {
 				Logger::fatal(1, "irccd: %s", ex.what());
 			}
 		} else

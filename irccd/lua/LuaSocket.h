@@ -19,16 +19,39 @@
 #ifndef _LUA_SOCKET_H_
 #define _LUA_SOCKET_H_
 
+/**
+ * @file LuaSocket.h
+ * @brief Lua bindings for sockets
+ */
+
 #include <lua.hpp>
 
-namespace irccd
-{
+namespace irccd {
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_socket(lua_State *L);
+
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_socket_listener(lua_State *L);
 
 #if defined(COMPAT_1_1)
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_socket_address(lua_State *L);
 
 #endif

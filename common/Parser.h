@@ -19,6 +19,11 @@
 #ifndef _PARSER_H_
 #define _PARSER_H_
 
+/**
+ * @file Parser.h
+ * @brief Config file parser
+ */
+
 #include <cstdlib>
 #include <functional>
 #include <stdexcept>
@@ -41,11 +46,24 @@ class Section {
 public:
 	friend class Parser;
 
+	/**
+	 * The map from key to values.
+	 */
 	using Map = std::unordered_map<std::string, std::string>;
 
-	// C++ Container compatibility
+	/**
+	 * The type of value.
+	 */
 	using value_type	= Map::value_type;
+
+	/**
+	 * The iterator object.
+	 */
 	using iterator		= Map::iterator;
+
+	/**
+	 * The const iterator object.
+	 */
 	using const_iterator	= Map::const_iterator;
 
 private:
@@ -56,7 +74,7 @@ private:
 public:
 	template <typename T>
 	struct Converter {
-		static const bool supported = false;
+		static const bool supported = false;	//!< not supported
 	};
 
 	/**
@@ -153,60 +171,115 @@ public:
 		return Converter<T>::convert(m_options.at(name));
 	}
 
+	/**
+	 * Test equality.
+	 *
+	 * @param s1 the first section
+	 * @param s2 the second section
+	 * @return true if equals
+	 */
 	friend bool operator==(const Section &s1, const Section &s2);
 };
 
+/**
+ * @brief Overload for booleans.
+ */
 template <>
 struct Section::Converter<bool> {
-	static const bool supported = true;
+	static const bool supported = true;	//!< is supported
 
+	/**
+	 * Convert from a string to bool. Supported true values are "yes",
+	 * "true", "1", all other are false.
+	 *
+	 * @param value the value
+	 * @return the converted value
+	 */
 	static bool convert(const std::string &value)
 	{
 		bool result(false);
 
 		if (value == "yes" || value == "true"|| value == "1")
 			result = true;
-		else if (value == "no" || value == "false" || value == "0")
-			result = false;
 
 		return result;
 	}
 };
 
+/**
+ * @brief Overload for integers.
+ */
 template <>
 struct Section::Converter<int> {
-	static const bool supported = true;
+	static const bool supported = true;	//!< is supported
 
+	/**
+	 * Convert a string to integer.
+	 *
+	 * @param value the value
+	 * @return the converted value
+	 * @throw std::invalid_argument on argument error
+	 */
 	static int convert(const std::string &value)
 	{
 		return std::stoi(value);
 	}
 };
 
+/**
+ * @brief Overload for floats.
+ */
 template <>
 struct Section::Converter<float> {
-	static const bool supported = true;
+	static const bool supported = true;	//!< is supported
 
+	/**
+	 * Convert a string to float.
+	 *
+	 * @param value the value
+	 * @return the converted value
+	 * @throw std::invalid_argument on argument error
+	 */
 	static float convert(const std::string &value)
 	{
 		return std::stof(value);
 	}
 };
 
+/**
+ * @brief Overload for double.
+ */
 template <>
 struct Section::Converter<double> {
-	static const bool supported = true;
+	static const bool supported = true;	//!< is supported
 
+	/**
+	 * Convert a string to double.
+	 *
+	 * @param value the value
+	 * @return the converted value
+	 * @throw std::invalid_argument on argument error
+	 */
 	static double convert(const std::string &value)
 	{
 		return std::stod(value);
 	}
 };
 
+/**
+ * @brief Overload for std::string.
+ */
 template <>
 struct Section::Converter<std::string> {
-	static const bool supported = true;
+	static const bool supported = true;	//!< is supported
 
+	/**
+	 * Create a copy of the string.
+	 *
+	 * @param value the value
+	 * @return the converted value
+	 * @throw std::invalid_argument on argument error
+	 */
 	static std::string convert(const std::string &value)
 	{
 		return value;
@@ -230,12 +303,29 @@ public:
 		DisableVerbosity	= 4	/*! be verbose by method */
 	};
 
+	/**
+	 * The find function.
+	 */
 	using FindFunc	= std::function<void (const Section &)>;
+
+	/**
+	 * The underlying list.
+	 */
 	using List	= std::vector<Section>;
 
-	// C++ Container compatibility
+	/**
+	 * The type of value.
+	 */
 	using value_type	= List::value_type;
+
+	/**
+	 * The iterator object.
+	 */
 	using iterator		= List::iterator;
+
+	/**
+	 * The const iterator object.
+	 */
 	using const_iterator	= List::const_iterator;
 
 private:
@@ -255,6 +345,9 @@ private:
 	void open();
 
 public:
+	/**
+	 * The default comment character
+	 */
 	static const char DEFAULT_COMMENT_CHAR;
 
 	/**
@@ -344,6 +437,13 @@ public:
 	 */
 	virtual void log(int number, const std::string &section, const std::string &message);
 
+	/**
+	 * Test equality.
+	 *
+	 * @param p1 the first parser
+	 * @param p2 the second parser
+	 * @return true if equals
+	 */
 	friend bool operator==(const Parser &p1, const Parser &p2);
 };
 

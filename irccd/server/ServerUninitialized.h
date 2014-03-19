@@ -19,6 +19,11 @@
 #ifndef _SERVER_UNINITIALIZED_H_
 #define _SERVER_UNINITIALIZED_H_
 
+/**
+ * @file ServerUninitialized.h
+ * @brief Server is currently not initialized
+ */
+
 #include "ServerState.h"
 
 namespace irccd {

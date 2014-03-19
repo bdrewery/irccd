@@ -19,6 +19,11 @@
 #ifndef _THREAD_H_
 #define _THREAD_H_
 
+/**
+ * @file Thread.h
+ * @brief Irccd thread interface
+ */
+
 #include <thread>
 
 #include "Luae.h"
@@ -39,6 +44,9 @@ private:
 	Thread();
 
 public:
+	/**
+	 * The smart pointer for \ref Thread
+	 */
 	using Ptr	= std::shared_ptr<Thread>;
 
 	friend class Plugin;
@@ -88,6 +96,9 @@ public:
 	 */
 	Process::Ptr process() const;
 
+	/**
+	 * Convert to lua_State *
+	 */
 	operator lua_State *();
 };
 

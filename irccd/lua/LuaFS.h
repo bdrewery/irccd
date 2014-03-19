@@ -19,10 +19,21 @@
 #ifndef _LUA_FS_H_
 #define _LUA_FS_H_
 
+/**
+ * @file LuaFS.h
+ * @brief Lua bindings for file dependant operations
+ */
+
 #include <lua.hpp>
 
 namespace irccd {
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_fs(lua_State *L);
 
 } // !irccd

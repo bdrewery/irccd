@@ -1,0 +1,44 @@
+\hypertarget{a00125}{\section{Server.\-h File Reference}
+\label{a00125}\index{Server.\-h@{Server.\-h}}
+}
+
+
+Irccd servers.  
+
+
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{a00036}{irccd\-::\-Irc\-Whois}
+\begin{DoxyCompactList}\small\item\em Describe a whois information. \end{DoxyCompactList}\item 
+class \hyperlink{a00055}{irccd\-::\-Server}
+\begin{DoxyCompactList}\small\item\em Connect to an I\-R\-C server. \end{DoxyCompactList}\item 
+struct \hyperlink{a00004}{irccd\-::\-Server\-::\-Channel}
+\begin{DoxyCompactList}\small\item\em A channel joined or to join. \end{DoxyCompactList}\item 
+struct \hyperlink{a00053}{irccd\-::\-Server\-::\-Retry\-Info}
+\begin{DoxyCompactList}\small\item\em The reconnection mechanism. \end{DoxyCompactList}\item 
+struct \hyperlink{a00031}{irccd\-::\-Server\-::\-Info}
+\begin{DoxyCompactList}\small\item\em \hyperlink{a00055}{Server} information. \end{DoxyCompactList}\item 
+struct \hyperlink{a00029}{irccd\-::\-Server\-::\-Identity}
+\begin{DoxyCompactList}\small\item\em An identity used for the server. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+using {\bfseries irccd\-::\-Irc\-Prefixes} = std\-::map$<$ Irc\-Chan\-Nick\-Mode, char $>$
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum {\bfseries Irc\-Chan\-Nick\-Mode} \{ \\*
+{\bfseries irccd\-::\-Creator} = 'O', 
+{\bfseries irccd\-::\-Half\-Operator} = 'h', 
+{\bfseries irccd\-::\-Operator} = 'o', 
+{\bfseries irccd\-::\-Protection} = 'a', 
+\\*
+{\bfseries irccd\-::\-Voiced} = 'v'
+ \}
+\begin{DoxyCompactList}\small\item\em Prefixes for channels. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Irccd servers. 

@@ -19,6 +19,11 @@
 #ifndef _PLUGIN_H_
 #define _PLUGIN_H_
 
+/**
+ * @file Plugin.h
+ * @brief Irccd plugins
+ */
+
 #include <unordered_map>
 #include <memory>
 #include <string>
@@ -34,10 +39,19 @@ namespace irccd {
 
 class IrcEvent;
 
+/**
+ * @brief Overload for string list
+ */
 template <>
 struct Luae::Convert<std::vector<std::string>> {
-	static const bool supported = true;
+	static const bool supported = true;	//!< is supported
 
+	/**
+	 * Push a string list.
+	 *
+	 * @param L the Lua state
+	 * @param value the value
+	 */
 	static void push(lua_State *L, const std::vector<std::string> &value)
 	{
 		int i = 0;
@@ -50,20 +64,38 @@ struct Luae::Convert<std::vector<std::string>> {
 	}
 };
 
+/**
+ * @brief Overload for \ref Server
+ */
 template <>
 struct Luae::Convert<Server::Ptr> {
-	static const bool supported = true;
+	static const bool supported = true;	//!< is supported
 
+	/**
+	 * Push a server.
+	 *
+	 * @param L the Lua state
+	 * @param server the server
+	 */
 	static void push(lua_State *L, const Server::Ptr &server)
 	{
 		LuaeClass::pushShared<Server>(L, server, ServerType);
 	}
 };
 
+/**
+ * @brief Overload for IrcWhois
+ */
 template <>
 struct Luae::Convert<IrcWhois> {
-	static const bool supported = true;
+	static const bool supported = true;	//!< is supported
 
+	/**
+	 * Push the whois information.
+	 *
+	 * @param L the Lua state
+	 * @param whois the whois information
+	 */
 	static void push(lua_State *L, const IrcWhois &whois)
 	{	
 		lua_createtable(L, 0, 0);
@@ -97,14 +129,27 @@ struct Luae::Convert<IrcWhois> {
  */
 class Plugin {
 public:
+	/**
+	 * @class ErrorException
+	 * @brief Error in plugins
+	 */
 	class ErrorException : public std::exception {
 	private:
 		std::string m_error;
 		std::string m_which;
 
 	public:
+		/**
+		 * Default constructor.
+		 */
 		ErrorException() = default;
 
+		/**
+		 * Construct an error.
+		 *
+		 * @param which the plugin name
+		 * @param error the error
+		 */
 		ErrorException(const std::string &which, const std::string &error);
 
 		/**
@@ -122,12 +167,19 @@ public:
 		std::string error() const;
 
 		/**
-		 * @copydoc std::exception::what
+		 * Get the error.
+		 *
+		 * @return the error
 		 */
 		virtual const char * what() const throw();
 	};
 
+	/**
+	 * The smart pointer for plugin.
+	 */
 	using Ptr		= std::shared_ptr<Plugin>;
+
+private:
 	using Dirs		= std::vector<std::string>;
 	using List		= std::vector<Plugin::Ptr>;
 	using Mutex		= std::recursive_mutex;
@@ -185,7 +237,6 @@ private:
 			}
 		}
 	}
-
 
 public:
 	/**

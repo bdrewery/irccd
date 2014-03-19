@@ -19,6 +19,11 @@
 #ifndef _SERVER_RUNNING_H_
 #define _SERVER_RUNNING_H_
 
+/**
+ * @file ServerRunning.h
+ * @brief Server is running
+ */
+
 #include <thread>
 #include <memory>
 #include <mutex>

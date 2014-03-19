@@ -17,13 +17,23 @@
  */
 
 #ifndef _LUA_PLUGIN_H_
-#define _LUA_PLUGIN_H
+#define _LUA_PLUGIN_H_
+
+/**
+ * @file LuaPlugin.h
+ * @brief Lua bindings for plugins
+ */
 
 #include <lua.hpp>
 
-namespace irccd
-{
+namespace irccd {
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_plugin(lua_State *L);
 
 };

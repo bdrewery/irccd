@@ -1,0 +1,458 @@
+\hypertarget{a00035}{\section{irccd\-:\-:Irc\-Session Class Reference}
+\label{a00035}\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}}
+}
+
+
+Wrapper for irc\-\_\-session\-\_\-t.  
+
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00035_a091c5cdd4db9675fee4a2bd29d24ffa6}{Irc\-Session} ()
+\item 
+\hyperlink{a00035_a317ab674eb328274b62d85cfbb022731}{Irc\-Session} (\hyperlink{a00035}{Irc\-Session} \&\&other)
+\item 
+\hyperlink{a00035}{Irc\-Session} \& \hyperlink{a00035_a7be54cea5e7e81baa3b2dafb79c7def6}{operator=} (\hyperlink{a00035}{Irc\-Session} \&\&other)
+\item 
+\hyperlink{a00035_a5bc9dd45ad95c0f2c58e9185f1ce4866}{operator irc\-\_\-session\-\_\-t $\ast$} ()
+\item 
+void \hyperlink{a00035_a9310da1118951722479b5b597eba615e}{connect} (std\-::shared\-\_\-ptr$<$ \hyperlink{a00055}{Server} $>$ server)
+\item 
+void \hyperlink{a00035_a4d017edb9f4735749e9c31f6e4970714}{run} ()
+\item 
+bool \hyperlink{a00035_ac8090aca0f8639e7d66d727a969c7ba9}{cnotice} (const std\-::string \&channel, const std\-::string \&message)
+\item 
+bool \hyperlink{a00035_a3942b5c7881122e2bfce098f6713319c}{invite} (const std\-::string \&target, const std\-::string \&channel)
+\item 
+bool \hyperlink{a00035_a51877d3f510cd2829c269e35195c96fe}{join} (const std\-::string \&channel, const std\-::string \&password)
+\item 
+bool \hyperlink{a00035_a6f9183f39ed15cd97fc3659e25c42709}{kick} (const std\-::string \&name, const std\-::string \&channel, const std\-::string \&reason)
+\item 
+bool \hyperlink{a00035_a5e40105dde1a33aca57c59b04b482078}{me} (const std\-::string \&target, const std\-::string \&message)
+\item 
+bool \hyperlink{a00035_a279db04d81937d22ec68f2e804ab7d24}{mode} (const std\-::string \&channel, const std\-::string \&mode)
+\item 
+bool \hyperlink{a00035_aec442c5c19a7aa0bdbbd2c333cc166a2}{names} (const std\-::string \&channel)
+\item 
+bool \hyperlink{a00035_ac48dc97273391c97191277c4aa327878}{nick} (const std\-::string \&newnick)
+\item 
+bool \hyperlink{a00035_a688985cff9ebe0fba8b08aea45d2f743}{notice} (const std\-::string \&target, const std\-::string \&message)
+\item 
+bool \hyperlink{a00035_a7639f81e2352f9c15fa92371e804f3f4}{part} (const std\-::string \&channel, const std\-::string \&reason)
+\item 
+bool \hyperlink{a00035_a5f2c115906eb2c117e705912dbc7d6ca}{say} (const std\-::string \&target, const std\-::string \&message)
+\item 
+bool \hyperlink{a00035_a3a1060fc5ee87566d8706f649ecb1e1e}{topic} (const std\-::string \&channel, const std\-::string \&topic)
+\item 
+bool \hyperlink{a00035_aaf051c9594168e0c88227442c7510c49}{umode} (const std\-::string \&\hyperlink{a00035_a279db04d81937d22ec68f2e804ab7d24}{mode})
+\item 
+bool \hyperlink{a00035_aaf6879d15dd0e6ecd457ee445b3c376b}{whois} (const std\-::string \&target)
+\item 
+bool \hyperlink{a00035_ab31c27f8e724f21e0df5de2bf155bdce}{send} (const std\-::string \&raw)
+\item 
+void \hyperlink{a00035_a192d7ceb5e1215e562d4674fafb65fe0}{disconnect} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static std\-::shared\-\_\-ptr$<$ \hyperlink{a00055}{Server} $>$ \hyperlink{a00035_a1ed9c9fe2ba41d117ed9b7213b71c01a}{to\-Server} (irc\-\_\-session\-\_\-t $\ast$)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Wrapper for irc\-\_\-session\-\_\-t. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00035_a091c5cdd4db9675fee4a2bd29d24ffa6}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!Irc\-Session@{Irc\-Session}}
+\index{Irc\-Session@{Irc\-Session}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{Irc\-Session}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Irc\-Session\-::\-Irc\-Session (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00035_a091c5cdd4db9675fee4a2bd29d24ffa6}
+Default constructor. \hypertarget{a00035_a317ab674eb328274b62d85cfbb022731}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!Irc\-Session@{Irc\-Session}}
+\index{Irc\-Session@{Irc\-Session}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{Irc\-Session}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Irc\-Session\-::\-Irc\-Session (
+\begin{DoxyParamCaption}
+\item[{{\bf Irc\-Session} \&\&}]{other}
+\end{DoxyParamCaption}
+)}}\label{a00035_a317ab674eb328274b62d85cfbb022731}
+Move constructor.
+
+
+\begin{DoxyParams}{Parameters}
+{\em other} & the other \hyperlink{a00035}{Irc\-Session} \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00035_ac8090aca0f8639e7d66d727a969c7ba9}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!cnotice@{cnotice}}
+\index{cnotice@{cnotice}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{cnotice}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::cnotice (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{channel, }
+\item[{const std\-::string \&}]{message}
+\end{DoxyParamCaption}
+)}}\label{a00035_ac8090aca0f8639e7d66d727a969c7ba9}
+Send a notice to a public channel.
+
+
+\begin{DoxyParams}{Parameters}
+{\em channel} & the target channel \\
+\hline
+{\em message} & the message to send \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00035_a9310da1118951722479b5b597eba615e}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!connect@{connect}}
+\index{connect@{connect}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{connect}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irc\-Session\-::connect (
+\begin{DoxyParamCaption}
+\item[{std\-::shared\-\_\-ptr$<$ {\bf Server} $>$}]{server}
+\end{DoxyParamCaption}
+)}}\label{a00035_a9310da1118951722479b5b597eba615e}
+Connect to the server.
+
+
+\begin{DoxyParams}{Parameters}
+{\em server} & the server \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00035_a192d7ceb5e1215e562d4674fafb65fe0}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!disconnect@{disconnect}}
+\index{disconnect@{disconnect}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{disconnect}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irc\-Session\-::disconnect (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00035_a192d7ceb5e1215e562d4674fafb65fe0}
+Disconnect the session. \hypertarget{a00035_a3942b5c7881122e2bfce098f6713319c}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!invite@{invite}}
+\index{invite@{invite}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{invite}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::invite (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{target, }
+\item[{const std\-::string \&}]{channel}
+\end{DoxyParamCaption}
+)}}\label{a00035_a3942b5c7881122e2bfce098f6713319c}
+Invite someone to a channel.
+
+
+\begin{DoxyParams}{Parameters}
+{\em target} & the target nickname \\
+\hline
+{\em channel} & the channel \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00035_a51877d3f510cd2829c269e35195c96fe}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!join@{join}}
+\index{join@{join}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{join}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::join (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{channel, }
+\item[{const std\-::string \&}]{password}
+\end{DoxyParamCaption}
+)}}\label{a00035_a51877d3f510cd2829c269e35195c96fe}
+Join a channel.
+
+
+\begin{DoxyParams}{Parameters}
+{\em channel} & the channel name \\
+\hline
+{\em password} & an optional password \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00035_a6f9183f39ed15cd97fc3659e25c42709}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!kick@{kick}}
+\index{kick@{kick}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{kick}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::kick (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{name, }
+\item[{const std\-::string \&}]{channel, }
+\item[{const std\-::string \&}]{reason}
+\end{DoxyParamCaption}
+)}}\label{a00035_a6f9183f39ed15cd97fc3659e25c42709}
+Kick someone from a channel.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & the nick name \\
+\hline
+{\em channel} & the channel from \\
+\hline
+{\em reason} & an optional reason \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00035_a5e40105dde1a33aca57c59b04b482078}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!me@{me}}
+\index{me@{me}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{me}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::me (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{target, }
+\item[{const std\-::string \&}]{message}
+\end{DoxyParamCaption}
+)}}\label{a00035_a5e40105dde1a33aca57c59b04b482078}
+Send a C\-T\-C\-P A\-C\-T\-I\-O\-N known as /me.
+
+
+\begin{DoxyParams}{Parameters}
+{\em target} & the nickname or channel \\
+\hline
+{\em message} & the message to send \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00035_a279db04d81937d22ec68f2e804ab7d24}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!mode@{mode}}
+\index{mode@{mode}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{mode}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::mode (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{channel, }
+\item[{const std\-::string \&}]{mode}
+\end{DoxyParamCaption}
+)}}\label{a00035_a279db04d81937d22ec68f2e804ab7d24}
+Change the channel mode.
+
+
+\begin{DoxyParams}{Parameters}
+{\em channel} & the target channel \\
+\hline
+{\em mode} & the mode \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00035_aec442c5c19a7aa0bdbbd2c333cc166a2}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!names@{names}}
+\index{names@{names}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{names}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::names (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{channel}
+\end{DoxyParamCaption}
+)}}\label{a00035_aec442c5c19a7aa0bdbbd2c333cc166a2}
+Get the list of names as a deferred call.
+
+
+\begin{DoxyParams}{Parameters}
+{\em channel} & which channel \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00035_ac48dc97273391c97191277c4aa327878}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!nick@{nick}}
+\index{nick@{nick}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{nick}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::nick (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{newnick}
+\end{DoxyParamCaption}
+)}}\label{a00035_ac48dc97273391c97191277c4aa327878}
+Change your nickname.
+
+
+\begin{DoxyParams}{Parameters}
+{\em newnick} & the new nickname \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00035_a688985cff9ebe0fba8b08aea45d2f743}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!notice@{notice}}
+\index{notice@{notice}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{notice}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::notice (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{target, }
+\item[{const std\-::string \&}]{message}
+\end{DoxyParamCaption}
+)}}\label{a00035_a688985cff9ebe0fba8b08aea45d2f743}
+Send a notice to someone.
+
+
+\begin{DoxyParams}{Parameters}
+{\em target} & the target nickname \\
+\hline
+{\em message} & the message \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00035_a5bc9dd45ad95c0f2c58e9185f1ce4866}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!operator irc\-\_\-session\-\_\-t $\ast$@{operator irc\-\_\-session\-\_\-t $\ast$}}
+\index{operator irc\-\_\-session\-\_\-t $\ast$@{operator irc\-\_\-session\-\_\-t $\ast$}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{operator irc\-\_\-session\-\_\-t $\ast$}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Irc\-Session\-::operator irc\-\_\-session\-\_\-t $\ast$ (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00035_a5bc9dd45ad95c0f2c58e9185f1ce4866}
+Cast to irc\-\_\-session\-\_\-t for raw commands.
+
+\begin{DoxyReturn}{Returns}
+the irc\-\_\-session\-\_\-t 
+\end{DoxyReturn}
+\hypertarget{a00035_a7be54cea5e7e81baa3b2dafb79c7def6}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!operator=@{operator=}}
+\index{operator=@{operator=}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{operator=}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Irc\-Session} \& irccd\-::\-Irc\-Session\-::operator= (
+\begin{DoxyParamCaption}
+\item[{{\bf Irc\-Session} \&\&}]{other}
+\end{DoxyParamCaption}
+)}}\label{a00035_a7be54cea5e7e81baa3b2dafb79c7def6}
+Move assignment operator.
+
+
+\begin{DoxyParams}{Parameters}
+{\em other} & the other \hyperlink{a00035}{Irc\-Session} \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+self 
+\end{DoxyReturn}
+\hypertarget{a00035_a7639f81e2352f9c15fa92371e804f3f4}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!part@{part}}
+\index{part@{part}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{part}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::part (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{channel, }
+\item[{const std\-::string \&}]{reason}
+\end{DoxyParamCaption}
+)}}\label{a00035_a7639f81e2352f9c15fa92371e804f3f4}
+Leave a channel.
+
+
+\begin{DoxyParams}{Parameters}
+{\em channel} & the channel to leave \\
+\hline
+{\em reason} & an optional reason \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00035_a4d017edb9f4735749e9c31f6e4970714}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!run@{run}}
+\index{run@{run}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{run}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irc\-Session\-::run (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00035_a4d017edb9f4735749e9c31f6e4970714}
+Run forever. \hypertarget{a00035_a5f2c115906eb2c117e705912dbc7d6ca}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!say@{say}}
+\index{say@{say}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{say}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::say (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{target, }
+\item[{const std\-::string \&}]{message}
+\end{DoxyParamCaption}
+)}}\label{a00035_a5f2c115906eb2c117e705912dbc7d6ca}
+Say something to a channel or to a nickname.
+
+
+\begin{DoxyParams}{Parameters}
+{\em target} & the nickname or channel \\
+\hline
+{\em message} & the message to send \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00035_ab31c27f8e724f21e0df5de2bf155bdce}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!send@{send}}
+\index{send@{send}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{send}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::send (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{raw}
+\end{DoxyParamCaption}
+)}}\label{a00035_ab31c27f8e724f21e0df5de2bf155bdce}
+Send a raw message, no need to finish with \textbackslash{}r\textbackslash{}n.
+
+
+\begin{DoxyParams}{Parameters}
+{\em raw} & the raw message \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00035_a3a1060fc5ee87566d8706f649ecb1e1e}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!topic@{topic}}
+\index{topic@{topic}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{topic}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::topic (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{channel, }
+\item[{const std\-::string \&}]{topic}
+\end{DoxyParamCaption}
+)}}\label{a00035_a3a1060fc5ee87566d8706f649ecb1e1e}
+Change a channel topic.
+
+
+\begin{DoxyParams}{Parameters}
+{\em channel} & the channel target \\
+\hline
+{\em topic} & the new topic \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00035_a1ed9c9fe2ba41d117ed9b7213b71c01a}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!to\-Server@{to\-Server}}
+\index{to\-Server@{to\-Server}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{to\-Server}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Server\-::\-Ptr} irccd\-::\-Irc\-Session\-::to\-Server (
+\begin{DoxyParamCaption}
+\item[{irc\-\_\-session\-\_\-t $\ast$}]{s}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00035_a1ed9c9fe2ba41d117ed9b7213b71c01a}
+Convert the s context to a shared\-\_\-ptr$<$\-Server$>$.
+
+
+\begin{DoxyParams}{Parameters}
+{\em s} & the session \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the shared\-\_\-ptr. 
+\end{DoxyReturn}
+\hypertarget{a00035_aaf051c9594168e0c88227442c7510c49}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!umode@{umode}}
+\index{umode@{umode}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{umode}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::umode (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{mode}
+\end{DoxyParamCaption}
+)}}\label{a00035_aaf051c9594168e0c88227442c7510c49}
+Change your own user mode.
+
+
+\begin{DoxyParams}{Parameters}
+{\em mode} & the mode \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+\hypertarget{a00035_aaf6879d15dd0e6ecd457ee445b3c376b}{\index{irccd\-::\-Irc\-Session@{irccd\-::\-Irc\-Session}!whois@{whois}}
+\index{whois@{whois}!irccd::IrcSession@{irccd\-::\-Irc\-Session}}
+\subsubsection[{whois}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irc\-Session\-::whois (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{target}
+\end{DoxyParamCaption}
+)}}\label{a00035_aaf6879d15dd0e6ecd457ee445b3c376b}
+Get the whois information from a user.
+
+
+\begin{DoxyParams}{Parameters}
+{\em target} & the nickname target \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the message was sent 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00083}{Irc\-Session.\-h}\item 
+Irc\-Session.\-cpp\end{DoxyCompactItemize}

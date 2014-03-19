@@ -16,8 +16,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LUA_H_
-#define _LUA_H_
+#ifndef _LUAE_H_
+#define _LUAE_H_
+
+/**
+ * @file Luae.h
+ * @brief Lua C++ extended API
+ */
 
 #include <cassert>
 #include <cstddef>
@@ -33,19 +38,59 @@
 
 #if !defined(NDEBUG)
 
+/**
+ * Store the current stack size. Should be called at the beginning of a
+ * function.
+ *
+ * @param L the Lua state
+ */
 #define LUAE_STACK_CHECKBEGIN(L)					\
 	int __topstack = lua_gettop((L))
 
+/**
+ * Check if the current stack size match the beginning. LUAE_STACK_CHECKBEGIN
+ * must have been called.
+ *
+ * @param L the Lua state
+ */
 #define LUAE_STACK_CHECKEQUALS(L)					\
 	assert(lua_gettop((L)) == __topstack)
 
+/**
+ * Check if the current stack size match the condition. LUAE_STACK_CHECKBEGIN
+ * must have been called.
+ *
+ * @param L the Lua state
+ * @param cond the condition
+ */
 #define LUAE_STACK_CHECKEND(L, cond)					\
 	assert(lua_gettop((L)) cond == __topstack)
 
 #else
 
+/**
+ * Store the current stack size. Should be called at the beginning of a
+ * function.
+ *
+ * @param L the Lua state
+ */
 #define LUAE_STACK_CHECKBEGIN(L)
+
+/**
+ * Check if the current stack size match the beginning. LUAE_STACK_CHECKBEGIN
+ * must have been called.
+ *
+ * @param L the Lua state
+ */
 #define LUAE_STACK_CHECKEQUALS(L)
+
+/**
+ * Check if the current stack size match the condition. LUAE_STACK_CHECKBEGIN
+ * must have been called.
+ *
+ * @param L the Lua state
+ * @param cond the condition
+ */
 #define LUAE_STACK_CHECKEND(L, cond)
 
 #endif
@@ -74,7 +119,7 @@ public:
 	 */
 	template <typename T>
 	struct Convert {
-		static const bool supported = false;
+		static const bool supported = false;	//!< true if supported
 	};
 
 	/**
@@ -83,10 +128,16 @@ public:
 	 */
 	template <typename Type>
 	struct Iterator {
-		Type	begin;
-		Type	end;
-		Type	current;
+		Type	begin;				//!< the beginning
+		Type	end;				//!< the end
+		Type	current;			//!< the current index
 
+		/**
+		 * Construct the iterator.
+		 *
+		 * @param begin the beginning
+		 * @param end the end
+		 */
 		Iterator(Type begin, Type end)
 			: begin(begin)
 			, end(end)
@@ -435,100 +486,210 @@ public:
 	}
 };
 
+/**
+ * @brief Overload for booleans.
+ */
 template <>
 struct Luae::Convert<bool> {
-	static const bool supported = true;
+	static const bool supported = true;	//!< is supported
 
+	/**
+	 * Push the boolean value.
+	 *
+	 * @param L the Lua state
+	 * @param value the value
+	 */
 	static void push(lua_State *L, const bool &value)
 	{
 		lua_pushboolean(L, value);
 	}
 
+	/**
+	 * Get a boolean.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return a boolean
+	 */
 	static bool get(lua_State *L, int index)
 	{
 		return lua_toboolean(L, index);
 	}
 
+	/**
+	 * Check for a bool.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 */
 	static bool check(lua_State *L, int index)
 	{
 		return lua_toboolean(L, index);
 	}
 };
 
+/**
+ * @brief Overload for integers.
+ */
 template <>
 struct Luae::Convert<int> {
-	static const bool supported = true;
+	static const bool supported = true;	//!< is supported
 
+	/**
+	 * Push the integer value.
+	 *
+	 * @param L the Lua state
+	 * @param value the value
+	 */
 	static void push(lua_State *L, const int &value)
 	{
 		lua_pushinteger(L, value);
 	}
 
+	/**
+	 * Get a integer.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return a boolean
+	 */
 	static int get(lua_State *L, int index)
 	{
 		return lua_tointeger(L, index);
 	}
 
+	/**
+	 * Check for an integer.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 */
 	static int check(lua_State *L, int index)
 	{
 		return luaL_checkinteger(L, index);
 	}
 };
 
+/**
+ * @brief Overload for doubles.
+ */
 template <>
 struct Luae::Convert<double> {
-	static const bool supported = true;
+	static const bool supported = true;	//!< is supported
 
+	/**
+	 * Push the double value.
+	 *
+	 * @param L the Lua state
+	 * @param value the value
+	 */
 	static void push(lua_State *L, const double &value)
 	{
 		lua_pushnumber(L, value);
 	}
 
+	/**
+	 * Get a double.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return a boolean
+	 */
 	static double get(lua_State *L, int index)
 	{
 		return lua_tonumber(L, index);
 	}
 
+	/**
+	 * Check for a double.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 */
 	static double check(lua_State *L, int index)
 	{
 		return luaL_checknumber(L, index);
 	}
 };
 
+/**
+ * @brief Overload for std::string.
+ */
 template <>
 struct Luae::Convert<std::string> {
-	static const bool supported = true;
+	static const bool supported = true;	//!< is supported
 
+	/**
+	 * Push the string value.
+	 *
+	 * @param L the Lua state
+	 * @param value the value
+	 */
 	static void push(lua_State *L, const std::string &value)
 	{
 		lua_pushlstring(L, value.c_str(), value.length());
 	}
 
+	/**
+	 * Get a string.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return a boolean
+	 */
 	static std::string get(lua_State *L, int index)
 	{
 		return lua_tostring(L, index);
 	}
 
+	/**
+	 * Check for a string.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 */
 	static std::string check(lua_State *L, int index)
 	{
 		return luaL_checkstring(L, index);
 	}
 };
 
+/**
+ * @brief Overload for const char *
+ */
 template <>
 struct Luae::Convert<const char *> {
-	static const bool supported = true;
+	static const bool supported = true;	//!< is supported
 
+	/**
+	 * Push the string value.
+	 *
+	 * @param L the Lua state
+	 * @param value the value
+	 */
 	static void push(lua_State *L, const char *value)
 	{
 		lua_pushstring(L, value);
 	}
 
+	/**
+	 * Get a string.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return a boolean
+	 */
 	static const char *get(lua_State *L, int index)
 	{
 		return lua_tostring(L, index);
 	}
 
+	/**
+	 * Check for a string.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 */
 	static const char *check(lua_State *L, int index)
 	{
 		return luaL_checkstring(L, index);
@@ -562,13 +723,20 @@ private:
 	void initRegistry();
 
 public:
-	/*
-	 * FieldRefs:		The field stored into the registry to avoid
-	 *			recreation of shared objects.
+	/**
+	 * The field stored into the registry to avoid recreation of shared
+	 * objects.
 	 */
 	static const char *FieldRefs;
 
+	/**
+	 * Deleted copy constructor.
+	 */
 	LuaeState(const LuaeState &) = delete;
+
+	/**
+	 * Deleted copy assignment.
+	 */
 	LuaeState &operator=(const LuaeState &) = delete;
 
 	/**
@@ -664,26 +832,37 @@ public:
  */
 class LuaeClass {
 public:
+	/**
+	 * Methods for a class.
+	 */
 	using Methods	= std::vector<luaL_Reg>;
 
+	/**
+	 * Smart pointer for Luae objects.
+	 */
 	template <typename T>
 	using Ptr	= std::shared_ptr<T>;
 
+	/**
+	 * @struct Def
+	 * @brief Definition of a class
+	 */
 	struct Def {
-		std::string	name;		//! metatable name
-		Methods		methods;	//! methods
-		Methods		metamethods;	//! metamethods
-		const Def	*parent;	//! optional parent class
+		std::string	name;		//!< metatable name
+		Methods		methods;	//!< methods
+		Methods		metamethods;	//!< metamethods
+		const Def	*parent;	//!< optional parent class
 	};
 
-	/*
-	 * FieldName:		The field stored in the object metatable about 
-	 *			the object metatable name.
-	 *
-	 * FieldParents:	The field that holds all parent classes. It is
-	 *			used to verify casts.
+	/**
+	 * The field stored in the object metatable about the object metatable
+	 * name.
 	 */
 	static const char *FieldName;
+
+	/**
+	 * The field that holds all parent classes. It is used to verify casts.
+	 */
 	static const char *FieldParents;
 
 	/**
@@ -822,6 +1001,9 @@ public:
  */
 class LuaeTable {
 public:
+	/**
+	 * The map function for \ref read
+	 */
 	using ReadFunction = std::function<void(lua_State *L, int tkey, int tvalue)>;
 
 	/**
@@ -829,7 +1011,7 @@ public:
 	 *
 	 * @param L the Lua state
 	 * @param nrec the optional number of entries as record
-	 * @param nrec the optional number of entries as sequence
+	 * @param narr the optional number of entries as sequence
 	 */
 	static void create(lua_State *L, int nrec = 0, int narr = 0);
 
@@ -1064,12 +1246,40 @@ public:
 
 } // !irccd
 
+/**
+ * Push a Lua userdata.
+ *
+ * @param size the object size
+ * @param L the Lua state
+ * @return the allocated data
+ */
 void *operator new(size_t size, lua_State *L);
 
+/**
+ * Push a Lua userdata with a metatable.
+ *
+ * @param size the object size
+ * @param L the Lua state
+ * @param metaname the metatable name
+ * @return the allocated data
+ */
 void *operator new(size_t size, lua_State *L, const char *metaname);
 
+/**
+ * Delete the Lua userdata.
+ *
+ * @param ptr the data
+ * @param L the Lua state
+ */
 void operator delete(void *ptr, lua_State *L);
 
+/**
+ * Delete the Lua userdata.
+ *
+ * @param ptr the data
+ * @param L the Lua state
+ * @param metaname the metatable name
+ */
 void operator delete(void *ptr, lua_State *L, const char *metaname);
 
-#endif // !_LUA_H_
+#endif // !_LUAE_H_

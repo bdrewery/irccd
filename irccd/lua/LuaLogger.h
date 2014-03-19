@@ -19,10 +19,21 @@
 #ifndef _LUA_LOGGER_H_
 #define _LUA_LOGGER_H_
 
+/**
+ * @file LuaLogger.h
+ * @brief Lua binfings for class Logger
+ */
+
 #include <lua.hpp>
 
 namespace irccd {
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_logger(lua_State *L);
 
 } // !irccd

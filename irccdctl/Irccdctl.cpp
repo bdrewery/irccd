@@ -663,7 +663,7 @@ void Irccdctl::openConfig()
 		try {
 			m_configPath = Util::findConfiguration("irccdctl.conf");
 			config = Parser(m_configPath);
-		} catch (Util::ErrorException ex) {
+		} catch (std::runtime_error ex) {
 			Logger::fatal(1, "%s: %s", getprogname(), ex.what());
 		}
 	} else

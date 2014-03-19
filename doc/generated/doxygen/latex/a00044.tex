@@ -1,0 +1,313 @@
+\hypertarget{a00044}{\section{irccd\-:\-:Luae\-Table Class Reference}
+\label{a00044}\index{irccd\-::\-Luae\-Table@{irccd\-::\-Luae\-Table}}
+}
+
+
+Some function for table manipulation.  
+
+
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+using \hyperlink{a00044_a9cf9541d4e6a0c0e659582029b5e015a}{Read\-Function} = std\-::function$<$ void(lua\-\_\-\-State $\ast$L, int tkey, int tvalue)$>$
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{a00044_ab8761e070cb40d555913ceedf72e20b2}{create} (lua\-\_\-\-State $\ast$L, int nrec=0, int narr=0)
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T \hyperlink{a00044_a4c3c2c2cfea3c0727a700413a91f86f0}{get} (lua\-\_\-\-State $\ast$L, int idx, const std\-::string \&name)
+\item 
+static void \hyperlink{a00044_afa49b9670fbdf8e437338cb7c3e4a721}{setfield} (lua\-\_\-\-State $\ast$L, int idx, const std\-::string \&name)
+\item 
+static void \hyperlink{a00044_aa1413d555ab5a26f042b6419d6cc1194}{getfield} (lua\-\_\-\-State $\ast$L, int idx, const std\-::string \&name)
+\item 
+{\footnotesize template$<$typename T $>$ }\\static void \hyperlink{a00044_a83523b8a94b260062de7187da0010019}{set} (lua\-\_\-\-State $\ast$L, int idx, const std\-::string \&name, const T \&value)
+\item 
+{\footnotesize template$<$size\-\_\-t N$>$ }\\static void \hyperlink{a00044_a58d550f29903e9bde8b78526547a6e7b}{set} (lua\-\_\-\-State $\ast$L, int idx, const std\-::string \&name, const char(\&s)\mbox{[}N\mbox{]})
+\item 
+{\footnotesize template$<$typename T $>$ }\\static void \hyperlink{a00044_aeb3fd26e671004f598b35e941eaa9602}{set\-Shared} (lua\-\_\-\-State $\ast$L, int index, const std\-::string \&name, const std\-::string \&meta, \hyperlink{a00041_a213f5d206d7bcfe4712ed9eacad9f0ce}{Luae\-Class\-::\-Ptr}$<$ T $>$ o)
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T \hyperlink{a00044_aba96fad8dbc7b62907f79ad28d5b8698}{require} (lua\-\_\-\-State $\ast$L, int idx, const std\-::string \&name)
+\item 
+static int \hyperlink{a00044_a360be9d74a19b8396d24e92a7120692d}{type} (lua\-\_\-\-State $\ast$L, int idx, const std\-::string \&name)
+\item 
+static void \hyperlink{a00044_a30043faca6031fb6cad7bf23029d8112}{read} (lua\-\_\-\-State $\ast$L, int idx, \hyperlink{a00044_a9cf9541d4e6a0c0e659582029b5e015a}{Read\-Function} func)
+\item 
+static int \hyperlink{a00044_a9d8db4bd19d0d5c554600c5e9692cfc8}{ref} (lua\-\_\-\-State $\ast$L, int idx, int \hyperlink{a00044_a360be9d74a19b8396d24e92a7120692d}{type}, const std\-::string \&name)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Some function for table manipulation. 
+
+Read, reference and get fields from tables. 
+
+\subsection{Member Typedef Documentation}
+\hypertarget{a00044_a9cf9541d4e6a0c0e659582029b5e015a}{\index{irccd\-::\-Luae\-Table@{irccd\-::\-Luae\-Table}!Read\-Function@{Read\-Function}}
+\index{Read\-Function@{Read\-Function}!irccd::LuaeTable@{irccd\-::\-Luae\-Table}}
+\subsubsection[{Read\-Function}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf irccd\-::\-Luae\-Table\-::\-Read\-Function} =  std\-::function$<$void(lua\-\_\-\-State $\ast$L, int tkey, int tvalue)$>$}}\label{a00044_a9cf9541d4e6a0c0e659582029b5e015a}
+The map function for \hyperlink{a00044_a30043faca6031fb6cad7bf23029d8112}{read} 
+
+\subsection{Member Function Documentation}
+\hypertarget{a00044_ab8761e070cb40d555913ceedf72e20b2}{\index{irccd\-::\-Luae\-Table@{irccd\-::\-Luae\-Table}!create@{create}}
+\index{create@{create}!irccd::LuaeTable@{irccd\-::\-Luae\-Table}}
+\subsubsection[{create}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Luae\-Table\-::create (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{nrec = {\ttfamily 0}, }
+\item[{int}]{narr = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00044_ab8761e070cb40d555913ceedf72e20b2}
+Push a new table onto the stack.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em nrec} & the optional number of entries as record \\
+\hline
+{\em narr} & the optional number of entries as sequence \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00044_a4c3c2c2cfea3c0727a700413a91f86f0}{\index{irccd\-::\-Luae\-Table@{irccd\-::\-Luae\-Table}!get@{get}}
+\index{get@{get}!irccd::LuaeTable@{irccd\-::\-Luae\-Table}}
+\subsubsection[{get}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ static T irccd\-::\-Luae\-Table\-::get (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{idx, }
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00044_a4c3c2c2cfea3c0727a700413a91f86f0}
+Get a field of a specific type from a table. Specialized for the types\-: int, double, bool and string.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em idx} & the table index \\
+\hline
+{\em name} & the field name \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the converted type. 
+\end{DoxyReturn}
+\hypertarget{a00044_aa1413d555ab5a26f042b6419d6cc1194}{\index{irccd\-::\-Luae\-Table@{irccd\-::\-Luae\-Table}!getfield@{getfield}}
+\index{getfield@{getfield}!irccd::LuaeTable@{irccd\-::\-Luae\-Table}}
+\subsubsection[{getfield}]{\setlength{\rightskip}{0pt plus 5cm}static void irccd\-::\-Luae\-Table\-::getfield (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{idx, }
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00044_aa1413d555ab5a26f042b6419d6cc1194}
+Get a field at the given index.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em idx} & the table index \\
+\hline
+{\em name} & the field name \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00044_a30043faca6031fb6cad7bf23029d8112}{\index{irccd\-::\-Luae\-Table@{irccd\-::\-Luae\-Table}!read@{read}}
+\index{read@{read}!irccd::LuaeTable@{irccd\-::\-Luae\-Table}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Luae\-Table\-::read (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{idx, }
+\item[{{\bf Read\-Function}}]{func}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00044_a30043faca6031fb6cad7bf23029d8112}
+Read a table, the function func is called for each element in the table. Parameter tkey is the Lua type of the key, parameter tvalue is the Lua type of the value. The key is available at index -\/2 and the value at index -\/1.
+
+{\bfseries Do not pop anything within the function.}
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em idx} & the table index \\
+\hline
+{\em func} & the function to call \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00044_a9d8db4bd19d0d5c554600c5e9692cfc8}{\index{irccd\-::\-Luae\-Table@{irccd\-::\-Luae\-Table}!ref@{ref}}
+\index{ref@{ref}!irccd::LuaeTable@{irccd\-::\-Luae\-Table}}
+\subsubsection[{ref}]{\setlength{\rightskip}{0pt plus 5cm}int irccd\-::\-Luae\-Table\-::ref (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{idx, }
+\item[{int}]{type, }
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00044_a9d8db4bd19d0d5c554600c5e9692cfc8}
+Reference a field from a table at the index. The reference is created in the registry only if type matches.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em idx} & the table index \\
+\hline
+{\em type} & the type requested \\
+\hline
+{\em name} & the field name \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the reference or L\-U\-A\-\_\-\-R\-E\-F\-N\-I\-L on problem 
+\end{DoxyReturn}
+\hypertarget{a00044_aba96fad8dbc7b62907f79ad28d5b8698}{\index{irccd\-::\-Luae\-Table@{irccd\-::\-Luae\-Table}!require@{require}}
+\index{require@{require}!irccd::LuaeTable@{irccd\-::\-Luae\-Table}}
+\subsubsection[{require}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ static T irccd\-::\-Luae\-Table\-::require (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{idx, }
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00044_aba96fad8dbc7b62907f79ad28d5b8698}
+Require a field from a table.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em idx} & the table index \\
+\hline
+{\em name} & the field name \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the value or call lua\-L\-\_\-error 
+\end{DoxyReturn}
+\hypertarget{a00044_a83523b8a94b260062de7187da0010019}{\index{irccd\-::\-Luae\-Table@{irccd\-::\-Luae\-Table}!set@{set}}
+\index{set@{set}!irccd::LuaeTable@{irccd\-::\-Luae\-Table}}
+\subsubsection[{set}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ static void irccd\-::\-Luae\-Table\-::set (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{idx, }
+\item[{const std\-::string \&}]{name, }
+\item[{const T \&}]{value}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00044_a83523b8a94b260062de7187da0010019}
+Set a table field. Specialized for the same fields as get.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em idx} & the index \\
+\hline
+{\em name} & the field name \\
+\hline
+{\em value} & the value \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See Also}
+\hyperlink{a00044_a4c3c2c2cfea3c0727a700413a91f86f0}{get} 
+\end{DoxySeeAlso}
+\hypertarget{a00044_a58d550f29903e9bde8b78526547a6e7b}{\index{irccd\-::\-Luae\-Table@{irccd\-::\-Luae\-Table}!set@{set}}
+\index{set@{set}!irccd::LuaeTable@{irccd\-::\-Luae\-Table}}
+\subsubsection[{set}]{\setlength{\rightskip}{0pt plus 5cm}template$<$size\-\_\-t N$>$ static void irccd\-::\-Luae\-Table\-::set (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{idx, }
+\item[{const std\-::string \&}]{name, }
+\item[{const char(\&)}]{s\mbox{[}\-N\mbox{]}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00044_a58d550f29903e9bde8b78526547a6e7b}
+Overload for string literals.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em idx} & the index \\
+\hline
+{\em name} & the field name \\
+\hline
+{\em s} & the string \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00044_afa49b9670fbdf8e437338cb7c3e4a721}{\index{irccd\-::\-Luae\-Table@{irccd\-::\-Luae\-Table}!setfield@{setfield}}
+\index{setfield@{setfield}!irccd::LuaeTable@{irccd\-::\-Luae\-Table}}
+\subsubsection[{setfield}]{\setlength{\rightskip}{0pt plus 5cm}static void irccd\-::\-Luae\-Table\-::setfield (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{idx, }
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00044_afa49b9670fbdf8e437338cb7c3e4a721}
+Set a field to the table at the given index.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em idx} & the table index \\
+\hline
+{\em name} & the field name \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See Also}
+\hyperlink{a00044_a83523b8a94b260062de7187da0010019}{set} 
+\end{DoxySeeAlso}
+\hypertarget{a00044_aeb3fd26e671004f598b35e941eaa9602}{\index{irccd\-::\-Luae\-Table@{irccd\-::\-Luae\-Table}!set\-Shared@{set\-Shared}}
+\index{set\-Shared@{set\-Shared}!irccd::LuaeTable@{irccd\-::\-Luae\-Table}}
+\subsubsection[{set\-Shared}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ static void irccd\-::\-Luae\-Table\-::set\-Shared (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{index, }
+\item[{const std\-::string \&}]{name, }
+\item[{const std\-::string \&}]{meta, }
+\item[{{\bf Luae\-Class\-::\-Ptr}$<$ T $>$}]{o}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00044_aeb3fd26e671004f598b35e941eaa9602}
+Set a class object to a table.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em index} & the table index \\
+\hline
+{\em name} & the field name \\
+\hline
+{\em meta} & the metatable name \\
+\hline
+{\em o} & the object \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00044_a360be9d74a19b8396d24e92a7120692d}{\index{irccd\-::\-Luae\-Table@{irccd\-::\-Luae\-Table}!type@{type}}
+\index{type@{type}!irccd::LuaeTable@{irccd\-::\-Luae\-Table}}
+\subsubsection[{type}]{\setlength{\rightskip}{0pt plus 5cm}int irccd\-::\-Luae\-Table\-::type (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{idx, }
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00044_a360be9d74a19b8396d24e92a7120692d}
+Check a table field.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em idx} & the table index \\
+\hline
+{\em name} & the field name \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the type 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00089}{Luae.\-h}\item 
+Luae.\-cpp\end{DoxyCompactItemize}

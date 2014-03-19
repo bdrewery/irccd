@@ -19,6 +19,11 @@
 #ifndef _IRC_SESSION_H_
 #define _IRC_SESSION_H_
 
+/**
+ * @file IrcSession.h
+ * @brief Wrapper for libircclient
+ */
+
 #include <memory>
 
 #include <libircclient.h>
@@ -34,6 +39,9 @@ class Server;
  */
 class IrcDeleter {
 public:
+	/**
+	 * Delete the irc_session_t
+	 */
 	void operator()(irc_session_t *s);
 };
 
@@ -181,7 +189,6 @@ public:
 	 * Get the list of names as a deferred call.
 	 *
 	 * @param channel which channel
-	 * @param plugin the plugin to call on end of list
 	 * @return true if the message was sent
 	 */
 	bool names(const std::string &channel);
@@ -189,7 +196,7 @@ public:
 	/**
 	 * Change your nickname.
 	 *
-	 * @param nick the new nickname
+	 * @param newnick the new nickname
 	 * @return true if the message was sent
 	 */
 	bool nick(const std::string &newnick);
@@ -197,7 +204,7 @@ public:
 	/**
 	 * Send a notice to someone.
 	 *
-	 * @param nickname the target nickname
+	 * @param target the target nickname
 	 * @param message the message
 	 * @return true if the message was sent
 	 */
@@ -251,7 +258,7 @@ public:
 	bool whois(const std::string &target);
 
 	/**
-	 * Send a raw message, no need to finish with \r\n.
+	 * Send a raw message, no need to finish with \\r\\n.
 	 *
 	 * @param raw the raw message
 	 * @return true if the message was sent

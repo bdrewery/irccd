@@ -19,6 +19,11 @@
 #ifndef _LOGGER_H_
 #define _LOGGER_H_
 
+/**
+ * @file Logger.h
+ * @brief Logging routines
+ */
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstdarg>
@@ -26,6 +31,10 @@
 
 namespace irccd {
 
+/**
+ * @class Logger
+ * @brief Logging utilities
+ */
 class Logger {
 private:
 	static bool m_verbose;

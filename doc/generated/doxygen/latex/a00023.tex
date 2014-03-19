@@ -1,0 +1,88 @@
+\hypertarget{a00023}{\section{irccd\-:\-:Date Class Reference}
+\label{a00023}\index{irccd\-::\-Date@{irccd\-::\-Date}}
+}
+
+
+\hyperlink{a00023}{Date} management.  
+
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00023_a9a47bc0b6bfd90c8b684e35ef6c8992f}{Date} ()
+\begin{DoxyCompactList}\small\item\em time epoch \end{DoxyCompactList}\item 
+\hyperlink{a00023_a486998701c179d97245d420ccd606818}{Date} (time\-\_\-t timestamp)
+\item 
+time\-\_\-t \hyperlink{a00023_adf764d90143f0cc239fa6c3c78d3432e}{get\-Timestamp} () const 
+\item 
+std\-::string \hyperlink{a00023_abbe160cbf2f59f2a05e310d27055be4a}{format} (const std\-::string \&format)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\hyperlink{a00023}{Date} management. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00023_a9a47bc0b6bfd90c8b684e35ef6c8992f}{\index{irccd\-::\-Date@{irccd\-::\-Date}!Date@{Date}}
+\index{Date@{Date}!irccd::Date@{irccd\-::\-Date}}
+\subsubsection[{Date}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Date\-::\-Date (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00023_a9a47bc0b6bfd90c8b684e35ef6c8992f}
+
+
+time epoch 
+
+Default constructor to now. \hypertarget{a00023_a486998701c179d97245d420ccd606818}{\index{irccd\-::\-Date@{irccd\-::\-Date}!Date@{Date}}
+\index{Date@{Date}!irccd::Date@{irccd\-::\-Date}}
+\subsubsection[{Date}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Date\-::\-Date (
+\begin{DoxyParamCaption}
+\item[{time\-\_\-t}]{timestamp}
+\end{DoxyParamCaption}
+)}}\label{a00023_a486998701c179d97245d420ccd606818}
+Constructor with specific timestamp.
+
+
+\begin{DoxyParams}{Parameters}
+{\em timestamp} & the timestamp \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00023_abbe160cbf2f59f2a05e310d27055be4a}{\index{irccd\-::\-Date@{irccd\-::\-Date}!format@{format}}
+\index{format@{format}!irccd::Date@{irccd\-::\-Date}}
+\subsubsection[{format}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string irccd\-::\-Date\-::format (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{format}
+\end{DoxyParamCaption}
+)}}\label{a00023_abbe160cbf2f59f2a05e310d27055be4a}
+Format the current that in the specified format, see strftime(3) for patterns.
+
+
+\begin{DoxyParams}{Parameters}
+{\em format} & the format \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the date formated 
+\end{DoxyReturn}
+\hypertarget{a00023_adf764d90143f0cc239fa6c3c78d3432e}{\index{irccd\-::\-Date@{irccd\-::\-Date}!get\-Timestamp@{get\-Timestamp}}
+\index{get\-Timestamp@{get\-Timestamp}!irccd::Date@{irccd\-::\-Date}}
+\subsubsection[{get\-Timestamp}]{\setlength{\rightskip}{0pt plus 5cm}time\-\_\-t irccd\-::\-Date\-::get\-Timestamp (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00023_adf764d90143f0cc239fa6c3c78d3432e}
+Get the timestamp.
+
+\begin{DoxyReturn}{Returns}
+the timestamp 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00073}{Date.\-h}\item 
+Date.\-cpp\end{DoxyCompactItemize}

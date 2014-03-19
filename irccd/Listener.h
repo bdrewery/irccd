@@ -19,6 +19,11 @@
 #ifndef _LISTENER_H_
 #define _LISTENER_H_
 
+/**
+ * @file Listener.h
+ * @brief Listener for irccdctl
+ */
+
 #include <map>
 #include <string>
 

@@ -1,0 +1,77 @@
+\hypertarget{a00061}{\section{irccd\-:\-:Server\-Uninitialized Class Reference}
+\label{a00061}\index{irccd\-::\-Server\-Uninitialized@{irccd\-::\-Server\-Uninitialized}}
+}
+
+
+Default server state.  
+
+
+Inheritance diagram for irccd\-:\-:Server\-Uninitialized\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{a00061}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual \hyperlink{a00060_aa1d1595a1abc377d310f06145103d7d3}{Ptr} \hyperlink{a00061_a42ee4a734b189fa5792a4098ff72e1a2}{exec} (\hyperlink{a00055_aea3f9694df81348b909814ac6f84f874}{Server\-::\-Ptr} server)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual std\-::string \hyperlink{a00061_ace769cdb916e8e9fe178919c67994a94}{which} () const 
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+Default server state. 
+
+This state is used when the server is allocated. It simply switch to the connecting state after being added to the server registry. 
+
+\subsection{Member Function Documentation}
+\hypertarget{a00061_a42ee4a734b189fa5792a4098ff72e1a2}{\index{irccd\-::\-Server\-Uninitialized@{irccd\-::\-Server\-Uninitialized}!exec@{exec}}
+\index{exec@{exec}!irccd::ServerUninitialized@{irccd\-::\-Server\-Uninitialized}}
+\subsubsection[{exec}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Server\-State\-::\-Ptr} irccd\-::\-Server\-Uninitialized\-::exec (
+\begin{DoxyParamCaption}
+\item[{{\bf Server\-::\-Ptr}}]{server}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00061_a42ee4a734b189fa5792a4098ff72e1a2}
+
+
+
+
+Execute the current state command. Returns the next transition if needed.
+
+
+\begin{DoxyParams}{Parameters}
+{\em server} & the owner \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the next transition 
+\end{DoxyReturn}
+\hypertarget{a00061_ace769cdb916e8e9fe178919c67994a94}{\index{irccd\-::\-Server\-Uninitialized@{irccd\-::\-Server\-Uninitialized}!which@{which}}
+\index{which@{which}!irccd::ServerUninitialized@{irccd\-::\-Server\-Uninitialized}}
+\subsubsection[{which}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string irccd\-::\-Server\-Uninitialized\-::which (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00061_ace769cdb916e8e9fe178919c67994a94}
+
+
+
+
+Get the current state identity.
+
+\begin{DoxyReturn}{Returns}
+the state name 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{a00060_af0912101bf33a1097470fae68b6d1c74}{irccd\-::\-Server\-State}.
+
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00137}{Server\-Uninitialized.\-h}\item 
+Server\-Uninitialized.\-cpp\end{DoxyCompactItemize}

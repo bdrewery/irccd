@@ -51,7 +51,7 @@ void Server::add(Server::Ptr server)
 {
 	Lock lk(serverLock);
 
-	auto info = server->getInfo();
+	auto info = server->info();
 
 	assert(!has(info.name));
 
@@ -85,7 +85,7 @@ void Server::remove(Server::Ptr server)
 {
 	Lock lk(serverLock);
 
-	auto &info = server->getInfo();
+	auto &info = server->info();
 
 	servers.erase(info.name);
 
@@ -204,37 +204,42 @@ void Server::extractPrefixes(const std::string &line)
 	}
 }
 
-Server::NameList &Server::getNameLists()
+Server::NameList &Server::nameLists()
 {
 	return m_nameLists;
 }
 
-Server::WhoisList &Server::getWhoisLists()
+Server::WhoisList &Server::whoisLists()
 {
 	return m_whoisLists;
 }
 
-Server::Info &Server::getInfo()
+Server::Info &Server::info()
 {
 	return m_info;
 }
 
-Server::Identity &Server::getIdentity()
+Server::Identity &Server::identity()
 {
 	return m_identity;
 }
 
-Server::RetryInfo &Server::getRecoInfo()
+Server::RetryInfo &Server::reco()
 {
 	return m_reco;
 }
 
-IrcSession &Server::getSession()
+IrcSession &Server::session()
 {
 	return m_session;
 }
 
-const Server::ChanList &Server::getChannels() const
+unsigned Server::options() const
+{
+	return m_options;
+}
+
+const Server::ChannelList &Server::channels() const
 {
 	return m_info.channels;
 }

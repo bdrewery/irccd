@@ -19,10 +19,21 @@
 #ifndef _LUA_PIPE_H_
 #define _LUA_PIPE_H_
 
+/**
+ * @file LuaPipe.h
+ * @brief Lua bindings for class Pipe
+ */
+
 #include <lua.hpp>
 
 namespace irccd {
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_thread_pipe(lua_State *L);
 
 } // !irccd

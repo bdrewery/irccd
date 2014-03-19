@@ -38,7 +38,7 @@ namespace {
 inline bool isMe(Server::Ptr s, const std::string &target)
 {
 	char tmp[32];
-	auto &identity = s->getIdentity();
+	auto &identity = s->identity();
 
 	std::memset(tmp, 0, sizeof (tmp));
 	irc_target_get_nick(target.c_str(), tmp, sizeof (tmp) -1);
@@ -94,15 +94,15 @@ void handleConnect(irc_session_t *session,
 		   unsigned int)
 {
 	auto s = IrcSession::toServer(session);
-	const auto &info = s->getInfo();
+	const auto &info = s->info();
 
 	// Reset the noretried counter
-	s->getRecoInfo().noretried = 0;
+	s->reco().noretried = 0;
 
 	Logger::log("server %s: successfully connected", info.name.c_str());
 
 	// Auto join channels
-	for (const auto &c : s->getChannels()) {
+	for (const auto &c : s->channels()) {
 		Logger::log("server %s: autojoining channel %s",
 		    info.name.c_str(), c.name.c_str());
 
@@ -213,7 +213,7 @@ void handleNick(irc_session_t *session,
 		unsigned int)
 {
 	auto s = IrcSession::toServer(session);
-	auto &id = s->getIdentity();
+	auto &id = s->identity();
 	auto nick = std::string(orig);
 
 	if (isMe(s, nick))
@@ -254,7 +254,7 @@ void handleNumeric(irc_session_t *session,
 	auto s = IrcSession::toServer(session);
 
 	if (event == LIBIRC_RFC_RPL_NAMREPLY) {
-		Server::NameList &list = s->getNameLists();
+		Server::NameList &list = s->nameLists();
 
 		if (params[3] != nullptr && params[2] != nullptr) {
 			auto users = Util::split(params[3], " \t");
@@ -268,7 +268,7 @@ void handleNumeric(irc_session_t *session,
 			}
 		}
 	} else if (event == LIBIRC_RFC_RPL_ENDOFNAMES) {
-		auto &list = s->getNameLists();
+		auto &list = s->nameLists();
 
 		if (params[1] != nullptr) {
 			EventQueue::add(std::bind(&Plugin::onNames, _1, s, strify(params[1]), list[params[1]]));
@@ -286,15 +286,15 @@ void handleNumeric(irc_session_t *session,
 		info.host = params[3];
 		info.realname = params[5];
 
-		s->getWhoisLists()[info.nick] = info;
+		s->whoisLists()[info.nick] = info;
 	} else if (event == LIBIRC_RFC_RPL_WHOISCHANNELS) {
-		auto &info = s->getWhoisLists()[params[1]];
+		auto &info = s->whoisLists()[params[1]];
 
 		// Add all channels
 		for (unsigned int i = 2; i < c; ++i)
 			info.channels.push_back(params[i]);
 	} else if (event == LIBIRC_RFC_RPL_ENDOFWHOIS) {
-		auto &info = s->getWhoisLists()[params[1]];
+		auto &info = s->whoisLists()[params[1]];
 
 		EventQueue::add(std::bind(&Plugin::onWhois, _1, s, info));
 	}
@@ -455,8 +455,8 @@ void IrcSession::connect(Server::Ptr server)
 	irc_set_ctx(m_handle.get(), new Server::Ptr(server));
 	irc_get_version(&major, &minor);
 
-	auto &info = server->getInfo();
-	auto &identity = server->getIdentity();
+	auto &info = server->info();
+	auto &identity = server->identity();
 
 	/*
 	 * After some discuss with George, SSL has been fixed in newer version

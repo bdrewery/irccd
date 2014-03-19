@@ -19,6 +19,11 @@
 #ifndef _DIRECTORY_H_
 #define _DIRECTORY_H_
 
+/**
+ * @file Directory.h
+ * @brief Directory management
+ */
+
 #include <cstddef>
 #include <string>
 #include <vector>
@@ -59,19 +64,37 @@ public:
 	 * @brief entry in the directory list
 	 */
 	struct Entry {
-		std::string	name;		//! name of entry (base name)
-		Type		type;		//! type of file
+		std::string	name;		//!< name of entry (base name)
+		Type		type = Unknown;	//!< type of file
 
-		Entry();
-
+		/**
+		 * Test equality.
+		 *
+		 * @param e1 the first entry
+		 * @param e2 the second entry
+		 * @return true if equals
+		 */
 		friend bool operator==(const Entry &e1, const Entry &e2);
 	};
 
+	/**
+	 * The list of entries.
+	 */
 	using List = std::vector<Entry>;
 
-	// C++ Container compatibility
+	/**
+	 * The type of value.
+	 */
 	using value_type	= List::value_type;
+
+	/**
+	 * The iterator object.
+	 */
 	using iterator		= List::iterator;
+
+	/**
+	 * The const iterator object.
+	 */
 	using const_iterator	= List::const_iterator;
 
 private:
@@ -127,6 +150,13 @@ public:
 	 */
 	int count() const;
 
+	/**
+	 * Test equality.
+	 *
+	 * @param d1 the first directory
+	 * @param d2 the second directory
+	 * @return true if equals
+	 */
 	friend bool operator==(const Directory &d1, const Directory &d2);
 };
 

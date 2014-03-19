@@ -19,11 +19,20 @@
 #ifndef _SYSTEM_H_
 #define _SYSTEM_H_
 
+/**
+ * @file System.h
+ * @brief System dependant functions
+ */
+
 #include <cstdint>
 #include <string>
 
 namespace irccd {
 
+/**
+ * @class System
+ * @brief System dependant operations
+ */
 class System {
 public:
 	/**
@@ -50,7 +59,7 @@ public:
 	/**
 	 * Sleep for seconds.
 	 *
-	 * @param ms milliseconds
+	 * @param seconds the seconds
 	 */
 	static void sleep(int seconds);
 

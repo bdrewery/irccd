@@ -19,10 +19,21 @@
 #ifndef _LUA_SYSTEM_H_
 #define _LUA_SYSTEM_H_
 
+/**
+ * @file LuaSystem.h
+ * @brief Lua bindings for system management
+ */
+
 #include <lua.hpp>
 
 namespace irccd {
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_system(lua_State *L);
 
 } // !irccd

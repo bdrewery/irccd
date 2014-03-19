@@ -1,0 +1,143 @@
+\hypertarget{a00068}{\section{irccd\-:\-:Thread Class Reference}
+\label{a00068}\index{irccd\-::\-Thread@{irccd\-::\-Thread}}
+}
+
+
+A thread inside a plugin.  
+
+
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+using \hyperlink{a00068_a87c135eab4b6a28732439c9131582661}{Ptr} = std\-::shared\-\_\-ptr$<$ \hyperlink{a00068}{Thread} $>$
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00068_a23aa3ca1eee026e241cd8c3f4a5e0608}{$\sim$\-Thread} ()
+\item 
+bool \hyperlink{a00068_a75c97ca19dcb64ef77673f1d39132f5d}{has\-Joined} () const 
+\item 
+void \hyperlink{a00068_aa07d50cd26118de8bb52092c9d04e4d1}{join} ()
+\item 
+void \hyperlink{a00068_ac6f0c0d981232624863580e17d57e0bb}{detach} ()
+\item 
+\hyperlink{a00052_a9333cbafb06dbf7cd0b6ed1a8e104c5c}{Process\-::\-Ptr} \hyperlink{a00068_aa6c57498a8d65be079f2bf5df9e85034}{process} () const 
+\item 
+\hyperlink{a00068_a5bed0d273f37147ebc2851bd0c04e1e8}{operator lua\-\_\-\-State $\ast$} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{a00068_a87c135eab4b6a28732439c9131582661}{Ptr} \hyperlink{a00068_afeccf95b24f4c21467dfb715a93edf3c}{create} ()
+\item 
+static void \hyperlink{a00068_ae9f1b8f9c39a27ed7643f4825b5d98d8}{start} (\hyperlink{a00068_a87c135eab4b6a28732439c9131582661}{Thread\-::\-Ptr} thread, int np)
+\end{DoxyCompactItemize}
+\subsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{a00068_a6a6c1cc25d50ed6f67a2dc0fc546c5a3}{class {\bfseries Plugin}}\label{a00068_a6a6c1cc25d50ed6f67a2dc0fc546c5a3}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A thread inside a plugin. 
+
+\subsection{Member Typedef Documentation}
+\hypertarget{a00068_a87c135eab4b6a28732439c9131582661}{\index{irccd\-::\-Thread@{irccd\-::\-Thread}!Ptr@{Ptr}}
+\index{Ptr@{Ptr}!irccd::Thread@{irccd\-::\-Thread}}
+\subsubsection[{Ptr}]{\setlength{\rightskip}{0pt plus 5cm}using {\bf irccd\-::\-Thread\-::\-Ptr} =  std\-::shared\-\_\-ptr$<${\bf Thread}$>$}}\label{a00068_a87c135eab4b6a28732439c9131582661}
+The smart pointer for \hyperlink{a00068}{Thread} 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00068_a23aa3ca1eee026e241cd8c3f4a5e0608}{\index{irccd\-::\-Thread@{irccd\-::\-Thread}!$\sim$\-Thread@{$\sim$\-Thread}}
+\index{$\sim$\-Thread@{$\sim$\-Thread}!irccd::Thread@{irccd\-::\-Thread}}
+\subsubsection[{$\sim$\-Thread}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Thread\-::$\sim$\-Thread (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00068_a23aa3ca1eee026e241cd8c3f4a5e0608}
+Default destructor. 
+
+\subsection{Member Function Documentation}
+\hypertarget{a00068_afeccf95b24f4c21467dfb715a93edf3c}{\index{irccd\-::\-Thread@{irccd\-::\-Thread}!create@{create}}
+\index{create@{create}!irccd::Thread@{irccd\-::\-Thread}}
+\subsubsection[{create}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Thread\-::\-Ptr} irccd\-::\-Thread\-::create (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00068_afeccf95b24f4c21467dfb715a93edf3c}
+Create a new thread as a shared pointer.
+
+\begin{DoxyReturn}{Returns}
+a thread object (nothing running) 
+\end{DoxyReturn}
+\hypertarget{a00068_ac6f0c0d981232624863580e17d57e0bb}{\index{irccd\-::\-Thread@{irccd\-::\-Thread}!detach@{detach}}
+\index{detach@{detach}!irccd::Thread@{irccd\-::\-Thread}}
+\subsubsection[{detach}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Thread\-::detach (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00068_ac6f0c0d981232624863580e17d57e0bb}
+Detach the thread, the object can be safely destroyed. \hypertarget{a00068_a75c97ca19dcb64ef77673f1d39132f5d}{\index{irccd\-::\-Thread@{irccd\-::\-Thread}!has\-Joined@{has\-Joined}}
+\index{has\-Joined@{has\-Joined}!irccd::Thread@{irccd\-::\-Thread}}
+\subsubsection[{has\-Joined}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Thread\-::has\-Joined (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00068_a75c97ca19dcb64ef77673f1d39132f5d}
+Check if the thread has been joined or detached.
+
+\begin{DoxyReturn}{Returns}
+true if any 
+\end{DoxyReturn}
+\hypertarget{a00068_aa07d50cd26118de8bb52092c9d04e4d1}{\index{irccd\-::\-Thread@{irccd\-::\-Thread}!join@{join}}
+\index{join@{join}!irccd::Thread@{irccd\-::\-Thread}}
+\subsubsection[{join}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Thread\-::join (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00068_aa07d50cd26118de8bb52092c9d04e4d1}
+Wait the thread to finish. \hypertarget{a00068_a5bed0d273f37147ebc2851bd0c04e1e8}{\index{irccd\-::\-Thread@{irccd\-::\-Thread}!operator lua\-\_\-\-State $\ast$@{operator lua\-\_\-\-State $\ast$}}
+\index{operator lua\-\_\-\-State $\ast$@{operator lua\-\_\-\-State $\ast$}!irccd::Thread@{irccd\-::\-Thread}}
+\subsubsection[{operator lua\-\_\-\-State $\ast$}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Thread\-::operator lua\-\_\-\-State $\ast$ (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00068_a5bed0d273f37147ebc2851bd0c04e1e8}
+Convert to lua\-\_\-\-State $\ast$ \hypertarget{a00068_aa6c57498a8d65be079f2bf5df9e85034}{\index{irccd\-::\-Thread@{irccd\-::\-Thread}!process@{process}}
+\index{process@{process}!irccd::Thread@{irccd\-::\-Thread}}
+\subsubsection[{process}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Process\-::\-Ptr} irccd\-::\-Thread\-::process (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00068_aa6c57498a8d65be079f2bf5df9e85034}
+Get the process.
+
+\begin{DoxyReturn}{Returns}
+the process 
+\end{DoxyReturn}
+\hypertarget{a00068_ae9f1b8f9c39a27ed7643f4825b5d98d8}{\index{irccd\-::\-Thread@{irccd\-::\-Thread}!start@{start}}
+\index{start@{start}!irccd::Thread@{irccd\-::\-Thread}}
+\subsubsection[{start}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Thread\-::start (
+\begin{DoxyParamCaption}
+\item[{{\bf Thread\-::\-Ptr}}]{thread, }
+\item[{int}]{np}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00068_ae9f1b8f9c39a27ed7643f4825b5d98d8}
+Start a thread by calling the function already pushed with its parameters.
+
+
+\begin{DoxyParams}{Parameters}
+{\em thread} & the thread to start \\
+\hline
+{\em np} & the number of parameters pushed \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00149}{Thread.\-h}\item 
+Thread.\-cpp\end{DoxyCompactItemize}

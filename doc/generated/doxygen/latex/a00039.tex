@@ -1,0 +1,137 @@
+\hypertarget{a00039}{\section{irccd\-:\-:Logger Class Reference}
+\label{a00039}\index{irccd\-::\-Logger@{irccd\-::\-Logger}}
+}
+
+
+Logging utilities.  
+
+
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{a00039_a7f9b5ea7f63d3a7e3529a87474d46986}{set\-Verbose} (bool verbose)
+\item 
+static void \hyperlink{a00039_a9ff2baa30eb4c2be476b54c08c3975cf}{set\-Syslog} (bool syslog)
+\item 
+static void \hyperlink{a00039_ae8b3b0a3378d42128a7944e4253302d5}{log} (std\-::string fmt,...)
+\item 
+static void \hyperlink{a00039_a14f5277c19098ed813f7d79c121becb1}{warn} (std\-::string fmt,...)
+\item 
+static void \hyperlink{a00039_af119eb310a296510ab38f8528fc0543c}{fatal} (int code, std\-::string fmt,...)
+\item 
+static void \hyperlink{a00039_ab2b7abacdc8de9cdbe60110e7a159acd}{debug} (std\-::string fmt,...)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Logging utilities. 
+
+\subsection{Member Function Documentation}
+\hypertarget{a00039_ab2b7abacdc8de9cdbe60110e7a159acd}{\index{irccd\-::\-Logger@{irccd\-::\-Logger}!debug@{debug}}
+\index{debug@{debug}!irccd::Logger@{irccd\-::\-Logger}}
+\subsubsection[{debug}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Logger\-::debug (
+\begin{DoxyParamCaption}
+\item[{std\-::string}]{fmt, }
+\item[{}]{...}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00039_ab2b7abacdc8de9cdbe60110e7a159acd}
+Write a message used as debugging, messages will only be shown if the application has been build with without N\-D\-E\-B\-U\-G macro set.
+
+
+\begin{DoxyParams}{Parameters}
+{\em fmt} & format \\
+\hline
+{\em ...} & arguments \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00039_af119eb310a296510ab38f8528fc0543c}{\index{irccd\-::\-Logger@{irccd\-::\-Logger}!fatal@{fatal}}
+\index{fatal@{fatal}!irccd::Logger@{irccd\-::\-Logger}}
+\subsubsection[{fatal}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Logger\-::fatal (
+\begin{DoxyParamCaption}
+\item[{int}]{code, }
+\item[{std\-::string}]{fmt, }
+\item[{}]{...}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00039_af119eb310a296510ab38f8528fc0543c}
+Write a message and then exits with a specific error code.
+
+
+\begin{DoxyParams}{Parameters}
+{\em code} & the code to exit \\
+\hline
+{\em fmt} & the format \\
+\hline
+{\em ...} & arguments \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00039_ae8b3b0a3378d42128a7944e4253302d5}{\index{irccd\-::\-Logger@{irccd\-::\-Logger}!log@{log}}
+\index{log@{log}!irccd::Logger@{irccd\-::\-Logger}}
+\subsubsection[{log}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Logger\-::log (
+\begin{DoxyParamCaption}
+\item[{std\-::string}]{fmt, }
+\item[{}]{...}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00039_ae8b3b0a3378d42128a7944e4253302d5}
+Log an additional verbose message.
+
+
+\begin{DoxyParams}{Parameters}
+{\em fmt} & format \\
+\hline
+{\em ...} & arguments \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00039_a9ff2baa30eb4c2be476b54c08c3975cf}{\index{irccd\-::\-Logger@{irccd\-::\-Logger}!set\-Syslog@{set\-Syslog}}
+\index{set\-Syslog@{set\-Syslog}!irccd::Logger@{irccd\-::\-Logger}}
+\subsubsection[{set\-Syslog}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Logger\-::set\-Syslog (
+\begin{DoxyParamCaption}
+\item[{bool}]{syslog}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00039_a9ff2baa30eb4c2be476b54c08c3975cf}
+Tells to use syslog. Only on Unix.
+
+
+\begin{DoxyParams}{Parameters}
+{\em syslog} & enable or disable \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00039_a7f9b5ea7f63d3a7e3529a87474d46986}{\index{irccd\-::\-Logger@{irccd\-::\-Logger}!set\-Verbose@{set\-Verbose}}
+\index{set\-Verbose@{set\-Verbose}!irccd::Logger@{irccd\-::\-Logger}}
+\subsubsection[{set\-Verbose}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Logger\-::set\-Verbose (
+\begin{DoxyParamCaption}
+\item[{bool}]{verbose}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00039_a7f9b5ea7f63d3a7e3529a87474d46986}
+Enable or disable the verbosity of further \hyperlink{a00039_ae8b3b0a3378d42128a7944e4253302d5}{log()} calls.
+
+\begin{DoxySeeAlso}{See Also}
+\hyperlink{a00039_ae8b3b0a3378d42128a7944e4253302d5}{log} 
+\end{DoxySeeAlso}
+
+\begin{DoxyParams}{Parameters}
+{\em verbose} & enable or disable \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00039_a14f5277c19098ed813f7d79c121becb1}{\index{irccd\-::\-Logger@{irccd\-::\-Logger}!warn@{warn}}
+\index{warn@{warn}!irccd::Logger@{irccd\-::\-Logger}}
+\subsubsection[{warn}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Logger\-::warn (
+\begin{DoxyParamCaption}
+\item[{std\-::string}]{fmt, }
+\item[{}]{...}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00039_a14f5277c19098ed813f7d79c121becb1}
+Write a warning message, it will be printed whenever the verbosity is set to false.
+
+
+\begin{DoxyParams}{Parameters}
+{\em fmt} & format \\
+\hline
+{\em ...} & arguments \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00087}{Logger.\-h}\item 
+Logger.\-cpp\end{DoxyCompactItemize}

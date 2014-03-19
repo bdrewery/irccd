@@ -48,7 +48,7 @@ int l_mkdir(lua_State *L)
 
 	try {
 		Util::mkdir(path, mode);
-	} catch (Util::ErrorException ex) {
+	} catch (std::runtime_error ex) {
 		lua_pushboolean(L, false);
 		lua_pushstring(L, ex.what());
 

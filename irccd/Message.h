@@ -19,6 +19,11 @@
 #ifndef _MESSAGE_H_
 #define _MESSAGE_H_
 
+/**
+ * @file Message.h
+ * @brief Client messages
+ */
+
 #include <sstream>
 #include <string>
 

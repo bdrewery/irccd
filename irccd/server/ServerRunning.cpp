@@ -32,8 +32,8 @@ ServerRunning::ServerRunning()
 
 ServerState::Ptr ServerRunning::exec(Server::Ptr server)
 {
-	auto &reco = server->getRecoInfo();
-	auto &session = server->getSession();
+	auto &reco = server->reco();
+	auto &session = server->session();
 
 	m_server = server;
 	session.run();

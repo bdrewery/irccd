@@ -19,6 +19,11 @@
 #ifndef _COMMAND_QUEUE_H_
 #define _COMMAND_QUEUE_H_
 
+/**
+ * @file CommandQueue.h
+ * @brief Client command queue
+ */
+
 #include <atomic>
 #include <condition_variable>
 #include <functional>
@@ -38,7 +43,13 @@ namespace irccd {
  */
 class CommandQueue {
 public:
+	/**
+	 * The function to call. The function must return false if it should
+	 * stay in the queue.
+	 */
 	using Function	= std::function<bool ()>;
+
+private:
 	using Cond	= std::condition_variable;
 	using Mutex	= std::mutex;
 	using Lock	= std::unique_lock<Mutex>;

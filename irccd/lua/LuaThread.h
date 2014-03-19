@@ -19,10 +19,21 @@
 #ifndef _LUA_THREAD_H_
 #define _LUA_THREAD_H_
 
+/**
+ * @file LuaThread.h
+ * @brief Lua bindings for threads
+ */
+
 #include <lua.hpp>
 
 namespace irccd {
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_thread(lua_State *L);
 
 } // !irccd

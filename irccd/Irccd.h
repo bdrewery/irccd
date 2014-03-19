@@ -19,6 +19,11 @@
 #ifndef _IRCCD_H_
 #define _IRCCD_H_
 
+/**
+ * @file Irccd.h
+ * @brief Main irccd class
+ */
+
 #include <exception>
 #include <mutex>
 #include <sstream>
@@ -38,6 +43,10 @@ namespace irccd {
  * Irccd main class
  * -------------------------------------------------------- */
 
+/**
+ * @enum Options
+ * @brief Options
+ */
 enum Options {
 	Config		= 'c',
 	Foreground	= 'f',
@@ -46,16 +55,20 @@ enum Options {
 	PluginWanted	= 'P'
 };
 
-using IdentityList	= std::vector<
-				Server::Identity
-			  >;
+/**
+ * List of identities.
+ */
+using IdentityList	= std::vector<Server::Identity>;
 
+/**
+ * @class Irccd
+ * @brief The main irccd class
+ */
 class Irccd {
-public:
+private:
 	using Wanted	= std::vector<std::string>;
 	using Overriden	= std::unordered_map<char, bool>;
 
-private:
 	static Irccd	m_instance;		//! unique instance
 
 	// Ignition
@@ -111,7 +124,7 @@ public:
 	 */
 	static Irccd &getInstance();
 
-	/*
+	/**
 	 * Initialize common settings.
 	 */
 	void initialize();

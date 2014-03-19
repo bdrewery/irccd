@@ -19,6 +19,11 @@
 #ifndef _SOCKET_ADDRESS_H_
 #define _SOCKET_ADDRESS_H_
 
+/**
+ * @file SocketAddress.h
+ * @brief Portable C++ socket addresses management
+ */
+
 #include "Socket.h"
 
 namespace irccd {
@@ -36,8 +41,8 @@ namespace irccd {
  */
 class SocketAddress {
 protected:
-	sockaddr_storage m_addr;
-	socklen_t m_addrlen;
+	sockaddr_storage m_addr;	//!< the address
+	socklen_t m_addrlen;		//!< the address length
 
 public:
 	// Friends.
@@ -146,8 +151,22 @@ public:
 
 #endif // ! !_WIN32
 
+/**
+ * Test equality.
+ *
+ * @param sa1 the first socket address
+ * @param sa2 the second socket address
+ * @return true if equals
+ */
 bool operator==(const irccd::SocketAddress &sa1, const irccd::SocketAddress &sa2);
 
+/**
+ * Less operator.
+ *
+ * @param sa1 the first socket
+ * @param sa2 the second socket
+ * @return true if sa1 is less
+ */
 bool operator<(const irccd::SocketAddress &sa1, const irccd::SocketAddress &sa2);
 
 } // !irccd

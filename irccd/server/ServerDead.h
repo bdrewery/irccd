@@ -19,6 +19,11 @@
 #ifndef _SERVER_DEAD_H_
 #define _SERVER_DEAD_H_
 
+/**
+ * @file ServerDead.h
+ * @brief Server is marked for deletion
+ */
+
 #include "ServerState.h"
 
 namespace irccd {

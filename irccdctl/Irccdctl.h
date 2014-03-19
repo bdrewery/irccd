@@ -19,6 +19,11 @@
 #ifndef _IRCCDCTL_H_
 #define _IRCCDCTL_H_
 
+/**
+ * @file Irccdctl.h
+ * @brief Main irccdctl class
+ */
+
 #include <string>
 #include <unordered_map>
 
@@ -29,6 +34,10 @@
 
 namespace irccd {
 
+/**
+ * @class Irccdctl
+ * @brief Main irccdctl class
+ */
 class Irccdctl {
 private:
 	using Args = std::unordered_map<char, std::string>;
@@ -132,8 +141,20 @@ public:
 	 */
 	void addArg(char c, const std::string &arg);
 
+	/**
+	 * Check if argument is set.
+	 *
+	 * @param c the option
+	 * @return true if set
+	 */
 	bool hasArg(char c);
 
+	/**
+	 * Get the argument value.
+	 *
+	 * @param c the option
+	 * @return the value
+	 */
 	const std::string &getArg(char c);
 
 	/**

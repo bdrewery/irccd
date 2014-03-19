@@ -1,0 +1,77 @@
+\hypertarget{a00058}{\section{irccd\-:\-:Server\-Disconnected Class Reference}
+\label{a00058}\index{irccd\-::\-Server\-Disconnected@{irccd\-::\-Server\-Disconnected}}
+}
+
+
+After a disconnection.  
+
+
+Inheritance diagram for irccd\-:\-:Server\-Disconnected\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{a00058}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual \hyperlink{a00060_aa1d1595a1abc377d310f06145103d7d3}{Ptr} \hyperlink{a00058_a88588e1ae97a8c2a57e0ebd9f0eb4f75}{exec} (\hyperlink{a00055_aea3f9694df81348b909814ac6f84f874}{Server\-::\-Ptr} server)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual std\-::string \hyperlink{a00058_a35cc8acd4560c37be3cb4b48c2d58d4b}{which} () const 
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+After a disconnection. 
+
+State when the thread has finished or irccd is leaving. 
+
+\subsection{Member Function Documentation}
+\hypertarget{a00058_a88588e1ae97a8c2a57e0ebd9f0eb4f75}{\index{irccd\-::\-Server\-Disconnected@{irccd\-::\-Server\-Disconnected}!exec@{exec}}
+\index{exec@{exec}!irccd::ServerDisconnected@{irccd\-::\-Server\-Disconnected}}
+\subsubsection[{exec}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Server\-State\-::\-Ptr} irccd\-::\-Server\-Disconnected\-::exec (
+\begin{DoxyParamCaption}
+\item[{{\bf Server\-::\-Ptr}}]{server}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00058_a88588e1ae97a8c2a57e0ebd9f0eb4f75}
+
+
+
+
+Execute the current state command. Returns the next transition if needed.
+
+
+\begin{DoxyParams}{Parameters}
+{\em server} & the owner \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the next transition 
+\end{DoxyReturn}
+\hypertarget{a00058_a35cc8acd4560c37be3cb4b48c2d58d4b}{\index{irccd\-::\-Server\-Disconnected@{irccd\-::\-Server\-Disconnected}!which@{which}}
+\index{which@{which}!irccd::ServerDisconnected@{irccd\-::\-Server\-Disconnected}}
+\subsubsection[{which}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string irccd\-::\-Server\-Disconnected\-::which (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00058_a35cc8acd4560c37be3cb4b48c2d58d4b}
+
+
+
+
+Get the current state identity.
+
+\begin{DoxyReturn}{Returns}
+the state name 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{a00060_af0912101bf33a1097470fae68b6d1c74}{irccd\-::\-Server\-State}.
+
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00131}{Server\-Disconnected.\-h}\item 
+Server\-Disconnected.\-cpp\end{DoxyCompactItemize}

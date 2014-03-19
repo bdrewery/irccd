@@ -1,0 +1,75 @@
+\hypertarget{a00038}{\section{irccd\-:\-:Listener Class Reference}
+\label{a00038}\index{irccd\-::\-Listener@{irccd\-::\-Listener}}
+}
+
+
+Listen for irccd clients.  
+
+
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{a00038_a183d8aff2083971eece0bc9041749e40}{add} (\hyperlink{a00062}{Socket} s)
+\item 
+static int \hyperlink{a00038_a3948a249523a14aad892a87f5f01cad7}{count} ()
+\item 
+static void \hyperlink{a00038_a3e767684be18ed00a7ecfd8d5a4c7419}{process} ()
+\item 
+static void \hyperlink{a00038_a96106c8c31c4d83fcb436336e509313a}{close} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Listen for irccd clients. 
+
+This class is used to manage irccd via sockets or irccdctl. It supports Unix and Internet sockets.
+
+Listeners are currently not thread safe and should only be used in the main thread. 
+
+\subsection{Member Function Documentation}
+\hypertarget{a00038_a183d8aff2083971eece0bc9041749e40}{\index{irccd\-::\-Listener@{irccd\-::\-Listener}!add@{add}}
+\index{add@{add}!irccd::Listener@{irccd\-::\-Listener}}
+\subsubsection[{add}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Listener\-::add (
+\begin{DoxyParamCaption}
+\item[{{\bf Socket}}]{s}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00038_a183d8aff2083971eece0bc9041749e40}
+Add a new listener for irccd client processing.
+
+
+\begin{DoxyParams}{Parameters}
+{\em s} & the server socket \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00038_a96106c8c31c4d83fcb436336e509313a}{\index{irccd\-::\-Listener@{irccd\-::\-Listener}!close@{close}}
+\index{close@{close}!irccd::Listener@{irccd\-::\-Listener}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Listener\-::close (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00038_a96106c8c31c4d83fcb436336e509313a}
+Close all listeners. \hypertarget{a00038_a3948a249523a14aad892a87f5f01cad7}{\index{irccd\-::\-Listener@{irccd\-::\-Listener}!count@{count}}
+\index{count@{count}!irccd::Listener@{irccd\-::\-Listener}}
+\subsubsection[{count}]{\setlength{\rightskip}{0pt plus 5cm}int irccd\-::\-Listener\-::count (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00038_a3948a249523a14aad892a87f5f01cad7}
+Get the number of listeners enabled.
+
+\begin{DoxyReturn}{Returns}
+the number 
+\end{DoxyReturn}
+\hypertarget{a00038_a3e767684be18ed00a7ecfd8d5a4c7419}{\index{irccd\-::\-Listener@{irccd\-::\-Listener}!process@{process}}
+\index{process@{process}!irccd::Listener@{irccd\-::\-Listener}}
+\subsubsection[{process}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Listener\-::process (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00038_a3e767684be18ed00a7ecfd8d5a4c7419}
+\hyperlink{a00052}{Process} clients\-: accept them, execute and respond. 
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00085}{Listener.\-h}\item 
+Listener.\-cpp\end{DoxyCompactItemize}

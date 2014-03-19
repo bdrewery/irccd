@@ -19,6 +19,11 @@
 #ifndef _SOCKET_LISTENER_H_
 #define _SOCKET_LISTENER_H_
 
+/**
+ * @file SocketListener.h
+ * @brief Portable C++ select(2) wrapper
+ */
+
 #include <vector>
 
 #include "Socket.h"
@@ -27,14 +32,22 @@ namespace irccd {
 
 /**
  * @class SocketTimeout
- * @brief thrown when a timeout occured
+ * @brief Thrown when a timeout occured
  */
-class SocketTimeout : public std::exception
-{
+class SocketTimeout : public std::exception {
 public:
-	virtual const char * what(void) const throw();
+	/**
+	 * Get the error.
+	 *
+	 * @return the error
+	 */
+	virtual const char * what() const throw();
 };
 
+/**
+ * @class SocketListener
+ * @brief A select(2) wrapper
+ */
 class SocketListener
 {
 private:

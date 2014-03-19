@@ -23,12 +23,29 @@
 
 namespace irccd {
 
+/* --------------------------------------------------------
+ * Helpers
+ * -------------------------------------------------------- */
+
+const char *SectionType		= "Section";
+const char *ParserType		= "Parser";
+
+/**
+ * @brief Overload for parser Section
+ */
 template <>
 struct Luae::Convert<Section> {
-	static const bool supported = true;
+	static const bool supported = true;	//!< is supported
 
-	static void push(lua_State *, const Section &)
+	/**
+	 * Push a section.
+	 *
+	 * @param L the Lua state
+	 * @param section the section
+	 */
+	static void push(lua_State *L, const Section &section)
 	{
+		new (L, SectionType) Section(section);
 	}
 };
 
@@ -120,11 +137,18 @@ void LuaParser::log(int number, const std::string &section, const std::string &m
  */
 class ParserWrapper {
 public:
-	LuaParser	m_parser;
-	std::string	m_path;
-	int		m_flags;
-	char		m_comment;
+	LuaParser	m_parser;	//!< the parser object
+	std::string	m_path;		//!< the path
+	int		m_flags;	//!< the flags
+	char		m_comment;	//!< the comment character
 
+	/**
+	 * Create the wrapper.
+	 *
+	 * @param path the path
+	 * @param flags the flags
+	 * @param comment the comment character
+	 */
 	ParserWrapper(const std::string &path, int flags, char comment)
 		: m_path(path)
 		, m_flags(flags)
@@ -132,13 +156,6 @@ public:
 	{
 	}
 };
-
-/* --------------------------------------------------------
- * Helpers
- * -------------------------------------------------------- */
-
-const char *SectionType		= "Section";
-const char *ParserType		= "Parser";
 
 /* --------------------------------------------------------
  * Parser functions

@@ -1,0 +1,178 @@
+\hypertarget{a00032}{\section{irccd\-:\-:Irccd Class Reference}
+\label{a00032}\index{irccd\-::\-Irccd@{irccd\-::\-Irccd}}
+}
+
+
+The main irccd class.  
+
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{a00032_a5f0b233f846b182042befc1b1b5dd4a0}{initialize} ()
+\item 
+void \hyperlink{a00032_a99dff83038019c1a0be7be7349cbe9ba}{override} (char c)
+\item 
+void \hyperlink{a00032_a79995420c457e5375d522a4e01a98c39}{set\-Config\-Path} (const std\-::string \&path)
+\item 
+void \hyperlink{a00032_a157ff3cb14fa910fb1d2cfa6e97ed722}{set\-Foreground} (bool mode)
+\item 
+void \hyperlink{a00032_a3d6ad58f308a9467657ca6154a80df1a}{defer\-Plugin} (const std\-::string \&name)
+\item 
+const \hyperlink{a00029}{Server\-::\-Identity} \& \hyperlink{a00032_af981b5a3fbf99978b10ffe5d52222ec7}{find\-Identity} (const std\-::string \&name)
+\item 
+int \hyperlink{a00032_ac38aca80cf91262e9b99d0483f804eff}{run} ()
+\item 
+bool \hyperlink{a00032_af2720395c731903d82a469f4bbf6d35b}{is\-Running} () const 
+\item 
+void \hyperlink{a00032_a170ef2b72ab7b23357c7abe1c2d549ff}{shutdown} ()
+\item 
+void \hyperlink{a00032_a913876eaf9f7caa2c9d29957ab0e791f}{stop} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{a00032}{Irccd} \& \hyperlink{a00032_ac073164716a711cfcf683c1a8d5e5281}{get\-Instance} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+The main irccd class. 
+
+\subsection{Member Function Documentation}
+\hypertarget{a00032_a3d6ad58f308a9467657ca6154a80df1a}{\index{irccd\-::\-Irccd@{irccd\-::\-Irccd}!defer\-Plugin@{defer\-Plugin}}
+\index{defer\-Plugin@{defer\-Plugin}!irccd::Irccd@{irccd\-::\-Irccd}}
+\subsubsection[{defer\-Plugin}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irccd\-::defer\-Plugin (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)}}\label{a00032_a3d6ad58f308a9467657ca6154a80df1a}
+Only for command line, defer a plugin to be load after the configuration file load.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & the name \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00032_af981b5a3fbf99978b10ffe5d52222ec7}{\index{irccd\-::\-Irccd@{irccd\-::\-Irccd}!find\-Identity@{find\-Identity}}
+\index{find\-Identity@{find\-Identity}!irccd::Irccd@{irccd\-::\-Irccd}}
+\subsubsection[{find\-Identity}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Server\-::\-Identity} \& irccd\-::\-Irccd\-::find\-Identity (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{name}
+\end{DoxyParamCaption}
+)}}\label{a00032_af981b5a3fbf99978b10ffe5d52222ec7}
+Find an identity.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & the identity's resource name. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+an identity or the default one 
+\end{DoxyReturn}
+\hypertarget{a00032_ac073164716a711cfcf683c1a8d5e5281}{\index{irccd\-::\-Irccd@{irccd\-::\-Irccd}!get\-Instance@{get\-Instance}}
+\index{get\-Instance@{get\-Instance}!irccd::Irccd@{irccd\-::\-Irccd}}
+\subsubsection[{get\-Instance}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Irccd} \& irccd\-::\-Irccd\-::get\-Instance (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00032_ac073164716a711cfcf683c1a8d5e5281}
+Get the unique irccd instance.
+
+\begin{DoxyReturn}{Returns}
+the irccd instance 
+\end{DoxyReturn}
+\hypertarget{a00032_a5f0b233f846b182042befc1b1b5dd4a0}{\index{irccd\-::\-Irccd@{irccd\-::\-Irccd}!initialize@{initialize}}
+\index{initialize@{initialize}!irccd::Irccd@{irccd\-::\-Irccd}}
+\subsubsection[{initialize}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irccd\-::initialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00032_a5f0b233f846b182042befc1b1b5dd4a0}
+Initialize common settings. \hypertarget{a00032_af2720395c731903d82a469f4bbf6d35b}{\index{irccd\-::\-Irccd@{irccd\-::\-Irccd}!is\-Running@{is\-Running}}
+\index{is\-Running@{is\-Running}!irccd::Irccd@{irccd\-::\-Irccd}}
+\subsubsection[{is\-Running}]{\setlength{\rightskip}{0pt plus 5cm}bool irccd\-::\-Irccd\-::is\-Running (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00032_af2720395c731903d82a469f4bbf6d35b}
+Check if the server is still running.
+
+\begin{DoxyReturn}{Returns}
+the status 
+\end{DoxyReturn}
+\hypertarget{a00032_a99dff83038019c1a0be7be7349cbe9ba}{\index{irccd\-::\-Irccd@{irccd\-::\-Irccd}!override@{override}}
+\index{override@{override}!irccd::Irccd@{irccd\-::\-Irccd}}
+\subsubsection[{override}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irccd\-::override (
+\begin{DoxyParamCaption}
+\item[{char}]{c}
+\end{DoxyParamCaption}
+)}}\label{a00032_a99dff83038019c1a0be7be7349cbe9ba}
+Tells irccd that a parameter from command line has been set.
+
+
+\begin{DoxyParams}{Parameters}
+{\em c} & the option \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00032_ac38aca80cf91262e9b99d0483f804eff}{\index{irccd\-::\-Irccd@{irccd\-::\-Irccd}!run@{run}}
+\index{run@{run}!irccd::Irccd@{irccd\-::\-Irccd}}
+\subsubsection[{run}]{\setlength{\rightskip}{0pt plus 5cm}int irccd\-::\-Irccd\-::run (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00032_ac38aca80cf91262e9b99d0483f804eff}
+Run the application.
+
+\begin{DoxyReturn}{Returns}
+the error code 
+\end{DoxyReturn}
+\hypertarget{a00032_a79995420c457e5375d522a4e01a98c39}{\index{irccd\-::\-Irccd@{irccd\-::\-Irccd}!set\-Config\-Path@{set\-Config\-Path}}
+\index{set\-Config\-Path@{set\-Config\-Path}!irccd::Irccd@{irccd\-::\-Irccd}}
+\subsubsection[{set\-Config\-Path}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irccd\-::set\-Config\-Path (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{path}
+\end{DoxyParamCaption}
+)}}\label{a00032_a79995420c457e5375d522a4e01a98c39}
+Set the config path to open.
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & the config file path \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00032_a157ff3cb14fa910fb1d2cfa6e97ed722}{\index{irccd\-::\-Irccd@{irccd\-::\-Irccd}!set\-Foreground@{set\-Foreground}}
+\index{set\-Foreground@{set\-Foreground}!irccd::Irccd@{irccd\-::\-Irccd}}
+\subsubsection[{set\-Foreground}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irccd\-::set\-Foreground (
+\begin{DoxyParamCaption}
+\item[{bool}]{mode}
+\end{DoxyParamCaption}
+)}}\label{a00032_a157ff3cb14fa910fb1d2cfa6e97ed722}
+Tells if we should run to foreground or not.
+
+
+\begin{DoxyParams}{Parameters}
+{\em mode} & the mode \\
+\hline
+\end{DoxyParams}
+\hypertarget{a00032_a170ef2b72ab7b23357c7abe1c2d549ff}{\index{irccd\-::\-Irccd@{irccd\-::\-Irccd}!shutdown@{shutdown}}
+\index{shutdown@{shutdown}!irccd::Irccd@{irccd\-::\-Irccd}}
+\subsubsection[{shutdown}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irccd\-::shutdown (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00032_a170ef2b72ab7b23357c7abe1c2d549ff}
+Tells irccd to stop. \hypertarget{a00032_a913876eaf9f7caa2c9d29957ab0e791f}{\index{irccd\-::\-Irccd@{irccd\-::\-Irccd}!stop@{stop}}
+\index{stop@{stop}!irccd::Irccd@{irccd\-::\-Irccd}}
+\subsubsection[{stop}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Irccd\-::stop (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00032_a913876eaf9f7caa2c9d29957ab0e791f}
+Stop all threads and everything else. 
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00079}{Irccd.\-h}\item 
+Irccd.\-cpp\end{DoxyCompactItemize}

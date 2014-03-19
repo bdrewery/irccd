@@ -142,7 +142,7 @@ void pushGeneralInfo(lua_State *L, const Server::Info &info, unsigned options)
 	LUAE_STACK_CHECKEQUALS(L);
 }
 
-void pushChannels(lua_State *L, const Server::ChanList &list)
+void pushChannels(lua_State *L, const Server::ChannelList &list)
 {
 	LUAE_STACK_CHECKBEGIN(L);
 
@@ -171,7 +171,7 @@ int l_getChannels(lua_State *L)
 	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 
 	Luae::deprecate(L, "getChannels", "info");
-	pushChannels(L, s->getChannels());
+	pushChannels(L, s->channels());
 
 	return 1;
 }
@@ -179,7 +179,7 @@ int l_getChannels(lua_State *L)
 int l_getIdentity(lua_State *L)
 {
 	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
-	auto &ident = s->getIdentity();
+	auto &ident = s->identity();
 
 	Luae::deprecate(L, "getIdentity", "info");
 	pushIdentity(L, ident);
@@ -190,7 +190,7 @@ int l_getIdentity(lua_State *L)
 int l_getInfo(lua_State *L)
 {
 	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
-	auto &info = s->getInfo();
+	auto &info = s->info();
 	auto options = s->options();
 
 	Luae::deprecate(L, "getInfo", "info");
@@ -205,7 +205,7 @@ int l_getName(lua_State *L)
 	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 
 	Luae::deprecate(L, "getName", "info");
-	lua_pushstring(L, s->getInfo().name.c_str());
+	lua_pushstring(L, s->info().name.c_str());
 
 	return 1;
 }
@@ -232,14 +232,14 @@ int l_info(lua_State *L)
 	lua_newtable(L);
 
 	// Store the following fields
-	pushGeneralInfo(L, s->getInfo(), s->options());
+	pushGeneralInfo(L, s->info(), s->options());
 
 	// Table for channels
-	pushChannels(L, s->getChannels());
+	pushChannels(L, s->channels());
 	lua_setfield(L, -2, "channels");
 
 	// Table for identity
-	pushIdentity(L, s->getIdentity());
+	pushIdentity(L, s->identity());
 	lua_setfield(L, -2, "identity");
 
 	LUAE_STACK_CHECKEND(L, - 1);
@@ -424,8 +424,8 @@ int l_tostring(lua_State *L)
 	auto server = LuaeClass::getShared<Server>(L, 1, ServerType);
 	std::ostringstream oss;
 
-	oss << "Server " << server->getInfo().name;
-	oss << " at " << server->getInfo().host;
+	oss << "Server " << server->info().name;
+	oss << " at " << server->info().host;
 
 	if (server->options() & Server::OptionSsl)
 		oss << " (using SSL)" << std::endl;

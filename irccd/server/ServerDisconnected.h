@@ -19,6 +19,11 @@
 #ifndef _SERVER_DISCONNECTED_H_
 #define _SERVER_DISCONNECTED_H_
 
+/**
+ * @file ServerDisconnected.h
+ * @brief Server has disconnected
+ */
+
 #include "ServerState.h"
 
 namespace irccd {

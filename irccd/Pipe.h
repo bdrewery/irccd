@@ -19,6 +19,11 @@
 #ifndef _PIPE_H_
 #define _PIPE_H_
 
+/**
+ * @file Pipe.h
+ * @brief Pipe for sharing data between threads
+ */
+
 #include <condition_variable>
 #include <functional>
 #include <memory>
@@ -51,7 +56,14 @@ private:
 	using Reader	= std::function<void (const LuaeValue &)>;
 
 public:
+	/**
+	 * The smart pointer for \ref Pipe.
+	 */
 	using Ptr	= std::shared_ptr<Pipe>;
+
+	/**
+	 * The queue of values.
+	 */
 	using Queue	= std::queue<LuaeValue>;
 
 private:

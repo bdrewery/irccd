@@ -1,0 +1,81 @@
+\hypertarget{a00045}{\section{irccd\-:\-:Luae\-Value Class Reference}
+\label{a00045}\index{irccd\-::\-Luae\-Value@{irccd\-::\-Luae\-Value}}
+}
+
+
+A fake variant for Lua values.  
+
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00045_afd770bc3707aa0aa9ddac91136c0c862}{Luae\-Value} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{a00045}{Luae\-Value} \hyperlink{a00045_a690c1042a78f805c3f9baf7a677468cf}{copy} (lua\-\_\-\-State $\ast$L, int index)
+\item 
+static void \hyperlink{a00045_a82b9ba69859caebffc0ef8280880124d}{push} (lua\-\_\-\-State $\ast$L, const \hyperlink{a00045}{Luae\-Value} \&value)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A fake variant for Lua values. 
+
+This class is primarly used for copying Lua values without checking the types, useful to pass data. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00045_afd770bc3707aa0aa9ddac91136c0c862}{\index{irccd\-::\-Luae\-Value@{irccd\-::\-Luae\-Value}!Luae\-Value@{Luae\-Value}}
+\index{Luae\-Value@{Luae\-Value}!irccd::LuaeValue@{irccd\-::\-Luae\-Value}}
+\subsubsection[{Luae\-Value}]{\setlength{\rightskip}{0pt plus 5cm}irccd\-::\-Luae\-Value\-::\-Luae\-Value (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00045_afd770bc3707aa0aa9ddac91136c0c862}
+Default constructor (type nil) 
+
+\subsection{Member Function Documentation}
+\hypertarget{a00045_a690c1042a78f805c3f9baf7a677468cf}{\index{irccd\-::\-Luae\-Value@{irccd\-::\-Luae\-Value}!copy@{copy}}
+\index{copy@{copy}!irccd::LuaeValue@{irccd\-::\-Luae\-Value}}
+\subsubsection[{copy}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Luae\-Value} irccd\-::\-Luae\-Value\-::copy (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{int}]{index}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00045_a690c1042a78f805c3f9baf7a677468cf}
+Dump a value at the specific index.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em index} & the value \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a tree of values 
+\end{DoxyReturn}
+\hypertarget{a00045_a82b9ba69859caebffc0ef8280880124d}{\index{irccd\-::\-Luae\-Value@{irccd\-::\-Luae\-Value}!push@{push}}
+\index{push@{push}!irccd::LuaeValue@{irccd\-::\-Luae\-Value}}
+\subsubsection[{push}]{\setlength{\rightskip}{0pt plus 5cm}void irccd\-::\-Luae\-Value\-::push (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L, }
+\item[{const {\bf Luae\-Value} \&}]{value}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00045_a82b9ba69859caebffc0ef8280880124d}
+Push a value to a state.
+
+
+\begin{DoxyParams}{Parameters}
+{\em L} & the Lua state \\
+\hline
+{\em value} & the value to push \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00089}{Luae.\-h}\item 
+Luae.\-cpp\end{DoxyCompactItemize}
