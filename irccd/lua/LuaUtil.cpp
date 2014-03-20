@@ -32,8 +32,8 @@
 
 namespace irccd {
 
-namespace util {
-
+namespace {
+	
 /* --------------------------------------------------------
  * Color and attributes
  * -------------------------------------------------------- */
@@ -104,7 +104,7 @@ std::unordered_map<std::string, int> convertFlags {
 	{ "ConvertHome",	Util::ConvertHome		},
 };
 
-int convert(lua_State *L)
+int l_convert(lua_State *L)
 {
 	auto line = luaL_checkstring(L, 1);
 	auto flags = 0;
@@ -135,7 +135,7 @@ int convert(lua_State *L)
 	return 1;
 }
 
-int date(lua_State *L)
+int l_date(lua_State *L)
 {
 	if (lua_gettop(L) >= 1) {
 		int tm = luaL_checkinteger(L, 1);
@@ -146,7 +146,7 @@ int date(lua_State *L)
 	return 1;
 }
 
-int format(lua_State *L)
+int l_format(lua_State *L)
 {
 	std::string text = luaL_checkstring(L, 1);
 	std::ostringstream oss;
@@ -193,7 +193,7 @@ int format(lua_State *L)
 	return 1;
 }
 
-int splituser(lua_State *L)
+int l_splituser(lua_State *L)
 {
 	auto target = luaL_checkstring(L, 1);
 	char nick[32];
@@ -206,7 +206,7 @@ int splituser(lua_State *L)
 	return 1;
 }
 
-int splithost(lua_State *L)
+int l_splithost(lua_State *L)
 {
 	auto target = luaL_checkstring(L, 1);
 	char host[32];
@@ -219,14 +219,12 @@ int splithost(lua_State *L)
 	return 1;
 }
 
-} // !util
-
 const luaL_Reg functions[] = {
-	{ "convert",		util::convert		},
-	{ "date",		util::date		},
-	{ "format",		util::format		},
-	{ "splituser",		util::splituser		},
-	{ "splithost",		util::splithost		},
+	{ "convert",		l_convert		},
+	{ "date",		l_date			},
+	{ "format",		l_format		},
+	{ "splituser",		l_splituser		},
+	{ "splithost",		l_splithost		},
 	{ nullptr,		nullptr			}
 };
 
@@ -234,9 +232,7 @@ const luaL_Reg functions[] = {
  * Date methods
  * -------------------------------------------------------- */
 
-namespace date {
-
-int calendar(lua_State *L)
+int l_dateCalendar(lua_State *L)
 {
 	Date *date;
 	time_t stamp;
@@ -267,7 +263,7 @@ int calendar(lua_State *L)
 	return 1;
 }
 
-int format(lua_State *L)
+int l_dateFormat(lua_State *L)
 {
 	Date *d;
 	std::string fmt, result;
@@ -282,7 +278,7 @@ int format(lua_State *L)
 	return 1;
 }
 
-int timestamp(lua_State *L)
+int l_dateTimestamp(lua_State *L)
 {
 	Date *date;
 
@@ -292,15 +288,11 @@ int timestamp(lua_State *L)
 	return 1;
 }
 
-} // !dateMethods
-
 /* --------------------------------------------------------
  * Date meta methods
  * -------------------------------------------------------- */
 
-namespace dateMt {
-
-int equals(lua_State *L)
+int l_dateEquals(lua_State *L)
 {
 	Date *d1, *d2;
 
@@ -312,14 +304,14 @@ int equals(lua_State *L)
 	return 1;
 }
 
-int gc(lua_State *L)
+int l_dateGc(lua_State *L)
 {
 	Luae::toType<Date *>(L, 1, DATE_TYPE)->~Date();
 
 	return 0;
 }
 
-int le(lua_State *L)
+int l_dateLe(lua_State *L)
 {
 	Date *d1, *d2;
 
@@ -331,7 +323,7 @@ int le(lua_State *L)
 	return 1;
 }
 
-int tostring(lua_State *L)
+int l_dateTostring(lua_State *L)
 {
 	Date *date;
 
@@ -341,22 +333,22 @@ int tostring(lua_State *L)
 	return 1;
 }
 
-} // !dateMt
-
 const luaL_Reg dateMethodsList[] = {
-	{ "calendar",		date::calendar		},
-	{ "format",		date::format		},
-	{ "timestamp",		date::timestamp		},
+	{ "calendar",		l_dateCalendar		},
+	{ "format",		l_dateFormat		},
+	{ "timestamp",		l_dateTimestamp		},
 	{ nullptr,		nullptr			}
 };
 
 const luaL_Reg dateMtList[] = {
-	{ "__eq",		dateMt::equals		},
-	{ "__gc",		dateMt::gc		},
-	{ "__le",		dateMt::le		},
-	{ "__tostring",		dateMt::tostring	},
+	{ "__eq",		l_dateEquals		},
+	{ "__gc",		l_dateGc		},
+	{ "__le",		l_dateLe		},
+	{ "__tostring",		l_dateTostring		},
 	{ nullptr,		nullptr			}
 };
+
+}
 
 int luaopen_util(lua_State *L)
 {
@@ -373,7 +365,7 @@ int luaopen_util(lua_State *L)
 	// Colors
 	lua_createtable(L, 0, 0);
 
-	for (auto p : util::colors) {
+	for (auto p : colors) {
 		lua_pushinteger(L, static_cast<int>(p.second));
 		lua_setfield(L, -2, p.first.c_str());
 	}
@@ -383,7 +375,7 @@ int luaopen_util(lua_State *L)
 	// Attributes
 	lua_createtable(L, 0, 0);
 
-	for (auto p : util::attributes) {
+	for (auto p : attributes) {
 		lua_pushinteger(L, static_cast<int>(p.second));
 		lua_setfield(L, -2, p.first.c_str());
 	}
@@ -391,7 +383,7 @@ int luaopen_util(lua_State *L)
 	lua_setfield(L, -2, "attribute");
 
 	// Conversion flags
-	for (auto p : util::convertFlags) {
+	for (auto p : convertFlags) {
 		lua_pushinteger(L, p.second);
 		lua_setfield(L, -2, p.first.c_str());
 	}

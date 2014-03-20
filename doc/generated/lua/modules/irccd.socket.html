@@ -31,17 +31,18 @@
 <h2>Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
-<li><a href="#Tables">Tables</a></li>
 <li><a href="#Class_Socket">Class Socket </a></li>
 </ul>
 
 
 <h2>Modules</h2>
 <ul class="nowrap">
-  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
   <li><a href="../modules/irccd.fs.html">irccd.fs</a></li>
+  <li><a href="../modules/irccd.html">irccd</a></li>
   <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
   <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
   <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
   <li><a href="../modules/irccd.server.html">irccd.server</a></li>
   <li><strong>irccd.socket</strong></li>
@@ -49,8 +50,6 @@
   <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
   <li><a href="../modules/irccd.system.html">irccd.system</a></li>
   <li><a href="../modules/irccd.thread.html">irccd.thread</a></li>
-  <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
-  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
 </ul>
 <h2>Topics</h2>
 <ul class="nowrap">
@@ -133,21 +132,6 @@ s:sendto("Test", host)
 	<tr>
 	<td class="name" nowrap><a href="#new">new (family, type)</a></td>
 	<td class="summary">Create a new socket.</td>
-	</tr>
-</table>
-<h2><a href="#Tables">Tables</a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#family">family</a></td>
-	<td class="summary">Socket address family</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#type">type</a></td>
-	<td class="summary">Socket type</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#protocol">protocol</a></td>
-	<td class="summary">Socket protocol</td>
 	</tr>
 </table>
 <h2><a href="#Class_Socket">Class Socket </a></h2>
@@ -240,84 +224,6 @@ s:sendto("Test", host)
         <li>
         the error message</li>
     </ol>
-
-
-
-
-</dd>
-</dl>
-    <h2><a name="Tables"></a>Tables</h2>
-    <dl class="function">
-    <dt>
-    <a name = "family"></a>
-    <strong>family</strong>
-    </dt>
-    <dd>
-    Socket address family
-
-    <h3>Fields:</h3>
-    <ul>
-        <li><span class="parameter">Inet</span>
-        AF_INET (IPv4) family.
-        </li>
-        <li><span class="parameter">Inet6</span>
-        AF_INET6 (IPv6) family.
-        </li>
-        <li><span class="parameter">Unix</span>
-        AF_LOCAL (Unix) family, only on Unix.
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "type"></a>
-    <strong>type</strong>
-    </dt>
-    <dd>
-    Socket type
-
-    <h3>Fields:</h3>
-    <ul>
-        <li><span class="parameter">Stream</span>
-        SOCK_STREAM sockets
-        </li>
-        <li><span class="parameter">Datagram</span>
-        SOCK_DGRAM sockets
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "protocol"></a>
-    <strong>protocol</strong>
-    </dt>
-    <dd>
-    Socket protocol
-
-    <h3>Fields:</h3>
-    <ul>
-        <li><span class="parameter">Tcp</span>
-        IPPROTO_TCP
-        </li>
-        <li><span class="parameter">Udp</span>
-        IPPROTO_UDP
-        </li>
-        <li><span class="parameter">IPv4</span>
-        IPPROTO_IPV4
-        </li>
-        <li><span class="parameter">IPv6</span>
-        IPPROTO_IPv6
-        </li>
-    </ul>
-
 
 
 

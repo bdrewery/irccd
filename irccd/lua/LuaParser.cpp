@@ -21,8 +21,8 @@
 #include "Irccd.h"
 #include "LuaParser.h"
 
-namespace irccd {
-
+namespace {
+	
 /* --------------------------------------------------------
  * Helpers
  * -------------------------------------------------------- */
@@ -30,6 +30,10 @@ namespace irccd {
 const char *SectionType		= "Section";
 const char *ParserType		= "Parser";
 
+}
+
+namespace irccd {
+	
 /**
  * @brief Overload for parser Section
  */

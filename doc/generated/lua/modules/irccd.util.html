@@ -31,7 +31,6 @@
 <h2>Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
-<li><a href="#Tables">Tables</a></li>
 <li><a href="#Conversion_flags">Conversion flags </a></li>
 <li><a href="#Class_Date">Class Date </a></li>
 <li><a href="#Date_metamethods">Date metamethods </a></li>
@@ -40,10 +39,12 @@
 
 <h2>Modules</h2>
 <ul class="nowrap">
-  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><strong>irccd.util</strong></li>
   <li><a href="../modules/irccd.fs.html">irccd.fs</a></li>
+  <li><a href="../modules/irccd.html">irccd</a></li>
   <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
   <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
   <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
   <li><a href="../modules/irccd.server.html">irccd.server</a></li>
   <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
@@ -51,8 +52,6 @@
   <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
   <li><a href="../modules/irccd.system.html">irccd.system</a></li>
   <li><a href="../modules/irccd.thread.html">irccd.thread</a></li>
-  <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
-  <li><strong>irccd.util</strong></li>
 </ul>
 <h2>Topics</h2>
 <ul class="nowrap">
@@ -121,17 +120,6 @@
 	<tr>
 	<td class="name" nowrap><a href="#splithost">splithost (user)</a></td>
 	<td class="summary">Split the hostname.</td>
-	</tr>
-</table>
-<h2><a href="#Tables">Tables</a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#color">color</a></td>
-	<td class="summary">Colors</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#attribute">attribute</a></td>
-	<td class="summary">Attributes</td>
 	</tr>
 </table>
 <h2><a href="#Conversion_flags">Conversion flags </a></h2>
@@ -260,7 +248,7 @@
 
     <h3>See also:</h3>
     <ul>
-         <a href="../modules/irccd.util.html#Class_Date">Date</a>
+         <a href="../modules/irccd.util.html#Date">Date</a>
     </ul>
 
 
@@ -352,113 +340,6 @@
 
         the nickname
     </ol>
-
-
-
-
-</dd>
-</dl>
-    <h2><a name="Tables"></a>Tables</h2>
-    <dl class="function">
-    <dt>
-    <a name = "color"></a>
-    <strong>color</strong>
-    </dt>
-    <dd>
-    Colors
-
-    <h3>Fields:</h3>
-    <ul>
-        <li><span class="parameter">White</span>
-        White.
-        </li>
-        <li><span class="parameter">Black</span>
-        Black.
-        </li>
-        <li><span class="parameter">Blue</span>
-        Blue.
-        </li>
-        <li><span class="parameter">Green</span>
-        Green.
-        </li>
-        <li><span class="parameter">Red</span>
-        Red.
-        </li>
-        <li><span class="parameter">Brown</span>
-        Brown.
-        </li>
-        <li><span class="parameter">Purple</span>
-        Purple.
-        </li>
-        <li><span class="parameter">Orange</span>
-        Orange.
-        </li>
-        <li><span class="parameter">Yellow</span>
-        Yellow.
-        </li>
-        <li><span class="parameter">LightGreen</span>
-        LightGreen.
-        </li>
-        <li><span class="parameter">Cyan</span>
-        Cyan.
-        </li>
-        <li><span class="parameter">LightCyan</span>
-        LightCyan.
-        </li>
-        <li><span class="parameter">LightBlue</span>
-        LightBlue.
-        </li>
-        <li><span class="parameter">Pink</span>
-        Pink.
-        </li>
-        <li><span class="parameter">Grey</span>
-        Grey.
-        </li>
-        <li><span class="parameter">LightGrey</span>
-        LightGrey.
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "attribute"></a>
-    <strong>attribute</strong>
-    </dt>
-    <dd>
-    Attributes
-
-    <h3>Fields:</h3>
-    <ul>
-        <li><span class="parameter">Bold</span>
-        Bold.
-        </li>
-        <li><span class="parameter">Color</span>
-        Color (start a color sequence).
-        </li>
-        <li><span class="parameter">Italic</span>
-        Italic.
-        </li>
-        <li><span class="parameter">StrikeThrough</span>
-        StrikeThrough.
-        </li>
-        <li><span class="parameter">Reset</span>
-        Reset (remove all formatting).
-        </li>
-        <li><span class="parameter">Underline</span>
-        Underline1.
-        </li>
-        <li><span class="parameter">Underline2</span>
-        Underline2.
-        </li>
-        <li><span class="parameter">Reverse</span>
-        Reverse (reverse foreground and background).
-        </li>
-    </ul>
-
 
 
 

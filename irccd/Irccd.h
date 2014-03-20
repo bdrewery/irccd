@@ -37,6 +37,9 @@
 #  include "Plugin.h"
 #endif
 
+/**
+ * @brief The irccd namespace
+ */
 namespace irccd {
 
 /* --------------------------------------------------------

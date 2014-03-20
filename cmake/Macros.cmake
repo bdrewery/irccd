@@ -78,7 +78,7 @@ function(asciidoc_file file)
 			   "${doc_SOURCE_DIR}/guides/${file}"
 		)
 
-		add_dependencies(generate-doc ${file})
+		add_dependencies(generate-guides ${file})
 	endif()
 endfunction()
 

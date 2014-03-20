@@ -19,6 +19,15 @@
 project(doc)
 
 # ---------------------------------------------------------
+# Meta target for doc generation
+# ---------------------------------------------------------
+
+add_custom_target(
+	docs
+	COMMENT "Generating documentation"
+)
+
+# ---------------------------------------------------------
 # Install manuals
 # ---------------------------------------------------------
 
@@ -42,6 +51,14 @@ if(DOXYGEN_FOUND)
 	set(DOXYGEN_INPUT ${CMAKE_SOURCE_DIR})
 	set(DOXYGEN_OUTPUT ${doc_SOURCE_DIR}/generated/doxygen)
 
+	if(NOT DOXYGEN_DOT_FOUND)
+		set(DOXYGEN_HAVE_DOT "NO")
+		set(DOXYGEN_DOT_PATH "")
+	else()
+		set(DOXYGEN_HAVE_DOT "YES")
+		set(DOXYGEN_DOT_PATH "\"${DOXYGEN_DOT_EXECUTABLE}\"")
+	endif()
+
 	configure_file(
 		"${doc_SOURCE_DIR}/doxygen/Doxyfile.in"
 		"${doc_BINARY_DIR}/Doxyfile"
@@ -55,6 +72,8 @@ if(DOXYGEN_FOUND)
 		WORKING_DIRECTORY
 			${CMAKE_SOURCE_DIR}
 	)
+
+	add_dependencies(docs generate-doxygen)
 endif()
 
 # ---------------------------------------------------------
@@ -74,6 +93,8 @@ if(LDOC)
 			"${CMAKE_CURRENT_SOURCE_DIR}/ldoc/style/robot.png"
 			"${CMAKE_CURRENT_SOURCE_DIR}/generated/lua/"
 	)
+
+	add_dependencies(docs generate-ldoc)
 endif()
 
 # ---------------------------------------------------------
@@ -86,16 +107,21 @@ endif()
 #
 if(ASCIIDOC)
 	add_custom_target(
-		generate-doc
+		generate-guides
 		COMMENT "Generated .html files from .txt"
-		COMMAND cmake -E make_directory
-			"${CMAKE_CURRENT_SOURCE_DIR}/generated/guides"
-		COMMAND cmake -E make_directory
-			"${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/icons"
-		COMMAND cmake -E copy_directory
-			"${CMAKE_CURRENT_SOURCE_DIR}/guides/icons/"
-			"${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/icons/"
+		COMMAND
+			${CMAKE_COMMAND} -E make_directory
+				"${CMAKE_CURRENT_SOURCE_DIR}/generated/guides"
+		COMMAND
+			${CMAKE_COMMAND} -E make_directory
+				"${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/icons"
+		COMMAND
+			${CMAKE_COMMAND} -E copy_directory
+				"${CMAKE_CURRENT_SOURCE_DIR}/guides/icons/"
+				"${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/icons/"
 	)
+
+	add_dependencies(docs generate-guides)
 endif()
 
 define_guide(user-guide "User guide")
