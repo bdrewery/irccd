@@ -1,6 +1,0 @@
-<map id="common/Socket.h" name="common/Socket.h">
-<area shape="rect" id="node2" href="$a00096.html" title="Listener for irccdctl." alt="" coords="57,155,175,181"/>
-<area shape="rect" id="node3" href="$a00080.html" title="Portable C++ socket addresses management." alt="" coords="236,80,426,107"/>
-<area shape="rect" id="node5" href="$a00082.html" title="Portable C++ select(2) wrapper." alt="" coords="22,80,211,107"/>
-<area shape="rect" id="node4" href="$a00150.html" title="Main irccdctl class." alt="" coords="267,155,395,181"/>
-</map>

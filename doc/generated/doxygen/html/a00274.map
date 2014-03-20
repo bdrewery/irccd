@@ -1,7 +1,0 @@
-<map id="irccd::ServerState" name="irccd::ServerState">
-<area shape="rect" id="node2" href="$a00055.html" title="The connecting state." alt="" coords="199,5,374,32"/>
-<area shape="rect" id="node3" href="$a00056.html" title="The server is dead and will be removed." alt="" coords="219,56,355,83"/>
-<area shape="rect" id="node4" href="$a00057.html" title="After a disconnection." alt="" coords="192,107,381,133"/>
-<area shape="rect" id="node5" href="$a00058.html" title="Forever loop." alt="" coords="211,157,363,184"/>
-<area shape="rect" id="node6" href="$a00060.html" title="Default server state." alt="" coords="197,208,376,235"/>
-</map>

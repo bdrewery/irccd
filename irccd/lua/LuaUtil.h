@@ -24,7 +24,8 @@
  * @brief Lua bindings for class Util
  */
 
-#include <lua.hpp>
+#include "Date.h"
+#include "Luae.h"
 
 namespace irccd {
 
@@ -32,6 +33,48 @@ namespace irccd {
  * The date type.
  */
 extern const char *DateType;
+
+/**
+ * @brief Overload for Date
+ */
+template <>
+struct Luae::Convert<Date> {
+	static const bool supported = true;	//!< is supported
+
+	/**
+	 * Push the date.
+	 *
+	 * @param L the Lua state
+	 * @param value the value
+	 */
+	static void push(lua_State *L, const Date &value)
+	{
+		new (L, DateType) Date(value);
+	}
+
+	/**
+	 * Get a date.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return a boolean
+	 */
+	static Date get(lua_State *L, int index)
+	{
+		return *Luae::toType<Date *>(L, index);
+	}
+
+	/**
+	 * Check for a date.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 */
+	static Date check(lua_State *L, int index)
+	{
+		return *Luae::toType<Date *>(L, index, DateType);
+	}
+};
 
 /**
  * The open function.

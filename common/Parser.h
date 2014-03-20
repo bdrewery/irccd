@@ -72,6 +72,9 @@ private:
 	bool		m_allowed;	//!< is authorized to push
 
 public:
+	/**
+	 * @brief The converter
+	 */
 	template <typename T>
 	struct Converter {
 		static const bool supported = false;	//!< not supported

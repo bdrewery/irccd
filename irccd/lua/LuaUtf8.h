@@ -23,6 +23,12 @@
 
 namespace irccd {
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_utf8(lua_State *L);
 
 } // !irccd

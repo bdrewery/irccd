@@ -114,6 +114,11 @@ private:
 
 public:
 	/**
+	 * Map from string to function.
+	 */
+	using Reg	= std::unordered_map<const char *, lua_CFunction>;
+
+	/**
 	 * @struct Convert
 	 * @brief Push or get values
 	 */
@@ -159,6 +164,31 @@ public:
 	static void preload(lua_State *L,
 			    const std::string &name,
 			    lua_CFunction func);
+
+	/**
+	 * Set a field to the table at the given index.
+	 *
+	 * @param L the Lua state
+	 * @param idx the table index
+	 * @param name the field name
+	 * @see set
+	 */
+	static inline void setfield(lua_State *L, int idx, const std::string &name)
+	{
+		lua_setfield(L, idx, name.c_str());
+	}
+
+	/**
+	 * Get a field at the given index.
+	 *
+	 * @param L the Lua state
+	 * @param idx the table index
+	 * @param name the field name
+	 */
+	static inline void getfield(lua_State *L, int idx, const std::string &name)
+	{
+		lua_getfield(L, idx, name.c_str());
+	}
 
 	/**
 	 * Get a global value from Lua.
@@ -213,6 +243,92 @@ public:
 	static inline void insert(lua_State *L, int index)
 	{
 		lua_insert(L, index);
+	}
+
+	/**
+	 * Get the up value index.
+	 *
+	 * @param index the index
+	 * @return the real index
+	 */
+	static inline int upvalueindex(int index)
+	{
+		return lua_upvalueindex(index);
+	}
+
+	/**
+	 * Create or get a metatable in the registry.
+	 *
+	 * @param L the Lua state
+	 * @param name the metatable name
+	 */
+	static inline void newmetatable(lua_State *L, const std::string &name)
+	{
+		luaL_newmetatable(L, name.c_str());
+	}
+
+	/**
+	 * Create a new table and fill it with functions.
+	 *
+	 * @param L the Lua state
+	 * @param functions the functions
+	 */
+	static inline void newlib(lua_State *L, const luaL_Reg *functions)
+	{
+		lua_createtable(L, 0, 0);
+		for (auto p = functions; p->name != nullptr; ++p) {
+			lua_pushcfunction(L, p->func);
+			lua_setfield(L, -2, p->name);
+		}
+	}
+
+	/**
+	 * Create a new table and fill it with functions.
+	 *
+	 * @param L the Lua state
+	 * @param functions the functions
+	 */
+	static inline void newlib(lua_State *L, const Reg &functions)
+	{
+		lua_createtable(L, 0, 0);
+		for (auto &p : functions) {
+			lua_pushcfunction(L, p.second);
+			lua_setfield(L, -2, p.first);
+		}
+	}
+
+	/**
+	 * Set the functions to the table at the top of stack.
+	 *
+	 * @param L the Lua state
+	 * @param functions the functions
+	 * @param nup the number of upvalues
+	 */
+	static inline void setfuncs(lua_State *L, const luaL_Reg *functions, int nup = 0)
+	{
+		luaL_setfuncs(L, functions, nup);
+	}
+
+	/**
+	 * Set the functions to the table at the top of stack.
+	 *
+	 * @param L the Lua state
+	 * @param functions the functions
+	 * @param nup the number of upvalues
+	 */
+	static inline void setfuncs(lua_State *L, const Reg &functions, int nup = 0)
+	{
+		luaL_checkversion(L);
+		luaL_checkstack(L, nup, "too many upvalues");
+
+		for (auto &l : functions) {
+			for (int i = 0; i < nup; i++)
+				lua_pushvalue(L, -nup);
+			lua_pushcclosure(L, l.second, nup);
+			lua_setfield(L, -(nup + 2), l.first);
+		}
+
+		lua_pop(L, nup);
 	}
 
 	/**
@@ -437,6 +553,17 @@ public:
 	}
 
 	/**
+	 * Get the current stack size.
+	 *
+	 * @param L the Lua state
+	 * @return the stack size
+	 */
+	static inline int gettop(lua_State *L)
+	{
+		return lua_gettop(L);
+	}
+
+	/**
 	 * Write a warning about a deprecated feature.
 	 *
 	 * @param L the Lua state
@@ -483,6 +610,26 @@ public:
 	static inline void pop(lua_State *L, int count)
 	{
 		lua_pop(L, count);
+	}
+};
+
+/**
+ * @brief Overload for nil.
+ */
+template <>
+struct Luae::Convert<std::nullptr_t> {
+	static const bool supported = true;	//!< is supported
+
+	/**
+	 * Push nil.
+	 *
+	 * @param L the Lua state
+	 * @param nil the nil value
+	 */
+	static void push(lua_State *L, const std::nullptr_t &nil)
+	{
+		lua_pushnil(L);
+		(void)nil;
 	}
 };
 
@@ -1039,31 +1186,6 @@ public:
 	}
 
 	/**
-	 * Set a field to the table at the given index.
-	 *
-	 * @param L the Lua state
-	 * @param idx the table index
-	 * @param name the field name
-	 * @see set
-	 */
-	static inline void setfield(lua_State *L, int idx, const std::string &name)
-	{
-		lua_setfield(L, idx, name.c_str());
-	}
-
-	/**
-	 * Get a field at the given index.
-	 *
-	 * @param L the Lua state
-	 * @param idx the table index
-	 * @param name the field name
-	 */
-	static inline void getfield(lua_State *L, int idx, const std::string &name)
-	{
-		lua_getfield(L, idx, name.c_str());
-	}
-
-	/**
 	 * Set a table field. Specialized for the same fields as get.
 	 *
 	 * @param L the Lua state
@@ -1078,7 +1200,7 @@ public:
 		LUAE_STACK_CHECKBEGIN(L);
 
 		Luae::push(L, value);
-		LuaeTable::setfield(L, (idx < 0) ? --idx : idx, name);
+		Luae::setfield(L, (idx < 0) ? --idx : idx, name);
 
 		LUAE_STACK_CHECKEQUALS(L);
 	}
@@ -1116,7 +1238,7 @@ public:
 		LUAE_STACK_CHECKBEGIN(L);
 
 		LuaeClass::pushShared(L, o, meta);
-		LuaeTable::setfield(L, (index < 0) ? --index : index, name);
+		Luae::setfield(L, (index < 0) ? --index : index, name);
 
 		LUAE_STACK_CHECKEQUALS(L);
 	}
