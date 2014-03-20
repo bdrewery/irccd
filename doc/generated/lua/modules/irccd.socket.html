@@ -98,6 +98,35 @@
 <p> This API provides support for low level sockets. It currently
  suports AF_INET, AF_INET6 and AF_LOCAL (on Unix only).</p>
 
+<p> <h2>Addresses</h2></p>
+
+<p> Starting from irccd 1.2, a new address system has been designed. Now
+ addresses are simple raw Lua tables. However, they are updated by irccd.socket
+ API for performance.</p>
+
+<p> For example, when binding a socket, you can use the following code:</p>
+
+<pre><code>s:bind {
+    address = "*",
+    port    = 8989,
+}
+</code></pre>
+
+<p> After the call, the table will have a new internal field that describe the
+ resolved address. For instance, if you plan to use sendto a lot, it is
+ recommended to create a table before sending like this:</p>
+
+<pre><code>local host = {
+     host   = "localhost",
+     port   = 80
+}
+
+s:sendto("Test", host)
+</code></pre>
+
+<p> After the first call to sendto, the host table will be updated and further
+ call will use the resolved address.</p>
+
 
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
@@ -149,11 +178,11 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Socket:receive">Socket:receive (howmany)</a></td>
-	<td class="summary">Receive some data.</td>
+	<td class="summary"><span class="deprecated">(deprecated)</span> Receive some data.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Socket:receiveFrom">Socket:receiveFrom (howmany, from)</a></td>
-	<td class="summary">Receive some data.</td>
+	<td class="name" nowrap><a href="#Socket:receiveFrom">Socket:receiveFrom (howmany)</a></td>
+	<td class="summary"><span class="deprecated">(deprecated)</span> Receive some data.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Socket:send">Socket:send (data)</a></td>
@@ -161,7 +190,19 @@
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Socket:send">Socket:send (data, address)</a></td>
-	<td class="summary">Send some data.</td>
+	<td class="summary"><span class="deprecated">(deprecated)</span> Send some data.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Socket:sendto">Socket:sendto (data, address)</a></td>
+	<td class="summary">Send data to not connected socket.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Socket:recv">Socket:recv (howmany)</a></td>
+	<td class="summary">Get some data as a stream mode.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Socket:recvfrom">Socket:recvfrom (howmany)</a></td>
+	<td class="summary">Get some data from a peer, typically UDP.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Socket:set">Socket:set (level, name, arg)</a></td>
@@ -291,7 +332,23 @@
     <strong>Socket:accept ()</strong>
     </dt>
     <dd>
-    Accept a client.
+    Accept a client. </p>
+
+<p> The address table will have the following fields:</p>
+
+<p> <br />
+ For internet families:
+ <ul>
+ <li><strong>ip (string)</strong>: Optional, the IP</li>
+ <li><strong>host (string)</strong>: Optional, the hostname</li>
+ <li><strong>service (string)</strong>: Optional, the service name</li>
+ <li><strong>port (number)</strong>: Optional, the port number</li>
+ </ul>
+ <br />
+ For unix families: <strong>(not supported on Windows)</strong>
+ <ul>
+ <li><strong>path (string)</strong>: The path</li>
+ </ul>
 
 
     <h3>Returns:</h3>
@@ -299,7 +356,7 @@
         <li>
         the accepted socket (or nil)</li>
         <li>
-        the socket information (or nil)</li>
+        the address table</li>
         <li>
         the error message if any</li>
     </ol>
@@ -313,13 +370,21 @@
     <strong>Socket:bind (address)</strong>
     </dt>
     <dd>
+    Bind to an address.
+ The address table must have the following fields:</p>
 
-<p>Bind to an address.
- As a convenience, this function may accept nil plus the error
- message for chained expression like:</p>
-<pre><code>s:bind(address.unix("/tmp/file.sock"))
-</code></pre>
-
+<p> <br />
+ For internet families:
+ <ul>
+ <li><strong>address (string)</strong>: Required, the address or "*" for any</li>
+ <li><strong>port (number)</strong>: Required, the port number</li>
+ <li><strong>family (enum)</strong>: Optional, the family. Default: same as socket</li>
+ </ul>
+ <br />
+ For unix families: <strong>(not supported on Windows)</strong>
+ <ul>
+ <li><strong>path (string)</strong>: Required, the path</li>
+ </ul>
 
     <h3>Parameters:</h3>
     <ul>
@@ -337,10 +402,6 @@
     </ol>
 
 
-    <h3>See also:</h3>
-    <ul>
-         <a href="../modules/irccd.socket.address.html#">irccd.socket.address</a>
-    </ul>
 
 
 </dd>
@@ -391,8 +452,21 @@
     </dt>
     <dd>
     Connect to an end point.
- Like Socket:bind, you can pass nil plus an error message as
- parameters.
+ The address table must have the following fields:</p>
+
+<p> <br />
+ For internet families:
+ <ul>
+ <li><strong>host (string)</strong>: Required, the hostname</li>
+ <li><strong>port (number)</strong>: Required, the port number</li>
+ <li><strong>family (enum)</strong>: Optional, the family. Default: same as socket</li>
+ <li><strong>type (enum)</strong>: Optional, the type. Default: same as socket</li>
+ </ul>
+ <br />
+ For unix families: <strong>(not supported on Windows)</strong>
+ <ul>
+ <li><strong>path (string)</strong>: Required, the path</li>
+ </ul>
 
     <h3>Parameters:</h3>
     <ul>
@@ -410,11 +484,6 @@
     </ol>
 
 
-    <h3>See also:</h3>
-    <ul>
-         <li><a href="../modules/irccd.socket.html#Socket:bind">Socket:bind</a></li>
-         <li><a href="../modules/irccd.socket.address.html#">irccd.socket.address</a></li>
-    </ul>
 
 
 </dd>
@@ -449,7 +518,7 @@
     <strong>Socket:receive (howmany)</strong>
     </dt>
     <dd>
-    Receive some data.
+    <span class="deprecated">(deprecated)</span> Receive some data.
  Get some data as a stream mode.
 
     <h3>Parameters:</h3>
@@ -468,24 +537,26 @@
     </ol>
 
 
+    <h3>See also:</h3>
+    <ul>
+         <li><a href="../modules/irccd.socket.address.html#">irccd.socket.address</a></li>
+         <li><a href="../modules/irccd.socket.html#Socket:recv">Socket:recv</a></li>
+    </ul>
 
 
 </dd>
     <dt>
     <a name = "Socket:receiveFrom"></a>
-    <strong>Socket:receiveFrom (howmany, from)</strong>
+    <strong>Socket:receiveFrom (howmany)</strong>
     </dt>
     <dd>
-    Receive some data.
+    <span class="deprecated">(deprecated)</span> Receive some data.
  Get some data from a peer, typically UDP.
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">howmany</span>
          how much to receive
-        </li>
-        <li><span class="parameter">from</span>
-         the address from
         </li>
     </ul>
 
@@ -494,13 +565,16 @@
         <li>
         the read string or nil</li>
         <li>
+        the address</li>
+        <li>
         the error message</li>
     </ol>
 
 
     <h3>See also:</h3>
     <ul>
-         <a href="../modules/irccd.socket.address.html#">irccd.socket.address</a>
+         <li><a href="../modules/irccd.socket.address.html#">irccd.socket.address</a></li>
+         <li><a href="../modules/irccd.socket.html#Socket:recvfrom">Socket:recvfrom</a></li>
     </ul>
 
 
@@ -537,8 +611,9 @@
     <strong>Socket:send (data, address)</strong>
     </dt>
     <dd>
-    Send some data.
- This function sends data to a datagram based socket
+    <span class="deprecated">(deprecated)</span> Send some data.
+ This function sends data to a datagram based socket. This function signature
+ is deprecated and new code should use sendto instead.
 
     <h3>Parameters:</h3>
     <ul>
@@ -561,8 +636,129 @@
 
     <h3>See also:</h3>
     <ul>
-         <a href="../modules/irccd.socket.address.html#">irccd.socket.address</a>
+         <li><a href="../modules/irccd.socket.address.html#">irccd.socket.address</a></li>
+         <li><a href="../modules/irccd.socket.html#Socket:sendto">Socket:sendto</a></li>
     </ul>
+
+
+</dd>
+    <dt>
+    <a name = "Socket:sendto"></a>
+    <strong>Socket:sendto (data, address)</strong>
+    </dt>
+    <dd>
+    Send data to not connected socket.
+ The address table must have the following fields:</p>
+
+<p> <br />
+ For internet families:
+ <ul>
+ <li><strong>host (string)</strong>: Required, the hostname</li>
+ <li><strong>port (number)</strong>: Required, the port number</li>
+ <li><strong>family (enum)</strong>: Optional, the family. Default: same as socket</li>
+ <li><strong>type (enum)</strong>: Optional, the type. Default: same as socket</li>
+ </ul>
+ <br />
+ For unix families: <strong>(not supported on Windows)</strong>
+ <ul>
+ <li><strong>path (string)</strong>: Required, the path</li>
+ </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">data</span>
+         the data
+        </li>
+        <li><span class="parameter">address</span>
+         the address
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the number of bytes sent or nil</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Socket:recv"></a>
+    <strong>Socket:recv (howmany)</strong>
+    </dt>
+    <dd>
+    Get some data as a stream mode.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">howmany</span>
+         how much to receive
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the read string or nil</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Socket:recvfrom"></a>
+    <strong>Socket:recvfrom (howmany)</strong>
+    </dt>
+    <dd>
+    Get some data from a peer, typically UDP.
+ This function will return the same address if the same client sent
+ data. That same table will only be returned if you didn't discard
+ the return value.</p>
+
+<p> This is useful if you want to keep track the data by users.</p>
+
+<p> </br >
+ The address table will have the following fields:</p>
+
+<p> <br />
+ For internet families:
+ <ul>
+ <li><strong>ip (string)</strong>: Optional, the IP</li>
+ <li><strong>host (string)</strong>: Optional, the hostname</li>
+ <li><strong>service (string)</strong>: Optional, the service name</li>
+ <li><strong>port (number)</strong>: Optional, the port number</li>
+ </ul>
+ <br />
+ For unix families: <strong>(not supported on Windows)</strong>
+ <ul>
+ <li><strong>path (string)</strong>: The path</li>
+ </ul>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">howmany</span>
+         how much to receive
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the read string or nil</li>
+        <li>
+        the client address</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
 
 
 </dd>

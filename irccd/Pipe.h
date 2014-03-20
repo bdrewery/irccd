@@ -55,12 +55,13 @@ public:
 	using Queue	= std::queue<LuaValue>;
 
 private:
-	static Pipes pipes;
-	static Mutex pipesMutex;
+	static Pipes	pipes;
+	static Mutex	pipesMutex;
 
-	Cond m_cond;
-	Mutex m_mutex;
-	Queue m_queue;
+	std::string	m_name;
+	Cond		m_cond;
+	Mutex		m_mutex;
+	Queue		m_queue;
 
 public:
 	/**
@@ -70,6 +71,25 @@ public:
 	 * @return the pipe ready to be used
 	 */
 	static Ptr get(const std::string &name);
+
+	/**
+	 * Destroy a pipe, will be destroyed if no one is using it
+	 *
+	 * @param pipe the pipe
+	 */
+	static void destroy(const Pipe::Ptr &pipe);
+
+	/**
+	 * Construct a named pipe.
+	 *
+	 * @param name the name
+	 */
+	Pipe(const std::string &name);
+
+	/**
+	 * Destroy the pipe.
+	 */
+	~Pipe();
 
 	/**
 	 * Push some data to the pipe.

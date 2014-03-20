@@ -101,6 +101,9 @@ void Server::flush()
 
 	for (auto it = servers.cbegin(); it != servers.cend(); ) {
 		if (it->second->m_state->which() == "Dead") {
+			it->second->m_session = IrcSession();
+			it->second->m_state = ServerState::Ptr();
+
 			Logger::debug("server: removing %s from registry",
 			    it->second->getInfo().name.c_str());
 			servers.erase(it++);
@@ -143,6 +146,9 @@ Server::Server(const Info &info,
 
 Server::~Server()
 {
+	if (m_thread.joinable())
+		m_thread.join();
+
 	Logger::debug("server %s: destroyed", m_info.name.c_str());
 }
 
@@ -283,7 +289,7 @@ void Server::restart()
 	Lock lk(m_lock);
 
 	m_reco.restarting = true;
-	irc_disconnect(m_session);
+	m_session.disconnect();
 }
 
 void Server::stop()
@@ -298,12 +304,6 @@ void Server::stop()
 		m_reco.enabled = false;
 		m_reco.stopping = true;
 		m_session.disconnect();
-	}
-
-	try {
-		m_thread.join();
-	} catch (std::system_error error) {
-		Logger::warn("server %s: %s", m_info.name.c_str(), error.what());
 	}
 }
 

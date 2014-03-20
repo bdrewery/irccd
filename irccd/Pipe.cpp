@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <Logger.h>
+
 #include "Pipe.h"
 
 namespace irccd {
@@ -28,9 +30,26 @@ Pipe::Ptr Pipe::get(const std::string &name)
 	Lock lk(pipesMutex);
 
 	if (pipes.find(name) == pipes.end())
-		pipes[name] = std::make_shared<Pipe>();
+		pipes[name] = std::make_shared<Pipe>(name);
 
 	return pipes[name];
+}
+
+void Pipe::destroy(const Pipe::Ptr &pipe)
+{
+	Lock lk(pipesMutex);
+
+	pipes.erase(pipe->m_name);
+}
+
+Pipe::Pipe(const std::string &name)
+	: m_name(name)
+{
+}
+
+Pipe::~Pipe()
+{
+	Logger::debug("pipe %s: destroyed", m_name.c_str());
 }
 
 void Pipe::push(const LuaValue &value)
