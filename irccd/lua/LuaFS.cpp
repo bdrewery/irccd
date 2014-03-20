@@ -135,15 +135,15 @@ int l_stat(lua_State *L)
 	lua_setfield(L, -2, "nlink");
 #endif
 #if defined(HAVE_STAT_ST_ATIME)
-	new (L, DATE_TYPE) Date(st.st_atime);
+	new (L, DateType) Date(st.st_atime);
 	lua_setfield(L, -2, "atime");
 #endif
 #if defined(HAVE_STAT_ST_MTIME)
-	new (L, DATE_TYPE) Date(st.st_mtime);
+	new (L, DateType) Date(st.st_mtime);
 	lua_setfield(L, -2, "mtime");
 #endif
 #if defined(HAVE_STAT_ST_CTIME)
-	new (L, DATE_TYPE) Date(st.st_ctime);
+	new (L, DateType) Date(st.st_ctime);
 	lua_setfield(L, -2, "ctime");
 #endif
 #if defined(HAVE_STAT_ST_SIZE)

@@ -39,14 +39,14 @@ std::string makeMessage(lua_State *L, const std::string &message)
 	return oss.str();
 }
 
-int log(lua_State *L)
+int l_log(lua_State *L)
 {
 	Logger::log("%s", makeMessage(L, luaL_checkstring(L, 1)).c_str());
 
 	return 0;
 }
 
-int warn(lua_State *L)
+int l_warn(lua_State *L)
 {
 	Logger::warn("%s", makeMessage(L, luaL_checkstring(L, 1)).c_str());
 
@@ -54,8 +54,8 @@ int warn(lua_State *L)
 }
 
 const luaL_Reg functions[] = {
-	{ "log",	log			},
-	{ "warn",	warn			},
+	{ "log",	l_log			},
+	{ "warn",	l_warn			},
 	{ nullptr,	nullptr			}
 };
 

@@ -88,7 +88,7 @@ void loadfile(Thread::Ptr thread, const char *path)
  * Thread management
  * --------------------------------------------------------- */
 
-const char *THREAD_TYPE = "Thread";
+const char *ThreadType = "Thread";
 
 /* ---------------------------------------------------------
  * Functions and metamethods
@@ -133,7 +133,7 @@ int l_threadNew(lua_State *L)
 		Process::initialize(process, info);
 
 		// Create the object to push as return value
-		Thread::Ptr *ptr = new (L, THREAD_TYPE) Thread::Ptr(thread);
+		Thread::Ptr *ptr = new (L, ThreadType) Thread::Ptr(thread);
 		Thread::start(*ptr, np);
 	} catch (std::out_of_range) {
 		Logger::fatal(1, "irccd: could not find plugin from Lua state %p", L);
@@ -144,7 +144,7 @@ int l_threadNew(lua_State *L)
 
 int l_threadJoin(lua_State *L)
 {
-	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
+	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, ThreadType);
 
 	try {
 		(*t)->join();
@@ -162,7 +162,7 @@ int l_threadJoin(lua_State *L)
 
 int l_threadDetach(lua_State *L)
 {
-	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
+	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, ThreadType);
 
 	try {
 		(*t)->detach();
@@ -180,7 +180,7 @@ int l_threadDetach(lua_State *L)
 
 int l_threadGc(lua_State *L)
 {
-	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
+	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, ThreadType);
 
 	/*
 	 * At this step, the thread is marked for deletion but may have not
@@ -202,7 +202,7 @@ int l_threadGc(lua_State *L)
 
 int l_threadToString(lua_State *L)
 {
-	Thread *t = Luae::toType<Thread *>(L, 1, THREAD_TYPE);
+	Thread *t = Luae::toType<Thread *>(L, 1, ThreadType);
 
 	lua_pushfstring(L, "thread %p", t);
 
@@ -233,7 +233,7 @@ int luaopen_thread(lua_State *L)
 	luaL_newlib(L, functions);
 
 	// Create thread object
-	luaL_newmetatable(L, THREAD_TYPE);
+	luaL_newmetatable(L, ThreadType);
 	luaL_setfuncs(L, threadMeta, 0);
 	luaL_newlib(L, threadMethods);
 	lua_setfield(L, -2, "__index");

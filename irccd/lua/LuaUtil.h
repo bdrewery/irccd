@@ -26,12 +26,12 @@
 
 #include <lua.hpp>
 
+namespace irccd {
+
 /**
  * The date type.
  */
-#define DATE_TYPE	"Date"
-
-namespace irccd {
+extern const char *DateType;
 
 /**
  * The open function.

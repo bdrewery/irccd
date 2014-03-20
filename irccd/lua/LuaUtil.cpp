@@ -33,7 +33,7 @@
 namespace irccd {
 
 namespace {
-	
+
 /* --------------------------------------------------------
  * Color and attributes
  * -------------------------------------------------------- */
@@ -139,9 +139,9 @@ int l_date(lua_State *L)
 {
 	if (lua_gettop(L) >= 1) {
 		int tm = luaL_checkinteger(L, 1);
-		new (L, DATE_TYPE) Date(tm);
+		new (L, DateType) Date(tm);
 	} else
-		new (L, DATE_TYPE) Date();
+		new (L, DateType) Date();
 
 	return 1;
 }
@@ -238,7 +238,7 @@ int l_dateCalendar(lua_State *L)
 	time_t stamp;
 	struct tm tm;
 
-	date = Luae::toType<Date *>(L, 1, DATE_TYPE);
+	date = Luae::toType<Date *>(L, 1, DateType);
 	stamp = date->getTimestamp();
 	tm = *localtime(&stamp);
 
@@ -278,7 +278,7 @@ int l_dateFormat(lua_State *L)
 	std::string fmt, result;
 
 	// Extract parameters
-	d = Luae::toType<Date *>(L, 1, DATE_TYPE);
+	d = Luae::toType<Date *>(L, 1, DateType);
 	fmt = luaL_checkstring(L, 2);
 
 	result = d->format(fmt);
@@ -291,7 +291,7 @@ int l_dateTimestamp(lua_State *L)
 {
 	Date *date;
 
-	date = Luae::toType<Date *>(L, 1, DATE_TYPE);
+	date = Luae::toType<Date *>(L, 1, DateType);
 	lua_pushinteger(L, (lua_Integer)date->getTimestamp());
 
 	return 1;
@@ -305,8 +305,8 @@ int l_dateEquals(lua_State *L)
 {
 	Date *d1, *d2;
 
-	d1 = Luae::toType<Date *>(L, 1, DATE_TYPE);
-	d2 = Luae::toType<Date *>(L, 2, DATE_TYPE);
+	d1 = Luae::toType<Date *>(L, 1, DateType);
+	d2 = Luae::toType<Date *>(L, 2, DateType);
 
 	lua_pushboolean(L, *d1 == *d2);
 
@@ -315,7 +315,7 @@ int l_dateEquals(lua_State *L)
 
 int l_dateGc(lua_State *L)
 {
-	Luae::toType<Date *>(L, 1, DATE_TYPE)->~Date();
+	Luae::toType<Date *>(L, 1, DateType)->~Date();
 
 	return 0;
 }
@@ -324,8 +324,8 @@ int l_dateLe(lua_State *L)
 {
 	Date *d1, *d2;
 
-	d1 = Luae::toType<Date *>(L, 1, DATE_TYPE);
-	d2 = Luae::toType<Date *>(L, 2, DATE_TYPE);
+	d1 = Luae::toType<Date *>(L, 1, DateType);
+	d2 = Luae::toType<Date *>(L, 2, DateType);
 
 	lua_pushboolean(L, *d1 <= *d2);
 
@@ -336,7 +336,7 @@ int l_dateTostring(lua_State *L)
 {
 	Date *date;
 
-	date = Luae::toType<Date *>(L, 1, DATE_TYPE);
+	date = Luae::toType<Date *>(L, 1, DateType);
 	lua_pushfstring(L, "%d", date->getTimestamp());
 
 	return 1;
@@ -359,13 +359,15 @@ const luaL_Reg dateMtList[] = {
 
 }
 
+const char *DateType = "Date";
+
 int luaopen_util(lua_State *L)
 {
 	// Util library
 	luaL_newlib(L, functions);
 
 	// Date type
-	luaL_newmetatable(L, DATE_TYPE);
+	luaL_newmetatable(L, DateType);
 	luaL_setfuncs(L, dateMtList, 0);
 	luaL_newlib(L, dateMethodsList);
 	lua_setfield(L, -2, "__index");
