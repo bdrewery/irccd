@@ -70,6 +70,48 @@ std::string Plugin::getGlobal(const std::string &name)
 	return result;
 }
 
+void Plugin::parseMessage(const std::string &message,
+			  const Server::Ptr &server,
+			  std::string &result,
+			  bool &iscommand)
+{
+	auto cc = server->info().command;
+	auto name = m_info.name;
+
+	result = message;
+	iscommand = false;
+
+	// handle special commands "!<plugin> command"
+	if (cc.length() > 0) {
+		auto pos = result.find_first_of(" \t");
+		auto fullcommand = cc + name;
+
+		/*
+		 * If the message that comes is "!foo" without spaces we
+		 * compare the command char + the plugin name. If there
+		 * is a space, we check until we find a space, if not
+		 * typing "!foo123123" will trigger foo plugin.
+		 */
+		if (pos == std::string::npos) {
+			iscommand = result == fullcommand;
+		} else {
+			iscommand = result.length() >= fullcommand.length() &&
+			    result.compare(0, pos, fullcommand) == 0;
+		}
+
+		if (iscommand) {
+			/*
+			 * If no space is found we just set the message to "" otherwise
+			 * the plugin name will be passed through onCommand
+			 */
+			if (pos == std::string::npos)
+				result = "";
+			else
+				result = message.substr(pos + 1);
+		}
+	}
+}
+
 /* --------------------------------------------------------
  * public static methods and members
  * -------------------------------------------------------- */
@@ -385,45 +427,15 @@ void Plugin::onMessage(const Server::Ptr &server,
 		       const std::string &nick,
 		       const std::string &message)
 {
-	auto cc = server->info().command;
-	auto name = m_info.name;
-	auto msg = message;
-	bool iscommand(false);
+	std::string result;
+	bool iscommand;
 
-	// handle special commands "!<plugin> command"
-	if (cc.length() > 0) {
-		auto pos = msg.find_first_of(" \t");
-		auto fullcommand = cc + name;
-
-		/*
-		 * If the message that comes is "!foo" without spaces we
-		 * compare the command char + the plugin name. If there
-		 * is a space, we check until we find a space, if not
-		 * typing "!foo123123" will trigger foo plugin.
-		 */
-		if (pos == std::string::npos) {
-			iscommand = msg == fullcommand;
-		} else {
-			iscommand = msg.length() >= fullcommand.length() &&
-			    msg.compare(0, pos, fullcommand) == 0;
-		}
-
-		if (iscommand) {
-			/*
-			 * If no space is found we just set the message to "" otherwise
-			 * the plugin name will be passed through onCommand
-			 */
-			if (pos == std::string::npos)
-				msg = "";
-			else
-				msg = message.substr(pos + 1);
-		}
-	}
+	parseMessage(message, server, result, iscommand);
 
 	if (iscommand)
-		call("onCommand", server, channel, nick, msg);
+		call("onCommand", server, channel, nick, result);
 	else
-		call("onMessage", server, channel, nick, msg);
+		call("onMessage", server, channel, nick, result);
 }
 
 void Plugin::onMe(const Server::Ptr &server,
@@ -477,7 +489,15 @@ void Plugin::onQuery(const Server::Ptr &server,
 		     const std::string &who,
 		     const std::string &message)
 {
-	call("onQuery", server, who, message);
+	std::string result;
+	bool iscommand;
+
+	parseMessage(message, server, result, iscommand);
+
+	if (iscommand)
+		call("onQueryCommand", server, who, result);
+	else
+		call("onQuery", server, who, result);
 }
 
 void Plugin::onReload()

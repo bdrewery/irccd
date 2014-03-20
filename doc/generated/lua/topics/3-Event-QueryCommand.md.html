@@ -31,6 +31,7 @@
 <h2>Contents</h2>
 <ul>
 <li><a href="#Function">Function </a></li>
+<li><a href="#Parameters">Parameters </a></li>
 </ul>
 
 
@@ -58,10 +59,10 @@
   <li><a href="../topics/3-Event-Query.md.html">3-Event-Query.md</a></li>
   <li><a href="../topics/3-Event-Reload.md.html">3-Event-Reload.md</a></li>
   <li><a href="../topics/3-Event-Topic.md.html">3-Event-Topic.md</a></li>
-  <li><strong>3-Event-Unload.md</strong></li>
+  <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
   <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
   <li><a href="../topics/3-Event-Whois.md.html">3-Event-Whois.md</a></li>
-  <li><a href="../topics/3-Event-QueryCommand.md.html">3-Event-QueryCommand.md</a></li>
+  <li><strong>3-Event-QueryCommand.md</strong></li>
 </ul>
 <h2>Modules</h2>
 <ul class="nowrap">
@@ -91,27 +92,33 @@
 
 <div id="content">
 
-<h1>Topic <code>3-Event-Unload.md</code></h1>
+<h1>Topic <code>3-Event-QueryCommand.md</code></h1>
 
 
-<h2>Unload</h2>
+<h2>Query</h2>
 
-<p>This function is called when <em>irccd</em> instance unload a plugin.</p>
-
-<p>There are <strong>no</strong> IRC events that call this function.</p>
+<p>This event is triggered when someone sent a private message to you as a plugin
+command. It works exactly like onCommand.</p>
 
 <p><a name="Function"></a></p>
 <h3>Function</h3>
 
 
 <pre>
-<span class="keyword">function</span> onUnload()
+<span class="keyword">function</span> onQueryCommand(server, who, message)
 </pre>
+
+<p><a name="Parameters"></a></p>
+<h3>Parameters</h3>
+
+<ul>
+    <li>server, the current server.</li>
+    <li>who, the person that said something.</li>
+    <li>message, The command content.</li>
+</ul>
 
 
 <!--- vim: set syntax=mkd: -->
-
-
 
 
 

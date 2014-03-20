@@ -196,6 +196,11 @@ private:
 
 	std::string getGlobal(const std::string &name);
 
+	void parseMessage(const std::string &message, 
+			  const Server::Ptr &server,
+			  std::string &result,
+			  bool &iscommand);
+
 	void pushObjects(lua_State *) const
 	{
 		// Dummy, stop recursion

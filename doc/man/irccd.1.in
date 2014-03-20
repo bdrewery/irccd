@@ -338,6 +338,23 @@ The person that said something.
 .It message
 The message sent.
 .El
+.\" Query Command
+.Ss Query Command
+This event is triggered when someone sent a private message to you as a plugin
+command. It works exactly like onCommand.
+.Bd -literal -offset indent
+function onQueryCommand(server, who, message)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It who
+The person that said something.
+.It message
+The command content.
+.El
 .\" Reload
 .Ss Reload
 This event is triggered when someone want to reload a plugin.

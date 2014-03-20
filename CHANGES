@@ -6,6 +6,7 @@ CURRENT
   * The function thread.new can now take a file path as argument,
   * New address system for irccd.socket,
   * Add new irccd.util.convert.
+  * Add onQueryCommand new callback
 
 1.1.2 February 26, 2014
 ---------------------------------------
