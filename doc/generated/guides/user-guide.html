@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="AsciiDoc 8.6.9">
+<title>Irccd 1.1 user guide</title>
+<style type="text/css">
+/*
+ * AsciiDoc 'volnitsky' theme for xhtml11 and html5 backends.
+ * Based on css from http://volnitsky.com, which was in turn based on default
+ * theme from AsciiDoc
+ *
+ * FIXME: The styling is still a bit rough in places.
+ *
+ */
+
+/* Default font. */
+body {
+	font-family: "DejaVu Sans", Sans, verdana;
+	font-size: 11px;
+}
+
+a {
+	font-weight: bold;
+	color: #214954;
+	text-decoration: none;
+}
+
+a:visited {
+	color: #214954;
+}
+
+a:hover {
+	color: #38788A;
+	text-decoration: underline;
+}
+
+em {
+  font-style: italic;
+  color: #444466;
+}
+
+strong {
+  font-weight: bold;
+  color: #444466;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #214954;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+	border-bottom: 1px solid #ccd;
+}
+h2 { padding-top: 0.5em; }
+h3 { float: left; }
+h3 + * { clear: left; }
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid #444466;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+
+pre {
+  padding: 0;
+  margin: 0;
+}
+
+#author {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+
+div.tableblock, div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+
+div.admonitionblock {
+  margin-top: 2.5em;
+  margin-bottom: 2.5em;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #214954;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid silver;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid silver;
+  background: #f4f4f4;
+  padding: 0.5em;
+}
+
+div.quoteblock {
+  padding-left: 2.0em;
+  margin-right: 10%;
+}
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock {
+  padding-left: 2.0em;
+  margin-right: 10%;
+}
+div.verseblock > pre.content {
+  font-family: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #444466;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 2px solid silver;
+}
+
+div.exampleblock > div.content {
+  border-left: 2px solid silver;
+  padding: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: #444466;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+div.tableblock > table {
+  border: 3px solid #444466;
+}
+thead {
+  font-weight: bold;
+  color: #444466;
+}
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: #444466;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toctitle {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 { margin-top: 0; margin-bottom: 0; }
+div.toclevel1 { margin-top: 0.3em; margin-left: 0; font-size: 1.0em; }
+div.toclevel2 { margin-top: 0.25em; margin-left: 2em; font-size: 0.9em; }
+div.toclevel3 { margin-left: 4em; font-size: 0.8em; }
+div.toclevel4 { margin-left: 6em; font-size: 0.8em; }
+
+body {
+  margin: 1em 5%;
+  padding-left: 0;
+
+}
+
+.monospaced, tt, div.listingblock > div.content {
+  font-family:  Monospace, "Sans Mono";
+  color: #004400;
+  line-height: 1.2em;
+}
+
+.paragraph p  {
+  line-height: 1.5em;
+  margin-top: 1em;
+}
+
+div.sectionbody div.ulist > ul > li {
+  list-style-type: square;
+  color: #aaa;
+}
+  div.sectionbody div.ulist >  ul > li > * {
+    color: black;
+    /*font-size: 50%;*/
+  }
+
+
+div.sectionbody div.ulist > ul > li div.ulist > ul > li {
+  color: #ccd ;
+}
+  div.sectionbody div.ulist > ul > li div.ulist > ul > li > * {
+    color: black ;
+  }
+
+em {
+  font-style: normal ! important;
+  font-weight: bold ! important;
+  color: #662222   ! important;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #666688;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-style: solid;
+  border-color: #444466;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #444466;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+
+
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install(2);
+/*]]>*/
+</script>
+</head>
+<body class="article">
+<div id="header">
+<h1>Irccd 1.1 user guide</h1>
+<span id="author">Demelier David</span><br>
+<span id="email" class="monospaced">&lt;<a href="mailto:demelier.david@gmail.com">demelier.david@gmail.com</a>&gt;</span><br>
+<span id="revdate">January, 30 2014</span>
+<div id="toc">
+  <div id="toctitle">Table of Contents</div>
+  <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>This guide will help you installing irccd on your system and running it.</p></div>
+<div class="sect2">
+<h3 id="_installing_irccd">Installing irccd</h3>
+<div class="paragraph"><p>Irccd is provided as prebuilt binaries for Windows, the installer is quite easy
+to use. If you have and old computer, you should take the 32bits version,
+otherwise, choose 64bit version.</p></div>
+<div class="paragraph"><p>Grab the irccd package that fits your system at
+<a href="http://projects.malikania.fr/irccd/download.php">http://projects.malikania.fr/irccd/download.php</a></p></div>
+<div class="paragraph"><p><a id="bfs"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_building_from_sources">Building from sources</h3>
+<div class="paragraph"><p>On Unix systems, there is probably prebuilt binaries provided by your
+distribution. If not you will need to build from sources, don&#8217;t worry it&#8217;s
+not very hard.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_requirements">Requirements</h3>
+<div class="paragraph"><p>To build from sources, you need the following installed on your system:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+cmake, <a href="http://www.cmake.org">http://www.cmake.org</a>.
+</p>
+</li>
+<li>
+<p>
+libxdg-basedir, <a href="https://github.com/devnev/libxdg-basedir">https://github.com/devnev/libxdg-basedir</a>. On Unix only
+  (optional).
+</p>
+</li>
+<li>
+<p>
+Lua 5.2, <a href="http://lua.org">http://lua.org</a> (optional).
+</p>
+</li>
+<li>
+<p>
+LuaJIT, <a href="http://luajit.org">http://luajit.org</a> (optional).
+</p>
+</li>
+<li>
+<p>
+C++11 support.
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_running_the_build">Running the build</h3>
+<div class="paragraph"><p>When you&#8217;re ready, extract the <span class="monospaced">irccd-x.y-sources.tar.xz</span> where <span class="monospaced">x.y</span> is
+replaced with the current version. Go to that directory, then type the
+following commands:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>markand@localhost [irccd-1.1] $ mkdir _build_
+markand@localhost [irccd-1.1] $ cd _build_
+markand@localhost [irccd-1.1/_build_] $ cmake ..
+markand@localhost [irccd-1.1/_build_] $ make
+markand@localhost [irccd-1.1/_build_] $ sudo make install</pre>
+</div></div>
+<div class="paragraph"><p>This is the quick way of compiling and installing. It&#8217;s also possible to set
+some options to customize the build.</p></div>
+<div class="paragraph"><div class="title">Switching to LuaJIT</div><p>You can use LuaJIT instead of vanilla Lua 5.2</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_LUA52=Off -DWITH_LUAJIT=On</pre>
+</div></div>
+<div class="paragraph"><div class="title">Disabling Lua</div><p>You can disable Lua support.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_LUA52=Off -DWITH_LUAJIT=Off</pre>
+</div></div>
+<div class="paragraph"><p>When disabling Lua, the IRC bot can still be used as a message relayer, so you
+can still use <a href="#irccdctl">irccdctl</a> to manage irccd.</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img src="icons/note.png" alt="Note">
+</td>
+<td class="content">If Lua is not found on your system, Lua support is automatically disabled, if
+you plan to use Lua, do the above command and switch Off to On.</td>
+</tr></table>
+</div>
+<div class="paragraph"><div class="title">Disable Lua documentation</div><p>If you don&#8217;t want to install Lua API documentation, use the following command.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_LDOC=Off</pre>
+</div></div>
+<div class="paragraph"><div class="title">Disable user guides</div><p>You can disable installation of user guides.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_DOC=Off</pre>
+</div></div>
+<div class="paragraph"><div class="title">Disable manual pages</div><p>On Windows, man pages are not really useful, you can also disable them</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_MAN=Off</pre>
+</div></div>
+<div class="paragraph"><div class="title">Changing the default installation path</div><p>Sometimes, you may need to install irccd over other place, for that, you can
+specify the prefix where to install files. On unix systems, it&#8217;s usually
+<em>/usr/local/</em> and <em>C:/Program Files/</em> on Windows.</p></div>
+<div class="paragraph"><p>To change this, use the following:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>markand@localhost [irccd-1.1/_build_] $ cmake .. -DCMAKE_INSTALL_PREFIX=/opt/some/directory</pre>
+</div></div>
+<div class="paragraph"><div class="title">Changing the man paths</div><p>By default, irccd use ${PREFIX}/share/man for manual pages. Some systems use
+different one.</p></div>
+<div class="paragraph"><p>For example, on FreeBSD the typical use would be:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>markand@localhost [irccd-1.1/_build_] $ cmake .. -DMANDIR=/usr/local/man</pre>
+</div></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_irccd">Configuring irccd</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Now that you&#8217;ve successfully installed irccd, let&#8217;s add a configuration file so
+we can run it.</p></div>
+<div class="paragraph"><p><a id="irccdpaths"></a></p></div>
+<div class="sect2">
+<h3 id="_paths">Paths</h3>
+<div class="paragraph"><p>The irccd configuration file is usually named <em>irccd.conf</em> and it&#8217;s location
+may vary on operating systems. On every operating systems, irccd will try
+to open user defined config file at first, then if not found, it fallbacks to
+the default configurations paths.</p></div>
+<div class="paragraph"><p>On Unix, the files are loaded in the following order:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+<em>${XDG_CONFIG_HOME}/irccd/irccd.conf</em><br>
+</p>
+</li>
+<li>
+<p>
+<em>/usr/local/etc/irccd.conf</em>.
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>On Windows, the files are loaded in the following order:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+<em>C:\Users\YourUser\irccd\irccd.conf</em>
+</p>
+</li>
+<li>
+<p>
+<em>Path\To\Irccd\Directory\etc\irccd.conf</em>
+</p>
+</li>
+</ol></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img src="icons/note.png" alt="Note">
+</td>
+<td class="content">
+<div class="title">Specify at the command line</div>On every operating systems, it&#8217;s possible to pass a specific configuration file
+at the command line, this will only try to open that file and exit if irccd
+failed to open it. Example: <span class="monospaced">irccd -c myconfig.conf</span>.</td>
+</tr></table>
+</div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img src="icons/caution.png" alt="Caution">
+</td>
+<td class="content">
+<div class="title">Changing prefix</div>The default config paths are using the default prefixes, check the
+<a href="#bfs">Building from sources</a> section.</td>
+</tr></table>
+</div>
+<div class="paragraph"><p><a id="irccdsyntax"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_syntax">Syntax</h3>
+<div class="paragraph"><p>The <em>irccd.conf</em> follow a very basic <strong>.ini</strong> syntax. Every options are stored in
+sections and some of these sections may be redefined one or more times.</p></div>
+<div class="paragraph"><p>Each option takes one line, it&#8217;s not possible to write more than one option on
+the same line.</p></div>
+<div class="paragraph"><p>The comment character is <strong>#</strong> and can live at the beginning or the end of a line.</p></div>
+<div class="listingblock">
+<div class="title">Correct config</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900"># This is a comment</span></span>
+<span style="font-weight: bold"><span style="color: #000000">[general]</span></span>
+<span style="color: #009900">verbose </span><span style="color: #990000">=</span> false
+
+<span style="font-weight: bold"><span style="color: #000000">[server]</span></span>
+<span style="color: #009900">host </span><span style="color: #990000">=</span> <span style="color: #FF0000">"localhost"</span>              <span style="font-style: italic"><span style="color: #9A1900"># this is a comment too</span></span></tt></pre></div></div>
+<div class="listingblock">
+<div class="title">Bad config</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="color: #009900">verbose </span><span style="color: #990000">=</span> true                          <span style="font-style: italic"><span style="color: #9A1900"># no section!</span></span>
+
+<span style="font-weight: bold"><span style="color: #000000">[server]</span></span>
+<span style="color: #009900">host </span><span style="color: #990000">=</span> <span style="color: #FF0000">"localhost"</span><span style="color: #009900"> port </span><span style="color: #990000">=</span> <span style="color: #FF0000">"8520"</span>        <span style="font-style: italic"><span style="color: #9A1900"># not allowed!</span></span></tt></pre></div></div>
+</div>
+<div class="sect2">
+<h3 id="_the_section_span_class_monospaced_general_span">The section <span class="monospaced">general</span></h3>
+<div class="paragraph"><p>This section contains global options that are used in the whole irccd
+application.</p></div>
+<div class="paragraph"><p>The options available:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">foreground</span>: (bool) Keep irccd to foreground, default: false.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">plugin-path</span>: (string) A path to local plugins, default: empty.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">syslog</span>: (bool) If enabled, use syslog instead of standard output, default: false.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">verbose</span>: (bool) Enable verbose message, default: false.
+</p>
+</li>
+</ul></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img src="icons/note.png" alt="Note">
+</td>
+<td class="content">The options foreground and syslog are only available on Unix systems.</td>
+</tr></table>
+</div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">[general]</span></span>
+<span style="color: #009900">verbose </span><span style="color: #990000">=</span> true</tt></pre></div></div>
+</div>
+<div class="sect2">
+<h3 id="_the_section_span_class_monospaced_plugins_span">The section <span class="monospaced">plugins</span></h3>
+<div class="paragraph"><p>This section is used to load plugins. Just add any key you like to load
+a plugin. If the value is not specified, the plugin is searched through
+the standard directories, otherwise, provide the full path (including the .lua
+extension).</p></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">[plugins]</span></span>
+<span style="color: #009900">history </span><span style="color: #990000">=</span>
+<span style="color: #009900">myplugin </span><span style="color: #990000">=</span> <span style="color: #990000">/</span>tmp<span style="color: #990000">/</span>myplugin<span style="color: #990000">.</span>lua</tt></pre></div></div>
+</div>
+<div class="sect2">
+<h3 id="_the_section_span_class_monospaced_identity_span">The section <span class="monospaced">identity</span></h3>
+<div class="paragraph"><p>This section is completely optional, if you don&#8217;t provide one, irccd will use a
+default identity with <span class="monospaced">irccd</span> as nickname and username.</p></div>
+<div class="paragraph"><p>This section is redefinable, you can create one or more.</p></div>
+<div class="paragraph"><p>The options available:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">name</span>: (string) Required. the identity unique id.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">nickname</span>: (string) The nickname, default: irccd.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">realname</span>: (string) The realname, default: IRC Client daemon.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">username</span>: (string) The username name, default: irccd.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">ctcp-version</span>: (string) What version to respond to CTCP VERSION, default: IRC Client Daemon.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">ctcp-autoreply</span>: (bool) Enable auto CTCP VERSION reply, default: true.
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">[identity]</span></span>
+<span style="color: #009900">name </span><span style="color: #990000">=</span> <span style="color: #FF0000">"default"</span>
+<span style="color: #009900">nickname </span><span style="color: #990000">=</span> <span style="color: #FF0000">"jean"</span>
+
+<span style="font-weight: bold"><span style="color: #000000">[identity]</span></span>
+<span style="color: #009900">name </span><span style="color: #990000">=</span> <span style="color: #FF0000">"development"</span>
+<span style="color: #009900">nickname </span><span style="color: #990000">=</span> <span style="color: #FF0000">"unstable"</span>
+<span style="color: #009900">username </span><span style="color: #990000">=</span> <span style="color: #FF0000">"un"</span></tt></pre></div></div>
+<div class="paragraph"><p><a id="irccdserver"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_the_section_span_class_monospaced_server_span">The section <span class="monospaced">server</span></h3>
+<div class="paragraph"><p>The section <span class="monospaced">server</span> is used to connect to one or more server. Thus, this
+section is also redefinable.</p></div>
+<div class="paragraph"><p>You need at least one server in your configuration file.</p></div>
+<div class="paragraph"><p>The options available:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">name</span>: (string) Required. A unique id.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">host</span>: (string) Required. The server address.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">port</span>: (int) Required, The server port.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">identity</span>: (string) An identity to use.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">password</span>: (string) An optional password.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">join-invite</span>: (bool) Join channels upon invitation, default: false.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">channels</span>: (string list) List of channel to auto join, default: empty.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">command-char</span>: (string) The prefix for invoking special commands, default: !.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">ssl</span>: (bool) Enable or disable SSL, default: false.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">ssl-verify</span>: (bool) Verify the SSL certificates, default: true.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">reconnect</span>: (bool) Enable reconnection after failure, default: true.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">reconnect-tries</span>: (int) Number of tries before giving up. A value of 0 means indefinitely, default: 0.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">reconnect-timeout</span>: (int) Number of seconds to wait before retrying, default: 30.
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">[server]</span></span>
+<span style="color: #009900">name </span><span style="color: #990000">=</span> <span style="color: #FF0000">"local"</span>
+<span style="color: #009900">host </span><span style="color: #990000">=</span> <span style="color: #FF0000">"localhost"</span>
+<span style="color: #009900">port </span><span style="color: #990000">=</span> <span style="color: #993399">6667</span></tt></pre></div></div>
+<div class="paragraph"><p><a id="listeners"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_the_section_span_class_monospaced_listener_span">The section <span class="monospaced">listener</span></h3>
+<div class="paragraph"><p>This section defines listeners, you may use sockets to do a basic IPC system
+in irccd. This let you controlling irccd with sockets.</p></div>
+<div class="paragraph"><p>For instance, with listeners, you may ask <span class="monospaced">irccd</span> to send a message, a notice or
+even kicking someone from a channel. This is done with the <a href="#irccdctl">irccdctl</a>
+utility.</p></div>
+<div class="paragraph"><p>There are two type of listeners availables:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Internet sockets, IPv4 and IPv6
+</p>
+</li>
+<li>
+<p>
+Unix sockets, based on files (not available on Windows)
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>The following options are available for both types.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">type</span>: (string) Required. type of listener "internet" or "unix"
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">protocol</span>: (string) Protocol to use, "tcp" or "udp", default: "tcp".
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_using_internet_sockets">Using internet sockets</h3>
+<div class="paragraph"><p>The options available:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">address</span>: (string) Address to bind or "*" for any, default: *.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">family</span>: (string list) Internet family: ipv6, ipv4. Both are accepted, default: ipv4
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">port</span>: (int) Required: port number.
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">[listener]</span></span>
+<span style="color: #009900">type </span><span style="color: #990000">=</span> <span style="color: #FF0000">"internet"</span>
+<span style="color: #009900">address </span><span style="color: #990000">=</span> <span style="color: #FF0000">"*"</span>
+<span style="color: #009900">family </span><span style="color: #990000">=</span> <span style="color: #FF0000">"ipv4 ipv6"</span>
+<span style="color: #009900">port </span><span style="color: #990000">=</span> <span style="color: #993399">9999</span></tt></pre></div></div>
+<div class="paragraph"><p>This will let you controlling irccd on port 9999 with both IPv4 and IPv6 families.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_using_unix_sockets">Using unix sockets</h3>
+<div class="paragraph"><p>The options available:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">path</span>: (string) Required. The file path to the socket.
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">[listener]</span></span>
+<span style="color: #009900">type </span><span style="color: #990000">=</span> <span style="color: #FF0000">"unix"</span>
+<span style="color: #009900">path </span><span style="color: #990000">=</span> <span style="color: #FF0000">"/tmp/irccd.sock"</span></tt></pre></div></div>
+<div class="paragraph"><p>This will let you controlling irccd on path <span class="monospaced">/tmp/irccd.sock</span>, the file is
+automatically deleted when irccd starts, but not when it stops.</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img src="icons/warning.png" alt="Warning">
+</td>
+<td class="content">Consider using internet sockets with care, especially if you are running your
+bot on a server with multiple users. If your bot has operator rights and you
+bind on any address, almost every users can do a kick or a ban. If this is a
+concern switch to a Unix socket if possible.</td>
+</tr></table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_full_example">Full example</h3>
+<div class="paragraph"><p>There is an example of file that can be used, be sure to define real servers as
+the one defined here does not exist for real.</p></div>
+<div class="listingblock">
+<div class="title">Example of <span class="monospaced">irccd.conf</span> file</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900"># This line is ignored</span></span>
+<span style="font-weight: bold"><span style="color: #000000">[general]</span></span>
+<span style="color: #009900">verbose </span><span style="color: #990000">=</span> true
+
+<span style="font-style: italic"><span style="color: #9A1900"># Add a listener that bind only to IPv6</span></span>
+<span style="font-weight: bold"><span style="color: #000000">[listener]</span></span>
+<span style="color: #009900">address </span><span style="color: #990000">=</span> <span style="color: #FF0000">"*"</span>
+<span style="color: #009900">family </span><span style="color: #990000">=</span> <span style="color: #FF0000">"ipv6"</span>
+<span style="color: #009900">port </span><span style="color: #990000">=</span> <span style="color: #FF0000">"12000"</span>
+
+<span style="font-style: italic"><span style="color: #9A1900"># A listener that bind to both IPv4 and IPv6</span></span>
+<span style="font-weight: bold"><span style="color: #000000">[listener]</span></span>
+<span style="color: #009900">address </span><span style="color: #990000">=</span> <span style="color: #FF0000">"*"</span>
+<span style="color: #009900">family </span><span style="color: #990000">=</span> <span style="color: #FF0000">"ipv4 ipv6"</span>
+<span style="color: #009900">port </span><span style="color: #990000">=</span> <span style="color: #FF0000">"15000"</span>
+
+<span style="font-style: italic"><span style="color: #9A1900"># Identity reused by many servers</span></span>
+<span style="font-weight: bold"><span style="color: #000000">[identity]</span></span>
+<span style="color: #009900">name </span><span style="color: #990000">=</span> <span style="color: #FF0000">"myIdentity"</span>
+<span style="color: #009900">nickname </span><span style="color: #990000">=</span> <span style="color: #FF0000">"superbot"</span>
+<span style="color: #009900">realname </span><span style="color: #990000">=</span> <span style="color: #FF0000">"SuperBot v1.0"</span>
+<span style="color: #009900">username </span><span style="color: #990000">=</span> <span style="color: #FF0000">"sp"</span>
+
+<span style="font-style: italic"><span style="color: #9A1900"># A server</span></span>
+<span style="font-weight: bold"><span style="color: #000000">[server]</span></span>
+<span style="color: #009900">host </span><span style="color: #990000">=</span> <span style="color: #FF0000">"irc.foo.org"</span>
+<span style="color: #009900">port </span><span style="color: #990000">=</span> <span style="color: #FF0000">"6667"</span>
+<span style="color: #009900">identity </span><span style="color: #990000">=</span> <span style="color: #FF0000">"myIdentity"</span>
+
+<span style="font-style: italic"><span style="color: #9A1900"># An other server</span></span>
+<span style="font-weight: bold"><span style="color: #000000">[server]</span></span>
+<span style="color: #009900">host </span><span style="color: #990000">=</span> <span style="color: #FF0000">"chat.wanadoo.fr"</span>
+<span style="color: #009900">port </span><span style="color: #990000">=</span> <span style="color: #FF0000">"6667"</span>
+<span style="color: #009900">identity </span><span style="color: #990000">=</span> <span style="color: #FF0000">"myIdentity"</span>
+
+<span style="font-style: italic"><span style="color: #9A1900"># Load some plugins</span></span>
+<span style="font-weight: bold"><span style="color: #000000">[plugins]</span></span>
+<span style="color: #009900">ask </span><span style="color: #990000">=</span>                                   <span style="font-style: italic"><span style="color: #9A1900"># This search for plugin ask</span></span>
+<span style="color: #009900">myplugin </span><span style="color: #990000">=</span> <span style="color: #990000">/</span>path<span style="color: #990000">/</span>to<span style="color: #990000">/</span>myplugin<span style="color: #990000">.</span>lua        <span style="font-style: italic"><span style="color: #9A1900"># This use absolute path</span></span></tt></pre></div></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_running_irccd">Running irccd</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Now that you have a configured file, you can start irccd by typing its name.</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>markand@localhost [~] $ irccd</pre>
+</div></div>
+<div class="paragraph"><p>The following options are available:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">-f</span>, do not run as a daemon, keep irccd to the foreground
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">-c config.conf</span>, load a specific config file, exit if not found
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">-p pluginpath</span>, add a directory to find plugins
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">-P plugin</span>, load a plugin, can be specified more than one time
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">-v</span>, be verbose
+</p>
+</li>
+</ul></div>
+<div class="sect2">
+<h3 id="_using_plugins">Using plugins</h3>
+<div class="paragraph"><p>Lua plugins can be used to manage IRC events, to let you overriding distributed
+plugins, irccd will try to open plugin in your home directory before.</p></div>
+<div class="paragraph"><p>On Unix, the paths are searched in the following order:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Specified by -p on command line
+</p>
+</li>
+<li>
+<p>
+<em>${XDG_CONFIG_HOME}/irccd/plugins</em>
+</p>
+</li>
+<li>
+<p>
+<em>${HOME}/.config/irccd/plugins</em>
+</p>
+</li>
+<li>
+<p>
+<em>/usr/local/share/irccd/plugins</em>
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p>On Windows, the paths are searched in the following order:</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Specified by -p on command line
+</p>
+</li>
+<li>
+<p>
+<em>C:\Users\YourUser\irccd\plugins</em>
+</p>
+</li>
+<li>
+<p>
+<em>Path\To\Irccd\Directory\share\plugins</em>
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p><a id="irccdplugnote"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_note_about_plugins">Note about plugins</h3>
+<div class="paragraph"><p>All plugins have a home directory. This allow configuring or caching some data
+needed for them. The home directory cannot be changed and is relative to the
+irccd <a href="#irccdpaths">config path</a> plus the plugin name. For example, the plugin
+<span class="monospaced">ask.lua</span> will have the following home:</p></div>
+<div class="paragraph"><p>On Unix: <em>~/.config/irccd/ask/</em></p></div>
+<div class="paragraph"><p>On Windows: <em>C:/Users/YourUser/irccd/ask/</em></p></div>
+<div class="paragraph"><p>And the respective installation config path or Windows executable location :</p></div>
+<div class="paragraph"><p>On Unix: <em>/usr/local/etc/irccd/ask</em></p></div>
+<div class="paragraph"><p>On Windows: <em>Path\To\Irccd\Directory\etc\irccd\ask</em></p></div>
+<div class="paragraph"><p>The order is :</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+User config directory
+</p>
+</li>
+<li>
+<p>
+System directory
+</p>
+</li>
+</ol></div>
+<div class="paragraph"><p><a id="irccdpatterns"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_common_patterns_in_plugins">Common patterns in plugins</h3>
+<div class="paragraph"><p>Some plugins can be configured, and some of them can use patterns to substitute
+variables.</p></div>
+<div class="paragraph"><p>For instance, using the <span class="monospaced">logger</span> plugin, it&#8217;s possible to customize the pattern
+to use when someone joins a channel like that:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>#U joined #c</pre>
+</div></div>
+<div class="paragraph"><p>The keywords <strong>#U</strong>
+will be substituted to the nickname and <strong>#c</strong> to the channel name.</p></div>
+<div class="paragraph"><p>Note, some keywords are obviously not available for all contexts. When plugins
+supports these patterns, they are marked as <strong>Keywords supported: #c, #m</strong>.</p></div>
+<div class="paragraph"><div class="title">Environment variables</div><p>If supported, you can use environment variables like <strong>${HOME}</strong>. Please not that
+braces are mandatory.</p></div>
+<div class="paragraph"><div class="title">Time</div><p>When you can use patterns, the date and time may be used just like <span class="monospaced">strftime(3)</span>
+so for the hours and minutes, you can use <strong>%H:%M</strong>.</p></div>
+<div class="paragraph"><div class="title">Home</div><p>To match your user directory, you can use the famous <strong>~</strong>.</p></div>
+<div class="paragraph"><div class="title">List of keywords supported</div><p>Here&#8217;s the list of keywords that a lot of plugins uses:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">#c</span>, the channel name
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">#m</span>, a message (depending on context)
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">#s</span>, the current server name
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">#t</span>, the topic
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">#T</span>, a target, i.e a person who gets kicked
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">#u</span>, the full user, i.e <span class="monospaced">markand!~mkd@localhost</span>
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">#U</span>, the nickname
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><div class="title">Example with <span class="monospaced">logger</span></div><p>Using the plugin logger, you can use a configuration like this:</p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">[general]</span></span>
+<span style="color: #009900">directory </span><span style="color: #990000">=</span> <span style="color: #FF0000">"~/logs/#s/%y/%m/#c-%d.log"</span>
+
+<span style="font-weight: bold"><span style="color: #000000">[formats]</span></span>
+<span style="color: #009900">message  </span><span style="color: #990000">=</span> <span style="color: #FF0000">"%H:%M #u: #m"</span></tt></pre></div></div>
+<div class="paragraph"><p>With this example, <strong>~</strong> will be substituted to the user home directory. With a
+server named <span class="monospaced">local</span>, a channel <span class="monospaced">#staff</span> everything would be stored like this:</p></div>
+<div class="paragraph"><p><span class="monospaced">/home/markand/local/13/07/#staff-08.log</span></p></div>
+<div class="paragraph"><p>Also the message would be stored like this:</p></div>
+<div class="paragraph"><p><span class="monospaced">20:50 markand: I'm watching TV.</span></p></div>
+<div class="paragraph"><p><a id="irccdctl"></a></p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_irccdctl_utility">The irccdctl utility</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The <span class="monospaced">irccdctl</span> utility let you controlling a running <span class="monospaced">irccd</span> instance. It uses
+sockets to perform any operation.</p></div>
+<div class="paragraph"><p>First, you need to define at least one <a href="#listeners">listener</a> before using
+irccdctl.</p></div>
+<div class="paragraph"><p>Second, you need to write a configuration file named <span class="monospaced">irccdctl.conf</span>. It takes
+places at exactly the same <a href="#irccdpaths">irccd paths</a>.</p></div>
+<div class="sect2">
+<h3 id="_the_section_span_class_monospaced_general_span_2">The section <span class="monospaced">general</span></h3>
+<div class="paragraph"><p>This section defines the global irccdctl parameters.</p></div>
+<div class="paragraph"><p>The options available:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">verbose</span>: (bool) enable verbose message, default: false.
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">[general]</span></span>
+<span style="color: #009900">verbose </span><span style="color: #990000">=</span> true</tt></pre></div></div>
+</div>
+<div class="sect2">
+<h3 id="_the_section_span_class_monospaced_socket_span">The section <span class="monospaced">socket</span></h3>
+<div class="paragraph"><p>The section socket permit irccdctl to connect to a specific irccd listener,
+only one may be defined.</p></div>
+<div class="paragraph"><p>Just like <a href="#listeners">listeners</a> you can connect to Unix or internet sockets.</p></div>
+<div class="paragraph"><p>The following options are available for both types.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">type</span>: (string) Required. type of listener "internet" or "unix"
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">protocol</span>: (string) Required. Protocol to use, "tcp" or "udp".
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_using_internet_sockets_2">Using internet sockets</h3>
+<div class="paragraph"><p>The options available:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">host</span>: (string) Required. Host to connect.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">family</span>: (string) Required. Internet family: ipv6 or ipv4.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">port</span>: (int) Required: port number.
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">[socket]</span></span>
+<span style="color: #009900">type </span><span style="color: #990000">=</span> <span style="color: #FF0000">"internet"</span>
+<span style="color: #009900">host </span><span style="color: #990000">=</span> <span style="color: #FF0000">"localhost"</span>
+<span style="color: #009900">port </span><span style="color: #990000">=</span> <span style="color: #FF0000">"9999"</span>
+<span style="color: #009900">family </span><span style="color: #990000">=</span> <span style="color: #FF0000">"ipv6"</span></tt></pre></div></div>
+</div>
+<div class="sect2">
+<h3 id="_using_unix_sockets_2">Using unix sockets</h3>
+<div class="paragraph"><p>The options available:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">path</span>: (string) Required. The file path to the socket.
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-weight: bold"><span style="color: #000000">[socket]</span></span>
+<span style="color: #009900">type </span><span style="color: #990000">=</span> <span style="color: #FF0000">"unix"</span>
+<span style="color: #009900">path </span><span style="color: #990000">=</span> <span style="color: #FF0000">"/tmp/irccd.sock"</span></tt></pre></div></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_available_options">Available options</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The following options are available:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">-c</span>, a path to a config file.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">-i identity</span>, use a specific identity, only used by connect command.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">-k key</span>, use a password, only used by connect command.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">-s</span>, use SSL, only used by connect command.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">-t domain</span>, the domain to use, specify internet or unix.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">-T type</span>, the type to use, tcp or udp.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">-v</span>, be more verbose.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>The following options are available for -t internet :</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">-4</span>, use IPv4.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">-6</span>, use IPv4.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">-h</span>, the hostname to connect.
+</p>
+</li>
+<li>
+<p>
+<span class="monospaced">-p</span>, the port to use.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>The following options are available for -t unix :</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<span class="monospaced">-P path</span>, the path to the unix socket.
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_available_commands">Available commands</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Almost of all these commands takes a server as parameter. It is one defined in
+the <a href="#irccdserver">server section</a> with the parameter <span class="monospaced">name</span>.</p></div>
+<div class="paragraph"><p>Only <span class="monospaced">load</span>, <span class="monospaced">reload</span> and <span class="monospaced">unload</span> do not need it.</p></div>
+<div class="paragraph"><p>The following commands are available for irccdctl:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="#irccdctlcnotice">cnotice</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlconnect">connect</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctldisconnect">disconnect</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlhelp">help</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlinvite">invite</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctljoin">join</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlkick">kick</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlload">load</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlme">me</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlmessage">message</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlmode">mode</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlnotice">notice</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlnick">nick</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlpart">part</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlreload">reload</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlrestart">restart</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctltopic">topic</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlumode">umode</a>
+</p>
+</li>
+<li>
+<p>
+<a href="#irccdctlunload">unload</a>
+</p>
+</li>
+</ul></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img src="icons/important.png" alt="Important">
+</td>
+<td class="content">
+<div class="title">Shell parsing warning</div>
+<div class="paragraph"><p>Some shells may discard arguments if they begins with a hash. For instance, bash
+will not understand the following command:</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ irccdctl join localhost #staff</pre>
+</div></div>
+<div class="paragraph"><p>Instead, enclose the arguments with quotes</p></div>
+<div class="listingblock">
+<div class="content monospaced">
+<pre>$ irccdctl join localhost "#staff"</pre>
+</div></div>
+</td>
+</tr></table>
+</div>
+<div class="paragraph"><p><a id="irccdctlcnotice"></a></p></div>
+<div class="sect2">
+<h3 id="_channel_notice">Channel notice</h3>
+<div class="paragraph"><p>Send a notice to a public channel. This is a notice that everyone
+will be notified by.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl cnotice server channel message</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl cnotice freenode #staff "Don't flood"</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctlconnect"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_connect">Connect</h3>
+<div class="paragraph"><p>Connect to a new IRC server.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl [-s] [-i identity] [-k password] connect name host port</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl connect wanadoo chat.wanadoo.fr 6667
+$ irccdctl connect -s wanadoo chat.wanadoo.fr 6697
+$ irccdctl connect -k "secret" wanadoo chat.wanadoo.fr 6667</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctldisconnect"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_disconnect">Disconnect</h3>
+<div class="paragraph"><p>Disconnect from a connected server.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl disconnect name</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl disconnect wanadoo</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctlhelp"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_help">Help</h3>
+<div class="paragraph"><p>Get the help.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl help subject</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl help message</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctlinvite"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_invite">Invite</h3>
+<div class="paragraph"><p>Invite someone to a channel, needed for channel with mode +i</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl invite server nickname channel</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl invite freenode xorg62 #staff</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctljoin"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_join">Join</h3>
+<div class="paragraph"><p>Join a channel on a specific server registered in irccd. The server
+is referenced by the parameter server. Parameter channel is the channel
+to join. An optional password may be set as password parameter.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl join server channel [password]</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl join freenode #staff</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctlkick"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_kick">Kick</h3>
+<div class="paragraph"><p>Kick someone from a channel. The parameter reason is optional and
+may be ommited but when specified it must be unclosed between quotes.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl kick server nick channel [reason]</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl kick freenode jean #staff "Stop flooding"</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctlload"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_load">Load</h3>
+<div class="paragraph"><p>Load a plugin into the irccd instance.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl load plugin</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl load ask</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctlme"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_me">Me</h3>
+<div class="paragraph"><p>Send a CTCP ACTION message. It is exactly the same syntax as  message.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl me server target message</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl me freenode #staff "going back soon"</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctlmessage"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_message">Message</h3>
+<div class="paragraph"><p>Send a message to someone or a channel. The target may be a channel or a real
+person
+If the message contains more than one word it must be enclosed between quotes.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl message server target message</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl message freenode #staff "Hello from irccd"</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctlmode"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_channel_mode">Channel mode</h3>
+<div class="paragraph"><p>Change the mode of the specified channel. The mode contains full parameters
+like "+b" or "+k secret".</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl mode server channel mode</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl mode freenode #staff +t</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctlnotice"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_private_notice">Private notice</h3>
+<div class="paragraph"><p>Send a private notice to a target user.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl notice server target message</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl notice freenode jean "Private notice"</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctlnick"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_change_nickname">Change nickname</h3>
+<div class="paragraph"><p>Change your nickname. The parameter nickname is the new nickname</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl nick server nickname</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl nick freenode david</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctlpart"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_part_from_a_channel">Part from a channel</h3>
+<div class="paragraph"><p>Leave a channel. Parameter server is one registered in irccd config.
+Parameter channel is the channel to leave.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl part server channel</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl part freenode #staff</pre>
+</div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img src="icons/note.png" alt="Note">
+</td>
+<td class="content">Currently, there is no option to provide a part message.</td>
+</tr></table>
+</div>
+<div class="paragraph"><p><a id="irccdctlreload"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_reload_a_plugin">Reload a plugin</h3>
+<div class="paragraph"><p>Reload a plugin, parameter name is the plugin to reload.
+The plugin needs to be loaded.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl reload name</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl reload logger</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctlrestart"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_restart_a_server">Restart a server</h3>
+<div class="paragraph"><p>Sometimes it is needed to force a reload by hand. This even more true when
+a server died, irccd has no way to detect that. This command force a
+reconnection even if it is not enabled in the config.</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img src="icons/note.png" alt="Note">
+</td>
+<td class="content">If the parameter name is not given, all servers are restarted.</td>
+</tr></table>
+</div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl restart [name]</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl restart</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctltopic"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_change_topic">Change topic</h3>
+<div class="paragraph"><p>Set the new topic of a channel. Topic must be enclosed between
+quotes.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl topic server channel topic</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl topic freenode #wmfs "This is the best channel"</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctlumode"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_change_your_user_mode">Change your user mode</h3>
+<div class="paragraph"><p>Change your own user mode.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl umode server mode</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl umode +i</pre>
+</div></div>
+<div class="paragraph"><p><a id="irccdctlunload"></a></p></div>
+</div>
+<div class="sect2">
+<h3 id="_unload_a_plugin">Unload a plugin</h3>
+<div class="paragraph"><p>Unload a loaded plugin from the irccd instance.</p></div>
+<div class="listingblock">
+<div class="title">Usage</div>
+<div class="content monospaced">
+<pre>$ irccdctl unload name</pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content monospaced">
+<pre>$ irccdctl unload logger</pre>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr></div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2014-02-28 11:24:39 CET
+</div>
+</div>
+</body>
+</html>

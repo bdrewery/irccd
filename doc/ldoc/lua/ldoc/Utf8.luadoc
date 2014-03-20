@@ -1,0 +1,45 @@
+--- Unicode.
+-- UTF-8 to UCS-4 conversions
+--
+-- @module irccd.utf8
+
+--- Get the real length of a UTF-8 string.
+-- @param str the string
+-- @return the length or nil
+-- @return the error message
+function utf8.length(str)
+end
+
+--- Iterate over a UTF-8 string.
+-- Returns an iterator which each time it is call, returns the current
+-- wide character.
+-- @param str the string
+-- @return the iterator or nil
+-- @return the error message
+-- @usage
+-- for c in utf8.list("Gérard")
+--	print(c)
+-- end
+function utf8.list(str)
+end
+
+--- Convert a UTF-8 string to UCS-4.
+-- @param str the string
+-- @return the sequence table of unicode characters or nil
+-- @return the error message
+function utf8.toarray(str)
+end
+
+--- Convert the character to a UTF-8 string.
+-- @param c the unicode code point
+-- @return the UTF-8 string or nil
+-- @return the error message
+function utf8.tostring(c)
+end
+
+--- Convert the UCS-4 table to UTF-8 string.
+-- @param seq the sequence of unicode code points
+-- @return the UTF-8 string or nil
+-- @return the error message
+function utf8.tostring(seq)
+end

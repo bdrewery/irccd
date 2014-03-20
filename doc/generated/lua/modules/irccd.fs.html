@@ -1,0 +1,478 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Irccd Lua API Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<h1>Navigation</h1>
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Class_Directory">Class Directory </a></li>
+<li><a href="#Directory_metamethods">Directory metamethods </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/irccd.html">irccd</a></li>
+  <li><strong>irccd.fs</strong></li>
+  <li><a href="../modules/irccd.logger.html">irccd.logger</a></li>
+  <li><a href="../modules/irccd.parser.html">irccd.parser</a></li>
+  <li><a href="../modules/irccd.plugin.html">irccd.plugin</a></li>
+  <li><a href="../modules/irccd.server.html">irccd.server</a></li>
+  <li><a href="../modules/irccd.socket.html">irccd.socket</a></li>
+  <li><a href="../modules/irccd.socket.address.html">irccd.socket.address</a></li>
+  <li><a href="../modules/irccd.socket.listener.html">irccd.socket.listener</a></li>
+  <li><a href="../modules/irccd.system.html">irccd.system</a></li>
+  <li><a href="../modules/irccd.thread.html">irccd.thread</a></li>
+  <li><a href="../modules/irccd.thread.pipe.html">irccd.thread.pipe</a></li>
+  <li><a href="../modules/irccd.utf8.html">irccd.utf8</a></li>
+  <li><a href="../modules/irccd.util.html">irccd.util</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="nowrap">
+  <li><a href="../topics/1-Introduction.md.html">1-Introduction.md</a></li>
+  <li><a href="../topics/1.1-Standard-Libraries.md.html">1.1-Standard-Libraries.md</a></li>
+  <li><a href="../topics/2-Plugin_creation.md.html">2-Plugin_creation.md</a></li>
+  <li><a href="../topics/2.1-Using_irccd_test.md.html">2.1-Using_irccd_test.md</a></li>
+  <li><a href="../topics/2.2-List_of_Events.md.html">2.2-List_of_Events.md</a></li>
+  <li><a href="../topics/3-Event-Action.md.html">3-Event-Action.md</a></li>
+  <li><a href="../topics/3-Event-Channel-notice.md.html">3-Event-Channel-notice.md</a></li>
+  <li><a href="../topics/3-Event-Command.md.html">3-Event-Command.md</a></li>
+  <li><a href="../topics/3-Event-Connect.md.html">3-Event-Connect.md</a></li>
+  <li><a href="../topics/3-Event-Invite.md.html">3-Event-Invite.md</a></li>
+  <li><a href="../topics/3-Event-Join.md.html">3-Event-Join.md</a></li>
+  <li><a href="../topics/3-Event-Kick.md.html">3-Event-Kick.md</a></li>
+  <li><a href="../topics/3-Event-Load.md.html">3-Event-Load.md</a></li>
+  <li><a href="../topics/3-Event-Message.md.html">3-Event-Message.md</a></li>
+  <li><a href="../topics/3-Event-Mode.md.html">3-Event-Mode.md</a></li>
+  <li><a href="../topics/3-Event-Names.md.html">3-Event-Names.md</a></li>
+  <li><a href="../topics/3-Event-Nick.md.html">3-Event-Nick.md</a></li>
+  <li><a href="../topics/3-Event-Notice.md.html">3-Event-Notice.md</a></li>
+  <li><a href="../topics/3-Event-Part.md.html">3-Event-Part.md</a></li>
+  <li><a href="../topics/3-Event-Query.md.html">3-Event-Query.md</a></li>
+  <li><a href="../topics/3-Event-QueryCommand.md.html">3-Event-QueryCommand.md</a></li>
+  <li><a href="../topics/3-Event-Reload.md.html">3-Event-Reload.md</a></li>
+  <li><a href="../topics/3-Event-Topic.md.html">3-Event-Topic.md</a></li>
+  <li><a href="../topics/3-Event-Unload.md.html">3-Event-Unload.md</a></li>
+  <li><a href="../topics/3-Event-User-mode.md.html">3-Event-User-mode.md</a></li>
+  <li><a href="../topics/3-Event-Whois.md.html">3-Event-Whois.md</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/Connect.lua.html">Connect.lua</a></li>
+  <li><a href="../examples/Formatting.lua.html">Formatting.lua</a></li>
+  <li><a href="../examples/Server.lua.html">Server.lua</a></li>
+  <li><a href="../examples/Welcome.lua.html">Welcome.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>irccd.fs</code></h1>
+
+<p>Filesystem support.</p>
+<p> Open, read and analyze directories.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#basename">basename (path)</a></td>
+	<td class="summary">Get the file name of a full path.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#dirname">dirname (path)</a></td>
+	<td class="summary">Get the parent path of a file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#exists">exists (path)</a></td>
+	<td class="summary">Check if a file exists.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mkdir">mkdir (path, mode)</a></td>
+	<td class="summary">Create a directory recursively.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#opendir">opendir (path, skipSpecial)</a></td>
+	<td class="summary">Open a directory.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#stat">stat (path)</a></td>
+	<td class="summary">Get file status.</td>
+	</tr>
+</table>
+<h2><a href="#Class_Directory">Class Directory </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Directory:count">Directory:count ()</a></td>
+	<td class="summary">Count the number of entries in the directory.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Directory:read">Directory:read ()</a></td>
+	<td class="summary">Iterate over the entries.</td>
+	</tr>
+</table>
+<h2><a href="#Directory_metamethods">Directory metamethods </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Directory:__eq">Directory:__eq (other)</a></td>
+	<td class="summary">Test equality.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Directory:__tostring">Directory:__tostring ()</a></td>
+	<td class="summary">Convert object to string.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2><a name="Functions"></a>Functions</h2>
+    <dl class="function">
+    <dt>
+    <a name = "basename"></a>
+    <strong>basename (path)</strong>
+    </dt>
+    <dd>
+    Get the file name of a full path.
+ Returns the file name only of a full path. For instance, returns
+ "foo.lua" when calling with "/usr/local/foo.lua"
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the file path
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the file name
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "dirname"></a>
+    <strong>dirname (path)</strong>
+    </dt>
+    <dd>
+    Get the parent path of a file.
+ This function may be used to get the parent path of a file. Example:
+ calling dirname on "/foo/bar/test.txt" will returns "/foo/bar".
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the full file path
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the parent path
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "exists"></a>
+    <strong>exists (path)</strong>
+    </dt>
+    <dd>
+    Check if a file exists.
+ Tests if a directory or a file exists.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path to check
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if exists
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "mkdir"></a>
+    <strong>mkdir (path, mode)</strong>
+    </dt>
+    <dd>
+    Create a directory recursively.
+ This function acts like <code>mkdir -p</code>.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path
+        </li>
+        <li><span class="parameter">mode</span>
+         an optional octal mode
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        true on success or false plus an error</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "opendir"></a>
+    <strong>opendir (path, skipSpecial)</strong>
+    </dt>
+    <dd>
+    Open a directory.
+ Optional boolean skipSpecial may be passed to avoid ".", ".." for being
+ included.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path
+        </li>
+        <li><span class="parameter">skipSpecial</span>
+         forget "." and "..", default: false
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a Directory object
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.fs.html#Class_Directory">Directory</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "stat"></a>
+    <strong>stat (path)</strong>
+    </dt>
+    <dd>
+    Get file status.
+ Returns a table with the following information:
+ <ul>
+ <li><span class="parameter">device</span>: the device number</li>
+ <li><span class="parameter">inode</span>: the inode number</li>
+ <li><span class="parameter">nlink</span>: the number of hard links to the file</li>
+ <li><span class="parameter">atime</span>: the last time the file was accessed</li>
+ <li><span class="parameter">mtime</span>: time when file data last modified</li>
+ <li><span class="parameter">ctime</span>: time when file status was last changed</li>
+ <li><span class="parameter">size</span>: the file size in bytes</li>
+ <li><span class="parameter">blocksize</span>: the optional I/O block size</li>
+ <li><span class="parameter">blocks</span>: the number of blocks for the file</li>
+ </ul>
+ <br /></p>
+
+<p> <strong>Note: not all fields are available.</strong><br />
+ <strong>Note: you must load the irccd.util library for fields atime, ctime and mtime.</strong>
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+         the path to the file
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the table or nil</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.util.html#">irccd.util</a>
+    </ul>
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">
+ <span class="keyword">local</span> fs = <span class="global">require</span> <span class="string">"irccd.fs"</span>
+ <span class="keyword">local</span> util = <span class="global">require</span> <span class="string">"irccd.util"</span>
+
+ <span class="keyword">local</span> status = fs.stat(<span class="string">"/path/to/file"</span>)
+
+ <span class="keyword">if</span> status.mtime <span class="keyword">then</span>
+         <span class="global">print</span>(<span class="global">string</span>.format(<span class="string">"Last modified on: %s"</span>, status.mtime:format(<span class="string">"%d %a %y %H:%M:%S"</span>)))
+ <span class="keyword">end</span></pre>
+    </ul>
+
+</dd>
+</dl>
+    <h2><a name="Class_Directory"></a>Class Directory </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "Directory:count"></a>
+    <strong>Directory:count ()</strong>
+    </dt>
+    <dd>
+    Count the number of entries in the directory.
+ Note that if you didn't passed true to fs.opendir() you will have
+ "." and ".." included.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the number of entries in the directory
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/irccd.fs.html#opendir">fs.opendir</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "Directory:read"></a>
+    <strong>Directory:read ()</strong>
+    </dt>
+    <dd>
+    Iterate over the entries.
+ This function returns 2 arguments
+ the entry and a boolean telling if is a directory.
+
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the entry name</li>
+        <li>
+        true if it is a directory</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">
+ <span class="keyword">local</span> d = fs.opendir(<span class="string">"/"</span>)
+
+ <span class="comment">-- Read the directory "/"
+</span> <span class="keyword">for</span> e, isdir <span class="keyword">in</span> d:read() <span class="keyword">do</span>
+         <span class="keyword">if</span> isdir <span class="keyword">then</span>
+                 <span class="global">print</span>(e .. <span class="string">" is a directory"</span>)
+         <span class="keyword">else</span>
+                 <span class="global">print</span>(<span class="string">"=&gt;"</span> .. e)
+         <span class="keyword">end</span>
+ <span class="keyword">end</span></pre>
+    </ul>
+
+</dd>
+</dl>
+    <h2><a name="Directory_metamethods"></a>Directory metamethods </h2>
+
+ The metamethods available for object Directory.
+    <dl class="function">
+    <dt>
+    <a name = "Directory:__eq"></a>
+    <strong>Directory:__eq (other)</strong>
+    </dt>
+    <dd>
+    Test equality.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+         the other directory
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true if they equals
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Directory:__tostring"></a>
+    <strong>Directory:__tostring ()</strong>
+    </dt>
+    <dd>
+    Convert object to string.
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a string
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.0</a></i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

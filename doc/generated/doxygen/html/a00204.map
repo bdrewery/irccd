@@ -1,0 +1,7 @@
+<map id="irccd/Luae.h" name="irccd/Luae.h">
+<area shape="rect" id="node2" href="$a00128.html" title="Irccd plugins." alt="" coords="25,155,132,181"/>
+<area shape="rect" id="node4" href="$a00130.html" title="Lua process (thread or plugin)" alt="" coords="102,80,220,107"/>
+<area shape="rect" id="node5" href="$a00148.html" title="Irccd thread interface." alt="" coords="187,155,297,181"/>
+<area shape="rect" id="node6" href="$a00126.html" title="Pipe for sharing data between threads." alt="" coords="297,80,391,107"/>
+<area shape="rect" id="node3" href="$a00090.html" title="Plugin event queue." alt="" coords="5,229,152,256"/>
+</map>
