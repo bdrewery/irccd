@@ -24,25 +24,6 @@
 #include <Logger.h>
 #include <Util.h>
 
-#if defined(WITH_LUA)
-#  include "event/IrcEventChannelMode.h"
-#  include "event/IrcEventChannelNotice.h"
-#  include "event/IrcEventConnect.h"
-#  include "event/IrcEventInvite.h"
-#  include "event/IrcEventJoin.h"
-#  include "event/IrcEventKick.h"
-#  include "event/IrcEventMe.h"
-#  include "event/IrcEventMessage.h"
-#  include "event/IrcEventMode.h"
-#  include "event/IrcEventNames.h"
-#  include "event/IrcEventNick.h"
-#  include "event/IrcEventNotice.h"
-#  include "event/IrcEventPart.h"
-#  include "event/IrcEventQuery.h"
-#  include "event/IrcEventTopic.h"
-#  include "event/IrcEventWhois.h"
-#endif
-
 #include "Irccd.h"
 #include "Plugin.h"
 #include "Server.h"
@@ -313,13 +294,13 @@ void testCommand(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		 */
 		auto command = "!" + Process::info(p->getState()).name + " " + std::string(argv[2]);
 
-		IrcEventMessage(s, argv[0], argv[1], command).action(p->getState());
+		p->onMessage(s, argv[0], argv[1], command);
 	}
 }
 
 void testConnect(Plugin::Ptr p, Server::Ptr s, int, char **)
 {
-	IrcEventConnect(s).action(p->getState());
+	p->onConnect(s);
 }
 
 void testChannelNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -327,7 +308,7 @@ void testChannelNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 3)
 		Logger::warn("test: onChannelNotice requires 3 arguments");
 	else
-		IrcEventChannelNotice(s, argv[1], argv[0], argv[2]).action(p->getState());
+		p->onChannelNotice(s, argv[0], argv[1], argv[2]);
 }
 
 void testInvite(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -335,7 +316,7 @@ void testInvite(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 2)
 		Logger::warn("test: onInvite requires 2 arguments");
 	else
-		IrcEventInvite(s, argv[1], argv[0]).action(p->getState());
+		p->onInvite(s, argv[0], argv[1]);
 }
 
 void testJoin(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -343,7 +324,7 @@ void testJoin(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 2)
 		Logger::warn("test: onJoin requires 2 arguments");
 	else
-		IrcEventJoin(s, argv[1], argv[0]).action(p->getState());
+		p->onJoin(s, argv[0], argv[1]);
 }
 
 void testKick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -356,7 +337,7 @@ void testKick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		if (argc >= 4)
 			reason = argv[3];
 
-		IrcEventKick(s, argv[1], argv[0], argv[2], reason).action(p->getState());
+		p->onKick(s, argv[0], argv[1], argv[2], reason);
 	}
 }
 
@@ -365,7 +346,7 @@ void testMe(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 3)
 		Logger::warn("test: onMessage requires 3 arguments");
 	else
-		IrcEventMe(s, argv[0], argv[1], argv[2]).action(p->getState());
+		p->onMe(s, argv[0], argv[1], argv[2]);
 }
 
 void testMessage(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -373,7 +354,7 @@ void testMessage(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 3)
 		Logger::warn("test: onMessage requires 3 arguments");
 	else
-		IrcEventMessage(s, argv[0], argv[1], argv[2]).action(p->getState());
+		p->onMessage(s, argv[0], argv[1], argv[2]);
 }
 
 void testMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -386,7 +367,7 @@ void testMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		if (argc >= 4)
 			modeArg = argv[3];
 
-		IrcEventChannelMode(s, argv[1], argv[0], argv[2], modeArg).action(p->getState());
+		p->onMode(s, argv[0], argv[1], argv[2], modeArg);
 	}
 }
 
@@ -395,7 +376,7 @@ void testNick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 2)
 		Logger::warn("test: onNick requires 2 arguments");
 	else
-		IrcEventNick(s, argv[0], argv[1]).action(p->getState());
+		p->onNick(s, argv[0], argv[1]);
 }
 
 void testNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -403,7 +384,7 @@ void testNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 3)
 		Logger::warn("test: onNotice requires 3 arguments");
 	else
-		IrcEventNotice(s, argv[0], argv[1], argv[2]).action(p->getState());
+		p->onNotice(s, argv[0], argv[1], argv[2]);
 }
 
 void testPart(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -416,7 +397,7 @@ void testPart(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		if (argc >= 3)
 			reason = argv[2];
 
-		IrcEventPart(s, argv[1], argv[0], reason).action(p->getState());
+		p->onPart(s, argv[0], argv[1], reason);
 	}
 }
 
@@ -425,7 +406,7 @@ void testQuery(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 2)
 		Logger::warn("test: onQuery requires 2 arguments");
 	else
-		IrcEventQuery(s, argv[0], argv[1]).action(p->getState());
+		p->onQuery(s, argv[0], argv[1]);
 }
 
 void testTopic(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -433,7 +414,7 @@ void testTopic(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 3)
 		Logger::warn("test: onTopic requires 3 arguments");
 	else
-		IrcEventTopic(s, argv[1], argv[0], argv[2]).action(p->getState());
+		p->onTopic(s, argv[0], argv[1], argv[2]);
 }
 
 void testUserMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
@@ -441,7 +422,7 @@ void testUserMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	if (argc < 2)
 		Logger::warn("test: onUserMode requires 2 arguments");
 	else
-		IrcEventMode(s, argv[0], argv[1]).action(p->getState());
+		p->onUserMode(s, argv[0], argv[1]);
 }
 
 std::unordered_map<std::string, TestFunction> testCommands {
@@ -534,6 +515,7 @@ void test(int argc, char **argv)
 		Logger::warn("\tonMode\t\t\tTest a public channel change");
 		Logger::warn("\tonNick\t\t\tChange your nickname");
 		Logger::warn("\tonPart\t\t\tLeave a channel");
+		Logger::warn("\tonQuery\t\t\tSend a private message");
 		Logger::warn("\tonTopic\t\t\tTest a topic channel change");
 		Logger::fatal(1, "\tonUserMode\t\tTest a user mode change");
 	}

@@ -312,7 +312,7 @@ void Server::cnotice(const std::string &channel, const std::string &message)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_session.cnotice(channel, message);
+		m_queue.add(std::bind(&IrcSession::cnotice, &m_session, channel, message));
 }
 
 void Server::invite(const std::string &target, const std::string &channel)
@@ -320,7 +320,7 @@ void Server::invite(const std::string &target, const std::string &channel)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_session.invite(target, channel);
+		m_queue.add(std::bind(&IrcSession::invite, &m_session, target, channel));
 }
 
 void Server::join(const std::string &name, const std::string &password)
@@ -328,15 +328,17 @@ void Server::join(const std::string &name, const std::string &password)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_session.join(name, password);
+		m_queue.add(std::bind(&IrcSession::join, &m_session, name, password));
 }
 
-void Server::kick(const std::string &name, const std::string &channel, const std::string &reason)
+void Server::kick(const std::string &name,
+		  const std::string &channel,
+		  const std::string &reason)
 {
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_session.kick(name, channel, reason);
+		m_queue.add(std::bind(&IrcSession::kick, &m_session, name, channel, reason));
 }
 
 void Server::me(const std::string &target, const std::string &message)
@@ -344,7 +346,7 @@ void Server::me(const std::string &target, const std::string &message)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_session.me(target, message);
+		m_queue.add(std::bind(&IrcSession::me, &m_session, target, message));
 }
 
 void Server::mode(const std::string &channel, const std::string &mode)
@@ -352,7 +354,7 @@ void Server::mode(const std::string &channel, const std::string &mode)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_session.mode(channel, mode);
+		m_queue.add(std::bind(&IrcSession::mode, &m_session, channel, mode));
 }
 
 void Server::names(const std::string &channel)
@@ -360,7 +362,7 @@ void Server::names(const std::string &channel)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_session.names(channel);
+		m_queue.add(std::bind(&IrcSession::names, &m_session, channel));
 }
 
 void Server::nick(const std::string &nick)
@@ -368,7 +370,7 @@ void Server::nick(const std::string &nick)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_session.nick(nick);
+		m_queue.add(std::bind(&IrcSession::nick, &m_session, nick));
 }
 
 void Server::notice(const std::string &nickname, const std::string &message)
@@ -376,7 +378,7 @@ void Server::notice(const std::string &nickname, const std::string &message)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running" && nickname[0] != '#')
-		m_session.notice(nickname, message);
+		m_queue.add(std::bind(&IrcSession::notice, &m_session, nickname, message));
 }
 
 void Server::part(const std::string &channel, const std::string &reason)
@@ -384,7 +386,7 @@ void Server::part(const std::string &channel, const std::string &reason)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_session.part(channel, reason);
+		m_queue.add(std::bind(&IrcSession::part, &m_session, channel, reason));
 }
 
 void Server::query(const std::string &who, const std::string &message)
@@ -393,7 +395,7 @@ void Server::query(const std::string &who, const std::string &message)
 
 	// Do not write to public channel
 	if (m_state->which() == "Running" && who[0] != '#')
-		m_session.query(who, message);
+		m_queue.add(std::bind(&IrcSession::say, &m_session, who, message));
 }
 
 void Server::say(const std::string &target, const std::string &message)
@@ -401,7 +403,7 @@ void Server::say(const std::string &target, const std::string &message)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_session.say(target, message);
+		m_queue.add(std::bind(&IrcSession::say, &m_session, target, message));
 }
 
 void Server::send(const std::string &msg)
@@ -409,7 +411,7 @@ void Server::send(const std::string &msg)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_session.send(msg);
+		m_queue.add(std::bind(&IrcSession::send, &m_session, msg));
 }
 
 void Server::topic(const std::string &channel, const std::string &topic)
@@ -417,7 +419,7 @@ void Server::topic(const std::string &channel, const std::string &topic)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_session.topic(channel, topic);
+		m_queue.add(std::bind(&IrcSession::topic, &m_session, channel, topic));
 }
 
 void Server::umode(const std::string &mode)
@@ -425,7 +427,7 @@ void Server::umode(const std::string &mode)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_session.umode(mode);
+		m_queue.add(std::bind(&IrcSession::umode, &m_session, mode));
 }
 
 void Server::whois(const std::string &target)
@@ -433,7 +435,7 @@ void Server::whois(const std::string &target)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_session.whois(target);
+		m_queue.add(std::bind(&IrcSession::whois, &m_session, target));
 }
 
 } // !irccd

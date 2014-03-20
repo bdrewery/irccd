@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <functional>
 #include <cstring>
 
 #include "Logger.h"
@@ -25,24 +26,10 @@
 
 #if defined(WITH_LUA)
 #  include "Plugin.h"
-
-#  include "event/IrcEventChannelMode.h"
-#  include "event/IrcEventChannelNotice.h"
-#  include "event/IrcEventConnect.h"
-#  include "event/IrcEventInvite.h"
-#  include "event/IrcEventJoin.h"
-#  include "event/IrcEventKick.h"
-#  include "event/IrcEventMe.h"
-#  include "event/IrcEventMessage.h"
-#  include "event/IrcEventMode.h"
-#  include "event/IrcEventNames.h"
-#  include "event/IrcEventNick.h"
-#  include "event/IrcEventNotice.h"
-#  include "event/IrcEventPart.h"
-#  include "event/IrcEventQuery.h"
-#  include "event/IrcEventTopic.h"
-#  include "event/IrcEventWhois.h"
+#  include "EventQueue.h"
 #endif
+
+using namespace std::placeholders;
 
 namespace irccd {
 
@@ -59,6 +46,11 @@ inline bool isMe(Server::Ptr s, const std::string &target)
 	return identity.nickname == tmp;
 }
 
+inline std::string strify(const char *t)
+{
+	return t == nullptr ? std::string("") : t;
+}
+
 void handleChannel(irc_session_t *session,
 		   const char *,
 		   const char *orig,
@@ -68,9 +60,8 @@ void handleChannel(irc_session_t *session,
 #if defined(WITH_LUA)
 	auto s = IrcSession::toServer(session);
 
-	IrcEvent::add(IrcEvent::Ptr(
-	    new IrcEventMessage(s, params[0], orig, (!params[1]) ? "" : params[1])
-	));
+	EventQueue::add(std::bind(&Plugin::onMessage, _1, s, strify(params[0]),
+	    strify(orig), strify(params[1])));
 #else
 	(void)session;
 	(void)orig;
@@ -87,9 +78,8 @@ void handleChannelNotice(irc_session_t *session,
 #if defined(WITH_LUA)
 	auto s = IrcSession::toServer(session);
 
-	IrcEvent::add(IrcEvent::Ptr(
-	    new IrcEventChannelNotice(s, params[0], orig, (!params[1]) ? "" : params[1])
-	));
+	EventQueue::add(std::bind(&Plugin::onChannelNotice, _1, s, strify(orig),
+	    strify(params[0]), strify(params[1])));
 #else
 	(void)session;
 	(void)orig;
@@ -117,7 +107,7 @@ void handleConnect(irc_session_t *session,
 	}
 
 #if defined(WITH_LUA)
-	IrcEvent::add(IrcEvent::Ptr(new IrcEventConnect(s)));
+	EventQueue::add(std::bind(&Plugin::onConnect, _1, s));
 #endif
 }
 
@@ -130,9 +120,8 @@ void handleCtcpAction(irc_session_t *session,
 #if defined(WITH_LUA)
 	auto s = IrcSession::toServer(session);
 
-	IrcEvent::add(IrcEvent::Ptr(
-	    new IrcEventMe(s, params[0], orig, (!params[1]) ? "" : params[1])
-	));
+	EventQueue::add(std::bind(&Plugin::onMe, _1, s, strify(params[0]),
+	    strify(orig), strify(params[1])));
 #else
 	(void)session;
 	(void)orig;
@@ -153,9 +142,7 @@ void handleInvite(irc_session_t *session,
 		s->join(params[0], "");
 
 #if defined(WITH_LUA)
-	IrcEvent::add(IrcEvent::Ptr(
-	    new IrcEventInvite(s, orig, params[0])
-	));
+	EventQueue::add(std::bind(&Plugin::onInvite, _1, s, strify(orig), strify(params[0])));
 #else
 	(void)orig;
 #endif
@@ -170,9 +157,7 @@ void handleJoin(irc_session_t *session,
 #if defined(WITH_LUA)
 	auto s = IrcSession::toServer(session);
 
-	IrcEvent::add(IrcEvent::Ptr(
-	    new IrcEventJoin(s, orig, params[0])
-	));
+	EventQueue::add(std::bind(&Plugin::onJoin, _1, s, strify(params[0]), strify(orig)));
 #else
 	(void)session;
 	(void)orig;
@@ -193,9 +178,8 @@ void handleKick(irc_session_t *session,
 		s->removeChannel(params[0]);
 
 #if defined(WITH_LUA)
-	IrcEvent::add(IrcEvent::Ptr(
-	    new IrcEventKick(s, orig, params[0], params[1], (!params[2]) ? "" : params[2])
-	));
+	EventQueue::add(std::bind(&Plugin::onKick, _1, s, strify(params[0]), strify(orig),
+	    strify(params[1]), strify(params[2])));
 #else
 	(void)orig;
 #endif
@@ -210,9 +194,8 @@ void handleMode(irc_session_t *session,
 #if defined(WITH_LUA)
 	auto s = IrcSession::toServer(session);
 
-	IrcEvent::add(IrcEvent::Ptr(
-	    new IrcEventChannelMode(s, orig, params[0], params[1], (!params[2]) ? "" : params[2])
-	));
+	EventQueue::add(std::bind(&Plugin::onMode, _1, s, strify(params[0]),
+	    strify(orig), strify(params[1]), strify(params[2])));
 #else
 	(void)session;
 	(void)orig;
@@ -234,9 +217,7 @@ void handleNick(irc_session_t *session,
 		id.nickname = nick;
 
 #if defined(WITH_LUA)
-	IrcEvent::add(IrcEvent::Ptr(
-	    new IrcEventNick(s, orig, params[0])
-	));
+	EventQueue::add(std::bind(&Plugin::onNick, _1, s, strify(orig), strify(params[0])));
 #else
 	(void)params;
 #endif
@@ -251,9 +232,8 @@ void handleNotice(irc_session_t *session,
 #if defined(WITH_LUA)
 	auto s = IrcSession::toServer(session);
 
-	IrcEvent::add(IrcEvent::Ptr(
-	    new IrcEventNotice(s, orig, params[0], (!params[1]) ? "" : params[1])
-	));
+	EventQueue::add(std::bind(&Plugin::onNotice, _1, s, strify(orig),
+	    strify(params[0]), strify(params[1])));
 #else
 	(void)session;
 	(void)orig;
@@ -288,9 +268,7 @@ void handleNumeric(irc_session_t *session,
 		auto &list = s->getNameLists();
 
 		if (params[1] != nullptr) {
-			IrcEvent::add(IrcEvent::Ptr(
-			    new IrcEventNames(s, list[params[1]], params[1])
-			));
+			EventQueue::add(std::bind(&Plugin::onNames, _1, s, strify(params[1]), list[params[1]]));
 		}
 
 		// Don't forget to remove the list
@@ -315,7 +293,7 @@ void handleNumeric(irc_session_t *session,
 	} else if (event == LIBIRC_RFC_RPL_ENDOFWHOIS) {
 		auto &info = s->getWhoisLists()[params[1]];
 
-		IrcEvent::add(IrcEvent::Ptr(new IrcEventWhois(s, info)));
+		EventQueue::add(std::bind(&Plugin::onWhois, _1, s, info));
 	}
 
 	if (event == 5) {
@@ -345,9 +323,8 @@ void handlePart(irc_session_t *session,
 		s->removeChannel(params[0]);
 
 #if defined(WITH_LUA)
-	IrcEvent::add(IrcEvent::Ptr(
-	    new IrcEventPart(s, orig, params[0], (!params[1]) ? "" : params[1])
-	));
+	EventQueue::add(std::bind(&Plugin::onPart, _1, s, strify(params[0]),
+	    strify(orig), strify(params[1])));
 #endif
 }
 
@@ -360,9 +337,7 @@ void handleQuery(irc_session_t *session,
 #if defined(WITH_LUA)
 	auto s = IrcSession::toServer(session);
 
-	IrcEvent::add(IrcEvent::Ptr(
-	    new IrcEventQuery(s, orig, (!params[1]) ? "" : params[1])
-	));
+	EventQueue::add(std::bind(&Plugin::onQuery, _1, s, strify(orig), strify(params[1])));
 #else
 	(void)session;
 	(void)orig;
@@ -379,9 +354,8 @@ void handleTopic(irc_session_t *session,
 #if defined(WITH_LUA)
 	auto s = IrcSession::toServer(session);
 
-	IrcEvent::add(IrcEvent::Ptr(
-	    new IrcEventTopic(s, orig, params[0], (!params[1]) ? "" : params[1])
-	));
+	EventQueue::add(std::bind(&Plugin::onTopic, _1, s, strify(params[0]),
+	    strify(orig), strify(params[1])));
 #else
 	(void)session;
 	(void)orig;
@@ -398,9 +372,7 @@ void handleUserMode(irc_session_t *session,
 #if defined(WITH_LUA)
 	auto s = IrcSession::toServer(session);
 
-	IrcEvent::add(IrcEvent::Ptr(
-	    new IrcEventMode(s, orig, params[0])
-	));
+	EventQueue::add(std::bind(&Plugin::onUserMode, _1, s, strify(orig), strify(params[0])));
 #else
 	(void)session;
 	(void)orig;
@@ -441,7 +413,7 @@ void IrcDeleter::operator()(irc_session_t *s)
 {
 	Logger::debug("server: destroying IrcSession");
 
-	delete reinterpret_cast<std::shared_ptr<Server> *>(irc_get_ctx(s));
+	delete reinterpret_cast<Server::Ptr *>(irc_get_ctx(s));
 
 	irc_destroy_session(s);
 }
@@ -523,106 +495,104 @@ void IrcSession::run()
 	irc_run(m_handle.get());
 }
 
-void IrcSession::cnotice(const std::string &channel,
+bool IrcSession::cnotice(const std::string &channel,
 			 const std::string &message)
 {
 	if (channel[0] == '#')
-		irc_cmd_notice(m_handle.get(), channel.c_str(), message.c_str());
+		return call(irc_cmd_notice, channel.c_str(), message.c_str());
+
+	return true;
 }
 
-void IrcSession::invite(const std::string &target,
+bool IrcSession::invite(const std::string &target,
 			const std::string &channel)
 {
-	irc_cmd_invite(m_handle.get(), target.c_str(), channel.c_str());
+	return call(irc_cmd_invite, target.c_str(), channel.c_str());
 }
 
-void IrcSession::join(const std::string &channel,
+bool IrcSession::join(const std::string &channel,
 		      const std::string &password)
 {
-	irc_cmd_join(m_handle.get(), channel.c_str(), password.c_str());
+	return call(irc_cmd_join, channel.c_str(), password.c_str());
 }
 
-void IrcSession::kick(const std::string &name,
+bool IrcSession::kick(const std::string &name,
 		      const std::string &channel,
 		      const std::string &reason)
 {
 	const char *r = (reason.length() == 0) ? nullptr : reason.c_str();
 
-	irc_cmd_kick(m_handle.get(), name.c_str(), channel.c_str(), r);
+	return call(irc_cmd_kick, name.c_str(), channel.c_str(), r);
 }
 
-void IrcSession::me(const std::string &target,
+bool IrcSession::me(const std::string &target,
 		    const std::string &message)
 {
-	irc_cmd_me(m_handle.get(), target.c_str(), message.c_str());
+	return call(irc_cmd_me, target.c_str(), message.c_str());
 }
 
-void IrcSession::mode(const std::string &channel,
+bool IrcSession::mode(const std::string &channel,
 		      const std::string &mode)
 {
-	irc_cmd_channel_mode(m_handle.get(), channel.c_str(), mode.c_str());
+	return call(irc_cmd_channel_mode, channel.c_str(), mode.c_str());
 }
 
-void IrcSession::names(const std::string &channel)
+bool IrcSession::names(const std::string &channel)
 {
-	irc_cmd_names(m_handle.get(), channel.c_str());
+	return call(irc_cmd_names, channel.c_str());
 }
 
-void IrcSession::nick(const std::string &newnick)
+bool IrcSession::nick(const std::string &newnick)
 {
-	irc_cmd_nick(m_handle.get(), newnick.c_str());
+	return call(irc_cmd_nick, newnick.c_str());
 }
 
-void IrcSession::notice(const std::string &target,
+bool IrcSession::notice(const std::string &target,
 			const std::string &message)
 {
 	if (target[0] != '#')
-		irc_cmd_notice(m_handle.get(), target.c_str(), message.c_str());
+		return call(irc_cmd_notice, target.c_str(), message.c_str());
+
+	return true;
 }
 
-void IrcSession::part(const std::string &channel,
+bool IrcSession::part(const std::string &channel,
 		      const std::string &reason)
 {
 	if (reason.length() > 0) {
 		auto str = "PART " + channel + ":" + reason;
 
-		send(str);
-	} else {
-		irc_cmd_part(m_handle.get(), channel.c_str());
+		return send(str);
 	}
+
+	return call(irc_cmd_part, channel.c_str());
 }
 
-void IrcSession::query(const std::string &target,
-		       const std::string &message)
-{
-	irc_cmd_msg(m_handle.get(), target.c_str(), message.c_str());
-}
-
-void IrcSession::say(const std::string &channel,
+bool IrcSession::say(const std::string &target,
 		     const std::string &message)
 {
-	irc_cmd_msg(m_handle.get(), channel.c_str(), message.c_str());
+	return call(irc_cmd_msg, target.c_str(), message.c_str());
 }
 
-void IrcSession::topic(const std::string &channel,
+bool IrcSession::topic(const std::string &channel,
 		       const std::string &topic)
 {
-	irc_cmd_topic(m_handle.get(), channel.c_str(), topic.c_str());
+	return call(irc_cmd_topic, channel.c_str(), topic.c_str());
 }
 
-void IrcSession::umode(const std::string &mode)
+bool IrcSession::umode(const std::string &mode)
 {
-	irc_cmd_user_mode(m_handle.get(), mode.c_str());
+	return call(irc_cmd_user_mode, mode.c_str());
 }
 
-void IrcSession::whois(const std::string &target)
+bool IrcSession::whois(const std::string &target)
 {
-	irc_cmd_whois(m_handle.get(), target.c_str());
+	return call(irc_cmd_whois, target.c_str());
 }
 
-void IrcSession::send(const std::string &raw)
+bool IrcSession::send(const std::string &raw)
 {
-	irc_send_raw(m_handle.get(), "%s", raw.c_str());
+	return call(irc_send_raw, "%s", raw.c_str());
 }
 
 void IrcSession::disconnect()

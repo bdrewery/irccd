@@ -30,6 +30,8 @@
 #include <SocketAddress.h>
 #include <SocketListener.h>
 
+#include <config.h>
+
 #include "Luae.h"
 #include "LuaSocket.h"
 
@@ -213,7 +215,7 @@ void mapToTable(lua_State *L,
  */
 void storeAddressData(lua_State *L, int index, const SocketAddress &sa)
 {
-	if (Luae::typeField(L, index, AddrField) == LUA_TNIL) {
+	if (LuaeTable::type(L, index, AddrField) == LUA_TNIL) {
 		if (index < 0)
 			-- index;
 
@@ -243,15 +245,15 @@ void storeAddressData(lua_State *L, int index, const SocketAddress &sa)
  */
 SocketAddressPtr checkUnix(lua_State *L, int index, const Socket &)
 {
-	LUA_STACK_CHECKBEGIN(L);
+	LUAE_STACK_CHECKBEGIN(L);
 
-	auto path = Luae::requireField<std::string>(L, index, "path");
+	auto path = LuaeTable::require<std::string>(L, index, "path");
 	auto rm = false;
 
-	if (Luae::typeField(L, index, "remove") != LUA_TNIL)
+	if (LuaeTable::type(L, index, "remove") != LUA_TNIL)
 		rm = lua_toboolean(L, index);
 
-	LUA_STACK_CHECKEQUALS(L);
+	LUAE_STACK_CHECKEQUALS(L);
 
 	return SocketAddressPtr(new AddressUnix(path, rm));
 }
@@ -282,34 +284,34 @@ SocketAddressPtr checkUnix(lua_State *L, int index, const Socket &)
  */
 SocketAddressPtr checkInet(lua_State *L, int index, const Socket &sc)
 {
-	LUA_STACK_CHECKBEGIN(L);
+	LUAE_STACK_CHECKBEGIN(L);
 
 	SocketAddressPtr ptr;
 
-	auto port = Luae::requireField<int>(L, index, "port");
+	auto port = LuaeTable::require<int>(L, index, "port");
 	auto family = sc.getDomain();
 
 	// If no family, we use the same as the socket
-	if (Luae::typeField(L, index, "family") == LUA_TNUMBER)
-		family = Luae::requireField<int>(L, index, "family");
+	if (LuaeTable::type(L, index, "family") == LUA_TNUMBER)
+		family = LuaeTable::require<int>(L, index, "family");
 
 	// If we have address field, we want to bind
-	if (Luae::typeField(L, index, "address") == LUA_TSTRING) {
-		auto address = Luae::requireField<std::string>(L, index, "address");
+	if (LuaeTable::type(L, index, "address") == LUA_TSTRING) {
+		auto address = LuaeTable::require<std::string>(L, index, "address");
 
 		ptr = SocketAddressPtr(new BindAddressIP(address, port, family));
 	} else {
-		auto host = Luae::requireField<std::string>(L, index, "host");
+		auto host = LuaeTable::require<std::string>(L, index, "host");
 		auto type = sc.getType();
 
 		// If no type, we use the same as the socket
-		if (Luae::typeField(L, index, "type") == LUA_TNUMBER)
-			type = Luae::requireField<int>(L, index, "type");
+		if (LuaeTable::type(L, index, "type") == LUA_TNUMBER)
+			type = LuaeTable::require<int>(L, index, "type");
 
 		ptr = SocketAddressPtr(new ConnectAddressIP(host, port, family, type));
 	}
 
-	LUA_STACK_CHECKEQUALS(L);
+	LUAE_STACK_CHECKEQUALS(L);
 
 	return ptr;
 }
@@ -327,7 +329,7 @@ SocketAddressPtr checkInet(lua_State *L, int index, const Socket &sc)
  */
 SocketAddressPtr checkAddress(lua_State *L, int index, const Socket &sc)
 {
-	LUA_STACK_CHECKBEGIN(L);
+	LUAE_STACK_CHECKBEGIN(L);
 
 	SocketAddressPtr address;
 
@@ -337,7 +339,7 @@ SocketAddressPtr checkAddress(lua_State *L, int index, const Socket &sc)
 	 * If the field AddrField is present, we create the address with that
 	 * data, otherwise, we return a new one
 	 */
-	if (Luae::typeField(L, index, AddrField) == LUA_TSTRING) {
+	if (LuaeTable::type(L, index, AddrField) == LUA_TSTRING) {
 		sockaddr_storage st;
 		const char *data;
 		int length;
@@ -346,7 +348,7 @@ SocketAddressPtr checkAddress(lua_State *L, int index, const Socket &sc)
 		data = lua_tostring(L, -1);
 		lua_pop(L, 1);
 
-		length = Luae::requireField<int>(L, index, LengthField);
+		length = LuaeTable::require<int>(L, index, LengthField);
 
 		std::memset(&st, 0, sizeof (sockaddr_storage));
 		std::memcpy(&st, data, length);
@@ -354,7 +356,7 @@ SocketAddressPtr checkAddress(lua_State *L, int index, const Socket &sc)
 		address = SocketAddressPtr(new SocketAddress(st, length));
 	} else {
 #if !defined(WIN32)
-		if (Luae::typeField(L, index, "path") != LUA_TNIL) {
+		if (LuaeTable::type(L, index, "path") != LUA_TNIL) {
 			address = checkUnix(L, index, sc);
 		} else {
 			address = checkInet(L, index, sc);
@@ -366,7 +368,7 @@ SocketAddressPtr checkAddress(lua_State *L, int index, const Socket &sc)
 		storeAddressData(L, index, *address);
 	}
 
-	LUA_STACK_CHECKEQUALS(L);
+	LUAE_STACK_CHECKEQUALS(L);
 
 	return address;
 }
@@ -450,7 +452,7 @@ void pushInet(lua_State *L, const SocketAddress &address)
  */
 void pushAddress(lua_State *L, const SocketAddress &address)
 {
-	LUA_STACK_CHECKBEGIN(L);
+	LUAE_STACK_CHECKBEGIN(L);
 
 	const auto &st = address.address();
 	const auto &len = address.length();
@@ -485,7 +487,7 @@ void pushAddress(lua_State *L, const SocketAddress &address)
 	}
 
 	lua_replace(L, -2);
-	LUA_STACK_CHECKEND(L, - 1);
+	LUAE_STACK_CHECKEND(L, - 1);
 }
 
 int genericReceive(lua_State *L, bool udp)
@@ -924,12 +926,12 @@ int l_bindInet(lua_State *L)
 
 	luaL_checktype(L, 1, LUA_TTABLE);
 
-	auto port = Luae::requireField<int>(L, 1, "port");
-	auto family = Luae::requireField<int>(L, 1, "family");
+	auto port = LuaeTable::require<int>(L, 1, "port");
+	auto family = LuaeTable::require<int>(L, 1, "family");
 	auto address = std::string("*");
 
-	if (Luae::typeField(L, 1, "address") == LUA_TSTRING)
-		address = Luae::requireField<std::string>(L, 1, "address");
+	if (LuaeTable::type(L, 1, "address") == LUA_TSTRING)
+		address = LuaeTable::require<std::string>(L, 1, "address");
 
 	lua_createtable(L, 0, 0);
 
@@ -963,9 +965,9 @@ int l_connectInet(lua_State *L)
 
 	luaL_checktype(L, 1, LUA_TTABLE);
 
-	auto port = Luae::requireField<int>(L, 1, "port");
-	auto family = Luae::requireField<int>(L, 1, "family");
-	auto host = Luae::requireField<std::string>(L, 1, "host");
+	auto port = LuaeTable::require<int>(L, 1, "port");
+	auto family = LuaeTable::require<int>(L, 1, "family");
+	auto host = LuaeTable::require<std::string>(L, 1, "host");
 	auto type = SOCK_STREAM;
 
 	lua_createtable(L, 0, 0);

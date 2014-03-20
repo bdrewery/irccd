@@ -48,11 +48,11 @@ private:
 	using Lock	= std::unique_lock<std::mutex>;
 	using Mutex	= std::mutex;
 	using Cond	= std::condition_variable;
-	using Reader	= std::function<void (const LuaValue &)>;
+	using Reader	= std::function<void (const LuaeValue &)>;
 
 public:
 	using Ptr	= std::shared_ptr<Pipe>;
-	using Queue	= std::queue<LuaValue>;
+	using Queue	= std::queue<LuaeValue>;
 
 private:
 	static Pipes	pipes;
@@ -96,21 +96,21 @@ public:
 	 *
 	 * @param value the value to push
 	 */
-	void push(const LuaValue &value);
+	void push(const LuaeValue &value);
 
 	/**
 	 * Get the first value.
 	 *
 	 * @return the first value
 	 */
-	LuaValue first();
+	LuaeValue first();
 
 	/**
 	 * Get the last value.
 	 *
 	 * @return the last value
 	 */
-	LuaValue last();
+	LuaeValue last();
 
 	/**
 	 * Completely clear the queue.

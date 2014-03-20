@@ -42,7 +42,7 @@
 
 #if defined(WITH_LUA)
 #  include "Plugin.h"
-#  include "IrcEvent.h"
+#  include "EventQueue.h"
 #endif
 
 namespace irccd {
@@ -450,7 +450,7 @@ int Irccd::run()
 {
 #if defined(WITH_LUA)
 	// Start the IrcEvent thread
-	IrcEvent::start();
+	EventQueue::start();
 #endif
 
 	openConfig();
@@ -493,7 +493,7 @@ void Irccd::stop()
 	Server::flush();
 
 #if defined(WITH_LUA)
-	IrcEvent::stop();
+	EventQueue::stop();
 #endif
 }
 

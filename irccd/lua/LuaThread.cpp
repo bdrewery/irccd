@@ -120,8 +120,8 @@ int l_threadNew(lua_State *L)
 
 	np = 0;
 	for (int i = 2; i <= lua_gettop(L); ++i) {
-		LuaValue v = LuaValue::copy(L, i);
-		LuaValue::push(*thread, v);
+		LuaeValue v = LuaeValue::copy(L, i);
+		LuaeValue::push(*thread, v);
 		++ np;
 	}
 

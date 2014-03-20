@@ -1,5 +1,5 @@
 /*
- * IrcEventTopic.h -- on channel topic changes
+ * CommandQueue.cpp -- client command queue
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
@@ -16,35 +16,58 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRC_EVENT_TOPIC_H_
-#define _IRC_EVENT_TOPIC_H_
-
-#include <string>
-
-#include "IrcEvent.h"
-#include "Server.h"
+#include "CommandQueue.h"
 
 namespace irccd {
 
-class IrcEventTopic : public IrcEvent {
-private:
-	Server::Ptr	m_server;
-	std::string	m_who;
-	std::string	m_channel;
-	std::string	m_topic;
+void CommandQueue::routine()
+{
+	while (m_alive) {
+		Function command;
 
-public:
-	IrcEventTopic(Server::Ptr server,
-		      const std::string &who,
-		      const std::string &channel,
-		      const std::string &topic);
+		{
+			Lock lock(m_mutex);
 
-	/**
-	 * @copydoc IrcEvent::action
-	 */
-	virtual void action(lua_State *L) const;
-};
+			m_cond.wait(lock, [&] () -> bool {
+				return !m_alive || m_cmds.size() > 0;
+			});
+
+			if (!m_alive)
+				continue;
+
+			command = m_cmds.front();
+		}
+
+		if (command()) {
+			Lock lock(m_mutex);
+
+			m_cmds.pop();
+		}
+	}
+}
+
+CommandQueue::CommandQueue()
+{
+	m_alive = true;
+	m_thread = Thread(&CommandQueue::routine, this);
+}
+
+CommandQueue::~CommandQueue()
+{
+	m_alive = false;
+	m_cond.notify_one();
+
+	try {
+		m_thread.join();
+	} catch (...) { }
+}
+
+void CommandQueue::add(Function command)
+{
+	Lock lock(m_mutex);
+
+	m_cmds.push(command);
+	m_cond.notify_one();
+}
 
 } // !irccd
-
-#endif // !_IRC_EVENT_TOPIC_H_

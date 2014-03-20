@@ -33,11 +33,11 @@ namespace {
 
 void extractChannels(lua_State *L, Server::Info &info)
 {
-	LUA_STACK_CHECKBEGIN(L);
+	LUAE_STACK_CHECKBEGIN(L);
 
-	if (Luae::typeField(L, 1, "channels") == LUA_TTABLE) {
+	if (LuaeTable::type(L, 1, "channels") == LUA_TTABLE) {
 		lua_getfield(L, 1, "channels");
-		Luae::readTable(L, -1, [&] (lua_State *L, int, int tvalue) {
+		LuaeTable::read(L, -1, [&] (lua_State *L, int, int tvalue) {
 			Server::Channel c;
 
 			// Standard string channel (no password)
@@ -63,12 +63,12 @@ void extractChannels(lua_State *L, Server::Info &info)
 		lua_pop(L, 1);
 	}
 
-	LUA_STACK_CHECKEQUALS(L);
+	LUAE_STACK_CHECKEQUALS(L);
 }
 
 void extractIdentity(lua_State *L, Server::Identity &ident)
 {
-	LUA_STACK_CHECKBEGIN(L);
+	LUAE_STACK_CHECKBEGIN(L);
 
 	std::unordered_map<std::string, std::string *> table {
 		{ "name",		&ident.name	},
@@ -79,9 +79,9 @@ void extractIdentity(lua_State *L, Server::Identity &ident)
 
 	std::string key;
 
-	if (Luae::typeField(L, 1, "identity") == LUA_TTABLE) {
+	if (LuaeTable::type(L, 1, "identity") == LUA_TTABLE) {
 		lua_getfield(L, 1, "identity");
-		Luae::readTable(L, -1, [&] (lua_State *L, int tkey, int tvalue) {
+		LuaeTable::read(L, -1, [&] (lua_State *L, int tkey, int tvalue) {
 			if (tkey == LUA_TSTRING && tvalue == LUA_TSTRING) {
 				key = lua_tostring(L, -2);
 
@@ -92,12 +92,12 @@ void extractIdentity(lua_State *L, Server::Identity &ident)
 		lua_pop(L, 1);
 	}
 
-	LUA_STACK_CHECKEQUALS(L);
+	LUAE_STACK_CHECKEQUALS(L);
 }
 
 void pushIdentity(lua_State *L, const Server::Identity &ident)
 {
-	LUA_STACK_CHECKBEGIN(L);
+	LUAE_STACK_CHECKBEGIN(L);
 
 	// Create the identity table result
 	lua_createtable(L, 5, 5);
@@ -114,12 +114,12 @@ void pushIdentity(lua_State *L, const Server::Identity &ident)
 	lua_pushstring(L, ident.realname.c_str());
 	lua_setfield(L, -2, "realname");
 
-	LUA_STACK_CHECKEND(L, - 1);
+	LUAE_STACK_CHECKEND(L, - 1);
 }
 
 void pushGeneralInfo(lua_State *L, const Server::Info &info, const Server::Options &options)
 {
-	LUA_STACK_CHECKBEGIN(L);
+	LUAE_STACK_CHECKBEGIN(L);
 
 	lua_pushlstring(L, info.name.c_str(), info.name.length());
 	lua_setfield(L, -2, "name");
@@ -139,12 +139,12 @@ void pushGeneralInfo(lua_State *L, const Server::Info &info, const Server::Optio
 	lua_pushlstring(L, options.commandChar.c_str(), options.commandChar.length());
 	lua_setfield(L, -2, "commandChar");
 
-	LUA_STACK_CHECKEQUALS(L);
+	LUAE_STACK_CHECKEQUALS(L);
 }
 
 void pushChannels(lua_State *L, const Server::ChanList &list)
 {
-	LUA_STACK_CHECKBEGIN(L);
+	LUAE_STACK_CHECKBEGIN(L);
 
 	int i = 0;
 
@@ -157,7 +157,7 @@ void pushChannels(lua_State *L, const Server::ChanList &list)
 		lua_settable(L, -3);
 	}
 
-	LUA_STACK_CHECKEND(L, - 1);
+	LUAE_STACK_CHECKEND(L, - 1);
 }
 
 /* --------------------------------------------------------
@@ -168,7 +168,7 @@ void pushChannels(lua_State *L, const Server::ChanList &list)
 
 int l_getChannels(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 
 	Luae::deprecate(L, "getChannels", "info");
 	pushChannels(L, s->getChannels());
@@ -178,7 +178,7 @@ int l_getChannels(lua_State *L)
 
 int l_getIdentity(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto &ident = s->getIdentity();
 
 	Luae::deprecate(L, "getIdentity", "info");
@@ -189,7 +189,7 @@ int l_getIdentity(lua_State *L)
 
 int l_getInfo(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto &info = s->getInfo();
 	auto &options = s->getOptions();
 
@@ -202,7 +202,7 @@ int l_getInfo(lua_State *L)
 
 int l_getName(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 
 	Luae::deprecate(L, "getName", "info");
 	lua_pushstring(L, s->getInfo().name.c_str());
@@ -214,7 +214,7 @@ int l_getName(lua_State *L)
 
 int l_cnotice(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto channel = luaL_checkstring(L, 2);
 	auto notice = luaL_checkstring(L, 3);
 
@@ -225,9 +225,9 @@ int l_cnotice(lua_State *L)
 
 int l_info(lua_State *L)
 {
-	LUA_STACK_CHECKBEGIN(L);
+	LUAE_STACK_CHECKBEGIN(L);
 
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 
 	lua_newtable(L);
 
@@ -242,14 +242,14 @@ int l_info(lua_State *L)
 	pushIdentity(L, s->getIdentity());
 	lua_setfield(L, -2, "identity");
 
-	LUA_STACK_CHECKEND(L, - 1);
+	LUAE_STACK_CHECKEND(L, - 1);
 
 	return 1;
 }
 
 int l_invite(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto nick = luaL_checkstring(L, 2);
 	auto channel = luaL_checkstring(L, 3);
 
@@ -260,7 +260,7 @@ int l_invite(lua_State *L)
 
 int l_join(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto channel = luaL_checkstring(L, 2);
 	auto password = "";
 
@@ -275,7 +275,7 @@ int l_join(lua_State *L)
 
 int l_kick(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto target = luaL_checkstring(L, 2);
 	auto channel = luaL_checkstring(L, 3);
 	auto reason = "";
@@ -291,7 +291,7 @@ int l_kick(lua_State *L)
 
 int l_me(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto target = luaL_checkstring(L, 2);
 	auto message = luaL_checkstring(L, 3);
 
@@ -302,7 +302,7 @@ int l_me(lua_State *L)
 
 int l_mode(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto channel = luaL_checkstring(L, 2);
 	auto mode = luaL_checkstring(L, 3);
 
@@ -313,7 +313,7 @@ int l_mode(lua_State *L)
 
 int l_names(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto channel = luaL_checkstring(L, 2);
 
 	s->names(channel);
@@ -323,7 +323,7 @@ int l_names(lua_State *L)
 
 int l_nick(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto newnick = luaL_checkstring(L, 2);
 
 	s->nick(newnick);
@@ -333,7 +333,7 @@ int l_nick(lua_State *L)
 
 int l_notice(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto nickname = luaL_checkstring(L, 2);
 	auto notice = luaL_checkstring(L, 3);
 
@@ -344,7 +344,7 @@ int l_notice(lua_State *L)
 
 int l_part(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto channel = luaL_checkstring(L, 2);
 	auto reason = "";
 
@@ -358,7 +358,7 @@ int l_part(lua_State *L)
 
 int l_query(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto target = luaL_checkstring(L, 2);
 	auto message = luaL_checkstring(L, 3);
 
@@ -369,7 +369,7 @@ int l_query(lua_State *L)
 
 int l_say(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto target = luaL_checkstring(L, 2);
 	auto message = luaL_checkstring(L, 3);
 
@@ -380,7 +380,7 @@ int l_say(lua_State *L)
 
 int l_send(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto message = luaL_checkstring(L, 2);
 
 	s->send(message);
@@ -390,7 +390,7 @@ int l_send(lua_State *L)
 
 int l_topic(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto channel = luaL_checkstring(L, 2);
 	auto topic = luaL_checkstring(L, 3);
 
@@ -401,7 +401,7 @@ int l_topic(lua_State *L)
 
 int l_umode(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto mode = luaL_checkstring(L, 2);
 
 	s->umode(mode);
@@ -411,7 +411,7 @@ int l_umode(lua_State *L)
 
 int l_whois(lua_State *L)
 {
-	auto s = Luae::getShared<Server>(L, 1, ServerType);
+	auto s = LuaeClass::getShared<Server>(L, 1, ServerType);
 	auto target = luaL_checkstring(L, 2);
 
 	s->whois(target);
@@ -421,7 +421,7 @@ int l_whois(lua_State *L)
 
 int l_tostring(lua_State *L)
 {
-	auto server = Luae::getShared<Server>(L, 1, ServerType);
+	auto server = LuaeClass::getShared<Server>(L, 1, ServerType);
 	std::ostringstream oss;
 
 	oss << "Server " << server->getInfo().name;
@@ -437,8 +437,8 @@ int l_tostring(lua_State *L)
 
 int l_equals(lua_State *L)
 {
-	auto s1 = Luae::getShared<Server>(L, 1, ServerType);
-	auto s2 = Luae::getShared<Server>(L, 2, ServerType);
+	auto s1 = LuaeClass::getShared<Server>(L, 1, ServerType);
+	auto s2 = LuaeClass::getShared<Server>(L, 2, ServerType);
 
 	lua_pushboolean(L, s1 == s2);
 
@@ -452,43 +452,44 @@ int l_gc(lua_State *L)
 	return 0;
 }
 
-const luaL_Reg serverMethods[] = {
-/*
- * DEPRECATION:	1.2-001
- *
- * These functions has been deprecated in favor of Server:info().
- */
+const LuaeClass::Def serverDef {
+	ServerType,
+	{
+	/*
+	 * DEPRECATION:	1.2-001
+	 *
+	 * These functions has been deprecated in favor of Server:info().
+	 */
 #if defined(COMPAT_1_1)
-	{ "getChannels",	l_getChannels		},
-	{ "getIdentity",	l_getIdentity		},
-	{ "getInfo",		l_getInfo		},
-	{ "getName",		l_getName		},
+		{ "getChannels",	l_getChannels		},
+		{ "getIdentity",	l_getIdentity		},
+		{ "getInfo",		l_getInfo		},
+		{ "getName",		l_getName		},
 #endif
-	{ "cnotice",		l_cnotice		},
-	{ "info",		l_info			},
-	{ "invite",		l_invite		},
-	{ "join",		l_join			},
-	{ "kick",		l_kick			},
-	{ "me",			l_me			},
-	{ "mode",		l_mode			},
-	{ "names",		l_names			},
-	{ "nick",		l_nick			},
-	{ "notice",		l_notice		},
-	{ "part",		l_part			},
-	{ "query",		l_query			},
-	{ "say",		l_say			},
-	{ "send",		l_send			},
-	{ "topic",		l_topic			},
-	{ "umode",		l_umode			},
-	{ "whois",		l_whois			},
-	{ nullptr,		nullptr			}
-};
-
-const luaL_Reg serverMt[] = {
-	{ "__tostring",		l_tostring		},
-	{ "__eq",		l_equals		},
-	{ "__gc",		l_gc			},
-	{ nullptr,		nullptr			}
+		{ "cnotice",		l_cnotice		},
+		{ "info",		l_info			},
+		{ "invite",		l_invite		},
+		{ "join",		l_join			},
+		{ "kick",		l_kick			},
+		{ "me",			l_me			},
+		{ "mode",		l_mode			},
+		{ "names",		l_names			},
+		{ "nick",		l_nick			},
+		{ "notice",		l_notice		},
+		{ "part",		l_part			},
+		{ "query",		l_query			},
+		{ "say",		l_say			},
+		{ "send",		l_send			},
+		{ "topic",		l_topic			},
+		{ "umode",		l_umode			},
+		{ "whois",		l_whois			},
+	},
+	{
+		{ "__tostring",		l_tostring		},
+		{ "__eq",		l_equals		},
+		{ "__gc",		l_gc			},
+	},
+	nullptr
 };
 
 int l_find(lua_State *L)
@@ -499,7 +500,7 @@ int l_find(lua_State *L)
 	try {
 		Server::Ptr server = Server::get(name);
 
-		Luae::pushShared<Server>(L, server, ServerType);
+		LuaeClass::pushShared<Server>(L, server, ServerType);
 
 		ret = 1;
 	} catch (std::out_of_range ex) {
@@ -522,9 +523,9 @@ int l_connect(lua_State *L)
 
 	luaL_checktype(L, 1, LUA_TTABLE);
 
-	info.name	= Luae::requireField<std::string>(L, 1, "name");
-	info.host	= Luae::requireField<std::string>(L, 1, "host");
-	info.port	= Luae::requireField<int>(L, 1, "port");
+	info.name	= LuaeTable::require<std::string>(L, 1, "name");
+	info.host	= LuaeTable::require<std::string>(L, 1, "host");
+	info.port	= LuaeTable::require<int>(L, 1, "port");
 
 	if (Server::has(info.name)) {
 		lua_pushboolean(L, false);
@@ -534,8 +535,8 @@ int l_connect(lua_State *L)
 		return 2;
 	}
 
-	if (Luae::typeField(L, 1, "password") == LUA_TSTRING)
-		info.password = Luae::requireField<std::string>(L, 1, "password");
+	if (LuaeTable::type(L, 1, "password") == LUA_TSTRING)
+		info.password = LuaeTable::require<std::string>(L, 1, "password");
 
 	extractChannels(L, info);
 	extractIdentity(L, ident);
@@ -562,12 +563,7 @@ int luaopen_server(lua_State *L)
 {
 	luaL_newlib(L, functions);
 
-	// Create the metatable for Server
-	luaL_newmetatable(L, ServerType);
-	luaL_setfuncs(L, serverMt, 0);
-	luaL_newlib(L, serverMethods);
-	lua_setfield(L, -2, "__index");
-	lua_pop(L, 1);
+	LuaeClass::create(L, serverDef);
 
 	return 1;
 }

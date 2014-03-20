@@ -50,7 +50,7 @@ int l_info(lua_State *L)
 			auto state = plugin->getState();
 
 			lua_getfield(state, LUA_REGISTRYINDEX, Process::FieldInfo);
-			LuaValue::push(L, LuaValue::copy(state, -1));
+			LuaeValue::push(L, LuaeValue::copy(state, -1));
 			lua_pop(state, 1);
 
 			ret = 1;

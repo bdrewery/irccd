@@ -31,6 +31,7 @@
 
 #include <config.h>
 
+#include "CommandQueue.h"
 #include "IrcSession.h"
 
 #include "server/ServerState.h"
@@ -176,6 +177,7 @@ private:
 
 	Mutex		m_lock;			//! lock for client operation
 	IrcSession	m_session;		//! the current session
+	CommandQueue	m_queue;		//! command queue
 
 	// State
 	ServerState::Ptr m_state;		//! the current state
@@ -186,40 +188,6 @@ protected:
 	Identity	m_identity;		//! identity to use
 	Options		m_options;		//! some options
 	RetryInfo	m_reco;			//! reconnection settings
-
-	void prepare(std::ostringstream &oss, const char *fmt)
-	{
-		while (*fmt) {
-			if (*fmt == '%') {
-				if (fmt[1] == '%')
-					++fmt;
-				else
-				    throw std::runtime_error("invalid format string: missing arguments");
-			}
-			
-			oss << *fmt++;
-		}
-	}
-
-	template<typename T, typename... Args>
-	void prepare(std::ostringstream &oss, const char *fmt, const T &value, Args... args)
-	{
-		while (*fmt) {
-			if (*fmt == '%') {
-				if (fmt[1] == '%')
-					++fmt;
-				else {
-					oss << value;
-					prepare(oss, fmt + 1, args...);
-					return;
-				}
-			}
-
-			oss << *fmt++;
-		}
-		
-		throw std::runtime_error("extra arguments provided to printf");
-	}
 
 public:
 	/**
@@ -405,27 +373,6 @@ public:
 	 * Request for stopping the server.
 	 */
 	void stop();
-
-	/**
-	 * Send a raw message with a kind of printf(3) arguments. Just specify
-	 * where you want to pass a parameter with %. Two %% write one %.
-	 *
-	 * This function effectively call send afterwards.
-	 *
-	 * @param fmt the format
-	 * @param args the arguments
-	 * @throw std::runtime_error on parameter errors
-	 * @see send
-	 */
-	template <typename... Args>
-	void send(const char *fmt, Args&&... args)
-	{
-		std::ostringstream oss;
-
-		prepare(oss, fmt, std::forward<Args>(args)...);
-
-		send(oss.str());
-	}
 
 	/* ------------------------------------------------
 	 * IRC commands

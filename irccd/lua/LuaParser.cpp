@@ -23,6 +23,15 @@
 
 namespace irccd {
 
+template <>
+struct Luae::Convert<Section> {
+	static const bool supported = true;
+
+	static void push(lua_State *, const Section &)
+	{
+	}
+};
+
 /* --------------------------------------------------------
  * LuaParser implementation
  * -------------------------------------------------------- */
@@ -321,7 +330,7 @@ int l_parserPairs(lua_State *L)
 {
 	auto p = Luae::toType<ParserWrapper *>(L, 1, ParserType);
 
-	Luae::pushPairs(L, SectionType, p->m_parser);
+	Luae::pushIterator(L, p->m_parser);
 
 	return 1;
 }

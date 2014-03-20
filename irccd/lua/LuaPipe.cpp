@@ -45,7 +45,7 @@ int l_pipePush(lua_State *L)
 	if (lua_gettop(L) == 1)
 		return luaL_error(L, "expected one argument");
 
-	auto v = LuaValue::copy(L, 2);
+	auto v = LuaeValue::copy(L, 2);
 	p->push(v);
 
 	return 0;
@@ -55,7 +55,7 @@ int l_pipeFirst(lua_State *L)
 {
 	auto p = *Luae::toType<Pipe::Ptr *>(L, 1, PIPE_TYPE);
 
-	LuaValue::push(L, p->first());
+	LuaeValue::push(L, p->first());
 
 	return 1;
 }
@@ -64,7 +64,7 @@ int l_pipeLast(lua_State *L)
 {
 	auto p = *Luae::toType<Pipe::Ptr *>(L, 1, PIPE_TYPE);
 
-	LuaValue::push(L, p->last());
+	LuaeValue::push(L, p->last());
 
 	return 1;
 }
@@ -91,7 +91,7 @@ int l_pipeList(lua_State *L)
 	 * Currently we only provide iterator method but this may
 	 * change in the future.
 	 */
-	p->list([&] (const LuaValue &v) {
+	p->list([&] (const LuaeValue &v) {
 		q.push(v);
 	});
 
@@ -101,11 +101,11 @@ int l_pipeList(lua_State *L)
 		Pipe::Queue *q = reinterpret_cast<Pipe::Queue *>(lua_touserdata(L, lua_upvalueindex(1)));
 
 		if (q->empty()) {
-			q->~queue<LuaValue>();
+			q->~queue<LuaeValue>();
 			return 0;
 		}
 
-		LuaValue::push(L, q->front());
+		LuaeValue::push(L, q->front());
 		q->pop();
 
 		return 1;

@@ -1,5 +1,5 @@
 /*
- * IrcEventMode.cpp -- on user mode change
+ * EventQueue.h -- plugin event queue
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
@@ -16,22 +16,40 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "IrcEventMode.h"
+#ifndef _EVENT_QUEUE_H_
+#define _EVENT_QUEUE_H_
+
+#include "Plugin.h"
 
 namespace irccd {
 
-IrcEventMode::IrcEventMode(Server::Ptr server,
-			   const std::string &who,
-			   const std::string &mode)
-	: m_server(server)
-	, m_who(who)
-	, m_mode(mode)
-{
-}
+class EventQueue {
+public:
+	using Function	= std::function<void (Plugin::Ptr)>;
+	using Cond	= std::condition_variable;
+	using Mutex	= std::mutex;
+	using Lock	= std::unique_lock<Mutex>;
+	using Queue	= std::queue<Function>;
+	using Thread	= std::thread;
+	using Atomic	= std::atomic_bool;
 
-void IrcEventMode::action(lua_State *L) const
-{
-	call(L, "onUserMode", m_server, m_who, m_mode);
-}
+private:
+	static Atomic	alive;
+	static Mutex	mutex;
+	static Cond	cond;
+	static Queue	queue;
+	static Thread	thread;
+
+	static void routine();
+
+public:
+	static void start();
+
+	static void stop();
+
+	static void add(const Function &event);
+};
 
 } // !irccd
+
+#endif // !_EVENT_QUEUE_H_

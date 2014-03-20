@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <config.h>
+
 #include "lua/LuaIrccd.h"
 #include "lua/LuaLogger.h"
 #include "lua/LuaFS.h"
@@ -93,7 +95,7 @@ void Process::initialize(Ptr process, const Info &info)
 
 	auto L = static_cast<lua_State *>(*process);
 
-	LUA_STACK_CHECKBEGIN(L);
+	LUAE_STACK_CHECKBEGIN(L);
 
 	/* Plugin information */
 	lua_createtable(L, 0, 0);
@@ -107,28 +109,28 @@ void Process::initialize(Ptr process, const Info &info)
 	setField(info.license, "license");
 
 	lua_setfield(L, LUA_REGISTRYINDEX, FieldInfo);
-	LUA_STACK_CHECKEQUALS(L);
+	LUAE_STACK_CHECKEQUALS(L);
 }
 
 Process::Info Process::info(lua_State *L)
 {
-	LUA_STACK_CHECKBEGIN(L);
+	LUAE_STACK_CHECKBEGIN(L);
 	Process::Info info;
 
 	lua_getfield(L, LUA_REGISTRYINDEX, FieldInfo);
 	if (lua_type(L, -1) != LUA_TTABLE)
 		luaL_error(L, "uninitialized state");
 
-	info.name = Luae::requireField<std::string>(L, -1, "name");
-	info.path = Luae::requireField<std::string>(L, -1, "path");
-	info.home = Luae::requireField<std::string>(L, -1, "home");
-	info.author = Luae::requireField<std::string>(L, -1, "author");
-	info.comment = Luae::requireField<std::string>(L, -1, "comment");
-	info.version = Luae::requireField<std::string>(L, -1, "version");
-	info.license = Luae::requireField<std::string>(L, -1, "license");
+	info.name = LuaeTable::require<std::string>(L, -1, "name");
+	info.path = LuaeTable::require<std::string>(L, -1, "path");
+	info.home = LuaeTable::require<std::string>(L, -1, "home");
+	info.author = LuaeTable::require<std::string>(L, -1, "author");
+	info.comment = LuaeTable::require<std::string>(L, -1, "comment");
+	info.version = LuaeTable::require<std::string>(L, -1, "version");
+	info.license = LuaeTable::require<std::string>(L, -1, "license");
 
 	lua_pop(L, 1);
-	LUA_STACK_CHECKEQUALS(L);
+	LUAE_STACK_CHECKEQUALS(L);
 
 	return info;
 }

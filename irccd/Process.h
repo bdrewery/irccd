@@ -56,7 +56,7 @@ public:
 	};
 
 private:
-	LuaState	m_state;
+	LuaeState	m_state;
 
 	Process() = default;
 
