@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <sstream>
+
 #include <config.h>
 
 #include "Logger.h"
@@ -134,12 +136,19 @@ void Luae::deprecate(lua_State *L,
 {
 	LUA_STACK_CHECKBEGIN(L);
 
+	std::ostringstream oss;
+
 	luaL_where(L, 1);
 	auto where = lua_tostring(L, -1);
 	lua_pop(L, 1);
 
-	Logger::warn("%s: warning, usage of deprecated function `%s'', please use `%s'",
-	    where, old.c_str(), repl.c_str());
+	oss << where << ": warning, usage of deprecated function `";
+	oss << old << "'";
+
+	if (repl.length() > 0)
+		oss << ", please use `" << repl << "'";
+
+	Logger::warn(oss.str());
 
 	LUA_STACK_CHECKEQUALS(L);
 }

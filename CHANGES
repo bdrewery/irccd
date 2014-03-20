@@ -3,7 +3,8 @@ IRC Client Daemon CHANGES
 
 CURRENT
 ---------------------------------------
-  * The function thread.new can now take a file path as argument.
+  * The function thread.new can now take a file path as argument,
+  * New address system for irccd.socket.
 
 1.1.2 February 26, 2014
 ---------------------------------------
