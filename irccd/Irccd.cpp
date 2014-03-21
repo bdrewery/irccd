@@ -271,11 +271,13 @@ void Irccd::readListeners(const Parser &config)
 void Irccd::extractInternet(const Section &s, int type)
 {
 	std::vector<std::string> protocols;
-	std::string address, family;
+	std::string address = "*", family;
 	int port;
 	bool ipv4 = false, ipv6 = false;
 
-	address = s.getOption<std::string>("address");
+	if (s.hasOption("address"))
+		address = s.getOption<std::string>("address");
+
 	family = s.getOption<std::string>("family");
 	port = s.getOption<int>("port");
 
