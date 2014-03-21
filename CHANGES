@@ -1,6 +1,11 @@
 IRC Client Daemon CHANGES
 =========================
 
+CURRENT-RELEASE
+---------------------------------------
+ * Fix default internet socket address,
+ * Remove listener disconnection errors.
+
 1.1.2 February 26, 2014
 ---------------------------------------
  * Fix the example in roulette documentation,
