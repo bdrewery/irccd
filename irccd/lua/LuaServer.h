@@ -24,8 +24,7 @@
  * @brief Lua bindings for class Server
  */
 
-#include <lua.hpp>
-
+#include "Luae.h"
 #include "Server.h"
 
 namespace irccd {
@@ -34,6 +33,51 @@ namespace irccd {
  * The server name object.
  */
 extern const char *ServerType;
+
+/**
+ * @brief Overload for \ref Server
+ */
+template <>
+struct Luae::Convert<Server::Ptr> {
+	static const bool hasPush	= true;	//!< push supported
+	static const bool hasGet	= true; //!< get supported
+	static const bool hasCheck	= true; //!< check supported
+
+	/**
+	 * Push a server.
+	 *
+	 * @param L the Lua state
+	 * @param server the server
+	 */
+	static void push(lua_State *L, const Server::Ptr &server)
+	{
+		LuaeClass::pushShared<Server>(L, server, ServerType);
+	}
+
+	/**
+	 * Get a shared object.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return the server
+	 */
+	static Server::Ptr get(lua_State *L, int index)
+	{
+		return *Luae::toType<Server::Ptr *>(L, index);
+	}
+
+	/**
+	 * Check for a shared object.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return the server
+	 */
+	static Server::Ptr check(lua_State *L, int index)
+	{
+		return LuaeClass::getShared<Server>(L, index, ServerType);
+	}
+};
 
 /**
  * The open function.

@@ -153,14 +153,13 @@ int l_stat(lua_State *L)
 	return 1;
 }
 
-const Luae::Reg functions[] = {
+const Luae::Reg functions {
 	{ "mkdir",		l_mkdir		},
 	{ "opendir",		l_opendir	},
 	{ "exists",		l_exists	},
 	{ "basename",		l_basename	},
 	{ "dirname",		l_dirname	},
 	{ "stat",		l_stat		},
-	{ nullptr,		nullptr		}
 };
 
 /* --------------------------------------------------------

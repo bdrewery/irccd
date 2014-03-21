@@ -267,9 +267,81 @@ void LuaeClass::create(lua_State *L, const Def &def)
 	LUAE_STACK_CHECKEQUALS(L);
 }
 
+void LuaeClass::testShared(lua_State *L, int index, const char *meta)
+{
+	LUAE_STACK_CHECKBEGIN(L);
+
+	luaL_checktype(L, index, LUA_TUSERDATA);
+	if (!luaL_getmetafield(L, index, FieldName))
+		luaL_error(L, "invalid type cast");
+
+	// Get the class name
+	const char *name = lua_tostring(L, -1);
+	lua_pop(L, 1);
+
+	bool found(false);
+
+	if (std::string(name) == std::string(meta)) {
+		found = true;
+	} else {
+		if (!luaL_getmetafield(L, index, FieldParents))
+			luaL_error(L, "invalid type cast");
+
+		lua_pushnil(L);
+		while (lua_next(L, -2) != 0) {
+			if (lua_type(L, -2) != LUA_TSTRING) {
+				lua_pop(L, 1);
+				continue;
+			}
+
+			auto tn = lua_tostring(L, -1);
+			if (std::string(tn) == std::string(meta))
+				found = true;
+
+			lua_pop(L, 1);
+		}
+
+		lua_pop(L, 1);
+	}
+
+	if (!found)
+		luaL_error(L, "invalid cast from `%s' to `%s'", name, meta);
+
+	LUAE_STACK_CHECKEQUALS(L);
+}
+
 /* --------------------------------------------------------
  * LuaeEnum
  * -------------------------------------------------------- */
+
+void LuaeEnum::create(lua_State *L, const Def &def)
+{
+	LUAE_STACK_CHECKBEGIN(L);
+
+	lua_createtable(L, 0, 0);
+
+	for (auto p : def) {
+		lua_pushinteger(L, p.second);
+		lua_setfield(L, -2, p.first);
+	}
+
+	LUAE_STACK_CHECKEND(L, - 1);
+}
+
+void LuaeEnum::create(lua_State *L, const Def &def, int index)
+{
+	LUAE_STACK_CHECKBEGIN(L);
+
+	if (index < 0)
+		-- index;
+
+	for (auto p : def) {
+		lua_pushinteger(L, p.second);
+		lua_setfield(L, index, p.first);
+	}
+
+	LUAE_STACK_CHECKEQUALS(L);
+}
 
 void LuaeEnum::create(lua_State *L,
 		      const Def &def,
@@ -278,11 +350,7 @@ void LuaeEnum::create(lua_State *L,
 {
 	LUAE_STACK_CHECKBEGIN(L);
 
-	lua_createtable(L, 0, def.size());
-	for (auto p : def) {
-		lua_pushinteger(L, p.second);
-		lua_setfield(L, -2, p.first.c_str());
-	}
+	create(L, def);
 
 	if (index < 0)
 		-- index;
@@ -300,7 +368,7 @@ void LuaeEnum::push(lua_State *L, const Def &def, int value)
 	for (auto p : def) {
 		if (value & p.second) {
 			lua_pushinteger(L, p.second);
-			lua_setfield(L, -2, p.first.c_str());
+			lua_setfield(L, -2, p.first);
 		}
 	}
 

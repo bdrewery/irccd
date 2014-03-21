@@ -68,87 +68,84 @@ enum class Attribute {
 	Reverse		= '\x16'
 };
 
-std::unordered_map<std::string, Color> colors {
-	{ "White",		Color::White			},
-	{ "Black",		Color::Black			},
-	{ "Blue",		Color::Blue			},
-	{ "Green",		Color::Green			},
-	{ "Red",		Color::Red			},
-	{ "Brown",		Color::Brown			},
-	{ "Purple",		Color::Purple			},
-	{ "Orange",		Color::Orange			},
-	{ "Yellow",		Color::Yellow			},
-	{ "LightGreen",		Color::LightGreen		},
-	{ "Cyan",		Color::Cyan			},
-	{ "LightCyan",		Color::LightCyan		},
-	{ "LightBlue",		Color::LightBlue		},
-	{ "Pink",		Color::Pink			},
-	{ "Grey",		Color::Grey			},
-	{ "LightGrey",		Color::LightGrey		}
+LuaeEnum::Def colors {
+	{ "White",		static_cast<int>(Color::White)			},
+	{ "Black",		static_cast<int>(Color::Black)			},
+	{ "Blue",		static_cast<int>(Color::Blue)			},
+	{ "Green",		static_cast<int>(Color::Green)			},
+	{ "Red",		static_cast<int>(Color::Red)			},
+	{ "Brown",		static_cast<int>(Color::Brown)			},
+	{ "Purple",		static_cast<int>(Color::Purple)			},
+	{ "Orange",		static_cast<int>(Color::Orange)			},
+	{ "Yellow",		static_cast<int>(Color::Yellow)			},
+	{ "LightGreen",		static_cast<int>(Color::LightGreen)		},
+	{ "Cyan",		static_cast<int>(Color::Cyan)			},
+	{ "LightCyan",		static_cast<int>(Color::LightCyan)		},
+	{ "LightBlue",		static_cast<int>(Color::LightBlue)		},
+	{ "Pink",		static_cast<int>(Color::Pink)			},
+	{ "Grey",		static_cast<int>(Color::Grey)			},
+	{ "LightGrey",		static_cast<int>(Color::LightGrey)		}
 };
 
-std::unordered_map<std::string, Attribute> attributes {
-	{ "Bold",		Attribute::Bold			},
-	{ "Color",		Attribute::Color		},
-	{ "Italic",		Attribute::Italic		},
-	{ "StrikeThrough",	Attribute::StrikeThrough	},
-	{ "Reset",		Attribute::Reset		},
-	{ "Underline",		Attribute::Underline		},
-	{ "Underline2",		Attribute::Underline2		},
-	{ "Reverse",		Attribute::Reverse		}
+LuaeEnum::Def attributes {
+	{ "Bold",		static_cast<int>(Attribute::Bold)		},
+	{ "Color",		static_cast<int>(Attribute::Color)		},
+	{ "Italic",		static_cast<int>(Attribute::Italic)		},
+	{ "StrikeThrough",	static_cast<int>(Attribute::StrikeThrough)	},
+	{ "Reset",		static_cast<int>(Attribute::Reset)		},
+	{ "Underline",		static_cast<int>(Attribute::Underline)		},
+	{ "Underline2",		static_cast<int>(Attribute::Underline2)		},
+	{ "Reverse",		static_cast<int>(Attribute::Reverse)		}
 };
 
-std::unordered_map<std::string, int> convertFlags {
-	{ "ConvertEnv",		Util::ConvertEnv		},
-	{ "ConvertDate",	Util::ConvertDate		},
-	{ "ConvertHome",	Util::ConvertHome		},
+LuaeEnum::Def convertFlags {
+	{ "ConvertEnv",		Util::ConvertEnv				},
+	{ "ConvertDate",	Util::ConvertDate				},
+	{ "ConvertHome",	Util::ConvertHome				},
 };
 
 int l_convert(lua_State *L)
 {
-	auto line = luaL_checkstring(L, 1);
+	auto line = Luae::check<std::string>(L, 1);
 	auto flags = 0;
 	Util::Args args;
 
 	/* Parse table */
-	luaL_checktype(L, 2, LUA_TTABLE);
+	Luae::checktype(L, 2, LUA_TTABLE);
 	LuaeTable::read(L, 2, [&] (lua_State *L, int tkey, int tvalue) {
 		if (tkey != LUA_TSTRING || tvalue != LUA_TSTRING)
 			return;
 
-		std::string key = luaL_checkstring(L, -2);
+		auto key = Luae::check<std::string>(L, -2);
 
 		// Handle date in a special case
 		if (key == "date")
-			args.timestamp = luaL_checkinteger(L, -1);
+			args.timestamp = Luae::check<int>(L, -1);
 		else if (key.size() == 1)
-			args.keywords[key[0]] = luaL_checkstring(L, -1);
+			args.keywords[key[0]] = Luae::check<std::string>(L, -1);
 	});
 
-	if (lua_gettop(L) >= 3)
+	if (Luae::gettop(L) >= 3)
 		flags = LuaeEnum::get(L, 3);
 
-	auto result = Util::convert(line, args, flags);
-
-	lua_pushlstring(L, result.c_str(), result.size());
+	Luae::push(L, Util::convert(line, args, flags));
 
 	return 1;
 }
 
 int l_date(lua_State *L)
 {
-	if (lua_gettop(L) >= 1) {
-		int tm = luaL_checkinteger(L, 1);
-		new (L, DateType) Date(tm);
-	} else
-		new (L, DateType) Date();
+	if (Luae::gettop(L) >= 1)
+		Luae::push(L, Date(Luae::get<int>(L, 1)));
+	else
+		Luae::push(L, Date());
 
 	return 1;
 }
 
 int l_format(lua_State *L)
 {
-	std::string text = luaL_checkstring(L, 1);
+	std::string text = Luae::check<std::string>(L, 1);
 	std::ostringstream oss;
 
 	luaL_checktype(L, 2, LUA_TTABLE);
@@ -171,50 +168,51 @@ int l_format(lua_State *L)
 	 * Attributes can be a table or a single attribute. If it's a table
 	 * we iterate it and add every attributes.
 	 */
-	lua_getfield(L, 2, "attrs");
+	Luae::getfield(L, 2, "attrs");
 
-	if (lua_type(L, -1) == LUA_TTABLE) {
-		int length = lua_rawlen(L, -1);
+	if (Luae::type(L, -1) == LUA_TTABLE) {
+		int length = Luae::rawlen(L, -1);
 
 		for (int i = 1; i <= length; ++i) {
-			lua_pushinteger(L, i);
-			lua_gettable(L, -2);
+			Luae::push(L, i);
+			Luae::gettable(L, -2);
 
-			oss << static_cast<char>(lua_tointeger(L, -1));
-			lua_pop(L, 1);
+			oss << static_cast<char>(Luae::get<int>(L, -1));
+			Luae::pop(L, 1);
 		}
-	} else if (lua_type(L, -1) == LUA_TNUMBER)
-		oss << static_cast<char>(lua_tointeger(L, -1));
+	} else if (Luae::type(L, -1) == LUA_TNUMBER)
+		oss << static_cast<char>(Luae::get<int>(L, -1));
 
-	lua_pop(L, 1);
+	Luae::pop(L, 1);
+
 	oss << text << static_cast<char>(Attribute::Reset);
-	lua_pushstring(L, oss.str().c_str());
+	Luae::push(L, oss.str());
 
 	return 1;
 }
 
 int l_splituser(lua_State *L)
 {
-	auto target = luaL_checkstring(L, 1);
+	auto target = Luae::check<std::string>(L, 1);
 	char nick[32];
 
 	std::memset(nick, 0, sizeof (nick));
 
-	irc_target_get_nick(target, nick, sizeof (nick) -1);
-	lua_pushstring(L, nick);
+	irc_target_get_nick(target.c_str(), nick, sizeof (nick) -1);
+	Luae::push(L, nick);
 
 	return 1;
 }
 
 int l_splithost(lua_State *L)
 {
-	auto target = luaL_checkstring(L, 1);
+	auto target = Luae::check<std::string>(L, 1);
 	char host[32];
 
 	std::memset(host, 0, sizeof (host));
 
-	irc_target_get_host(target, host, sizeof (host) -1);
-	lua_pushstring(L, host);
+	irc_target_get_host(target.c_str(), host, sizeof (host) -1);
+	Luae::push(L, host);
 
 	return 1;
 }
@@ -234,65 +232,41 @@ const luaL_Reg functions[] = {
 
 int l_dateCalendar(lua_State *L)
 {
-	Date *date;
-	time_t stamp;
-	struct tm tm;
-
-	date = Luae::toType<Date *>(L, 1, DateType);
-	stamp = date->getTimestamp();
-	tm = *localtime(&stamp);
+	auto date = Luae::get<Date *>(L, 1);
+	auto stamp = date->getTimestamp();
+	auto tm = *localtime(&stamp);
 
 	// Create the table result
-	lua_createtable(L, 8, 8);
+	LuaeTable::create(L, 0, 8);
 
-	lua_pushinteger(L, tm.tm_sec);
-	lua_setfield(L, -2, "seconds");
-
-	lua_pushinteger(L, tm.tm_min);
-	lua_setfield(L, -2, "minutes");
-
-	lua_pushinteger(L, tm.tm_hour);
-	lua_setfield(L, -2, "hours");
-
-	lua_pushinteger(L, tm.tm_mon + 1);
-	lua_setfield(L, -2, "month");
-
-	lua_pushinteger(L, tm.tm_year + 1900);
-	lua_setfield(L, -2, "year");
-
-	lua_pushinteger(L, tm.tm_mday);
-	lua_setfield(L, -2, "monthDay");
-
-	lua_pushinteger(L, tm.tm_wday);
-	lua_setfield(L, -2, "weekDay");
-
-	lua_pushinteger(L, tm.tm_yday);
-	lua_setfield(L, -2, "yearDay");
+	LuaeTable::set(L, -1, "seconds", static_cast<int>(tm.tm_sec));
+	LuaeTable::set(L, -1, "minutes", static_cast<int>(tm.tm_min));
+	LuaeTable::set(L, -1, "hours", static_cast<int>(tm.tm_hour));
+	LuaeTable::set(L, -1, "month", static_cast<int>(tm.tm_mon + 1));
+	LuaeTable::set(L, -1, "year", static_cast<int>(tm.tm_year + 1900));
+	LuaeTable::set(L, -1, "monthDay", static_cast<int>(tm.tm_mday));
+	LuaeTable::set(L, -1, "weekDay", static_cast<int>(tm.tm_wday));
+	LuaeTable::set(L, -1, "yearDay", static_cast<int>(tm.tm_yday));
 
 	return 1;
 }
 
 int l_dateFormat(lua_State *L)
 {
-	Date *d;
-	std::string fmt, result;
-
 	// Extract parameters
-	d = Luae::toType<Date *>(L, 1, DateType);
-	fmt = luaL_checkstring(L, 2);
+	auto d = Luae::check<Date *>(L, 1);
+	auto fmt = Luae::check<std::string>(L, 2);
 
-	result = d->format(fmt);
-	lua_pushstring(L, result.c_str());
+	Luae::push(L, d->format(fmt));
 
 	return 1;
 }
 
 int l_dateTimestamp(lua_State *L)
 {
-	Date *date;
+	auto date = Luae::check<Date *>(L, 1);
 
-	date = Luae::toType<Date *>(L, 1, DateType);
-	lua_pushinteger(L, (lua_Integer)date->getTimestamp());
+	Luae::push(L, static_cast<int>(date->getTimestamp()));
 
 	return 1;
 }
@@ -303,58 +277,51 @@ int l_dateTimestamp(lua_State *L)
 
 int l_dateEquals(lua_State *L)
 {
-	Date *d1, *d2;
+	auto d1 = Luae::check<Date *>(L, 1);
+	auto d2 = Luae::check<Date *>(L, 2);
 
-	d1 = Luae::toType<Date *>(L, 1, DateType);
-	d2 = Luae::toType<Date *>(L, 2, DateType);
-
-	lua_pushboolean(L, *d1 == *d2);
+	Luae::push(L, *d1 == *d2);
 
 	return 1;
 }
 
 int l_dateGc(lua_State *L)
 {
-	Luae::toType<Date *>(L, 1, DateType)->~Date();
+	Luae::check<Date *>(L, 1)->~Date();
 
 	return 0;
 }
 
 int l_dateLe(lua_State *L)
 {
-	Date *d1, *d2;
+	auto d1 = Luae::check<Date *>(L, 1);
+	auto d2 = Luae::check<Date *>(L, 2);
 
-	d1 = Luae::toType<Date *>(L, 1, DateType);
-	d2 = Luae::toType<Date *>(L, 2, DateType);
-
-	lua_pushboolean(L, *d1 <= *d2);
+	Luae::push(L, *d1 <= *d2);
 
 	return 1;
 }
 
 int l_dateTostring(lua_State *L)
 {
-	Date *date;
+	auto date = Luae::toType<Date *>(L, 1, DateType);
 
-	date = Luae::toType<Date *>(L, 1, DateType);
 	lua_pushfstring(L, "%d", date->getTimestamp());
 
 	return 1;
 }
 
-const luaL_Reg dateMethodsList[] = {
+const Luae::Reg dateMethodsList {
 	{ "calendar",		l_dateCalendar		},
 	{ "format",		l_dateFormat		},
-	{ "timestamp",		l_dateTimestamp		},
-	{ nullptr,		nullptr			}
+	{ "timestamp",		l_dateTimestamp		}
 };
 
-const luaL_Reg dateMtList[] = {
+const Luae::Reg dateMtList {
 	{ "__eq",		l_dateEquals		},
 	{ "__gc",		l_dateGc		},
 	{ "__le",		l_dateLe		},
-	{ "__tostring",		l_dateTostring		},
-	{ nullptr,		nullptr			}
+	{ "__tostring",		l_dateTostring		}
 };
 
 }
@@ -364,40 +331,23 @@ const char *DateType = "Date";
 int luaopen_util(lua_State *L)
 {
 	// Util library
-	luaL_newlib(L, functions);
+	Luae::newlib(L, functions);
 
 	// Date type
-	luaL_newmetatable(L, DateType);
-	luaL_setfuncs(L, dateMtList, 0);
-	luaL_newlib(L, dateMethodsList);
-	lua_setfield(L, -2, "__index");
-	lua_pop(L, 1);
+	Luae::newmetatable(L, DateType);
+	Luae::setfuncs(L, dateMtList);
+	Luae::newlib(L, dateMethodsList);
+	Luae::setfield(L, -2, "__index");
+	Luae::pop(L, 1);
 
 	// Colors
-	lua_createtable(L, 0, 0);
-
-	for (auto p : colors) {
-		lua_pushinteger(L, static_cast<int>(p.second));
-		lua_setfield(L, -2, p.first.c_str());
-	}
-
-	lua_setfield(L, -2, "color");
+	LuaeEnum::create(L, colors, -1, "color");
 
 	// Attributes
-	lua_createtable(L, 0, 0);
-
-	for (auto p : attributes) {
-		lua_pushinteger(L, static_cast<int>(p.second));
-		lua_setfield(L, -2, p.first.c_str());
-	}
-
-	lua_setfield(L, -2, "attribute");
+	LuaeEnum::create(L, attributes, -1, "attribute");
 
 	// Conversion flags
-	for (auto p : convertFlags) {
-		lua_pushinteger(L, p.second);
-		lua_setfield(L, -2, p.first.c_str());
-	}
+	LuaeEnum::create(L, convertFlags, -1);
 
 	return 1;
 }

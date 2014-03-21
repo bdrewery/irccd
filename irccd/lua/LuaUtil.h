@@ -36,10 +36,14 @@ extern const char *DateType;
 
 /**
  * @brief Overload for Date
+ *
+ * The object is used as userdata.
  */
 template <>
 struct Luae::Convert<Date> {
-	static const bool supported = true;	//!< is supported
+	static const bool hasPush	= true;	//!< push supported
+	static const bool hasGet	= true;	//!< get supported
+	static const bool hasCheck	= true;	//!< check supported
 
 	/**
 	 * Push the date.
@@ -59,9 +63,9 @@ struct Luae::Convert<Date> {
 	 * @param index the index
 	 * @return a boolean
 	 */
-	static Date get(lua_State *L, int index)
+	static Date *get(lua_State *L, int index)
 	{
-		return *Luae::toType<Date *>(L, index);
+		return Luae::toType<Date *>(L, index);
 	}
 
 	/**
@@ -70,9 +74,9 @@ struct Luae::Convert<Date> {
 	 * @param L the Lua state
 	 * @param index the index
 	 */
-	static Date check(lua_State *L, int index)
+	static Date *check(lua_State *L, int index)
 	{
-		return *Luae::toType<Date *>(L, index, DateType);
+		return Luae::toType<Date *>(L, index, DateType);
 	}
 };
 

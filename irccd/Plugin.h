@@ -40,55 +40,11 @@ namespace irccd {
 class IrcEvent;
 
 /**
- * @brief Overload for string list
- */
-template <>
-struct Luae::Convert<std::vector<std::string>> {
-	static const bool supported = true;	//!< is supported
-
-	/**
-	 * Push a string list.
-	 *
-	 * @param L the Lua state
-	 * @param value the value
-	 */
-	static void push(lua_State *L, const std::vector<std::string> &value)
-	{
-		int i = 0;
-
-		lua_createtable(L, value.size(), 0);
-		for (const auto &s : value) {
-			lua_pushlstring(L, s.c_str(), s.length());
-			lua_rawseti(L, -2, ++i);
-		}
-	}
-};
-
-/**
- * @brief Overload for \ref Server
- */
-template <>
-struct Luae::Convert<Server::Ptr> {
-	static const bool supported = true;	//!< is supported
-
-	/**
-	 * Push a server.
-	 *
-	 * @param L the Lua state
-	 * @param server the server
-	 */
-	static void push(lua_State *L, const Server::Ptr &server)
-	{
-		LuaeClass::pushShared<Server>(L, server, ServerType);
-	}
-};
-
-/**
  * @brief Overload for IrcWhois
  */
 template <>
 struct Luae::Convert<IrcWhois> {
-	static const bool supported = true;	//!< is supported
+	static const bool hasPush = true;	//!< is supported
 
 	/**
 	 * Push the whois information.

@@ -124,7 +124,9 @@ public:
 	 */
 	template <typename T>
 	struct Convert {
-		static const bool supported = false;	//!< true if supported
+		static const bool hasPush	= false;	//!< has push function
+		static const bool hasGet	= false;	//!< has get function
+		static const bool hasCheck	= false;	//!< has check function
 	};
 
 	/**
@@ -276,10 +278,7 @@ public:
 	static inline void newlib(lua_State *L, const luaL_Reg *functions)
 	{
 		lua_createtable(L, 0, 0);
-		for (auto p = functions; p->name != nullptr; ++p) {
-			lua_pushcfunction(L, p->func);
-			lua_setfield(L, -2, p->name);
-		}
+		luaL_setfuncs(L, functions, 0);
 	}
 
 	/**
@@ -433,21 +432,21 @@ public:
 	}
 
 	/**
-	 * Push a value to Lua.
-	 *
+	 * Push an object into the stack.
+	 * 
 	 * @param L the Lua state
-	 * @param value the value
+	 * @param value the value to push
 	 */
 	template <typename T>
 	static void push(lua_State *L, const T &value)
 	{
-		static_assert(Convert<T>::supported, "type not supported");
+		static_assert(Convert<T>::hasPush, "type not supported");
 
 		Convert<T>::push(L, value);
 	}
 
 	/**
-	 * Overload for string literals.
+	 * Overload for string literals and arrays.
 	 *
 	 * @param L the Lua state
 	 * @param s the string
@@ -472,30 +471,169 @@ public:
 	}
 
 	/**
-	 * Get a value from Lua. The type are not checked
+	 * Set the value at the top of stack to the ntn value at the value
+	 * at the given index.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @param n the nth index
+	 */
+	static inline void rawset(lua_State *L, int index, int n)
+	{
+		lua_rawseti(L, index, n);
+	}
+
+	/**
+	 * Like rawseti with a void pointer as the key.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @param n the nth index
+	 */
+	static inline void rawset(lua_State *L, int index, const void *ptr)
+	{
+		lua_rawsetp(L, index, ptr);
+	}
+
+	/**
+	 * Get the value length.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @return the raw length
+	 */
+	static inline int rawlen(lua_State *L, int index)
+	{
+		return lua_rawlen(L, index);
+	}
+
+	/**
+	 * Set the value at the given index. Top value is the value to assign
+	 * key is just below the value.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 */
+	static inline void gettable(lua_State *L, int index)
+	{
+		lua_gettable(L, index);
+	}
+
+	/**
+	 * Does t[n] where n is the value at the top of the stack and the key
+	 * just below the value.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 */
+	static inline void settable(lua_State *L, int index)
+	{
+		lua_settable(L, index);
+	}
+
+	/**
+	 * Get a userdata. The Convert overload must return a pointer to the
+	 * object.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 */
+	template <typename T>
+	static T get(lua_State *L,
+		    int index,
+		    typename std::enable_if<std::is_pointer<T>::value>::type * = 0,
+		    typename std::enable_if<std::is_class<typename std::remove_pointer<T>::type>::value>::type * = 0)
+	{
+		static_assert(Convert<typename std::remove_pointer<T>::type>::hasGet, "type not supported");
+
+		return Convert<typename std::remove_pointer<T>::type>::get(L, index);
+	}
+
+	/**
+	 * Get an object value from Lua.
 	 *
 	 * @param L the Lua state
 	 * @param index the value index
 	 * @return the value
 	 */
 	template <typename T>
-	static T get(lua_State *L, int index)
+	static T get(lua_State *L,
+		     int index,
+		     typename std::enable_if<std::is_class<T>::value>::type * = 0)
 	{
-		static_assert(Convert<T>::supported, "type not supported");
+		static_assert(Convert<T>::hasGet, "type not supported");
 
 		return Convert<T>::get(L, index);
 	}
 
 	/**
-	 * Get the value at the index, raise a Lua error on failures.
+	 * Get a primitive value from Lua.
 	 *
 	 * @param L the Lua state
 	 * @param index the value index
 	 * @return the value
 	 */
 	template <typename T>
-	static T check(lua_State *L, int index)
+	static T get(lua_State *L,
+		     int index,
+		     typename std::enable_if<std::is_fundamental<T>::value>::type * = 0)
 	{
+		static_assert(Convert<T>::hasGet, "type not supported");
+
+		return Convert<T>::get(L, index);
+	}
+
+	/**
+	 * Get a userdata. The Convert overload must return a pointer to the
+	 * object.
+	 *
+	 * If the object is not the correct type, calls luaL_error.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 */
+	template <typename T>
+	static T check(lua_State *L,
+		       int index,
+		       typename std::enable_if<std::is_pointer<T>::value>::type * = 0,
+		       typename std::enable_if<std::is_class<typename std::remove_pointer<T>::type>::value>::type * = 0)
+	{
+		static_assert(Convert<typename std::remove_pointer<T>::type>::hasCheck, "type not supported");
+
+		return Convert<typename std::remove_pointer<T>::type>::check(L, index);
+	}
+
+	/**
+	 * Check for an object value from Lua.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @return the value
+	 */
+	template <typename T>
+	static T check(lua_State *L,
+		       int index,
+		       typename std::enable_if<std::is_class<T>::value>::type * = 0)
+	{
+		static_assert(Convert<T>::hasCheck, "type not supported");
+
+		return Convert<T>::check(L, index);
+	}
+
+	/**
+	 * Check for a primitive value from Lua.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @return the value
+	 */
+	template <typename T>
+	static T check(lua_State *L,
+		       int index,
+		       typename std::enable_if<std::is_fundamental<T>::value>::type * = 0)
+	{
+		static_assert(Convert<T>::hasCheck, "type not supported");
+
 		return Convert<T>::check(L, index);
 	}
 
@@ -618,7 +756,7 @@ public:
  */
 template <>
 struct Luae::Convert<std::nullptr_t> {
-	static const bool supported = true;	//!< is supported
+	static const bool hasPush	= true;	//!< push supported
 
 	/**
 	 * Push nil.
@@ -638,7 +776,9 @@ struct Luae::Convert<std::nullptr_t> {
  */
 template <>
 struct Luae::Convert<bool> {
-	static const bool supported = true;	//!< is supported
+	static const bool hasPush	= true;	//!< push supported
+	static const bool hasGet	= true;	//!< get supported
+	static const bool hasCheck	= true;	//!< check supported
 
 	/**
 	 * Push the boolean value.
@@ -680,7 +820,9 @@ struct Luae::Convert<bool> {
  */
 template <>
 struct Luae::Convert<int> {
-	static const bool supported = true;	//!< is supported
+	static const bool hasPush	= true;	//!< push supported
+	static const bool hasGet	= true;	//!< get supported
+	static const bool hasCheck	= true;	//!< check supported
 
 	/**
 	 * Push the integer value.
@@ -722,7 +864,9 @@ struct Luae::Convert<int> {
  */
 template <>
 struct Luae::Convert<double> {
-	static const bool supported = true;	//!< is supported
+	static const bool hasPush	= true;	//!< push supported
+	static const bool hasGet	= true;	//!< get supported
+	static const bool hasCheck	= true;	//!< check supported
 
 	/**
 	 * Push the double value.
@@ -764,7 +908,9 @@ struct Luae::Convert<double> {
  */
 template <>
 struct Luae::Convert<std::string> {
-	static const bool supported = true;	//!< is supported
+	static const bool hasPush	= true;	//!< push supported
+	static const bool hasGet	= true;	//!< get supported
+	static const bool hasCheck	= true;	//!< check supported
 
 	/**
 	 * Push the string value.
@@ -802,11 +948,135 @@ struct Luae::Convert<std::string> {
 };
 
 /**
+ * @brief Overload for string list
+ */
+template <>
+struct Luae::Convert<std::vector<std::string>> {
+	static const bool hasPush	= true;	//!< push supported
+	static const bool hasGet	= true; //!< get supported
+	static const bool hasCheck	= true; //!< check supported
+
+	/**
+	 * Push a string list.
+	 *
+	 * @param L the Lua state
+	 * @param value the value
+	 */
+	static void push(lua_State *L, const std::vector<std::string> &value)
+	{
+		int i = 0;
+
+		lua_createtable(L, value.size(), 0);
+		for (const auto &s : value) {
+			lua_pushlstring(L, s.c_str(), s.length());
+			lua_rawseti(L, -2, ++i);
+		}
+	}
+
+	/**
+	 * Get a string list.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return the list
+	 */
+	static std::vector<std::string> get(lua_State *L, int index)
+	{
+		std::vector<std::string> list;
+
+		if (index < 0)
+			-- index;
+
+		lua_pushnil(L);
+		while (lua_next(L, index)) { 
+			if (lua_type(L, -1) == LUA_TSTRING)
+				list.push_back(lua_tostring(L, -1));
+
+			lua_pop(L, 1);
+		}
+
+		return list;
+	}
+
+	static std::vector<std::string> check(lua_State *L, int index)
+	{
+		luaL_checktype(L, index, LUA_TTABLE);
+
+		return get(L, index);
+	}
+};
+
+/**
+ * @brief Overload for std::u32string.
+ */
+template <>
+struct Luae::Convert<std::u32string> {
+	static const bool hasPush	= true;	//!< push supported
+	static const bool hasGet	= true;	//!< get supported
+	static const bool hasCheck	= true;	//!< check supported
+
+	/**
+	 * Push the string value.
+	 *
+	 * @param L the Lua state
+	 * @param value the value
+	 */
+	static void push(lua_State *L, const std::string &str)
+	{
+		lua_createtable(L, str.size(), 0);
+		for (size_t i = 0; i < str.size(); ++i) {
+			lua_pushinteger(L, str[i]);
+			lua_rawseti(L, -2, i + 1);
+		}
+	}
+
+	/**
+	 * Get a string.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return a boolean
+	 */
+	static std::u32string get(lua_State *L, int index)
+	{
+		std::u32string result;
+
+		if (index < 0)
+			-- index;
+
+		lua_pushnil(L);
+		while (lua_next(L, index)) { 
+			if (lua_type(L, -1) == LUA_TNUMBER)
+				result.push_back(lua_tonumber(L, -1));
+
+			lua_pop(L, 1);
+		}
+
+		return result;
+	}
+
+	/**
+	 * Check for a string.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 */
+	static std::u32string check(lua_State *L, int index)
+	{
+		luaL_checktype(L, index, LUA_TTABLE);
+
+		return get(L, index);
+	}
+};
+
+/**
  * @brief Overload for const char *
  */
 template <>
 struct Luae::Convert<const char *> {
-	static const bool supported = true;	//!< is supported
+	static const bool hasPush	= true;	//!< push supported
+	static const bool hasGet	= true;	//!< get supported
+	static const bool hasCheck	= true;	//!< check supported
 
 	/**
 	 * Push the string value.
@@ -1058,6 +1328,16 @@ public:
 	}
 
 	/**
+	 * Check if the object at index is suitable for cast to meta. Calls
+	 * luaL_error if not.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @param meta the object name
+	 */
+	static void testShared(lua_State *L, int index, const char *meta);
+
+	/**
 	 * Get an object from Lua that was previously push with pushShared.
 	 *
 	 * @param L the Lua state
@@ -1068,45 +1348,7 @@ public:
 	template <typename T>
 	static Ptr<T> getShared(lua_State *L, int index, const char *meta)
 	{
-		LUAE_STACK_CHECKBEGIN(L);
-
-		luaL_checktype(L, index, LUA_TUSERDATA);
-		if (!luaL_getmetafield(L, index, FieldName))
-			luaL_error(L, "invalid type cast");
-
-		// Get the class name
-		const char *name = lua_tostring(L, -1);
-		lua_pop(L, 1);
-
-		bool found(false);
-
-		if (std::string(name) == std::string(meta)) {
-			found = true;
-		} else {
-			if (!luaL_getmetafield(L, index, FieldParents))
-				luaL_error(L, "invalid type cast");
-
-			lua_pushnil(L);
-			while (lua_next(L, -2) != 0) {
-				if (lua_type(L, -2) != LUA_TSTRING) {
-					lua_pop(L, 1);
-					continue;
-				}
-
-				auto tn = lua_tostring(L, -1);
-				if (std::string(tn) == std::string(meta))
-					found = true;
-
-				lua_pop(L, 1);
-			}
-	
-			lua_pop(L, 1);
-		}
-
-		if (!found)
-			luaL_error(L, "invalid cast from `%s' to `%s'", name, meta);
-
-		LUAE_STACK_CHECKEQUALS(L);
+		testShared(L, index, meta);
 		
 		return *static_cast<Ptr<T> *>(lua_touserdata(L, index));
 	}
@@ -1220,30 +1462,6 @@ public:
 	}
 
 	/**
-	 * Set a class object to a table.
-	 *
-	 * @param L the Lua state
-	 * @param index the table index
-	 * @param name the field name
-	 * @param meta the metatable name
-	 * @param o the object
-	 */
-	template <typename T>
-	static void setShared(lua_State *L,
-			      int index,
-			      const std::string &name,
-			      const std::string &meta,
-			      LuaeClass::Ptr<T> o)
-	{
-		LUAE_STACK_CHECKBEGIN(L);
-
-		LuaeClass::pushShared(L, o, meta);
-		Luae::setfield(L, (index < 0) ? --index : index, name);
-
-		LUAE_STACK_CHECKEQUALS(L);
-	}
-
-	/**
 	 * Require a field from a table.
 	 *
 	 * @param L the Lua state
@@ -1326,10 +1544,27 @@ public:
 	/**
 	 * The definition of the enumeration
 	 */
-	using Def = std::unordered_map<std::string, int>;
+	using Def = std::unordered_map<const char *, int>;
 
 	/**
-	 * Bind the enumeration as a table into an existing table.
+	 * Bind the enumeration and keep it at the top of the stack.
+	 *
+	 * @param @ the Lua state
+	 * @param def the definition
+	 */
+	static void create(lua_State *L, const Def &def);
+
+	/**
+	 * Set the enumeration values to an existing table.
+	 *
+	 * @param L the Lua state
+	 * @param def the definition
+	 * @param index the table index
+	 */
+	static void create(lua_State *L, const Def &def, int index);
+
+	/**
+	 * Create the enumeration table and set it to a table field.
 	 *
 	 * @param L the Lua state
 	 * @param def the definition
