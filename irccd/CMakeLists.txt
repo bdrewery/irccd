@@ -108,6 +108,8 @@ if(WITH_LUA52 OR WITH_LUAJIT)
 			Plugin.h
 			Process.cpp
 			Process.h
+			System.cpp
+			System.h
 			Test.cpp
 			Test.h
 			Thread.cpp
