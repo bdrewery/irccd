@@ -120,6 +120,22 @@
 	<td class="name" nowrap><a href="#tostring">tostring (seq)</a></td>
 	<td class="summary">Convert the UCS-4 table to UTF-8 string.</td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#toupper">toupper (str)</a></td>
+	<td class="summary">Convert the UTF-8 string to upper case.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#toupper">toupper (array)</a></td>
+	<td class="summary">Convert the unicode array to upper case.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tolower">tolower (str)</a></td>
+	<td class="summary">Convert the UTF-8 string to lower case.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tolower">tolower (array)</a></td>
+	<td class="summary">Convert the unicode array to lower case.</td>
+	</tr>
 </table>
 
 <br/>
@@ -259,6 +275,110 @@
     <ol>
         <li>
         the UTF-8 string or nil</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "toupper"></a>
+    <strong>toupper (str)</strong>
+    </dt>
+    <dd>
+    Convert the UTF-8 string to upper case.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">str</span>
+         the UTF-8 string
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the UTF-8 upper case string</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "toupper"></a>
+    <strong>toupper (array)</strong>
+    </dt>
+    <dd>
+    Convert the unicode array to upper case.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">array</span>
+         the unicode sequence
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the array unicode upper case string</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "tolower"></a>
+    <strong>tolower (str)</strong>
+    </dt>
+    <dd>
+    Convert the UTF-8 string to lower case.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">str</span>
+         the UTF-8 string
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the UTF-8 lower case string</li>
+        <li>
+        the error message</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "tolower"></a>
+    <strong>tolower (array)</strong>
+    </dt>
+    <dd>
+    Convert the unicode array to lower case.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">array</span>
+         the unicode sequence
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        the array unicode lower case string</li>
         <li>
         the error message</li>
     </ol>

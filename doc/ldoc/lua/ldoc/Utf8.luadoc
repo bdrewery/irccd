@@ -43,3 +43,31 @@ end
 -- @return the error message
 function utf8.tostring(seq)
 end
+
+--- Convert the UTF-8 string to upper case.
+-- @param str the UTF-8 string
+-- @return the UTF-8 upper case string
+-- @return the error message
+function utf8.toupper(str)
+end
+
+--- Convert the unicode array to upper case.
+-- @param array the unicode sequence
+-- @return the array unicode upper case string
+-- @return the error message
+function utf8.toupper(array)
+end
+
+--- Convert the UTF-8 string to lower case.
+-- @param str the UTF-8 string
+-- @return the UTF-8 lower case string
+-- @return the error message
+function utf8.tolower(str)
+end
+
+--- Convert the unicode array to lower case.
+-- @param array the unicode sequence
+-- @return the array unicode lower case string
+-- @return the error message
+function utf8.tolower(array)
+end

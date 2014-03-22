@@ -83,6 +83,132 @@ public:
 	 * @throw std::invalid_argument on invalid sequence
 	 */
 	static std::u32string toucs(const std::string &str);
+
+	/**
+	 * Check if the unicode character is space.
+	 *
+	 * @param c the character
+	 * @return true if space
+	 */
+	static bool isspace(uint32_t c);
+
+	/**
+	 * Check if the unicode character is digit.
+	 *
+	 * @param c the character
+	 * @return true if digit
+	 */
+	static bool isdigit(uint32_t c);
+
+	/**
+	 * Check if the unicode character is letter.
+	 *
+	 * @param c the character
+	 * @return true if letter
+	 */
+	static bool isletter(uint32_t c);
+
+	/**
+	 * Check if the unicode character is upper case.
+	 *
+	 * @param c the character
+	 * @return true if upper case
+	 */
+	static bool isupper(uint32_t c);
+
+	/**
+	 * Check if the unicode character is lower case.
+	 *
+	 * @param c the character
+	 * @return true if lower case
+	 */
+	static bool islower(uint32_t c);
+
+	/**
+	 * Check if the unicode character is title case.
+	 *
+	 * @param c the character
+	 * @return true if title case
+	 */
+	static bool istitle(uint32_t c);
+
+	/**
+	 * Convert to upper case.
+	 *
+	 * @param c the character
+	 * @return the upper case character
+	 */
+	static uint32_t toupper(uint32_t c);
+
+	/**
+	 * Convert to lower case.
+	 *
+	 * @param c the character
+	 * @return the lower case character
+	 */
+	static uint32_t tolower(uint32_t c);
+
+	/**
+	 * Convert to title case.
+	 *
+	 * @param c the character
+	 * @return the title case character
+	 */
+	static uint32_t totitle(uint32_t c);
+
+	/**
+	 * Convert the UTF-8 string to upper case.
+	 *
+	 * @param str the str
+	 * @return the upper case string
+	 */
+	static inline std::string toupper(const std::string &str)
+	{
+		return toutf8(toupper(toucs(str)));
+	}
+
+	/**
+	 * Convert the UCS-4 string to upper case.
+	 *
+	 * @param str the str
+	 * @return the upper case string
+	 */
+	static inline std::u32string toupper(const std::u32string &str)
+	{
+		auto copy = str;
+
+		for (size_t i = 0; i < str.size(); ++i)
+			copy[i] = toupper(str[i]);
+
+		return copy;
+	}
+
+	/**
+	 * Convert the UTF-8 string to lower case.
+	 *
+	 * @param str the str
+	 * @return the lower case string
+	 */
+	static inline std::string tolower(const std::string &str)
+	{
+		return toutf8(tolower(toucs(str)));
+	}
+
+	/**
+	 * Convert the UCS-4 string to lower case.
+	 *
+	 * @param str the str
+	 * @return the lower case string
+	 */
+	static inline std::u32string tolower(const std::u32string &str)
+	{
+		auto copy = str;
+
+		for (size_t i = 0; i < str.size(); ++i)
+			copy[i] = tolower(str[i]);
+
+		return copy;
+	}
 };
 
 } // !irccd

@@ -1425,6 +1425,76 @@ struct Luae::Convert<std::string> {
 };
 
 /**
+ * @brief Overload for std::u32string.
+ */
+template <>
+struct Luae::Convert<std::u32string> {
+	static const bool hasPush	= true;	//!< push supported
+	static const bool hasGet	= true;	//!< get supported
+	static const bool hasCheck	= true;	//!< check supported
+
+	/**
+	 * Push the string value.
+	 *
+	 * @param L the Lua state
+	 * @param str the value
+	 */
+	static void push(lua_State *L, const std::u32string &str)
+	{
+		lua_createtable(L, str.size(), 0);
+		for (size_t i = 0; i < str.size(); ++i) {
+			lua_pushinteger(L, str[i]);
+			lua_rawseti(L, -2, i + 1);
+		}
+	}
+
+	/**
+	 * Get a string.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return a boolean
+	 */
+	static std::u32string get(lua_State *L, int index)
+	{
+		std::u32string result;
+
+		if (lua_type(L, index) == LUA_TNUMBER) {
+			result.push_back(lua_tonumber(L, index));
+		} else if (lua_type(L, index) == LUA_TTABLE) {
+			if (index < 0)
+				-- index;
+
+			lua_pushnil(L);
+			while (lua_next(L, index)) { 
+				if (lua_type(L, -1) == LUA_TNUMBER)
+					result.push_back(lua_tonumber(L, -1));
+
+				lua_pop(L, 1);
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Check for a string.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 */
+	static std::u32string check(lua_State *L, int index)
+	{
+		if (lua_type(L, index) != LUA_TNUMBER &&
+		    lua_type(L, index) != LUA_TTABLE)
+			luaL_error(L, "expected table or number");
+			// NOTREACHED
+
+		return get(L, index);
+	}
+};
+
+/**
  * @brief Overload for string list
  */
 template <>
@@ -1483,69 +1553,6 @@ struct Luae::Convert<std::vector<std::string>> {
 	 * @return the list
 	 */
 	static std::vector<std::string> check(lua_State *L, int index)
-	{
-		luaL_checktype(L, index, LUA_TTABLE);
-
-		return get(L, index);
-	}
-};
-
-/**
- * @brief Overload for std::u32string.
- */
-template <>
-struct Luae::Convert<std::u32string> {
-	static const bool hasPush	= true;	//!< push supported
-	static const bool hasGet	= true;	//!< get supported
-	static const bool hasCheck	= true;	//!< check supported
-
-	/**
-	 * Push the string value.
-	 *
-	 * @param L the Lua state
-	 * @param str the value
-	 */
-	static void push(lua_State *L, const std::string &str)
-	{
-		lua_createtable(L, str.size(), 0);
-		for (size_t i = 0; i < str.size(); ++i) {
-			lua_pushinteger(L, str[i]);
-			lua_rawseti(L, -2, i + 1);
-		}
-	}
-
-	/**
-	 * Get a string.
-	 *
-	 * @param L the Lua state
-	 * @param index the index
-	 * @return a boolean
-	 */
-	static std::u32string get(lua_State *L, int index)
-	{
-		std::u32string result;
-
-		if (index < 0)
-			-- index;
-
-		lua_pushnil(L);
-		while (lua_next(L, index)) { 
-			if (lua_type(L, -1) == LUA_TNUMBER)
-				result.push_back(lua_tonumber(L, -1));
-
-			lua_pop(L, 1);
-		}
-
-		return result;
-	}
-
-	/**
-	 * Check for a string.
-	 *
-	 * @param L the Lua state
-	 * @param index the index
-	 */
-	static std::u32string check(lua_State *L, int index)
 	{
 		luaL_checktype(L, index, LUA_TTABLE);
 

@@ -24,25 +24,25 @@ namespace irccd {
 
 namespace {
 
-int pushArray(lua_State *L, int index)
+int convert(lua_State *L, bool toupper)
 {
-	std::string str = luaL_checkstring(L, index);
-	std::u32string result;
-
 	try {
-		result = Utf8::toucs(str);
-	} catch (std::invalid_argument error) {
-		lua_pushnil(L);
-		lua_pushstring(L, error.what());
+		if (Luae::type(L, 1) == LUA_TTABLE) {
+			if (toupper)
+				Luae::push(L, Utf8::toupper(Luae::check<std::u32string>(L, 1)));
+			else
+				Luae::push(L, Utf8::tolower(Luae::check<std::u32string>(L, 1)));
+		} else {
+			if (toupper)
+				Luae::push(L, Utf8::toupper(Luae::check<std::string>(L, 1)));
+			else
+				Luae::push(L, Utf8::tolower(Luae::check<std::string>(L, 1)));
+		}
+	} catch (const std::invalid_argument &argument) {
+		Luae::push(L, nullptr);
+		Luae::push(L, argument.what());
 
 		return 2;
-	}
-
-	lua_createtable(L, 0, 0);
-
-	for (size_t i = 0; i < result.size(); ++i) {
-		lua_pushinteger(L, result[i]);
-		lua_rawseti(L, -2, i + 1);
 	}
 
 	return 1;
@@ -50,32 +50,32 @@ int pushArray(lua_State *L, int index)
 
 int iterator(lua_State *L)
 {
-	auto i = lua_tointeger(L, lua_upvalueindex(2));
-	auto length = lua_rawlen(L, lua_upvalueindex(1));
+	auto i = Luae::get<int>(L, Luae::upvalueindex(2));
+	auto length = Luae::rawlen(L, Luae::upvalueindex(1));
 
 	if (i - 1 == static_cast<int>(length))
 		return 0;
 
-	lua_rawgeti(L, lua_upvalueindex(1), i);
-	auto value = lua_tonumber(L, -1);
-	lua_pop(L, 1);
+	Luae::rawget(L, Luae::upvalueindex(1), i);
+	auto value = Luae::get<int>(L, -1);
+	Luae::pop(L, 1);
 
-	lua_pushinteger(L, ++i);
-	lua_replace(L, lua_upvalueindex(2));
-	lua_pushinteger(L, value);
+	Luae::push(L, ++i);
+	Luae::replace(L, Luae::upvalueindex(2));
+	Luae::push(L, value);
 
 	return 1;
 }
 
 int l_length(lua_State *L)
 {
-	auto str = luaL_checkstring(L, 1);
+	auto str = Luae::check<std::string>(L, 1);
 
 	try {
-		lua_pushinteger(L, Utf8::length(str));
-	} catch (std::invalid_argument error) {
-		lua_pushnil(L);
-		lua_pushstring(L, error.what());
+		Luae::push(L, static_cast<int>(Utf8::length(str)));
+	} catch (const std::invalid_argument &error) {
+		Luae::push(L, nullptr);
+		Luae::push(L, error.what());
 
 		return 2;
 	}
@@ -85,66 +85,69 @@ int l_length(lua_State *L)
 
 int l_tostring(lua_State *L)
 {
-	std::u32string array;
-	std::string result;
-
-	if (lua_type(L, 1) == LUA_TTABLE) {
-		luaL_checktype(L, 1, LUA_TTABLE);
-
-		LuaeTable::read(L, 1, [&] (lua_State *, int tkey, int tvalue) {
-			if (tkey != LUA_TNUMBER || tvalue != LUA_TNUMBER)
-				luaL_error(L, "invalid UCS-4 string");
-
-			array.push_back(lua_tointeger(L, -1));
-		});
-	} else if (lua_type(L, 1) == LUA_TNUMBER) {
-		array.push_back(luaL_checkinteger(L, 1));
-	} else
-		return luaL_error(L, "expected a table or number");
+	auto array = Luae::check<std::u32string>(L, 1);
 
 	try {
-		result = Utf8::toutf8(array);
-	} catch (std::invalid_argument error) {
-		lua_pushnil(L);
-		lua_pushstring(L, error.what());
+		Luae::push(L, Utf8::toutf8(array));
+	} catch (const std::invalid_argument &error) {
+		Luae::push(L, nullptr);
+		Luae::push(L, error.what());
 
 		return 2;
 	}
-
-	lua_pushlstring(L, result.c_str(), result.length());
 
 	return 1;
 }
 
 int l_toarray(lua_State *L)
 {
-	return pushArray(L, 1);
-}
+	auto array = Luae::check<std::string>(L, 1);
 
-int l_list(lua_State *L)
-{
-	if (pushArray(L, 1) == 2)
+	try {
+		Luae::push(L, Utf8::toucs(array));
+	} catch (const std::invalid_argument &error) {
+		Luae::push(L, nullptr);
+		Luae::push(L, error.what());
+
 		return 2;
-
-	lua_pushinteger(L, 1);
-	lua_pushcclosure(L, iterator, 2);
+	}
 
 	return 1;
 }
 
-const luaL_Reg functions[] = {
+int l_list(lua_State *L)
+{
+	Luae::push(L, Utf8::toucs(Luae::check<std::string>(L, 1)));
+	Luae::push(L, 1);
+	Luae::pushfunction(L, iterator, 2);
+
+	return 1;
+}
+
+int l_toupper(lua_State *L)
+{
+	return convert(L, true);
+}
+
+int l_tolower(lua_State *L)
+{
+	return convert(L, false);
+}
+
+const Luae::Reg functions {
 	{ "length",		l_length	},
 	{ "tostring",		l_tostring	},
 	{ "toarray",		l_toarray	},
 	{ "list",		l_list		},
-	{ nullptr,		nullptr		}
+	{ "toupper",		l_toupper	},
+	{ "tolower",		l_tolower	},
 };
 
 }
 
 int luaopen_utf8(lua_State *L)
 {
-	luaL_newlib(L, functions);
+	Luae::newlib(L, functions);
 
 	return 1;
 }
