@@ -97,6 +97,225 @@
 
 namespace irccd {
 
+/* {{{ LuaeState */
+
+/**
+ * @class LuaeState
+ * @brief Wrapper for lua_State
+ *
+ * This class automatically create a new Lua state and add implicit
+ * cast operator plus RAII destruction.
+ */
+class LuaeState {
+private:
+	struct Deleter {
+		void operator()(lua_State *L)
+		{
+			lua_close(L);
+		}
+	};
+
+	using Ptr = std::unique_ptr<lua_State, Deleter>;
+
+	Ptr m_state;
+
+	void initRegistry();
+
+public:
+	/**
+	 * The field stored into the registry to avoid recreation of shared
+	 * objects.
+	 */
+	static const char *FieldRefs;
+
+	/**
+	 * Deleted copy constructor.
+	 */
+	LuaeState(const LuaeState &) = delete;
+
+	/**
+	 * Deleted copy assignment.
+	 */
+	LuaeState &operator=(const LuaeState &) = delete;
+
+	/**
+	 * Default constructor. Create a new state.
+	 */
+	LuaeState();
+
+	/**
+	 * Use the already created state.
+	 *
+	 * @param L the state to use
+	 */
+	LuaeState(lua_State *L);
+
+	/**
+	 * Move constructor.
+	 *
+	 * @param state the Lua state to move
+	 */
+	LuaeState(LuaeState &&state);
+
+	/**
+	 * Move assignment operator.
+	 *
+	 * @param state the Lua state to move
+	 */
+	LuaeState &operator=(LuaeState &&state);
+
+	/**
+	 * Implicit cast operator for convenient usage to C Lua API.
+	 *
+	 * @return the state as lua_State *
+	 */
+	operator lua_State*();
+};
+
+/* }}} */
+
+/* {{{ LuaeClass */
+
+/**
+ * @class LuaeClass
+ * @brief Support for object oriented programming between C++ and Lua
+ *
+ * This class provides functions for passing and retrieving objects from C++ and
+ * Lua.
+ */
+class LuaeClass {
+public:
+	/**
+	 * Methods for a class.
+	 */
+	using Methods	= std::vector<luaL_Reg>;
+
+	/**
+	 * Smart pointer for Luae objects.
+	 */
+	template <typename T>
+	using Ptr	= std::shared_ptr<T>;
+
+	/**
+	 * @struct Def
+	 * @brief Definition of a class
+	 */
+	struct Def {
+		std::string	name;		//!< metatable name
+		Methods		methods;	//!< methods
+		Methods		metamethods;	//!< metamethods
+		const Def	*parent;	//!< optional parent class
+	};
+
+	/**
+	 * The field stored in the object metatable about the object metatable
+	 * name.
+	 */
+	static const char *FieldName;
+
+	/**
+	 * The field that holds all parent classes. It is used to verify casts.
+	 */
+	static const char *FieldParents;
+
+	/**
+	 * Initialize a new object.
+	 *
+	 * @param L the Lua state
+	 * @param def the definition
+	 */
+	static void create(lua_State *L, const Def &def);
+
+	/**
+	 * Push a shared object to Lua, it also push it to the "__refs"
+	 * table with __mode = "v". That is if we need to push the object
+	 * again we use the same reference so Lua get always the same
+	 * userdata and gain the following benefits:
+	 *
+	 * 1. The user can use the userdata as table key
+	 * 2. A performance gain thanks to less allocations
+	 *
+	 * @param L the Lua state
+	 * @param o the object to push
+	 * @param name the object metatable name
+	 */
+	template <typename T>
+	static void pushShared(lua_State *L, Ptr<T> o, const std::string &name)
+	{
+		LUAE_STACK_CHECKBEGIN(L);
+
+		lua_getfield(L, LUA_REGISTRYINDEX, LuaeState::FieldRefs);
+		assert(lua_type(L, -1) == LUA_TTABLE);
+
+		lua_rawgetp(L, -1, o.get());
+
+		if (lua_type(L, -1) == LUA_TNIL) {
+			lua_pop(L, 1);
+
+			new (L, name.c_str()) std::shared_ptr<T>(o);
+			
+			lua_pushvalue(L, -1);
+			lua_rawsetp(L, -3, o.get());
+		}
+
+		lua_replace(L, -2);
+
+		LUAE_STACK_CHECKEND(L, -1);
+	}
+
+	/**
+	 * Check if the object at index is suitable for cast to meta. Calls
+	 * luaL_error if not.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @param meta the object name
+	 */
+	static void testShared(lua_State *L, int index, const char *meta);
+
+	/**
+	 * Get an object from Lua that was previously push with pushShared.
+	 *
+	 * @param L the Lua state
+	 * @param index the object index
+	 * @param meta the object metatable name
+	 * @return the object
+	 */
+	template <typename T>
+	static Ptr<T> getShared(lua_State *L, int index, const char *meta)
+	{
+		testShared(L, index, meta);
+		
+		return *static_cast<Ptr<T> *>(lua_touserdata(L, index));
+	}
+
+	/**
+	 * Delete the shared pointer at the given index. This function does
+	 * not check if the type is valid for performance reason. And because
+	 * it's usually called in __gc, there is no reason to check.
+	 *
+	 * Also return 0 the __gc method can directly call
+	 * return LuaeClass::deleteShared(...)
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return 0 for convenience
+	 */
+	template <typename T>
+	static int deleteShared(lua_State *L, int index)
+	{
+		LUAE_STACK_CHECKBEGIN(L);
+
+		static_cast<Ptr<T> *>(lua_touserdata(L, index))->~shared_ptr<T>();
+
+		LUAE_STACK_CHECKEQUALS(L);
+
+		return 0;
+	}
+};
+
+/* }}} */
+
 /* {{{ Luae */
 
 /**
@@ -152,6 +371,118 @@ public:
 		{
 		}
 	};
+
+	/**
+	 * Test if the object can be pushed as a userdata. If the object can
+	 * be pushed as a userdata, it must match the following requirements:
+	 *
+	 *	- Copy constructible
+	 *	- IsUserdata overload must have const char *MetatableName
+	 *
+	 * ## Userdata object
+	 *
+	 * The following example code allows the class Object to be pushed
+	 * and get as Lua userdata.
+	 *
+	 * @code
+	 * struct Object { };
+	 *
+	 * template <>
+	 * struct Luae::IsUserdata<Object> : std::true_type {
+	 * 	static const char *MetatableName;
+	 * };
+	 *
+	 * const char *Luae::IsUserdata<Object>::MetatableName = "Object";
+	 *
+	 * int l_push(lua_State *L)
+	 * {
+	 * 	Luae::push(L, Object());
+	 * }
+	 *
+	 * int l_get(lua_State *L)
+	 * {
+	 * 	Object *o = Luae::get<Object>(L, 1);
+	 * }
+	 * @endcode
+	 * @note You don't need to add the pointer type to the get template parameter
+	 *
+	 * ## Custom object
+	 *
+	 * This other example can be used to push custom objects but not as
+	 * userdata. You can use this to push and read tables for instance.
+	 *
+	 * @code
+	 * struct Point {
+	 * 	int x, y;
+	 * };
+	 *
+	 * template <>
+	 * struct Luae::Convert<Point> {
+	 * 	static const bool hasPush = true;
+	 * 	static const bool hasGet = true;
+	 * 	static const bool hasCheck = true;
+	 *
+	 * 	static void push(lua_State *L, const Point &p)
+	 * 	{
+	 * 		lua_createtable(L, 0, 0);
+	 * 		lua_pushinteger(L, p.x);
+	 * 		lua_setfield(L, -2, "x");
+	 * 		lua_pushinteger(L, p.y);
+	 * 		lua_setfield(L, -2, "y");
+	 * 	}
+	 *
+	 * 	static Point get(lua_State *L, int index)
+	 * 	{
+	 * 		Point p;
+	 *
+	 * 		if (lua_type(L, index) == LUA_TTABLE) {
+	 * 			lua_getfield(L, index, "x");
+	 * 			p.x = lua_tonumber(L, -1);
+	 * 			lua_pop(L, 1);
+	 * 			lua_getfield(L, index, "y");
+	 * 			p.y = lua_tonumber(L, -1);
+	 * 			lua_pop(L, 1);
+	 * 		}
+	 *
+	 * 		return p;
+	 * 	}
+	 *
+	 * 	static Point check(lua_State *L, int index)
+	 * 	{
+	 * 		// Do your check
+	 *
+	 * 		return get(L, index);
+	 * 	}
+	 * };
+	 *
+	 * int l_push(lua_State *L)
+	 * {
+	 * 	Luae::push<Point>(L, Point {1, 2});
+	 * }
+	 *
+	 * int l_get(lua_State *L)
+	 * {
+	 * 	Point p = Luae::get<Point>(L, 1);
+	 * }
+	 * @endcode
+	 * @note Here you get a T and not a T *
+	 */
+	template <typename T>
+	struct IsUserdata : std::false_type { };
+
+private:
+	template <typename T>
+	struct IsSharedUserdata : std::false_type { };
+
+	template <typename T>
+	struct IsSharedUserdata<std::shared_ptr<T>> {
+		static const bool value = IsUserdata<T>::value;
+	};
+
+public:
+	/* -------------------------------------------------
+	 * Standard Lua API wrappers
+	 * ------------------------------------------------- */
 
 	/**
 	 * Preload a library, it will be added to package.preload so the
@@ -270,6 +601,17 @@ public:
 	}
 
 	/**
+	 * Push a copy of the value at the top of stack.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 */
+	static inline void pushvalue(lua_State *L, int index)
+	{
+		lua_pushvalue(L, index);
+	}
+
+	/**
 	 * Create a new table and fill it with functions.
 	 *
 	 * @param L the Lua state
@@ -353,6 +695,18 @@ public:
 	}
 
 	/**
+	 * Unref the value from the table.
+	 *
+	 * @param L the Lua state
+	 * @param index the table index
+	 * @param ref the reference
+	 */
+	static inline void unref(lua_State *L, int index, int ref)
+	{
+		luaL_unref(L, index, ref);
+	}
+
+	/**
 	 * Wrapper around pcall, throw instead of returning an error code.
 	 *
 	 * @param L the Lua state
@@ -432,29 +786,15 @@ public:
 	}
 
 	/**
-	 * Push an object into the stack.
-	 * 
-	 * @param L the Lua state
-	 * @param value the value to push
-	 */
-	template <typename T>
-	static void push(lua_State *L, const T &value)
-	{
-		static_assert(Convert<T>::hasPush, "type not supported");
-
-		Convert<T>::push(L, value);
-	}
-
-	/**
-	 * Overload for string literals and arrays.
+	 * Calls a Lua function in non-protected mode.
 	 *
 	 * @param L the Lua state
-	 * @param s the string
+	 * @param np the number of parameters
+	 * @param nr the number of return values
 	 */
-	template <size_t N>
-	static void push(lua_State *L, const char (&s)[N])
+	static inline void call(lua_State *L, int np = 0, int nr = 0)
 	{
-		push<const char *>(L, s);
+		lua_call(L, np, nr);
 	}
 
 	/**
@@ -488,11 +828,34 @@ public:
 	 *
 	 * @param L the Lua state
 	 * @param index the value index
-	 * @param n the nth index
+	 * @param ptr the pointer key
 	 */
 	static inline void rawset(lua_State *L, int index, const void *ptr)
 	{
 		lua_rawsetp(L, index, ptr);
+	}
+
+	/**
+	 * Like gettable but with raw access.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 */
+	static inline void rawget(lua_State *L, int index)
+	{
+		lua_rawget(L, index);
+	}
+
+	/**
+	 * Like gettable but with raw access.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @param n the nt
+	 */
+	static inline void rawget(lua_State *L, int index, int n)
+	{
+		lua_rawgeti(L, index, n);
 	}
 
 	/**
@@ -532,34 +895,119 @@ public:
 	}
 
 	/**
-	 * Get a userdata. The Convert overload must return a pointer to the
-	 * object.
+	 * Pops the table at the top of the stack and sets it as the metatable
+	 * of the value at the given index.
 	 *
 	 * @param L the Lua state
 	 * @param index the value index
 	 */
-	template <typename T>
-	static T get(lua_State *L,
-		    int index,
-		    typename std::enable_if<std::is_pointer<T>::value>::type * = 0,
-		    typename std::enable_if<std::is_class<typename std::remove_pointer<T>::type>::value>::type * = 0)
+	static inline void setmetatable(lua_State *L, int index)
 	{
-		static_assert(Convert<typename std::remove_pointer<T>::type>::hasGet, "type not supported");
-
-		return Convert<typename std::remove_pointer<T>::type>::get(L, index);
+		lua_setmetatable(L, index);
 	}
 
 	/**
-	 * Get an object value from Lua.
+	 * Get the current stack size.
 	 *
 	 * @param L the Lua state
-	 * @param index the value index
-	 * @return the value
+	 * @return the stack size
+	 */
+	static inline int gettop(lua_State *L)
+	{
+		return lua_gettop(L);
+	}
+
+	/**
+	 * Pop arguments from the stack.
+	 *
+	 * @param L the Lua state
+	 * @param count the number of values to pop
+	 */
+	static inline void pop(lua_State *L, int count)
+	{
+		lua_pop(L, count);
+	}
+
+	/* -------------------------------------------------
+	 * Extended API
+	 * ------------------------------------------------- */
+
+	/**
+	 * Push standard objects. These objects are usually primitives types
+	 * or objects that does not have LuaName field. They are usually
+	 * mapped to the Lua type or tables.
+	 *
+	 * @param L the Lua state
+	 * @param value the value
 	 */
 	template <typename T>
-	static T get(lua_State *L,
-		     int index,
-		     typename std::enable_if<std::is_class<T>::value>::type * = 0)
+	static void push(lua_State *L,
+			 const T &value,
+			 typename std::enable_if<!IsUserdata<T>::value, T>::type * = 0,
+			 typename std::enable_if<!IsSharedUserdata<T>::value, T>::type * = 0)
+	{
+		static_assert(Convert<T>::hasPush, "type not supported");
+
+		Convert<T>::push(L, value);
+	}
+
+	/**
+	 * Push objects as userdata. The object must be copy constructible. This
+	 * overload is enabled when the object has a LuaName static field.
+	 *
+	 * @param L the Lua state
+	 * @param value the value
+	 */
+	template <typename T>
+	static void push(lua_State *L,
+			 const T &value,
+			 typename std::enable_if<IsUserdata<T>::value, T>::type * = 0)
+	{
+		new (L, IsUserdata<T>::MetatableName) T(value);
+	}
+
+	/**
+	 * Works like userdata excepts that it use shared pointer objects. It
+	 * use LuaeClass::pushShared.
+	 *
+	 * @param L the Lua state
+	 * @param value the value
+	 */
+	template <typename T>
+	static void push(lua_State *L,
+			 const T &value,
+			 typename std::enable_if<IsSharedUserdata<T>::value>::type * = 0)
+	{
+		using Type = typename T::element_type;
+
+		LuaeClass::pushShared<Type>(L, value, IsUserdata<Type>::MetatableName);
+	}
+
+	/**
+	 * Overload for string literals and arrays.
+	 *
+	 * @param L the Lua state
+	 * @param s the string
+	 */
+	template <size_t N>
+	static void push(lua_State *L, const char (&s)[N])
+	{
+		push<const char *>(L, s);
+	}
+
+	/**
+	 * Get the data, the type is not checked.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return a T value
+	 */
+	template <typename T>
+	static T
+	get(lua_State *L,
+	    int index,
+	    typename std::enable_if<!IsUserdata<T>::value, T>::type * = 0,
+	    typename std::enable_if<!IsSharedUserdata<T>::value, T>::type * = 0)
 	{
 		static_assert(Convert<T>::hasGet, "type not supported");
 
@@ -567,53 +1015,51 @@ public:
 	}
 
 	/**
-	 * Get a primitive value from Lua.
+	 * Get a userdata object. The type is not checked and just cast.
 	 *
 	 * @param L the Lua state
-	 * @param index the value index
-	 * @return the value
+	 * @param index the index
+	 * @return a T * value
 	 */
 	template <typename T>
-	static T get(lua_State *L,
-		     int index,
-		     typename std::enable_if<std::is_fundamental<T>::value>::type * = 0)
+	static T *
+	get(lua_State *L,
+	    int index,
+	    typename std::enable_if<IsUserdata<T>::value, T *>::type * = 0)
 	{
-		static_assert(Convert<T>::hasGet, "type not supported");
-
-		return Convert<T>::get(L, index);
+		return Luae::toType<T *>(L, index);
 	}
 
 	/**
-	 * Get a userdata. The Convert overload must return a pointer to the
-	 * object.
-	 *
-	 * If the object is not the correct type, calls luaL_error.
+	 * Get a shared pointer object created from LuaeClass. The type is not
+	 * checked.
 	 *
 	 * @param L the Lua state
-	 * @param index the value index
+	 * @param index the index
+	 * @return a std::shared_ptr<>
 	 */
-	template <typename T>
-	static T check(lua_State *L,
-		       int index,
-		       typename std::enable_if<std::is_pointer<T>::value>::type * = 0,
-		       typename std::enable_if<std::is_class<typename std::remove_pointer<T>::type>::value>::type * = 0)
+	template <typename T, typename Type = typename T::element_type>
+	static std::shared_ptr<Type>
+	get(lua_State *L,
+	   int index,
+	   typename std::enable_if<IsSharedUserdata<T>::value, T>::type * = 0)
 	{
-		static_assert(Convert<typename std::remove_pointer<T>::type>::hasCheck, "type not supported");
-
-		return Convert<typename std::remove_pointer<T>::type>::check(L, index);
+		return LuaeClass::getShared<Type>(L, index); 
 	}
 
 	/**
-	 * Check for an object value from Lua.
+	 * Check for a data. The type is checked.
 	 *
 	 * @param L the Lua state
-	 * @param index the value index
-	 * @return the value
+	 * @param index the index
+	 * @return a T value
 	 */
 	template <typename T>
-	static T check(lua_State *L,
-		       int index,
-		       typename std::enable_if<std::is_class<T>::value>::type * = 0)
+	static T
+	check(lua_State *L,
+	      int index,
+	      typename std::enable_if<!IsUserdata<T>::value, T>::type * = 0,
+	      typename std::enable_if<!IsSharedUserdata<T>::value, T>::type * = 0)
 	{
 		static_assert(Convert<T>::hasCheck, "type not supported");
 
@@ -621,20 +1067,35 @@ public:
 	}
 
 	/**
-	 * Check for a primitive value from Lua.
+	 * Check for a userdata object.
 	 *
 	 * @param L the Lua state
-	 * @param index the value index
-	 * @return the value
+	 * @param index the index
+	 * @return a T * value
 	 */
 	template <typename T>
-	static T check(lua_State *L,
-		       int index,
-		       typename std::enable_if<std::is_fundamental<T>::value>::type * = 0)
+	static T *
+	check(lua_State *L,
+	      int index,
+	      typename std::enable_if<IsUserdata<T>::value, T *>::type * = 0)
 	{
-		static_assert(Convert<T>::hasCheck, "type not supported");
+		return Luae::toType<T *>(L, index, IsUserdata<T>::MetatableName);
+	}
 
-		return Convert<T>::check(L, index);
+	/**
+	 * Check for a shared pointer object created from LuaeClass.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return a std::shared_ptr<>
+	 */
+	template <typename T, typename Type = typename T::element_type>
+	static std::shared_ptr<Type>
+	check(lua_State *L,
+	      int index,
+	      typename std::enable_if<IsSharedUserdata<T>::value, T>::type * = 0)
+	{
+		return LuaeClass::getShared<Type>(L, index, IsUserdata<Type>::MetatableName); 
 	}
 
 	/**
@@ -658,8 +1119,6 @@ public:
 		using ValueType		= typename Container::value_type;
 		using IteratorType	= typename Container::const_iterator;
 
-		static_assert(Convert<ValueType>::supported, "type not supported");
-
 		LUAE_STACK_CHECKBEGIN(L);
 
 		new (L) Iterator<IteratorType>(container.cbegin(), container.cend());
@@ -680,7 +1139,7 @@ public:
 			if (it->current == it->end)
 				return 0;
 
-				Converter::push(L, *(it->current++));
+				Luae::push(L, *(it->current++));
 
 			return 1;
 		}, 1);
@@ -688,17 +1147,6 @@ public:
 		LUAE_STACK_CHECKEND(L, -1);
 		
 		return 1;
-	}
-
-	/**
-	 * Get the current stack size.
-	 *
-	 * @param L the Lua state
-	 * @return the stack size
-	 */
-	static inline int gettop(lua_State *L)
-	{
-		return lua_gettop(L);
 	}
 
 	/**
@@ -738,17 +1186,6 @@ public:
 	{
 		return reinterpret_cast<T>(luaL_checkudata(L, idx, meta));
 	}
-
-	/**
-	 * Pop arguments from the stack.
-	 *
-	 * @param L the Lua state
-	 * @param count the number of values to pop
-	 */
-	static inline void pop(lua_State *L, int count)
-	{
-		lua_pop(L, count);
-	}
 };
 
 /**
@@ -762,12 +1199,10 @@ struct Luae::Convert<std::nullptr_t> {
 	 * Push nil.
 	 *
 	 * @param L the Lua state
-	 * @param nil the nil value
 	 */
-	static void push(lua_State *L, const std::nullptr_t &nil)
+	static void push(lua_State *L, const std::nullptr_t &)
 	{
 		lua_pushnil(L);
-		(void)nil;
 	}
 };
 
@@ -854,6 +1289,50 @@ struct Luae::Convert<int> {
 	 * @param index the index
 	 */
 	static int check(lua_State *L, int index)
+	{
+		return luaL_checkinteger(L, index);
+	}
+};
+
+/**
+ * @brief Overload for longs.
+ */
+template <>
+struct Luae::Convert<long> {
+	static const bool hasPush	= true;	//!< push supported
+	static const bool hasGet	= true;	//!< get supported
+	static const bool hasCheck	= true;	//!< check supported
+
+	/**
+	 * Push the integer value.
+	 *
+	 * @param L the Lua state
+	 * @param value the value
+	 */
+	static void push(lua_State *L, const long &value)
+	{
+		lua_pushinteger(L, value);
+	}
+
+	/**
+	 * Get a integer.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return a boolean
+	 */
+	static long get(lua_State *L, int index)
+	{
+		return lua_tointeger(L, index);
+	}
+
+	/**
+	 * Check for an integer.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 */
+	static long check(lua_State *L, int index)
 	{
 		return luaL_checkinteger(L, index);
 	}
@@ -998,6 +1477,13 @@ struct Luae::Convert<std::vector<std::string>> {
 		return list;
 	}
 
+	/**
+	 * Check for a string list.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return the list
+	 */
 	static std::vector<std::string> check(lua_State *L, int index)
 	{
 		luaL_checktype(L, index, LUA_TTABLE);
@@ -1019,7 +1505,7 @@ struct Luae::Convert<std::u32string> {
 	 * Push the string value.
 	 *
 	 * @param L the Lua state
-	 * @param value the value
+	 * @param str the value
 	 */
 	static void push(lua_State *L, const std::string &str)
 	{
@@ -1115,83 +1601,6 @@ struct Luae::Convert<const char *> {
 
 /* }}} */
 
-/* {{{ LuaeState */
-
-/**
- * @class LuaeState
- * @brief Wrapper for lua_State
- *
- * This class automatically create a new Lua state and add implicit
- * cast operator plus RAII destruction.
- */
-class LuaeState {
-private:
-	struct Deleter {
-		void operator()(lua_State *L)
-		{
-			lua_close(L);
-		}
-	};
-
-	using Ptr = std::unique_ptr<lua_State, Deleter>;
-
-	Ptr m_state;
-
-	void initRegistry();
-
-public:
-	/**
-	 * The field stored into the registry to avoid recreation of shared
-	 * objects.
-	 */
-	static const char *FieldRefs;
-
-	/**
-	 * Deleted copy constructor.
-	 */
-	LuaeState(const LuaeState &) = delete;
-
-	/**
-	 * Deleted copy assignment.
-	 */
-	LuaeState &operator=(const LuaeState &) = delete;
-
-	/**
-	 * Default constructor. Create a new state.
-	 */
-	LuaeState();
-
-	/**
-	 * Use the already created state.
-	 *
-	 * @param L the state to use
-	 */
-	LuaeState(lua_State *L);
-
-	/**
-	 * Move constructor.
-	 *
-	 * @param state the Lua state to move
-	 */
-	LuaeState(LuaeState &&state);
-
-	/**
-	 * Move assignment operator.
-	 *
-	 * @param state the Lua state to move
-	 */
-	LuaeState &operator=(LuaeState &&state);
-
-	/**
-	 * Implicit cast operator for convenient usage to C Lua API.
-	 *
-	 * @return the state as lua_State *
-	 */
-	operator lua_State*();
-};
-
-/* }}} */
-
 /* {{{ LuaeValue */
 
 /**
@@ -1234,148 +1643,6 @@ public:
 	 * Default constructor (type nil)
 	 */
 	LuaeValue();
-};
-
-/* }}} */
-
-/* {{{ LuaeClass */
-
-/**
- * @class LuaeClass
- * @brief Support for object oriented programming between C++ and Lua
- *
- * This class provides functions for passing and retrieving objects from C++ and
- * Lua.
- */
-class LuaeClass {
-public:
-	/**
-	 * Methods for a class.
-	 */
-	using Methods	= std::vector<luaL_Reg>;
-
-	/**
-	 * Smart pointer for Luae objects.
-	 */
-	template <typename T>
-	using Ptr	= std::shared_ptr<T>;
-
-	/**
-	 * @struct Def
-	 * @brief Definition of a class
-	 */
-	struct Def {
-		std::string	name;		//!< metatable name
-		Methods		methods;	//!< methods
-		Methods		metamethods;	//!< metamethods
-		const Def	*parent;	//!< optional parent class
-	};
-
-	/**
-	 * The field stored in the object metatable about the object metatable
-	 * name.
-	 */
-	static const char *FieldName;
-
-	/**
-	 * The field that holds all parent classes. It is used to verify casts.
-	 */
-	static const char *FieldParents;
-
-	/**
-	 * Initialize a new object.
-	 *
-	 * @param L the Lua state
-	 * @param def the definition
-	 */
-	static void create(lua_State *L, const Def &def);
-
-	/**
-	 * Push a shared object to Lua, it also push it to the "__refs"
-	 * table with __mode = "v". That is if we need to push the object
-	 * again we use the same reference so Lua get always the same
-	 * userdata and gain the following benefits:
-	 *
-	 * 1. The user can use the userdata as table key
-	 * 2. A performance gain thanks to less allocations
-	 *
-	 * @param L the Lua state
-	 * @param o the object to push
-	 * @param name the object metatable name
-	 */
-	template <typename T>
-	static void pushShared(lua_State *L, Ptr<T> o, const std::string &name)
-	{
-		LUAE_STACK_CHECKBEGIN(L);
-
-		lua_getfield(L, LUA_REGISTRYINDEX, LuaeState::FieldRefs);
-		assert(lua_type(L, -1) == LUA_TTABLE);
-
-		lua_rawgetp(L, -1, o.get());
-
-		if (lua_type(L, -1) == LUA_TNIL) {
-			lua_pop(L, 1);
-
-			new (L, name.c_str()) std::shared_ptr<T>(o);
-			
-			lua_pushvalue(L, -1);
-			lua_rawsetp(L, -3, o.get());
-		}
-
-		lua_replace(L, -2);
-
-		LUAE_STACK_CHECKEND(L, -1);
-	}
-
-	/**
-	 * Check if the object at index is suitable for cast to meta. Calls
-	 * luaL_error if not.
-	 *
-	 * @param L the Lua state
-	 * @param index the value index
-	 * @param meta the object name
-	 */
-	static void testShared(lua_State *L, int index, const char *meta);
-
-	/**
-	 * Get an object from Lua that was previously push with pushShared.
-	 *
-	 * @param L the Lua state
-	 * @param index the object index
-	 * @param meta the object metatable name
-	 * @return the object
-	 */
-	template <typename T>
-	static Ptr<T> getShared(lua_State *L, int index, const char *meta)
-	{
-		testShared(L, index, meta);
-		
-		return *static_cast<Ptr<T> *>(lua_touserdata(L, index));
-	}
-
-	/**
-	 * Delete the shared pointer at the given index. This function does
-	 * not check if the type is valid for performance reason. And because
-	 * it's usually called in __gc, there is no reason to check.
-	 *
-	 * Also return 0 the __gc method can directly call
-	 * return LuaeClass::deleteShared(...)
-	 *
-	 * @param L the Lua state
-	 * @param index the index
-	 * @return 0 for convenience
-	 */
-	template <typename T>
-	static int deleteShared(lua_State *L, int index)
-	{
-		LUAE_STACK_CHECKBEGIN(L);
-
-		Luae::toType<Ptr<T> *>(L, index)->~shared_ptr<T>();
-
-		LUAE_STACK_CHECKEQUALS(L);
-
-		return 0;
-	}
 };
 
 /* }}} */
@@ -1549,7 +1816,7 @@ public:
 	/**
 	 * Bind the enumeration and keep it at the top of the stack.
 	 *
-	 * @param @ the Lua state
+	 * @param L the Lua state
 	 * @param def the definition
 	 */
 	static void create(lua_State *L, const Def &def);

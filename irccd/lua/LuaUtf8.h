@@ -19,6 +19,11 @@
 #ifndef _LUA_UTF8_H_
 #define _LUA_UTF8_H_
 
+/**
+ * @file LuaUtf8.h
+ * @brief Lua bindings for class Utf8
+ */
+
 #include <lua.hpp>
 
 namespace irccd {

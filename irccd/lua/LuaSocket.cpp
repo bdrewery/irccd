@@ -64,9 +64,7 @@ const char *ListenerType	= "Listener";
  * Enumerations
  * --------------------------------------------------------- */
 
-using EnumMap = std::unordered_map<std::string, int>;
-
-EnumMap sockFamilies {
+LuaeEnum::Def sockFamilies {
 	{ "Inet",	AF_INET		},
 	{ "Inet6",	AF_INET6	},
 
@@ -75,12 +73,12 @@ EnumMap sockFamilies {
 #endif
 };
 
-EnumMap sockTypes {
+LuaeEnum::Def sockTypes {
 	{ "Stream",	SOCK_STREAM	},
 	{ "Datagram",	SOCK_DGRAM	}
 };
 
-EnumMap sockProtocols {
+LuaeEnum::Def sockProtocols {
 	{ "Tcp",	IPPROTO_TCP	},
 	{ "Udp",	IPPROTO_UDP	},
 	{ "IPv4",	IPPROTO_IP	},
@@ -186,24 +184,6 @@ OptionMap options = prepareOptions();
  * --------------------------------------------------------- */
 
 using SocketAddressPtr = std::unique_ptr<SocketAddress>;
-
-void mapToTable(lua_State *L,
-		const EnumMap &map,
-		int index,
-		const std::string &name)
-{
-	lua_createtable(L, 0, 0);
-
-	for (auto p : map) {
-		lua_pushinteger(L, p.second);
-		lua_setfield(L, -2, p.first.c_str());
-	}
-
-	if (index < 0)
-		-- index;
-
-	lua_setfield(L, index, name.c_str());
-}
 
 /**
  * Store the SocketAddress into the AddrField to the table at the
@@ -1115,27 +1095,26 @@ const luaL_Reg listenerMeta[] = {
 int luaopen_socket(lua_State *L)
 {
 	// Socket functions
-	luaL_newlib(L, sockFunctions);
+	Luae::newlib(L, sockFunctions);
 
 	// Map families, types
-	mapToTable(L, sockFamilies, -1, "family");
-	mapToTable(L, sockTypes, -1, "type");
-	mapToTable(L, sockProtocols, -1, "protocol");
+	LuaeEnum::create(L, sockFamilies, -1, "family");
+	LuaeEnum::create(L, sockTypes, -1, "type");
+	LuaeEnum::create(L, sockProtocols, -1, "protocol");
 
 	// Create a special table for keeping addresses
-	lua_createtable(L, 0, 0);
-	lua_createtable(L, 0, 0);
-	lua_pushstring(L, "v");
-	lua_setfield(L, -2, "__mode");
-	lua_setmetatable(L, -2);
-	lua_setfield(L, LUA_REGISTRYINDEX, RegField);
+	LuaeTable::create(L);
+	LuaeTable::create(L);
+	LuaeTable::set(L, -1, "__mode", "v");
+	Luae::setmetatable(L, -2);
+	Luae::setfield(L, LUA_REGISTRYINDEX, RegField);
 
 	// Create Socket type
-	luaL_newmetatable(L, SocketType);
-	luaL_setfuncs(L, sockMeta, 0);
-	luaL_newlib(L, sockMethods);
-	lua_setfield(L, -2, "__index");
-	lua_pop(L, 1);
+	Luae::newmetatable(L, SocketType);
+	Luae::setfuncs(L, sockMeta);
+	Luae::newlib(L, sockMethods);
+	Luae::setfield(L, -2, "__index");
+	Luae::pop(L, 1);
 
 	return 1;
 }
@@ -1144,7 +1123,7 @@ int luaopen_socket(lua_State *L)
 
 int luaopen_socket_address(lua_State *L)
 {
-	luaL_newlib(L, addressFunctions);
+	Luae::newlib(L, addressFunctions);
 
 	return 1;
 }
@@ -1153,14 +1132,14 @@ int luaopen_socket_address(lua_State *L)
 
 int luaopen_socket_listener(lua_State *L)
 {
-	luaL_newlib(L, listenerFunctions);
+	Luae::newlib(L, listenerFunctions);
 
 	// Create the SocketListener type
-	luaL_newmetatable(L, ListenerType);
-	luaL_setfuncs(L, listenerMeta, 0);
-	luaL_newlib(L, listenerMethods);
-	lua_setfield(L, -2, "__index");
-	lua_pop(L, 1);
+	Luae::newmetatable(L, ListenerType);
+	Luae::setfuncs(L, listenerMeta);
+	Luae::newlib(L, listenerMethods);
+	Luae::setfield(L, -2, "__index");
+	Luae::pop(L, 1);
 
 	return 1;
 }

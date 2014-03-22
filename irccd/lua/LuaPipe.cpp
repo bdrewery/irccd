@@ -30,7 +30,7 @@ const char *PipeType	= "Pipe";
 
 int l_pipeGet(lua_State *L)
 {
-	auto name = luaL_checkstring(L, 1);
+	auto name = Luae::check<std::string>(L, 1);
 	auto pipe = Pipe::get(name);
 
 	new (L, PipeType) Pipe::Ptr(pipe);
@@ -74,10 +74,10 @@ int l_pipeWait(lua_State *L)
 	auto p = *Luae::toType<Pipe::Ptr *>(L, 1, PipeType);
 	int ms = 0;
 
-	if (lua_gettop(L) >= 2)
-		ms = luaL_checkinteger(L, 2);
+	if (Luae::gettop(L) >= 2)
+		ms = Luae::check<int>(L, 2);
 
-	lua_pushboolean(L, p->wait(ms));
+	Luae::push(L, p->wait(ms));
 
 	return 1;
 }
@@ -97,7 +97,7 @@ int l_pipeList(lua_State *L)
 
 	// Push as the upvalue
 	new (L) Pipe::Queue(q);
-	lua_pushcclosure(L, [] (lua_State *L) -> int {
+	Luae::pushfunction(L, [] (lua_State *L) -> int {
 		Pipe::Queue *q = reinterpret_cast<Pipe::Queue *>(lua_touserdata(L, lua_upvalueindex(1)));
 
 		if (q->empty()) {
@@ -143,39 +143,36 @@ int l_pipeGc(lua_State *L)
 	return 0;
 }
 
-const luaL_Reg functions[] = {
-	{ "get",		l_pipeGet	},
-	{ nullptr,		nullptr		}
+const Luae::Reg functions {
+	{ "get",		l_pipeGet	}
 };
 
-const luaL_Reg pipeMethods[] = {
+const Luae::Reg pipeMethods {
 	{ "push",		l_pipePush	},
 	{ "first",		l_pipeFirst	},
 	{ "last",		l_pipeLast	},
 	{ "wait",		l_pipeWait	},
 	{ "list",		l_pipeList	},
 	{ "clear",		l_pipeClear	},
-	{ "pop",		l_pipePop	},
-	{ nullptr,		nullptr		}
+	{ "pop",		l_pipePop	}
 };
 
 const luaL_Reg pipeMeta[] = {
-	{ "__gc",		l_pipeGc	},
-	{ nullptr,		nullptr		}
+	{ "__gc",		l_pipeGc	}
 };
 
 }
 
 int luaopen_thread_pipe(lua_State *L)
 {
-	luaL_newlib(L, functions);
+	Luae::newlib(L, functions);
 
 	// Create pipe object
-	luaL_newmetatable(L, PipeType);
-	luaL_setfuncs(L, pipeMeta, 0);
-	luaL_newlib(L, pipeMethods);
-	lua_setfield(L, -2, "__index");
-	lua_pop(L, 1);
+	Luae::newmetatable(L, PipeType);
+	Luae::setfuncs(L, pipeMeta);
+	Luae::newlib(L, pipeMethods);
+	Luae::setfield(L, -2, "__index");
+	Luae::pop(L, 1);
 
 	return 1;
 }

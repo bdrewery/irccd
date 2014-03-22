@@ -84,7 +84,10 @@ if(LDOC)
 	add_custom_target(
 		generate-ldoc
 		COMMENT "Generating Lua API documentation"
-		COMMAND ${LDOC} -q .
+		COMMAND
+			${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_SOURCE_DIR}/generated/lua"
+		COMMAND
+			${LDOC} -q .
 			WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/doc/ldoc"
 		COMMAND cmake -E copy
 			"${CMAKE_CURRENT_SOURCE_DIR}/ldoc/style/logo.png"
@@ -111,14 +114,19 @@ if(ASCIIDOC)
 		COMMENT "Generated .html files from .txt"
 		COMMAND
 			${CMAKE_COMMAND} -E make_directory
-				"${CMAKE_CURRENT_SOURCE_DIR}/generated/guides"
-		COMMAND
-			${CMAKE_COMMAND} -E make_directory
 				"${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/icons"
 		COMMAND
 			${CMAKE_COMMAND} -E copy_directory
 				"${CMAKE_CURRENT_SOURCE_DIR}/guides/icons/"
 				"${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/icons/"
+	)
+
+	add_custom_target(
+		generate-guides-directory
+		COMMENT "Creating ${CMAKE_CURRENT_SOURCE_DIR}/generated/guides"
+		COMMAND
+		${CMAKE_COMMAND} -E make_directory
+			"${CMAKE_CURRENT_SOURCE_DIR}/generated/guides"
 	)
 
 	add_dependencies(docs generate-guides)

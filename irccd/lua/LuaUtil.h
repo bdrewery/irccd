@@ -40,44 +40,11 @@ extern const char *DateType;
  * The object is used as userdata.
  */
 template <>
-struct Luae::Convert<Date> {
-	static const bool hasPush	= true;	//!< push supported
-	static const bool hasGet	= true;	//!< get supported
-	static const bool hasCheck	= true;	//!< check supported
-
+struct Luae::IsUserdata<Date> : std::true_type {
 	/**
-	 * Push the date.
-	 *
-	 * @param L the Lua state
-	 * @param value the value
+	 * The metatable name.
 	 */
-	static void push(lua_State *L, const Date &value)
-	{
-		new (L, DateType) Date(value);
-	}
-
-	/**
-	 * Get a date.
-	 *
-	 * @param L the Lua state
-	 * @param index the index
-	 * @return a boolean
-	 */
-	static Date *get(lua_State *L, int index)
-	{
-		return Luae::toType<Date *>(L, index);
-	}
-
-	/**
-	 * Check for a date.
-	 *
-	 * @param L the Lua state
-	 * @param index the index
-	 */
-	static Date *check(lua_State *L, int index)
-	{
-		return Luae::toType<Date *>(L, index, DateType);
-	}
+	static const char *MetatableName;
 };
 
 /**

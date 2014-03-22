@@ -425,9 +425,7 @@ int l_equals(lua_State *L)
 
 int l_gc(lua_State *L)
 {
-	(static_cast<Server::Ptr *>(luaL_checkudata(L, 1, ServerType)))->~shared_ptr<Server>();
-
-	return 0;
+	return LuaeClass::deleteShared<Server>(L, 1);
 }
 
 const LuaeClass::Def serverDef {
@@ -478,7 +476,7 @@ int l_find(lua_State *L)
 	try {
 		Server::Ptr server = Server::get(name);
 
-		Luae::push<Server::Ptr>(L, server);
+		Luae::push(L, server);
 
 		ret = 1;
 	} catch (std::out_of_range ex) {
@@ -493,7 +491,6 @@ int l_find(lua_State *L)
 
 int l_connect(lua_State *L)
 {
-	Server::Ptr server;
 	Server::Info info;
 	Server::Identity ident;
 	Server::RetryInfo reco;
@@ -519,7 +516,7 @@ int l_connect(lua_State *L)
 	extractChannels(L, info);
 	extractIdentity(L, ident);
 
-	server = std::make_shared<Server>(info, ident, reco, options);
+	auto server = std::make_shared<Server>(info, ident, reco, options);
 	Server::add(server);
 
 	Luae::push(L, true);
@@ -535,6 +532,8 @@ const Luae::Reg functions {
 }
 
 const char *ServerType = "Server";
+
+const char *Luae::IsUserdata<Server>::MetatableName = ServerType;
 
 int luaopen_server(lua_State *L)
 {

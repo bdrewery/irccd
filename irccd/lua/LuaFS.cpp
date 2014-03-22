@@ -34,9 +34,25 @@
 
 namespace irccd {
 
-namespace {
-
+/**
+ * The directory type.
+ */
 const char *DirType = "Directory";
+
+/**
+ * Overload for Directory
+ */
+template <>
+struct Luae::IsUserdata<Directory> : std::true_type {
+	/**
+	 * The metatable name.
+	 */
+	static const char *MetatableName;
+};
+
+const char *Luae::IsUserdata<Directory>::MetatableName = DirType;
+
+namespace {
 
 int l_mkdir(lua_State *L)
 {
@@ -70,7 +86,7 @@ int l_opendir(lua_State *L)
 		flags |= Directory::NotDot | Directory::NotDotDot;
 
 	try {
-		new (L, DirType) Directory(path, flags);
+		Luae::push(L, Directory(path, flags));
 	} catch (std::runtime_error error) {
 		Luae::push(L, nullptr);
 		Luae::push(L, error.what());
@@ -174,7 +190,7 @@ int l_read(lua_State *L)
 
 	Luae::deprecate(L, "read", "pairs");
 
-	auto d = Luae::toType<Directory *>(L, 1, DirType);
+	auto d = Luae::check<Directory>(L, 1);
 
 	new (L) DirectoryIterator(d->cbegin(), d->cend());
 	Luae::pushfunction(L, [] (lua_State *L) -> int {
@@ -199,7 +215,7 @@ int l_read(lua_State *L)
 
 int l_count(lua_State *L)
 {
-	auto d = Luae::toType<Directory *>(L, 1, DirType);
+	auto d = Luae::check<Directory>(L, 1);
 
 	Luae::push(L, d->count());
 
@@ -212,8 +228,8 @@ int l_count(lua_State *L)
 
 int l_eq(lua_State *L)
 {
-	auto d1 = Luae::toType<Directory *>(L, 1, DirType);
-	auto d2 = Luae::toType<Directory *>(L, 2, DirType);
+	auto d1 = Luae::check<Directory>(L, 1);
+	auto d2 = Luae::check<Directory>(L, 2);
 
 	Luae::push(L, *d1 == *d2);
 
@@ -222,14 +238,14 @@ int l_eq(lua_State *L)
 
 int l_gc(lua_State *L)
 {
-	Luae::toType<Directory *>(L, 1, DirType)->~Directory();
+	Luae::check<Directory>(L, 1)->~Directory();
 
 	return 0;
 }
 
 int l_tostring(lua_State *L)
 {
-	auto d = Luae::toType<Directory *>(L, 1, DirType);
+	auto d = Luae::check<Directory>(L, 1);
 
 	// TODO
 	lua_pushfstring(L, "Directory with %d entries", d->count());
@@ -241,7 +257,7 @@ int l_pairs(lua_State *L)
 {
 	using DirectoryIterator = Luae::Iterator<Directory::const_iterator>;
 
-	auto d = Luae::toType<Directory *>(L, 1, DirType);
+	auto d = Luae::check<Directory>(L, 1);
 
 	new (L) DirectoryIterator(d->cbegin(), d->cend());
 	Luae::pushfunction(L, [] (lua_State *L) -> int {

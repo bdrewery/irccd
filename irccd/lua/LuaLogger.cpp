@@ -53,17 +53,16 @@ int l_warn(lua_State *L)
 	return 0;
 }
 
-const luaL_Reg functions[] = {
+const Luae::Reg functions {
 	{ "log",	l_log			},
-	{ "warn",	l_warn			},
-	{ nullptr,	nullptr			}
+	{ "warn",	l_warn			}
 };
 
 }
 
 int luaopen_logger(lua_State *L)
 {
-	luaL_newlib(L, functions);
+	Luae::newlib(L, functions);
 
 	return 1;
 }

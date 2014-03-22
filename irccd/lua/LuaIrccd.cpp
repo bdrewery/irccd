@@ -23,16 +23,11 @@ namespace irccd {
 
 int luaopen_irccd(lua_State *L)
 {
-	lua_createtable(L, 3, 3);
+	LuaeTable::create(L);
 
-	lua_pushinteger(L, MAJOR);
-	lua_setfield(L, -2, "VERSION_MAJOR");
-
-	lua_pushinteger(L, MINOR);
-	lua_setfield(L, -2, "VERSION_MINOR");
-
-	lua_pushinteger(L, PATCH);
-	lua_setfield(L, -2, "VERSION_PATCH");
+	LuaeTable::set(L, -1, "VERSION_MAJOR", MAJOR);
+	LuaeTable::set(L, -1, "VERSION_MINOR", MINOR);
+	LuaeTable::set(L, -1, "VERSION_PATCH", PATCH);
 
 	lua_pushfstring(L, "%d.%d", MAJOR, MINOR);
 	lua_setfield(L, -2, "VERSION");

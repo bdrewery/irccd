@@ -232,7 +232,7 @@ const luaL_Reg functions[] = {
 
 int l_dateCalendar(lua_State *L)
 {
-	auto date = Luae::get<Date *>(L, 1);
+	auto date = Luae::get<Date>(L, 1);
 	auto stamp = date->getTimestamp();
 	auto tm = *localtime(&stamp);
 
@@ -254,7 +254,7 @@ int l_dateCalendar(lua_State *L)
 int l_dateFormat(lua_State *L)
 {
 	// Extract parameters
-	auto d = Luae::check<Date *>(L, 1);
+	auto d = Luae::check<Date>(L, 1);
 	auto fmt = Luae::check<std::string>(L, 2);
 
 	Luae::push(L, d->format(fmt));
@@ -264,7 +264,7 @@ int l_dateFormat(lua_State *L)
 
 int l_dateTimestamp(lua_State *L)
 {
-	auto date = Luae::check<Date *>(L, 1);
+	auto date = Luae::check<Date>(L, 1);
 
 	Luae::push(L, static_cast<int>(date->getTimestamp()));
 
@@ -277,8 +277,8 @@ int l_dateTimestamp(lua_State *L)
 
 int l_dateEquals(lua_State *L)
 {
-	auto d1 = Luae::check<Date *>(L, 1);
-	auto d2 = Luae::check<Date *>(L, 2);
+	auto d1 = Luae::check<Date>(L, 1);
+	auto d2 = Luae::check<Date>(L, 2);
 
 	Luae::push(L, *d1 == *d2);
 
@@ -287,15 +287,15 @@ int l_dateEquals(lua_State *L)
 
 int l_dateGc(lua_State *L)
 {
-	Luae::check<Date *>(L, 1)->~Date();
+	Luae::check<Date>(L, 1)->~Date();
 
 	return 0;
 }
 
 int l_dateLe(lua_State *L)
 {
-	auto d1 = Luae::check<Date *>(L, 1);
-	auto d2 = Luae::check<Date *>(L, 2);
+	auto d1 = Luae::check<Date>(L, 1);
+	auto d2 = Luae::check<Date>(L, 2);
 
 	Luae::push(L, *d1 <= *d2);
 
@@ -304,7 +304,7 @@ int l_dateLe(lua_State *L)
 
 int l_dateTostring(lua_State *L)
 {
-	auto date = Luae::toType<Date *>(L, 1, DateType);
+	auto date = Luae::check<Date>(L, 1);
 
 	lua_pushfstring(L, "%d", date->getTimestamp());
 
@@ -327,6 +327,8 @@ const Luae::Reg dateMtList {
 }
 
 const char *DateType = "Date";
+
+const char *Luae::IsUserdata<Date>::MetatableName = DateType;
 
 int luaopen_util(lua_State *L)
 {
