@@ -3,6 +3,42 @@
 --
 -- @module irccd.utf8
 
+--- Check if the unicode character is a digit.
+-- @param c the character
+-- @return true if digit
+function utf8.isdigit(c)
+end
+
+--- Check if the unicode character is a letter.
+-- @param c the character
+-- @return true if letter
+function utf8.isletter(c)
+end
+
+--- Check if the unicode character is in lower case.
+-- @param c the character
+-- @return true if lower
+function utf8.islower(c)
+end
+
+--- Check if the unicode character is a space.
+-- @param c the character
+-- @return true if space
+function utf8.isspace(c)
+end
+
+--- Check if the unicode character is in title case.
+-- @param c the character
+-- @return true if title
+function utf8.istitle(c)
+end
+
+--- Check if the unicode character is in upper case.
+-- @param c the character
+-- @return true if upper
+function utf8.isupper(c)
+end
+
 --- Get the real length of a UTF-8 string.
 -- @param str the string
 -- @return the length or nil
