@@ -399,4 +399,15 @@ std::vector<std::string> Util::split(const std::string &list,
 	return result;
 }
 
+std::string Util::strip(const std::string &str)
+{
+	auto copy = str;
+	auto test = [] (char c) { return !std::isspace(c); };
+
+	copy.erase(copy.begin(), std::find_if(copy.begin(), copy.end(), test));
+	copy.erase(std::find_if(copy.rbegin(), copy.rend(), test).base(), copy.end());
+
+	return copy;
+}
+
 } // !irccd

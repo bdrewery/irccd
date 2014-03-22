@@ -117,12 +117,20 @@
 	<td class="summary">Format text with colors and attributes.</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#split">split (value, delim, count)</a></td>
+	<td class="summary">Split a string into list.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#splituser">splituser (user)</a></td>
 	<td class="summary">Split the nickname.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#splithost">splithost (user)</a></td>
 	<td class="summary">Split the hostname.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#strip">strip (value)</a></td>
+	<td class="summary">Removes trailing and leading whitespaces from the string.</td>
 	</tr>
 </table>
 <h2><a href="#Tables">Tables</a></h2>
@@ -308,6 +316,38 @@
 
 </dd>
     <dt>
+    <a name = "split"></a>
+    <strong>split (value, delim, count)</strong>
+    </dt>
+    <dd>
+    Split a string into list.
+ Create a list from the string split by any of the characters specified in
+ delim. Split at most count values, if set to -1, split indefinitely.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+         the value to split
+        </li>
+        <li><span class="parameter">delim</span>
+         the characters
+        </li>
+        <li><span class="parameter">count</span>
+         the optional count (default: -1)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a sequence table
+    </ol>
+
+
+
+
+</dd>
+    <dt>
     <a name = "splituser"></a>
     <strong>splituser (user)</strong>
     </dt>
@@ -353,6 +393,30 @@
     <ol>
 
         the nickname
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "strip"></a>
+    <strong>strip (value)</strong>
+    </dt>
+    <dd>
+    Removes trailing and leading whitespaces from the string.
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+         the value
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the cleaned string
     </ol>
 
 

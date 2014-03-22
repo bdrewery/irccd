@@ -121,14 +121,6 @@ if(ASCIIDOC)
 				"${CMAKE_CURRENT_SOURCE_DIR}/generated/guides/icons/"
 	)
 
-	add_custom_target(
-		generate-guides-directory
-		COMMENT "Creating ${CMAKE_CURRENT_SOURCE_DIR}/generated/guides"
-		COMMAND
-		${CMAKE_COMMAND} -E make_directory
-			"${CMAKE_CURRENT_SOURCE_DIR}/generated/guides"
-	)
-
 	add_dependencies(docs generate-guides)
 endif()
 

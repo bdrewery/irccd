@@ -973,13 +973,11 @@ public:
 	 * @param L the Lua state
 	 * @param value the value
 	 */
-	template <typename T>
+	template <typename T, typename Type = typename T::element_type>
 	static void push(lua_State *L,
 			 const T &value,
 			 typename std::enable_if<IsSharedUserdata<T>::value>::type * = 0)
 	{
-		using Type = typename T::element_type;
-
 		LuaeClass::pushShared<Type>(L, value, IsUserdata<Type>::MetatableName);
 	}
 

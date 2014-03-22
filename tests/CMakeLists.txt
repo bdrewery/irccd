@@ -84,5 +84,11 @@ if(WITH_TESTS)
 
 		# Conversion
 		create_test(TestConverter converter/TestConverter.cpp)
+
+		# Strip
+		create_test(TestStrip strip/TestStrip.cpp)
+
+		# Split
+		create_test(TestSplit split/TestSplit.cpp)
 	endif()
 endif()

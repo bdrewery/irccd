@@ -22,9 +22,6 @@
 #include <sstream>
 
 #include <Date.h>
-#include <Directory.h>
-#include <Logger.h>
-#include <System.h>
 #include <Util.h>
 
 #include "Irccd.h"
@@ -191,6 +188,20 @@ int l_format(lua_State *L)
 	return 1;
 }
 
+int l_split(lua_State *L)
+{
+	auto str = Luae::check<std::string>(L, 1);
+	auto delim = Luae::check<std::string>(L, 2);
+	auto max = -1;
+
+	if (Luae::gettop(L) >= 3)
+		max = Luae::check<int>(L, 3);
+
+	Luae::push(L, Util::split(str, delim, max));
+
+	return 1;
+}
+
 int l_splituser(lua_State *L)
 {
 	auto target = Luae::check<std::string>(L, 1);
@@ -217,12 +228,23 @@ int l_splithost(lua_State *L)
 	return 1;
 }
 
+int l_strip(lua_State *L)
+{
+	auto value = Luae::check<std::string>(L, 1);
+
+	Luae::push(L, Util::strip(value));
+
+	return 1;
+}
+
 const luaL_Reg functions[] = {
 	{ "convert",		l_convert		},
 	{ "date",		l_date			},
 	{ "format",		l_format		},
+	{ "split",		l_split			},
 	{ "splituser",		l_splituser		},
 	{ "splithost",		l_splithost		},
+	{ "strip",		l_strip			},
 	{ nullptr,		nullptr			}
 };
 

@@ -102,6 +102,16 @@ end
 function util.format(text, attrs)
 end
 
+--- Split a string into list.
+-- Create a list from the string split by any of the characters specified in
+-- delim. Split at most count values, if set to -1, split indefinitely.
+-- @param value the value to split
+-- @param delim the characters
+-- @param count the optional count (default: -1)
+-- @return a sequence table
+function util.split(value, delim, count)
+end
+
 --- Split the nickname.
 -- Extract the nickname from a user, for instance with
 -- foo!~foo@localhost, foo will be returned.
@@ -116,6 +126,12 @@ end
 -- @param user the user to split
 -- @return the nickname
 function util.splithost(user)
+end
+
+--- Removes trailing and leading whitespaces from the string.
+-- @param value the value
+-- @return the cleaned string
+function util.strip(value)
 end
 
 --- Date

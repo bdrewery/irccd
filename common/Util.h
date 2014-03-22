@@ -204,6 +204,14 @@ public:
 	static std::vector<std::string> split(const std::string &list,
 					      const std::string &delimiter,
 					      int max = -1);
+
+	/**
+	 * Remove leading and trailing spaces.
+	 *
+	 * @param str the string
+	 * @return the removed white spaces
+	 */
+	static std::string strip(const std::string &str);
 };
 
 } // !irccd
