@@ -32,7 +32,7 @@ rbsearch(uint32_t c, uint32_t *t, int n, int ne)
 
 	while (n > 1) {
 		m = n >> 1;
-		p = t + m*ne;
+		p = t + m * ne;
 
 		if (c >= p[0]) {
 			t = p;
@@ -45,6 +45,12 @@ rbsearch(uint32_t c, uint32_t *t, int n, int ne)
 		return t;
 	return 0;
 }
+
+/*
+ * The following values have been generated from Go mkrunetype.c
+ *
+ * http://golang.org/src/lib9/utf/mkrunetype.c
+ */
 
 /* {{{ Spaces */
 

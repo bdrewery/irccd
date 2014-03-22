@@ -67,6 +67,48 @@ int iterator(lua_State *L)
 	return 1;
 }
 
+int l_isdigit(lua_State *L)
+{
+	Luae::push(L, Utf8::isdigit(Luae::check<int>(L, 1)));
+
+	return 1;
+}
+
+int l_isletter(lua_State *L)
+{
+	Luae::push(L, Utf8::isletter(Luae::check<int>(L, 1)));
+
+	return 1;
+}
+
+int l_islower(lua_State *L)
+{
+	Luae::push(L, Utf8::islower(Luae::check<int>(L, 1)));
+
+	return 1;
+}
+
+int l_isspace(lua_State *L)
+{
+	Luae::push(L, Utf8::isspace(Luae::check<int>(L, 1)));
+
+	return 1;
+}
+
+int l_istitle(lua_State *L)
+{
+	Luae::push(L, Utf8::istitle(Luae::check<int>(L, 1)));
+
+	return 1;
+}
+
+int l_isupper(lua_State *L)
+{
+	Luae::push(L, Utf8::isupper(Luae::check<int>(L, 1)));
+
+	return 1;
+}
+
 int l_length(lua_State *L)
 {
 	auto str = Luae::check<std::string>(L, 1);
@@ -83,18 +125,11 @@ int l_length(lua_State *L)
 	return 1;
 }
 
-int l_tostring(lua_State *L)
+int l_list(lua_State *L)
 {
-	auto array = Luae::check<std::u32string>(L, 1);
-
-	try {
-		Luae::push(L, Utf8::toutf8(array));
-	} catch (const std::invalid_argument &error) {
-		Luae::push(L, nullptr);
-		Luae::push(L, error.what());
-
-		return 2;
-	}
+	Luae::push(L, Utf8::toucs(Luae::check<std::string>(L, 1)));
+	Luae::push(L, 1);
+	Luae::pushfunction(L, iterator, 2);
 
 	return 1;
 }
@@ -115,11 +150,23 @@ int l_toarray(lua_State *L)
 	return 1;
 }
 
-int l_list(lua_State *L)
+int l_tolower(lua_State *L)
 {
-	Luae::push(L, Utf8::toucs(Luae::check<std::string>(L, 1)));
-	Luae::push(L, 1);
-	Luae::pushfunction(L, iterator, 2);
+	return convert(L, false);
+}
+
+int l_tostring(lua_State *L)
+{
+	auto array = Luae::check<std::u32string>(L, 1);
+
+	try {
+		Luae::push(L, Utf8::toutf8(array));
+	} catch (const std::invalid_argument &error) {
+		Luae::push(L, nullptr);
+		Luae::push(L, error.what());
+
+		return 2;
+	}
 
 	return 1;
 }
@@ -129,18 +176,19 @@ int l_toupper(lua_State *L)
 	return convert(L, true);
 }
 
-int l_tolower(lua_State *L)
-{
-	return convert(L, false);
-}
-
 const Luae::Reg functions {
+	{ "isdigit",		l_isdigit	},
+	{ "isletter",		l_isletter	},
+	{ "islower",		l_islower	},
+	{ "isspace",		l_isspace	},
+	{ "istitle",		l_istitle	},
+	{ "isupper",		l_isupper	},
 	{ "length",		l_length	},
-	{ "tostring",		l_tostring	},
-	{ "toarray",		l_toarray	},
 	{ "list",		l_list		},
-	{ "toupper",		l_toupper	},
+	{ "toarray",		l_toarray	},
 	{ "tolower",		l_tolower	},
+	{ "tostring",		l_tostring	},
+	{ "toupper",		l_toupper	},
 };
 
 }
