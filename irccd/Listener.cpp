@@ -287,7 +287,6 @@ void Listener::clientRead(Socket &client)
 				execute(ret, client);
 		}
 	} catch (SocketError ex) {
-		Logger::warn("listener: Could not read from client %s", ex.what());
 		removeIt = true;
 	}
 
