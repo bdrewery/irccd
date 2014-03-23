@@ -46,10 +46,14 @@ inline bool isMe(Server::Ptr s, const std::string &target)
 	return identity.nickname == tmp;
 }
 
+#if defined(WITH_LUA)
+
 inline std::string strify(const char *t)
 {
 	return t == nullptr ? std::string("") : t;
 }
+
+#endif
 
 void handleChannel(irc_session_t *session,
 		   const char *,
@@ -309,7 +313,8 @@ void handleNumeric(irc_session_t *session,
 	}
 #else
 	(void)session;
-	(void)orig;
+	(void)event;
+	(void)c;
 	(void)params;
 #endif
 }

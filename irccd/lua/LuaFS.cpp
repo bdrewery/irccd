@@ -99,29 +99,21 @@ int l_opendir(lua_State *L)
 
 int l_exists(lua_State *L)
 {
-	auto path = Luae::check<std::string>(L, 1);
-
-	Luae::push(L, Util::exist(path));
+	Luae::push(L, Util::exist(Luae::check<std::string>(L, 1)));
 
 	return 1;
 }
 
 int l_basename(lua_State *L)
 {
-	auto path = Luae::check<std::string>(L, 1);
-	auto ret = Util::baseName(path);
-
-	Luae::push(L, ret);
+	Luae::push(L, Util::baseName(Luae::check<std::string>(L, 1)));
 
 	return 1;
 }
 
 int l_dirname(lua_State *L)
 {
-	auto path = Luae::check<std::string>(L, 1);
-	auto ret = Util::dirName(path);
-
-	Luae::push<std::string>(L, ret);
+	Luae::push(L, Util::dirName(Luae::check<std::string>(L, 1)));
 
 	return 1;
 }

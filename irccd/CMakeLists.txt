@@ -45,6 +45,8 @@ set(SOURCES
 	Listener.cpp
 	Listener.h
 	main.cpp
+	System.cpp
+	System.h
 )
 
 set(
@@ -108,8 +110,6 @@ if(WITH_LUA52 OR WITH_LUAJIT)
 			Plugin.h
 			Process.cpp
 			Process.h
-			System.cpp
-			System.h
 			Test.cpp
 			Test.h
 			Thread.cpp
