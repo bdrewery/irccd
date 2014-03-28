@@ -63,25 +63,6 @@ function(apply_libraries target libs)
 	endif()
 endfunction()
 
-function(asciidoc_file file)
-	if(ASCIIDOC)
-		string(REGEX REPLACE "(.*)\\.txt$" "\\1" output ${file})
-
-		add_custom_target(${file}
-			COMMENT "Generating asciidoc html from ${file}"
-			WORKING_DIRECTORY ${doc_SOURCE_DIR}
-			COMMAND ${ASCIIDOC}
-			-b html5
-			-a themedir="${doc_SOURCE_DIR}/guides/themes/irccd"
-			-a theme=irccd
-			-o "${GENERATED_DIRECTORY}/guides/${output}.html"
-			   "${doc_SOURCE_DIR}/guides/${file}"
-		)
-
-		add_dependencies(generate-guides ${file})
-	endif()
-endfunction()
-
 function(add_nsis_install command)
 	file(
 		APPEND
@@ -181,20 +162,10 @@ endfunction()
 # documentation.
 #
 macro(define_plugin name file description default)
-	asciidoc_file(plugin-${file}.txt)
-
 	option(WITH_PLUGIN_${name} ${description} ${default})
 
 	if(WITH_PLUGIN_${name})
 		install(FILES ${file}.lua DESTINATION ${MODDIR})
-
-		if(WITH_DOC)
-			# Install its guide
-			install(
-				FILES ${GENERATED_DIRECTORY}/guides/plugin-${file}.html
-				DESTINATION ${DOCDIR}/guides/
-			)
-		endif()
 
 		if(WIN32)
 			add_nsis_install(
@@ -205,37 +176,6 @@ macro(define_plugin name file description default)
 				"Delete \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\\Plugin ${file}.lnk\\\""
 			)
 		endif()
-	endif()
-endmacro()
-
-# ---------------------------------------------------------
-# define_plugin(name file description default)
-#
-# Parameters:
-#	file		- The file (excluding its extension)
-#	name		- The guide name
-#
-# This function install a documentation for the wanted guide.
-#
-macro(define_guide file name)
-	asciidoc_file(${file}.txt)
-
-	if(WITH_DOC)
-		# Install its guide
-		install(
-			FILES ${GENERATED_DIRECTORY}/guides/${file}.html
-			DESTINATION ${DOCDIR}/guides/
-		)
-	endif()
-
-	if(WIN32)
-		add_nsis_install(
-			"CreateShortCut \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\${name}.lnk\\\" \\\"$INSTDIR\\\\doc\\\\guides\\\\${file}.html\\\""
-		)
-
-		add_nsis_uninstall(
-			"Delete \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\${name}.lnk\\\""
-		)
 	endif()
 endmacro()
 

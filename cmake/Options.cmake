@@ -30,9 +30,6 @@ if(WITH_LUA52 AND WITH_LUAJIT)
 	message(FATAL_ERROR "Please select WITH_LUA52 or WITH_LUAJIT")
 endif()
 
-option(WITH_LDOC "Install Lua API documentation" On)
-option(WITH_DOC "Install user guides" On)
-
 # Manual pages on Windows are pretty useless
 if(WIN32)
 	set(USE_MAN "No")
