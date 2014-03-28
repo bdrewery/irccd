@@ -146,6 +146,8 @@ in the file.
 default: 0.
 .It reconnect-timeout
 (int) Number of seconds to wait before retrying, default: 30.
+.It auto-rejoin
+(bool) Rejoin a channel if the bot has been kicked, default: false.
 .El
 .\" PLUGINS
 .Ss plugins

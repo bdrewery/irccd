@@ -181,8 +181,12 @@ void handleKick(irc_session_t *session,
 	auto s = IrcSession::toServer(session);
 
 	// If I was kicked, I need to remove the channel list
-	if (isMe(s, params[1]))
+	if (isMe(s, params[1])) {
 		s->removeChannel(params[0]);
+
+		if (s->options() & Server::OptionAutoRejoin)
+			s->join(params[0]);
+	}
 
 #if defined(WITH_LUA)
 	EventQueue::add(std::bind(&Plugin::onKick, _1, s, strify(params[0]), strify(orig),
