@@ -16,18 +16,6 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-#
-# Delete the documentation from startup menu after the objects
-#
-if(WIN32)
-	add_nsis_uninstall(
-		"
-		  RMDir \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\"
-		  RMDir \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\"
-		"
-	)
-endif()
-
 if(WIN32)
 	message("${IRCCD_PACKAGE_NAME}")
 	set(CPACK_NSIS_PACKAGE_NAME ${IRCCD_PACKAGE_NAME})
@@ -63,7 +51,7 @@ if(WIN32)
 	list(
 		APPEND
 		CPACK_NSIS_EXTRA_INSTALL_COMMANDS
-		"ExecWait '$INSTDIR\\\\tmp\\\\${REDIST_FILE} /passive'"
+		"ExecWait '$INSTDIR\\\\tmp\\\\${REDIST_FILE} /quiet'"
 	)
 
 	set(CPACK_GENERATOR "NSIS")
@@ -89,8 +77,8 @@ if(WIN32)
 	file(READ ${CMAKE_BINARY_DIR}/nsis_extra_uninstall.txt UNINSTALL_COMMANDS)
 
 	# Startup menu for documentation
-	set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS ${INSTALL_COMMANDS})
-	set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS ${UNINSTALL_COMMANDS})
+	set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS ${CPACK_NSIS_EXTRA_INSTALL_COMMANDS} ${INSTALL_COMMANDS})
+	set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS ${CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS} ${UNINSTALL_COMMANDS})
 
 	# Wizards images (currently not working)
 	set(CPACK_PACKAGE_NAME "Irccd")

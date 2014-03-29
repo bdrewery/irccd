@@ -27,10 +27,10 @@ set(MONTH "January")
 set(DAY 30)
 set(YEAR 2014)
 
-define_man(man/irccd.1.in man1)
-define_man(man/irccd.conf.5.in man5)
-define_man(man/irccdctl.1.in man1)
-define_man(man/irccdctl.conf.5.in man5)
+define_man(irccd.1 man1)
+define_man(irccd.conf.5 man5)
+define_man(irccdctl.1 man1)
+define_man(irccdctl.conf.5 man5)
 
 # ---------------------------------------------------------
 # Create a target for doxygen

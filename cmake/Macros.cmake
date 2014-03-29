@@ -166,16 +166,6 @@ macro(define_plugin name file description default)
 
 	if(WITH_PLUGIN_${name})
 		install(FILES ${file}.lua DESTINATION ${MODDIR})
-
-		if(WIN32)
-			add_nsis_install(
-				"CreateShortCut \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\\Plugin ${file}.lnk\\\" \\\"$INSTDIR\\\\doc\\\\guides\\\\plugin-${file}.html\\\""
-			)
-
-			add_nsis_uninstall(
-				"Delete \\\"$SMPROGRAMS\\\\${IRCCD_PACKAGE_NAME}\\\\Documentation\\\\Plugins\\\\Plugin ${file}.lnk\\\""
-			)
-		endif()
 	endif()
 endmacro()
 
@@ -183,20 +173,21 @@ endmacro()
 # define_man(file man)
 #
 # Parameters:
-#	file		- The file to build
+#	file		- The file name to build
 #	man		- The man section
 #
 # This function configure the manual and install it if WITH_MAN is set.
 #
 function(define_man file man)
-	if (WITH_MAN)
-		# Remove .in end
-		string(REGEX REPLACE "(.*)\\.in$" "\\1" output ${file})
-		configure_file("${file}" "${CMAKE_BINARY_DIR}/${output}")
+	if(WITH_MAN)
+		set(path "${doc_SOURCE_DIR}/man/${file}.in")
+		set(output "${doc_BINARY_DIR}/${file}")
+
+		configure_file(${path} ${output})
 
 		install(
-			FILES "${CMAKE_BINARY_DIR}/${output}"
-			DESTINATION "${MANDIR}/${man}"
+			FILES ${output}
+			DESTINATION ${MANDIR}/${man}
 		)
 	endif()
 endfunction()

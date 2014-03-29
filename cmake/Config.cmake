@@ -73,22 +73,3 @@ else()
 	set(ETCDIR "etc"
 	    CACHE STRING "Configuration directory")
 endif()
-
-# ---------------------------------------------------------
-# Documentation variables
-# ---------------------------------------------------------
-
-#
-# The directory where generated documentation should live
-#
-set(GENERATED_DIRECTORY "${CMAKE_SOURCE_DIR}/doc/generated" PARENT_SCOPE)
-
-find_file(
-	LDOC ldoc
-	NAMES ldoc ldoc.lua
-)
-
-find_file(
-	ASCIIDOC asciidoc
-	NAMES asciidoc asciidoc.py
-)
