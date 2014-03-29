@@ -185,6 +185,15 @@ int l_read(lua_State *L)
 	auto d = Luae::check<Directory>(L, 1);
 
 	new (L) DirectoryIterator(d->cbegin(), d->cend());
+	LuaeTable::create(L);
+	Luae::pushfunction(L, [] (lua_State *L) -> int {
+		Luae::toType<DirectoryIterator *>(L, Luae::upvalueindex(1))->~DirectoryIterator();
+
+		return 0;
+	});;
+	Luae::setfield(L, -2, "__gc");
+	Luae::setmetatable(L, -2);
+
 	Luae::pushfunction(L, [] (lua_State *L) -> int {
 		auto it = Luae::toType<DirectoryIterator *>(L, Luae::upvalueindex(1));
 
@@ -252,6 +261,15 @@ int l_pairs(lua_State *L)
 	auto d = Luae::check<Directory>(L, 1);
 
 	new (L) DirectoryIterator(d->cbegin(), d->cend());
+	LuaeTable::create(L);
+	Luae::pushfunction(L, [] (lua_State *L) -> int {
+		Luae::toType<DirectoryIterator *>(L, Luae::upvalueindex(1))->~DirectoryIterator();
+
+		return 0;
+	});;
+	Luae::setfield(L, -2, "__gc");
+	Luae::setmetatable(L, -2);
+
 	Luae::pushfunction(L, [] (lua_State *L) -> int {
 		auto it = Luae::toType<DirectoryIterator *>(L, Luae::upvalueindex(1));
 
