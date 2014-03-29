@@ -10,6 +10,10 @@ CURRENT
   * Added more fields in Date:calendar,
   * Add option auto-rejoin to server.
 
+1.1.4 March 28, 2014
+---------------------------------------
+  * Fix Visual C++ redistributable installation.
+
 1.1.3 March 22, 2014
 ---------------------------------------
   * Fix default internet socket address,
