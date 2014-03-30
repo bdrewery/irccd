@@ -80,7 +80,7 @@ using IrcPrefixes	= std::map<IrcChanNickMode, char>;
  * Server class, each class define a server that irccd
  * can connect to
  */
-class Server : public std::enable_shared_from_this<Server> {
+class Server {
 public:
 	/**
 	 * @struct Channel
@@ -151,10 +151,10 @@ public:
 	 * @brief Some options for the server
 	 */
 	enum Options {
-		OptionJoinInvite	= (1 << 0),
-		OptionAutoRejoin	= (1 << 1),
-		OptionSsl		= (1 << 2),
-		OptionSslNoVerify	= (1 << 3)
+		OptionJoinInvite	= (1 << 0),	//! join on invite
+		OptionAutoRejoin	= (1 << 1),	//! auto rejoin after kick
+		OptionSsl		= (1 << 2),	//! use SSL
+		OptionSslNoVerify	= (1 << 3)	//! do not verify SSL
 	};
 
 	/**

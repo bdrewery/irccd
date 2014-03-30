@@ -485,30 +485,131 @@ public:
 	 * ------------------------------------------------- */
 
 	/**
-	 * Preload a library, it will be added to package.preload so the
-	 * user can successfully call require "name". In order to work, you need
-	 * to open luaopen_package and luaopen_base first.
+	 * Calls a Lua function in non-protected mode.
 	 *
 	 * @param L the Lua state
-	 * @param name the module name
-	 * @param func the opening library
-	 * @see require
+	 * @param np the number of parameters
+	 * @param nr the number of return values
 	 */
-	static void preload(lua_State *L,
-			    const std::string &name,
-			    lua_CFunction func);
+	static inline void call(lua_State *L, int np = 0, int nr = 0)
+	{
+		lua_call(L, np, nr);
+	}
 
 	/**
-	 * Set a field to the table at the given index.
+	 * Ensure that there are at least extra free stack slots in the stack.
 	 *
 	 * @param L the Lua state
-	 * @param idx the table index
-	 * @param name the field name
-	 * @see set
+	 * @param extra the extra data
+	 * @return true if possible
 	 */
-	static inline void setfield(lua_State *L, int idx, const std::string &name)
+	static inline int checkstack(lua_State *L, int extra)
 	{
-		lua_setfield(L, idx, name.c_str());
+		return lua_checkstack(L, extra);
+	}
+
+	/**
+	 * Check the type at the given index. Calls luaL_error on bad
+	 * type.
+	 *
+	 * @param L the Lua state
+	 * @param index the the index
+	 * @param type the type to check
+	 */
+	static inline void checktype(lua_State *L, int index, int type)
+	{
+		luaL_checktype(L, index, type);
+	}
+
+	/**
+	 * Compares two Lua values.
+	 *
+	 * Operation is one of:
+	 *
+	 * * LUA_OPEQ,
+	 * * LUA_OPLT,
+	 * * LUA_OPLE
+	 *
+	 * @param L the Lua state
+	 * @param index1 the first value
+	 * @param index2 the second value
+	 * @param op the operation
+	 * @return true if index1 statisfies op compared to index2
+	 */
+	static inline bool compare(lua_State *L, int index1, int index2, int op)
+	{
+		return lua_compare(L, index1, index2, op) == 1;
+	}
+
+	/**
+	 * Concatenate the n values at the top of the stack and pops them.
+	 * Leaves the result at the top of the stack.
+	 *
+	 * @param L the Lua state
+	 * @param n the number to concat
+	 */
+	static inline void concat(lua_State *L, int n)
+	{
+		lua_concat(L, n);
+	}
+
+	/**
+	 * Moves the element at the index from into the valid index to.
+	 *
+	 * @param L the Lua state
+	 * @param from the from index
+	 * @param to the destination index
+	 */
+	static inline void copy(lua_State *L, int from, int to)
+	{
+		lua_copy(L, from, to);
+	}
+
+	/**
+	 * Load and execute a file.
+	 *
+	 * @param L the Lua state
+	 * @param path the the path
+	 * @throw std::runtime_error on error
+	 */
+	static inline void dofile(lua_State *L, const std::string &path)
+	{
+		doexecute(L, luaL_dofile(L, path.c_str()));
+	}
+
+	/**
+	 * Load and execute a string.
+	 *
+	 * @param L the Lua state
+	 * @param data the data
+	 * @throw std::runtime_error on error
+	 */
+	static inline void dostring(lua_State *L, const std::string &data)
+	{
+		doexecute(L, luaL_dostring(L, data.c_str()));
+	}
+
+	/**
+	 * Generate an error with the string at the top of the stack.
+	 *
+	 * @param L the Lua state
+	 * @return nothing
+	 */
+	static inline int error(lua_State *L)
+	{
+		return lua_error(L);
+	}
+
+	/**
+	 * Controls the garbage collector.
+	 *
+	 * @param L the Lua state
+	 * @param what the action
+	 * @param data optional GC data
+	 */
+	static inline int gc(lua_State *L, int what, int data = 0)
+	{
+		return lua_gc(L, what, data);
 	}
 
 	/**
@@ -535,36 +636,49 @@ public:
 	}
 
 	/**
-	 * Load all Lua libraries.
+	 * Get the metatable of the value at the given index. Returns false
+	 * if does not have a metatable and pushes nothing.
 	 *
 	 * @param L the Lua state
+	 * @param index the value index
 	 */
-	static inline void openlibs(lua_State *L)
+	static inline bool getmetatable(lua_State *L, int index)
 	{
-		luaL_openlibs(L);
+		return lua_getmetatable(L, index) == 1;
 	}
 
 	/**
-	 * Set a global.
+	 * Set the value at the given index. Top value is the value to assign
+	 * key is just below the value.
 	 *
 	 * @param L the Lua state
-	 * @param name the name
+	 * @param index the value index
 	 */
-	static inline void setglobal(lua_State *L, const std::string &name)
+	static inline void gettable(lua_State *L, int index)
 	{
-		lua_setglobal(L, name.c_str());
+		lua_gettable(L, index);
 	}
 
 	/**
-	 * Push a function with an optional number of upvalues.
+	 * Get the current stack size.
 	 *
 	 * @param L the Lua state
-	 * @param func the function
-	 * @param nup the number of up values
+	 * @return the stack size
 	 */
-	static inline void pushfunction(lua_State *L, lua_CFunction func, int nup = 0)
+	static inline int gettop(lua_State *L)
 	{
-		lua_pushcclosure(L, func, nup);
+		return lua_gettop(L);
+	}
+
+	/**
+	 * Pushes the Lua value associated with the userdata.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 */
+	static inline void getuservalue(lua_State *L, int index)
+	{
+		lua_getuservalue(L, index);
 	}
 
 	/**
@@ -579,14 +693,15 @@ public:
 	}
 
 	/**
-	 * Get the up value index.
+	 * Push the result of the operator '#' from the value at the given
+	 * index.
 	 *
-	 * @param index the index
-	 * @return the real index
+	 * @param L the Lua state
+	 * @param index the value index
 	 */
-	static inline int upvalueindex(int index)
+	static inline void len(lua_State *L, int index)
 	{
-		return lua_upvalueindex(index);
+		lua_len(L, index);
 	}
 
 	/**
@@ -598,17 +713,6 @@ public:
 	static inline void newmetatable(lua_State *L, const std::string &name)
 	{
 		luaL_newmetatable(L, name.c_str());
-	}
-
-	/**
-	 * Push a copy of the value at the top of stack.
-	 *
-	 * @param L the Lua state
-	 * @param index the index
-	 */
-	static inline void pushvalue(lua_State *L, int index)
-	{
-		lua_pushvalue(L, index);
 	}
 
 	/**
@@ -636,6 +740,224 @@ public:
 			lua_pushcfunction(L, p.second);
 			lua_setfield(L, -2, p.first);
 		}
+	}
+
+	/**
+	 * Pops a key from the stack and pushes a key-value pair from the table
+	 * at the given index.
+	 *
+	 * @param L the Lua state
+	 * @param index the table index
+	 * @return true if there are still elements
+	 */
+	static inline bool next(lua_State *L, int index)
+	{
+		return lua_next(L, index) == 1;
+	}
+
+	/**
+	 * Load all Lua libraries.
+	 *
+	 * @param L the Lua state
+	 */
+	static inline void openlibs(lua_State *L)
+	{
+		luaL_openlibs(L);
+	}
+
+	/**
+	 * Wrapper around pcall, throw instead of returning an error code.
+	 *
+	 * @param L the Lua state
+	 * @param np the number of parameters
+	 * @param nr the number of return value
+	 * @param error the message handler
+	 */
+	static inline void pcall(lua_State *L, int np, int nr, int error = 0)
+	{
+		if (lua_pcall(L, np, nr, error) != LUA_OK) {
+			auto error = lua_tostring(L, -1);
+			lua_pop(L, 1);
+
+			throw std::runtime_error(error);
+		}
+	}
+
+	/**
+	 * Pop arguments from the stack.
+	 *
+	 * @param L the Lua state
+	 * @param count the number of values to pop
+	 */
+	static inline void pop(lua_State *L, int count = 1)
+	{
+		lua_pop(L, count);
+	}
+
+	/**
+	 * Pushes a copy of the value at the given index.
+	 *
+	 * @param L the Lua state
+	 * @param index the value to copy
+	 */
+	static inline void pushvalue(lua_State *L, int index)
+	{
+		lua_pushvalue(L, index);
+	}
+
+	/**
+	 * Returns true if the values are primitively equal.
+	 *
+	 * @param L the Lua state
+	 * @param index1 the first value
+	 * @param index2 the second value
+	 * @return true if they equals
+	 */
+	static inline bool rawequal(lua_State *L, int index1, int index2)
+	{
+		return lua_rawequal(L, index1, index2) == 1;
+	}
+
+	/**
+	 * Like gettable but with raw access.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 */
+	static inline void rawget(lua_State *L, int index)
+	{
+		lua_rawget(L, index);
+	}
+
+	/**
+	 * Like gettable but with raw access.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @param n the nt
+	 */
+	static inline void rawget(lua_State *L, int index, int n)
+	{
+		lua_rawgeti(L, index, n);
+	}
+
+	/**
+	 * Like rawgeti but with pointer.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @param p the pointer key
+	 */
+	static inline void rawget(lua_State *L, int index, const void *p)
+	{
+		lua_rawgetp(L, index, p);
+	}
+
+	/**
+	 * Get the value length.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @return the raw length
+	 */
+	static inline int rawlen(lua_State *L, int index)
+	{
+		return lua_rawlen(L, index);
+	}
+
+	/**
+	 * Similar to settable but without raw assignment.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 */
+	static inline void rawset(lua_State *L, int index)
+	{
+		lua_rawset(L, index);
+	}
+
+	/**
+	 * Set the value at the top of stack to the ntn value at the value
+	 * at the given index.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @param n the nth index
+	 */
+	static inline void rawset(lua_State *L, int index, int n)
+	{
+		lua_rawseti(L, index, n);
+	}
+
+	/**
+	 * Like rawseti with a void pointer as the key.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @param ptr the pointer key
+	 */
+	static inline void rawset(lua_State *L, int index, const void *ptr)
+	{
+		lua_rawsetp(L, index, ptr);
+	}
+
+	/**
+	 * Push a function with an optional number of upvalues.
+	 *
+	 * @param L the Lua state
+	 * @param func the function
+	 * @param nup the number of up values
+	 */
+	static inline void pushfunction(lua_State *L, lua_CFunction func, int nup = 0)
+	{
+		lua_pushcclosure(L, func, nup);
+	}
+
+	/**
+	 * Create a unique reference to the table at the given index.
+	 *
+	 * @param L the Lua state
+	 * @param index the table index
+	 * @return the reference
+	 */
+	static inline int ref(lua_State *L, int index)
+	{
+		return luaL_ref(L, index);
+	}
+
+	/**
+	 * Remove the element at the given index.
+	 *
+	 * @param L the Lua state
+	 * @param index the table index
+	 */
+	static inline void remove(lua_State *L, int index)
+	{
+		lua_remove(L, index);
+	}
+
+	/**
+	 * Replace the element at the given index by the one at the top.
+	 *
+	 * @param L the Lua state
+	 * @param index the new index
+	 */
+	static inline void replace(lua_State *L, int index)
+	{
+		lua_replace(L, index);
+	}
+
+	/**
+	 * Set a field to the table at the given index.
+	 *
+	 * @param L the Lua state
+	 * @param idx the table index
+	 * @param name the field name
+	 * @see set
+	 */
+	static inline void setfield(lua_State *L, int idx, const std::string &name)
+	{
+		lua_setfield(L, idx, name.c_str());
 	}
 
 	/**
@@ -673,225 +995,14 @@ public:
 	}
 
 	/**
-	 * Replace the element at the given index by the one at the top.
+	 * Set a global.
 	 *
 	 * @param L the Lua state
-	 * @param index the new index
+	 * @param name the name
 	 */
-	static inline void replace(lua_State *L, int index)
+	static inline void setglobal(lua_State *L, const std::string &name)
 	{
-		lua_replace(L, index);
-	}
-
-	/**
-	 * Remove the element at the given index.
-	 *
-	 * @param L the Lua state
-	 * @param index the table index
-	 */
-	static inline void remove(lua_State *L, int index)
-	{
-		lua_remove(L, index);
-	}
-
-	/**
-	 * Unref the value from the table.
-	 *
-	 * @param L the Lua state
-	 * @param index the table index
-	 * @param ref the reference
-	 */
-	static inline void unref(lua_State *L, int index, int ref)
-	{
-		luaL_unref(L, index, ref);
-	}
-
-	/**
-	 * Wrapper around pcall, throw instead of returning an error code.
-	 *
-	 * @param L the Lua state
-	 * @param np the number of parameters
-	 * @param nr the number of return value
-	 * @param error the message handler
-	 */
-	static inline void pcall(lua_State *L, int np, int nr, int error = 0)
-	{
-		if (lua_pcall(L, np, nr, error) != LUA_OK) {
-			auto error = lua_tostring(L, -1);
-			lua_pop(L, 1);
-
-			throw std::runtime_error(error);
-		}
-	}
-
-	/**
-	 * Create a unique reference to the table at the given index.
-	 *
-	 * @param L the Lua state
-	 * @param index the table index
-	 * @return the reference
-	 */
-	static inline int ref(lua_State *L, int index)
-	{
-		return luaL_ref(L, index);
-	}
-
-	/**
-	 * Load a library just like it was loaded with require.
-	 *
-	 * @param L the Lua state
-	 * @param name the module name
-	 * @param func the function
-	 * @param global store as global
-	 */
-	static void require(lua_State *L,
-			    const std::string &name,
-			    lua_CFunction func,
-			    bool global);
-
-	/**
-	 * Load and execute a file.
-	 *
-	 * @param L the Lua state
-	 * @param path the the path
-	 * @throw std::runtime_error on error
-	 */
-	static inline void dofile(lua_State *L, const std::string &path)
-	{
-		doexecute(L, luaL_dofile(L, path.c_str()));
-	}
-
-	/**
-	 * Load and execute a string.
-	 *
-	 * @param L the Lua state
-	 * @param data the data
-	 * @throw std::runtime_error on error
-	 */
-	static inline void dostring(lua_State *L, const std::string &data)
-	{
-		doexecute(L, luaL_dostring(L, data.c_str()));
-	}
-
-	/**
-	 * Get the type at the given index.
-	 *
-	 * @param L the Lua state
-	 * @param index the value index
-	 * @return the type
-	 */
-	static inline int type(lua_State *L, int index)
-	{
-		return lua_type(L, index);
-	}
-
-	/**
-	 * Calls a Lua function in non-protected mode.
-	 *
-	 * @param L the Lua state
-	 * @param np the number of parameters
-	 * @param nr the number of return values
-	 */
-	static inline void call(lua_State *L, int np = 0, int nr = 0)
-	{
-		lua_call(L, np, nr);
-	}
-
-	/**
-	 * Check the type at the given index. Calls luaL_error on bad
-	 * type.
-	 *
-	 * @param L the Lua state
-	 * @param index the the index
-	 * @param type the type to check
-	 */
-	static inline void checktype(lua_State *L, int index, int type)
-	{
-		luaL_checktype(L, index, type);
-	}
-
-	/**
-	 * Set the value at the top of stack to the ntn value at the value
-	 * at the given index.
-	 *
-	 * @param L the Lua state
-	 * @param index the value index
-	 * @param n the nth index
-	 */
-	static inline void rawset(lua_State *L, int index, int n)
-	{
-		lua_rawseti(L, index, n);
-	}
-
-	/**
-	 * Like rawseti with a void pointer as the key.
-	 *
-	 * @param L the Lua state
-	 * @param index the value index
-	 * @param ptr the pointer key
-	 */
-	static inline void rawset(lua_State *L, int index, const void *ptr)
-	{
-		lua_rawsetp(L, index, ptr);
-	}
-
-	/**
-	 * Like gettable but with raw access.
-	 *
-	 * @param L the Lua state
-	 * @param index the value index
-	 */
-	static inline void rawget(lua_State *L, int index)
-	{
-		lua_rawget(L, index);
-	}
-
-	/**
-	 * Like gettable but with raw access.
-	 *
-	 * @param L the Lua state
-	 * @param index the value index
-	 * @param n the nt
-	 */
-	static inline void rawget(lua_State *L, int index, int n)
-	{
-		lua_rawgeti(L, index, n);
-	}
-
-	/**
-	 * Get the value length.
-	 *
-	 * @param L the Lua state
-	 * @param index the value index
-	 * @return the raw length
-	 */
-	static inline int rawlen(lua_State *L, int index)
-	{
-		return lua_rawlen(L, index);
-	}
-
-	/**
-	 * Set the value at the given index. Top value is the value to assign
-	 * key is just below the value.
-	 *
-	 * @param L the Lua state
-	 * @param index the value index
-	 */
-	static inline void gettable(lua_State *L, int index)
-	{
-		lua_gettable(L, index);
-	}
-
-	/**
-	 * Does t[n] where n is the value at the top of the stack and the key
-	 * just below the value.
-	 *
-	 * @param L the Lua state
-	 * @param index the value index
-	 */
-	static inline void settable(lua_State *L, int index)
-	{
-		lua_settable(L, index);
+		lua_setglobal(L, name.c_str());
 	}
 
 	/**
@@ -907,30 +1018,130 @@ public:
 	}
 
 	/**
-	 * Get the current stack size.
+	 * Does t[n] where n is the value at the top of the stack and the key
+	 * just below the value.
 	 *
 	 * @param L the Lua state
-	 * @return the stack size
+	 * @param index the value index
 	 */
-	static inline int gettop(lua_State *L)
+	static inline void settable(lua_State *L, int index)
 	{
-		return lua_gettop(L);
+		lua_settable(L, index);
 	}
 
 	/**
-	 * Pop arguments from the stack.
+	 * Set the stack size.
 	 *
 	 * @param L the Lua state
-	 * @param count the number of values to pop
+	 * @param index the index
 	 */
-	static inline void pop(lua_State *L, int count)
+	static inline void settop(lua_State *L, int index = 0)
 	{
-		lua_pop(L, count);
+		lua_settop(L, index);
+	}
+
+	/**
+	 * Pops a table or nil from the top stack and set it as the new
+	 * associated value to the userdata.
+	 *
+	 * @param L the Lua state
+	 * @param index the userdata index
+	 */
+	static inline void setuservalue(lua_State *L, int index)
+	{
+		lua_setuservalue(L, index);
+	}
+
+	/**
+	 * Get the type at the given index.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @return the type
+	 */
+	static inline int type(lua_State *L, int index)
+	{
+		return lua_type(L, index);
+	}
+
+	/**
+	 * Get the type name.
+	 *
+	 * @param L the Lua state
+	 * @param type the type
+	 * @return the name
+	 * @see type
+	 */
+	static inline const char *typeName(lua_State *L, int type)
+	{
+		return lua_typename(L, type);
+	}
+
+	/**
+	 * Get the type name from a index.
+	 *
+	 * @param L the Lua state
+	 * @param index the value index
+	 * @return the name
+	 */
+	static inline const char *typeNamei(lua_State *L, int index)
+	{
+		return luaL_typename(L, index);
+	}
+
+	/**
+	 * Unref the value from the table.
+	 *
+	 * @param L the Lua state
+	 * @param index the table index
+	 * @param ref the reference
+	 */
+	static inline void unref(lua_State *L, int index, int ref)
+	{
+		luaL_unref(L, index, ref);
+	}
+
+	/**
+	 * Get the up value index.
+	 *
+	 * @param index the index
+	 * @return the real index
+	 */
+	static inline int upvalueindex(int index)
+	{
+		return lua_upvalueindex(index);
 	}
 
 	/* -------------------------------------------------
 	 * Extended API
 	 * ------------------------------------------------- */
+
+	/**
+	 * Preload a library, it will be added to package.preload so the
+	 * user can successfully call require "name". In order to work, you need
+	 * to open luaopen_package and luaopen_base first.
+	 *
+	 * @param L the Lua state
+	 * @param name the module name
+	 * @param func the opening library
+	 * @see require
+	 */
+	static void preload(lua_State *L,
+			    const std::string &name,
+			    lua_CFunction func);
+
+	/**
+	 * Load a library just like it was loaded with require.
+	 *
+	 * @param L the Lua state
+	 * @param name the module name
+	 * @param func the function
+	 * @param global store as global
+	 */
+	static void require(lua_State *L,
+			    const std::string &name,
+			    lua_CFunction func,
+			    bool global);
 
 	/**
 	 * Push standard objects. These objects are usually primitives types
