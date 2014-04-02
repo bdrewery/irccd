@@ -49,11 +49,11 @@ int LuaParser::readTuning(lua_State *L, int idx)
 		if (rel < 0)
 			--rel;
 
-		while (lua_next(L, rel)) {
-			if (lua_isnumber(L, -1))
-				tuning |= lua_tointeger(L, -1);
+		while (Luae::next(L, rel)) {
+			if (Luae::type(L, -1) == LUA_TNUMBER)
+				tuning |= Luae::get<int>(L, -1);
 
-			Luae::pop(L, 1);
+			Luae::pop(L);
 		}
 	}
 
@@ -290,7 +290,7 @@ int l_parserHasSection(lua_State *L)
 int l_parserGetSection(lua_State *L)
 {
 	auto p = Luae::check<ParserWrapper>(L, 1);
-	auto name = luaL_checkstring(L, 2);
+	auto name = Luae::check<std::string>(L, 2);
 	int ret = 0;
 
 	try {
@@ -298,8 +298,8 @@ int l_parserGetSection(lua_State *L)
 
 		ret = 1;
 	} catch (std::out_of_range ex) {
-		lua_pushnil(L);
-		lua_pushfstring(L, ex.what());
+		Luae::push(L, nullptr);
+		Luae::push(L, ex.what());
 
 		ret = 2;
 	}
@@ -449,7 +449,7 @@ int l_sectionHasOption(lua_State *L)
 int l_sectionGetOption(lua_State *L)
 {
 	auto s = Luae::check<Section>(L, 1);
-	auto name = luaL_checkstring(L, 2);
+	auto name = Luae::check<std::string>(L, 2);
 	std::string type = "string";
 
 	if (Luae::gettop(L) >= 3)
@@ -457,7 +457,7 @@ int l_sectionGetOption(lua_State *L)
 
 	if (!s->hasOption(name)) {
 		Luae::push(L, nullptr);
-		lua_pushfstring(L, "option %s not found", name);
+		Luae::pushfstring(L, "option %s not found", name.c_str());
 
 		return 2;
 	}
@@ -527,7 +527,7 @@ int l_sectionPairs(lua_State *L)
 	 */
 	new (L) SectionIterator(s->begin(), s->end());
 	Luae::pushfunction(L, [] (lua_State *L) -> int {
-		auto it = Luae::toType<SectionIterator *>(L, lua_upvalueindex(1));
+		auto it = Luae::toType<SectionIterator *>(L, Luae::upvalueindex(1));
 
 		if (it->current == it->end)
 			return 0;

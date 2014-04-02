@@ -25,13 +25,12 @@ Message::Message(const Message &m)
 
 bool Message::isFinished(const std::string &data, std::string &ret)
 {
-	std::size_t pos;
-	std::string tmp;
-
 	m_data << data;
-	tmp = m_data.str();
 
-	if ((pos = tmp.find_first_of("\n")) == std::string::npos)
+	auto tmp = m_data.str();
+	auto pos = tmp.find_first_of("\n");
+
+	if (pos == std::string::npos)
 		return false;
 
 	// Remove the '\n'

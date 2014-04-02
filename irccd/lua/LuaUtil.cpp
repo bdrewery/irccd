@@ -328,7 +328,7 @@ int l_dateTostring(lua_State *L)
 {
 	auto date = Luae::check<Date>(L, 1);
 
-	lua_pushfstring(L, "%d", date->getTimestamp());
+	Luae::pushfstring(L, "%d", date->getTimestamp());
 
 	return 1;
 }

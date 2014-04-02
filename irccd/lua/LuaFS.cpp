@@ -248,8 +248,7 @@ int l_tostring(lua_State *L)
 {
 	auto d = Luae::check<Directory>(L, 1);
 
-	// TODO
-	lua_pushfstring(L, "Directory with %d entries", d->count());
+	Luae::pushfstring(L, "Directory with %d entries", d->count());
 
 	return 1;
 }

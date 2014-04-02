@@ -143,7 +143,7 @@ void Irccd::openConfig()
 void Irccd::readGeneral(const Parser &config)
 {
 	if (config.hasSection("general")) {
-		Section general = config.getSection("general");
+		auto general = config.getSection("general");
 
 #if defined(WITH_LUA)
 		// Extract parameters that are needed for the next
@@ -304,9 +304,7 @@ void Irccd::extractInternet(const Section &s, int type)
 #if !defined(_WIN32)
 void Irccd::extractUnix(const Section &s, int type)
 {
-	std::string path;
-
-	path = s.requireOption<std::string>("path");
+	auto path = s.requireOption<std::string>("path");
 
 	// First remove the dust
 	if (Util::exist(path) && remove(path.c_str()) < 0) {
@@ -394,7 +392,7 @@ void Irccd::extractChannels(const Section &section, Server::Ptr server)
 		list = section.getOption<std::string>("channels");
 		channels = Util::split(list, " \t");
 
-		for (const std::string &s : channels)
+		for (const auto &s : channels)
 			server->addChannel(Server::toChannel(s));
 	}
 }
@@ -439,11 +437,10 @@ const Server::Identity &Irccd::findIdentity(const std::string &name)
 	 * When name is length 0 that mean user hasn't defined an identity
 	 * because it's optional, we don't write an empty message error.
 	 */
-
 	if (name.length() == 0)
 		return m_defaultIdentity;
 
-	for (const Server::Identity &i : m_identities)
+	for (const auto &i : m_identities)
 		if (i.name == name)
 			return i;
 
@@ -470,8 +467,6 @@ int Irccd::run()
 			System::sleep(1);
 		else
 			Listener::process();
-
-		//Server::flush();
 	}
 
 	stop();

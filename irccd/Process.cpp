@@ -85,32 +85,30 @@ const Process::Libraries Process::irccdLibs = {
 
 Process::Ptr Process::create()
 {
+	/*
+	 * Use the std::shared_ptr constructor because std::make_shared
+	 * needs a default constructor which is private for Process.
+	 */
 	return std::shared_ptr<Process>(new Process);
 }
 
 void Process::initialize(Ptr process, const Info &info)
 {
-	auto setField = [&] (const std::string &which, const std::string &name) {
-		lua_pushlstring(*process, which.c_str(), which.length());
-		lua_setfield(*process, -2, name.c_str());
-	};
-
 	auto L = static_cast<lua_State *>(*process);
 
 	LUAE_STACK_CHECKBEGIN(L);
 
 	/* Plugin information */
-	lua_createtable(L, 0, 0);
+	LuaeTable::create(L);
+	LuaeTable::set(L, -1, "name", info.name);
+	LuaeTable::set(L, -1, "path", info.path);
+	LuaeTable::set(L, -1, "home", info.home);
+	LuaeTable::set(L, -1, "author", info.author);
+	LuaeTable::set(L, -1, "comment", info.comment);
+	LuaeTable::set(L, -1, "version", info.version);
+	LuaeTable::set(L, -1, "license", info.license);
+	Luae::setfield(L, LUA_REGISTRYINDEX, FieldInfo);
 
-	setField(info.name, "name");
-	setField(info.path, "path");
-	setField(info.home, "home");
-	setField(info.author, "author");
-	setField(info.comment, "comment");
-	setField(info.version, "version");
-	setField(info.license, "license");
-
-	lua_setfield(L, LUA_REGISTRYINDEX, FieldInfo);
 	LUAE_STACK_CHECKEQUALS(L);
 }
 
@@ -119,9 +117,9 @@ Process::Info Process::info(lua_State *L)
 	LUAE_STACK_CHECKBEGIN(L);
 	Process::Info info;
 
-	lua_getfield(L, LUA_REGISTRYINDEX, FieldInfo);
-	if (lua_type(L, -1) != LUA_TTABLE)
-		luaL_error(L, "uninitialized state");
+	Luae::getfield(L, LUA_REGISTRYINDEX, FieldInfo);
+	if (Luae::type(L, -1) != LUA_TTABLE)
+		Luae::error(L, "uninitialized state");
 
 	info.name = LuaeTable::require<std::string>(L, -1, "name");
 	info.path = LuaeTable::require<std::string>(L, -1, "path");
@@ -131,7 +129,7 @@ Process::Info Process::info(lua_State *L)
 	info.version = LuaeTable::require<std::string>(L, -1, "version");
 	info.license = LuaeTable::require<std::string>(L, -1, "license");
 
-	lua_pop(L, 1);
+	Luae::pop(L);
 	LUAE_STACK_CHECKEQUALS(L);
 
 	return info;

@@ -60,9 +60,8 @@ struct ClientHandler {
 Optional getOptional(const std::string &line)
 {
 	Optional opt;
-	size_t pos;
 
-	pos = line.find(":");
+	auto pos = line.find(":");
 	if (pos != std::string::npos) {
 		opt = std::make_pair(
 			line.substr(0, pos),

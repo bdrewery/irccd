@@ -313,7 +313,7 @@ SocketAddressPtr checkAddress(lua_State *L, int index, const Socket &sc)
 
 	SocketAddressPtr address;
 
-	luaL_checktype(L, index, LUA_TTABLE);
+	Luae::checktype(L, index, LUA_TTABLE);
 
 	/*
 	 * If the field AddrField is present, we create the address with that
@@ -321,17 +321,12 @@ SocketAddressPtr checkAddress(lua_State *L, int index, const Socket &sc)
 	 */
 	if (LuaeTable::type(L, index, AddrField) == LUA_TSTRING) {
 		sockaddr_storage st;
-		const char *data;
-		int length;
 
-		lua_getfield(L, index, AddrField);
-		data = lua_tostring(L, -1);
-		lua_pop(L, 1);
-
-		length = LuaeTable::require<int>(L, index, LengthField);
+		auto data = LuaeTable::require<std::string>(L, index, AddrField);
+		auto length = LuaeTable::require<int>(L, index, LengthField);
 
 		std::memset(&st, 0, sizeof (sockaddr_storage));
-		std::memcpy(&st, data, length);
+		std::memcpy(&st, data.c_str(), length);
 
 		address = SocketAddressPtr(new SocketAddress(st, length));
 	} else {
@@ -369,8 +364,8 @@ void pushUnix(lua_State *L, const SocketAddress &address)
 {
 	auto sun = reinterpret_cast<const sockaddr_un *>(&address.address());
 
-	lua_pushstring(L, sun->sun_path);
-	lua_setfield(L, -2, "path");
+	Luae::push(L, sun->sun_path);
+	Luae::setfield(L, -2, "path");
 }
 
 #endif
@@ -399,11 +394,8 @@ void pushInet(lua_State *L, const SocketAddress &address)
 	    service, sizeof (service), 0);
 
 	if (e == 0) {
-		lua_pushstring(L, host);
-		lua_setfield(L, -2, "host");
-
-		lua_pushstring(L, service);
-		lua_setfield(L, -2, "service");
+		LuaeTable::set(L, -2, "host", host);
+		LuaeTable::set(L, -2, "service", service);
 	}
 
 	// 2. Now get these info with numeric variants
@@ -412,11 +404,8 @@ void pushInet(lua_State *L, const SocketAddress &address)
 	    service, sizeof (service), flags);
 
 	if (e == 0) {
-		lua_pushstring(L, host);
-		lua_setfield(L, -2, "ip");
-
-		lua_pushinteger(L, std::atoi(service));
-		lua_setfield(L, -2, "port");
+		LuaeTable::set(L, -2, "ip", host);
+		LuaeTable::set(L, -2, "port", std::atoi(service));
 	}
 }
 
@@ -802,7 +791,7 @@ int l_tostring(lua_State *L)
 {
 	auto s = Luae::toType<Socket *>(L, 1, SocketType);
 
-	lua_pushfstring(L, "socket %d", s->getType());
+	Luae::pushfstring(L, "socket %d", s->getType());
 
 	return 1;
 }
@@ -1059,7 +1048,7 @@ int l_listenerToStr(lua_State *L)
 {
 	auto l = Luae::toType<SocketListener *>(L, 1, ListenerType);
 
-	lua_pushfstring(L, "listener of %d clients", l->size());
+	Luae::pushfstring(L, "listener of %d clients", l->size());
 
 	return 1;
 }

@@ -53,26 +53,13 @@ struct Luae::Convert<IrcWhois> {
 	 * @param whois the whois information
 	 */
 	static void push(lua_State *L, const IrcWhois &whois)
-	{	
-		lua_createtable(L, 0, 0);
-		lua_pushlstring(L, whois.nick.c_str(), whois.nick.length());
-		lua_setfield(L, -2, "nickname");
-		lua_pushlstring(L, whois.user.c_str(), whois.user.length());
-		lua_setfield(L, -2, "user");
-		lua_pushlstring(L, whois.host.c_str(), whois.host.length());
-		lua_setfield(L, -2, "host");
-		lua_pushlstring(L, whois.realname.c_str(), whois.realname.length());
-		lua_setfield(L, -2, "realname");
-
-		// Store optionnal channels
-		lua_createtable(L, 0, 0);
-
-		for (size_t i = 4; i < whois.channels.size(); ++i) {
-			lua_pushstring(L, whois.channels[i].c_str());
-			lua_rawseti(L, -2, i - 3);
-		}
-
-		lua_setfield(L, -2, "channels");
+	{
+		LuaeTable::create(L);
+		LuaeTable::set(L, -1, "nickname", whois.nick);
+		LuaeTable::set(L, -1, "user", whois.user);
+		LuaeTable::set(L, -1, "host", whois.host);
+		LuaeTable::set(L, -1, "realname", whois.realname);
+		LuaeTable::set(L, -1, "channels", whois.channels);
 	}
 };
 

@@ -504,8 +504,7 @@ int l_connect(lua_State *L)
 
 	if (Server::has(info.name)) {
 		Luae::push(L, false);
-		lua_pushfstring(L, "server %s already connected",
-		    info.name.c_str());
+		Luae::pushfstring(L, "server %s already connected", info.name.c_str());
 
 		return 2;
 	}

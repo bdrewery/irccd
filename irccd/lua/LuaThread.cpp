@@ -204,7 +204,7 @@ int l_threadToString(lua_State *L)
 {
 	Thread *t = Luae::toType<Thread *>(L, 1, ThreadType);
 
-	lua_pushfstring(L, "thread %p", t);
+	Luae::pushfstring(L, "thread %p", t);
 
 	return 1;
 }

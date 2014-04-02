@@ -453,7 +453,8 @@ void testPlugin(const char *file, int argc, char **argv)
 	info.name = "local";
 	info.host = "local";
 	info.port = 6667;
-	std::shared_ptr<FakeServer> server = std::make_shared<FakeServer>(info, ident);
+
+	auto server = std::make_shared<FakeServer>(info, ident);
 
 	if (strcmp(argv[0], "help") == 0) {
 		if (argc > 1) {
@@ -468,8 +469,8 @@ void testPlugin(const char *file, int argc, char **argv)
 	}
 
 	// Always push before calling it
-	std::string name = Util::baseName(std::string(file));
-	size_t epos = name.find(".lua");
+	auto name = Util::baseName(std::string(file));
+	auto epos = name.find(".lua");
 	if (epos != std::string::npos)
 		name = name.erase(epos);
 

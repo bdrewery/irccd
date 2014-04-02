@@ -29,15 +29,19 @@
 using namespace irccd;
 using namespace std;
 
-static void quit(int)
+namespace {
+
+void quit(int)
 {
 	Irccd::getInstance().shutdown();
 }
 
-static void usage()
+void usage()
 {
 	Logger::warn("usage: %s [-fv] [-c config] [-p pluginpath] [-P plugin]", getprogname());
 	Logger::fatal(1, "       %s test plugin.lua [command] [parameters...]", getprogname());
+}
+
 }
 
 int main(int argc, char **argv)

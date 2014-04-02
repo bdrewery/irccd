@@ -1,7 +1,7 @@
 /*
  * Luae.h -- Lua helpers and such
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -601,6 +601,20 @@ public:
 	}
 
 	/**
+	 * Raises a Lua error, thus calling longjmp.
+	 *
+	 * @param L the Lua state
+	 * @param fmt the format
+	 * @param args the arguments
+	 * @return nothing
+	 */
+	template <typename... Args>
+	static inline int error(lua_State *L, const char *fmt, Args&&... args)
+	{
+		return luaL_error(L, fmt, std::forward<Args>(args)...);
+	}
+
+	/**
 	 * Controls the garbage collector.
 	 *
 	 * @param L the Lua state
@@ -899,6 +913,21 @@ public:
 	static inline void rawset(lua_State *L, int index, const void *ptr)
 	{
 		lua_rawsetp(L, index, ptr);
+	}
+
+	/**
+	 * Push a formatted string like lua_pushfstring. Warning, it is not type
+	 * safe and you should for instance not pass std::String to %s.
+	 *
+	 * @param L the Lua state
+	 * @param fmt the format
+	 * @param args the arguments
+	 * @return the formatted string
+	 */
+	template <typename... Args>
+	static inline const char *pushfstring(lua_State *L, const char *fmt, Args&&... args)
+	{
+		return lua_pushfstring(L, fmt, std::forward<Args>(args)...);
 	}
 
 	/**
