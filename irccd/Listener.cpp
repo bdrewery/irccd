@@ -92,10 +92,8 @@ void handleConnect(const Params &params)
 	}
 
 	if (params.size() >= 4) {
-		Optional o;
-
 		for (size_t i = 3; i < params.size(); ++i) {
-			o = getOptional(params[i]);
+			auto o = getOptional(params[i]);
 			if (o.first == "key")
 				info.password = o.second;
 			if (o.first == "ident")
@@ -248,10 +246,8 @@ Listener::DatagramClients	Listener::m_dgramClients;
 
 void Listener::clientAdd(Socket &server)
 {
-	Socket client;
-
 	try {
-		Socket client = server.accept();
+		auto client = server.accept();
 
 		// Add to clients to read data
 		m_streamClients[client] = Message();
@@ -263,8 +259,7 @@ void Listener::clientAdd(Socket &server)
 
 void Listener::clientRead(Socket &client)
 {
-	char data[128 + 1];
-	int length;
+
 	bool removeIt = false;
 
 	/*
@@ -272,7 +267,8 @@ void Listener::clientRead(Socket &client)
 	 * even if the client has disconnected.
 	 */
 	try {
-		length = client.recv(data, sizeof (data) - 1);
+		char data[128 + 1];
+		auto length = client.recv(data, sizeof (data) - 1);
 
 		// Disconnection?
 		if (length == 0)
@@ -297,14 +293,13 @@ void Listener::clientRead(Socket &client)
 
 void Listener::peerRead(Socket &s)
 {
-	SocketAddress addr;
-	char data[128 + 1];
-	int length;
-
 	try {
+		SocketAddress addr;
 		std::string ret;
+		char data[128 + 1];
 
-		length = s.recvfrom(data, sizeof (data) - 1, addr);
+		auto length = s.recvfrom(data, sizeof (data) - 1, addr);
+
 		data[length] = '\0';
 
 		// If no client, create first
@@ -326,12 +321,11 @@ void Listener::execute(const std::string &cmd,
 		       Socket s,
 		       const SocketAddress &addr)
 {
-	std::string cmdName;
-	size_t cmdDelim;
+	auto cmdDelim = cmd.find_first_of(" \t");
 
-	cmdDelim = cmd.find_first_of(" \t");
 	if (cmdDelim != std::string::npos) {
-		cmdName = cmd.substr(0, cmdDelim);
+		auto cmdName = cmd.substr(0, cmdDelim);
+
 		if (handlers.find(cmdName) == handlers.end())
 			Logger::warn("listener: invalid command %s", cmdName.c_str());
 		else {
@@ -339,8 +333,8 @@ void Listener::execute(const std::string &cmd,
 			auto h = handlers[cmdName];
 
 			try {
-				std::string lineArgs = cmd.substr(cmdDelim + 1);
-				std::vector<std::string> params = Util::split(lineArgs, " \t", h.m_nosplit);
+				auto lineArgs = cmd.substr(cmdDelim + 1);
+				auto params = Util::split(lineArgs, " \t", h.m_nosplit);
 
 				/*
 				 * Check the number of args needed.
@@ -353,9 +347,9 @@ void Listener::execute(const std::string &cmd,
 					result = oss.str();
 				} else
 					h.m_function(params);
-			} catch (std::out_of_range ex) {
+			} catch (const std::out_of_range &ex) {
 				result = ex.what() + std::string("\n");
-			} catch (std::runtime_error ex) {
+			} catch (const std::runtime_error &ex) {
 				result = ex.what() + std::string("\n");
 			}
 
@@ -389,7 +383,7 @@ int Listener::count()
 void Listener::process()
 {
 	try {
-		Socket s = m_listener.select(1, 0);
+		auto s = m_listener.select(1, 0);
 
 		/*
 		 * For stream based server add a client and wait for its data,

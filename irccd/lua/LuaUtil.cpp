@@ -145,7 +145,7 @@ int l_format(lua_State *L)
 	std::string text = Luae::check<std::string>(L, 1);
 	std::ostringstream oss;
 
-	luaL_checktype(L, 2, LUA_TTABLE);
+	Luae::checktype(L, 2, LUA_TTABLE);
 
 	/*
 	 * First, if "fg" or "bg" field is defined we append the color
@@ -180,7 +180,7 @@ int l_format(lua_State *L)
 	} else if (Luae::type(L, -1) == LUA_TNUMBER)
 		oss << static_cast<char>(Luae::get<int>(L, -1));
 
-	Luae::pop(L, 1);
+	Luae::pop(L);
 
 	oss << text << static_cast<char>(Attribute::Reset);
 	Luae::push(L, oss.str());
@@ -237,15 +237,14 @@ int l_strip(lua_State *L)
 	return 1;
 }
 
-const luaL_Reg functions[] = {
+const Luae::Reg functions {
 	{ "convert",		l_convert		},
 	{ "date",		l_date			},
 	{ "format",		l_format		},
 	{ "split",		l_split			},
 	{ "splituser",		l_splituser		},
 	{ "splithost",		l_splithost		},
-	{ "strip",		l_strip			},
-	{ nullptr,		nullptr			}
+	{ "strip",		l_strip			}
 };
 
 /* --------------------------------------------------------

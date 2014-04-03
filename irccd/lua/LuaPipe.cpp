@@ -42,8 +42,8 @@ int l_pipePush(lua_State *L)
 {
 	auto p = *Luae::toType<Pipe::Ptr *>(L, 1, PipeType);
 
-	if (lua_gettop(L) == 1)
-		return luaL_error(L, "expected one argument");
+	if (Luae::gettop(L) == 1)
+		return Luae::error(L, "expected one argument");
 
 	auto v = LuaeValue::copy(L, 2);
 	p->push(v);
@@ -95,15 +95,28 @@ int l_pipeList(lua_State *L)
 		q.push(v);
 	});
 
-	// Push as the upvalue
+	/*
+	 * Push the queue as an upvalue and a table with a __gc function to
+	 * destroy correctly the queue.
+	 */
 	new (L) Pipe::Queue(q);
+	LuaeTable::create(L);
 	Luae::pushfunction(L, [] (lua_State *L) -> int {
-		Pipe::Queue *q = reinterpret_cast<Pipe::Queue *>(lua_touserdata(L, lua_upvalueindex(1)));
+		Luae::toType<Pipe::Queue *>(L, 1)->~queue<LuaeValue>();
 
-		if (q->empty()) {
-			q->~queue<LuaeValue>();
+		return 0;
+	});
+	Luae::setfield(L, -2, "__gc");
+	Luae::setmetatable(L, -2);
+
+	/*
+	 * Push the iterator function which pops the value from the copy.
+	 */
+	Luae::pushfunction(L, [] (lua_State *L) -> int {
+		auto q = Luae::toType<Pipe::Queue *>(L, Luae::upvalueindex(1));
+
+		if (q->empty())
 			return 0;
-		}
 
 		LuaeValue::push(L, q->front());
 		q->pop();
@@ -157,7 +170,7 @@ const Luae::Reg pipeMethods {
 	{ "pop",		l_pipePop	}
 };
 
-const luaL_Reg pipeMeta[] = {
+const Luae::Reg pipeMeta {
 	{ "__gc",		l_pipeGc	}
 };
 

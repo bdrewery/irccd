@@ -46,13 +46,13 @@ void extractChannels(lua_State *L, Server::Info &info)
 				info.channels.push_back(c);
 			} else if (tvalue == LUA_TTABLE) {
 				// First index is channel name
-				lua_rawgeti(L, -1, 1);
-				if (lua_type(L, -1) == LUA_TSTRING)
-					c.name = lua_tostring(L, -1);
+				Luae::rawget(L, -1, 1);
+				if (Luae::type(L, -1) == LUA_TSTRING)
+					c.name = Luae::get<std::string>(L, -1);
 				Luae::pop(L, 1);
 
 				// Second index is channel password
-				lua_rawgeti(L, -1, 2);
+				Luae::rawget(L, -1, 2);
 				if (Luae::type(L, -1) == LUA_TSTRING)
 					c.password = Luae::get<std::string>(L, -1);
 				Luae::pop(L, 1);
@@ -183,7 +183,7 @@ int l_getName(lua_State *L)
 	auto s = Luae::check<Server::Ptr>(L, 1);
 
 	Luae::deprecate(L, "getName", "info");
-	lua_pushstring(L, s->info().name.c_str());
+	Luae::push(L, s->info().name);
 
 	return 1;
 }
@@ -193,8 +193,8 @@ int l_getName(lua_State *L)
 int l_cnotice(lua_State *L)
 {
 	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto channel = luaL_checkstring(L, 2);
-	auto notice = luaL_checkstring(L, 3);
+	auto channel = Luae::check<std::string>(L, 2);
+	auto notice = Luae::check<std::string>(L, 3);
 
 	s->cnotice(channel, notice);
 
@@ -470,7 +470,7 @@ const LuaeClass::Def serverDef {
 
 int l_find(lua_State *L)
 {
-	auto name = luaL_checkstring(L, 1);
+	auto name = Luae::check<std::string>(L, 1);
 	int ret;
 
 	try {
@@ -496,7 +496,7 @@ int l_connect(lua_State *L)
 	Server::RetryInfo reco;
 	unsigned options = 0;
 
-	luaL_checktype(L, 1, LUA_TTABLE);
+	Luae::checktype(L, 1, LUA_TTABLE);
 
 	info.name	= LuaeTable::require<std::string>(L, 1, "name");
 	info.host	= LuaeTable::require<std::string>(L, 1, "host");

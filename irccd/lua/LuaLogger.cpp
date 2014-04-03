@@ -41,14 +41,14 @@ std::string makeMessage(lua_State *L, const std::string &message)
 
 int l_log(lua_State *L)
 {
-	Logger::log("%s", makeMessage(L, luaL_checkstring(L, 1)).c_str());
+	Logger::log("%s", makeMessage(L, Luae::check<std::string>(L, 1)).c_str());
 
 	return 0;
 }
 
 int l_warn(lua_State *L)
 {
-	Logger::warn("%s", makeMessage(L, luaL_checkstring(L, 1)).c_str());
+	Logger::warn("%s", makeMessage(L, Luae::check<std::string>(L, 1)).c_str());
 
 	return 0;
 }
