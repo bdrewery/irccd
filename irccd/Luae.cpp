@@ -96,7 +96,15 @@ LuaeValue LuaeValue::copy(lua_State *L, int index)
 		v.number = lua_tonumber(L, index);
 		break;
 	case LUA_TSTRING:
-		v.str = lua_tostring(L, index);
+	{
+		const char *tmp = lua_tolstring(L, index, &v.stringLength);
+
+		v.string.reserve(v.stringLength);
+
+		// Copy string by hand which avoid '\0'
+		for (std::size_t i = 0; i < v.stringLength; ++i)
+			v.string.push_back(tmp[i]);
+	}
 		break;
 	case LUA_TTABLE:
 	{
@@ -126,7 +134,7 @@ void LuaeValue::push(lua_State *L, const LuaeValue &value)
 		lua_pushboolean(L, value.boolean);
 		break;
 	case LUA_TSTRING:
-		lua_pushlstring(L,  value.str.c_str(), value.str.size());
+		lua_pushlstring(L,  value.string.data(), value.stringLength);
 		break;
 	case LUA_TNUMBER:
 		lua_pushnumber(L, value.number);
