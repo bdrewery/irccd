@@ -17,6 +17,7 @@
  */
 
 #include <sstream>
+#include <stdexcept>
 
 #include "Directory.h"
 
