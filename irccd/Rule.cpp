@@ -62,17 +62,17 @@ std::ostream &operator<<(std::ostream &out, const RuleMatch &match)
 
 	out << "  servers: ";
 	for (const auto &s : match.m_servers)
-		out << (s.second ? "" : "!") << s.first;
+		out << (s.second ? "" : "!") << s.first << " ";
 	out << std::endl;
 
 	out << "  channels: ";
 	for (const auto &c : match.m_channels)
-		out << (c.second ? "" : "!") << c.first;
+		out << (c.second ? "" : "!") << c.first << " ";
 	out << std::endl;
 
 	out << "  plugins: ";
 	for (const auto &p : match.m_plugins)
-		out << (p.second ? "" : "!") << p.first;
+		out << (p.second ? "" : "!") << p.first << " ";
 
 	return out;
 }
@@ -128,12 +128,12 @@ std::ostream &operator<<(std::ostream &out, const RuleProperties &properties)
 
 	out << "  set-plugins: ";
 	for (const auto &sp : properties.m_setPlugins)
-		out << (sp.second ? "" : "!") << sp.first;
+		out << (sp.second ? "" : "!") << sp.first << " ";
 	out << std::endl;
 
 	out << "  set-events: ";
 	for (const auto &se : properties.m_setEvents)
-		out << (se.second ? "" : "!") << se.first;
+		out << (se.second ? "" : "!") << se.first << " ";
 	out << std::endl;
 
 	out << "  recode: ";

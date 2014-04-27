@@ -237,7 +237,6 @@ void Irccd::readRules(const Parser &config)
 		if (s.hasOption("set-events"))
 			extractor(p, s.getOption<string>("set-events"), &RuleProperties::setEvent);
 
-		std::cout << Rule(m, p) << std::endl;
 		RuleManager::instance().add(Rule(m, p));
 	});
 }

@@ -69,29 +69,22 @@ RuleResult RuleManager::solve(const std::string &server,
 	if (RuleValidEvents.count(event) == 0)
 		throw std::invalid_argument(event + " is not a valid event");
 
-	printf("==== Checking for %s, %s, %s, %s\n", server.c_str(), channel.c_str(), event.c_str(), plugin.c_str());
-
 	try {
-		int i = 0;
-		printf("size: %d\n", m_rules.size());
 		for (const auto &r : m_rules) {
 			const auto &match	= r.match();
 			const auto &properties	= r.properties();
 
-			printf("rule: #%d\n", ++i);
 			/*
 			 * 1. Check first if the match is applied.
 			 */
 			if (!match.match(server, channel, plugin))
 				continue;
 
-			printf("before: %d\n", result.enabled);
 			result.enabled = properties.isPluginEnabled(plugin, result.enabled)
 			    && properties.isEventEnabled(event, result.enabled);
-			printf("after: %d\n", result.enabled);
 		}
 	} catch (const std::invalid_argument &error) {
-		Logger::warn("rules: %s", error.what());
+		Logger::warn("rule: %s", error.what());
 		result.enabled = false;
 	}
 

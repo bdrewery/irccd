@@ -57,12 +57,7 @@ public:
 	 */
 	EventInfo(const std::string &server,
 		  const std::string &channel,
-		  const std::string &event)
-		: m_server(server)
-		, m_channel(channel)
-		, m_event(event)
-	{
-	}
+		  const std::string &event);
 
 	/**
 	 * Get the server name.
