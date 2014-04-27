@@ -3,4 +3,3 @@ IRC Client Daemon TODO
 
 * Document the new Server:send() method,
 * Document ctcp usage,
-* Document commandChar,
