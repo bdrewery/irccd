@@ -205,9 +205,8 @@ int l_new(lua_State *L)
 	return 1;
 }
 
-const luaL_Reg functionList[] = {
-	{ "new",		l_new			},
-	{ nullptr,		nullptr			}
+const Luae::Reg functionList {
+	{ "new",		l_new			}
 };
 
 int l_parserOpen(lua_State *L)
@@ -231,7 +230,7 @@ int l_parserOpen(lua_State *L)
 int l_parserIterator(lua_State *L)
 {
 	auto array = Luae::toType<std::vector<Section> *>(L, Luae::upvalueindex(1));
-	auto idx = lua_tointeger(L, Luae::upvalueindex(2));
+	auto idx = Luae::get<int>(L, Luae::upvalueindex(2));
 
 	if ((size_t)idx >= array->size())
 		return 0;
@@ -280,7 +279,7 @@ int l_parserFindSections(lua_State *L)
 int l_parserHasSection(lua_State *L)
 {
 	auto p = Luae::check<ParserWrapper>(L, 1);
-	auto name = luaL_checkstring(L, 2);
+	auto name = Luae::check<std::string>(L, 2);
 
 	Luae::push(L, p->m_parser.hasSection(name));
 
@@ -313,7 +312,7 @@ int l_parserRequireSection(lua_State *L)
 	auto name = Luae::check<std::string>(L, 2);
 
 	if (!p->m_parser.hasSection(name))
-		return luaL_error(L, "section %s not found", name.c_str());
+		return Luae::error(L, "section %s not found", name.c_str());
 
 	// Copy the section
 	Luae::push(L, Section(p->m_parser.getSection(name)));
@@ -370,7 +369,6 @@ int l_parserTostring(lua_State *L)
 {
 	auto p = Luae::check<ParserWrapper>(L, 1);
 	std::ostringstream oss;
-	std::string str;
 
 	oss << "sections: [";
 	for (const auto &s : p->m_parser) {
@@ -380,8 +378,7 @@ int l_parserTostring(lua_State *L)
 	}
 	oss << " ]";
 
-	str = oss.str();
-	Luae::push(L, str);
+	Luae::push(L, oss.str());
 
 	return 1;
 }
@@ -439,7 +436,7 @@ int l_sectionName(lua_State *L)
 int l_sectionHasOption(lua_State *L)
 {
 	auto s = Luae::check<Section>(L, 1);
-	auto name = luaL_checkstring(L, 2);
+	auto name = Luae::check<std::string>(L, 2);
 
 	Luae::push(L, s->hasOption(name));
 
@@ -475,7 +472,7 @@ int l_sectionRequireOption(lua_State *L)
 		type = Luae::check<std::string>(L, 3);
 
 	if (!s->hasOption(name))
-		return luaL_error(L, "option %s not found", name.c_str());
+		return Luae::error(L, "option %s not found", name.c_str());
 
 	return pushOption(L, *s, name, type);
 }

@@ -127,9 +127,13 @@ int l_length(lua_State *L)
 
 int l_list(lua_State *L)
 {
-	Luae::push(L, Utf8::toucs(Luae::check<std::string>(L, 1)));
-	Luae::push(L, 1);
-	Luae::pushfunction(L, iterator, 2);
+	try {
+		Luae::push(L, Utf8::toucs(Luae::check<std::string>(L, 1)));
+		Luae::push(L, 1);
+		Luae::pushfunction(L, iterator, 2);
+	} catch (const std::invalid_argument &error) {
+		return luaL_error(L, "%s", error.what());
+	}
 
 	return 1;
 }

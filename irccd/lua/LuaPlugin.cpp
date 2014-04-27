@@ -41,7 +41,7 @@ int l_info(lua_State *L)
 	 * If the name is specified, search for a plugin, otherwise use
 	 * ourselve.
 	 */
-	if (lua_gettop(L) >= 1) {
+	if (Luae::gettop(L) >= 1) {
 		auto name = Luae::check<std::string>(L, 1);
 
 		try {

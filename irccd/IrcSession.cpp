@@ -262,7 +262,7 @@ void handleNumeric(irc_session_t *session,
 	auto s = IrcSession::toServer(session);
 
 	if (event == LIBIRC_RFC_RPL_NAMREPLY) {
-		Server::NameList &list = s->nameLists();
+		auto &list = s->nameLists();
 
 		if (params[3] != nullptr && params[2] != nullptr) {
 			auto users = Util::split(params[3], " \t");
