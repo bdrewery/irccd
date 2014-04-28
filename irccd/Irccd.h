@@ -107,16 +107,21 @@ private:
 	void readGeneral(const Parser &config);		// [general]
 	void readPlugins(const Parser &config);		// [plugins]
 	void readIdentities(const Parser &config);	// [identity]
-	void readRules(const Parser &config);		// [rule]
+
+	/* ------------------------------------------------
+	 * [rule]
+	 * ------------------------------------------------ */
+
+	void readRules(const Parser &config);
 
 	template <typename T>
 	void extractor(T &add,
-			    const std::string &value,
-			    void (T::*func)(const std::string &, bool))
+		       const std::string &value,
+		       void (T::*func)(const std::string &, bool))
 	{
 		for (const auto &s : Util::split(value, " \t")) {
 			auto copy = s;
-			auto enabled = value.size() > 0 && value[0] != '!';
+			auto enabled = copy.size() > 0 && copy[0] != '!';
 
 			if (!enabled)
 				copy.erase(0, 1);
@@ -125,12 +130,20 @@ private:
 		}
 	}
 
+	/* ------------------------------------------------
+	 * [listener]
+	 * ------------------------------------------------ */
+
 	void readListeners(const Parser &config);
 	void extractInternet(const Section &s, int type);
 
 #if !defined(_WIN32)
 	void extractUnix(const Section &s, int type);
 #endif
+
+	/* ------------------------------------------------
+	 * [server]
+	 * ------------------------------------------------ */
 
 	void readServers(const Parser &config);
 	void extractChannels(const Section &section, Server::Ptr server);

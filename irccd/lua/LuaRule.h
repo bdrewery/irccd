@@ -19,10 +19,21 @@
 #ifndef _LUA_RULE_H_
 #define _LUA_RULE_H_
 
+/**
+ * @file LuaRule.h
+ * @brief Lua bindings for class RuleManager
+ */
+
 #include <lua.hpp>
 
 namespace irccd {
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_rule(lua_State *L);
 
 } // !irccd

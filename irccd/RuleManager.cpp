@@ -134,6 +134,10 @@ RuleResult RuleManager::solve(const std::string &server,
 
 	try {
 		for (const auto &r : m_rules) {
+			// Skip disabled rules
+			if (!r.isEnabled())
+				continue;
+
 			const auto &match	= r.match();
 			const auto &properties	= r.properties();
 

@@ -39,6 +39,21 @@ void RuleMatch::addPlugin(const std::string &plugin, bool enabled)
 	m_plugins[plugin] = enabled;
 }
 
+const RuleMap &RuleMatch::servers() const
+{
+	return m_servers;
+}
+
+const RuleMap &RuleMatch::channels() const
+{
+	return m_channels;
+}
+
+const RuleMap &RuleMatch::plugins() const
+{
+	return m_plugins;
+}
+
 bool RuleMatch::match(const std::string &server,
 		      const std::string &channel,
 		      const std::string &plugin) const
@@ -102,6 +117,16 @@ void RuleProperties::setEvent(const std::string &name, bool mode)
 	m_setEvents[name] = mode;
 }
 
+const RuleMap &RuleProperties::plugins() const
+{
+	return m_setPlugins;
+}
+
+const RuleMap &RuleProperties::events() const
+{
+	return m_setEvents;
+}
+
 bool RuleProperties::isPluginEnabled(const std::string &name, bool current) const
 {
 	return get(m_setPlugins, name, current);
@@ -114,6 +139,9 @@ bool RuleProperties::isEventEnabled(const std::string &name, bool current) const
 
 void RuleProperties::setRecode(const std::string &from, const std::string &to)
 {
+	if (to.size() > 0 && from.size() == 0)
+		throw std::invalid_argument("if to is set, from can not be empty");
+
 	m_recode = std::make_pair(from, to);
 }
 
@@ -139,6 +167,12 @@ std::ostream &operator<<(std::ostream &out, const RuleProperties &properties)
 	out << "  recode: ";
 	if (properties.m_recode.first.size() == 0 && properties.m_recode.second.size() == 0)
 		out << "empty";
+	else {
+		out << properties.m_recode.first;
+
+		if (properties.m_recode.second.size() > 0)
+			out << " -> " << properties.m_recode.second;
+	}
 
 	return out;
 }

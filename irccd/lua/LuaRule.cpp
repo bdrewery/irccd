@@ -21,16 +21,94 @@
 
 namespace irccd {
 
+/**
+ * @brief Support for Rule
+ *
+ * Pushes a table with the following fields:
+ *
+ * <pre>
+ * local r = {
+ *	enabled = true | false,
+ *
+ *	match = {
+ *		servers	= {
+ *			["localhost"] = true,
+ *			["malikania"] = true
+ *		},
+ *
+ *		channels = {
+ *			["#staff"] = true,
+ *		},
+ *
+ *		plugins	= {
+ *			["a"] = true
+ *		},
+ *	},
+ *
+ *	set = {
+ *		recode = { "ISO-8859-15", "UTF-8" }
+ *		plugins = {
+ *			["x"] = true
+ *		},
+ *
+ *		events = {
+ *			["onCommand"] = false
+ *		}
+ *	}
+ * }
+ * </pre>
+ */
 template <>
 struct Luae::Convert<Rule> {
+private:
+	static void setSequence(lua_State *L, const RuleMap &map, const std::string &field)
+	{
+		LuaeTable::create(L);
+
+		for (const auto &r : map)
+			LuaeTable::set(L, -1, r.first, r.second);
+
+		Luae::setfield(L, -2, field);
+	}
+
+	template <typename T>
+	using AddFunc = void (T::*)(const std::string &, bool);
+
+	template <typename T>
+	static void getSequence(lua_State *L, AddFunc<T> add, T &t, const std::string &field)
+	{
+		Luae::getfield(L, -1, field);
+		if (Luae::type(L, -1) == LUA_TTABLE) {
+			LuaeTable::read(L, -1, [&] (lua_State *L, int tkey, int tvalue) {
+				if (tkey == LUA_TSTRING && tvalue == LUA_TBOOLEAN)
+					(t.*add)(Luae::get<std::string>(L, -2), Luae::get<bool>(L, -1));
+			});
+		}
+		Luae::pop(L);
+	}
+
+public:
+	/**
+	 * Push supported.
+	 */
 	static const bool hasPush = true;
+
+	/**
+	 * Check supported.
+	 */
 	static const bool hasCheck = true;
 
-	static void push(lua_State *, const Rule &)
+	/**
+	 * Push the rule.
+	 *
+	 * @param L the Lua state
+	 * @param rule the rule
+	 */
+	static void push(lua_State *L, const Rule &rule)
 	{
-#if 0
-		auto match	= rule.match();
-		auto properties	= rule.properties();
+		const auto &match	= rule.match();
+		const auto &properties	= rule.properties();
+		const auto &recode	= properties.recode();
 
 		// Main table
 		LuaeTable::create(L);
@@ -38,13 +116,41 @@ struct Luae::Convert<Rule> {
 
 		// Match subtable
 		LuaeTable::create(L);
+		setSequence(L, match.servers(), "servers");
+		setSequence(L, match.channels(), "channels");
+		setSequence(L, match.plugins(), "plugins");
 		Luae::setfield(L, -2, "match");
-#endif
+
+		// Set subtable
+		LuaeTable::create(L);
+		setSequence(L, properties.plugins(), "plugins");
+		setSequence(L, properties.events(), "events");
+
+		// Recode
+		LuaeTable::create(L);
+		if (recode.first.size() > 0) {
+			Luae::push(L, recode.first);
+			Luae::rawset(L, -2, 1);
+			if (recode.second.size() > 0) {
+				Luae::push(L, recode.second);
+				Luae::rawset(L, -2, 2);
+			}
+		}
+		Luae::setfield(L, -2, "recode");
+
+		Luae::setfield(L, -2, "set");
 	}
 
-	static Rule check(lua_State *, int)
+	/**
+	 * Check the rule.
+	 *
+	 * @param L the Lua state
+	 * @param index the index
+	 * @return the rule
+	 * @throw std::invalid_argument if bad arguments
+	 */
+	static Rule check(lua_State *L, int index)
 	{
-#if 0
 		RuleMatch match;
 		RuleProperties properties;
 		bool enabled = true;
@@ -57,10 +163,43 @@ struct Luae::Convert<Rule> {
 
 		// Match subtable
 		if (LuaeTable::type(L, index, "match") == LUA_TTABLE) {
+			Luae::getfield(L, index, "match");
+			getSequence(L, &RuleMatch::addServer, match, "servers");
+			getSequence(L, &RuleMatch::addChannel, match, "channels");
+			getSequence(L, &RuleMatch::addPlugin, match, "plugins");
+			Luae::pop(L);
 		}
 
-#endif
-		return Rule(RuleMatch(), RuleProperties());
+		// Set subtable
+		if (LuaeTable::type(L, index, "set") == LUA_TTABLE) {
+			Luae::getfield(L, index, "set");
+			getSequence(L, &RuleProperties::setPlugin, properties, "plugins");
+			getSequence(L, &RuleProperties::setEvent, properties, "events");
+
+			// Recode
+			Luae::getfield(L, -1, "recode");
+			if (Luae::type(L, -1) == LUA_TTABLE) {
+				std::string from;
+				std::string to;
+
+				Luae::rawget(L, -1, 1);
+				if (Luae::type(L, -1) == LUA_TSTRING)
+					from = Luae::get<std::string>(L, -1);
+				Luae::pop(L);
+
+				Luae::rawget(L, -1, 2);
+				if (Luae::type(L, -1) == LUA_TSTRING)
+					to = Luae::get<std::string>(L, -1);
+				Luae::pop(L);
+	
+				properties.setRecode(from, to);
+			}
+			Luae::pop(L);
+
+			Luae::pop(L);
+		}
+
+		return Rule(match, properties, enabled);
 	}
 };
 
@@ -70,6 +209,11 @@ int l_add(lua_State *L)
 {
 	try {
 		Luae::push(L, RuleManager::instance().add(Luae::check<Rule>(L, 1)));
+	} catch (const std::invalid_argument &ex) {
+		Luae::push(L, nullptr);
+		Luae::push(L, ex.what());
+
+		return 2;
 	} catch (const std::out_of_range &ex) {
 		Luae::push(L, nullptr);
 		Luae::push(L, ex.what());
@@ -77,13 +221,15 @@ int l_add(lua_State *L)
 		return 2;
 	}
 
+	Luae::push(L, true);
+
 	return 1;
 }
 
 int l_get(lua_State *L)
 {
 	try {
-		Luae::push(L, RuleManager::instance().get(Luae::check<int>(L, 1)));
+		Luae::push(L, RuleManager::instance().get(Luae::check<int>(L, 1) - 1));
 	} catch (const std::out_of_range &ex) {
 		Luae::push(L, nullptr);
 		Luae::push(L, ex.what());
@@ -97,7 +243,7 @@ int l_get(lua_State *L)
 int l_remove(lua_State *L)
 {
 	try {
-		RuleManager::instance().remove(Luae::check<int>(L, 1));
+		RuleManager::instance().remove(Luae::check<int>(L, 1) - 1);
 	} catch (const std::out_of_range &ex) {
 		Luae::push(L, nullptr);
 		Luae::push(L, ex.what());
@@ -108,16 +254,40 @@ int l_remove(lua_State *L)
 	return 0;
 }
 
-int l_list(lua_State *)
+int l_list(lua_State *L)
 {
-	/* XXX */
-	return 0;
+	Luae::push(L, 0);
+	Luae::pushfunction(L, [] (lua_State *L) -> int{
+		auto i = Luae::get<int>(L, Luae::upvalueindex(1));
+		auto l = RuleManager::instance().count();
+
+		if (static_cast<unsigned>(i) >= l)
+			return 0;
+
+		/*
+		 * Here, an other thread may have deleted a rule already.
+		 */
+		try {
+			Luae::push(L, RuleManager::instance().get(i));
+			Luae::push(L, ++i);
+
+			// Replace the counter
+			Luae::push(L, i);
+			Luae::replace(L, Luae::upvalueindex(1));
+		} catch (const std::out_of_range &) {
+			return 0;
+		}
+
+		return 2;
+	}, 1);
+
+	return 1;
 }
 
 int l_enable(lua_State *L)
 {
 	try {
-		RuleManager::instance().enable(Luae::check<int>(L, 1));
+		RuleManager::instance().enable(Luae::check<int>(L, 1) - 1);
 	} catch (const std::out_of_range &ex) {
 		Luae::push(L, nullptr);
 		Luae::push(L, ex.what());
@@ -133,7 +303,7 @@ int l_enable(lua_State *L)
 int l_disable(lua_State *L)
 {
 	try {
-		RuleManager::instance().disable(Luae::check<int>(L, 1));
+		RuleManager::instance().disable(Luae::check<int>(L, 1) - 1);
 	} catch (const std::out_of_range &ex) {
 		Luae::push(L, nullptr);
 		Luae::push(L, ex.what());

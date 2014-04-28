@@ -83,6 +83,27 @@ public:
 	void addPlugin(const std::string &plugin, bool enabled = true);
 
 	/**
+	 * Get the read-only map of servers.
+	 *
+	 * @return the servers
+	 */
+	const RuleMap &servers() const;
+
+	/**
+	 * Get the read-only map of channels.
+	 *
+	 * @return the channels
+	 */
+	const RuleMap &channels() const;
+
+	/**
+	 * Get the read-only map of plugins.
+	 *
+	 * @return the plugins
+	 */
+	const RuleMap &plugins() const;
+
+	/**
 	 * Check if the parameters match the rule.
 	 *
 	 * @param server the server
@@ -135,6 +156,20 @@ public:
 	void setEvent(const std::string &event, bool mode = true);
 
 	/**
+	 * Get the read-only set map of plugins.
+	 *
+	 * @return the map of plugins
+	 */
+	const RuleMap &plugins() const;
+
+	/**
+	 * Get the read-only set map of events.
+	 *
+	 * @return the map of plugins
+	 */
+	const RuleMap &events() const;
+
+	/**
 	 * Check if the plugin is enabled. If it is not set, current is
 	 * returned.
 	 *
@@ -159,6 +194,7 @@ public:
 	 *
 	 * @param from the incoming encoding
 	 * @param to the desired encoding for plugins
+	 * @throw std::invalid_argument if to is set and from is not
 	 */
 	void setRecode(const std::string &from, const std::string &to = "");
 
@@ -197,6 +233,7 @@ public:
 	 *
 	 * @param match the rule match
 	 * @param properties the properties
+	 * @param enabled true if the rule must be enabled
 	 */
 	Rule(const RuleMatch &match, const RuleProperties &properties, bool enabled = true);
 
