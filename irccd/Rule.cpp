@@ -147,10 +147,26 @@ std::ostream &operator<<(std::ostream &out, const RuleProperties &properties)
  * Rule
  * --------------------------------------------------------- */
 
-Rule::Rule(const RuleMatch &match, const RuleProperties &properties)
-	: m_match(match)
+Rule::Rule(const RuleMatch &match, const RuleProperties &properties, bool enabled)
+	: m_enabled(enabled)
+	, m_match(match)
 	, m_properties(properties)
 {
+}
+
+void Rule::enable()
+{
+	m_enabled = true;
+}
+
+void Rule::disable()
+{
+	m_enabled = false;
+}
+
+bool Rule::isEnabled() const
+{
+	return m_enabled;
 }
 
 const RuleMatch &Rule::match() const

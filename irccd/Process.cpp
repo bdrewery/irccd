@@ -24,6 +24,7 @@
 #include "lua/LuaParser.h"
 #include "lua/LuaPipe.h"
 #include "lua/LuaPlugin.h"
+#include "lua/LuaRule.h"
 #include "lua/LuaServer.h"
 #include "lua/LuaSocket.h"
 #include "lua/LuaSystem.h"
@@ -71,6 +72,7 @@ const Process::Libraries Process::irccdLibs = {
 	{ "irccd.fs",			luaopen_fs		},
 	{ "irccd.parser",		luaopen_parser		},
 	{ "irccd.plugin",		luaopen_plugin		},
+	{ "irccd.rule",			luaopen_rule		},
 	{ "irccd.socket",		luaopen_socket		},
 #if defined(COMPAT_1_1)
 	{ "irccd.socket.address",	luaopen_socket_address	},

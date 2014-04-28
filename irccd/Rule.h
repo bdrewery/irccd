@@ -187,6 +187,7 @@ public:
  */
 class Rule {
 private:
+	bool		m_enabled = true;
 	RuleMatch	m_match;
 	RuleProperties	m_properties;
 
@@ -197,7 +198,24 @@ public:
 	 * @param match the rule match
 	 * @param properties the properties
 	 */
-	Rule(const RuleMatch &match, const RuleProperties &properties);
+	Rule(const RuleMatch &match, const RuleProperties &properties, bool enabled = true);
+
+	/**
+	 * Enable the rule.
+	 */
+	void enable();
+
+	/**
+	 * Disable the rule
+	 */
+	void disable();
+
+	/**
+	 * Tell if the rule is enabled.
+	 *
+	 * @return true if enabled.
+	 */
+	bool isEnabled() const;
 
 	/**
 	 * Get the rule match.

@@ -54,11 +54,70 @@ RuleManager &RuleManager::instance()
 	return s_instance;
 }
 
-void RuleManager::add(const Rule &rule)
+void RuleManager::assertIndex(int index) const
+{
+	if (index < 0 || static_cast<size_t>(index) >= m_rules.size())
+		throw std::out_of_range(std::to_string(index) + " is out of range");
+}
+
+int RuleManager::add(const Rule &rule, int index)
 {
 	Lock lk(m_lock);
 
-	m_rules.push_back(rule);
+	if (index < 0) {
+		m_rules.push_back(rule);
+		return m_rules.size() - 1;
+	}
+
+	if ((size_t)index >= m_rules.size())
+		throw std::out_of_range(std::to_string(index) + " is out of range");
+
+	m_rules.insert(m_rules.begin() + index, rule);
+
+	return index;
+}
+
+Rule RuleManager::get(int index) const
+{
+	Lock lk(m_lock);
+
+	assertIndex(index);
+
+	return m_rules[index];
+}
+
+void RuleManager::remove(int index)
+{
+	Lock lk(m_lock);
+
+	assertIndex(index);
+
+	m_rules.erase(m_rules.begin() + index);
+}
+
+unsigned RuleManager::count() const
+{
+	Lock lk(m_lock);
+
+	return static_cast<unsigned>(m_rules.size());
+}
+
+void RuleManager::enable(int index)
+{
+	Lock lk(m_lock);
+
+	assertIndex(index);
+
+	m_rules[index].enable();
+}
+
+void RuleManager::disable(int index)
+{
+	Lock lk(m_lock);
+
+	assertIndex(index);
+
+	m_rules[index].disable();
 }
 
 RuleResult RuleManager::solve(const std::string &server,

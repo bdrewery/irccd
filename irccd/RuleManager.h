@@ -65,6 +65,8 @@ private:
 	RuleManager(const RuleManager &) = delete;
 	RuleManager &operator=(const RuleManager &) = delete;
 
+	void assertIndex(int index) const;
+
 public:
 	/**
 	 * Get the rule manager instance.
@@ -77,8 +79,51 @@ public:
 	 * Append a rule to the end.
 	 *
 	 * @param rule the rule to append
+	 * @param index the index where to insert
+	 * @return the inserted index
+	 * @throw std::out_of_range if index is out of bounds
 	 */
-	void add(const Rule &rule);
+	int add(const Rule &rule, int index = -1);
+
+	/**
+	 * Get a copy of a rule.
+	 *
+	 * @param index the index
+	 * @return the rule
+	 * @throw std::out_of_range if index is out of bounds
+	 */
+	Rule get(int index) const;
+
+	/**
+	 * Remove an existing rule.
+	 *
+	 * @param index the index
+	 * @throw std::out_of_range if index is out of bounds
+	 */
+	void remove(int index);
+
+	/**
+	 * Get the number of rules in the manager.
+	 *
+	 * @return the count.
+	 */
+	unsigned count() const;
+
+	/**
+	 * Enable a rule.
+	 *
+	 * @param index the index
+	 * @throw std::out_of_range if index is out of bounds
+	 */
+	void enable(int index);
+
+	/**
+	 * Disable a rule.
+	 *
+	 * @param index the index
+	 * @throw std::out_of_range if index is out of bounds
+	 */
+	void disable(int index);
 
 	/**
 	 * Check the result of a plugin and event. We first make

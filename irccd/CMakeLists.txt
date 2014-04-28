@@ -90,6 +90,8 @@ if(WITH_LUA52 OR WITH_LUAJIT)
 			lua/LuaPipe.h
 			lua/LuaPlugin.cpp
 			lua/LuaPlugin.h
+			lua/LuaRule.cpp
+			lua/LuaRule.h
 			lua/LuaServer.cpp
 			lua/LuaServer.h
 			lua/LuaSocket.cpp
