@@ -56,6 +56,8 @@ RuleManager &RuleManager::instance()
 
 void RuleManager::add(const Rule &rule)
 {
+	Lock lk(m_lock);
+
 	m_rules.push_back(rule);
 }
 
@@ -64,6 +66,8 @@ RuleResult RuleManager::solve(const std::string &server,
 			      const std::string &event,
 			      const std::string &plugin) const
 {
+	Lock lk(m_lock);
+
 	RuleResult result;
 
 	if (RuleValidEvents.count(event) == 0)
@@ -93,6 +97,8 @@ RuleResult RuleManager::solve(const std::string &server,
 
 void RuleManager::clear()
 {
+	Lock lk(m_lock);
+
 	m_rules.clear();
 }
 

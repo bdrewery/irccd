@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <unordered_set>
+#include <mutex>
 
 #include "Rule.h"
 
@@ -48,12 +49,17 @@ struct RuleResult {
 /**
  * @class RuleManager
  * @brief Owner of rules and solver
+ *
+ * All functions are thread safe.
  */
 class RuleManager {
 private:
+	using Lock		= std::lock_guard<std::mutex>;
+
 	static RuleManager	s_instance;
 
 	std::vector<Rule>	m_rules;
+	mutable std::mutex	m_lock;
 
 	RuleManager() = default;
 	RuleManager(const RuleManager &) = delete;
