@@ -311,14 +311,14 @@ void Irccd::extractUnix(const Section &s, int type)
 		Logger::warn("listener: error removing %s: %s", path.c_str(), strerror(errno));
 	} else {
 		try {
-			Socket unix(AF_UNIX, type, 0);
+			Socket un(AF_UNIX, type, 0);
 
-			unix.bind(AddressUnix(path, true));
+			un.bind(AddressUnix(path, true));
 
 			if (type == SOCK_STREAM)
-				unix.listen(64);
+				un.listen(64);
 
-			Listener::add(unix);
+			Listener::add(un);
 			Logger::log("listener: listening for clients on %s...", path.c_str());
 		} catch (SocketError ex) {
 			Logger::warn("listener: unix socket error: %s", ex.what());

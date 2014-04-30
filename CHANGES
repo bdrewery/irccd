@@ -8,7 +8,8 @@ CURRENT
   * Add new irccd.util.convert,
   * Add onQueryCommand new callback,
   * Added more fields in Date:calendar,
-  * Add option auto-rejoin to server.
+  * Add option auto-rejoin to server,
+  * Added coroutine library.
 
 1.1.4 March 28, 2014
 ---------------------------------------
