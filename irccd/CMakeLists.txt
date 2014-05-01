@@ -62,6 +62,31 @@ set(
 
 set(LUA_SUPPORT "disabled" PARENT_SCOPE)
 
+#
+# Optional libiconv for rule reencoding
+#
+set(USE_ICONV "disabled" PARENT_SCOPE)
+
+if(WITH_LIBICONV)
+	find_package(Libiconv)
+
+	if(Libiconv_FOUND)
+		set(USE_ICONV "enabled" PARENT_SCOPE)
+
+		list(
+			APPEND
+			SOURCES
+			Converter.cpp
+			Converter.h
+		)
+	else()
+		set(WITH_LIBICONV Off)
+	endif()
+endif()
+
+#
+# Optional Lua
+#
 if(WITH_LUA52 OR WITH_LUAJIT)
 	if(WITH_LUA52)
 		find_package(Lua52)

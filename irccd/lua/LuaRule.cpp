@@ -208,7 +208,10 @@ namespace {
 int l_add(lua_State *L)
 {
 	try {
-		Luae::push(L, RuleManager::instance().add(Luae::check<Rule>(L, 1)));
+		auto rule = Luae::check<Rule>(L, 1);
+		auto index = luaL_optint(L, 2, -1);
+
+		Luae::push(L, RuleManager::instance().add(rule, index));
 	} catch (const std::invalid_argument &ex) {
 		Luae::push(L, nullptr);
 		Luae::push(L, ex.what());
@@ -251,7 +254,9 @@ int l_remove(lua_State *L)
 		return 2;
 	}
 
-	return 0;
+	Luae::push(L, true);
+
+	return 1;
 }
 
 int l_list(lua_State *L)

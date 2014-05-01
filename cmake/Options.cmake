@@ -18,6 +18,7 @@
 
 option(WITH_IPV6 "Enable IPv6" On)
 option(WITH_SSL "Enable SSL" On)
+option(WITH_LIBICONV "Enable libiconv for reencoding" On)
 
 # Use bundled xdg-basedir or not
 option(WITH_BUNDLE_XDGBASEDIR "Build with bundled libxdg-basedir" Off)
