@@ -28,7 +28,7 @@ if (NOT Libiconv_LIBRARY)
 	check_function_exists(iconv_close _HAVE_ICONV_CLOSE_FUNC)
 	check_function_exists(iconv _HAVE_ICONV_FUNC)
 
-	if (_HAVE_ICONV_OPEN_FUNC and _HAVE_ICONV_CLOSE_FUNC and _HAVE_ICONV_FUNC)
+	if (_HAVE_ICONV_OPEN_FUNC AND _HAVE_ICONV_CLOSE_FUNC AND _HAVE_ICONV_FUNC)
 		set(Libiconv_LIBRARY "")
 	endif ()
 endif()

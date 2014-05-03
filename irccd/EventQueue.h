@@ -96,7 +96,7 @@ public:
 	 * The function to add in the event queue. It takes the plugin
 	 * as parameter for the current plugin.
 	 */
-	using Function	= std::function<void (Plugin::Ptr)>;
+	using Function	= std::function<void (Plugin &)>;
 
 private:
 	using Pair	= std::pair<Function, EventInfo>;
