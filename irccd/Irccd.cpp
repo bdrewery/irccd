@@ -16,6 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#if !defined(_WIN32)
+#  include <sys/types.h>
+#  include <pwd.h>
+#  include <unistd.h>
+#endif
+
 #include <algorithm>
 #include <cstddef>
 #include <cstring>
@@ -158,9 +164,37 @@ void Irccd::readGeneral(const Parser &config)
 			m_foreground = general.getOption<bool>("foreground");
 		if (general.hasOption("verbose") && !isOverriden(Options::Verbose))
 			Logger::setVerbose(general.getOption<bool>("verbose"));
+
+		m_uid = parse(general, "uid", false);
+		m_gid = parse(general, "gid", true);
 #endif
 	}
 }
+
+#if !defined(_WIN32)
+
+int Irccd::parse(const Section &section, const char *name, bool isgid)
+{
+	int result;
+
+	if (section.hasOption(name)) {
+		auto value = section.getOption<std::string>(name);
+		auto pw = getpwnam(value.c_str());
+
+		if (pw == nullptr) {
+			try {
+				result = std::stoi(value);
+			} catch (...) {
+				Logger::warn("irccd: invalid %sid %s", ((isgid) ? "g" : "u"), value.c_str());
+			}
+		} else
+			result = (isgid) ? pw->pw_gid : pw->pw_uid;
+	}
+
+	return 0;
+}
+
+#endif
 
 void Irccd::readPlugins(const Parser &config)
 {

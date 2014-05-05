@@ -86,6 +86,11 @@ private:
 	IdentityList	m_identities;		//! user identities
 	Server::Identity m_defaultIdentity;	//! default identity
 
+#if !defined(_WIN32)
+	uid_t		m_uid = 0;		//! uid to run
+	gid_t		m_gid = 0;		//! gid to run
+#endif
+
 	/*
 	 * Plugin specified by commands line that should be
 	 * loaded after initialization.
@@ -104,6 +109,8 @@ private:
 	 */
 	void openConfig();
 	void readGeneral(const Parser &config);		// [general]
+	int parse(const Section &section, const char *name, bool isgid);
+
 	void readPlugins(const Parser &config);		// [plugins]
 	void readIdentities(const Parser &config);	// [identity]
 
