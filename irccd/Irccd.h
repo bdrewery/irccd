@@ -110,6 +110,7 @@ private:
 	void openConfig();
 	void readGeneral(const Parser &config);		// [general]
 	int parse(const Section &section, const char *name, bool isgid);
+	std::string idname(bool isgid);
 
 	void readPlugins(const Parser &config);		// [plugins]
 	void readIdentities(const Parser &config);	// [identity]

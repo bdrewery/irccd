@@ -18,6 +18,7 @@
 
 #if !defined(_WIN32)
 #  include <sys/types.h>
+#  include <grp.h>
 #  include <pwd.h>
 #  include <unistd.h>
 #endif
@@ -167,6 +168,13 @@ void Irccd::readGeneral(const Parser &config)
 
 		m_uid = parse(general, "uid", false);
 		m_gid = parse(general, "gid", true);
+
+		if (setgid(m_gid) < 0)
+			Logger::warn("irccd: failed to set gid to %s: %s",
+			    idname(true).c_str(), std::strerror(errno));
+		if (setuid(m_uid) < 0)
+			Logger::warn("irccd: failed to set uid to %s: %s",
+			    idname(false).c_str(), std::strerror(errno));
 #endif
 	}
 }
@@ -175,23 +183,41 @@ void Irccd::readGeneral(const Parser &config)
 
 int Irccd::parse(const Section &section, const char *name, bool isgid)
 {
-	int result;
+	int result(0);
 
-	if (section.hasOption(name)) {
-		auto value = section.getOption<std::string>(name);
-		auto pw = getpwnam(value.c_str());
+	if (!section.hasOption(name))
+		return 0;
 
-		if (pw == nullptr) {
-			try {
-				result = std::stoi(value);
-			} catch (...) {
-				Logger::warn("irccd: invalid %sid %s", ((isgid) ? "g" : "u"), value.c_str());
-			}
-		} else
-			result = (isgid) ? pw->pw_gid : pw->pw_uid;
+	auto value = section.getOption<std::string>(name);
+
+	try {
+		if (isgid) {
+			auto group = getgrnam(value.c_str());
+			result = (group == nullptr) ? std::stoi(value) : group->gr_gid;
+		} else {
+			auto pw = getpwnam(value.c_str());
+			result = (pw == nullptr) ? std::stoi(value) : pw->pw_uid;
+		}
+	} catch (...) {
+		Logger::warn("irccd: invalid %sid %s", ((isgid) ? "g" : "u"), value.c_str());
 	}
 
-	return 0;
+	return result;
+}
+
+std::string Irccd::idname(bool isgid)
+{
+	std::string result;
+
+	if (isgid) {
+		auto group = getgrgid(m_gid);
+		result = (group == nullptr) ? std::to_string(m_gid) : group->gr_name;
+	} else {
+		auto pw = getpwuid(m_uid);
+		result = (pw == nullptr) ? std::to_string(m_uid) : pw->pw_name;
+	}
+
+	return result;
 }
 
 #endif
