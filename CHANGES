@@ -9,7 +9,8 @@ CURRENT
   * Add onQueryCommand new callback,
   * Added more fields in Date:calendar,
   * Add option auto-rejoin to server,
-  * Added coroutine library.
+  * Added coroutine library,
+  * Add uid and gid options.
 
 1.1.4 March 28, 2014
 ---------------------------------------
