@@ -149,6 +149,7 @@ RuleResult RuleManager::solve(const std::string &server,
 
 			result.enabled = properties.isPluginEnabled(plugin, result.enabled)
 			    && properties.isEventEnabled(event, result.enabled);
+			result.encoding = properties.encoding();
 		}
 	} catch (const std::invalid_argument &error) {
 		Logger::warn("rule: %s", error.what());
