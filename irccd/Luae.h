@@ -306,7 +306,7 @@ public:
 	{
 		LUAE_STACK_CHECKBEGIN(L);
 
-		static_cast<Ptr<T> *>(lua_touserdata(L, index))->~shared_ptr<T>();
+		static_cast<Ptr<T> *>(lua_touserdata(L, index))->~shared_ptr();
 
 		LUAE_STACK_CHECKEQUALS(L);
 

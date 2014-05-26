@@ -112,7 +112,7 @@ void EventQueue::routine()
 			}
 
 			try {
-				call.first(p);
+				call.first(*p);
 			} catch (Plugin::ErrorException ex) {
 				Logger::warn("plugin %s: %s", ex.which().c_str(), ex.what());
 			}

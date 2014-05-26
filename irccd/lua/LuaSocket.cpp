@@ -543,9 +543,9 @@ int genericSend(lua_State *L, bool udp)
 
 int l_new(lua_State *L)
 {
-	auto family = luaL_checkinteger(L, 1);
-	auto type = SOCK_STREAM;
-	auto protocol = 0;
+	int family = luaL_checkinteger(L, 1);
+	int type = SOCK_STREAM;
+	int protocol = 0;
 
 	if (lua_gettop(L) >= 2)
 		type = luaL_checkinteger(L, 2);
