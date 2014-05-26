@@ -443,12 +443,10 @@ void Luae::require(lua_State *L, const std::string &name, lua_CFunction func, bo
 	LUAE_STACK_CHECKEQUALS(L);
 }
 
-void Luae::deprecate(lua_State *L, const std::string &name, const std::string &repl)
+void Luae::deprecate(lua_State *, const std::string &name, const std::string &repl)
 {
 	std::ostringstream oss;
-	auto info = Process::info(L);
 
-	oss << "plugin " << info.name << ": ";
 	oss << "warning, usage of deprecated function `" << name << "'";
 
 	if (repl.size() > 0)
