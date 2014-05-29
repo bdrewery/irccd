@@ -19,12 +19,17 @@
 #ifndef _EVENT_QUEUE_H_
 #define _EVENT_QUEUE_H_
 
+#include <condition_variable>
+#include <list>
+#include <memory>
+#include <thread>
+
 /**
  * @file EventQueue.h
  * @brief Plugin event queue
  */
 
-#include "Plugin.h"
+#include "event/Event.h"
 
 namespace irccd {
 
@@ -34,17 +39,13 @@ namespace irccd {
  */
 class EventQueue {
 public:
-	/**
-	 * The function to add in the event queue. It takes the plugin
-	 * as parameter for the current plugin.
-	 */
-	using Function	= std::function<void (Plugin::Ptr)>;
+	using Ptr	= std::unique_ptr<Event>;
 
 private:
 	using Cond	= std::condition_variable;
 	using Mutex	= std::mutex;
 	using Lock	= std::unique_lock<Mutex>;
-	using Queue	= std::queue<Function>;
+	using List	= std::list<Ptr>;
 	using Thread	= std::thread;
 	using Atomic	= std::atomic_bool;
 
@@ -52,7 +53,7 @@ private:
 	static Atomic	alive;
 	static Mutex	mutex;
 	static Cond	cond;
-	static Queue	queue;
+	static List	list;
 	static Thread	thread;
 
 	static void routine();
@@ -73,7 +74,18 @@ public:
 	 *
 	 * @param event the event function
 	 */
-	static void add(const Function &event);
+	template <typename Evt>
+	static void add(Evt &&event)
+	{
+		{
+			Lock lock(mutex);
+
+			list.push_back(std::unique_ptr<Evt>(new Evt(std::move(event))));
+		}
+
+		cond.notify_one();
+	}
+
 };
 
 } // !irccd

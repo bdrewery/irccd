@@ -1,5 +1,5 @@
 /*
- * CommandQueue.cpp -- client command queue
+ * CommandKick.h -- kick someone from a channel
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
@@ -16,63 +16,33 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "CommandQueue.h"
+#ifndef _COMMAND_KICK_H_
+#define _COMMAND_KICK_H_
+
+#include <memory>
+
+#include "Command.h"
 
 namespace irccd {
 
-void CommandQueue::routine()
-{
-	while (m_alive) {
-		Ptr *command = nullptr;
+class Server;
 
-		{
-			Lock lock(m_mutex);
+class CommandKick final : public Command {
+private:
+	std::shared_ptr<Server>	m_server;
+	std::string		m_target;
+	std::string		m_channel;
+	std::string		m_reason;
 
-			m_cond.wait(lock, [&] () -> bool {
-				return !m_alive || m_cmds.size() > 0;
-			});
+public:
+	CommandKick(const std::shared_ptr<Server> &server,
+		    const std::string &target,
+		    const std::string &channel,
+		    const std::string &reason);
 
-			if (!m_alive)
-				continue;
-
-			command = &m_cmds.front();
-		}
-
-		/*
-		 * IF RuleManager::shouldEncode(io)
-		 *
-		 * io->encode()
-		 */
-
-		if ((*command)->call()) {
-			Lock lock(m_mutex);
-
-			m_cmds.pop_front();
-		}
-	}
-}
-
-CommandQueue::CommandQueue()
-{
-	m_alive = true;
-	m_thread = Thread(&CommandQueue::routine, this);
-}
-
-CommandQueue::~CommandQueue()
-{
-	m_alive = false;
-	m_cond.notify_one();
-
-	try {
-		m_thread.join();
-	} catch (...) { }
-}
-
-void CommandQueue::clear()
-{
-	Lock lock(m_mutex);
-
-	m_cmds.clear();
-}
+	bool call() override;
+};
 
 } // !irccd
+
+#endif // !_COMMAND_KICK_H_

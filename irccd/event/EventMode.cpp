@@ -1,5 +1,5 @@
 /*
- * CommandQueue.cpp -- client command queue
+ * EventMode.cpp -- on channel mode
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
@@ -16,63 +16,28 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "CommandQueue.h"
+#include "EventMode.h"
+#include "Plugin.h"
 
 namespace irccd {
 
-void CommandQueue::routine()
+EventMode::EventMode(const std::shared_ptr<Server> &server,
+		     const std::string &channel,
+		     const std::string &nickname,
+		     const std::string &mode,
+		     const std::string &argument)
+	: Event(server->info().name, channel)
+	, m_server(server)
+	, m_channel(channel)
+	, m_nickname(nickname)
+	, m_mode(mode)
+	, m_argument(argument)
 {
-	while (m_alive) {
-		Ptr *command = nullptr;
-
-		{
-			Lock lock(m_mutex);
-
-			m_cond.wait(lock, [&] () -> bool {
-				return !m_alive || m_cmds.size() > 0;
-			});
-
-			if (!m_alive)
-				continue;
-
-			command = &m_cmds.front();
-		}
-
-		/*
-		 * IF RuleManager::shouldEncode(io)
-		 *
-		 * io->encode()
-		 */
-
-		if ((*command)->call()) {
-			Lock lock(m_mutex);
-
-			m_cmds.pop_front();
-		}
-	}
 }
 
-CommandQueue::CommandQueue()
+void EventMode::call(Plugin &p)
 {
-	m_alive = true;
-	m_thread = Thread(&CommandQueue::routine, this);
+	p.onMode(m_server, m_channel, m_nickname, m_mode, m_argument);
 }
 
-CommandQueue::~CommandQueue()
-{
-	m_alive = false;
-	m_cond.notify_one();
-
-	try {
-		m_thread.join();
-	} catch (...) { }
 }
-
-void CommandQueue::clear()
-{
-	Lock lock(m_mutex);
-
-	m_cmds.clear();
-}
-
-} // !irccd

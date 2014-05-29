@@ -27,6 +27,23 @@
 #if defined(WITH_LUA)
 #  include "Plugin.h"
 #  include "EventQueue.h"
+
+#  include "event/EventConnect.h"
+#  include "event/EventChannelNotice.h"
+#  include "event/EventMessage.h"
+#  include "event/EventMe.h"
+#  include "event/EventInvite.h"
+#  include "event/EventJoin.h"
+#  include "event/EventKick.h"
+#  include "event/EventMode.h"
+#  include "event/EventNick.h"
+#  include "event/EventNotice.h"
+#  include "event/EventNames.h"
+#  include "event/EventWhois.h"
+#  include "event/EventPart.h"
+#  include "event/EventQuery.h"
+#  include "event/EventTopic.h"
+#  include "event/EventUserMode.h"
 #endif
 
 using namespace std::placeholders;
@@ -62,9 +79,7 @@ void handleChannel(irc_session_t *session,
 		   unsigned int)
 {
 #if defined(WITH_LUA)
-	auto s = IrcSession::toServer(session);
-
-	EventQueue::add(std::bind(&Plugin::onMessage, _1, s, strify(params[0]),
+	EventQueue::add(EventMessage(IrcSession::toServer(session), strify(params[0]),
 	    strify(orig), strify(params[1])));
 #else
 	(void)session;
@@ -80,9 +95,7 @@ void handleChannelNotice(irc_session_t *session,
 			 unsigned int)
 {
 #if defined(WITH_LUA)
-	auto s = IrcSession::toServer(session);
-
-	EventQueue::add(std::bind(&Plugin::onChannelNotice, _1, s, strify(orig),
+	EventQueue::add(EventChannelNotice(IrcSession::toServer(session), strify(orig),
 	    strify(params[0]), strify(params[1])));
 #else
 	(void)session;
@@ -114,7 +127,7 @@ void handleConnect(irc_session_t *session,
 	}
 
 #if defined(WITH_LUA)
-	EventQueue::add(std::bind(&Plugin::onConnect, _1, s));
+	EventQueue::add(EventConnect(s));
 #endif
 }
 
@@ -125,9 +138,7 @@ void handleCtcpAction(irc_session_t *session,
 		      unsigned int)
 {
 #if defined(WITH_LUA)
-	auto s = IrcSession::toServer(session);
-
-	EventQueue::add(std::bind(&Plugin::onMe, _1, s, strify(params[0]),
+	EventQueue::add(EventMe(IrcSession::toServer(session), strify(params[0]),
 	    strify(orig), strify(params[1])));
 #else
 	(void)session;
@@ -145,11 +156,11 @@ void handleInvite(irc_session_t *session,
 	auto s = IrcSession::toServer(session);
 
 	// if join-invite is set to true join it
-	if (s->options() & Server::OptionSsl)
-		s->join(params[0], "");
+	if (s->options() & Server::OptionJoinInvite)
+		s->join(strify(params[1]), "");
 
 #if defined(WITH_LUA)
-	EventQueue::add(std::bind(&Plugin::onInvite, _1, s, strify(orig), strify(params[0])));
+	EventQueue::add(EventInvite(s, strify(params[1]), strify(orig)));
 #else
 	(void)orig;
 #endif
@@ -162,9 +173,7 @@ void handleJoin(irc_session_t *session,
 		unsigned int)
 {
 #if defined(WITH_LUA)
-	auto s = IrcSession::toServer(session);
-
-	EventQueue::add(std::bind(&Plugin::onJoin, _1, s, strify(params[0]), strify(orig)));
+	EventQueue::add(EventJoin(IrcSession::toServer(session), strify(params[0]), strify(orig)));
 #else
 	(void)session;
 	(void)orig;
@@ -189,7 +198,7 @@ void handleKick(irc_session_t *session,
 	}
 
 #if defined(WITH_LUA)
-	EventQueue::add(std::bind(&Plugin::onKick, _1, s, strify(params[0]), strify(orig),
+	EventQueue::add(EventKick(s, strify(params[0]), strify(orig),
 	    strify(params[1]), strify(params[2])));
 #else
 	(void)orig;
@@ -203,9 +212,7 @@ void handleMode(irc_session_t *session,
 		unsigned int)
 {
 #if defined(WITH_LUA)
-	auto s = IrcSession::toServer(session);
-
-	EventQueue::add(std::bind(&Plugin::onMode, _1, s, strify(params[0]),
+	EventQueue::add(EventMode(IrcSession::toServer(session), strify(params[0]),
 	    strify(orig), strify(params[1]), strify(params[2])));
 #else
 	(void)session;
@@ -228,7 +235,7 @@ void handleNick(irc_session_t *session,
 		id.nickname = nick;
 
 #if defined(WITH_LUA)
-	EventQueue::add(std::bind(&Plugin::onNick, _1, s, strify(orig), strify(params[0])));
+	EventQueue::add(EventNick(s, strify(orig), strify(params[0])));
 #else
 	(void)params;
 #endif
@@ -241,9 +248,7 @@ void handleNotice(irc_session_t *session,
 		  unsigned int)
 {
 #if defined(WITH_LUA)
-	auto s = IrcSession::toServer(session);
-
-	EventQueue::add(std::bind(&Plugin::onNotice, _1, s, strify(orig),
+	EventQueue::add(EventNotice(IrcSession::toServer(session), strify(orig),
 	    strify(params[0]), strify(params[1])));
 #else
 	(void)session;
@@ -278,9 +283,8 @@ void handleNumeric(irc_session_t *session,
 	} else if (event == LIBIRC_RFC_RPL_ENDOFNAMES) {
 		auto &list = s->nameLists();
 
-		if (params[1] != nullptr) {
-			EventQueue::add(std::bind(&Plugin::onNames, _1, s, strify(params[1]), list[params[1]]));
-		}
+		if (params[1] != nullptr)
+			EventQueue::add(EventNames(s, strify(params[1]), list[params[1]]));
 
 		// Don't forget to remove the list
 		list.clear();
@@ -304,7 +308,7 @@ void handleNumeric(irc_session_t *session,
 	} else if (event == LIBIRC_RFC_RPL_ENDOFWHOIS) {
 		auto &info = s->whoisLists()[params[1]];
 
-		EventQueue::add(std::bind(&Plugin::onWhois, _1, s, info));
+		EventQueue::add(EventWhois(s, info));
 	}
 
 	if (event == 5) {
@@ -335,8 +339,7 @@ void handlePart(irc_session_t *session,
 		s->removeChannel(params[0]);
 
 #if defined(WITH_LUA)
-	EventQueue::add(std::bind(&Plugin::onPart, _1, s, strify(params[0]),
-	    strify(orig), strify(params[1])));
+	EventQueue::add(EventPart(s, strify(params[0]), strify(orig), strify(params[1])));
 #endif
 }
 
@@ -347,9 +350,7 @@ void handleQuery(irc_session_t *session,
 		 unsigned int)
 {
 #if defined(WITH_LUA)
-	auto s = IrcSession::toServer(session);
-
-	EventQueue::add(std::bind(&Plugin::onQuery, _1, s, strify(orig), strify(params[1])));
+	EventQueue::add(EventQuery(IrcSession::toServer(session), strify(orig), strify(params[1])));
 #else
 	(void)session;
 	(void)orig;
@@ -364,9 +365,7 @@ void handleTopic(irc_session_t *session,
 		 unsigned int)
 {
 #if defined(WITH_LUA)
-	auto s = IrcSession::toServer(session);
-
-	EventQueue::add(std::bind(&Plugin::onTopic, _1, s, strify(params[0]),
+	EventQueue::add(EventTopic(IrcSession::toServer(session), strify(params[0]),
 	    strify(orig), strify(params[1])));
 #else
 	(void)session;
@@ -382,9 +381,7 @@ void handleUserMode(irc_session_t *session,
 		    unsigned int)
 {
 #if defined(WITH_LUA)
-	auto s = IrcSession::toServer(session);
-
-	EventQueue::add(std::bind(&Plugin::onUserMode, _1, s, strify(orig), strify(params[0])));
+	EventQueue::add(EventUserMode(IrcSession::toServer(session), strify(orig), strify(params[0])));
 #else
 	(void)session;
 	(void)orig;

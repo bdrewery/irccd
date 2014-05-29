@@ -1,5 +1,5 @@
 /*
- * CommandQueue.cpp -- client command queue
+ * EventNotice.cpp -- on private notices
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
@@ -16,63 +16,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "CommandQueue.h"
+#include "EventNotice.h"
+#include "Plugin.h"
 
 namespace irccd {
 
-void CommandQueue::routine()
+EventNotice::EventNotice(const std::shared_ptr<Server> &server,
+			 const std::string &who,
+			 const std::string &target,
+			 const std::string &notice)
+	: m_server(server)
+	, m_who(who)
+	, m_target(target)
+	, m_notice(notice)
 {
-	while (m_alive) {
-		Ptr *command = nullptr;
-
-		{
-			Lock lock(m_mutex);
-
-			m_cond.wait(lock, [&] () -> bool {
-				return !m_alive || m_cmds.size() > 0;
-			});
-
-			if (!m_alive)
-				continue;
-
-			command = &m_cmds.front();
-		}
-
-		/*
-		 * IF RuleManager::shouldEncode(io)
-		 *
-		 * io->encode()
-		 */
-
-		if ((*command)->call()) {
-			Lock lock(m_mutex);
-
-			m_cmds.pop_front();
-		}
-	}
 }
 
-CommandQueue::CommandQueue()
+void EventNotice::call(Plugin &p)
 {
-	m_alive = true;
-	m_thread = Thread(&CommandQueue::routine, this);
+	p.onNotice(m_server, m_who, m_target, m_notice);
 }
 
-CommandQueue::~CommandQueue()
-{
-	m_alive = false;
-	m_cond.notify_one();
-
-	try {
-		m_thread.join();
-	} catch (...) { }
 }
-
-void CommandQueue::clear()
-{
-	Lock lock(m_mutex);
-
-	m_cmds.clear();
-}
-
-} // !irccd

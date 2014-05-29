@@ -1,5 +1,5 @@
 /*
- * CommandQueue.cpp -- client command queue
+ * EventInvite.cpp -- on channel invites
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
@@ -16,63 +16,24 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "CommandQueue.h"
+#include "EventInvite.h"
+#include "Plugin.h"
 
 namespace irccd {
 
-void CommandQueue::routine()
+EventInvite::EventInvite(const std::shared_ptr<Server> &server,
+			 const std::string &channel,
+			 const std::string &who)
+	: Event(server->info().name, channel)
+	, m_server(server)
+	, m_channel(channel)
+	, m_who(who)
 {
-	while (m_alive) {
-		Ptr *command = nullptr;
-
-		{
-			Lock lock(m_mutex);
-
-			m_cond.wait(lock, [&] () -> bool {
-				return !m_alive || m_cmds.size() > 0;
-			});
-
-			if (!m_alive)
-				continue;
-
-			command = &m_cmds.front();
-		}
-
-		/*
-		 * IF RuleManager::shouldEncode(io)
-		 *
-		 * io->encode()
-		 */
-
-		if ((*command)->call()) {
-			Lock lock(m_mutex);
-
-			m_cmds.pop_front();
-		}
-	}
 }
 
-CommandQueue::CommandQueue()
+void EventInvite::call(Plugin &p)
 {
-	m_alive = true;
-	m_thread = Thread(&CommandQueue::routine, this);
-}
-
-CommandQueue::~CommandQueue()
-{
-	m_alive = false;
-	m_cond.notify_one();
-
-	try {
-		m_thread.join();
-	} catch (...) { }
-}
-
-void CommandQueue::clear()
-{
-	Lock lock(m_mutex);
-
-	m_cmds.clear();
+	p.onInvite(m_server, m_channel, m_who);
 }
 
 } // !irccd

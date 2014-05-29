@@ -19,36 +19,37 @@
 #include <Logger.h>
 
 #include "EventQueue.h"
+#include "Plugin.h"
 
 namespace irccd {
 
 EventQueue::Atomic	EventQueue::alive(true);
 EventQueue::Mutex	EventQueue::mutex;
 EventQueue::Cond	EventQueue::cond;
-EventQueue::Queue	EventQueue::queue;
+EventQueue::List	EventQueue::list;
 EventQueue::Thread	EventQueue::thread;
 
 void EventQueue::routine()
 {
 	while (alive) {
-		Function event;
+		Ptr *event;
 
 		{
 			Lock lock(mutex);
 
 			cond.wait(lock, [&] () -> bool {
-				return !alive || queue.size() > 0;
+				return !alive || list.size() > 0;
 			});
 
 			if (!alive)
 				continue;
 
-			event = queue.front();
+			event = &list.front();
 		}
-
+	
 		Plugin::forAll([=] (Plugin::Ptr p) {
 			try {
-				event(p);
+				(*event)->call(*p);
 			} catch (Plugin::ErrorException ex) {
 				Logger::warn("plugin %s: %s", ex.which().c_str(), ex.what());
 			}
@@ -57,7 +58,7 @@ void EventQueue::routine()
 		{
 			Lock lock(mutex);
 
-			queue.pop();
+			list.pop_front();
 		}
 	}
 }
@@ -76,14 +77,6 @@ void EventQueue::stop()
 	try {
 		thread.join();
 	} catch (...) { }
-}
-
-void EventQueue::add(const Function &event)
-{
-	Lock lock(mutex);
-
-	queue.push(event);
-	cond.notify_one();
 }
 
 } // !irccd

@@ -22,6 +22,74 @@ project(irccd)
 set(SOURCES
 	CommandQueue.cpp
 	CommandQueue.h
+	IO.cpp
+	IO.h
+	event/Event.cpp
+	event/Event.h
+	event/EventConnect.cpp
+	event/EventConnect.h
+	event/EventMe.cpp
+	event/EventMe.h
+	event/EventMessage.cpp
+	event/EventMessage.h
+	event/EventChannelNotice.cpp
+	event/EventChannelNotice.h
+	event/EventInvite.cpp
+	event/EventInvite.h
+	event/EventJoin.cpp
+	event/EventJoin.h
+	event/EventKick.cpp
+	event/EventKick.h
+	event/EventMode.cpp
+	event/EventMode.h
+	event/EventNames.cpp
+	event/EventNames.h
+	event/EventNick.cpp
+	event/EventNick.h
+	event/EventNotice.cpp
+	event/EventNotice.h
+	event/EventPart.cpp
+	event/EventPart.h
+	event/EventQuery.cpp
+	event/EventQuery.h
+	event/EventTopic.cpp
+	event/EventTopic.h
+	event/EventUserMode.cpp
+	event/EventUserMode.h
+	event/EventWhois.cpp
+	event/EventWhois.h
+	command/Command.cpp
+	command/Command.h
+	command/CommandChannelNotice.cpp
+	command/CommandChannelNotice.h
+	command/CommandInvite.cpp
+	command/CommandInvite.h
+	command/CommandJoin.cpp
+	command/CommandJoin.h
+	command/CommandKick.cpp
+	command/CommandKick.h
+	command/CommandMe.cpp
+	command/CommandMe.h
+	command/CommandMessage.cpp
+	command/CommandMessage.h
+	command/CommandMode.cpp
+	command/CommandMode.h
+	command/CommandNames.cpp
+	command/CommandNames.h
+	command/CommandNick.cpp
+	command/CommandNick.h
+	command/CommandNotice.cpp
+	command/CommandNotice.h
+	command/CommandPart.cpp
+	command/CommandPart.h
+	command/CommandSend.cpp
+	command/CommandSend.h
+	command/CommandTopic.cpp
+	command/CommandTopic.h
+	command/CommandUserMode.cpp
+	command/CommandUserMode.h
+	command/CommandWhois.cpp
+	command/CommandWhois.h
 	server/ServerConnecting.cpp
 	server/ServerConnecting.h
 	server/ServerDead.cpp
