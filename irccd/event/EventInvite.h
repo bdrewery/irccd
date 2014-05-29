@@ -39,8 +39,9 @@ public:
 		    const std::string &who);
 
 	void call(Plugin &p) override;
+	const char *name() const override;
 };
 
-};
+} // !irccd
 
 #endif // !_EVENT_INVITE_H_

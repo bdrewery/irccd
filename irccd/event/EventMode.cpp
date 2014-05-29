@@ -40,4 +40,9 @@ void EventMode::call(Plugin &p)
 	p.onMode(m_server, m_channel, m_nickname, m_mode, m_argument);
 }
 
+const char *EventMode::name() const
+{
+	return "onMode";
 }
+
+} // !irccd

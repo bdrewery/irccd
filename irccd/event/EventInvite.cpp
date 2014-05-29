@@ -36,4 +36,9 @@ void EventInvite::call(Plugin &p)
 	p.onInvite(m_server, m_channel, m_who);
 }
 
+const char *EventInvite::name() const
+{
+	return "onInvite";
+}
+
 } // !irccd

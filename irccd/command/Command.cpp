@@ -26,5 +26,4 @@ Command::Command(const std::string &serverName,
 {
 }
 
-
 } // !irccd

@@ -47,12 +47,24 @@ public:
 	 */
 	IO(const std::string &serverName = "", const std::string &targetName = "");
 
+	const std::string &server() const;
+
+	const std::string &target() const;
+
 	/**
 	 * The function that should encode the data if needed.
 	 *
 	 * @param encoding the desired encoding
 	 */
 	virtual void encode(const std::string &encoding);
+
+	/**
+	 * Tells if the IO is empty, such as not suitable for
+	 * rule matching.
+	 *
+	 * @return true if rule should not be applied
+	 */
+	virtual bool empty() const;
 
 	/**
 	 * The copy assignment is disabled.

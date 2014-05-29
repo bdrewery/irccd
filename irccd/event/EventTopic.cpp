@@ -38,4 +38,9 @@ void EventTopic::call(Plugin &p)
 	p.onTopic(m_server, m_channel, m_who, m_topic);
 }
 
+const char *EventTopic::name() const
+{
+	return "onTopic";
+}
+
 } // !irccd

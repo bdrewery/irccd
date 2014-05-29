@@ -24,11 +24,25 @@ IO::IO(const std::string &serverName, const std::string &targetName)
 	: m_serverName(serverName)
 	, m_targetName(targetName)
 {
+}
 
+const std::string &IO::server() const
+{
+	return m_serverName;
+}
+
+const std::string &IO::target() const
+{
+	return m_targetName;
 }
 
 void IO::encode(const std::string &)
 {
+}
+
+bool IO::empty() const
+{
+	return m_serverName.size() == 0 && m_targetName.size() == 0;
 }
 
 } // !irccd

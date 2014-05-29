@@ -35,4 +35,9 @@ void EventNames::call(Plugin &p)
 	p.onNames(m_server, m_channel, m_names);
 }
 
+const char *EventNames::name() const
+{
+	return "onNames";
 }
+
+} // !irccd

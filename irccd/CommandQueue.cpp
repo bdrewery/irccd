@@ -17,6 +17,7 @@
  */
 
 #include "CommandQueue.h"
+#include "RuleManager.h"
 
 namespace irccd {
 
@@ -43,6 +44,13 @@ void CommandQueue::routine()
 		 *
 		 * io->encode()
 		 */
+		if (!(*command)->empty()) {
+			const auto &manager = RuleManager::instance();
+			const auto result = manager.solve((*command)->server(), (*command)->target(), "", "");
+
+			if (result.encoding.size() > 0)
+				printf("SENDING REENCODE TO %s\n", result.encoding.c_str());
+		}
 
 		if ((*command)->call()) {
 			Lock lock(m_mutex);

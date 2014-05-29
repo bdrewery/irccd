@@ -39,6 +39,7 @@ public:
 		   const std::string &message);
 
 	void call(Plugin &p) override;
+	const char *name() const override;
 };
 
 } // !irccd

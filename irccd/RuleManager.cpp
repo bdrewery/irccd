@@ -129,9 +129,6 @@ RuleResult RuleManager::solve(const std::string &server,
 
 	RuleResult result;
 
-	if (RuleValidEvents.count(event) == 0)
-		throw std::invalid_argument(event + " is not a valid event");
-
 	try {
 		for (const auto &r : m_rules) {
 			// Skip disabled rules

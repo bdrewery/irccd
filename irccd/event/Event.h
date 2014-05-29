@@ -31,6 +31,7 @@ public:
 	Event(const std::string &serverName, const std::string &targetName);
 
 	virtual void call(Plugin &p) = 0;
+	virtual const char *name() const = 0;
 };
 
 } // !irccd

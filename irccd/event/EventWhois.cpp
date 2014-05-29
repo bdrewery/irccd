@@ -33,4 +33,9 @@ void EventWhois::call(Plugin &p)
 	p.onWhois(m_server, m_info);
 }
 
+const char *EventWhois::name() const
+{
+	return "onWhois";
+}
+
 } // !irccd

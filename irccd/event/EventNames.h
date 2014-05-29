@@ -40,8 +40,9 @@ public:
 		   const std::vector<std::string> &names);
 
 	void call(Plugin &p) override;
+	const char *name() const override;
 };
 
-}
+} // !irccd
 
 #endif // !_EVENT_NAMES_H_

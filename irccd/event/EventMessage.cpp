@@ -39,4 +39,9 @@ void EventMessage::call(Plugin &p)
 	p.onMessage(m_server, m_channel, m_nickname, m_message);
 }
 
+const char *EventMessage::name() const
+{
+	return "onMessage";
+}
+
 } // !irccd

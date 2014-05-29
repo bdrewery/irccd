@@ -37,4 +37,9 @@ void EventNotice::call(Plugin &p)
 	p.onNotice(m_server, m_who, m_target, m_notice);
 }
 
+const char *EventNotice::name() const
+{
+	return "onNotice";
 }
+
+} // !irccd

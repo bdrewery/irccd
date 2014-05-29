@@ -35,4 +35,4 @@ bool CommandInvite::call()
 	return m_server->session().invite(m_target, m_channel);
 }
 
-}
+} // !irccd

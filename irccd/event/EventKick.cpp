@@ -40,4 +40,9 @@ void EventKick::call(Plugin &p)
 	p.onKick(m_server, m_channel, m_who, m_kicked, m_reason);
 }
 
+const char *EventKick::name() const
+{
+	return "onKick";
+}
+
 } // !irccd

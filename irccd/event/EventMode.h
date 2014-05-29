@@ -43,6 +43,7 @@ public:
 		  const std::string &arguement);
 
 	void call(Plugin &p) override;
+	const char *name() const override;
 };
 
 } // !irccd

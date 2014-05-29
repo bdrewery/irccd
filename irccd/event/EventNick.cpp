@@ -35,4 +35,9 @@ void EventNick::call(Plugin &p)
 	p.onNick(m_server, m_oldnickname, m_newnickname);
 }
 
+const char *EventNick::name() const
+{
+	return "onNick";
+}
+
 } // !irccd

@@ -51,20 +51,20 @@ void EventQueue::routine()
 		Plugin::forAll([=] (Plugin::Ptr p) {
 			const auto &manager = RuleManager::instance();
 
-#if 0
-			if (!call.second.empty()) {
+			if (!(*event)->empty()) {
+				printf("Solving... %s\n", (*event)->name());
 				auto result = manager.solve(
-				    call.second.server(),
-				    call.second.channel(),
-				    call.second.event(),
+				    (*event)->server(),
+				    (*event)->target(),
+				    (*event)->name(),
 				    p->getName()
 				);
 
 				if (!result.enabled) {
 					Logger::debug("rule: skip on match %s, %s, %s, %s",
-					    call.second.server().c_str(),
-					    call.second.channel().c_str(),
-					    call.second.event().c_str(),
+					    (*event)->server().c_str(),
+					    (*event)->target().c_str(),
+					    (*event)->name(),
 					    p->getName().c_str()
 					);
 
@@ -75,7 +75,6 @@ void EventQueue::routine()
 					printf("REENCODING FROM %s\n", result.encoding.c_str());
 				}
 			}
-#endif
 
 			try {
 				(*event)->call(*p);

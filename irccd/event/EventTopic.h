@@ -41,6 +41,7 @@ public:
 		   const std::string &topic);
 
 	void call(Plugin &p) override;
+	const char *name() const override;
 };
 
 } // !irccd

@@ -39,4 +39,9 @@ void EventChannelNotice::call(Plugin &p)
 	p.onChannelNotice(m_server, m_who, m_channel, m_notice);
 }
 
+const char *EventChannelNotice::name() const
+{
+	return "onChannelNotice";
+}
+
 } // !irccd

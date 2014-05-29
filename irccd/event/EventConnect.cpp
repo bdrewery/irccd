@@ -31,4 +31,9 @@ void EventConnect::call(Plugin &p)
 	p.onConnect(m_server);
 }
 
+const char *EventConnect::name() const
+{
+	return "onConnect";
+}
+
 } // !irccd

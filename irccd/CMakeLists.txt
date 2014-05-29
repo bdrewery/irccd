@@ -19,89 +19,24 @@
 # Project
 project(irccd)
 
-set(SOURCES
+add_subdirectory(command)
+add_subdirectory(event)
+add_subdirectory(lua)
+add_subdirectory(server)
+
+source_group(command FILES ${COMMAND_SOURCES})
+source_group(event FILES ${EVENT_SOURCES})
+source_group(lua FILES ${LUA_SOURCES})
+source_group(server FILES ${SERVER_SOURCES})
+
+set(
+	SOURCES
+	${SERVER_SOURCES}
+	${COMMAND_SOURCES}
 	CommandQueue.cpp
 	CommandQueue.h
 	IO.cpp
 	IO.h
-	event/Event.cpp
-	event/Event.h
-	event/EventConnect.cpp
-	event/EventConnect.h
-	event/EventMe.cpp
-	event/EventMe.h
-	event/EventMessage.cpp
-	event/EventMessage.h
-	event/EventChannelNotice.cpp
-	event/EventChannelNotice.h
-	event/EventInvite.cpp
-	event/EventInvite.h
-	event/EventJoin.cpp
-	event/EventJoin.h
-	event/EventKick.cpp
-	event/EventKick.h
-	event/EventMode.cpp
-	event/EventMode.h
-	event/EventNames.cpp
-	event/EventNames.h
-	event/EventNick.cpp
-	event/EventNick.h
-	event/EventNotice.cpp
-	event/EventNotice.h
-	event/EventPart.cpp
-	event/EventPart.h
-	event/EventQuery.cpp
-	event/EventQuery.h
-	event/EventTopic.cpp
-	event/EventTopic.h
-	event/EventUserMode.cpp
-	event/EventUserMode.h
-	event/EventWhois.cpp
-	event/EventWhois.h
-	command/Command.cpp
-	command/Command.h
-	command/CommandChannelNotice.cpp
-	command/CommandChannelNotice.h
-	command/CommandInvite.cpp
-	command/CommandInvite.h
-	command/CommandJoin.cpp
-	command/CommandJoin.h
-	command/CommandKick.cpp
-	command/CommandKick.h
-	command/CommandMe.cpp
-	command/CommandMe.h
-	command/CommandMessage.cpp
-	command/CommandMessage.h
-	command/CommandMode.cpp
-	command/CommandMode.h
-	command/CommandNames.cpp
-	command/CommandNames.h
-	command/CommandNick.cpp
-	command/CommandNick.h
-	command/CommandNotice.cpp
-	command/CommandNotice.h
-	command/CommandPart.cpp
-	command/CommandPart.h
-	command/CommandSend.cpp
-	command/CommandSend.h
-	command/CommandTopic.cpp
-	command/CommandTopic.h
-	command/CommandUserMode.cpp
-	command/CommandUserMode.h
-	command/CommandWhois.cpp
-	command/CommandWhois.h
-	server/ServerConnecting.cpp
-	server/ServerConnecting.h
-	server/ServerDead.cpp
-	server/ServerDead.h
-	server/ServerDisconnected.cpp
-	server/ServerDisconnected.h
-	server/ServerRunning.cpp
-	server/ServerRunning.h
-	server/ServerState.cpp
-	server/ServerState.h
-	server/ServerUninitialized.cpp
-	server/ServerUninitialized.h
 	Server.cpp
 	Server.h
 	Irccd.cpp
@@ -169,34 +104,10 @@ if(WITH_LUA52 OR WITH_LUAJIT)
 		list(
 			APPEND
 			SOURCES
+			${LUA_SOURCES}
+			${EVENT_SOURCES}
 			EventQueue.cpp
 			EventQueue.h
-			lua/LuaIrccd.cpp
-			lua/LuaIrccd.h
-			lua/LuaLogger.cpp
-			lua/LuaLogger.h
-			lua/LuaFS.cpp
-			lua/LuaFS.h
-			lua/LuaParser.cpp
-			lua/LuaParser.h
-			lua/LuaPipe.cpp
-			lua/LuaPipe.h
-			lua/LuaPlugin.cpp
-			lua/LuaPlugin.h
-			lua/LuaRule.cpp
-			lua/LuaRule.h
-			lua/LuaServer.cpp
-			lua/LuaServer.h
-			lua/LuaSocket.cpp
-			lua/LuaSocket.h
-			lua/LuaSystem.cpp
-			lua/LuaSystem.h
-			lua/LuaThread.cpp
-			lua/LuaThread.h
-			lua/LuaUtf8.cpp
-			lua/LuaUtf8.h
-			lua/LuaUtil.cpp
-			lua/LuaUtil.h
 			Luae.cpp
 			Luae.h
 			Pipe.cpp

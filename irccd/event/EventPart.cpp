@@ -38,4 +38,9 @@ void EventPart::call(Plugin &p)
 	p.onPart(m_server, m_channel, m_nickname, m_reason);
 }
 
+const char *EventPart::name() const
+{
+	return "onPart";
+}
+
 } // !irccd

@@ -36,4 +36,9 @@ void EventQuery::call(Plugin &p)
 	p.onQuery(m_server, m_who, m_message);
 }
 
+const char *EventQuery::name() const
+{
+	return "onQuery";
+}
+
 } // !irccd

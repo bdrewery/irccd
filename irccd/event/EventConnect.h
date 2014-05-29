@@ -35,6 +35,7 @@ public:
 	EventConnect(const std::shared_ptr<Server> &server);
 
 	void call(Plugin &p) override;
+	const char *name() const override;
 };
 
 } // !irccd

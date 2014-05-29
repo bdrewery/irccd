@@ -36,4 +36,9 @@ void EventJoin::call(Plugin &p)
 	p.onJoin(m_server, m_channel, m_nickname);
 }
 
+const char *EventJoin::name() const
+{
+	return "onJoin";
 }
+
+} // !irccd

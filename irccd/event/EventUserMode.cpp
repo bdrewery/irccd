@@ -35,4 +35,9 @@ void EventUserMode::call(Plugin &p)
 	p.onUserMode(m_server, m_nickname, m_mode);
 }
 
+const char *EventUserMode::name() const
+{
+	return "onUserMode";
+}
+
 } // !irccd
