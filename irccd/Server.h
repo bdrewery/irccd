@@ -80,7 +80,7 @@ using IrcPrefixes	= std::map<IrcChanNickMode, char>;
  * Server class, each class define a server that irccd
  * can connect to
  */
-class Server {
+class Server : public std::enable_shared_from_this<Server> {
 public:
 	/**
 	 * @struct Channel

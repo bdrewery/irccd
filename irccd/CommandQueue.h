@@ -28,8 +28,10 @@
 #include <condition_variable>
 #include <functional>
 #include <mutex>
-#include <queue>
+#include <list>
 #include <thread>
+
+#include "command/Command.h"
 
 namespace irccd {
 
@@ -43,17 +45,13 @@ namespace irccd {
  */
 class CommandQueue {
 public:
-	/**
-	 * The function to call. The function must return false if it should
-	 * stay in the queue.
-	 */
-	using Function	= std::function<bool ()>;
+	using Ptr	= std::unique_ptr<Command>;
 
 private:
 	using Cond	= std::condition_variable;
 	using Mutex	= std::mutex;
 	using Lock	= std::unique_lock<Mutex>;
-	using Queue	= std::queue<Function>;
+	using Queue	= std::list<Ptr>;
 	using Thread	= std::thread;
 	using Atomic	= std::atomic_bool;
 
@@ -82,7 +80,17 @@ public:
 	 *
 	 * @param command the command
 	 */
-	void add(Function command);
+	template <typename Cmd>
+	void add(Cmd &&command)
+	{
+		{
+			Lock lock(m_mutex);
+
+			m_cmds.push_back(std::unique_ptr<Cmd>(new Cmd(std::move(command))));
+		}
+
+		m_cond.notify_one();
+	}
 
 	/**
 	 * Clear all commands.

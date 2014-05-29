@@ -1857,13 +1857,21 @@ struct Luae::Convert<const char *> {
  */
 class LuaeValue {
 private:
+	int type;
+
 	union {
 		lua_Number	 number;
 		bool		 boolean;
 	};
 
-	int type;
-	std::string str;
+	/*
+	 * Handle strings manually as Lua string can contains embedded '\0' we
+	 * need to store the real length.
+	 */
+	std::vector<char> string;
+	std::size_t stringLength;
+
+	// For LUA_TTABLE
 	std::vector<std::pair<LuaeValue, LuaeValue>> table;
 
 public:

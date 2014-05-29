@@ -370,7 +370,7 @@ int luaopen_util(lua_State *L)
 	LuaeEnum::create(L, attributes, -1, "attribute");
 
 	// Conversion flags
-	LuaeEnum::create(L, convertFlags, -1);
+	LuaeEnum::create(L, convertFlags, -1, "flags");
 
 	return 1;
 }

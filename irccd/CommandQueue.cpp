@@ -23,7 +23,7 @@ namespace irccd {
 void CommandQueue::routine()
 {
 	while (m_alive) {
-		Function command;
+		Ptr *command = nullptr;
 
 		{
 			Lock lock(m_mutex);
@@ -35,13 +35,19 @@ void CommandQueue::routine()
 			if (!m_alive)
 				continue;
 
-			command = m_cmds.front();
+			command = &m_cmds.front();
 		}
 
-		if (command()) {
+		/*
+		 * IF RuleManager::shouldEncode(io)
+		 *
+		 * io->encode()
+		 */
+
+		if ((*command)->call()) {
 			Lock lock(m_mutex);
 
-			m_cmds.pop();
+			m_cmds.pop_front();
 		}
 	}
 }
@@ -62,20 +68,11 @@ CommandQueue::~CommandQueue()
 	} catch (...) { }
 }
 
-void CommandQueue::add(Function command)
-{
-	Lock lock(m_mutex);
-
-	m_cmds.push(command);
-	m_cond.notify_one();
-}
-
 void CommandQueue::clear()
 {
 	Lock lock(m_mutex);
 
-	while (!m_cmds.empty())
-		m_cmds.pop();
+	m_cmds.clear();
 }
 
 } // !irccd

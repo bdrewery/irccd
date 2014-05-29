@@ -49,6 +49,7 @@ const char *	Process::FieldInfo = "__process_info__";
 
 const Process::Libraries Process::luaLibs = {
 	{ "_G",				luaopen_base		},
+	{ "coroutine",			luaopen_coroutine	},
 	{ "io",				luaopen_io		},
 	{ "math",			luaopen_math		},
 	{ "package",			luaopen_package		},

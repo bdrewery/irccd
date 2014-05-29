@@ -19,72 +19,19 @@
 #ifndef _EVENT_QUEUE_H_
 #define _EVENT_QUEUE_H_
 
+#include <condition_variable>
+#include <list>
+#include <memory>
+#include <thread>
+
 /**
  * @file EventQueue.h
  * @brief Plugin event queue
  */
 
-#include <utility>
-
-#include "Plugin.h"
+#include "event/Event.h"
 
 namespace irccd {
-
-/**
- * @class EventInfo
- * @brief An event information
- *
- * Used to check rules in the event queue.
- */
-class EventInfo {
-private:
-	std::string	m_server;		//!< the server name
-	std::string	m_channel;		//!< the channel name
-	std::string	m_event;		//!< the event name
-
-public:
-	/**
-	 * Default constructor.
-	 */
-	EventInfo() = default;
-
-	/**
-	 * Constructor with all parameters.
-	 *
-	 * @param server the server
-	 * @param channel the channel
-	 * @param event the event
-	 */
-	EventInfo(const std::string &server,
-		  const std::string &channel,
-		  const std::string &event);
-
-	/**
-	 * Get the server name.
-	 *
-	 * @return the server
-	 */
-	const std::string &server() const;
-
-	/**
-	 * Get the channel name.
-	 *
-	 * @return the server
-	 */
-	const std::string &channel() const;
-
-	/**
-	 * Get the event name.
-	 *
-	 * @return the server
-	 */
-	const std::string &event() const;
-
-	/**
-	 * Check if the event info is empty.
-	 */
-	bool empty() const;
-};
 
 /**
  * @class EventQueue
@@ -92,18 +39,13 @@ public:
  */
 class EventQueue {
 public:
-	/**
-	 * The function to add in the event queue. It takes the plugin
-	 * as parameter for the current plugin.
-	 */
-	using Function	= std::function<void (Plugin &)>;
+	using Ptr	= std::unique_ptr<Event>;
 
 private:
-	using Pair	= std::pair<Function, EventInfo>;
 	using Cond	= std::condition_variable;
 	using Mutex	= std::mutex;
 	using Lock	= std::unique_lock<Mutex>;
-	using Queue	= std::queue<Pair>;
+	using List	= std::list<Ptr>;
 	using Thread	= std::thread;
 	using Atomic	= std::atomic_bool;
 
@@ -111,7 +53,7 @@ private:
 	static Atomic	alive;
 	static Mutex	mutex;
 	static Cond	cond;
-	static Queue	queue;
+	static List	list;
 	static Thread	thread;
 
 	static void routine();
@@ -131,10 +73,19 @@ public:
 	 * Add a function to the event queue.
 	 *
 	 * @param event the event function
-	 * @param info the event information (for rules)
 	 */
-	static void add(const Function &event,
-			const EventInfo &info = EventInfo());
+	template <typename Evt>
+	static void add(Evt &&event)
+	{
+		{
+			Lock lock(mutex);
+
+			list.push_back(std::unique_ptr<Evt>(new Evt(std::move(event))));
+		}
+
+		cond.notify_one();
+	}
+
 };
 
 } // !irccd

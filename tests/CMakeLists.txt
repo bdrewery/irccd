@@ -37,6 +37,9 @@ function(create_test name sources)
 		${CMAKE_BINARY_DIR}
 		${CMAKE_SOURCE_DIR}
 		${irccd_SOURCE_DIR}
+		${LUA52_INCLUDE_DIR}
+		${LUAJIT_INCLUDE_DIR}
+		${extern_SOURCE_DIR}
 	)
 
 	add_executable(${name} ${sources})
@@ -50,6 +53,9 @@ function(create_test name sources)
 	target_link_libraries(
 		${name}
 		common
+		ircclient
+		${LUA52_LIBRARIES}
+		${LUAJIT_LIBRARIES}
 		${CPPUNIT_LIBRARY}
 	)
 endfunction()
@@ -104,5 +110,17 @@ if(WITH_TESTS)
 
 		create_test(TestRules "${RULES_SOURCES}")
 
+		# LuaUtil
+		set(
+			TEST_LUA_UTIL_SOURCES
+			lua-util/TestLuaUtil.cpp
+			${irccd_SOURCE_DIR}/Luae.cpp
+			${irccd_SOURCE_DIR}/Luae.h
+			${irccd_SOURCE_DIR}/lua/LuaUtil.cpp
+			${irccd_SOURCE_DIR}/lua/LuaUtil.h
+		)
+
+		create_test(TestLuaUtil	"${TEST_LUA_UTIL_SOURCES}")
+		create_dir(TestLuaUtil lua-util/scripts)
 	endif()
 endif()

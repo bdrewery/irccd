@@ -19,74 +19,39 @@
 #include <Logger.h>
 
 #include "EventQueue.h"
+#include "Plugin.h"
 #include "RuleManager.h"
 
 namespace irccd {
 
-/* --------------------------------------------------------
- * EventInfo
- * -------------------------------------------------------- */
-
-EventInfo::EventInfo(const std::string &server,
-		     const std::string &channel,
-		     const std::string &event)
-	: m_server(server)
-	, m_channel(channel)
-	, m_event(event)
-{
-}
-
-const std::string &EventInfo::server() const
-{
-	return m_server;
-}
-
-const std::string &EventInfo::channel() const
-{
-	return m_channel;
-}
-
-const std::string &EventInfo::event() const
-{
-	return m_event;
-}
-
-bool EventInfo::empty() const
-{
-	return m_server.size() == 0 && m_channel.size() == 0;
-}
-
-/* --------------------------------------------------------
- * EventQueue
- * -------------------------------------------------------- */
-
 EventQueue::Atomic	EventQueue::alive(true);
 EventQueue::Mutex	EventQueue::mutex;
 EventQueue::Cond	EventQueue::cond;
-EventQueue::Queue	EventQueue::queue;
+EventQueue::List	EventQueue::list;
 EventQueue::Thread	EventQueue::thread;
 
 void EventQueue::routine()
 {
 	while (alive) {
-		Pair call;
+		Ptr *event;
 
 		{
 			Lock lock(mutex);
 
 			cond.wait(lock, [&] () -> bool {
-				return !alive || queue.size() > 0;
+				return !alive || list.size() > 0;
 			});
 
 			if (!alive)
 				continue;
 
-			call = queue.front();
+			event = &list.front();
 		}
-
+	
 		Plugin::forAll([=] (Plugin::Ptr p) {
 			const auto &manager = RuleManager::instance();
 
+#if 0
 			if (!call.second.empty()) {
 				auto result = manager.solve(
 				    call.second.server(),
@@ -110,9 +75,10 @@ void EventQueue::routine()
 					printf("REENCODING FROM %s\n", result.encoding.c_str());
 				}
 			}
+#endif
 
 			try {
-				call.first(*p);
+				(*event)->call(*p);
 			} catch (Plugin::ErrorException ex) {
 				Logger::warn("plugin %s: %s", ex.which().c_str(), ex.what());
 			}
@@ -121,7 +87,7 @@ void EventQueue::routine()
 		{
 			Lock lock(mutex);
 
-			queue.pop();
+			list.pop_front();
 		}
 	}
 }
@@ -140,14 +106,6 @@ void EventQueue::stop()
 	try {
 		thread.join();
 	} catch (...) { }
-}
-
-void EventQueue::add(const Function &event, const EventInfo &info)
-{
-	Lock lock(mutex);
-
-	queue.push(std::make_pair(event, info));
-	cond.notify_one();
 }
 
 } // !irccd

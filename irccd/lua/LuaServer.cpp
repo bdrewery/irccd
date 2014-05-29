@@ -168,12 +168,10 @@ int l_getIdentity(lua_State *L)
 int l_getInfo(lua_State *L)
 {
 	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto &info = s->info();
-	auto options = s->options();
 
 	Luae::deprecate(L, "getInfo", "info");
 	LuaeTable::create(L);
-	pushGeneralInfo(L, info, options);
+	pushGeneralInfo(L, s->info(), s->options());
 
 	return 1;
 }
@@ -193,10 +191,8 @@ int l_getName(lua_State *L)
 int l_cnotice(lua_State *L)
 {
 	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto channel = Luae::check<std::string>(L, 2);
-	auto notice = Luae::check<std::string>(L, 3);
 
-	s->cnotice(channel, notice);
+	s->cnotice(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
 	return 0;
 }
@@ -228,10 +224,8 @@ int l_info(lua_State *L)
 int l_invite(lua_State *L)
 {
 	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto nick = Luae::check<std::string>(L, 2);
-	auto channel = Luae::check<std::string>(L, 3);
 
-	s->invite(nick, channel);
+	s->invite(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
 	return 0;
 }
@@ -239,14 +233,13 @@ int l_invite(lua_State *L)
 int l_join(lua_State *L)
 {
 	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto channel = Luae::check<std::string>(L, 2);
 	std::string password = "";
 
 	// optional password
 	if (Luae::gettop(L) == 3)
 		password = Luae::check<std::string>(L, 3);
 
-	s->join(channel, password);
+	s->join(Luae::check<std::string>(L, 2), password);
 
 	return 0;
 }
@@ -270,10 +263,8 @@ int l_kick(lua_State *L)
 int l_me(lua_State *L)
 {
 	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto target = Luae::check<std::string>(L, 2);
-	auto message = Luae::check<std::string>(L, 3);
 
-	s->me(target, message);
+	s->me(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
 	return 0;
 }
@@ -281,30 +272,22 @@ int l_me(lua_State *L)
 int l_mode(lua_State *L)
 {
 	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto channel = Luae::check<std::string>(L, 2);
-	auto mode = Luae::check<std::string>(L, 3);
 
-	s->mode(channel, mode);
+	s->mode(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
 	return 0;
 }
 
 int l_names(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto channel = Luae::check<std::string>(L, 2);
-
-	s->names(channel);
+	Luae::check<Server::Ptr>(L, 1)->names(Luae::check<std::string>(L, 2));
 
 	return 0;
 }
 
 int l_nick(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto newnick = Luae::check<std::string>(L, 2);
-
-	s->nick(newnick);
+	Luae::check<Server::Ptr>(L, 1)->nick(Luae::check<std::string>(L, 2));
 
 	return 0;
 }
@@ -312,10 +295,8 @@ int l_nick(lua_State *L)
 int l_notice(lua_State *L)
 {
 	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto nickname = Luae::check<std::string>(L, 2);
-	auto notice = Luae::check<std::string>(L, 3);
 
-	s->notice(nickname, notice);
+	s->notice(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
 	return 0;
 }
@@ -337,10 +318,8 @@ int l_part(lua_State *L)
 int l_query(lua_State *L)
 {
 	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto target = Luae::check<std::string>(L, 2);
-	auto message = Luae::check<std::string>(L, 3);
 
-	s->query(target, message);
+	s->query(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
 	return 0;
 }
@@ -348,20 +327,15 @@ int l_query(lua_State *L)
 int l_say(lua_State *L)
 {
 	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto target = Luae::check<std::string>(L, 2);
-	auto message = Luae::check<std::string>(L, 3);
 
-	s->say(target, message);
+	s->say(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
 	return 0;
 }
 
 int l_send(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto message = Luae::check<std::string>(L, 2);
-
-	s->send(message);
+	Luae::check<Server::Ptr>(L, 1)->send(Luae::check<std::string>(L, 2));
 
 	return 0;
 }
@@ -369,30 +343,22 @@ int l_send(lua_State *L)
 int l_topic(lua_State *L)
 {
 	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto channel = Luae::check<std::string>(L, 2);
-	auto topic = Luae::check<std::string>(L, 3);
 
-	s->topic(channel, topic);
+	s->topic(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
 	return 0;
 }
 
 int l_umode(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto mode = Luae::check<std::string>(L, 2);
-
-	s->umode(mode);
+	Luae::check<Server::Ptr>(L, 1)->umode(Luae::check<std::string>(L, 2));
 
 	return 0;
 }
 
 int l_whois(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
-	auto target = Luae::check<std::string>(L, 2);
-
-	s->whois(target);
+	Luae::check<Server::Ptr>(L, 1)->whois(Luae::check<std::string>(L, 2));
 
 	return 0;
 }
@@ -415,10 +381,7 @@ int l_tostring(lua_State *L)
 
 int l_equals(lua_State *L)
 {
-	auto s1 = Luae::check<Server::Ptr>(L, 1);
-	auto s2 = Luae::check<Server::Ptr>(L, 2);
-
-	Luae::push(L, s1 == s2);
+	Luae::push(L, Luae::check<Server::Ptr>(L, 1) == Luae::check<Server::Ptr>(L, 2));
 
 	return 1;
 }

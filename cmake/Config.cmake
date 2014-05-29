@@ -22,21 +22,7 @@
 
 if(UNIX)
 	set(C_FLAGS "${C_FLAGS} -Wall -Wextra")
-	set(CXX_FLAGS "${CXX_FLAGS} -Wall -Wextra -std=c++11")
-
-	#
-	# FreeBSD require -std=c++11 -stdlib=libc++ to compile
-	# with clang++
-	#
-	if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
-		get_filename_component(CC ${CMAKE_CXX_COMPILER} NAME)
-
-		if(NOT ${CC} STREQUAL "clang++")
-			message(FATAL_ERROR "FreeBSD requires clang++ compiler")
-		endif()
-
-		set(CXX_FLAGS "${CXX_FLAGS} -stdlib=libc++")
-	endif ()
+	set(CXX_FLAGS "${CXX_FLAGS} -Wall -Wextra -std=gnu++11")
 elseif(WIN32)
 	set(C_FLAGS "${C_FLAGS} /D _CRT_SECURE_NO_WARNINGS")
 	set(CXX_FLAGS "${CXX_FLAGS} /D _CRT_SECURE_NO_WARNINGS")

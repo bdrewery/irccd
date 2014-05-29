@@ -33,6 +33,22 @@
 #include "server/ServerConnecting.h"
 #include "server/ServerUninitialized.h"
 
+#include "command/CommandChannelNotice.h"
+#include "command/CommandInvite.h"
+#include "command/CommandJoin.h"
+#include "command/CommandKick.h"
+#include "command/CommandMessage.h"
+#include "command/CommandMe.h"
+#include "command/CommandMode.h"
+#include "command/CommandNames.h"
+#include "command/CommandNick.h"
+#include "command/CommandNotice.h"
+#include "command/CommandPart.h"
+#include "command/CommandSend.h"
+#include "command/CommandTopic.h"
+#include "command/CommandUserMode.h"
+#include "command/CommandWhois.h"
+
 #if defined(WITH_LUA)
 #  include "Plugin.h"
 #endif
@@ -323,7 +339,7 @@ void Server::cnotice(const std::string &channel, const std::string &message)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_queue.add(std::bind(&IrcSession::cnotice, &m_session, channel, message));
+		m_queue.add(CommandChannelNotice(shared_from_this(), channel, message));
 }
 
 void Server::invite(const std::string &target, const std::string &channel)
@@ -331,7 +347,7 @@ void Server::invite(const std::string &target, const std::string &channel)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_queue.add(std::bind(&IrcSession::invite, &m_session, target, channel));
+		m_queue.add(CommandInvite(shared_from_this(), target, channel));
 }
 
 void Server::join(const std::string &name, const std::string &password)
@@ -339,7 +355,7 @@ void Server::join(const std::string &name, const std::string &password)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_queue.add(std::bind(&IrcSession::join, &m_session, name, password));
+		m_queue.add(CommandJoin(shared_from_this(), name, password));
 }
 
 void Server::kick(const std::string &name,
@@ -349,7 +365,7 @@ void Server::kick(const std::string &name,
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_queue.add(std::bind(&IrcSession::kick, &m_session, name, channel, reason));
+		m_queue.add(CommandKick(shared_from_this(), name, channel, reason));
 }
 
 void Server::me(const std::string &target, const std::string &message)
@@ -357,7 +373,7 @@ void Server::me(const std::string &target, const std::string &message)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_queue.add(std::bind(&IrcSession::me, &m_session, target, message));
+		m_queue.add(CommandMe(shared_from_this(), target, message));
 }
 
 void Server::mode(const std::string &channel, const std::string &mode)
@@ -365,7 +381,7 @@ void Server::mode(const std::string &channel, const std::string &mode)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_queue.add(std::bind(&IrcSession::mode, &m_session, channel, mode));
+		m_queue.add(CommandMode(shared_from_this(), channel, mode));
 }
 
 void Server::names(const std::string &channel)
@@ -373,7 +389,7 @@ void Server::names(const std::string &channel)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_queue.add(std::bind(&IrcSession::names, &m_session, channel));
+		m_queue.add(CommandNames(shared_from_this(), channel));
 }
 
 void Server::nick(const std::string &nick)
@@ -381,7 +397,7 @@ void Server::nick(const std::string &nick)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_queue.add(std::bind(&IrcSession::nick, &m_session, nick));
+		m_queue.add(CommandNick(shared_from_this(), nick));
 }
 
 void Server::notice(const std::string &nickname, const std::string &message)
@@ -389,7 +405,7 @@ void Server::notice(const std::string &nickname, const std::string &message)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running" && nickname[0] != '#')
-		m_queue.add(std::bind(&IrcSession::notice, &m_session, nickname, message));
+		m_queue.add(CommandNotice(shared_from_this(), nickname, message));
 }
 
 void Server::part(const std::string &channel, const std::string &reason)
@@ -397,7 +413,7 @@ void Server::part(const std::string &channel, const std::string &reason)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_queue.add(std::bind(&IrcSession::part, &m_session, channel, reason));
+		m_queue.add(CommandPart(shared_from_this(), channel, reason));
 }
 
 void Server::query(const std::string &who, const std::string &message)
@@ -406,7 +422,7 @@ void Server::query(const std::string &who, const std::string &message)
 
 	// Do not write to public channel
 	if (m_state->which() == "Running" && who[0] != '#')
-		m_queue.add(std::bind(&IrcSession::say, &m_session, who, message));
+		m_queue.add(CommandMessage(shared_from_this(), who, message));
 }
 
 void Server::say(const std::string &target, const std::string &message)
@@ -414,7 +430,7 @@ void Server::say(const std::string &target, const std::string &message)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_queue.add(std::bind(&IrcSession::say, &m_session, target, message));
+		m_queue.add(CommandMessage(shared_from_this(), target, message));
 }
 
 void Server::send(const std::string &msg)
@@ -422,7 +438,7 @@ void Server::send(const std::string &msg)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_queue.add(std::bind(&IrcSession::send, &m_session, msg));
+		m_queue.add(CommandSend(shared_from_this(), msg));
 }
 
 void Server::topic(const std::string &channel, const std::string &topic)
@@ -430,7 +446,7 @@ void Server::topic(const std::string &channel, const std::string &topic)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_queue.add(std::bind(&IrcSession::topic, &m_session, channel, topic));
+		m_queue.add(CommandTopic(shared_from_this(), channel, topic));
 }
 
 void Server::umode(const std::string &mode)
@@ -438,7 +454,7 @@ void Server::umode(const std::string &mode)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_queue.add(std::bind(&IrcSession::umode, &m_session, mode));
+		m_queue.add(CommandUserMode(shared_from_this(), mode));
 }
 
 void Server::whois(const std::string &target)
@@ -446,7 +462,7 @@ void Server::whois(const std::string &target)
 	Lock lk(m_lock);
 
 	if (m_state->which() == "Running")
-		m_queue.add(std::bind(&IrcSession::whois, &m_session, target));
+		m_queue.add(CommandWhois(shared_from_this(), target));
 }
 
 } // !irccd
