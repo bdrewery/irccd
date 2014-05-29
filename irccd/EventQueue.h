@@ -19,6 +19,7 @@
 #ifndef _EVENT_QUEUE_H_
 #define _EVENT_QUEUE_H_
 
+#include <atomic>
 #include <condition_variable>
 #include <list>
 #include <memory>

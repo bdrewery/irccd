@@ -1354,7 +1354,6 @@ public:
 		  typename Converter = Convert<typename Container::value_type>>
 	static int pushIterator(lua_State *L, const Container &container)
 	{
-		using ValueType		= typename Container::value_type;
 		using IteratorType	= typename Container::const_iterator;
 
 		LUAE_STACK_CHECKBEGIN(L);
