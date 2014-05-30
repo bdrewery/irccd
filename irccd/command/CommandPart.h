@@ -19,6 +19,11 @@
 #ifndef _COMMAND_PART_H_
 #define _COMMAND_PART_H_
 
+/**
+ * @file CommandPart.h
+ * @brief Leave a channel
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandPart
+ * @brief Leave a channel
+ */
 class CommandPart final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -34,10 +43,20 @@ private:
 	std::string		m_reason;
 
 public:
+	/**
+	 * Leave a channel.
+	 *
+	 * @param server the server
+	 * @param channel the channel
+	 * @param reason the reason
+	 */
 	CommandPart(const std::shared_ptr<Server> &server,
 		    const std::string &channel,
 		    const std::string &reason);
 
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 

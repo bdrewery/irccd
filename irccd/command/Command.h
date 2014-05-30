@@ -19,22 +19,42 @@
 #ifndef _COMMAND_H_
 #define _COMMAND_H_
 
+/**
+ * @file Command.h
+ * @brief Base class for server commands
+ */
+
 #include "IO.h"
 
 namespace irccd {
 
+/**
+ * @class Command
+ * @brief Base class for server command
+ */
 class Command : public IO {
 public:
+	/**
+	 * Command constructor.
+	 *
+	 * @param serverName the server name
+	 * @param targetName the channel name
+	 */
 	Command(const std::string &serverName = "", const std::string &targetName = "");
 
-	std::string tryEncode(const std::string &input)
-	{
-		if (m_mustEncode)
-			return tryEncodeFull("UTF-8", m_encoding, input);
+	/**
+	 * Try to encode to the server encoding or return the same input.
+	 *
+	 * @param input the input
+	 * @return the converted string or input
+	 */
+	std::string tryEncode(const std::string &input);
 
-		return input;
-	}
-
+	/**
+	 * Call the server command.
+	 *
+	 * @return true if was sent correctly
+	 */
 	virtual bool call() = 0;
 };
 

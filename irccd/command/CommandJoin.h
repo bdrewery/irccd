@@ -19,6 +19,11 @@
 #ifndef _COMMAND_JOIN_H_
 #define _COMMAND_JOIN_H_
 
+/**
+ * @file CommandJoin.h
+ * @brief Join a channel
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandJoin
+ * @brief Join a channel
+ */
 class CommandJoin final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -34,10 +43,20 @@ private:
 	std::string		m_password;
 
 public:
+	/**
+	 * Join a channel constructor.
+	 *
+	 * @param server the server
+	 * @param channel the channel
+	 * @param password the optional password
+	 */
 	CommandJoin(const std::shared_ptr<Server> &server,
 		    const std::string &channel,
 		    const std::string &password);
 
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 

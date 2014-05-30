@@ -19,6 +19,11 @@
 #ifndef _COMMAND_NOTICE_H_
 #define _COMMAND_NOTICE_H_
 
+/**
+ * @file CommandNotice.h
+ * @brief Send a private notice
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandNotice
+ * @brief Send a private notice
+ */
 class CommandNotice final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -34,10 +43,20 @@ private:
 	std::string		m_message;
 
 public:
+	/**
+	 * Command notice command constructor.
+	 *
+	 * @param server the server
+	 * @param nickname the target
+	 * @param message the notice
+	 */
 	CommandNotice(const std::shared_ptr<Server> &server,
 		      const std::string &nickname,
 		      const std::string &message);
 
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 

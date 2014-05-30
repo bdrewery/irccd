@@ -19,6 +19,11 @@
 #ifndef _COMMAND_WHOIS_H_
 #define _COMMAND_WHOIS_H_
 
+/**
+ * @file CommandWhois.h
+ * @brief Get whois
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,15 +32,28 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandWhois
+ * @brief Get whois
+ */
 class CommandWhois final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
 	std::string		m_target;
 
 public:
+	/**
+	 * Whois command constructor.
+	 *
+	 * @param server the server
+	 * @param target the target
+	 */
 	CommandWhois(const std::shared_ptr<Server> &server,
 		     const std::string &target);
 
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 

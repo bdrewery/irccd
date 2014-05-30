@@ -19,6 +19,11 @@
 #ifndef _COMMAND_NAMES_H_
 #define _COMMAND_NAMES_H_
 
+/**
+ * @file CommandNames.h
+ * @brief Get the names on a channel
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,15 +32,28 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandNames
+ * @brief Get the names on a channel
+ */
 class CommandNames final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
 	std::string		m_channel;
 
 public:
+	/**
+	 * Names command constructor.
+	 *
+	 * @param server the server
+	 * @param channel the channel
+	 */
 	CommandNames(const std::shared_ptr<Server> &server,
 		     const std::string &channel);
 
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 

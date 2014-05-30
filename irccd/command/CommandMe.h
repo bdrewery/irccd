@@ -19,6 +19,11 @@
 #ifndef _COMMAND_ME_H_
 #define _COMMAND_ME_H_
 
+/**
+ * @file CommandMe.h
+ * @brief CTCP Action
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandMe
+ * @brief CTCP Action
+ */
 class CommandMe final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -34,10 +43,20 @@ private:
 	std::string		m_message;
 
 public:
+	/**
+	 * CTCP Action constructor.
+	 *
+	 * @param server the server
+	 * @param channel the channel
+	 * @param message the message
+	 */
 	CommandMe(const std::shared_ptr<Server> &server,
-		  const std::string &target,
+		  const std::string &channel,
 		  const std::string &message);
 
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 

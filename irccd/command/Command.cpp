@@ -26,4 +26,12 @@ Command::Command(const std::string &serverName,
 {
 }
 
+std::string Command::tryEncode(const std::string &input)
+{
+	if (m_mustEncode)
+		return tryEncodeFull("UTF-8", m_encoding, input);
+
+	return input;
+}
+
 } // !irccd

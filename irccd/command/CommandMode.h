@@ -19,6 +19,11 @@
 #ifndef _COMMAND_MODE_H_
 #define _COMMAND_MODE_H_
 
+/**
+ * @file CommandMode.h
+ * @brief Channel mode
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandMode
+ * @brief Change a channel mode
+ */
 class CommandMode final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -34,10 +43,20 @@ private:
 	std::string		m_mode;
 
 public:
+	/**
+	 * Channel mode change constructor.
+	 *
+	 * @param server the server
+	 * @param channel the channel
+	 * @param mode the mode
+	 */
 	CommandMode(const std::shared_ptr<Server> &server,
 		    const std::string &channel,
 		    const std::string &mode);
 
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 

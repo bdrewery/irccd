@@ -19,6 +19,11 @@
 #ifndef _COMMAND_CHANNEL_NOTICE_H_
 #define _COMMAND_CHANNEL_NOTICE_H_
 
+/**
+ * @file CommandChannelNotice.h
+ * @brief Channel notice
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandChannelNotice
+ * @brief Channel notice
+ */
 class CommandChannelNotice final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -34,10 +43,20 @@ private:
 	std::string		m_notice;
 
 public:
+	/**
+	 * Channel notice constructor.
+	 *
+	 * @param server the server
+	 * @param channel the channel
+	 * @param notice the notice
+	 */
 	CommandChannelNotice(const std::shared_ptr<Server> &server,
 			     const std::string &channel,
 			     const std::string &notice);
 
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 

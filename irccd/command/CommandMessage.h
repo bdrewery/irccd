@@ -19,6 +19,11 @@
 #ifndef _COMMAND_MESSAGE_H_
 #define _COMMAND_MESSAGE_H_
 
+/**
+ * @file CommandMessage.h
+ * @brief Send a channel message
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandMessage
+ * @brief Channel message
+ */
 class CommandMessage final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -34,10 +43,20 @@ private:
 	std::string		m_message;
 
 public:
+	/**
+	 * Channel message constructor.
+	 *
+	 * @param server the server
+	 * @param channel the channel
+	 * @param message the message
+	 */
 	CommandMessage(const std::shared_ptr<Server> &server,
-		       const std::string &target,
+		       const std::string &channel,
 		       const std::string &message);
 
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 

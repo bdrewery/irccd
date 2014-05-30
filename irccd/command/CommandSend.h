@@ -19,6 +19,11 @@
 #ifndef _COMMAND_SEND_H_
 #define _COMMAND_SEND_H_
 
+/**
+ * @file CommandSend.h
+ * @brief Send a raw message
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,15 +32,28 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandSend
+ * @brief Send a raw message
+ */
 class CommandSend final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
 	std::string		m_message;
 
 public:
+	/**
+	 * Send constructor.
+	 *
+	 * @param server the server
+	 * @param message the message
+	 */
 	CommandSend(const std::shared_ptr<Server> &server,
 		    const std::string &message);
 
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 

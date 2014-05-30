@@ -19,6 +19,11 @@
 #ifndef _COMMAND_KICK_H_
 #define _COMMAND_KICK_H_
 
+/**
+ * @file CommandKick.h
+ * @brief Kick from a channel
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandKick
+ * @brief Kick from a channel
+ */
 class CommandKick final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -35,14 +44,22 @@ private:
 	std::string		m_reason;
 
 public:
+	/**
+	 * Kick from a channel constructor.
+	 *
+	 * @param server the server
+	 * @param target the target
+	 * @param channel the channel
+	 * @param reason the optional reason
+	 */
 	CommandKick(const std::shared_ptr<Server> &server,
 		    const std::string &target,
 		    const std::string &channel,
 		    const std::string &reason);
 
-#if 0
-	void encode(const std::string &encoding) override;
-#endif
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 

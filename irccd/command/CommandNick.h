@@ -19,6 +19,11 @@
 #ifndef _COMMAND_NICK_H_
 #define _COMMAND_NICK_H_
 
+/**
+ * @file CommandNick.h
+ * @brief Change the nickname
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,15 +32,28 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandNick
+ * @brief Change the nickname
+ */
 class CommandNick final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
 	std::string		m_nick;
 
 public:
+	/**
+	 * Nickname change command.
+	 *
+	 * @param server the server
+	 * @param nick the new nickname
+	 */
 	CommandNick(const std::shared_ptr<Server> &server,
 		    const std::string &nick);
 
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 

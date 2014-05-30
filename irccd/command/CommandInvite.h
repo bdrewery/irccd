@@ -19,6 +19,11 @@
 #ifndef _COMMAND_INVITE_H_
 #define _COMMAND_INVITE_H_
 
+/**
+ * @file CommandInvite.h
+ * @brief Channel invite
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandInvite
+ * @brief Channel invite
+ */
 class CommandInvite final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -34,10 +43,20 @@ private:
 	std::string		m_channel;
 
 public:
+	/**
+	 * Channel invite constructor.
+	 *
+	 * @param server the server
+	 * @param target the target
+	 * @param channel on which channel
+	 */
 	CommandInvite(const std::shared_ptr<Server> &server,
 		      const std::string &target,
 		      const std::string &channel);
 
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 

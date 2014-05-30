@@ -19,6 +19,11 @@
 #ifndef _COMMAND_TOPIC_H_
 #define _COMMAND_TOPIC_H_
 
+/**
+ * @file CommandTopic.h
+ * @brief Change the topic
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandTopic
+ * @brief Change a topic
+ */
 class CommandTopic final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -34,10 +43,20 @@ private:
 	std::string		m_topic;
 
 public:
+	/**
+	 * Topic command constructor.
+	 *
+	 * @param server the server
+	 * @param channel on which channel
+	 * @param topic the topic
+	 */
 	CommandTopic(const std::shared_ptr<Server> &server,
 		     const std::string &channel,
 		     const std::string &topic);
 
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 

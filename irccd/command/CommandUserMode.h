@@ -19,6 +19,11 @@
 #ifndef _COMMAND_USER_MODE_H_
 #define _COMMAND_USER_MODE_H_
 
+/**
+ * @file CommandUserMode.h
+ * @brief Change your user mode
+ */
+
 #include <memory>
 
 #include "Command.h"
@@ -27,15 +32,28 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class CommandUserMode
+ * @brief Change your user mode
+ */
 class CommandUserMode final : public Command {
 private:
 	std::shared_ptr<Server>	m_server;
 	std::string		m_mode;
 
 public:
+	/**
+	 * User mode change constructor.
+	 *
+	 * @param server the server
+	 * @param mode the mode
+	 */
 	CommandUserMode(const std::shared_ptr<Server> &server,
 			const std::string &mode);
 
+	/**
+	 * @copydoc Command::call
+	 */
 	bool call() override;
 };
 
