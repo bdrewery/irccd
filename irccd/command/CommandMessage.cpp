@@ -33,7 +33,7 @@ CommandMessage::CommandMessage(const std::shared_ptr<Server> &server,
 
 bool CommandMessage::call()
 {
-	return m_server->session().say(m_target, m_message);
+	return m_server->session().say(m_target, tryEncode(m_message));
 }
 
 } // !irccd

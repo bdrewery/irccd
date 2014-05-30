@@ -17,6 +17,8 @@
  */
 
 #include "IO.h"
+#include "Converter.h"
+#include "Logger.h"
 
 namespace irccd {
 
@@ -24,6 +26,18 @@ IO::IO(const std::string &serverName, const std::string &targetName)
 	: m_serverName(serverName)
 	, m_targetName(targetName)
 {
+}
+
+std::string IO::tryEncodeFull(const std::string &from, const std::string &to, const std::string &input) const
+{
+	try {
+		return Converter::convert(from.c_str(), to.c_str(), input);
+	} catch (const std::exception &error) {
+		Logger::warn("rule: encoding failure: %s", error.what());
+	}
+
+	// Return the input string as a callback
+	return input;
 }
 
 const std::string &IO::server() const
@@ -36,8 +50,10 @@ const std::string &IO::target() const
 	return m_targetName;
 }
 
-void IO::encode(const std::string &)
+void IO::encode(const std::string &encoding)
 {
+	m_mustEncode = true;
+	m_encoding = encoding;
 }
 
 bool IO::empty() const

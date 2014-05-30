@@ -24,7 +24,8 @@ namespace irccd {
 CommandTopic::CommandTopic(const std::shared_ptr<Server> &server,
 			   const std::string &channel,
 			   const std::string &topic)
-	: m_server(server)
+	: Command(server->info().name, channel)
+	, m_server(server)
 	, m_channel(channel)
 	, m_topic(topic)
 {
@@ -32,7 +33,7 @@ CommandTopic::CommandTopic(const std::shared_ptr<Server> &server,
 
 bool CommandTopic::call()
 {
-	return m_server->session().topic(m_channel, m_topic);
+	return m_server->session().topic(m_channel, tryEncode(m_topic));
 }
 
 } // !irccd

@@ -24,7 +24,8 @@ namespace irccd {
 CommandPart::CommandPart(const std::shared_ptr<Server> &server,
 			 const std::string &channel,
 			 const std::string &reason)
-	: m_server(server)
+	: Command(server->info().name, channel)
+	, m_server(server)
 	, m_channel(channel)
 	, m_reason(reason)
 {
@@ -32,7 +33,7 @@ CommandPart::CommandPart(const std::shared_ptr<Server> &server,
 
 bool CommandPart::call()
 {
-	return m_server->session().part(m_channel, m_reason);
+	return m_server->session().part(m_channel, tryEncode(m_reason));
 }
 
 } // !irccd

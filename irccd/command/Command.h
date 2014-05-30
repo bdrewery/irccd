@@ -27,6 +27,14 @@ class Command : public IO {
 public:
 	Command(const std::string &serverName = "", const std::string &targetName = "");
 
+	std::string tryEncode(const std::string &input)
+	{
+		if (m_mustEncode)
+			return tryEncodeFull("UTF-8", m_encoding, input);
+
+		return input;
+	}
+
 	virtual bool call() = 0;
 };
 

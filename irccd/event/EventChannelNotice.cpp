@@ -31,12 +31,11 @@ EventChannelNotice::EventChannelNotice(const std::shared_ptr<Server> &server,
 	, m_channel(channel)
 	, m_notice(notice)
 {
-
 }
 
 void EventChannelNotice::call(Plugin &p)
 {
-	p.onChannelNotice(m_server, m_who, m_channel, m_notice);
+	p.onChannelNotice(m_server, m_who, m_channel, tryEncode(m_notice));
 }
 
 const char *EventChannelNotice::name() const

@@ -24,7 +24,8 @@ namespace irccd {
 CommandMe::CommandMe(const std::shared_ptr<Server> &server,
 		     const std::string &target,
 		     const std::string &message)
-	: m_server(server)
+	: Command(server->info().name, target)
+	, m_server(server)
 	, m_target(target)
 	, m_message(message)
 {
@@ -32,7 +33,7 @@ CommandMe::CommandMe(const std::shared_ptr<Server> &server,
 
 bool CommandMe::call()
 {
-	return m_server->session().me(m_target, m_message);
+	return m_server->session().me(m_target, tryEncode(m_message));
 }
 
 } // !irccd

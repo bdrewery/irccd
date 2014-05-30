@@ -35,7 +35,7 @@ EventTopic::EventTopic(const std::shared_ptr<Server> &server,
 
 void EventTopic::call(Plugin &p)
 {
-	p.onTopic(m_server, m_channel, m_who, m_topic);
+	p.onTopic(m_server, m_channel, m_who, tryEncode(m_topic));
 }
 
 const char *EventTopic::name() const

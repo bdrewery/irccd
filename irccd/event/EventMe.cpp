@@ -35,7 +35,7 @@ EventMe::EventMe(const std::shared_ptr<Server> &server,
 
 void EventMe::call(Plugin &p)
 {
-	p.onMe(m_server, m_channel, m_nickname, m_message);
+	p.onMe(m_server, m_channel, m_nickname, tryEncode(m_message));
 }
 
 const char *EventMe::name() const

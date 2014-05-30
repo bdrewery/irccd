@@ -35,7 +35,7 @@ EventPart::EventPart(const std::shared_ptr<Server> &server,
 
 void EventPart::call(Plugin &p)
 {
-	p.onPart(m_server, m_channel, m_nickname, m_reason);
+	p.onPart(m_server, m_channel, m_nickname, tryEncode(m_reason));
 }
 
 const char *EventPart::name() const

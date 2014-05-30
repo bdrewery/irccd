@@ -52,7 +52,6 @@ void EventQueue::routine()
 			const auto &manager = RuleManager::instance();
 
 			if (!(*event)->empty()) {
-				printf("Solving... %s\n", (*event)->name());
 				auto result = manager.solve(
 				    (*event)->server(),
 				    (*event)->target(),
@@ -72,7 +71,8 @@ void EventQueue::routine()
 				}
 
 				if (result.encoding.size() > 0) {
-					printf("REENCODING FROM %s\n", result.encoding.c_str());
+					(*event)->encode(result.encoding);
+					Logger::debug("rule: encoding event from %s", result.encoding.c_str());
 				}
 			}
 

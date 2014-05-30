@@ -30,6 +30,14 @@ public:
 	Event() = default;
 	Event(const std::string &serverName, const std::string &targetName);
 
+	std::string tryEncode(const std::string &input)
+	{
+		if (m_mustEncode)
+			return tryEncodeFull(m_encoding, "UTF-8", input);
+
+		return input;
+	}
+
 	virtual void call(Plugin &p) = 0;
 	virtual const char *name() const = 0;
 };

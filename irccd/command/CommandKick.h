@@ -40,6 +40,9 @@ public:
 		    const std::string &channel,
 		    const std::string &reason);
 
+#if 0
+	void encode(const std::string &encoding) override;
+#endif
 	bool call() override;
 };
 

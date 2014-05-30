@@ -28,6 +28,21 @@ private:
 	std::string	m_serverName;
 	std::string	m_targetName;
 
+protected:
+	bool		m_mustEncode = false;
+	std::string	m_encoding;
+
+	/**
+	 * Try to reencode the input to the specified encoding, returns
+	 * the input string on failures.
+	 *
+	 * @param from the source encoding
+	 * @param to the destination encoding
+	 * @param input the input
+	 * @return the converted string or input on failures
+	 */
+	std::string tryEncodeFull(const std::string &from, const std::string &to, const std::string &input) const;
+
 public:
 	/**
 	 * Copy constructor disabled.
@@ -47,20 +62,33 @@ public:
 	 */
 	IO(const std::string &serverName = "", const std::string &targetName = "");
 
+	/**
+	 * Get the server name.
+	 *
+	 * @return the server name
+	 */
 	const std::string &server() const;
 
+	/**
+	 * Get the target name.
+	 *
+	 * @return the target name
+	 */
 	const std::string &target() const;
 
 	/**
-	 * The function that should encode the data if needed.
+	 * Set the required encoding, this set m_mustEncode to true
+	 * and the new m_encoding to encoding.
 	 *
 	 * @param encoding the desired encoding
 	 */
-	virtual void encode(const std::string &encoding);
+	void encode(const std::string &encoding);
 
 	/**
 	 * Tells if the IO is empty, such as not suitable for
 	 * rule matching.
+	 *
+	 * It returns true for private notices, queries and such.
 	 *
 	 * @return true if rule should not be applied
 	 */

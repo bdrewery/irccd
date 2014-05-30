@@ -33,7 +33,7 @@ CommandChannelNotice::CommandChannelNotice(const std::shared_ptr<Server> &server
 
 bool CommandChannelNotice::call()
 {
-	return m_server->session().cnotice(m_channel, m_notice)	;
+	return m_server->session().cnotice(m_channel, tryEncode(m_notice));
 }
 
 } // !irccd

@@ -17,6 +17,7 @@
  */
 
 #include "CommandQueue.h"
+#include "Logger.h"
 #include "RuleManager.h"
 
 namespace irccd {
@@ -39,17 +40,14 @@ void CommandQueue::routine()
 			command = &m_cmds.front();
 		}
 
-		/*
-		 * IF RuleManager::shouldEncode(io)
-		 *
-		 * io->encode()
-		 */
 		if (!(*command)->empty()) {
 			const auto &manager = RuleManager::instance();
 			const auto result = manager.solve((*command)->server(), (*command)->target(), "", "");
 
-			if (result.encoding.size() > 0)
-				printf("SENDING REENCODE TO %s\n", result.encoding.c_str());
+			if (result.encoding.size() > 0) {
+				(*command)->encode(result.encoding);
+				Logger::debug("rule: encoding message to %s", result.encoding.c_str());
+			}
 		}
 
 		if ((*command)->call()) {

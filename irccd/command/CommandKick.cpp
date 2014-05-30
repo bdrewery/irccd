@@ -25,12 +25,22 @@ CommandKick::CommandKick(const std::shared_ptr<Server> &server,
 			 const std::string &target,
 			 const std::string &channel,
 			 const std::string &reason)
-	: m_server(server)
+	: Command(server->info().name, channel)
+	, m_server(server)
 	, m_target(target)
 	, m_channel(channel)
 	, m_reason(reason)
 {
 }
+
+#if 0
+
+void CommandKick::encode(const std::string &encoding)
+{
+	m_reason = tryEncode(encoding, m_reason);
+}
+
+#endif
 
 bool CommandKick::call()
 {

@@ -37,7 +37,7 @@ EventKick::EventKick(const std::shared_ptr<Server> &server,
 
 void EventKick::call(Plugin &p)
 {
-	p.onKick(m_server, m_channel, m_who, m_kicked, m_reason);
+	p.onKick(m_server, m_channel, m_who, m_kicked, tryEncode(m_reason));
 }
 
 const char *EventKick::name() const
