@@ -294,8 +294,14 @@ void Irccd::readRules(const Parser &config)
 			extractor(p, s.getOption<string>("set-plugins"), &RuleProperties::setPlugin);
 		if (s.hasOption("set-events"))
 			extractor(p, s.getOption<string>("set-events"), &RuleProperties::setEvent);
-		if (s.hasOption("encoding"))
+		if (s.hasOption("encoding")) {
+			if (m.plugins().size() > 0) {
+				Logger::warn("rule: encoding parameter should be set only with servers and channels");
+				return;
+			}
+
 			p.setEncoding(s.getOption<string>("encoding"));
+		}
 
 		RuleManager::instance().add(Rule(m, p));
 	});

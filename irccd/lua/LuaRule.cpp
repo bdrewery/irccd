@@ -170,8 +170,14 @@ public:
 			getSequence(L, &RuleProperties::setPlugin, properties, "plugins");
 			getSequence(L, &RuleProperties::setEvent, properties, "events");
 
-			if (LuaeTable::type(L, -1, "encoding") == LUA_TSTRING)
+			if (LuaeTable::type(L, -1, "encoding") == LUA_TSTRING) {
+				if (match.plugins().size() > 0) {
+					Luae::error(L, "encoding parameter should be set only with servers and channels");
+					// NOTREACHED
+				}
+
 				properties.setEncoding(LuaeTable::get<std::string>(L, -1, "encoding"));
+			}
 
 			Luae::pop(L);
 		}
@@ -189,12 +195,7 @@ int l_add(lua_State *L)
 		auto index = luaL_optint(L, 2, -1);
 
 		Luae::push(L, RuleManager::instance().add(rule, index));
-	} catch (const std::invalid_argument &ex) {
-		Luae::push(L, nullptr);
-		Luae::push(L, ex.what());
-
-		return 2;
-	} catch (const std::out_of_range &ex) {
+	} catch (const std::exception &ex) {
 		Luae::push(L, nullptr);
 		Luae::push(L, ex.what());
 
