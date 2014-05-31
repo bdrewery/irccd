@@ -90,7 +90,9 @@ if(WITH_TESTS)
 		create_test(TestSocket sockets/TestSockets.cpp)
 
 		# Conversion
-		create_test(TestConverter converter/TestConverter.cpp)
+		if(WITH_LIBICONV)
+			create_test(TestConverter converter/TestConverter.cpp)
+		endif()
 
 		# Strip
 		create_test(TestStrip strip/TestStrip.cpp)

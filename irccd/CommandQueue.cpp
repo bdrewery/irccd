@@ -18,7 +18,10 @@
 
 #include "CommandQueue.h"
 #include "Logger.h"
-#include "RuleManager.h"
+
+#if defined(WITH_LUA)
+#  include "RuleManager.h"
+#endif
 
 namespace irccd {
 
@@ -40,6 +43,7 @@ void CommandQueue::routine()
 			command = &m_cmds.front();
 		}
 
+#if defined(WITH_LUA)
 		if (!(*command)->empty()) {
 			const auto &manager = RuleManager::instance();
 			const auto result = manager.solve((*command)->server(), (*command)->target(), "", "");
@@ -49,6 +53,7 @@ void CommandQueue::routine()
 				Logger::debug("rule: encoding message to %s", result.encoding.c_str());
 			}
 		}
+#endif
 
 		if ((*command)->call()) {
 			Lock lock(m_mutex);

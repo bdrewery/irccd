@@ -16,9 +16,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <config.h>
+
 #include "IO.h"
-#include "Converter.h"
 #include "Logger.h"
+
+#if defined(WITH_LIBICONV)
+#  include "Converter.h"
+#endif
 
 namespace irccd {
 
@@ -30,6 +35,7 @@ IO::IO(const std::string &serverName, const std::string &targetName)
 
 std::string IO::tryEncodeFull(const std::string &from, const std::string &to, const std::string &input) const
 {
+#if defined(WITH_LIBICONV)
 	try {
 		return Converter::convert(from.c_str(), to.c_str(), input);
 	} catch (const std::exception &error) {
@@ -38,6 +44,12 @@ std::string IO::tryEncodeFull(const std::string &from, const std::string &to, co
 
 	// Return the input string as a callback
 	return input;
+#else
+	(void)from;
+	(void)to;
+
+	return input;
+#endif
 }
 
 const std::string &IO::server() const

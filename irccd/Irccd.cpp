@@ -239,6 +239,7 @@ void Irccd::readPlugins(const Parser &config)
 			}
 		}
 #else
+		(void)config;
 		Logger::warn("irccd: ignoring plugins, Lua support is disabled");
 #endif
 	}
@@ -275,6 +276,7 @@ void Irccd::readIdentities(const Parser &config)
 
 void Irccd::readRules(const Parser &config)
 {
+#if defined(WITH_LUA)
 	using std::string;
 
 	config.findSections("rule", [&] (const Section &s) {
@@ -305,6 +307,10 @@ void Irccd::readRules(const Parser &config)
 
 		RuleManager::instance().add(Rule(m, p));
 	});
+#else
+	(void)config;
+	Logger::warn("irccd: ignoring rules, Lua support is disabled");
+#endif
 }
 
 void Irccd::readListeners(const Parser &config)
