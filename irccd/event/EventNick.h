@@ -19,6 +19,11 @@
 #ifndef _EVENT_NICK_H_
 #define _EVENT_NICK_H_
 
+/**
+ * @file EventNick.h
+ * @brief On nick change
+ */
+
 #include <memory>
 
 #include "Event.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class EventNick
+ * @brief On nick change
+ */
 class EventNick final : public Event {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -34,11 +43,25 @@ private:
 	std::string		m_newnickname;
 
 public:
+	/**
+	 * Event constructor.
+	 *
+	 * @param server the server
+	 * @param oldnickname the old nickname
+	 * @param newnickname the new nickname
+	 */
 	EventNick(const std::shared_ptr<Server> &server,
 		  const std::string &oldnickname,
 		  const std::string &newnickname);
 
+	/**
+	 * @copydoc Event::call
+	 */
 	void call(Plugin &p) override;
+
+	/**
+	 * @copydoc Event::name
+	 */
 	const char *name() const override;
 };
 

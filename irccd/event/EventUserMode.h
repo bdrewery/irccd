@@ -19,6 +19,11 @@
 #ifndef _EVENT_USER_MODE_H_
 #define _EVENT_USER_MODE_H_
 
+/**
+ * @file EventUserMode.h
+ * @brief On userm ode change
+ */
+
 #include <memory>
 
 #include "Event.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class EventUserMode
+ * @brief On user mode change
+ */
 class EventUserMode final : public Event {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -34,11 +43,25 @@ private:
 	std::string		m_mode;
 
 public:
+	/**
+	 * Event constructor.
+	 *
+	 * @param server the server
+	 * @param nickname the one who changed your mode
+	 * @param mode the mode
+	 */
 	EventUserMode(const std::shared_ptr<Server> &server,
 		      const std::string &nickname,
 		      const std::string &mode);
 
+	/**
+	 * @copydoc Event::call
+	 */
 	void call(Plugin &p) override;
+
+	/**
+	 * @copydoc Event::name
+	 */
 	const char *name() const override;
 };
 

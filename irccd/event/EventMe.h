@@ -19,6 +19,11 @@
 #ifndef _EVENT_ME_H_
 #define _EVENT_ME_H_
 
+/**
+ * @file EventMe.h
+ * @brief On me
+ */
+
 #include <memory>
 
 #include "Event.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class EventMe
+ * @brief On me
+ */
 class EventMe final : public Event {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -35,12 +44,27 @@ private:
 	std::string		m_message;
 
 public:
+	/**
+	 * Event constructor.
+	 *
+	 * @param server the server
+	 * @param channel the channel
+	 * @param nickname the user
+	 * @param message the message
+	 */
 	EventMe(const std::shared_ptr<Server> &server,
 		const std::string &channel,
 		const std::string &nickname,
 		const std::string &message);
 
+	/**
+	 * @copydoc Event::call
+	 */
 	void call(Plugin &p) override;
+
+	/**
+	 * @copydoc Event::name
+	 */
 	const char *name() const override;
 };
 

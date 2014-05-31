@@ -19,21 +19,43 @@
 #ifndef _EVENT_WHOIS_H_
 #define _EVENT_WHOIS_H_
 
+/**
+ * @file EventWhois.h
+ * @brief On whois
+ */
+
 #include "Event.h"
 #include "Server.h"
 
 namespace irccd {
 
+/**
+ * @class EventWhois
+ * @brief On whois
+ */
 class EventWhois final : public Event {
 private:
 	std::shared_ptr<Server>	m_server;
 	IrcWhois		m_info;
 
 public:
+	/**
+	 * Event constructor.
+	 *
+	 * @param server the server
+	 * @param info the whois information
+	 */
 	EventWhois(const std::shared_ptr<Server> &server,
 		   const IrcWhois &info);
 
+	/**
+	 * @copydoc Event::call
+	 */
 	void call(Plugin &p) override;
+
+	/**
+	 * @copydoc Event::name
+	 */
 	const char *name() const override;
 };
 

@@ -19,6 +19,11 @@
 #ifndef _EVENT_INVITE_H_
 #define _EVENT_INVITE_H_
 
+/**
+ * @file EventInvite.h
+ * @brief On invite
+ */
+
 #include <memory>
 
 #include "Event.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class EventInvite
+ * @brief On invite
+ */
 class EventInvite final : public Event {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -34,11 +43,25 @@ private:
 	std::string		m_who;
 
 public:
+	/**
+	 * Event constructor.
+	 *
+	 * @param server the server
+	 * @param channel the channel
+	 * @param who the user who invited you
+	 */
 	EventInvite(const std::shared_ptr<Server> &server,
 		    const std::string &channel,
 		    const std::string &who);
 
+	/**
+	 * @copydoc Event::call
+	 */
 	void call(Plugin &p) override;
+
+	/**
+	 * @copydoc Event::name
+	 */
 	const char *name() const override;
 };
 

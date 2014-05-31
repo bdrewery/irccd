@@ -54,8 +54,6 @@
 
 namespace irccd {
 
-Irccd Irccd::m_instance;
-
 Irccd::Irccd()
 	: m_running(true)
 	, m_foreground(false)
@@ -383,7 +381,7 @@ void Irccd::extractInternet(const Section &s, int type)
 		if (type == SOCK_STREAM)
 			inet.listen(64);
 
-		Listener::add(inet);
+		Listener::instance().add(inet);
 		Logger::log("listener: listening for clients on port %d...", port);
 	} catch (SocketError ex) {
 		Logger::warn("listener: internet socket error: %s", ex.what());
@@ -407,7 +405,7 @@ void Irccd::extractUnix(const Section &s, int type)
 			if (type == SOCK_STREAM)
 				un.listen(64);
 
-			Listener::add(un);
+			Listener::instance().add(un);
 			Logger::log("listener: listening for clients on %s...", path.c_str());
 		} catch (SocketError ex) {
 			Logger::warn("listener: unix socket error: %s", ex.what());
@@ -491,11 +489,6 @@ Irccd::~Irccd()
 	Socket::finish();
 }
 
-Irccd &Irccd::getInstance()
-{
-	return m_instance;
-}
-
 void Irccd::override(char c)
 {
 	m_overriden[c] = true;
@@ -542,7 +535,7 @@ int Irccd::run()
 {
 #if defined(WITH_LUA)
 	// Start the IrcEvent thread
-	EventQueue::start();
+	EventQueue::instance().start();
 #endif
 
 	openConfig();
@@ -552,10 +545,10 @@ int Irccd::run()
 		 * If no listeners is enabled, we must wait a bit to avoid
 		 * CPU usage exhaustion.
 		 */
-		if (Listener::count() == 0)
+		if (Listener::instance().count() == 0)
 			System::sleep(1);
 		else
-			Listener::process();
+			Listener::instance().process();
 	}
 
 	stop();
@@ -579,11 +572,11 @@ void Irccd::stop()
 		s->kill();
 	});
 
-	Listener::close();
+	Listener::instance().close();
 	Server::clearThreads();
 
 #if defined(WITH_LUA)
-	EventQueue::stop();
+	EventQueue::instance().stop();
 #endif
 }
 

@@ -45,7 +45,7 @@ ServerState::Ptr ServerDisconnected::exec(Server::Ptr server)
 	/*
 	 * First, check that we requested to quit or stopping the server.
 	 */
-	if (!Irccd::getInstance().isRunning() || reco.stopping)
+	if (!Irccd::instance().isRunning() || reco.stopping)
 		return ServerState::Ptr(new ServerDead);
 
 	Logger::log("server %s: disconnected", info.name.c_str());
@@ -59,7 +59,7 @@ ServerState::Ptr ServerDisconnected::exec(Server::Ptr server)
 	while (!done && reco.enabled) {
 		done = reco.restarting || reco.stopping;
 
-		if (!Irccd::getInstance().isRunning() || tosleep <= 0)
+		if (!Irccd::instance().isRunning() || tosleep <= 0)
 			done = true;
 		if (reco.maxretries >= 1 && reco.noretried >= reco.maxretries)
 			done = true;

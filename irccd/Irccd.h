@@ -29,6 +29,7 @@
 #include <sstream>
 
 #include <Parser.h>
+#include <Singleton.h>
 #include <Util.h>
 #include <config.h>
 
@@ -68,12 +69,12 @@ using IdentityList	= std::vector<Server::Identity>;
  * @class Irccd
  * @brief The main irccd class
  */
-class Irccd {
+class Irccd : public Singleton<Irccd> {
 private:
+	friend class Singleton<Irccd>;
+
 	using Wanted	= std::vector<std::string>;
 	using Overriden	= std::unordered_map<char, bool>;
-
-	static Irccd	m_instance;		//! unique instance
 
 	// Ignition
 	bool		m_running;		//! forever loop
@@ -158,13 +159,6 @@ private:
 
 public:
 	~Irccd();
-
-	/**
-	 * Get the unique irccd instance.
-	 *
-	 * @return the irccd instance
-	 */
-	static Irccd &getInstance();
 
 	/**
 	 * Initialize common settings.

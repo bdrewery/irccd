@@ -19,6 +19,11 @@
 #ifndef _EVENT_TOPIC_H_
 #define _EVENT_TOPIC_H_
 
+/**
+ * @file EventTopic.h
+ * @brief On topic change
+ */
+
 #include <memory>
 
 #include "Event.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class EventTopic
+ * @brief On topic change
+ */
 class EventTopic final : public Event {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -35,12 +44,27 @@ private:
 	std::string		m_topic;
 
 public:
+	/**
+	 * Event constructor.
+	 *
+	 * @param server the server
+	 * @param channel the channel
+	 * @param who the one who changed the topic
+	 * @param topic the new topic
+	 */
 	EventTopic(const std::shared_ptr<Server> &server,
 		   const std::string &channel,
 		   const std::string &who,
 		   const std::string &topic);
 
+	/**
+	 * @copydoc Event::call
+	 */
 	void call(Plugin &p) override;
+
+	/**
+	 * @copydoc Event::name
+	 */
 	const char *name() const override;
 };
 

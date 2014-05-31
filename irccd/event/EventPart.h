@@ -19,6 +19,11 @@
 #ifndef _EVENT_PART_H_
 #define _EVENT_PART_H_
 
+/**
+ * @file EventPart.h
+ * @brief On part
+ */
+
 #include <memory>
 
 #include "Event.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class EventPart
+ * @brief On part
+ */
 class EventPart final : public Event {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -35,12 +44,27 @@ private:
 	std::string		m_reason;
 
 public:
+	/**
+	 * Event constructor.
+	 *
+	 * @param server the server
+	 * @param channel the channel
+	 * @param nickname the nickname
+	 * @param reason the reason
+	 */
 	EventPart(const std::shared_ptr<Server> &server,
 		  const std::string &channel,
 		  const std::string &nickname,
 		  const std::string &reason);
 
+	/**
+	 * @copydoc Event::call
+	 */
 	void call(Plugin &p) override;
+
+	/**
+	 * @copydoc Event::name
+	 */
 	const char *name() const override;
 };
 

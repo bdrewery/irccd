@@ -1,5 +1,5 @@
 /*
- * EventNames.h -- on channel name listing
+ * Singleton.h -- singleton template
  *
  * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
@@ -16,56 +16,45 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _EVENT_NAMES_H_
-#define _EVENT_NAMES_H_
+#ifndef _SINGLETON_H_
+#define _SINGLETON_H_
 
 /**
- * @file EventNames.h
- * @brief On name listing
+ * @file Singleton.h
+ * @brief The singleton template
  */
 
 #include <memory>
-#include <vector>
-
-#include "Event.h"
 
 namespace irccd {
 
-class Server;
-
 /**
- * @class EventNames
- * @brief On name listing
+ * @class Singleton
+ * @brief The singleton
  */
-class EventNames final : public Event {
+template <typename T>
+class Singleton {
 private:
-	std::shared_ptr<Server>		m_server;
-	std::string			m_channel;
-	std::vector<std::string>	m_names;
+	static std::unique_ptr<T>	s_instance;
 
 public:
 	/**
-	 * Event constructor.
+	 * Get the singleton instance.
 	 *
-	 * @param server the server
-	 * @param channel the channel
-	 * @param names the list
+	 * @return the reference instance
 	 */
-	EventNames(const std::shared_ptr<Server> &server,
-		   const std::string &channel,
-		   const std::vector<std::string> &names);
+	static T &instance()
+	{
+		if (!s_instance)
+			s_instance = std::unique_ptr<T>(new T);
 
-	/**
-	 * @copydoc Event::call
-	 */
-	void call(Plugin &p) override;
-
-	/**
-	 * @copydoc Event::name
-	 */
-	const char *name() const override;
+		return *s_instance;
+	}
 };
+
+template <typename T>
+std::unique_ptr<T> Singleton<T>::s_instance;
 
 } // !irccd
 
-#endif // !_EVENT_NAMES_H_
+#endif // !_SINGLETON_H_

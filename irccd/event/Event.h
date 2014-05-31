@@ -19,26 +19,51 @@
 #ifndef _EVENT_H_
 #define _EVENT_H_
 
+/**
+ * @file Event.h
+ * @brief Base event class
+ */
+
 #include "IO.h"
 
 namespace irccd {
 
 class Plugin;
 
+/**
+ * @class Event
+ * @brief Base event class for plugins
+ */
 class Event : public IO {
 public:
-	Event() = default;
-	Event(const std::string &serverName, const std::string &targetName);
+	/**
+	 * Construct an event.
+	 *
+	 * @param serverName the server name
+	 * @param targetName the target name
+	 */
+	Event(const std::string &serverName = "", const std::string &targetName = "");
 
-	std::string tryEncode(const std::string &input)
-	{
-		if (m_mustEncode)
-			return tryEncodeFull(m_encoding, "UTF-8", input);
+	/**
+	 * Try to encode the plugin to UTF-8 from the server encoding.
+	 *
+	 * @param input the input
+	 * @return the converted string or input on failures
+	 */
+	std::string tryEncode(const std::string &input);
 
-		return input;
-	}
-
+	/**
+	 * Execute the plugin command.
+	 *
+	 * @param p the current plugin
+	 */
 	virtual void call(Plugin &p) = 0;
+
+	/**
+	 * Get the event name such as onMessage, onCommand.
+	 *
+	 * @return the event name
+	 */
 	virtual const char *name() const = 0;
 };
 

@@ -47,13 +47,6 @@ const std::unordered_set<std::string> RuleValidEvents {
 	"onWhois"
 };
 
-RuleManager RuleManager::s_instance;
-
-RuleManager &RuleManager::instance()
-{
-	return s_instance;
-}
-
 void RuleManager::assertIndex(int index) const
 {
 	if (index < 0 || static_cast<size_t>(index) >= m_rules.size())

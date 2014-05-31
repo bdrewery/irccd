@@ -19,6 +19,11 @@
 #ifndef _EVENT_MODE_H_
 #define _EVENT_MODE_H_
 
+/**
+ * @file EventMode.h
+ * @brief On channel mode
+ */
+
 #include <memory>
 
 #include "Event.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class EventMode
+ * @brief On channel mode
+ */
 class EventMode final : public Event {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -36,13 +45,29 @@ private:
 	std::string		m_argument;
 
 public:
+	/**
+	 * Event constructor.
+	 *
+	 * @param server the server
+	 * @param channel the channel
+	 * @param nickname the one who changed the mode
+	 * @param mode the mode
+	 * @param argument the optional argument
+	 */
 	EventMode(const std::shared_ptr<Server> &server,
 		  const std::string &channel,
 		  const std::string &nickname,
 		  const std::string &mode,
-		  const std::string &arguement);
+		  const std::string &argument);
 
+	/**
+	 * @copydoc Event::call
+	 */
 	void call(Plugin &p) override;
+
+	/**
+	 * @copydoc Event::name
+	 */
 	const char *name() const override;
 };
 

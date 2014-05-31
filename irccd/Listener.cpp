@@ -45,9 +45,7 @@ struct ClientHandler {
 	int		m_nosplit;
 	SocketFunction	m_function;	
 
-	ClientHandler()
-	{
-	}
+	ClientHandler() = default;
 
 	ClientHandler(int noargs, int nosplit, SocketFunction function)
 		: m_noargs(noargs)
@@ -97,7 +95,7 @@ void handleConnect(const Params &params)
 			if (o.first == "key")
 				info.password = o.second;
 			if (o.first == "ident")
-				ident = Irccd::getInstance().findIdentity(o.second);
+				ident = Irccd::instance().findIdentity(o.second);
 			if (o.first == "ssl")
 				options |= Server::OptionSsl;
 		}
@@ -237,12 +235,7 @@ std::unordered_map<std::string, ClientHandler> handlers {
 	{ "UNLOAD",	ClientHandler(1, 1, handleUnload)		}
 };
 
-}
-
-SocketListener			Listener::m_listener;
-Listener::MasterSockets		Listener::m_socketServers;
-Listener::StreamClients		Listener::m_streamClients;
-Listener::DatagramClients	Listener::m_dgramClients;
+} // !namespace
 
 void Listener::clientAdd(Socket &server)
 {
@@ -399,7 +392,7 @@ void Listener::process()
 		} else
 			peerRead(s);
 	} catch (SocketError er) {
-		if (Irccd::getInstance().isRunning())
+		if (Irccd::instance().isRunning())
 			Logger::warn("listener: socket error %s", er.what());
 	} catch (SocketTimeout) { }
 }

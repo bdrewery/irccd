@@ -25,4 +25,12 @@ Event::Event(const std::string &serverName, const std::string &targetName)
 {
 }
 
+std::string Event::tryEncode(const std::string &input)
+{
+	if (m_mustEncode)
+		return tryEncodeFull(m_encoding, "UTF-8", input);
+
+	return input;
+}
+
 } // !irccd

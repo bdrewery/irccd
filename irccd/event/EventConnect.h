@@ -19,6 +19,11 @@
 #ifndef _EVENT_CONNECT_H_
 #define _EVENT_CONNECT_H_
 
+/**
+ * @file EventConnect.h
+ * @brief On connect
+ */
+
 #include <memory>
 
 #include "Event.h"
@@ -27,14 +32,30 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class EventConnect
+ * @brief On connect
+ */
 class EventConnect final : public Event {
 private:
 	std::shared_ptr<Server>	m_server;
 
 public:
+	/**
+	 * Event constructor.
+	 *
+	 * @param server the server
+	 */
 	EventConnect(const std::shared_ptr<Server> &server);
 
+	/**
+	 * @copydoc Event::call
+	 */
 	void call(Plugin &p) override;
+
+	/**
+	 * @copydoc Event::name
+	 */
 	const char *name() const override;
 };
 

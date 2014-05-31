@@ -19,6 +19,11 @@
 #ifndef _EVENT_CHANNEL_NOTICE_H_
 #define _EVENT_CHANNEL_NOTICE_H_
 
+/**
+ * @file EventChannelNotice.h
+ * @brief On channel notice
+ */
+
 #include <memory>
 
 #include "Event.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class EventChannelNotice
+ * @brief On channel notice
+ */
 class EventChannelNotice final : public Event {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -35,12 +44,27 @@ private:
 	std::string		m_notice;
 
 public:
+	/**
+	 * Event constructor.
+	 *
+	 * @param server the server
+	 * @param who the user who has sent the notice
+	 * @param channel the channel
+	 * @param notice the notice message
+	 */
 	EventChannelNotice(const std::shared_ptr<Server> &server,
 			   const std::string &who,
 			   const std::string &channel,
 			   const std::string &notice);
 
+	/**
+	 * @copydoc Event::call
+	 */
 	void call(Plugin &p) override;
+
+	/**
+	 * @copydoc Event::name
+	 */
 	const char *name() const override;
 };
 

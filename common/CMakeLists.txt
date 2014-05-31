@@ -32,6 +32,7 @@ set(SOURCES
 	Logger.h
 	Parser.cpp
 	Parser.h
+	Singleton.h
 	Socket.cpp
 	Socket.h
 	SocketAddress.cpp

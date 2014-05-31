@@ -28,6 +28,8 @@
 #include <unordered_set>
 #include <mutex>
 
+#include <Singleton.h>
+
 #include "Rule.h"
 
 namespace irccd {
@@ -52,11 +54,11 @@ struct RuleResult {
  *
  * All functions are thread safe.
  */
-class RuleManager {
+class RuleManager : public Singleton<RuleManager> {
 private:
-	using Lock		= std::lock_guard<std::mutex>;
+	friend class Singleton<RuleManager>;
 
-	static RuleManager	s_instance;
+	using Lock		= std::lock_guard<std::mutex>;
 
 	std::vector<Rule>	m_rules;
 	mutable std::mutex	m_lock;
@@ -68,13 +70,6 @@ private:
 	void assertIndex(int index) const;
 
 public:
-	/**
-	 * Get the rule manager instance.
-	 *
-	 * @return the manager
-	 */
-	static RuleManager &instance();
-
 	/**
 	 * Append a rule to the end.
 	 *

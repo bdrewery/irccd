@@ -19,6 +19,11 @@
 #ifndef _EVENT_QUERY_H_
 #define _EVENT_QUERY_H_
 
+/**
+ * @file EventQuery.h
+ * @brief On query
+ */
+
 #include <memory>
 
 #include "Event.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class EventQuery
+ * @brief On query
+ */
 class EventQuery final : public Event {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -34,11 +43,25 @@ private:
 	std::string		m_message;
 
 public:
+	/**
+	 * Event constructor.
+	 *
+	 * @param server the server
+	 * @param who the nickname
+	 * @param message the message
+	 */
 	EventQuery(const std::shared_ptr<Server> &server,
 		   const std::string &who,
 		   const std::string &message);
 
+	/**
+	 * @copydoc Event::call
+	 */
 	void call(Plugin &p) override;
+
+	/**
+	 * @copydoc Event::name
+	 */
 	const char *name() const override;
 };
 

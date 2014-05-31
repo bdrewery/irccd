@@ -24,28 +24,22 @@
 
 namespace irccd {
 
-EventQueue::Atomic	EventQueue::alive(true);
-EventQueue::Mutex	EventQueue::mutex;
-EventQueue::Cond	EventQueue::cond;
-EventQueue::List	EventQueue::list;
-EventQueue::Thread	EventQueue::thread;
-
 void EventQueue::routine()
 {
-	while (alive) {
+	while (m_alive) {
 		Ptr *event;
 
 		{
-			Lock lock(mutex);
+			Lock lock(m_mutex);
 
-			cond.wait(lock, [&] () -> bool {
-				return !alive || list.size() > 0;
+			m_cond.wait(lock, [&] () -> bool {
+				return !m_alive || m_list.size() > 0;
 			});
 
-			if (!alive)
+			if (!m_alive)
 				continue;
 
-			event = &list.front();
+			event = &m_list.front();
 		}
 	
 		Plugin::forAll([=] (Plugin::Ptr p) {
@@ -72,7 +66,9 @@ void EventQueue::routine()
 
 				if (result.encoding.size() > 0) {
 					(*event)->encode(result.encoding);
-					Logger::debug("rule: encoding event from %s", result.encoding.c_str());
+
+					Logger::debug("rule: encoding event %s from %s",
+					    (*event)->name(), result.encoding.c_str());
 				}
 			}
 
@@ -84,26 +80,26 @@ void EventQueue::routine()
 		});
 
 		{
-			Lock lock(mutex);
+			Lock lock(m_mutex);
 
-			list.pop_front();
+			m_list.pop_front();
 		}
 	}
 }
 
 void EventQueue::start()
 {
-	alive = true;
-	thread = std::thread(routine);
+	m_alive = true;
+	m_thread = std::thread(&EventQueue::routine, this);
 }
 
 void EventQueue::stop()
 {
-	alive = false;
-	cond.notify_one();
+	m_alive = false;
+	m_cond.notify_one();
 
 	try {
-		thread.join();
+		m_thread.join();
 	} catch (...) { }
 }
 

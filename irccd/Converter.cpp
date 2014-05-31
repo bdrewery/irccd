@@ -28,7 +28,16 @@
 
 #include "Converter.h"
 
+/**
+ * @struct Deleter
+ * @brief The iconv descriptor deleter
+ */
 struct Deleter {
+	/**
+	 * Destroy the iconv descriptor.
+	 *
+	 * @param desc the descriptor
+	 */
 	void operator()(iconv_t desc)
 	{
 		iconv_close(desc);

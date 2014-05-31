@@ -19,16 +19,18 @@
 #ifndef _EVENT_QUEUE_H_
 #define _EVENT_QUEUE_H_
 
+/**
+ * @file EventQueue.h
+ * @brief Plugin event queue
+ */
+
 #include <atomic>
 #include <condition_variable>
 #include <list>
 #include <memory>
 #include <thread>
 
-/**
- * @file EventQueue.h
- * @brief Plugin event queue
- */
+#include <Singleton.h>
 
 #include "event/Event.h"
 
@@ -38,11 +40,11 @@ namespace irccd {
  * @class EventQueue
  * @brief The Lua event queue
  */
-class EventQueue {
-public:
-	using Ptr	= std::unique_ptr<Event>;
-
+class EventQueue : public Singleton<EventQueue> {
 private:
+	friend class Singleton<EventQueue>;
+
+	using Ptr	= std::unique_ptr<Event>;
 	using Cond	= std::condition_variable;
 	using Mutex	= std::mutex;
 	using Lock	= std::unique_lock<Mutex>;
@@ -51,24 +53,24 @@ private:
 	using Atomic	= std::atomic_bool;
 
 private:
-	static Atomic	alive;
-	static Mutex	mutex;
-	static Cond	cond;
-	static List	list;
-	static Thread	thread;
+	Atomic	m_alive{true};
+	Mutex	m_mutex;
+	Cond	m_cond;
+	List	m_list;
+	Thread	m_thread;
 
-	static void routine();
+	void routine();
 
 public:
 	/**
 	 * Start the event queue.
 	 */
-	static void start();
+	void start();
 
 	/**
 	 * Stop the event queue.
 	 */
-	static void stop();
+	void stop();
 
 	/**
 	 * Add a function to the event queue.
@@ -76,17 +78,16 @@ public:
 	 * @param event the event function
 	 */
 	template <typename Evt>
-	static void add(Evt &&event)
+	void add(Evt &&event)
 	{
 		{
-			Lock lock(mutex);
+			Lock lock(m_mutex);
 
-			list.push_back(std::unique_ptr<Evt>(new Evt(std::move(event))));
+			m_list.push_back(std::unique_ptr<Evt>(new Evt(std::move(event))));
 		}
 
-		cond.notify_one();
+		m_cond.notify_one();
 	}
-
 };
 
 } // !irccd

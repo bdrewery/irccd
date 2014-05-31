@@ -79,8 +79,8 @@ void handleChannel(irc_session_t *session,
 		   unsigned int)
 {
 #if defined(WITH_LUA)
-	EventQueue::add(EventMessage(IrcSession::toServer(session), strify(params[0]),
-	    strify(orig), strify(params[1])));
+	EventQueue::instance().add(EventMessage(IrcSession::toServer(session),
+	    strify(params[0]), strify(orig), strify(params[1])));
 #else
 	(void)session;
 	(void)orig;
@@ -95,8 +95,8 @@ void handleChannelNotice(irc_session_t *session,
 			 unsigned int)
 {
 #if defined(WITH_LUA)
-	EventQueue::add(EventChannelNotice(IrcSession::toServer(session), strify(orig),
-	    strify(params[0]), strify(params[1])));
+	EventQueue::instance().add(EventChannelNotice(IrcSession::toServer(session),
+	    strify(orig), strify(params[0]), strify(params[1])));
 #else
 	(void)session;
 	(void)orig;
@@ -127,7 +127,7 @@ void handleConnect(irc_session_t *session,
 	}
 
 #if defined(WITH_LUA)
-	EventQueue::add(EventConnect(s));
+	EventQueue::instance().add(EventConnect(s));
 #endif
 }
 
@@ -138,8 +138,8 @@ void handleCtcpAction(irc_session_t *session,
 		      unsigned int)
 {
 #if defined(WITH_LUA)
-	EventQueue::add(EventMe(IrcSession::toServer(session), strify(params[0]),
-	    strify(orig), strify(params[1])));
+	EventQueue::instance().add(EventMe(IrcSession::toServer(session),
+	    strify(params[0]), strify(orig), strify(params[1])));
 #else
 	(void)session;
 	(void)orig;
@@ -160,7 +160,7 @@ void handleInvite(irc_session_t *session,
 		s->join(strify(params[1]), "");
 
 #if defined(WITH_LUA)
-	EventQueue::add(EventInvite(s, strify(params[1]), strify(orig)));
+	EventQueue::instance().add(EventInvite(s, strify(params[1]), strify(orig)));
 #else
 	(void)orig;
 #endif
@@ -173,7 +173,8 @@ void handleJoin(irc_session_t *session,
 		unsigned int)
 {
 #if defined(WITH_LUA)
-	EventQueue::add(EventJoin(IrcSession::toServer(session), strify(params[0]), strify(orig)));
+	EventQueue::instance().add(EventJoin(IrcSession::toServer(session),
+	    strify(params[0]), strify(orig)));
 #else
 	(void)session;
 	(void)orig;
@@ -198,7 +199,7 @@ void handleKick(irc_session_t *session,
 	}
 
 #if defined(WITH_LUA)
-	EventQueue::add(EventKick(s, strify(params[0]), strify(orig),
+	EventQueue::instance().add(EventKick(s, strify(params[0]), strify(orig),
 	    strify(params[1]), strify(params[2])));
 #else
 	(void)orig;
@@ -212,8 +213,8 @@ void handleMode(irc_session_t *session,
 		unsigned int)
 {
 #if defined(WITH_LUA)
-	EventQueue::add(EventMode(IrcSession::toServer(session), strify(params[0]),
-	    strify(orig), strify(params[1]), strify(params[2])));
+	EventQueue::instance().add(EventMode(IrcSession::toServer(session),
+	    strify(params[0]), strify(orig), strify(params[1]), strify(params[2])));
 #else
 	(void)session;
 	(void)orig;
@@ -235,7 +236,7 @@ void handleNick(irc_session_t *session,
 		id.nickname = nick;
 
 #if defined(WITH_LUA)
-	EventQueue::add(EventNick(s, strify(orig), strify(params[0])));
+	EventQueue::instance().add(EventNick(s, strify(orig), strify(params[0])));
 #else
 	(void)params;
 #endif
@@ -248,8 +249,8 @@ void handleNotice(irc_session_t *session,
 		  unsigned int)
 {
 #if defined(WITH_LUA)
-	EventQueue::add(EventNotice(IrcSession::toServer(session), strify(orig),
-	    strify(params[0]), strify(params[1])));
+	EventQueue::instance().add(EventNotice(IrcSession::toServer(session),
+	    strify(orig), strify(params[0]), strify(params[1])));
 #else
 	(void)session;
 	(void)orig;
@@ -284,7 +285,7 @@ void handleNumeric(irc_session_t *session,
 		auto &list = s->nameLists();
 
 		if (params[1] != nullptr)
-			EventQueue::add(EventNames(s, strify(params[1]), list[params[1]]));
+			EventQueue::instance().add(EventNames(s, strify(params[1]), list[params[1]]));
 
 		// Don't forget to remove the list
 		list.clear();
@@ -308,7 +309,7 @@ void handleNumeric(irc_session_t *session,
 	} else if (event == LIBIRC_RFC_RPL_ENDOFWHOIS) {
 		auto &info = s->whoisLists()[params[1]];
 
-		EventQueue::add(EventWhois(s, info));
+		EventQueue::instance().add(EventWhois(s, info));
 	}
 
 	if (event == 5) {
@@ -339,7 +340,8 @@ void handlePart(irc_session_t *session,
 		s->removeChannel(params[0]);
 
 #if defined(WITH_LUA)
-	EventQueue::add(EventPart(s, strify(params[0]), strify(orig), strify(params[1])));
+	EventQueue::instance().add(EventPart(s, strify(params[0]),
+	    strify(orig), strify(params[1])));
 #endif
 }
 
@@ -350,7 +352,8 @@ void handleQuery(irc_session_t *session,
 		 unsigned int)
 {
 #if defined(WITH_LUA)
-	EventQueue::add(EventQuery(IrcSession::toServer(session), strify(orig), strify(params[1])));
+	EventQueue::instance().add(EventQuery(IrcSession::toServer(session),
+	    strify(orig), strify(params[1])));
 #else
 	(void)session;
 	(void)orig;
@@ -365,8 +368,8 @@ void handleTopic(irc_session_t *session,
 		 unsigned int)
 {
 #if defined(WITH_LUA)
-	EventQueue::add(EventTopic(IrcSession::toServer(session), strify(params[0]),
-	    strify(orig), strify(params[1])));
+	EventQueue::instance().add(EventTopic(IrcSession::toServer(session),
+	    strify(params[0]), strify(orig), strify(params[1])));
 #else
 	(void)session;
 	(void)orig;
@@ -381,7 +384,8 @@ void handleUserMode(irc_session_t *session,
 		    unsigned int)
 {
 #if defined(WITH_LUA)
-	EventQueue::add(EventUserMode(IrcSession::toServer(session), strify(orig), strify(params[0])));
+	EventQueue::instance().add(EventUserMode(IrcSession::toServer(session),
+	    strify(orig), strify(params[0])));
 #else
 	(void)session;
 	(void)orig;
@@ -416,7 +420,7 @@ irc_callbacks_t createHandlers()
 
 irc_callbacks_t callbacks = createHandlers();
 
-}
+} // !namespace
 
 void IrcDeleter::operator()(irc_session_t *s)
 {

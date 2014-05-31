@@ -27,6 +27,7 @@
 #include <map>
 #include <string>
 
+#include <Singleton.h>
 #include <Socket.h>
 #include <SocketAddress.h>
 #include <SocketListener.h>
@@ -45,29 +46,31 @@ namespace irccd {
  * Listeners are currently not thread safe and should only be used
  * in the main thread.
  */
-class Listener {
+class Listener : public Singleton<Listener> {
 private:
+	friend class Singleton<Listener>;
+
 	using MasterSockets	= std::vector<Socket>;
 	using StreamClients	= std::map<Socket, Message>;
 	using DatagramClients	= std::map<SocketAddress, Message>;
 
 	// List of listening sockets and the listener
-	static MasterSockets m_socketServers;			//! socket servers
-	static SocketListener m_listener;			//! socket listener
+	MasterSockets m_socketServers;
+	SocketListener m_listener;
 
 	// Clients (both TCP and UDP)
-	static StreamClients m_streamClients;			//! tcp based clients
-	static DatagramClients m_dgramClients;			//! udp based "clients"
+	StreamClients m_streamClients;			//!< tcp based clients
+	DatagramClients m_dgramClients;			//!< udp based "clients"
 
-	static void clientAdd(Socket &client);
-	static void clientRead(Socket &client);
-	static void peerRead(Socket &s);
-	static void execute(const std::string &cmd,
-			    Socket s,
-			    const SocketAddress &info = SocketAddress());
-	static void notifySocket(const std::string &message,
-				 Socket s,
-				 const SocketAddress &info);
+	void clientAdd(Socket &client);
+	void clientRead(Socket &client);
+	void peerRead(Socket &s);
+	void execute(const std::string &cmd,
+		     Socket s,
+		     const SocketAddress &info = SocketAddress());
+	void notifySocket(const std::string &message,
+			  Socket s,
+			  const SocketAddress &info);
 
 public:
 	/**
@@ -75,24 +78,24 @@ public:
 	 *
 	 * @param s the server socket
 	 */
-	static void add(Socket s);
+	void add(Socket s);
 
 	/**
 	 * Get the number of listeners enabled.
 	 *
 	 * @return the number
 	 */
-	static int count();
+	int count();
 
 	/**
 	 * Process clients: accept them, execute and respond.
 	 */
-	static void process();
+	void process();
 
 	/**
 	 * Close all listeners.
 	 */
-	static void close();
+	void close();
 };
 
 } // !irccd

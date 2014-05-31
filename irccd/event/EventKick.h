@@ -19,6 +19,11 @@
 #ifndef _EVENT_KICK_H_
 #define _EVENT_KICK_H_
 
+/**
+ * @file EventKick.h
+ * @brief On kick
+ */
+
 #include <memory>
 
 #include "Event.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class EventKick
+ * @brief On kick
+ */
 class EventKick final : public Event {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -36,13 +45,29 @@ private:
 	std::string		m_reason;
 
 public:
+	/**
+	 * Event constructor.
+	 *
+	 * @param server the server
+	 * @param channel from which channel
+	 * @param who the user who kicked
+	 * @param kicked the kicked person
+	 * @param reason the reason
+	 */
 	EventKick(const std::shared_ptr<Server> &server,
 		  const std::string &channel,
 		  const std::string &who,
 		  const std::string &kicked,
 		  const std::string &reason);
 
+	/**
+	 * @copydoc Event::call
+	 */
 	void call(Plugin &p) override;
+
+	/**
+	 * @copydoc Event::name
+	 */
 	const char *name() const override;
 };
 

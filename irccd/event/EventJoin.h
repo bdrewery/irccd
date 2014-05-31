@@ -19,6 +19,11 @@
 #ifndef _EVENT_JOIN_H_
 #define _EVENT_JOIN_H_
 
+/**
+ * @file EventJoin.h
+ * @brief On join
+ */
+
 #include <memory>
 
 #include "Event.h"
@@ -27,6 +32,10 @@ namespace irccd {
 
 class Server;
 
+/**
+ * @class EventJoin
+ * @brief On join
+ */
 class EventJoin final : public Event {
 private:
 	std::shared_ptr<Server>	m_server;
@@ -34,11 +43,25 @@ private:
 	std::string		m_nickname;
 
 public:
+	/**
+	 * Event constructor.
+	 *
+	 * @param server the server
+	 * @param channel the channel
+	 * @param nickname the nickname
+	 */
 	EventJoin(const std::shared_ptr<Server> &server,
 		  const std::string &channel,
 		  const std::string &nickname);
 
+	/**
+	 * @copydoc Event::call
+	 */
 	void call(Plugin &p) override;
+
+	/**
+	 * @copydoc Event::name
+	 */
 	const char *name() const override;
 };
 

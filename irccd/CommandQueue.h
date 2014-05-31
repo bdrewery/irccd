@@ -44,10 +44,8 @@ namespace irccd {
  * may be full, then we send the message again until it is sent.
  */
 class CommandQueue {
-public:
-	using Ptr	= std::unique_ptr<Command>;
-
 private:
+	using Ptr	= std::unique_ptr<Command>;
 	using Cond	= std::condition_variable;
 	using Mutex	= std::mutex;
 	using Lock	= std::unique_lock<Mutex>;

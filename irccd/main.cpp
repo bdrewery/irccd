@@ -33,7 +33,7 @@ namespace {
 
 void quit(int)
 {
-	Irccd::getInstance().shutdown();
+	Irccd::instance().shutdown();
 }
 
 void usage()
@@ -46,7 +46,7 @@ void usage()
 
 int main(int argc, char **argv)
 {
-	Irccd &irccd = Irccd::getInstance();
+	Irccd &irccd = Irccd::instance();
 	int ch;
 
 	setprogname("irccd");

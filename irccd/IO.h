@@ -19,18 +19,30 @@
 #ifndef _IO_H_
 #define _IO_H_
 
+/**
+ * @file IO.h
+ * @brief Incoming and outgoing messages
+ *
+ * This file is used with IRC events and server commands. It contains an optional
+ * server and channel name to apply an encoding rule if needed.
+ */
+
 #include <string>
 
 namespace irccd {
 
+/**
+ * @class IO
+ * @brief The base IO class
+ */
 class IO {
 private:
 	std::string	m_serverName;
 	std::string	m_targetName;
 
 protected:
-	bool		m_mustEncode = false;
-	std::string	m_encoding;
+	bool		m_mustEncode = false;	//!< should encode ?
+	std::string	m_encoding;		//!< the destination encoding
 
 	/**
 	 * Try to reencode the input to the specified encoding, returns
