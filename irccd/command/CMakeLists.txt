@@ -1,0 +1,54 @@
+#
+# CMakeLists.txt -- CMake build system for irccd
+#
+# Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+
+set(
+	COMMAND_SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/Command.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Command.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandChannelNotice.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandChannelNotice.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandInvite.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandInvite.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandJoin.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandJoin.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandKick.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandKick.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandMe.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandMe.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandMessage.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandMessage.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandMode.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandMode.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandNames.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandNames.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandNick.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandNick.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandNotice.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandNotice.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandPart.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandPart.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandSend.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandSend.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandTopic.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandTopic.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandUserMode.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandUserMode.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandWhois.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CommandWhois.h
+	PARENT_SCOPE
+)
