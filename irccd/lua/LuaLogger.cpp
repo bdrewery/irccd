@@ -39,9 +39,30 @@ std::string makeMessage(lua_State *L, const std::string &message)
 	return oss.str();
 }
 
+int l_debug(lua_State *L)
+{
+	Logger::debug("%s", makeMessage(L, Luae::check<std::string>(L, 1)).c_str());
+
+	return 0;
+}
+
+int l_debugf(lua_State *L)
+{
+	Logger::debug("%s", makeMessage(L, Luae::format(L, 1)).c_str());
+
+	return 0;
+}
+
 int l_log(lua_State *L)
 {
 	Logger::log("%s", makeMessage(L, Luae::check<std::string>(L, 1)).c_str());
+
+	return 0;
+}
+
+int l_logf(lua_State *L)
+{
+	Logger::log("%s", makeMessage(L, Luae::format(L, 1)).c_str());
 
 	return 0;
 }
@@ -53,9 +74,20 @@ int l_warn(lua_State *L)
 	return 0;
 }
 
+int l_warnf(lua_State *L)
+{
+	Logger::warn("%s", makeMessage(L, Luae::format(L, 1)).c_str());
+
+	return 0;
+}
+
 const Luae::Reg functions {
+	{ "debug",	l_debug			},
+	{ "debugf",	l_debugf		},
 	{ "log",	l_log			},
-	{ "warn",	l_warn			}
+	{ "logf",	l_logf			},
+	{ "warn",	l_warn			},
+	{ "warnf",	l_warnf			}
 };
 
 }

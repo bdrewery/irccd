@@ -11,7 +11,9 @@ CURRENT
   * Add option auto-rejoin to server,
   * Added coroutine library,
   * Add uid and gid options,
-  * Add new server.list function.
+  * Add new server.list function,
+  * Add rules system,
+  * Add logger.logf, logger.warnf, logger.debug[f].
 
 1.1.4 March 28, 2014
 ---------------------------------------
