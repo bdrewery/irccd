@@ -420,27 +420,6 @@ void Luae::doexecute(lua_State *L, int status)
 	}
 }
 
-std::string Luae::format(lua_State *L, int index)
-{
-	std::string s;
-
-	lua_getfield(L, LUA_REGISTRYINDEX, "__luae_format");
-	if (lua_type(L, -1) == LUA_TNIL) {
-		lua_pop(L, 1);
-		luaopen_string(L);
-		lua_getfield(L, -1, "format");
-		lua_remove(L, -2);
-		lua_pushvalue(L, -1);
-		lua_setfield(L, LUA_REGISTRYINDEX, "__luae_format");
-	}
-	lua_insert(L, index);
-	lua_call(L, lua_gettop(L) - index, 1);
-	s = lua_tostring(L, -1);
-	lua_pop(L, 1);
-
-	return s;
-}
-
 void Luae::preload(lua_State *L, const std::string &name, lua_CFunction func)
 {
 	LUAE_STACK_CHECKBEGIN(L);

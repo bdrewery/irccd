@@ -1146,23 +1146,6 @@ public:
 	 * ------------------------------------------------- */
 
 	/**
-	 * Format a string by using string.format. The index argument is the first
-	 * expected argument of sprintf(3) like call.
-	 *
-	 * If you expose a Lua function like this:
-	 *	f(level, foo, format, ...)
-	 *
-	 * You should call this function with index equals to 3 (the format argument).
-	 *
-	 * Note: since you cannot determine the number of arguments passed to the format,
-	 *	 the index argument must be absolute.
-	 *
-	 * @param index the index to the format string
-	 * @return the formatted string
-	 */
-	static std::string format(lua_State *L, int index);
-
-	/**
 	 * Preload a library, it will be added to package.preload so the
 	 * user can successfully call require "name". In order to work, you need
 	 * to open luaopen_package and luaopen_base first.
