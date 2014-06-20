@@ -44,7 +44,7 @@ function(apply_flags target flags)
 	endif()
 
 	# Remove Windows useless warnings
-	if(WIN32)
+	if(WIN32 AND MSVC)
 		target_compile_definitions(
 			${target}
 			PRIVATE "_CRT_SECURE_NO_WARNINGS"
@@ -130,7 +130,7 @@ function(define_executable)
 	apply_flags(${EXE_TARGET} EXE_FLAGS)
 	apply_libraries(${EXE_TARGET} EXE_LIBRARIES)
 
-	if(WIN32)
+	if(WIN32 AND MSVC)
 		set_target_properties(
 			${EXE_TARGET}
 			PROPERTIES

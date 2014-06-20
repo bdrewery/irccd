@@ -73,7 +73,6 @@ if(WIN32)
 
 	# Read from file the extra commands
 	file(READ ${CMAKE_BINARY_DIR}/nsis_extra_install.txt INSTALL_COMMANDS)
-	file(READ ${CMAKE_BINARY_DIR}/nsis_extra_uninstall.txt UNINSTALL_COMMANDS)
 
 	# Startup menu for documentation
 	set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS ${CPACK_NSIS_EXTRA_INSTALL_COMMANDS} ${INSTALL_COMMANDS})

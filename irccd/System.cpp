@@ -18,6 +18,7 @@
 
 #include <cstdlib>
 #include <ctime>
+#include <stdexcept>
 
 #if defined(_WIN32)
 #  include <sys/types.h>

@@ -22,7 +22,7 @@
 
 #include "Directory.h"
 
-#if defined(_MSC_VER)
+#if defined(_WIN32)
 #  include <Windows.h>
 #else
 #  include <cstring>
@@ -34,7 +34,7 @@
 
 namespace irccd {
 
-#if defined(_MSC_VER)
+#if defined(_WIN32)
 
 namespace {
 

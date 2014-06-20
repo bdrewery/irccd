@@ -23,7 +23,7 @@
 if(UNIX)
 	set(C_FLAGS "${C_FLAGS} -Wall -Wextra")
 	set(CXX_FLAGS "${CXX_FLAGS} -Wall -Wextra -std=gnu++11")
-elseif(WIN32)
+elseif(WIN32 AND MSVC)
 	set(C_FLAGS "${C_FLAGS} /D _CRT_SECURE_NO_WARNINGS")
 	set(CXX_FLAGS "${CXX_FLAGS} /D _CRT_SECURE_NO_WARNINGS")
 endif()

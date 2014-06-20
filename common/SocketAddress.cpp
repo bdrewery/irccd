@@ -20,7 +20,7 @@
 #include <cstdio>
 #include <cstring>
 
-#if !defined(WIN32)
+#if !defined(_WIN32)
 #  include <sys/un.h>
 
 #  define gai_strerrorA(s)	gai_strerror(s)

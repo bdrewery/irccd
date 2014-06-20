@@ -24,6 +24,8 @@
  * @brief Lua process (thread or plugin)
  */
 
+#if defined(WITH_LUA)
+
 #include <unordered_map>
 
 #include "config.h"
@@ -120,5 +122,7 @@ public:
 };
 
 } // !irccd
+
+#endif // !_WITH_LUA
 
 #endif // !_PROCESS_H_
