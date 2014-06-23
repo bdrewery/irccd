@@ -119,6 +119,17 @@ int l_dirname(lua_State *L)
 	return 1;
 }
 
+int l_separator(lua_State *L)
+{
+#if defined(_WIN32)
+	Luae::push(L, "\\");
+#else
+	Luae::push(L, "/");
+#endif
+
+	return 1;
+}
+
 int l_stat(lua_State *L)
 {
 	auto path = Luae::check<std::string>(L, 1);
@@ -168,6 +179,7 @@ const Luae::Reg functions {
 	{ "exists",		l_exists	},
 	{ "basename",		l_basename	},
 	{ "dirname",		l_dirname	},
+	{ "separator",		l_separator	},
 	{ "stat",		l_stat		},
 };
 

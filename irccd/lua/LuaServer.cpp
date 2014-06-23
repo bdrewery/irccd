@@ -432,27 +432,6 @@ const LuaeClass::Def serverDef {
 	nullptr
 };
 
-int l_find(lua_State *L)
-{
-	auto name = Luae::check<std::string>(L, 1);
-	int ret;
-
-	try {
-		Server::Ptr server = Server::get(name);
-
-		Luae::push(L, server);
-
-		ret = 1;
-	} catch (std::out_of_range ex) {
-		Luae::push(L, nullptr);
-		Luae::push(L, ex.what());
-
-		ret = 2;
-	}
-
-	return ret;
-}
-
 int l_connect(lua_State *L)
 {
 	Server::Info info;
@@ -487,9 +466,61 @@ int l_connect(lua_State *L)
 	return 1;
 }
 
+int l_find(lua_State *L)
+{
+	auto name = Luae::check<std::string>(L, 1);
+	int ret;
+
+	try {
+		Server::Ptr server = Server::get(name);
+
+		Luae::push(L, server);
+
+		ret = 1;
+	} catch (std::out_of_range ex) {
+		Luae::push(L, nullptr);
+		Luae::push(L, ex.what());
+
+		ret = 2;
+	}
+
+	return ret;
+}
+
+int l_list(lua_State *L)
+{
+	int i = 0;
+
+	lua_createtable(L, 0, 0);
+	Server::forAll([&] (Server::Ptr server) {
+		lua_pushstring(L, server->info().name.c_str());
+		lua_rawseti(L, -2, ++i);
+	});
+
+	lua_pushinteger(L, 0);
+	lua_pushinteger(L, i);
+
+	lua_pushcclosure(L, [] (lua_State *L) {
+		auto index = lua_tointeger(L, lua_upvalueindex(2));
+		auto count = lua_tointeger(L, lua_upvalueindex(3));
+
+		if (index >= count)
+			return 0;
+
+		lua_rawgeti(L, lua_upvalueindex(1), index + 1);
+		lua_pushinteger(L, index + 1);
+		lua_replace(L, lua_upvalueindex(2));
+
+		return 1;
+	}, 3);
+
+	return 1;
+}
+
 const Luae::Reg functions {
-	{ "find",		l_find				},
 	{ "connect",		l_connect			},
+	{ "find",		l_find				},
+	{ "list",		l_list				}
 };
 
 }
