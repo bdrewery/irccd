@@ -100,7 +100,16 @@ void EventQueue::stop()
 
 	try {
 		m_thread.join();
-	} catch (...) { }
+
+		// Close plugins
+		Plugin::forAll([] (Plugin::Ptr p) {
+			p->onUnload();
+		});
+	} catch (const std::exception &ex) {
+		Logger::warn("irccd: %s", ex.what());
+	} catch (const Plugin::ErrorException &ex) {
+		Logger::warn("irccd: %s", ex.what());
+	}
 }
 
 } // !irccd
