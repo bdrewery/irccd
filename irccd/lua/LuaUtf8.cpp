@@ -17,7 +17,7 @@
  */
 
 #include <irccd/Luae.h>
-#include <irccd/utf8.h>
+#include <irccd/Utf8.h>
 
 namespace irccd {
 
