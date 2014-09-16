@@ -18,6 +18,7 @@
 
 #include <cerrno>
 #include <string>
+#include <cstring>
 #include <iterator>
 #include <memory>
 #include <string>
@@ -27,6 +28,8 @@
 #include <iconv.h>
 
 #include "Converter.h"
+
+namespace irccd {
 
 /**
  * @struct Deleter
@@ -70,7 +73,7 @@ std::string Converter::convert(const char *from,
 
 	while (insize > 0) {
 		/* Convert */
-		auto r = iconv(cv.get(), &b, &insize, &p, &outsize);
+		auto r = iconv(cv.get(), (char **)&b, &insize, (char **)&p, &outsize);
 
 		if (r == (size_t)-1) {
 			switch (errno) {
@@ -98,3 +101,5 @@ std::string Converter::convert(const char *from,
 
 	return std::string(&result[0], (p - &result[0]));
 }
+
+} // !irccd

@@ -29,7 +29,7 @@ if (NOT Libiconv_LIBRARY)
 	check_function_exists(iconv _HAVE_ICONV_FUNC)
 
 	if (_HAVE_ICONV_OPEN_FUNC AND _HAVE_ICONV_CLOSE_FUNC AND _HAVE_ICONV_FUNC)
-		set(Libiconv_LIBRARY "")
+		set(Libiconv_LIBRARY c)
 	endif ()
 endif()
 

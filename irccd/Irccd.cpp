@@ -546,25 +546,29 @@ const Server::Identity &Irccd::findIdentity(const std::string &name)
 
 int Irccd::run()
 {
+	try {
 #if defined(WITH_LUA)
-	// Start the IrcEvent thread
-	EventQueue::instance().start();
+		// Start the IrcEvent thread
+		EventQueue::instance().start();
 #endif
 
-	openConfig();
+		openConfig();
 
-	while (m_running) {
-		/*
-		 * If no listeners is enabled, we must wait a bit to avoid
-		 * CPU usage exhaustion.
-		 */
-		if (Listener::instance().count() == 0)
-			System::sleep(1);
-		else
-			Listener::instance().process();
+		while (m_running) {
+			/*
+			 * If no listeners is enabled, we must wait a bit to avoid
+			 * CPU usage exhaustion.
+			 */
+			if (Listener::instance().count() == 0)
+				System::sleep(1);
+			else
+				Listener::instance().process();
+		}
+
+		stop();
+	} catch (const std::exception &ex) {
+		Logger::fatal(1, ex.what());
 	}
-
-	stop();
 
 	return 0;
 }

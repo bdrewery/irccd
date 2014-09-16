@@ -107,8 +107,6 @@ void EventQueue::stop()
 		});
 	} catch (const std::exception &ex) {
 		Logger::warn("irccd: %s", ex.what());
-	} catch (const Plugin::ErrorException &ex) {
-		Logger::warn("irccd: %s", ex.what());
 	}
 }
 

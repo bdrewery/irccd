@@ -26,6 +26,8 @@
 
 #include <string>
 
+namespace irccd {
+
 /**
  * @class Converter
  * @brief Convert string between different encodings
@@ -45,5 +47,7 @@ public:
 				   const char *to,
 				   const std::string &input);
 };
+
+} // !irccd
 
 #endif // !_CONVERTER_H_
