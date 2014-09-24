@@ -54,9 +54,9 @@ struct RuleResult {
  *
  * All functions are thread safe.
  */
-class RuleManager : public Singleton<RuleManager> {
+class RuleManager final : public Singleton<RuleManager> {
 private:
-	friend class Singleton<RuleManager>;
+	SINGLETON(RuleManager);
 
 	using Lock		= std::lock_guard<std::mutex>;
 
@@ -65,7 +65,9 @@ private:
 
 	RuleManager() = default;
 	RuleManager(const RuleManager &) = delete;
+	RuleManager(RuleManager &&) = delete;
 	RuleManager &operator=(const RuleManager &) = delete;
+	RuleManager &operator=(RuleManager &&) = delete;
 
 	void assertIndex(int index) const;
 

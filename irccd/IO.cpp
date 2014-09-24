@@ -27,9 +27,9 @@
 
 namespace irccd {
 
-IO::IO(const std::string &serverName, const std::string &targetName)
-	: m_serverName(serverName)
-	, m_targetName(targetName)
+IO::IO(std::string serverName, std::string targetName)
+	: m_serverName(std::move(serverName))
+	, m_targetName(std::move(targetName))
 {
 }
 

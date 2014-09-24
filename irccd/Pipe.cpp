@@ -16,40 +16,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Logger.h>
+#include <common/Logger.h>
 
 #include "Pipe.h"
+#include "PipeManager.h"
 
 namespace irccd {
 
-Pipe::Pipes Pipe::pipes;
-Pipe::Mutex Pipe::pipesMutex;
-
-Pipe::Ptr Pipe::get(const std::string &name)
-{
-	Lock lk(pipesMutex);
-
-	if (pipes.find(name) == pipes.end())
-		pipes[name] = std::make_shared<Pipe>(name);
-
-	return pipes[name];
-}
-
-void Pipe::destroy(const Pipe::Ptr &pipe)
-{
-	Lock lk(pipesMutex);
-
-	pipes.erase(pipe->m_name);
-}
-
-Pipe::Pipe(const std::string &name)
-	: m_name(name)
+Pipe::Pipe(std::string name)
+	: m_name(std::move(name))
 {
 }
 
 Pipe::~Pipe()
 {
 	Logger::debug("pipe %s: destroyed", m_name.c_str());
+	PipeManager::instance().remove(m_name);
 }
 
 void Pipe::push(const LuaeValue &value)
@@ -92,9 +74,8 @@ void Pipe::clear()
 
 bool Pipe::wait(unsigned long ms)
 {
-	bool ret = true;
-
 	Lock lk(m_mutex);
+	bool ret = true;
 
 	if (ms == 0)
 		m_cond.wait(lk);
@@ -102,16 +83,6 @@ bool Pipe::wait(unsigned long ms)
 		ret = m_cond.wait_for(lk, std::chrono::milliseconds(ms)) != std::cv_status::timeout;
 
 	return ret;
-}
-
-void Pipe::list(Reader reader)
-{
-	Lock lk(m_mutex);
-
-	while (!m_queue.empty()) {
-		reader(m_queue.front());
-		m_queue.pop();
-	}
 }
 
 void Pipe::pop()

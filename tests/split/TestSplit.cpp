@@ -16,70 +16,35 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cppunit/TextTestRunner.h>
+#include <gtest/gtest.h>
 
 #include <common/Util.h>
 
-#include "TestSplit.h"
-
 namespace irccd {
 
-using String	= std::string;
-using List	= std::vector<std::string>;
+using List = std::vector<std::string>;
 
-std::ostream &operator<<(std::ostream &stream, List list)
-{
-	stream << "[ ";
-
-	for (size_t i = 0; i < list.size(); ++i) {
-		stream << list[i];
-		if (i != list.size() - 1)
-			stream << ", ";
-	}
-
-	stream << " ]";
-
-	return stream;
-}
-
-std::string message(const List &expected, const List &result)
-{
-	std::ostringstream oss;
-
-	oss << "expected: " << expected << std::endl;
-	oss << "actual: " << result << std::endl;
-
-	return oss.str();
-}
-
-#define EXPECT(e, r)							\
-	CPPUNIT_ASSERT_MESSAGE(message(e, r), e == r)
-
-void TestSplit::simple()
+TEST(Basic, simple)
 {
 	List expected { "a", "b" };
 	List result = Util::split("a;b", ";");
 
-	EXPECT(expected, result);
+	ASSERT_EQ(expected, result);
 }
 
-void TestSplit::cut()
+TEST(Basic, cut)
 {
 	List expected { "msg", "#staff", "foo bar baz" };
 	List result = Util::split("msg;#staff;foo bar baz", ";", 3);
 
-	EXPECT(expected, result);
+	ASSERT_EQ(expected, result);
 }
 
 } // !irccd
 
-int main()
+int main(int argc, char **argv)
 {
-	using namespace irccd;
+	testing::InitGoogleTest(&argc, argv);
 
-	CppUnit::TextTestRunner runnerText;
-
-	runnerText.addTest(TestSplit::suite());
-
-	return runnerText.run("", false) == 1 ? 0 : 1;
+	return RUN_ALL_TESTS();
 }

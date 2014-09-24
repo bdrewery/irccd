@@ -86,16 +86,7 @@ const Process::Libraries Process::irccdLibs = {
 	{ "irccd.util",			luaopen_util		}
 };
 
-Process::Ptr Process::create()
-{
-	/*
-	 * Use the std::shared_ptr constructor because std::make_shared
-	 * needs a default constructor which is private for Process.
-	 */
-	return std::shared_ptr<Process>(new Process);
-}
-
-void Process::initialize(Ptr process, const Info &info)
+void Process::initialize(std::shared_ptr<Process> &process, const Info &info)
 {
 	auto L = static_cast<lua_State *>(*process);
 

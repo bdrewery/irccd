@@ -34,7 +34,7 @@ namespace irccd {
 namespace {
 
 using HelpFunction	= std::function<void ()>;
-using TestFunction	= std::function<void (Plugin::Ptr, Server::Ptr, int, char **)>;
+using TestFunction	= std::function<void (std::shared_ptr<Plugin>, std::shared_ptr<Server>, int, char **)>;
 
 class FakeServer : public Server {
 public:
@@ -284,7 +284,7 @@ std::unordered_map<std::string, HelpFunction> helpCommands {
 
 // {{{ Test functions
 
-void testCommand(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testCommand(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onCommand requires 3 arguments");
@@ -298,12 +298,12 @@ void testCommand(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	}
 }
 
-void testConnect(Plugin::Ptr p, Server::Ptr s, int, char **)
+void testConnect(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int, char **)
 {
 	p->onConnect(s);
 }
 
-void testChannelNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testChannelNotice(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onChannelNotice requires 3 arguments");
@@ -311,7 +311,7 @@ void testChannelNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		p->onChannelNotice(s, argv[0], argv[1], argv[2]);
 }
 
-void testInvite(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testInvite(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onInvite requires 2 arguments");
@@ -319,7 +319,7 @@ void testInvite(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		p->onInvite(s, argv[0], argv[1]);
 }
 
-void testJoin(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testJoin(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onJoin requires 2 arguments");
@@ -327,7 +327,7 @@ void testJoin(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		p->onJoin(s, argv[0], argv[1]);
 }
 
-void testKick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testKick(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	std::string reason;
 
@@ -341,7 +341,7 @@ void testKick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	}
 }
 
-void testMe(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testMe(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onMessage requires 3 arguments");
@@ -349,7 +349,7 @@ void testMe(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		p->onMe(s, argv[0], argv[1], argv[2]);
 }
 
-void testMessage(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testMessage(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onMessage requires 3 arguments");
@@ -357,7 +357,7 @@ void testMessage(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		p->onMessage(s, argv[0], argv[1], argv[2]);
 }
 
-void testMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testMode(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	std::string modeArg;
 
@@ -371,7 +371,7 @@ void testMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	}
 }
 
-void testNick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testNick(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onNick requires 2 arguments");
@@ -379,7 +379,7 @@ void testNick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		p->onNick(s, argv[0], argv[1]);
 }
 
-void testNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testNotice(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onNotice requires 3 arguments");
@@ -387,7 +387,7 @@ void testNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		p->onNotice(s, argv[0], argv[1], argv[2]);
 }
 
-void testPart(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testPart(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	std::string reason;
 
@@ -401,7 +401,7 @@ void testPart(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 	}
 }
 
-void testQuery(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testQuery(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onQuery requires 2 arguments");
@@ -409,7 +409,7 @@ void testQuery(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		p->onQuery(s, argv[0], argv[1]);
 }
 
-void testTopic(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testTopic(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onTopic requires 3 arguments");
@@ -417,7 +417,7 @@ void testTopic(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		p->onTopic(s, argv[0], argv[1], argv[2]);
 }
 
-void testUserMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testUserMode(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onUserMode requires 2 arguments");

@@ -71,7 +71,7 @@ std::string Plugin::getGlobal(const std::string &name)
 }
 
 void Plugin::parseMessage(const std::string &message,
-			  const Server::Ptr &server,
+			  const std::shared_ptr<Server> &server,
 			  std::string &result,
 			  bool &iscommand)
 {
@@ -113,218 +113,14 @@ void Plugin::parseMessage(const std::string &message,
 }
 
 /* --------------------------------------------------------
- * public static methods and members
- * -------------------------------------------------------- */
-
-Plugin::Mutex		Plugin::pluginLock;
-Plugin::Dirs		Plugin::pluginDirs;
-Plugin::List		Plugin::plugins;
-
-bool Plugin::isLoaded(const std::string &name)
-{
-	Lock lk(pluginLock);
-	bool ret = true;
-
-	try {
-		(void)find(name);
-	} catch (std::out_of_range ex) {
-		ret = false;
-	}
-
-	return ret;
-}
-
-std::vector<std::string> Plugin::list()
-{
-	Lock lk(pluginLock);
-	std::vector<std::string> list;
-
-	for (auto p : plugins)
-		list.push_back(p->m_info.name);
-
-	return list;
-}
-
-void Plugin::addPath(const std::string &path)
-{
-	Lock lk(pluginLock);
-
-	pluginDirs.push_back(path);
-}
-
-void Plugin::load(const std::string &name, bool relative)
-{
-	Lock lk(pluginLock);
-
-	std::ostringstream oss;
-	std::string realname, realpath;
-	bool found = false;
-
-	if (isLoaded(name))
-		throw std::runtime_error("plugin " + name + " already loaded");
-
-	/*
-	 * If the plugin has been specified by path using foo = /path then
-	 * it should contains the .lua extension, otherwise we search
-	 * for it.
-	 */
-	if (relative) {
-		Logger::log("irccd: checking for plugin %s", name.c_str());
-		found = Util::exist(name);
-
-		/*
-		 * Compute the name by removing .lua extension and optional
-		 * directory.
-		 */
-		realpath = name;
-		realname = Util::baseName(realpath);
-
-		auto pos = realname.find(".lua");
-		if (pos != std::string::npos)
-			realname.erase(pos);
-	} else {
-		realname = name;
-
-		// Seek the plugin in the directories.
-		for (auto p : pluginDirs) {
-			oss.str("");
-			oss << p;
-
-			// Add a / or \\ only if needed
-			if (p.length() > 0 && p[p.length() - 1] != Util::DIR_SEP)
-				oss << Util::DIR_SEP;
-
-			oss << name << ".lua";
-
-			realpath = oss.str();
-			Logger::log("irccd: checking for plugin %s", realpath.c_str());
-
-			if (Util::exist(realpath)) {
-				found = true;
-				break;
-			}
-		}
-	}
-
-	if (!found)
-		throw std::runtime_error("plugin " + realname + " not found");
-
-	/*
-	 * At this step, the open function will open the lua
-	 * script, that script may want to call some bindings
-	 * directly so we need to add it to the registered
-	 * Lua plugins even if it has failed. So we remove
-	 * it only on failure and expect plugins to be well
-	 * coded.
-	 */
-
-	auto p = std::make_shared<Plugin>(realname, realpath);
-	plugins.push_back(p);
-
-	try {
-		p->open();
-	} catch (ErrorException ex) {
-		plugins.erase(
-			std::remove(plugins.begin(), plugins.end(), p),
-			plugins.end()
-		);
-
-		throw std::runtime_error("failed to load " + ex.which() + ": " + ex.error());
-	}
-}
-
-void Plugin::unload(const std::string &name)
-{
-	Lock lk(pluginLock);
-
-	try {
-		auto i = find(name);
-
-		try {
-			i->call("onUnload");
-		} catch (Plugin::ErrorException ex) {
-			Logger::warn("irccd: error while unloading %s: %s",
-			    name.c_str(), ex.what());
-		}
-
-		plugins.erase(
-			std::remove(plugins.begin(), plugins.end(), i),
-			plugins.end()
-		);
-	} catch (std::out_of_range) {
-		Logger::warn("irccd: there is no plugin %s loaded", name.c_str());
-	}
-}
-
-void Plugin::reload(const std::string &name)
-{
-	Lock lk(pluginLock);
-
-	try {
-		auto i = find(name);
-
-		try {
-			i->call("onReload");
-		} catch (Plugin::ErrorException ex) {
-			Logger::warn("plugin %s: %s",
-			    ex.which().c_str(), ex.error().c_str());
-		}
-	} catch (std::out_of_range ex) {
-		Logger::warn("irccd: %s", ex.what());
-	}
-}
-
-Plugin::Ptr Plugin::find(const std::string &name)
-{
-	Lock lk(pluginLock);
-	std::ostringstream oss;
-
-	auto i = std::find_if(plugins.begin(), plugins.end(),
-	    [&] (Plugin::Ptr p) -> bool {
-		return p->getName() == name;
-	    }
-	);
-
-	if (i == plugins.end()) {
-		oss << "plugin " << name << " not found";
-
-		throw std::out_of_range(oss.str());
-	}
-
-	return *i;
-}
-
-void Plugin::forAll(MapFunc func)
-{
-	Lock lk(pluginLock);
-
-	/*
-	 * We use an index based loop because if the handle
-	 * load a plugin, the for range will getting invalid.
-	 */
-	for (size_t i = 0; i < plugins.size(); ++i)
-		func(plugins[i]);
-}
-
-void Plugin::collectGarbage()
-{
-	Lock lk(pluginLock);
-
-	for (auto p : plugins)
-		lua_gc(p->getState(), LUA_GCCOLLECT, 0);
-}
-
-/* --------------------------------------------------------
  * Public methods
  * -------------------------------------------------------- */
 
-Plugin::Plugin(const std::string &name,
-	       const std::string &path)
+Plugin::Plugin(std::string name, std::string path)
 {
-	m_info.name = name;
-	m_info.path = path;
-
-	m_process = Process::create();
+	m_info.name = std::move(name);
+	m_info.path = std::move(path);
+	m_process = std::make_shared<Process>();
 }
 
 const std::string &Plugin::getName() const
@@ -347,17 +143,17 @@ void Plugin::open()
 	auto L = static_cast<lua_State *>(*m_process);
 
 	// Load default library as it was done by require.
-	for (auto l : Process::luaLibs)
+	for (const auto &l : Process::luaLibs)
 		Luae::require(L, l.first, l.second, true);
 
 	// Put external modules in package.preload so user
 	// will need require (modname)
-	for (auto l : Process::irccdLibs)
+	for (const auto &l : Process::irccdLibs)
 		Luae::preload(L, l.first, l.second);
 
 	try {
 		Luae::dofile(L, m_info.path);
-	} catch (std::runtime_error error) {
+	} catch (const std::exception &error) {
 		throw ErrorException(m_info.name, error.what());
 	}
 
@@ -381,40 +177,29 @@ void Plugin::open()
  * Plugin callbacks
  * -------------------------------------------------------- */
 
-void Plugin::onConnect(const Server::Ptr &server)
+void Plugin::onConnect(std::shared_ptr<Server> server)
 {
-	call("onConnect", server);
+	call("onConnect", std::move(server));
 }
 
-void Plugin::onChannelNotice(const Server::Ptr &server,
-			     const std::string &who,
-			     const std::string &channel,
-			     const std::string &notice)
+void Plugin::onChannelNotice(std::shared_ptr<Server> server, std::string who, std::string channel, std::string notice)
 {
-	call("onChannelNotice", server, who, channel, notice);
+	call("onChannelNotice", std::move(server), std::move(who), std::move(channel), std::move(notice));
 }
 
-void Plugin::onInvite(const Server::Ptr &server,
-		      const std::string &channel,
-		      const std::string &who)
+void Plugin::onInvite(std::shared_ptr<Server> server, std::string channel, std::string who)
 {
-	call("onInvite", server, channel, who);
+	call("onInvite", std::move(server), std::move(channel), std::move(who));
 }
 
-void Plugin::onJoin(const Server::Ptr &server,
-		    const std::string &channel,
-		    const std::string &nickname)
+void Plugin::onJoin(std::shared_ptr<Server> server, std::string channel, std::string nickname)
 {
-	call("onJoin", server, channel, nickname);
+	call("onJoin", std::move(server), std::move(channel), std::move(nickname));
 }
 
-void Plugin::onKick(const Server::Ptr &server,
-		    const std::string &channel,
-		    const std::string &who,
-		    const std::string &kicked,
-		    const std::string &reason)
+void Plugin::onKick(std::shared_ptr<Server> server, std::string channel, std::string who, std::string kicked, std::string reason)
 {
-	call("onKick", server, channel, who, kicked, reason);
+	call("onKick", std::move(server), std::move(channel), std::move(who), std::move(kicked), std::move(reason));
 }
 
 void Plugin::onLoad()
@@ -422,10 +207,7 @@ void Plugin::onLoad()
 	call("onLoad");
 }
 
-void Plugin::onMessage(const Server::Ptr &server,
-		       const std::string &channel,
-		       const std::string &nick,
-		       const std::string &message)
+void Plugin::onMessage(std::shared_ptr<Server> server, std::string channel, std::string nick, std::string message)
 {
 	std::string result;
 	bool iscommand;
@@ -433,61 +215,42 @@ void Plugin::onMessage(const Server::Ptr &server,
 	parseMessage(message, server, result, iscommand);
 
 	if (iscommand)
-		call("onCommand", server, channel, nick, result);
+		call("onCommand", std::move(server), std::move(channel), std::move(nick), std::move(result));
 	else
-		call("onMessage", server, channel, nick, result);
+		call("onMessage", std::move(server), std::move(channel), std::move(nick), std::move(result));
 }
 
-void Plugin::onMe(const Server::Ptr &server,
-		  const std::string &channel,
-		  const std::string &nick,
-		  const std::string &message)
+void Plugin::onMe(std::shared_ptr<Server> server, std::string channel, std::string nick, std::string message)
 {
-	call("onMe", server, channel, nick, message);
+	call("onMe", std::move(server), std::move(channel), std::move(nick), std::move(message));
 }
 
-void Plugin::onMode(const Server::Ptr &server,
-		    const std::string &channel,
-		    const std::string &nickname,
-		    const std::string &mode,
-		    const std::string &arg)
+void Plugin::onMode(std::shared_ptr<Server> server, std::string channel, std::string nickname, std::string mode, std::string arg)
 {
-	call("onMode", server, channel, nickname, mode, arg);
+	call("onMode", std::move(server), std::move(channel), std::move(nickname), std::move(mode), std::move(arg));
 }
 
-void Plugin::onNames(const Server::Ptr &server,
-		     const std::string &channel,
-		     const std::vector<std::string> &list)
+void Plugin::onNames(std::shared_ptr<Server> server, std::string channel, std::vector<std::string> list)
 {
-	call("onNames", server, channel, list);
+	call("onNames", std::move(server), std::move(channel), std::move(list));
 }
 
-void Plugin::onNick(const Server::Ptr &server,
-		    const std::string &oldnick,
-		    const std::string &newnick)
+void Plugin::onNick(std::shared_ptr<Server> server, std::string oldnick, std::string newnick)
 {
-	call("onNick", server, oldnick, newnick);
+	call("onNick", std::move(server), std::move(oldnick), std::move(newnick));
 }
 
-void Plugin::onNotice(const Server::Ptr &server,
-		      const std::string &who,
-		      const std::string &target,
-		      const std::string &notice)
+void Plugin::onNotice(std::shared_ptr<Server> server, std::string who, std::string target, std::string notice)
 {
-	call("onNotice", server, who, target, notice);
+	call("onNotice", std::move(server), std::move(who), std::move(target), std::move(notice));
 }
 
-void Plugin::onPart(const Server::Ptr &server,
-		    const std::string &channel,
-		    const std::string &nickname,
-		    const std::string &reason)
+void Plugin::onPart(std::shared_ptr<Server> server, std::string channel, std::string nickname, std::string reason)
 {
-	call("onPart", server, channel, nickname, reason);
+	call("onPart", std::move(server), std::move(channel), std::move(nickname), std::move(reason));
 }
 
-void Plugin::onQuery(const Server::Ptr &server,
-		     const std::string &who,
-		     const std::string &message)
+void Plugin::onQuery(std::shared_ptr<Server> server, std::string who, std::string message)
 {
 	std::string result;
 	bool iscommand;
@@ -495,9 +258,9 @@ void Plugin::onQuery(const Server::Ptr &server,
 	parseMessage(message, server, result, iscommand);
 
 	if (iscommand)
-		call("onQueryCommand", server, who, result);
+		call("onQueryCommand", std::move(server), std::move(who), std::move(result));
 	else
-		call("onQuery", server, who, result);
+		call("onQuery", std::move(server), std::move(who), std::move(result));
 }
 
 void Plugin::onReload()
@@ -505,12 +268,9 @@ void Plugin::onReload()
 	call("onReload");
 }
 
-void Plugin::onTopic(const Server::Ptr &server,
-		     const std::string &channel,
-		     const std::string &who,
-		     const std::string &topic)
+void Plugin::onTopic(std::shared_ptr<Server> server, std::string channel, std::string who, std::string topic)
 {
-	call("onTopic", server, channel, who, topic);
+	call("onTopic", std::move(server), std::move(channel), std::move(who), std::move(topic));
 }
 
 void Plugin::onUnload()
@@ -518,17 +278,14 @@ void Plugin::onUnload()
 	call("onUnload");
 }
 
-void Plugin::onUserMode(const Server::Ptr &server,
-			const std::string &who,
-			const std::string &mode)
+void Plugin::onUserMode(std::shared_ptr<Server> server, std::string who, std::string mode)
 {
-	call("onUserMode", server, who, mode);
+	call("onUserMode", std::move(server), std::move(who), std::move(mode));
 }
 
-void Plugin::onWhois(const Server::Ptr &server,
-		     const IrcWhois &info)
+void Plugin::onWhois(std::shared_ptr<Server> server, IrcWhois info)
 {
-	call("onWhois", server, info);
+	call("onWhois", std::move(server), std::move(info));
 }
 
 } // !irccd

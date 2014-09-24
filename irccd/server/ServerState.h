@@ -41,23 +41,16 @@ class Server;
 class ServerState {
 public:
 	/**
-	 * The unique pointer for \ref ServerState
-	 */
-	using Ptr = std::unique_ptr<ServerState>;
-
-	/**
 	 * Default destructor.
 	 */
-	virtual ~ServerState();
+	virtual ~ServerState() = default;
 
 	/**
-	 * Execute the current state command. Returns the next transition
-	 * if needed.
+	 * Execute the current state command.
 	 *
 	 * @param server the owner
-	 * @return the next transition
 	 */
-	virtual Ptr exec(std::shared_ptr<Server> server) = 0;
+	virtual void exec(Server &server) = 0;
 
 	/**
 	 * Get the current state identity.

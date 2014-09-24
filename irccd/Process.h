@@ -22,12 +22,15 @@
 /**
  * @file Process.h
  * @brief Lua process (thread or plugin)
+ *
+ * @warning Do not rename the include guard, it conflicts with a Windows header
  */
  
 #include <config.h>
 
 #if defined(WITH_LUA)
 
+#include <memory>
 #include <unordered_map>
 
 #include "config.h"
@@ -42,13 +45,8 @@ class Plugin;
  * @class Process
  * @brief A thread or / process that owns a Lua state
  */
-class Process {
+class Process final {
 public:
-	/**
-	 * The smart pointer for \ref Process
-	 */
-	using Ptr	= std::shared_ptr<Process>;
-
 	/**
 	 * The libraries
 	 */
@@ -72,16 +70,14 @@ public:
 	};
 
 private:
-	LuaeState	m_state;
-
-	Process() = default;
+	LuaeState m_state;
 
 public:
 	/**
 	 * The following fields are store in the lua_State * registry
 	 * and may be retrieved at any time from any Lua API.
 	 */
-	static const char *	FieldInfo;
+	static const char *FieldInfo;
 
 	/**
 	 * The standard Lua libraries.
@@ -94,19 +90,12 @@ public:
 	static const Libraries irccdLibs;
 
 	/**
-	 * Create a process with a new Lua state.
-	 *
-	 * @return the process
-	 */
-	static Ptr create();
-
-	/**
 	 * Initialize the process, adds the name and home
 	 *
 	 * @param process the process
 	 * @param info the info
 	 */
-	static void initialize(Ptr process, const Info &info);
+	static void initialize(std::shared_ptr<Process> &process, const Info &info);
 
 	/**
 	 * Get the info from the registry. Calls luaL_error if any functions

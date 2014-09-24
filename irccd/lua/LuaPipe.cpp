@@ -20,6 +20,7 @@
 
 #include <irccd/Luae.h>
 #include <irccd/Pipe.h>
+#include <irccd/PipeManager.h>
 
 #include "LuaPipe.h"
 
@@ -32,16 +33,16 @@ const char *PipeType	= "Pipe";
 int l_pipeGet(lua_State *L)
 {
 	auto name = Luae::check<std::string>(L, 1);
-	auto pipe = Pipe::get(name);
+	auto pipe = PipeManager::instance().get(name);
 
-	new (L, PipeType) Pipe::Ptr(pipe);
+	new (L, PipeType) std::shared_ptr<Pipe>(pipe);
 
 	return 1;
 }
 
 int l_pipePush(lua_State *L)
 {
-	auto p = *Luae::toType<Pipe::Ptr *>(L, 1, PipeType);
+	auto p = *Luae::toType<std::shared_ptr<Pipe> *>(L, 1, PipeType);
 
 	if (Luae::gettop(L) == 1)
 		return Luae::error(L, "expected one argument");
@@ -54,7 +55,7 @@ int l_pipePush(lua_State *L)
 
 int l_pipeFirst(lua_State *L)
 {
-	auto p = *Luae::toType<Pipe::Ptr *>(L, 1, PipeType);
+	auto p = *Luae::toType<std::shared_ptr<Pipe> *>(L, 1, PipeType);
 
 	LuaeValue::push(L, p->first());
 
@@ -63,7 +64,7 @@ int l_pipeFirst(lua_State *L)
 
 int l_pipeLast(lua_State *L)
 {
-	auto p = *Luae::toType<Pipe::Ptr *>(L, 1, PipeType);
+	auto p = *Luae::toType<std::shared_ptr<Pipe> *>(L, 1, PipeType);
 
 	LuaeValue::push(L, p->last());
 
@@ -72,7 +73,7 @@ int l_pipeLast(lua_State *L)
 
 int l_pipeWait(lua_State *L)
 {
-	auto p = *Luae::toType<Pipe::Ptr *>(L, 1, PipeType);
+	auto p = *Luae::toType<std::shared_ptr<Pipe> *>(L, 1, PipeType);
 	int ms = 0;
 
 	if (Luae::gettop(L) >= 2)
@@ -85,7 +86,7 @@ int l_pipeWait(lua_State *L)
 
 int l_pipeList(lua_State *L)
 {
-	Pipe::Ptr p = *Luae::toType<Pipe::Ptr *>(L, 1, PipeType);
+	auto p = *Luae::toType<std::shared_ptr<Pipe> *>(L, 1, PipeType);
 	Pipe::Queue q;
 
 	/*
@@ -130,7 +131,7 @@ int l_pipeList(lua_State *L)
 
 int l_pipeClear(lua_State *L)
 {
-	auto p = *Luae::toType<Pipe::Ptr *>(L, 1, PipeType);
+	auto p = *Luae::toType<std::shared_ptr<Pipe> *>(L, 1, PipeType);
 
 	p->clear();
 
@@ -139,7 +140,7 @@ int l_pipeClear(lua_State *L)
 
 int l_pipePop(lua_State *L)
 {
-	auto p = *Luae::toType<Pipe::Ptr *>(L, 1, PipeType);
+	auto p = *Luae::toType<std::shared_ptr<Pipe> *>(L, 1, PipeType);
 
 	p->pop();
 
@@ -148,10 +149,8 @@ int l_pipePop(lua_State *L)
 
 int l_pipeGc(lua_State *L)
 {
-	auto pipe = Luae::toType<Pipe::Ptr *>(L, 1, PipeType);
+	auto pipe = Luae::toType<std::shared_ptr<Pipe> *>(L, 1, PipeType);
 
-	// Remove the pipe from the named ones.
-	Pipe::destroy(*pipe);
 	(*pipe).~shared_ptr<Pipe>();
 
 	return 0;

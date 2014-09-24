@@ -117,30 +117,14 @@ public:
 		virtual const char * what() const throw();
 	};
 
-	/**
-	 * The smart pointer for plugin.
-	 */
-	using Ptr		= std::shared_ptr<Plugin>;
-
 private:
-	using Dirs		= std::vector<std::string>;
-	using List		= std::vector<Plugin::Ptr>;
-	using Mutex		= std::recursive_mutex;
-	using Lock		= std::lock_guard<Mutex>;
-	using MapFunc		= std::function<void (Ptr ptr)>;
-
-private:
-	static Mutex		pluginLock;	//! lock for managing plugins
-	static Dirs		pluginDirs;	//! list of plugin directories
-	static List		plugins;	//! map of plugins loaded
-
-	Process::Ptr		m_process;	//! lua_State
-	Process::Info		m_info;		//! plugin information
+	std::shared_ptr<Process> m_process;
+	Process::Info m_info;
 
 	std::string getGlobal(const std::string &name);
 
 	void parseMessage(const std::string &message, 
-			  const Server::Ptr &server,
+			  const std::shared_ptr<Server> &server,
 			  std::string &result,
 			  bool &iscommand);
 
@@ -150,7 +134,7 @@ private:
 	}
 
 	template <typename T, typename... Args>
-	void pushObjects(lua_State *L, T &value, Args&&... args) const
+	void pushObjects(lua_State *L, const T &value, Args&&... args) const
 	{
 		Luae::push(L, value);
 		pushObjects(L, args...);
@@ -180,79 +164,13 @@ private:
 
 			try {
 				Luae::pcall(*m_process, after - before, 0);
-			} catch (std::runtime_error error) {
+			} catch (const std::runtime_error &error) {
 				throw Plugin::ErrorException(m_info.name, error.what());
 			}
 		}
 	}
 
 public:
-	/**
-	 * Check whether a plugin is loaded.
-	 *
-	 * @param name the name
-	 * @return true if loaded
-	 */
-	static bool isLoaded(const std::string &name);
-
-	/**
-	 * Get a list of loaded plugins.
-	 *
-	 * @return the list of loaded plugins
-	 */
-	static std::vector<std::string> list();
-
-	/**
-	 * Add path for finding plugins.
-	 *
-	 * @param path the path
-	 */
-	static void addPath(const std::string &path);
-
-	/**
-	 * Try to load a plugin.
-	 *
-	 * @param path the full path
-	 * @param relative tell if the path is relative
-	 * @throw std::runtime_error on failure
-	 */
-	static void load(const std::string &path, bool relative = false);
-
-	/**
-	 * Unload a plugin.
-	 *
-	 * @param name the plugin name
-	 */
-	static void unload(const std::string &name);
-
-	/**
-	 * Reload a plugin.
-	 *
-	 * @param name the plugin to reload
-	 */
-	static void reload(const std::string &name);
-
-	/**
-	 * Find a plugin by its name.
-	 *
-	 * @param name the plugin name
-	 * @return the plugin
-	 * @throw std::out_of_range if not found
-	 */
-	static Ptr find(const std::string &name);
-
-	/**
-	 * Iterate over all plugins.
-	 *
-	 * @param func the function to call
-	 */
-	static void forAll(MapFunc func);
-
-	/**
-	 * Collect garbage for all plugins.
-	 */
-	static void collectGarbage();
-
 	/**
 	 * Default constructor. (Forbidden)
 	 */
@@ -264,8 +182,7 @@ public:
 	 * @param name the plugin name
 	 * @param path the path to the plugin
 	 */
-	Plugin(const std::string &name,
-	       const std::string &path);
+	Plugin(std::string name, std::string path);
 
 	/**
 	 * Get the plugin name.
@@ -310,7 +227,7 @@ public:
 	 *
 	 * @param server the server
 	 */
-	void onConnect(const Server::Ptr &server);
+	void onConnect(std::shared_ptr<Server> server);
 
 	/**
 	 * On a channel notice.
@@ -320,10 +237,7 @@ public:
 	 * @param channel on which channel
 	 * @param notice the message
 	 */
-	void onChannelNotice(const Server::Ptr &server,
-			     const std::string &who,
-			     const std::string &channel,
-			     const std::string &notice);
+	void onChannelNotice(std::shared_ptr<Server> server, std::string who, std::string channel, std::string notice);
 
 	/**
 	 * On invitation.
@@ -332,9 +246,7 @@ public:
 	 * @param channel the channel
 	 * @param who the user who invited you
 	 */
-	void onInvite(const Server::Ptr &server,
-		      const std::string &channel,
-		      const std::string &who);
+	void onInvite(std::shared_ptr<Server> server, std::string channel, std::string who);
 
 	/**
 	 * On join.
@@ -343,9 +255,7 @@ public:
 	 * @param channel the channel
 	 * @param nickname the user who joined
 	 */
-	void onJoin(const Server::Ptr &server,
-		    const std::string &channel,
-		    const std::string &nickname);
+	void onJoin(std::shared_ptr<Server> server, std::string channel, std::string nickname);
 
 	/**
 	 * On kick.
@@ -356,11 +266,7 @@ public:
 	 * @param kicked the kicked target
 	 * @param reason the optional reason
 	 */
-	void onKick(const Server::Ptr &server,
-		    const std::string &channel,
-		    const std::string &who,
-		    const std::string &kicked,
-		    const std::string &reason);
+	void onKick(std::shared_ptr<Server> server, std::string channel, std::string who, std::string kicked, std::string reason);
 
 	/**
 	 * On unload.
@@ -377,10 +283,7 @@ public:
 	 * @param nick the user who sent the message
 	 * @param message the message or command
 	 */
-	void onMessage(const Server::Ptr &server,
-		       const std::string &channel,
-		       const std::string &nick,
-		       const std::string &message);
+	void onMessage(std::shared_ptr<Server> server, std::string channel, std::string nick, std::string message);
 
 	/**
 	 * On CTCP Action.
@@ -390,10 +293,7 @@ public:
 	 * @param nick the user who sent the message
 	 * @param message the message
 	 */
-	void onMe(const Server::Ptr &server,
-		  const std::string &channel,
-		  const std::string &nick,
-		  const std::string &message);
+	void onMe(std::shared_ptr<Server> server, std::string channel, std::string nick, std::string message);
 
 	/**
 	 * On channel mode.
@@ -404,11 +304,7 @@ public:
 	 * @param mode the mode
 	 * @param arg the optional mode argument
 	 */
-	void onMode(const Server::Ptr &server,
-		    const std::string &channel,
-		    const std::string &nickname,
-		    const std::string &mode,
-		    const std::string &arg);
+	void onMode(std::shared_ptr<Server> server, std::string channel, std::string nickname, std::string mode, std::string arg);
 
 	/**
 	 * On names listing.
@@ -417,9 +313,7 @@ public:
 	 * @param channel the channel
 	 * @param list the list of nicknames
 	 */
-	void onNames(const Server::Ptr &server,
-		     const std::string &channel,
-		     const std::vector<std::string> &list);
+	void onNames(std::shared_ptr<Server> server, std::string channel, std::vector<std::string> list);
 
 	/**
 	 * On nick change.
@@ -428,9 +322,7 @@ public:
 	 * @param oldnick the old nickname
 	 * @param newnick the new nickname
 	 */
-	void onNick(const Server::Ptr &server,
-		    const std::string &oldnick,
-		    const std::string &newnick);
+	void onNick(std::shared_ptr<Server> server, std::string oldnick, std::string newnick);
 
 	/**
 	 * On user notice.
@@ -440,10 +332,7 @@ public:
 	 * @param target the target, usually your nickname
 	 * @param notice the notice
 	 */
-	void onNotice(const Server::Ptr &server,
-		      const std::string &who,
-		      const std::string &target,
-		      const std::string &notice);
+	void onNotice(std::shared_ptr<Server> server, std::string who, std::string target, std::string notice);
 
 	/**
 	 * On part.
@@ -453,10 +342,7 @@ public:
 	 * @param nickname the user who left
 	 * @param reason the optional reason
 	 */
-	void onPart(const Server::Ptr &server,
-		    const std::string &channel,
-		    const std::string &nickname,
-		    const std::string &reason);
+	void onPart(std::shared_ptr<Server> server, std::string channel, std::string nickname, std::string reason);
 
 	/**
 	 * On user query.
@@ -465,9 +351,7 @@ public:
 	 * @param who the user who sent the notice
 	 * @param message the message
 	 */
-	void onQuery(const Server::Ptr &server,
-		     const std::string &who,
-		     const std::string &message);
+	void onQuery(std::shared_ptr<Server> server, std::string who, std::string message);
 
 	/**
 	 * On reload.
@@ -482,10 +366,7 @@ public:
 	 * @param who the user who sent the topic
 	 * @param topic the new topic
 	 */
-	void onTopic(const Server::Ptr &server,
-		     const std::string &channel,
-		     const std::string &who,
-		     const std::string &topic);
+	void onTopic(std::shared_ptr<Server> server, std::string channel, std::string who, std::string topic);
 
 	/**
 	 * On unload.
@@ -499,9 +380,7 @@ public:
 	 * @param who the person who changed the mode
 	 * @param mode the new mode
 	 */
-	void onUserMode(const Server::Ptr &server,
-			const std::string &who,
-			const std::string &mode);
+	void onUserMode(std::shared_ptr<Server> server, std::string who, std::string mode);
 
 	/**
 	 * On whois information.
@@ -509,8 +388,7 @@ public:
 	 * @param server the server
 	 * @param info the info
 	 */
-	void onWhois(const Server::Ptr &server,
-		     const IrcWhois &info);
+	void onWhois(std::shared_ptr<Server> server, IrcWhois info);
 };
 
 } // !irccd

@@ -21,6 +21,7 @@
 
 #include <irccd/Luae.h>
 #include <irccd/Plugin.h>
+#include <irccd/PluginManager.h>
 
 #include "LuaPlugin.h"
 
@@ -30,7 +31,7 @@ namespace {
 
 int l_addPath(lua_State *L)
 {
-	Plugin::addPath(Luae::check<std::string>(L, 1));
+	PluginManager::instance().addPath(Luae::check<std::string>(L, 1));
 
 	return 0;
 }
@@ -47,7 +48,7 @@ int l_info(lua_State *L)
 		auto name = Luae::check<std::string>(L, 1);
 
 		try {
-			auto plugin = Plugin::find(name);
+			auto plugin = PluginManager::instance().find(name);
 			auto state = plugin->getState();
 
 			Luae::getfield(state, LUA_REGISTRYINDEX, Process::FieldInfo);
@@ -55,7 +56,7 @@ int l_info(lua_State *L)
 			Luae::pop(state);
 
 			ret = 1;
-		} catch (std::out_of_range ex) {
+		} catch (const std::exception &ex) {
 			Luae::push(L, nullptr);
 			Luae::push(L, ex.what());
 
@@ -72,7 +73,7 @@ int l_info(lua_State *L)
 
 int l_list(lua_State *L)
 {
-	auto list = Plugin::list();
+	auto list = PluginManager::instance().list();
 	auto i = 0;
 
 	/*
@@ -117,8 +118,8 @@ int l_load(lua_State *L)
 	auto path = Luae::check<std::string>(L, 1);
 
 	try {
-		Plugin::load(path, Util::isAbsolute(path));
-	} catch (std::runtime_error error) {
+		PluginManager::instance().load(path, Util::isAbsolute(path));
+	} catch (const std::exception &error) {
 		Luae::push(L, nullptr);
 		Luae::pushfstring(L, "plugin: %s", error.what());
 
@@ -132,14 +133,14 @@ int l_load(lua_State *L)
 
 int l_reload(lua_State *L)
 {
-	Plugin::reload(Luae::check<std::string>(L, 1));
+	PluginManager::instance().reload(Luae::check<std::string>(L, 1));
 
 	return 0;
 }
 
 int l_unload(lua_State *L)
 {
-	Plugin::unload(Luae::check<std::string>(L, 1));
+	PluginManager::instance().unload(Luae::check<std::string>(L, 1));
 
 	return 0;
 }
@@ -153,7 +154,7 @@ const Luae::Reg functionList {
 	{ "unload",		l_unload		}
 };
 
-}
+} // !namespace
 
 int luaopen_plugin(lua_State *L)
 {

@@ -36,7 +36,7 @@ if(WIN32)
 	)
 endif()
 
-set(CMAKE_MODULE_PATH ${cmake_SOURCE_DIR} PARENT_SCOPE)
+set(CMAKE_MODULE_PATH ${cmake_SOURCE_DIR}/packages PARENT_SCOPE)
 
 include(CMakeParseArguments)
 
@@ -48,27 +48,4 @@ include(Extern.cmake)
 configure_file(
 	"${CMAKE_SOURCE_DIR}/cmake/config.h.in"
 	"${CMAKE_BINARY_DIR}/config.h"
-)
-
-set(
-	FILES
-	FindLuaJIT.cmake
-	Config.cmake
-	config.h.in
-	CPackConfig.cmake
-	Extern.cmake
-	FindCppunit.cmake
-	FindLibircclient.cmake
-	FindLua52.cmake
-	FindXDG.cmake
-	Macros.cmake
-	NSIS.InstallOptions.ini.in
-	NSIS.template.in
-	Options.cmake
-)
-
-add_custom_target(
-	cmake
-	COMMENT "General CMake files for malikania"
-	SOURCES ${FILES}
 )

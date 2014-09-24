@@ -34,26 +34,14 @@ namespace irccd {
 class Server;
 
 /**
- * @class IrcDeleter
- * @brief Delete the irc_session_t
- */
-class IrcDeleter {
-public:
-	/**
-	 * Delete the irc_session_t
-	 */
-	void operator()(irc_session_t *s);
-};
-
-/**
  * @class IrcSession
  * @brief Wrapper for irc_session_t
  */
 class IrcSession {
 private:
-	using Ptr	= std::unique_ptr<irc_session_t, IrcDeleter>;
+	//using Ptr = std::unique_ptr<irc_session_t, void (*)(irc_session_t *)>;
 
-	Ptr m_handle;
+	std::unique_ptr<irc_session_t, void (*)(irc_session_t *)> m_handle;
 
 	/**
 	 * Call a libircclient function with its parameters, if the function
@@ -90,21 +78,6 @@ public:
 	IrcSession();
 
 	/**
-	 * Move constructor.
-	 *
-	 * @param other the other IrcSession
-	 */
-	IrcSession(IrcSession &&other);
-
-	/**
-	 * Move assignment operator.
-	 *
-	 * @param other the other IrcSession
-	 * @return self
-	 */
-	IrcSession &operator=(IrcSession &&other);
-
-	/**
 	 * Cast to irc_session_t for raw commands.
 	 *
 	 * @return the irc_session_t
@@ -130,8 +103,7 @@ public:
 	 * @param message the message to send
 	 * @return true if the message was sent
 	 */
-	bool cnotice(const std::string &channel,
-		     const std::string &message);
+	bool cnotice(const std::string &channel, const std::string &message);
 
 	/**
 	 * Invite someone to a channel.
@@ -140,8 +112,7 @@ public:
 	 * @param channel the channel
 	 * @return true if the message was sent
 	 */
-	bool invite(const std::string &target,
-		    const std::string &channel);
+	bool invite(const std::string &target, const std::string &channel);
 
 	/**
 	 * Join a channel.
@@ -150,8 +121,7 @@ public:
 	 * @param password an optional password
 	 * @return true if the message was sent
 	 */
-	bool join(const std::string &channel,
-		  const std::string &password);
+	bool join(const std::string &channel, const std::string &password);
 
 	/**
 	 * Kick someone from a channel.
@@ -161,9 +131,7 @@ public:
 	 * @param reason an optional reason
 	 * @return true if the message was sent
 	 */
-	bool kick(const std::string &name,
-		  const std::string &channel,
-		  const std::string &reason);
+	bool kick(const std::string &name, const std::string &channel, const std::string &reason);
 
 	/**
 	 * Send a CTCP ACTION known as /me.
@@ -172,8 +140,7 @@ public:
 	 * @param message the message to send
 	 * @return true if the message was sent
 	 */
-	bool me(const std::string &target,
-		const std::string &message);
+	bool me(const std::string &target, const std::string &message);
 
 	/**
 	 * Change the channel mode.
@@ -182,8 +149,7 @@ public:
 	 * @param mode the mode
 	 * @return true if the message was sent
 	 */
-	bool mode(const std::string &channel,
-		  const std::string &mode);
+	bool mode(const std::string &channel, const std::string &mode);
 
 	/**
 	 * Get the list of names as a deferred call.
@@ -208,8 +174,7 @@ public:
 	 * @param message the message
 	 * @return true if the message was sent
 	 */
-	bool notice(const std::string &target,
-		    const std::string &message);
+	bool notice(const std::string &target, const std::string &message);
 
 	/**
 	 * Leave a channel.
@@ -218,8 +183,7 @@ public:
 	 * @param reason an optional reason
 	 * @return true if the message was sent
 	 */
-	bool part(const std::string &channel,
-		  const std::string &reason);
+	bool part(const std::string &channel, const std::string &reason);
 
 	/**
 	 * Say something to a channel or to a nickname.
@@ -228,8 +192,7 @@ public:
 	 * @param message the message to send
 	 * @return true if the message was sent
 	 */
-	bool say(const std::string &target,
-		 const std::string &message);
+	bool say(const std::string &target, const std::string &message);
 
 	/**
 	 * Change a channel topic.
@@ -238,8 +201,7 @@ public:
 	 * @param topic the new topic
 	 * @return true if the message was sent
 	 */
-	bool topic(const std::string &channel,
-		   const std::string &topic);
+	bool topic(const std::string &channel, const std::string &topic);
 
 	/**
 	 * Change your own user mode.

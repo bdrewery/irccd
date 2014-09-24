@@ -39,6 +39,11 @@ private:
 
 public:
 	/**
+	 * Default destructor.
+	 */
+	virtual ~Singleton() = default;
+
+	/**
 	 * Get the singleton instance.
 	 *
 	 * @return the reference instance
@@ -46,7 +51,7 @@ public:
 	static T &instance()
 	{
 		if (!s_instance)
-			s_instance = std::unique_ptr<T>(new T);
+			s_instance = std::make_unique<T>();
 
 		return *s_instance;
 	}
@@ -56,5 +61,14 @@ template <typename T>
 std::unique_ptr<T> Singleton<T>::s_instance;
 
 } // !irccd
+
+/**
+ * Needed if you make your class constructor private.
+ *
+ * @param cls the class name
+ * @example SINGLETON(MyObject)
+ */
+#define SINGLETON(cls)							\
+	friend std::unique_ptr<cls> std::make_unique<cls>()
 
 #endif // !_SINGLETON_H_

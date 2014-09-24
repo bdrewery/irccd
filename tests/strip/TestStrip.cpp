@@ -16,95 +16,89 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cppunit/TextTestRunner.h>
+#include <gtest/gtest.h>
 
 #include <common/Util.h>
 
-#include "TestStrip.h"
-
 namespace irccd {
 
-void TestStrip::left()
+TEST(Basic, left)
 {
 	std::string value = "   123";
 	std::string result = Util::strip(value);
 
-	CPPUNIT_ASSERT_EQUAL(std::string("123"), result);
+	ASSERT_EQ("123", result);
 }
 
-void TestStrip::right()
+TEST(Basic, right)
 {
 	std::string value = "123   ";
 	std::string result = Util::strip(value);
 
-	CPPUNIT_ASSERT_EQUAL(std::string("123"), result);
+	ASSERT_EQ("123", result);
 }
 
-void TestStrip::both()
+TEST(Basic, both)
 {
 	std::string value = "   123   ";
 	std::string result = Util::strip(value);
 
-	CPPUNIT_ASSERT_EQUAL(std::string("123"), result);
+	ASSERT_EQ("123", result);
 }
 
-void TestStrip::none()
+TEST(Basic, none)
 {
 	std::string value = "without";
 	std::string result = Util::strip(value);
 
-	CPPUNIT_ASSERT_EQUAL(std::string("without"), result);
+	ASSERT_EQ("without", result);
 }
 
-void TestStrip::betweenEmpty()
+TEST(Basic, betweenEmpty)
 {
 	std::string value = "one list";
 	std::string result = Util::strip(value);
 
-	CPPUNIT_ASSERT_EQUAL(std::string("one list"), result);
+	ASSERT_EQ("one list", result);
 }
 
-void TestStrip::betweenLeft()
+TEST(Basic, betweenLeft)
 {
 	std::string value = "  space at left";
 	std::string result = Util::strip(value);
 
-	CPPUNIT_ASSERT_EQUAL(std::string("space at left"), result);
+	ASSERT_EQ("space at left", result);
 }
 
-void TestStrip::betweenRight()
+TEST(Basic, betweenRight)
 {
 	std::string value = "space at right  ";
 	std::string result = Util::strip(value);
 
-	CPPUNIT_ASSERT_EQUAL(std::string("space at right"), result);
+	ASSERT_EQ("space at right", result);
 }
 
-void TestStrip::betweenBoth()
+TEST(Basic, betweenBoth)
 {
 	std::string value = "  space at both  ";
 	std::string result = Util::strip(value);
 
-	CPPUNIT_ASSERT_EQUAL(std::string("space at both"), result);
+	ASSERT_EQ("space at both", result);
 }
 
-void TestStrip::empty()
+TEST(Basic, empty)
 {
 	std::string value = "    ";
 	std::string result = Util::strip(value);
 
-	CPPUNIT_ASSERT_EQUAL(std::string(""), result);
+	ASSERT_EQ("", result);
 }
 
 } // !irccd
 
-int main()
+int main(int argc, char **argv)
 {
-	using namespace irccd;
+	testing::InitGoogleTest(&argc, argv);
 
-	CppUnit::TextTestRunner runnerText;
-
-	runnerText.addTest(TestStrip::suite());
-
-	return runnerText.run("", false) == 1 ? 0 : 1;
+	return RUN_ALL_TESTS();
 }

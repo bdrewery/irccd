@@ -43,13 +43,8 @@ namespace irccd {
  *
  * This class is an helper to share data between threads.
  */
-class Pipe {
+class Pipe final {
 private:
-	using Pipes	= std::unordered_map<
-				std::string,
-				std::shared_ptr<Pipe>
-			  >;
-
 	using Lock	= std::unique_lock<std::mutex>;
 	using Mutex	= std::mutex;
 	using Cond	= std::condition_variable;
@@ -57,19 +52,11 @@ private:
 
 public:
 	/**
-	 * The smart pointer for \ref Pipe.
-	 */
-	using Ptr	= std::shared_ptr<Pipe>;
-
-	/**
 	 * The queue of values.
 	 */
 	using Queue	= std::queue<LuaeValue>;
 
 private:
-	static Pipes	pipes;
-	static Mutex	pipesMutex;
-
 	std::string	m_name;
 	Cond		m_cond;
 	Mutex		m_mutex;
@@ -77,26 +64,11 @@ private:
 
 public:
 	/**
-	 * Get (or create) a pipe.
-	 *
-	 * @param name the name
-	 * @return the pipe ready to be used
-	 */
-	static Ptr get(const std::string &name);
-
-	/**
-	 * Destroy a pipe, will be destroyed if no one is using it
-	 *
-	 * @param pipe the pipe
-	 */
-	static void destroy(const Pipe::Ptr &pipe);
-
-	/**
 	 * Construct a named pipe.
 	 *
 	 * @param name the name
 	 */
-	Pipe(const std::string &name);
+	Pipe(std::string name);
 
 	/**
 	 * Destroy the pipe.
@@ -142,7 +114,16 @@ public:
 	 *
 	 * @param reader the function to be called
 	 */
-	void list(Reader reader);
+	template <typename Func>
+	void list(Func reader)
+	{
+		Lock lk(m_mutex);
+
+		while (!m_queue.empty()) {
+			reader(m_queue.front());
+			m_queue.pop();
+		}
+	}
 
 	/**
 	 * Pop one value.

@@ -46,7 +46,7 @@ namespace irccd {
  * Listeners are currently not thread safe and should only be used
  * in the main thread.
  */
-class Listener : public Singleton<Listener> {
+class Listener final : public Singleton<Listener> {
 private:
 	friend class Singleton<Listener>;
 
@@ -65,12 +65,8 @@ private:
 	void clientAdd(Socket &client);
 	void clientRead(Socket &client);
 	void peerRead(Socket &s);
-	void execute(const std::string &cmd,
-		     Socket s,
-		     const SocketAddress &info = SocketAddress());
-	void notifySocket(const std::string &message,
-			  Socket s,
-			  const SocketAddress &info);
+	void execute(const std::string &cmd, Socket s, const SocketAddress &info = SocketAddress());
+	void notifySocket(const std::string &message, Socket s, const SocketAddress &info);
 
 public:
 	/**

@@ -25,6 +25,7 @@
 
 #include "Irccd.h"
 #include "Test.h"
+#include "PluginManager.h"
 
 using namespace irccd;
 using namespace std;
@@ -43,7 +44,7 @@ void usage()
 	Logger::fatal(1, "       %s test plugin.lua [command] [parameters...]", getprogname());
 }
 
-}
+} // !namespace
 
 int main(int argc, char **argv)
 {
@@ -69,7 +70,7 @@ int main(int argc, char **argv)
 			break;
 		case 'p':
 #if defined(WITH_LUA)
-			Plugin::addPath(string(optarg));
+			PluginManager::instance().addPath(string(optarg));
 #endif
 			break;
 		case 'P':

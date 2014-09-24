@@ -64,7 +64,7 @@ const char *loader(lua_State *, Buffer *buffer, size_t *size)
 	return buffer->array.data();
 }
 
-void loadfunction(Thread::Ptr thread, lua_State *owner)
+void loadfunction(std::shared_ptr<Thread> &thread, lua_State *owner)
 {
 	Buffer chunk;
 
@@ -74,7 +74,7 @@ void loadfunction(Thread::Ptr thread, lua_State *owner)
 	lua_load(*thread, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
 }
 
-void loadfile(Thread::Ptr thread, const char *path)
+void loadfile(std::shared_ptr<Thread> &thread, const char *path)
 {
 	if (luaL_loadfile(*thread, path) != LUA_OK) {
 		auto error = lua_tostring(*thread, -1);
@@ -96,12 +96,12 @@ const char *ThreadType = "Thread";
 
 int l_threadNew(lua_State *L)
 {
-	Thread::Ptr thread = Thread::create();
+	auto thread = std::make_shared<Thread>();
 	int np;
 
-	for (auto l : Process::luaLibs)
+	for (const auto &l : Process::luaLibs)
 		Luae::require(*thread, l.first, l.second, true);
-	for (auto l : Process::irccdLibs)
+	for (const auto &l : Process::irccdLibs)
 		Luae::preload(*thread, l.first, l.second);
 
 	try {
@@ -133,7 +133,7 @@ int l_threadNew(lua_State *L)
 		Process::initialize(process, info);
 
 		// Create the object to push as return value
-		Thread::Ptr *ptr = new (L, ThreadType) Thread::Ptr(thread);
+		auto *ptr = new (L, ThreadType) std::shared_ptr<Thread>(thread);
 		Thread::start(*ptr, np);
 	} catch (std::out_of_range) {
 		Logger::fatal(1, "irccd: could not find plugin from Lua state %p", L);
@@ -144,7 +144,7 @@ int l_threadNew(lua_State *L)
 
 int l_threadJoin(lua_State *L)
 {
-	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, ThreadType);
+	auto *t = Luae::toType<std::shared_ptr<Thread> *>(L, 1, ThreadType);
 
 	try {
 		(*t)->join();
@@ -162,7 +162,7 @@ int l_threadJoin(lua_State *L)
 
 int l_threadDetach(lua_State *L)
 {
-	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, ThreadType);
+	auto *t = Luae::toType<std::shared_ptr<Thread> *>(L, 1, ThreadType);
 
 	try {
 		(*t)->detach();
@@ -180,7 +180,7 @@ int l_threadDetach(lua_State *L)
 
 int l_threadGc(lua_State *L)
 {
-	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, ThreadType);
+	auto *t = Luae::toType<std::shared_ptr<Thread> *>(L, 1, ThreadType);
 
 	/*
 	 * At this step, the thread is marked for deletion but may have not

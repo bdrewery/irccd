@@ -27,9 +27,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
-#include <sstream>
 #include <string>
-#include <stdexcept>
 #include <thread>
 #include <unordered_map>
 #include <vector>
@@ -102,9 +100,9 @@ public:
 	 */
 	struct RetryInfo {
 		bool		enabled = true;		//!< enable the reconnection mechanism
-		int		maxretries = 0;		//!< max number of test (0 = forever)
-		int		noretried = 0;		//!< current number of test
-		int		timeout = 30;		//!< seconds to wait before testing
+		unsigned	maxretries = 0;		//!< max number of test (0 = forever)
+		unsigned	noretried = 0;		//!< current number of test
+		unsigned	timeout = 30;		//!< seconds to wait before testing
 
 		/*
 		 * The following variables are only used in the
@@ -168,38 +166,32 @@ public:
 	/**
 	 * List of WHOIS being built.
 	 */
-	using WhoisList	= std::unordered_map<
-				std::string,
-				IrcWhois
-			  >;
-
-	/**
-	 * Smart pointer for Server.
-	 */
-	using Ptr	= std::shared_ptr<Server>;
-
-	/**
-	 * The map function for function @ref forAll.
-	 */
-	using MapFunc	= std::function<void (Server::Ptr)>;
+	using WhoisList	= std::unordered_map<std::string, IrcWhois>;
 
 private:
-	using Map	= std::unordered_map<std::string, Ptr>;
-	using Threads	= std::unordered_map<std::string, std::thread>;
+	using Thread	= std::thread;
 	using Mutex	= std::recursive_mutex;
 	using Lock	= std::lock_guard<Mutex>;
+	using State	= std::unique_ptr<ServerState>;
 
 private:
-	static Map	servers;		//!< all servers
-	static Threads	threads;		//!< all threads
-	static Mutex	serverLock;		//!< lock for server management
-
 	NameList	m_nameLists;		//!< channels names to receive
 	WhoisList	m_whoisLists;		//!< list of whois
 	Mutex		m_lock;			//!< lock for client operation
 	IrcSession	m_session;		//!< the current session
+	Thread		m_thread;		//!< the thread
 	CommandQueue	m_queue;		//!< command queue
-	ServerState::Ptr m_state;		//!< the current state
+	State		m_state;		//!< the current state
+	State		m_nextState;		//!< the next state
+	bool		m_running { true };	//!< should we stop running the server
+
+	Server(const Server &) = delete;
+	Server &operator=(const Server &) = delete;
+
+	Server(Server &&) = delete;
+	Server &operator=(Server &&) = delete;
+
+	void routine();
 
 protected:
 	Info		m_info;			//!< server info
@@ -208,50 +200,6 @@ protected:
 	unsigned	m_options;		//!< the options
 
 public:
-	/**
-	 * Add a new server to the registry. It also start the server
-	 * immediately.
-	 *
-	 * @param server the server to add
-	 */
-	static void add(Ptr server);
-
-	/**
-	 * Remove the server from the registry.
-	 *
-	 * @param server
-	 */
-	static void remove(Ptr server);
-
-	/**
-	 * Get an existing server.
-	 *
-	 * @param name the server name
-	 * @return the server
-	 * @throw std::out_of_range if not found
-	 */
-	static Server::Ptr get(const std::string &name);
-
-	/**
-	 * Check if a server exists
-	 *
-	 * @param name the server name
-	 * @return true if the server by this name is loaded
-	 */
-	static bool has(const std::string &name);
-
-	/**
-	 * Call a function for all servers.
-	 *
-	 * @param func the function
-	 */
-	static void forAll(MapFunc func);
-
-	/**
-	 * Clear all threads.
-	 */
-	static void clearThreads();
-
 	/**
 	 * Convert a channel line to Channel. The line must be in the
 	 * following form:
@@ -272,10 +220,7 @@ public:
 	 * @param reco the reconnection options
 	 * @param options some options
 	 */
-	Server(const Info &info,
-	       const Identity &identity,
-	       const RetryInfo &reco,
-	       unsigned options = 0);
+	Server(Info info, Identity identity, RetryInfo reco, unsigned options = 0);
 
 	/**
 	 * Default destructor.
@@ -378,9 +323,42 @@ public:
 	void removeChannel(const std::string &name);
 
 	/**
-	 * Kill the server.
+	 * Change the state. Set a new state that will be called almost
+	 * immediately after the current state.
+	 *
+	 * @param args the arguments
 	 */
-	void kill();
+	template <typename State, typename... Args>
+	void next(Args&&... args)
+	{
+		Lock lk(m_lock);
+
+		m_nextState = std::make_unique<State>(std::forward<Args>(args)...);
+	}
+
+	/**
+	 * Stop the state server.
+	 *
+	 * @param null the nullptr value
+	 */
+	inline void next(std::nullptr_t)
+	{
+		Lock lk(m_lock);
+
+		m_running = false;
+	}
+
+	/**
+	 * Check if the server is dead.
+	 *
+	 * @return true if no state
+	 */
+	bool isDead() const;
+
+	/**
+	 * Start the server thread.
+	 */
+	void start();
 
 	/**
 	 * Force a reconnection.
@@ -388,9 +366,9 @@ public:
 	void reconnect();
 
 	/**
-	 * Clear the command queue. Only used in ServerDead state.
+	 * Stop the server, disconnect and close everything.
 	 */
-	void clearCommands();
+	void stop();
 
 	/* ------------------------------------------------
 	 * IRC commands
@@ -405,39 +383,32 @@ public:
 	/**
 	 * @copydoc IrcSession::cnotice
 	 */
-	virtual void cnotice(const std::string &channel,
-			     const std::string &message);
+	virtual void cnotice(const std::string &channel, const std::string &message);
 
 	/**
 	 * @copydoc IrcSession::invite
 	 */
-	virtual void invite(const std::string &target,
-			    const std::string &channel);
+	virtual void invite(const std::string &target, const std::string &channel);
 
 	/**
 	 * @copydoc IrcSession::join
 	 */
-	virtual void join(const std::string &channel,
-			  const std::string &password = "");
+	virtual void join(const std::string &channel, const std::string &password = "");
 
 	/**
 	 * @copydoc IrcSession::kick
 	 */
-	virtual void kick(const std::string &name,
-			  const std::string &channel,
-			  const std::string &reason = "");
+	virtual void kick(const std::string &name, const std::string &channel, const std::string &reason = "");
 
 	/**
 	 * @copydoc IrcSession::me
 	 */
-	virtual void me(const std::string &target,
-			const std::string &message);
+	virtual void me(const std::string &target, const std::string &message);
 
 	/**
 	 * @copydoc IrcSession::mode
 	 */
-	virtual void mode(const std::string &channel,
-			  const std::string &mode);
+	virtual void mode(const std::string &channel, const std::string &mode);
 
 	/**
 	 * @copydoc IrcSession::names
@@ -452,26 +423,22 @@ public:
 	/**
 	 * @copydoc IrcSession::notice
 	 */
-	virtual void notice(const std::string &target,
-			    const std::string &message);
+	virtual void notice(const std::string &target, const std::string &message);
 
 	/**
 	 * @copydoc IrcSession::part
 	 */
-	virtual void part(const std::string &channel,
-			  const std::string &reason = "");
+	virtual void part(const std::string &channel, const std::string &reason = "");
 
 	/**
 	 * @copydoc IrcSession::say
 	 */
-	virtual void query(const std::string &target,
-			   const std::string &message);
+	virtual void query(const std::string &target, const std::string &message);
 
 	/**
 	 * @copydoc IrcSession::say
 	 */
-	virtual void say(const std::string &target,
-			 const std::string &message);
+	virtual void say(const std::string &target, const std::string &message);
 
 	/**
 	 * @copydoc IrcSession::send
@@ -481,8 +448,7 @@ public:
 	/**
 	 * @copydoc IrcSession::topic
 	 */
-	virtual void topic(const std::string &channel,
-			   const std::string &topic);
+	virtual void topic(const std::string &channel, const std::string &topic);
 
 	/**
 	 * @copydoc IrcSession::umode

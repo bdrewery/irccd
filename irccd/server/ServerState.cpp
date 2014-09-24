@@ -20,8 +20,4 @@
 
 namespace irccd {
 
-ServerState::~ServerState()
-{
-}
-
 } // !irccd

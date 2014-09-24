@@ -38,13 +38,13 @@ set(VERSION "${MAJOR}.${MINOR}-dev")
 #
 # The following settings are used for the doc/ directory and CPack.
 #
-if(WIN32)
-	if(CMAKE_CL_64)
+if (WIN32)
+	if (CMAKE_CL_64)
 		set(IRCCD_PACKAGE_NAME "Irccd (x64)")
-	else()
+	else ()
 		set(IRCCD_PACKAGE_NAME "Irccd")
-	endif()
-endif()
+	endif ()
+endif ()
 
 add_subdirectory(cmake)
 
@@ -74,18 +74,25 @@ include(CTest)
 add_subdirectory(tests)
 
 message("Installation directories:")
-message("\tMANDIR\t\t\t${CMAKE_INSTALL_PREFIX}/${MANDIR}")
-message("\tDOCDIR\t\t\t${CMAKE_INSTALL_PREFIX}/${DOCDIR}")
-message("\tMODDIR\t\t\t${CMAKE_INSTALL_PREFIX}/${MODDIR}")
+message("    MANDIR            ${CMAKE_INSTALL_PREFIX}/${MANDIR}")
+message("    DOCDIR            ${CMAKE_INSTALL_PREFIX}/${DOCDIR}")
+message("    MODDIR            ${CMAKE_INSTALL_PREFIX}/${MODDIR}")
+message("")
+
+message("Compiling with the following flags:")
+message("    General flags:    ${CMAKE_CXX_FLAGS}")
+message("    Debug flags:      ${CMAKE_CXX_FLAGS_DEBUG}")
+message("    Release flags:    ${CMAKE_CXX_FLAGS_RELEASE}")
 message("")
 
 message("Compiling irccd with following options:")
-message("\tBuild Type:\t\t${CMAKE_BUILD_TYPE}")
-message("\tLua support:\t\t${LUA_SUPPORT}")
-message("\tTests:\t\t\t${UNIT_TESTS}")
-message("\tIconv:\t\t\t${USE_ICONV}")
-message("\tirccd config:\t\t${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccd.conf")
-message("\tirccdctl config:\t${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccdctl.conf")
+message("    Build type:       ${CMAKE_BUILD_TYPE}")
+message("    Lua support:      ${HAVE_LUA_MESSAGE}")
+message("    Tests:            ${HAVE_TESTS_MESSAGE}")
+message("    Iconv:            ${HAVE_LIBICONV_MESSAGE}")
+message("    Doxygen:          ${HAVE_DOXYGEN_MESSAGE}")
+message("    irccd config:     ${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccd.conf")
+message("    irccdctl config:  ${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccdctl.conf")
 message("")
 
 # CPack

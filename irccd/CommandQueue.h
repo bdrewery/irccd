@@ -78,13 +78,13 @@ public:
 	 *
 	 * @param command the command
 	 */
-	template <typename Cmd>
-	void add(Cmd &&command)
+	template <typename Cmd, typename... Args>
+	void add(Args&&... args)
 	{
 		{
 			Lock lock(m_mutex);
 
-			m_cmds.push_back(std::unique_ptr<Cmd>(new Cmd(std::move(command))));
+			m_cmds.push_back(std::make_unique<Cmd>(std::forward<Args>(args)...));
 		}
 
 		m_cond.notify_one();

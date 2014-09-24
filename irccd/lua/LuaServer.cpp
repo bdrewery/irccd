@@ -21,6 +21,7 @@
 
 #include <irccd/Irccd.h>
 #include <irccd/Luae.h>
+#include <irccd/ServerManager.h>
 
 #include "LuaServer.h"
 
@@ -148,7 +149,7 @@ void pushChannels(lua_State *L, const Server::ChannelList &list)
 
 int l_getChannels(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 
 	Luae::deprecate(L, "getChannels", "info");
 	pushChannels(L, s->channels());
@@ -158,7 +159,7 @@ int l_getChannels(lua_State *L)
 
 int l_getIdentity(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 
 	Luae::deprecate(L, "getIdentity", "info");
 	pushIdentity(L, s->identity());
@@ -168,7 +169,7 @@ int l_getIdentity(lua_State *L)
 
 int l_getInfo(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 
 	Luae::deprecate(L, "getInfo", "info");
 	LuaeTable::create(L);
@@ -179,7 +180,7 @@ int l_getInfo(lua_State *L)
 
 int l_getName(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 
 	Luae::deprecate(L, "getName", "info");
 	Luae::push(L, s->info().name);
@@ -191,7 +192,7 @@ int l_getName(lua_State *L)
 
 int l_cnotice(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 
 	s->cnotice(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
@@ -202,7 +203,7 @@ int l_info(lua_State *L)
 {
 	LUAE_STACK_CHECKBEGIN(L);
 
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 
 	LuaeTable::create(L);
 
@@ -224,7 +225,7 @@ int l_info(lua_State *L)
 
 int l_invite(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 
 	s->invite(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
@@ -233,7 +234,7 @@ int l_invite(lua_State *L)
 
 int l_join(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 	std::string password = "";
 
 	// optional password
@@ -247,7 +248,7 @@ int l_join(lua_State *L)
 
 int l_kick(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 	auto target = Luae::check<std::string>(L, 2);
 	auto channel = Luae::check<std::string>(L, 3);
 	std::string reason = "";
@@ -263,7 +264,7 @@ int l_kick(lua_State *L)
 
 int l_me(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 
 	s->me(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
@@ -272,7 +273,7 @@ int l_me(lua_State *L)
 
 int l_mode(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 
 	s->mode(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
@@ -281,21 +282,21 @@ int l_mode(lua_State *L)
 
 int l_names(lua_State *L)
 {
-	Luae::check<Server::Ptr>(L, 1)->names(Luae::check<std::string>(L, 2));
+	Luae::check<std::shared_ptr<Server>>(L, 1)->names(Luae::check<std::string>(L, 2));
 
 	return 0;
 }
 
 int l_nick(lua_State *L)
 {
-	Luae::check<Server::Ptr>(L, 1)->nick(Luae::check<std::string>(L, 2));
+	Luae::check<std::shared_ptr<Server>>(L, 1)->nick(Luae::check<std::string>(L, 2));
 
 	return 0;
 }
 
 int l_notice(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 
 	s->notice(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
@@ -304,7 +305,7 @@ int l_notice(lua_State *L)
 
 int l_part(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 	auto channel = Luae::check<std::string>(L, 2);
 	std::string reason = "";
 
@@ -318,7 +319,7 @@ int l_part(lua_State *L)
 
 int l_query(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 
 	s->query(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
@@ -327,7 +328,7 @@ int l_query(lua_State *L)
 
 int l_say(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 
 	s->say(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
@@ -336,14 +337,14 @@ int l_say(lua_State *L)
 
 int l_send(lua_State *L)
 {
-	Luae::check<Server::Ptr>(L, 1)->send(Luae::check<std::string>(L, 2));
+	Luae::check<std::shared_ptr<Server>>(L, 1)->send(Luae::check<std::string>(L, 2));
 
 	return 0;
 }
 
 int l_topic(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 
 	s->topic(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
 
@@ -352,21 +353,21 @@ int l_topic(lua_State *L)
 
 int l_umode(lua_State *L)
 {
-	Luae::check<Server::Ptr>(L, 1)->umode(Luae::check<std::string>(L, 2));
+	Luae::check<std::shared_ptr<Server>>(L, 1)->umode(Luae::check<std::string>(L, 2));
 
 	return 0;
 }
 
 int l_whois(lua_State *L)
 {
-	Luae::check<Server::Ptr>(L, 1)->whois(Luae::check<std::string>(L, 2));
+	Luae::check<std::shared_ptr<Server>>(L, 1)->whois(Luae::check<std::string>(L, 2));
 
 	return 0;
 }
 
 int l_tostring(lua_State *L)
 {
-	auto s = Luae::check<Server::Ptr>(L, 1);
+	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
 	std::ostringstream oss;
 
 	oss << "Server " << s->info().name;
@@ -382,7 +383,7 @@ int l_tostring(lua_State *L)
 
 int l_equals(lua_State *L)
 {
-	Luae::push(L, Luae::check<Server::Ptr>(L, 1) == Luae::check<Server::Ptr>(L, 2));
+	Luae::push(L, Luae::check<std::shared_ptr<Server>>(L, 1) == Luae::check<std::shared_ptr<Server>>(L, 2));
 
 	return 1;
 }
@@ -397,6 +398,7 @@ const LuaeClass::Def serverDef {
 	{
 	/*
 	 * DEPRECATION:	1.2-001
+	 * REMOVAL:	1.3
 	 *
 	 * These functions has been deprecated in favor of Server:info().
 	 */
@@ -445,7 +447,7 @@ int l_connect(lua_State *L)
 	info.host	= LuaeTable::require<std::string>(L, 1, "host");
 	info.port	= LuaeTable::require<int>(L, 1, "port");
 
-	if (Server::has(info.name)) {
+	if (ServerManager::instance().has(info.name)) {
 		Luae::push(L, false);
 		Luae::pushfstring(L, "server %s already connected", info.name.c_str());
 
@@ -458,9 +460,7 @@ int l_connect(lua_State *L)
 	extractChannels(L, info);
 	extractIdentity(L, ident);
 
-	auto server = std::make_shared<Server>(info, ident, reco, options);
-	Server::add(server);
-
+	ServerManager::instance().add(std::make_shared<Server>(info, ident, reco, options));
 	Luae::push(L, true);
 
 	return 1;
@@ -472,12 +472,12 @@ int l_find(lua_State *L)
 	int ret;
 
 	try {
-		Server::Ptr server = Server::get(name);
+		auto server = ServerManager::instance().get(name);
 
 		Luae::push(L, server);
 
 		ret = 1;
-	} catch (std::out_of_range ex) {
+	} catch (const std::out_of_range &ex) {
 		Luae::push(L, nullptr);
 		Luae::push(L, ex.what());
 
@@ -492,7 +492,7 @@ int l_list(lua_State *L)
 	int i = 0;
 
 	lua_createtable(L, 0, 0);
-	Server::forAll([&] (Server::Ptr server) {
+	ServerManager::instance().forAll([&] (const auto &server) {
 		lua_pushstring(L, server->info().name.c_str());
 		lua_rawseti(L, -2, ++i);
 	});

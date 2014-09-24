@@ -20,6 +20,7 @@
 
 #include "EventQueue.h"
 #include "Plugin.h"
+#include "PluginManager.h"
 #include "RuleManager.h"
 
 namespace irccd {
@@ -42,7 +43,7 @@ void EventQueue::routine()
 			event = &m_list.front();
 		}
 	
-		Plugin::forAll([=] (Plugin::Ptr p) {
+		PluginManager::instance().forAll([=] (auto &p) {
 			const auto &manager = RuleManager::instance();
 
 			if (!(*event)->empty()) {
@@ -87,13 +88,13 @@ void EventQueue::routine()
 	}
 }
 
-void EventQueue::start()
+EventQueue::EventQueue()
 {
 	m_alive = true;
 	m_thread = std::thread(&EventQueue::routine, this);
 }
 
-void EventQueue::stop()
+EventQueue::~EventQueue()
 {
 	m_alive = false;
 	m_cond.notify_one();
@@ -102,7 +103,7 @@ void EventQueue::stop()
 		m_thread.join();
 
 		// Close plugins
-		Plugin::forAll([] (Plugin::Ptr p) {
+		PluginManager::instance().forAll([] (auto &p) {
 			p->onUnload();
 		});
 	} catch (const std::exception &ex) {

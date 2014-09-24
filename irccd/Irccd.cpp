@@ -24,6 +24,7 @@
 #endif
 
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <cstring>
 #include <functional>
@@ -41,10 +42,11 @@
 #include "Irccd.h"
 #include "Listener.h"
 #include "System.h"
+#include "ServerManager.h"
+#include "PluginManager.h"
 
-#include "server/ServerDead.h"
-#include "server/ServerDisconnected.h"
-#include "server/ServerRunning.h"
+#include "server/Disconnected.h"
+#include "server/Running.h"
 
 #if defined(WITH_LUA)
 #  include "Plugin.h"
@@ -52,6 +54,8 @@
 #  include "Rule.h"
 #  include "RuleManager.h"
 #endif
+
+using namespace std::literals;
 
 namespace irccd {
 
@@ -71,7 +75,7 @@ void Irccd::initialize()
 #if defined(WITH_LUA)
 	// Add user's path
 	oss << Util::pathUser() << "plugins/";
-	Plugin::addPath(oss.str());
+	PluginManager::instance().addPath(oss.str());
 
 	// Add system's path
 	oss.str("");
@@ -79,7 +83,7 @@ void Irccd::initialize()
 		oss << Util::pathBase();
 
 	oss << MODDIR << Util::DIR_SEP;
-	Plugin::addPath(oss.str());
+	PluginManager::instance().addPath(oss.str());
 #endif
 }
 
@@ -137,8 +141,8 @@ void Irccd::openConfig()
 	/* Now, we load plugins specified by command line */
 	for (auto s : m_wantedPlugins) {
 		try {
-			Plugin::load(s);
-		} catch (std::runtime_error error) {
+			PluginManager::instance().load(s);
+		} catch (const std::exception &error) {
 			Logger::warn("irccd: %s", error.what());
 		}
 	}
@@ -155,7 +159,7 @@ void Irccd::readGeneral(const Parser &config)
 #if defined(WITH_LUA)
 		// Extract parameters that are needed for the next
 		if (general.hasOption("plugin-path"))
-			Plugin::addPath(general.getOption<std::string>("plugin-path"));
+			PluginManager::instance().addPath(general.getOption<std::string>("plugin-path"));
 #endif
 
 #if !defined(_WIN32)
@@ -232,9 +236,9 @@ void Irccd::readPlugins(const Parser &config)
 		for (auto opt : section) {
 			try {
 				if (opt.second.length() == 0)
-					Plugin::load(opt.first);
+					PluginManager::instance().load(opt.first);
 				else
-					Plugin::load(opt.second, true);
+					PluginManager::instance().load(opt.second, true);
 			} catch (std::runtime_error error) {
 				Logger::warn("irccd: %s", error.what());
 			}
@@ -469,21 +473,22 @@ void Irccd::readServers(const Parser &config)
 			if (s.hasOption("reconnect-timeout"))
 				reco.timeout = s.getOption<int>("reconnect-timeout");
 
-			Server::Ptr server = std::make_shared<Server>(info, identity, reco, options);
+			auto server = std::make_shared<Server>(info, identity, reco, options);
+			auto &manager = ServerManager::instance();
 
 			// Extract channels to auto join
 			extractChannels(s, server);
-			if (Server::has(info.name))
+			if (manager.has(info.name))
 				Logger::warn("server %s: duplicated server", info.name.c_str());
 			else
-				Server::add(server);
-		} catch (std::out_of_range ex) {
+				manager.add(std::move(server));
+		} catch (const std::out_of_range &ex) {
 			Logger::warn("server: parameter %s", ex.what());
 		}
 	});
 }
 
-void Irccd::extractChannels(const Section &section, Server::Ptr server)
+void Irccd::extractChannels(const Section &section, std::shared_ptr<Server> &server)
 {
 	std::vector<std::string> channels;
 	std::string list, name, password;
@@ -546,29 +551,29 @@ const Server::Identity &Irccd::findIdentity(const std::string &name)
 
 int Irccd::run()
 {
-	try {
 #if defined(WITH_LUA)
-		// Start the IrcEvent thread
-		EventQueue::instance().start();
+	// Start the IrcEvent thread
+	//EventQueue::instance().start();
 #endif
 
-		openConfig();
+	openConfig();
 
-		while (m_running) {
+	while (m_running) {
+		try {
 			/*
 			 * If no listeners is enabled, we must wait a bit to avoid
 			 * CPU usage exhaustion.
 			 */
 			if (Listener::instance().count() == 0)
-				System::sleep(1);
+				std::this_thread::sleep_for(50ms);
 			else
 				Listener::instance().process();
+		} catch (const std::exception &ex) {
+			Logger::warn(ex.what());
 		}
-
-		stop();
-	} catch (const std::exception &ex) {
-		Logger::fatal(1, ex.what());
 	}
+
+	stop();
 
 	return 0;
 }
@@ -585,16 +590,10 @@ void Irccd::shutdown()
 
 void Irccd::stop()
 {
-	Server::forAll([] (Server::Ptr s) {
-		s->kill();
-	});
-
 	Listener::instance().close();
-	Server::clearThreads();
-
-#if defined(WITH_LUA)
-	EventQueue::instance().stop();
-#endif
+	ServerManager::instance().forAll([] (auto &s) {
+		s->stop();
+	});
 }
 
 } // !irccd

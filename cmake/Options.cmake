@@ -16,31 +16,37 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+# Options that controls the build:
+#
+# WITH_IPV6		Enable IPv6 support (default: on)
+# WITH_SSL		Enable OpenSSL (default: on)
+# WITH_LIBICONV		Enable libiconv reencoding (default: on)
+# WITH_LUA		Enable Lua (default: on)
+# WITH_TESTS		Enable unit testing (default: on)
+# WITH_DOXYGEN		Enable internal irccd documentation (default: on)
+#
 option(WITH_IPV6 "Enable IPv6" On)
 option(WITH_SSL "Enable SSL" On)
 option(WITH_LIBICONV "Enable libiconv for reencoding" On)
-
-# Use bundled xdg-basedir or not
-option(WITH_BUNDLE_XDGBASEDIR "Build with bundled libxdg-basedir" Off)
-
-# Optional Lua support
-option(WITH_LUA52 "Build with Lua plugin support" On)
-option(WITH_LUAJIT "Build with LuaJIT plugin support" Off)
-
-if(WITH_LUA52 AND WITH_LUAJIT)
-	message(FATAL_ERROR "Please select WITH_LUA52 or WITH_LUAJIT")
-endif()
+option(WITH_TESTS "Enable unit testing" On)
 
 # Manual pages on Windows are pretty useless
-if(WIN32)
+if (WIN32)
 	set(USE_MAN "No")
-else()
+else ()
 	set(USE_MAN "Yes")
-endif()
+endif ()
 
+# Options that controls the installation:
+#
+# WITH_MAN		Install manpages (default: on, off for Windows)
+# WITH_SYSTEMD		Install systemd service (default: off)
+#
 option(WITH_MAN "Install man pages" ${USE_MAN})
-
-#
-# Additional contributions, not always tested!
-#
 option(WITH_SYSTEMD "Install systemd service" Off)
+
+# Lua version:
+#
+# WITH_LUAVER		Selects the Lua version, allowed: 5.1, 5.2 and JIT (default: 5.2)
+#
+set(WITH_LUAVER "5.2" CACHE STRING "Lua version")

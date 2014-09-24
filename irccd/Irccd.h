@@ -72,13 +72,14 @@ using IdentityList	= std::vector<Server::Identity>;
 class Irccd : public Singleton<Irccd> {
 private:
 	friend class Singleton<Irccd>;
+	friend std::unique_ptr<Irccd> std::make_unique<Irccd>();
 
 	using Wanted	= std::vector<std::string>;
 	using Overriden	= std::unordered_map<char, bool>;
 
 	// Ignition
-	bool		m_running;		//! forever loop
-	bool		m_foreground;		//! run to foreground
+	bool		m_running { true };
+	bool		m_foreground { false };
 
 	// Config
 	std::string	m_configPath;		//! config file path
@@ -155,7 +156,7 @@ private:
 	 * ------------------------------------------------ */
 
 	void readServers(const Parser &config);
-	void extractChannels(const Section &section, Server::Ptr server);
+	void extractChannels(const Section &section, std::shared_ptr<Server> &server);
 
 public:
 	~Irccd();

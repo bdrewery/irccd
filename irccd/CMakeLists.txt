@@ -39,6 +39,8 @@ set(
 	IO.h
 	Server.cpp
 	Server.h
+	ServerManager.cpp
+	ServerManager.h
 	Irccd.cpp
 	Irccd.h
 	IrcSession.cpp
@@ -58,18 +60,24 @@ set(
 	common
 )
 
-set(LUA_SUPPORT "disabled" PARENT_SCOPE)
+set(
+	INCLUDES
+	${CMAKE_SOURCE_DIR}
+)
 
-#
-# Optional libiconv for rule reencoding
-#
-set(USE_ICONV "disabled" PARENT_SCOPE)
+# ---------------------------------------------------------
+# Optional libiconv
+# ---------------------------------------------------------
 
-if(WITH_LIBICONV)
+if (WITH_LIBICONV)
+	set(HAVE_LIBICONV_MESSAGE "disabled (iconv not found)" CACHE INTERNAL "")
+	set(HAVE_LIBICONV FALSE CACHE INTERNAL "")
+
 	find_package(Libiconv)
 
-	if(Libiconv_FOUND)
-		set(USE_ICONV "enabled" PARENT_SCOPE)
+	if (Libiconv_FOUND)
+		set(HAVE_LIBICONV_MESSAGE "enabled" CACHE INTERNAL "")
+		set(HAVE_LIBICONV TRUE CACHE INTERNAL "")
 
 		list(
 			APPEND
@@ -77,22 +85,52 @@ if(WITH_LIBICONV)
 			Converter.cpp
 			Converter.h
 		)
-	else()
-		set(WITH_LIBICONV Off)
-	endif()
-endif()
+	endif ()
+else ()
+	set(HAVE_LIBICONV_MESSAGE "disabled by user" CACHE INTERNAL "")
+	set(HAVE_LIBICONV FALSE CACHE INTERNAL "")
+endif ()
 
-#
+# ---------------------------------------------------------
 # Optional Lua
-#
-if(WITH_LUA52 OR WITH_LUAJIT)
-	if(WITH_LUA52)
-		find_package(Lua52)
-	elseif(WITH_LUAJIT)
-		find_package(LuaJIT)
-	endif()
+# ---------------------------------------------------------
 
-	if (LUA52_FOUND OR LUAJIT_FOUND)
+if (WITH_LUA)
+	set(HAVE_LUA_MESSAGE "disabled (Lua not found)" CACHE INTERNAL "")
+	set(HAVE_LUA FALSE CACHE INTERNAL "")
+
+	if (WITH_LUAVER MATCHES "5.2")
+		find_package(Lua52)
+		list(APPEND INCLUDES ${LUA52_INCLUDE_DIR})
+		list(APPEND LIBRARIES ${LUA52_LIBRARIES})
+
+		if (LUA52_FOUND)
+			set(HAVE_LUA_MESSAGE "enabled (Lua 5.2)" CACHE INTERNAL "")
+			set(HAVE_LUA TRUE CACHE INTERNAL "")
+		endif ()
+	elseif (WITH_LUAVER MATCHES "5.1")
+		find_package(Lua51)
+		list(APPEND INCLUDES ${LUA_INCLUDE_DIR})
+		list(APPEND LIBRARIES ${LUA_LIBRARIES})
+
+		if (LUA51_FOUND)
+			set(HAVE_LUA_MESSAGE "enabled (Lua 5.1)" CACHE INTERNAL "")
+			set(HAVE_LUA TRUE CACHE INTERNAL "")
+		endif ()
+	elseif (WITH_LUAVER MATCHES "JIT")
+		find_package(LuaJIT)
+		list(APPEND INCLUDES ${LUAJIT_INCLUDE_DIR})
+		list(APPEND LIBRARIES ${LUAJIT_LIBRARIES})
+
+		if (LuaJIT_FOUND)
+			set(HAVE_LUA_MESSAGE "enabled (LuaJIT)" CACHE INTERNAL "")
+			set(HAVE_LUA TRUE CACHE INTERNAL "")
+		endif ()
+	else ()
+		message(FATAL_ERROR "Unknown Lua version selected ${WITH_LUAVER}")
+	endif ()
+
+	if (HAVE_LUA)
 		add_subdirectory(plugins)
 
 		# Optional Lua sources
@@ -107,8 +145,12 @@ if(WITH_LUA52 OR WITH_LUAJIT)
 			Luae.h
 			Pipe.cpp
 			Pipe.h
+			PipeManager.cpp
+			PipeManager.h
 			Plugin.cpp
 			Plugin.h
+			PluginManager.cpp
+			PluginManager.h
 			Process.cpp
 			Process.h
 			Rule.cpp
@@ -135,24 +177,11 @@ if(WITH_LUA52 OR WITH_LUAJIT)
 			plugins/logger.lua
 			plugins/roulette.lua
 		)
-
-		if(WITH_LUA52)
-			list(APPEND INCLUDES ${LUA52_INCLUDE_DIR})
-			list(APPEND LIBRARIES ${LUA52_LIBRARIES})
-			set(LUA_SUPPORT "enabled (Lua 5.2)" PARENT_SCOPE)
-		elseif(WITH_LUAJIT)
-			list(APPEND INCLUDES ${LUAJIT_INCLUDE_DIR})
-			list(APPEND LIBRARIES ${LUAJIT_LIBRARIES})
-			set(LUA_SUPPORT "enabled (LuaJIT)" PARENT_SCOPE)
-		endif()
-	endif()
-endif()
-
-if(UNIX)
-	list(APPEND LIBRARIES "pthread")
-endif()
-
-list(APPEND INCLUDES ${CMAKE_SOURCE_DIR})
+	endif ()
+else ()
+	set(HAVE_LUA_MESSAGE "disabled by user" CACHE INTERNAL "")
+	set(HAVE_LUA FALSE CACHE INTERNAL "")
+endif ()
 
 define_executable(
 	TARGET irccd
@@ -162,6 +191,10 @@ define_executable(
 	LIBRARIES ${LIBRARIES}
 	INSTALL_RUNTIME bin/
 )
+
+if (UNIX)
+	set_target_properties(irccd PROPERTIES LINK_FLAGS "-pthread")
+endif ()
 
 install(
 	FILES "${CMAKE_SOURCE_DIR}/doc/examples/irccd.conf"

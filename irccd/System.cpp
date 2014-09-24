@@ -69,11 +69,6 @@ uint64_t systemUptime()
 	return ::GetTickCount64() / 1000;
 }
 
-void systemUsleep(int milliseconds)
-{
-	::Sleep(milliseconds * 1000);
-}
-
 uint64_t systemTicks()
 {
 	_timeb tp;
@@ -135,11 +130,6 @@ uint64_t systemUptime()
 #endif
 }
 
-void systemUsleep(int milliseconds)
-{
-	::usleep(milliseconds * 1000);
-}
-
 uint64_t systemTicks()
 {
         struct timeval tp;
@@ -181,16 +171,6 @@ std::string System::version()
 uint64_t System::uptime()
 {
 	return systemUptime();
-}
-
-void System::sleep(int seconds)
-{
-	return System::usleep(seconds * 1000);
-}
-
-void System::usleep(int milliseconds)
-{
-	return systemUsleep(milliseconds);
 }
 
 uint64_t System::ticks()

@@ -25,6 +25,8 @@
  *
  * This file is used with IRC events and server commands. It contains an optional
  * server and channel name to apply an encoding rule if needed.
+ *
+ * @warning Do not rename the include guard, it conflicts with a Windows header
  */
 
 #include <string>
@@ -41,7 +43,7 @@ private:
 	std::string	m_targetName;
 
 protected:
-	bool		m_mustEncode = false;	//!< should encode ?
+	bool		m_mustEncode { false };	//!< should encode ?
 	std::string	m_encoding;		//!< the destination encoding
 
 	/**
@@ -67,12 +69,17 @@ public:
 	IO(IO &&) = default;
 
 	/**
+	 * Default destructor.
+	 */
+	virtual ~IO() = default;
+
+	/**
 	 * Constructor with server name and target name.
 	 *
 	 * @param serverName the server name
 	 * @param targetName the target name
 	 */
-	IO(const std::string &serverName = "", const std::string &targetName = "");
+	IO(std::string serverName, std::string targetName);
 
 	/**
 	 * Get the server name.

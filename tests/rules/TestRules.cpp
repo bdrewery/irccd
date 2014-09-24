@@ -16,12 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cppunit/TextTestRunner.h>
+#include <gtest/gtest.h>
 
 #include <RuleManager.h>
 #include <Rule.h>
-
-#include "TestRules.h"
 
 namespace irccd {
 
@@ -62,77 +60,80 @@ namespace irccd {
  * set-plugins	= "game"
  * set-events	= "onMessage onCommand"
  */
-void TestRules::setUp()
-{
-	RuleManager &manager = RuleManager::instance();	
-
-	// #1
+class RulesTest : public testing::Test {
+protected:
+	RulesTest()
 	{
-		RuleMatch match;
-		RuleProperties properties;
+		auto &manager = RuleManager::instance();
 
-		match.addChannel("#staff");
-		properties.setEvent("onCommand", false);
+		// #1
+		{
+			RuleMatch match;
+			RuleProperties properties;
 
-		manager.add(Rule(match, properties));
+			match.addChannel("#staff");
+			properties.setEvent("onCommand", false);
+
+			manager.add(Rule(match, properties));
+		}
+
+		// #2
+		{
+			RuleMatch match;
+			RuleProperties properties;
+
+			match.addServer("unsafe");
+			match.addChannel("#staff");
+			properties.setEvent("onCommand");
+
+			manager.add(Rule(match, properties));
+		}
+
+		// #3-1
+		{
+			RuleProperties properties;
+
+			properties.setPlugin("game", false);
+
+			manager.add(Rule(RuleMatch(), properties));
+		}
+
+		// #3-2
+		{
+			RuleMatch match;
+			RuleProperties properties;
+
+			match.addServer("malikania");
+			match.addServer("localhost");
+			match.addChannel("#games");
+			match.addPlugin("game");
+
+			properties.setPlugin("game");
+			properties.setEvent("onCommand");
+			properties.setEvent("onMessage");
+
+			manager.add(Rule(match, properties));
+		}
 	}
 
-	// #2
+	~RulesTest()
 	{
-		RuleMatch match;
-		RuleProperties properties;
-
-		match.addServer("unsafe");
-		match.addChannel("#staff");
-		properties.setEvent("onCommand");
-
-		manager.add(Rule(match, properties));
+		RuleManager::instance().clear();
 	}
+};
 
-	// #3-1
-	{
-		RuleProperties properties;
-
-		properties.setPlugin("game", false);
-
-		manager.add(Rule(RuleMatch(), properties));
-	}
-
-	// #3-2
-	{
-		RuleMatch match;
-		RuleProperties properties;
-
-		match.addServer("malikania");
-		match.addServer("localhost");
-		match.addChannel("#games");
-		match.addPlugin("game");
-
-		properties.setPlugin("game");
-		properties.setEvent("onCommand");
-		properties.setEvent("onMessage");
-
-		manager.add(Rule(match, properties));
-	}
-}
-
-void TestRules::tearDown()
-{
-	RuleManager::instance().clear();
-}
-
-void TestRules::basicMatch1()
+TEST_F(RulesTest, basicMatch1)
 {
 	RuleMatch m;
 
 	/*
 	 * [rule]
 	 */
-	CPPUNIT_ASSERT(m.match("freenode", "#test", "a"));
-	CPPUNIT_ASSERT(m.match("", "", ""));
+	ASSERT_TRUE(m.match("freenode", "#test", "a"));
+	ASSERT_TRUE(m.match("", "", ""));
 }
 
-void TestRules::basicMatch2()
+TEST_F(RulesTest, basicMatch2)
 {
 	RuleMatch m;
 
@@ -142,11 +143,11 @@ void TestRules::basicMatch2()
 	 */
 	m.addServer("freenode");
 
-	CPPUNIT_ASSERT(m.match("freenode", "#test", "a"));
-	CPPUNIT_ASSERT(!m.match("malikania", "#test", "a"));
+	ASSERT_TRUE(m.match("freenode", "#test", "a"));
+	ASSERT_FALSE(m.match("malikania", "#test", "a"));
 }
 
-void TestRules::basicMatch3()
+TEST_F(RulesTest, basicMatch3)
 {
 	RuleMatch m;
 
@@ -158,12 +159,12 @@ void TestRules::basicMatch3()
 	m.addServer("freenode");
 	m.addChannel("#staff");
 
-	CPPUNIT_ASSERT(m.match("freenode", "#staff", "a"));
-	CPPUNIT_ASSERT(!m.match("freenode", "#test", "a"));
-	CPPUNIT_ASSERT(!m.match("malikania", "#staff", "a"));
+	ASSERT_TRUE(m.match("freenode", "#staff", "a"));
+	ASSERT_FALSE(m.match("freenode", "#test", "a"));
+	ASSERT_FALSE(m.match("malikania", "#staff", "a"));
 }
 
-void TestRules::basicMatch4()
+TEST_F(RulesTest, basicMatch4)
 {
 	RuleMatch m;
 
@@ -177,12 +178,12 @@ void TestRules::basicMatch4()
 	m.addChannel("#staff");
 	m.addPlugin("a");
 
-	CPPUNIT_ASSERT(m.match("malikania", "#staff", "a"));
-	CPPUNIT_ASSERT(!m.match("malikania", "#staff", "b"));
-	CPPUNIT_ASSERT(!m.match("freenode", "#staff", "a"));
+	ASSERT_TRUE(m.match("malikania", "#staff", "a"));
+	ASSERT_FALSE(m.match("malikania", "#staff", "b"));
+	ASSERT_FALSE(m.match("freenode", "#staff", "a"));
 }
 
-void TestRules::complexMatch1()
+TEST_F(RulesTest, complexMatch1)
 {
 	RuleMatch m;
 
@@ -193,12 +194,12 @@ void TestRules::complexMatch1()
 	m.addServer("malikania");
 	m.addServer("freenode");
 
-	CPPUNIT_ASSERT(m.match("malikania", "", ""));
-	CPPUNIT_ASSERT(m.match("freenode", "", ""));
-	CPPUNIT_ASSERT(!m.match("no", "", ""));
+	ASSERT_TRUE(m.match("malikania", "", ""));
+	ASSERT_TRUE(m.match("freenode", "", ""));
+	ASSERT_FALSE(m.match("no", "", ""));
 }
 
-void TestRules::complexMatch2()
+TEST_F(RulesTest, complexMatch2)
 {
 	RuleMatch m;
 
@@ -209,12 +210,12 @@ void TestRules::complexMatch2()
 	m.addServer("malikania");
 	m.addServer("freenode", false);
 
-	CPPUNIT_ASSERT(m.match("malikania", "", ""));
-	CPPUNIT_ASSERT(!m.match("freenode", "", ""));
-	CPPUNIT_ASSERT(!m.match("no", "", ""));
+	ASSERT_TRUE(m.match("malikania", "", ""));
+	ASSERT_FALSE(m.match("freenode", "", ""));
+	ASSERT_FALSE(m.match("no", "", ""));
 }
 
-void TestRules::complexMatch3()
+TEST_F(RulesTest, complexMatch3)
 {
 	RuleMatch m;
 
@@ -229,22 +230,22 @@ void TestRules::complexMatch3()
 	m.addChannel("#staff");
 	m.addChannel("#test", false);
 
-	CPPUNIT_ASSERT(!m.match("", "", ""));
-	CPPUNIT_ASSERT(!m.match("", "#games", ""));
-	CPPUNIT_ASSERT(!m.match("", "#test", ""));
+	ASSERT_FALSE(m.match("", "", ""));
+	ASSERT_FALSE(m.match("", "#games", ""));
+	ASSERT_FALSE(m.match("", "#test", ""));
 
-	CPPUNIT_ASSERT(m.match("malikania", "#staff", ""));
-	CPPUNIT_ASSERT(m.match("localhost", "#staff", ""));
-	CPPUNIT_ASSERT(!m.match("malikania", "#test", ""));
-	CPPUNIT_ASSERT(!m.match("localhost", "#test", ""));
-	CPPUNIT_ASSERT(!m.match("freenode", "#staff", ""));
-	CPPUNIT_ASSERT(!m.match("freenode", "#test", ""));
-	CPPUNIT_ASSERT(!m.match("no", "", ""));
-	CPPUNIT_ASSERT(!m.match("no", "#test", ""));
-	CPPUNIT_ASSERT(!m.match("no", "#staff", ""));
+	ASSERT_TRUE(m.match("malikania", "#staff", ""));
+	ASSERT_TRUE(m.match("localhost", "#staff", ""));
+	ASSERT_FALSE(m.match("malikania", "#test", ""));
+	ASSERT_FALSE(m.match("localhost", "#test", ""));
+	ASSERT_FALSE(m.match("freenode", "#staff", ""));
+	ASSERT_FALSE(m.match("freenode", "#test", ""));
+	ASSERT_FALSE(m.match("no", "", ""));
+	ASSERT_FALSE(m.match("no", "#test", ""));
+	ASSERT_FALSE(m.match("no", "#staff", ""));
 }
 
-void TestRules::complexMatch4()
+TEST_F(RulesTest, complexMatch4)
 {
 	RuleMatch m;
 
@@ -262,106 +263,102 @@ void TestRules::complexMatch4()
 	m.addPlugin("a");
 	m.addPlugin("b", false);
 
-	CPPUNIT_ASSERT(!m.match("", "", ""));
-	CPPUNIT_ASSERT(!m.match("", "", "a"));
-	CPPUNIT_ASSERT(!m.match("", "", "b"));
-	CPPUNIT_ASSERT(!m.match("", "#games", ""));
-	CPPUNIT_ASSERT(!m.match("", "#test", ""));
-	CPPUNIT_ASSERT(!m.match("", "#games", "a"));
-	CPPUNIT_ASSERT(!m.match("", "#test", "b"));
+	ASSERT_FALSE(m.match("", "", ""));
+	ASSERT_FALSE(m.match("", "", "a"));
+	ASSERT_FALSE(m.match("", "", "b"));
+	ASSERT_FALSE(m.match("", "#games", ""));
+	ASSERT_FALSE(m.match("", "#test", ""));
+	ASSERT_FALSE(m.match("", "#games", "a"));
+	ASSERT_FALSE(m.match("", "#test", "b"));
 
-	CPPUNIT_ASSERT(!m.match("malikania", "", ""));
-	CPPUNIT_ASSERT(!m.match("malikania", "#games", ""));
-	CPPUNIT_ASSERT(!m.match("malikania", "#test", ""));
-	CPPUNIT_ASSERT(!m.match("malikania", "", "a"));
-	CPPUNIT_ASSERT(!m.match("malikania", "", "b"));
-	CPPUNIT_ASSERT(m.match("malikania", "#games", "a"));
-	CPPUNIT_ASSERT(!m.match("malikania", "#games", "b"));
-	CPPUNIT_ASSERT(!m.match("malikania", "#test", "a"));
-	CPPUNIT_ASSERT(!m.match("malikania", "#test", "b"));
+	ASSERT_FALSE(m.match("malikania", "", ""));
+	ASSERT_FALSE(m.match("malikania", "#games", ""));
+	ASSERT_FALSE(m.match("malikania", "#test", ""));
+	ASSERT_FALSE(m.match("malikania", "", "a"));
+	ASSERT_FALSE(m.match("malikania", "", "b"));
+	ASSERT_TRUE(m.match("malikania", "#games", "a"));
+	ASSERT_FALSE(m.match("malikania", "#games", "b"));
+	ASSERT_FALSE(m.match("malikania", "#test", "a"));
+	ASSERT_FALSE(m.match("malikania", "#test", "b"));
 
-	CPPUNIT_ASSERT(!m.match("localhost", "", ""));
-	CPPUNIT_ASSERT(!m.match("localhost", "#games", ""));
-	CPPUNIT_ASSERT(!m.match("localhost", "#test", ""));
-	CPPUNIT_ASSERT(!m.match("localhost", "", "a"));
-	CPPUNIT_ASSERT(!m.match("localhost", "", "b"));
-	CPPUNIT_ASSERT(m.match("localhost", "#games", "a"));
-	CPPUNIT_ASSERT(!m.match("localhost", "#games", "b"));
-	CPPUNIT_ASSERT(!m.match("localhost", "#test", "a"));
-	CPPUNIT_ASSERT(!m.match("localhost", "#test", "b"));
+	ASSERT_FALSE(m.match("localhost", "", ""));
+	ASSERT_FALSE(m.match("localhost", "#games", ""));
+	ASSERT_FALSE(m.match("localhost", "#test", ""));
+	ASSERT_FALSE(m.match("localhost", "", "a"));
+	ASSERT_FALSE(m.match("localhost", "", "b"));
+	ASSERT_TRUE(m.match("localhost", "#games", "a"));
+	ASSERT_FALSE(m.match("localhost", "#games", "b"));
+	ASSERT_FALSE(m.match("localhost", "#test", "a"));
+	ASSERT_FALSE(m.match("localhost", "#test", "b"));
 
-	CPPUNIT_ASSERT(!m.match("freenode", "", ""));
-	CPPUNIT_ASSERT(!m.match("freenode", "#games", ""));
-	CPPUNIT_ASSERT(!m.match("freenode", "#test", ""));
-	CPPUNIT_ASSERT(!m.match("freenode", "#games", "a"));
-	CPPUNIT_ASSERT(!m.match("freenode", "#games", "b"));
-	CPPUNIT_ASSERT(!m.match("freenode", "#test", "a"));
-	CPPUNIT_ASSERT(!m.match("freenode", "#test", "b"));
+	ASSERT_FALSE(m.match("freenode", "", ""));
+	ASSERT_FALSE(m.match("freenode", "#games", ""));
+	ASSERT_FALSE(m.match("freenode", "#test", ""));
+	ASSERT_FALSE(m.match("freenode", "#games", "a"));
+	ASSERT_FALSE(m.match("freenode", "#games", "b"));
+	ASSERT_FALSE(m.match("freenode", "#test", "a"));
+	ASSERT_FALSE(m.match("freenode", "#test", "b"));
 }
 
-void TestRules::basic()
+TEST_F(RulesTest, basicSolve)
 {
 	auto &manager = RuleManager::instance();
 
 	/* Allowed */
 	auto result = manager.solve("malikania", "#staff", "onMessage", "a");
-	CPPUNIT_ASSERT(result.enabled);
+	ASSERT_TRUE(result.enabled);
 
 	/* Allowed */
 	result = manager.solve("freenode", "#staff", "onTopic", "b");
-	CPPUNIT_ASSERT(result.enabled);
+	ASSERT_TRUE(result.enabled);
 
 	/* Not allowed */
 	result = manager.solve("malikania", "#staff", "onCommand", "c");
-	CPPUNIT_ASSERT(!result.enabled);
+	ASSERT_FALSE(result.enabled);
 
 	/* Not allowed */
 	result = manager.solve("freenode", "#staff", "onCommand", "c");
-	CPPUNIT_ASSERT(!result.enabled);
+	ASSERT_FALSE(result.enabled);
 
 	/* Allowed */
 	result = manager.solve("unsafe", "#staff", "onCommand", "c");
-	CPPUNIT_ASSERT(result.enabled);
+	ASSERT_TRUE(result.enabled);
 }
 
-void TestRules::games()
+TEST_F(RulesTest, gamesSolve)
 {
 	auto &manager = RuleManager::instance();
 
 	/* Allowed */
 	auto result = manager.solve("malikania", "#games", "onMessage", "game");
-	CPPUNIT_ASSERT(result.enabled);
+	ASSERT_TRUE(result.enabled);
 
 	/* Allowed */
 	result = manager.solve("localhost", "#games", "onMessage", "game");
-	CPPUNIT_ASSERT(result.enabled);
+	ASSERT_TRUE(result.enabled);
 
 	/* Allowed */
 	result = manager.solve("malikania", "#games", "onCommand", "game");
-	CPPUNIT_ASSERT(result.enabled);
+	ASSERT_TRUE(result.enabled);
 
 	/* Not allowed */
 	result = manager.solve("malikania", "#games", "onQuery", "game");
-	CPPUNIT_ASSERT(!result.enabled);
+	ASSERT_FALSE(result.enabled);
 
 	/* Not allowed */
 	result = manager.solve("freenode", "#no", "onMessage", "game");
-	CPPUNIT_ASSERT(!result.enabled);
+	ASSERT_FALSE(result.enabled);
 
 	/* Not allowed */
 	result = manager.solve("malikania", "#test", "onMessage", "game");
-	CPPUNIT_ASSERT(!result.enabled);
+	ASSERT_FALSE(result.enabled);
 }
 
 } // !irccd
 
-int main()
+int main(int argc, char **argv)
 {
-	using namespace irccd;
+	testing::InitGoogleTest(&argc, argv);
 
-	CppUnit::TextTestRunner runnerText;
-
-	runnerText.addTest(TestRules::suite());
-
-	return runnerText.run("", false) == 1 ? 0 : 1;
+	return RUN_ALL_TESTS();
 }

@@ -18,17 +18,16 @@
 
 set(
 	SERVER_SOURCES
-	${CMAKE_CURRENT_SOURCE_DIR}/ServerConnecting.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/ServerConnecting.h
-	${CMAKE_CURRENT_SOURCE_DIR}/ServerDead.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/ServerDead.h
-	${CMAKE_CURRENT_SOURCE_DIR}/ServerDisconnected.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/ServerDisconnected.h
-	${CMAKE_CURRENT_SOURCE_DIR}/ServerRunning.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/ServerRunning.h
-	${CMAKE_CURRENT_SOURCE_DIR}/ServerState.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Connecting.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Connecting.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Disconnected.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Disconnected.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Running.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Running.h
 	${CMAKE_CURRENT_SOURCE_DIR}/ServerState.h
-	${CMAKE_CURRENT_SOURCE_DIR}/ServerUninitialized.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/ServerUninitialized.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Uninitialized.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Uninitialized.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Waiting.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Waiting.h
 	PARENT_SCOPE
 )

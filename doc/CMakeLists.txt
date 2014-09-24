@@ -36,31 +36,39 @@ define_man(irccdctl.conf.5 man5)
 # Create a target for doxygen
 # ---------------------------------------------------------
 
-find_package(Doxygen QUIET)
+if (WITH_DOXYGEN)
+	set(HAVE_DOXYGEN_MESSAGE "disabled (doxygen not found)" CACHE INTERNAL "")
 
-if(DOXYGEN_FOUND)
-	set(DOXYGEN_INPUT ${CMAKE_SOURCE_DIR})
-	set(DOXYGEN_OUTPUT ${CMAKE_BINARY_DIR}/doxygen)
+	find_package(Doxygen QUIET)
 
-	if(NOT DOXYGEN_DOT_FOUND)
-		set(DOXYGEN_HAVE_DOT "NO")
-		set(DOXYGEN_DOT_PATH "")
-	else()
-		set(DOXYGEN_HAVE_DOT "YES")
-		set(DOXYGEN_DOT_PATH "\"${DOXYGEN_DOT_EXECUTABLE}\"")
-	endif()
+	if (DOXYGEN_FOUND)
+		set(HAVE_DOXYGEN_MESSAGE "enabled" CACHE INTERNAL "")
 
-	configure_file(
-		"${doc_SOURCE_DIR}/doxygen/Doxyfile.in"
-		"${doc_BINARY_DIR}/doxygen/Doxyfile"
-	)
+		set(DOXYGEN_INPUT ${CMAKE_SOURCE_DIR})
+		set(DOXYGEN_OUTPUT ${CMAKE_BINARY_DIR}/doxygen)
 
-	add_custom_target(
-		doxygen
-		COMMENT "Generating doxygen documentation"
-		COMMAND
-			${DOXYGEN_EXECUTABLE} ${doc_BINARY_DIR}/doxygen/Doxyfile
-		WORKING_DIRECTORY
-			${CMAKE_SOURCE_DIR}
-	)
-endif()
+		if (NOT DOXYGEN_DOT_FOUND)
+			set(DOXYGEN_HAVE_DOT "NO")
+			set(DOXYGEN_DOT_PATH "")
+		else ()
+			set(DOXYGEN_HAVE_DOT "YES")
+			set(DOXYGEN_DOT_PATH "\"${DOXYGEN_DOT_EXECUTABLE}\"")
+		endif ()
+
+		configure_file(
+			"${doc_SOURCE_DIR}/doxygen/Doxyfile.in"
+			"${doc_BINARY_DIR}/doxygen/Doxyfile"
+		)
+
+		add_custom_target(
+			doxygen
+			COMMENT "Generating doxygen documentation"
+			COMMAND
+				${DOXYGEN_EXECUTABLE} ${doc_BINARY_DIR}/doxygen/Doxyfile
+			WORKING_DIRECTORY
+				${CMAKE_SOURCE_DIR}
+		)
+	endif ()
+else ()
+	set(HAVE_DOXYGEN_MESSAGE "disabled by user" CACHE INTERNAL "")
+endif ()

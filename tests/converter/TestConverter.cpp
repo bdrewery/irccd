@@ -19,37 +19,23 @@
 #include <cstdlib>
 #include <sstream>
 
-#include <cppunit/TextTestRunner.h>
+#include <gtest/gtest.h>
 
 #include <common/Parser.h>
 #include <common/Util.h>
 
-#include "TestConverter.h"
+namespace irccd {
 
-namespace irccd
-{
-
-std::string TestConverter::message(const std::string &expected,
-				   const std::string &result)
-{
-	std::ostringstream oss;
-
-	oss << "'" << expected << "' expected, ";
-	oss << "got '" << result << "'";
-
-	return oss.str();
-}
-
-void TestConverter::useless()
+TEST(Basic, useless)
 {
 	std::string str = "#";
 	Util::Args args;
 
 	std::string result = Util::convert(str, args);
-	CPPUNIT_ASSERT_MESSAGE(message("#", result), result == "#");
+	ASSERT_EQ("#", result);
 }
 
-void TestConverter::simple()
+TEST(Basic, simple)
 {
 	std::string str = "#s";
 	Util::Args args;
@@ -57,10 +43,10 @@ void TestConverter::simple()
 	args.keywords['s'] = "test";
 	std::string result = Util::convert(str, args);
 
-	CPPUNIT_ASSERT_MESSAGE(message("test", result), result == "test");
+	ASSERT_EQ("test", result);
 }
 
-void TestConverter::two()
+TEST(Basic, two)
 {
 	std::string str = "#s #c";
 	Util::Args args;
@@ -70,10 +56,10 @@ void TestConverter::two()
 
 	std::string result = Util::convert(str, args);
 
-	CPPUNIT_ASSERT_MESSAGE(message("s c", result), result == "s c");
+	ASSERT_EQ("s c", result);
 }
 
-void TestConverter::oneAbsent()
+TEST(Basic, oneAbsent)
 {
 	std::string str = "#s #x #c";
 	Util::Args args;
@@ -83,10 +69,10 @@ void TestConverter::oneAbsent()
 
 	std::string result = Util::convert(str, args);
 
-	CPPUNIT_ASSERT_MESSAGE(message("s #x c", result), result == "s #x c");
+	ASSERT_EQ("s #x c", result);
 }
 
-void TestConverter::replaceByPattern()
+TEST(Basic, replaceByPattern)
 {
 	std::string str = "#a #b";
 	Util::Args args;
@@ -97,22 +83,22 @@ void TestConverter::replaceByPattern()
 
 	std::string result = Util::convert(str, args);
 
-	CPPUNIT_ASSERT_MESSAGE(message("#c b", result), result == "#c b");
+	ASSERT_EQ("#c b", result);
 }
 
-void TestConverter::dateFlags()
+TEST(Basic, dateFlags)
 {
 	std::string str = "%h";
 	Util::Args args;
 
 	std::string result = Util::convert(str, args, Util::ConvertDate);
-	CPPUNIT_ASSERT_MESSAGE(message("number", result), result != "%h");
+	ASSERT_NE("%h", result);
 
 	result = Util::convert(str, args);
-	CPPUNIT_ASSERT_MESSAGE(message("number", result), result == "%h");
+	ASSERT_EQ("%h", result);
 }
 
-void TestConverter::homeFlags()
+TEST(Basic, homeFlags)
 {
 	auto home = std::getenv("HOME");
 
@@ -123,13 +109,13 @@ void TestConverter::homeFlags()
 	Util::Args args;
 
 	std::string result = Util::convert(str, args, Util::ConvertHome);
-	CPPUNIT_ASSERT_MESSAGE(message(home, result), home == result);
+	ASSERT_EQ(home, result);
 
 	result = Util::convert(str, args);
-	CPPUNIT_ASSERT_MESSAGE(message(result, str), result == str);
+	ASSERT_EQ(str, result);
 }
 
-void TestConverter::envFlags()
+TEST(Basic, envFlags)
 {
 	auto home = std::getenv("HOME");
 
@@ -140,21 +126,17 @@ void TestConverter::envFlags()
 	Util::Args args;
 
 	std::string result = Util::convert(str, args, Util::ConvertEnv);
-	CPPUNIT_ASSERT_MESSAGE(message(home, result), home == result);
+	ASSERT_EQ(home, result);
 
 	result = Util::convert(str, args);
-	CPPUNIT_ASSERT_MESSAGE(message(result, str), result == str);
+	ASSERT_EQ(str, result);
 }
 
 } // !irccd
 
-int main()
+int main(int argc, char **argv)
 {
-	using namespace irccd;
+	testing::InitGoogleTest(&argc, argv);
 
-	CppUnit::TextTestRunner runnerText;
-
-	runnerText.addTest(TestConverter::suite());
-
-	return runnerText.run("", false) == 1 ? 0 : 1;
+	return RUN_ALL_TESTS();
 }

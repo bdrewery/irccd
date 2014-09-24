@@ -25,7 +25,7 @@ include(CheckSymbolExists)
 
 # Check of getopt(3) function.
 check_function_exists(getopt HAVE_GETOPT)
-if(NOT HAVE_GETOPT)
+if (NOT HAVE_GETOPT)
 	include_directories("${EXTERNDIR}/getopt")
 	list(
 		APPEND
@@ -39,11 +39,11 @@ if(NOT HAVE_GETOPT)
 		EXTINCLUDES
 		${EXTERNDIR}/getopt
 	)
-endif()
+endif ()
 
 # Check of setprogname(3) function.
 check_function_exists(setprogname HAVE_SETPROGNAME)
-if(NOT HAVE_SETPROGNAME)
+if (NOT HAVE_SETPROGNAME)
 	include_directories("${EXTERNDIR}/setprogname")
 	list(
 		APPEND
@@ -57,7 +57,7 @@ if(NOT HAVE_SETPROGNAME)
 		EXTINCLUDES
 		${EXTERNDIR}/setprogname
 	)
-endif()
+endif ()
 
 # unistd.h has some useful routines.
 check_include_file(unistd.h HAVE_UNISTD_H)
@@ -78,10 +78,17 @@ check_struct_has_member("struct stat" st_blocks sys/stat.h HAVE_STAT_ST_BLOCKS)
 set(EXTSOURCES ${EXTSOURCES} PARENT_SCOPE)
 set(EXTINCLUDES ${EXTINCLUDES} PARENT_SCOPE)
 
-#
-# Compile libircclient as internal
-#
 add_subdirectory(
 	"${CMAKE_SOURCE_DIR}/extern/libircclient"
 	"${CMAKE_BINARY_DIR}/libircclient"
+)
+
+add_subdirectory(
+	"${CMAKE_SOURCE_DIR}/extern/libxdg-basedir"
+	"${CMAKE_BINARY_DIR}/libxdg-basedir"
+)
+
+add_subdirectory(
+	"${CMAKE_SOURCE_DIR}/extern/gtest"
+	"${CMAKE_BINARY_DIR}/gtest"
 )

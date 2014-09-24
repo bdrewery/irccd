@@ -42,7 +42,7 @@ namespace irccd {
  */
 class EventQueue : public Singleton<EventQueue> {
 private:
-	friend class Singleton<EventQueue>;
+	SINGLETON(EventQueue);
 
 	using Ptr	= std::unique_ptr<Event>;
 	using Cond	= std::condition_variable;
@@ -53,7 +53,7 @@ private:
 	using Atomic	= std::atomic_bool;
 
 private:
-	Atomic	m_alive{true};
+	Atomic	m_alive { true };
 	Mutex	m_mutex;
 	Cond	m_cond;
 	List	m_list;
@@ -61,29 +61,26 @@ private:
 
 	void routine();
 
+	EventQueue();
+
 public:
 	/**
-	 * Start the event queue.
+	 * Destroy the thread
 	 */
-	void start();
-
-	/**
-	 * Stop the event queue.
-	 */
-	void stop();
+	~EventQueue();
 
 	/**
 	 * Add a function to the event queue.
 	 *
 	 * @param event the event function
 	 */
-	template <typename Evt>
-	void add(Evt &&event)
+	template <typename Evt, typename... Args>
+	void add(Args&&... args)
 	{
 		{
 			Lock lock(m_mutex);
 
-			m_list.push_back(std::unique_ptr<Evt>(new Evt(std::move(event))));
+			m_list.push_back(std::make_unique<Evt>(std::forward<Args>(args)...));
 		}
 
 		m_cond.notify_one();

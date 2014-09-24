@@ -20,17 +20,25 @@
 # Global compile flags
 # ---------------------------------------------------------
 
-if(UNIX)
-	set(C_FLAGS "${C_FLAGS} -Wall -Wextra")
-	set(CXX_FLAGS "${CXX_FLAGS} -Wall -Wextra -std=gnu++11")
-elseif(WIN32 AND MSVC)
-	set(C_FLAGS "${C_FLAGS} /D _CRT_SECURE_NO_WARNINGS")
-	set(CXX_FLAGS "${CXX_FLAGS} /D _CRT_SECURE_NO_WARNINGS")
-endif()
+if (UNIX)
+	set(C_FLAGS "-Wall -Wextra ${C_FLAGS}")
+	set(CXX_FLAGS "-Wall -Wextra -std=c++14 ${CXX_FLAGS}")
+elseif (WIN32)
+	# MSVC not supported until Visual Studio 2014 (I hope)
+	if (MINGW)
+		set(C_FLAGS "-Wall -Wextra ${C_FLAGS}")
+		set(CXX_FLAGS "-Wall -Wextra -std=c++14 ${CXX_FLAGS}")
+	else ()
+		message(FATAL_ERROR "Irccd does not support Visual Studio yet")
+
+		set(C_FLAGS "/D _CRT_SECURE_NO_WARNINGS ${C_FLAGS}")
+		set(CXX_FLAGS "/D _CRT_SECURE_NO_WARNINGS ${CXX_FLAGS}")
+	endif ()
+endif ()
 
 # Add global flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${C_FLAGS}" PARENT_SCOPE)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}" PARENT_SCOPE)
+set(CMAKE_C_FLAGS "${C_FLAGS} ${CMAKE_C_FLAGS}" PARENT_SCOPE)
+set(CMAKE_CXX_FLAGS "${CXX_FLAGS} ${CMAKE_CXX_FLAGS}" PARENT_SCOPE)
 
 # ---------------------------------------------------------
 # Installation paths
@@ -40,22 +48,22 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}" PARENT_SCOPE)
 # Installation paths. On Windows, we just use the suffix relative
 # to the installation path.
 #
-if(WIN32)
+if (WIN32)
 	set(MODDIR "plugins"
-	    CACHE STRING "Module prefix where to install")
+		CACHE STRING "Module prefix where to install")
 	set(DOCDIR "doc"
-	    CACHE STRING "Documentation directory")
+		CACHE STRING "Documentation directory")
 	set(MANDIR "man"
-	    CACHE STRING "Man directory")
+		CACHE STRING "Man directory")
 	set(ETCDIR "etc"
-	    CACHE STRING "Configuration directory")
-else()
+		CACHE STRING "Configuration directory")
+else ()
 	set(MODDIR "share/irccd/plugins"
-	    CACHE STRING "Module prefix where to install")
+		CACHE STRING "Module prefix where to install")
 	set(DOCDIR "share/doc/irccd"
-	    CACHE STRING "Documentation directory")
+		CACHE STRING "Documentation directory")
 	set(MANDIR "share/man"
-	    CACHE STRING "Man directory")
+		CACHE STRING "Man directory")
 	set(ETCDIR "etc"
-	    CACHE STRING "Configuration directory")
-endif()
+		CACHE STRING "Configuration directory")
+endif ()

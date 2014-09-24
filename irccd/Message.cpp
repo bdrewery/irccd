@@ -18,11 +18,6 @@
 
 #include "Message.h"
 
-Message::Message(const Message &m)
-{
-	m_data.str(m.m_data.str());
-}
-
 bool Message::isFinished(const std::string &data, std::string &ret)
 {
 	m_data << data;
@@ -38,11 +33,4 @@ bool Message::isFinished(const std::string &data, std::string &ret)
 	ret = tmp;
 
 	return true;
-}
-
-Message &Message::operator=(const Message &m)
-{
-	m_data.str(m.m_data.str());
-
-	return *this;
 }

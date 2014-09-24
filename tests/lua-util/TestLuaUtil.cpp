@@ -16,69 +16,63 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cppunit/TextTestRunner.h>
+#include <gtest/gtest.h>
 #include <lua.hpp>
 
 #include <lua/LuaUtil.h>
 
-#include "TestLuaUtil.h"
-
 namespace irccd {
 
-void TestLuaUtil::split()
+TEST(Basic, split)
 {
 	try {
 		LuaeState L;
 
 		Luae::openlibs(L);
 		Luae::require(L, "irccd.util", luaopen_util, false);
-		Luae::dofile(L, "lua-util/scripts/test-util.lua");
+		Luae::dofile(L, "scripts/test-util.lua");
 		Luae::getglobal(L, "split");
 		Luae::pcall(L, 0, 0);
 	} catch (const std::runtime_error &error) {
-		CPPUNIT_ASSERT_MESSAGE(error.what(), false);
+		FAIL() << error.what();
 	}
 }
 
-void TestLuaUtil::strip()
+TEST(Basic, strip)
 {
 	try {
 		LuaeState L;
 
 		Luae::openlibs(L);
 		Luae::require(L, "irccd.util", luaopen_util, false);
-		Luae::dofile(L, "lua-util/scripts/test-util.lua");
+		Luae::dofile(L, "scripts/test-util.lua");
 		Luae::getglobal(L, "strip");
 		Luae::pcall(L, 0, 0);
 	} catch (const std::runtime_error &error) {
-		CPPUNIT_ASSERT_MESSAGE(error.what(), false);
+		FAIL() << error.what();
 	}
 }
 
-void TestLuaUtil::convert()
+TEST(Basic, convert)
 {
 	try {
 		LuaeState L;
 
 		Luae::openlibs(L);
 		Luae::require(L, "irccd.util", luaopen_util, false);
-		Luae::dofile(L, "lua-util/scripts/test-util.lua");
+		Luae::dofile(L, "scripts/test-util.lua");
 		Luae::getglobal(L, "convert");
 		Luae::pcall(L, 0, 0);
 	} catch (const std::runtime_error &error) {
-		CPPUNIT_ASSERT_MESSAGE(error.what(), false);
+		FAIL() << error.what();
 	}
 }
 
 } // !irccd
 
-int main()
+int main(int argc, char **argv)
 {
-	using namespace irccd;
+	testing::InitGoogleTest(&argc, argv);
 
-	CppUnit::TextTestRunner runnerText;
-
-	runnerText.addTest(TestLuaUtil::suite());
-
-	return runnerText.run("", false) == 1 ? 0 : 1;
+	return RUN_ALL_TESTS();
 }

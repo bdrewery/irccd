@@ -57,20 +57,6 @@ public:
 	static uint64_t uptime();
 
 	/**
-	 * Sleep for seconds.
-	 *
-	 * @param seconds the seconds
-	 */
-	static void sleep(int seconds);
-
-	/**
-	 * Sleep for milliseconds.
-	 *
-	 * @param ms milliseconds
-	 */
-	static void usleep(int ms);
-
-	/**
 	 * Get the milliseconds elapsed since the application
 	 * startup.
 	 *

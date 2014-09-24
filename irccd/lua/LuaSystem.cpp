@@ -16,6 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <chrono>
+#include <thread>
+
 #include <common/Directory.h>
 
 #include <irccd/Luae.h>
@@ -50,14 +53,14 @@ int l_uptime(lua_State *L)
 
 int l_sleep(lua_State *L)
 {
-	System::sleep(Luae::check<int>(L, 1));
+	std::this_thread::sleep_for(std::chrono::seconds(Luae::check<int>(L, 1)));
 
 	return 0;
 }
 
 int l_usleep(lua_State *L)
 {
-	System::usleep(Luae::check<int>(L, 1));
+	std::this_thread::sleep_for(std::chrono::milliseconds(Luae::check<int>(L, 1)));
 
 	return 0;
 }

@@ -22,12 +22,7 @@
 
 namespace irccd {
 
-Thread::Ptr Thread::create()
-{
-	return std::shared_ptr<Thread>(new Thread);
-}
-
-void Thread::start(Thread::Ptr thread, int np)
+void Thread::start(std::shared_ptr<Thread> &thread, int np)
 {
 	thread->m_thread = std::thread([=] () {
 		lua_State *L = *thread->m_process;
@@ -40,9 +35,10 @@ void Thread::start(Thread::Ptr thread, int np)
 }
 
 Thread::Thread()
-	: m_joined(false)
+	: m_process(std::make_shared<Process>())
+	, m_joined(false)
+
 {
-	m_process = Process::create();
 }
 
 Thread::~Thread()
@@ -67,7 +63,7 @@ void Thread::detach()
 	m_joined = true;
 }
 
-Process::Ptr Thread::process() const
+std::shared_ptr<Process> Thread::process() const
 {
 	return m_process;
 }

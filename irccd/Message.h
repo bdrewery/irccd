@@ -20,7 +20,7 @@
 #define _MESSAGE_H_
 
 /**
- * @file Message.h
+ * @file irccd/Message.h
  * @brief Client messages
  */
 
@@ -34,23 +34,11 @@
  * This class handles incoming data from clients and tells when a data
  * is finished.
  */
-class Message {
+class Message final {
 private:
 	std::ostringstream m_data;
 
 public:
-	/**
-	 * Default constructor.
-	 */
-	Message() = default;
-
-	/**
-	 * Copy constructor.
-	 *
-	 * @param m the old message
-	 */
-	Message(const Message &m);
-
 	/**
 	 * Tell if the client message has finished. A client message
 	 * ends with '\n'.
@@ -60,14 +48,6 @@ public:
 	 * @return true if finished
 	 */
 	bool isFinished(const std::string &msg, std::string &command);
-
-	/**
-	 * Copy assignment.
-	 *
-	 * @param m the message
-	 * @return the message
-	 */
-	Message &operator=(const Message &m);
 };
 
 #endif // !_MESSAGE_H_
