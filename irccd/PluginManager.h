@@ -123,13 +123,6 @@ public:
 		for (size_t i = 0; i < m_plugins.size(); ++i)
 			func(m_plugins[i]);
 	}
-
-#if 0
-	/**
-	 * Collect garbage for all plugins.
-	 */
-	void collectGarbage();
-#endif
 };
 
 } // !irccd

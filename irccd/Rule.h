@@ -59,7 +59,7 @@ public:
 	 * @param server the server
 	 * @param enabled true to enable
 	 */
-	void addServer(const std::string &server, bool enabled = true);
+	void addServer(std::string server, bool enabled = true);
 
 	/**
 	 * Add a channel.
@@ -67,7 +67,7 @@ public:
 	 * @param channel the channel
 	 * @param enabled true to enable
 	 */
-	void addChannel(const std::string &channel, bool enabled = true);
+	void addChannel(std::string channel, bool enabled = true);
 
 	/**
 	 * Add a plugin.
@@ -75,7 +75,7 @@ public:
 	 * @param plugin the plugin
 	 * @param enabled true to enable
 	 */
-	void addPlugin(const std::string &plugin, bool enabled = true);
+	void addPlugin(std::string plugin, bool enabled = true);
 
 	/**
 	 * Get the read-only map of servers.
@@ -105,9 +105,7 @@ public:
 	 * @param channel the channel
 	 * @param plugin the plugin name
 	 */
-	bool match(const std::string &server,
-		   const std::string &channel,
-		   const std::string &plugin) const;
+	bool match(const std::string &server, const std::string &channel, const std::string &plugin) const;
 
 	/**
 	 * Convert to string.
@@ -140,7 +138,7 @@ public:
 	 * @param plugin the plugin
 	 * @param mode true to (re)enable
 	 */
-	void setPlugin(const std::string &plugin, bool mode = true);
+	void setPlugin(std::string plugin, bool mode = true);
 
 	/**
 	 * Enable or disable an event for the rule.
@@ -148,7 +146,7 @@ public:
 	 * @param event the event
 	 * @param mode true to (re)enable
 	 */
-	void setEvent(const std::string &event, bool mode = true);
+	void setEvent(std::string event, bool mode = true);
 
 	/**
 	 * Get the read-only set map of plugins.

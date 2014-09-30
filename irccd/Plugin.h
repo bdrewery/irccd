@@ -70,7 +70,7 @@ struct Luae::Convert<IrcWhois> {
  * A plugin is identified by name and can be loaded and unloaded
  * at runtime.
  */
-class Plugin {
+class Plugin final {
 public:
 	/**
 	 * @class ErrorException
@@ -93,28 +93,28 @@ public:
 		 * @param which the plugin name
 		 * @param error the error
 		 */
-		ErrorException(const std::string &which, const std::string &error);
+		ErrorException(std::string which, std::string error);
 
 		/**
 		 * Tells which plugin name has failed.
 		 *
 		 * @return the plugin name
 		 */
-		std::string which() const;
+		const std::string &which() const;
 
 		/**
 		 * Get the error.
 		 *
 		 * @return the error
 		 */
-		std::string error() const;
+		const std::string &error() const;
 
 		/**
 		 * Get the error.
 		 *
 		 * @return the error
 		 */
-		virtual const char * what() const throw();
+		virtual const char *what() const noexcept;
 	};
 
 private:

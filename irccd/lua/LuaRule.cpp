@@ -72,7 +72,7 @@ private:
 	}
 
 	template <typename T>
-	using AddFunc = void (T::*)(const std::string &, bool);
+	using AddFunc = void (T::*)(std::string, bool);
 
 	template <typename T>
 	static void getSequence(lua_State *L, AddFunc<T> add, T &t, const std::string &field)

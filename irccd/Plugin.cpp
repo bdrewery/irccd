@@ -32,24 +32,23 @@ namespace irccd {
  * Plugin exception
  * -------------------------------------------------------- */
 
-Plugin::ErrorException::ErrorException(const std::string &which,
-				       const std::string &error)
-	: m_error(error)
-	, m_which(which)
+Plugin::ErrorException::ErrorException(std::string which, std::string error)
+	: m_error(std::move(error))
+	, m_which(std::move(which))
 {
 }
 
-std::string Plugin::ErrorException::which() const
+const std::string &Plugin::ErrorException::which() const
 {
 	return m_which;
 }
 
-std::string Plugin::ErrorException::error() const
+const std::string &Plugin::ErrorException::error() const
 {
 	return m_error;
 }
 
-const char * Plugin::ErrorException::what() const throw()
+const char *Plugin::ErrorException::what() const throw()
 {
 	return m_error.c_str();
 }

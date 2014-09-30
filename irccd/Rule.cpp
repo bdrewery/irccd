@@ -26,19 +26,19 @@ namespace irccd {
  * RuleMatch
  * --------------------------------------------------------- */
 
-void RuleMatch::addServer(const std::string &server, bool enabled)
+void RuleMatch::addServer(std::string server, bool enabled)
 {
-	m_servers[server] = enabled;
+	m_servers[std::move(server)] = enabled;
 }
 
-void RuleMatch::addChannel(const std::string &channel, bool enabled)
+void RuleMatch::addChannel(std::string channel, bool enabled)
 {
-	m_channels[channel] = enabled;
+	m_channels[std::move(channel)] = enabled;
 }
 
-void RuleMatch::addPlugin(const std::string &plugin, bool enabled)
+void RuleMatch::addPlugin(std::string plugin, bool enabled)
 {
-	m_plugins[plugin] = enabled;
+	m_plugins[std::move(plugin)] = enabled;
 }
 
 const RuleMap &RuleMatch::servers() const
@@ -56,9 +56,7 @@ const RuleMap &RuleMatch::plugins() const
 	return m_plugins;
 }
 
-bool RuleMatch::match(const std::string &server,
-		      const std::string &channel,
-		      const std::string &plugin) const
+bool RuleMatch::match(const std::string &server, const std::string &channel, const std::string &plugin) const
 {
 	if (m_servers.size() == 0 && m_channels.size() == 0 && m_plugins.size() == 0)
 		return true;
@@ -109,14 +107,14 @@ bool RuleProperties::get(const RuleMap &map, const std::string &name, bool curre
 	return map.at(name);
 }
 
-void RuleProperties::setPlugin(const std::string &name, bool mode)
+void RuleProperties::setPlugin(std::string name, bool mode)
 {
-	m_setPlugins[name] = mode;
+	m_setPlugins[std::move(name)] = mode;
 }
 
-void RuleProperties::setEvent(const std::string &name, bool mode)
+void RuleProperties::setEvent(std::string name, bool mode)
 {
-	m_setEvents[name] = mode;
+	m_setEvents[std::move(name)] = mode;
 }
 
 const RuleMap &RuleProperties::plugins() const

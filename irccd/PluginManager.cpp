@@ -17,6 +17,7 @@
  */
 
 #include <algorithm>
+#include <sstream>
 
 #include <common/Logger.h>
 #include <common/Util.h>
@@ -33,7 +34,7 @@ bool PluginManager::isLoaded(const std::string &name)
 
 	try {
 		(void)find(name);
-	} catch (std::out_of_range ex) {
+	} catch (const std::out_of_range &) {
 		ret = false;
 	}
 
@@ -192,17 +193,5 @@ std::shared_ptr<Plugin> PluginManager::find(const std::string &name)
 
 	return *i;
 }
-
-#if 0
-
-void PluginManager::collectGarbage()
-{
-	Lock lk(pluginLock);
-
-	for (auto p : plugins)
-		lua_gc(p->getState(), LUA_GCCOLLECT, 0);
-}
-
-#endif
 
 } // !irccd

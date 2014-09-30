@@ -125,9 +125,7 @@ private:
 	void readRules(const Parser &config);
 
 	template <typename T>
-	void extractor(T &add,
-		       const std::string &value,
-		       void (T::*func)(const std::string &, bool))
+	void extractor(T &add, const std::string &value, void (T::*func)(std::string , bool))
 	{
 		for (const auto &s : Util::split(value, " \t")) {
 			auto copy = s;
