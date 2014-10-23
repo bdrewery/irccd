@@ -48,7 +48,7 @@
 #include "server/Disconnected.h"
 #include "server/Running.h"
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 #  include "Plugin.h"
 #  include "EventQueue.h"
 #  include "Rule.h"
@@ -72,7 +72,7 @@ void Irccd::initialize()
 	Socket::init();
 	Logger::setVerbose(false);
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	// Add user's path
 	oss << Util::pathUser() << "plugins/";
 	PluginManager::instance().addPath(oss.str());
@@ -137,7 +137,7 @@ void Irccd::openConfig()
 	readListeners(config);
 	readPlugins(config);
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	/* Now, we load plugins specified by command line */
 	for (auto s : m_wantedPlugins) {
 		try {
@@ -156,7 +156,7 @@ void Irccd::readGeneral(const Parser &config)
 	if (config.hasSection("general")) {
 		auto general = config.getSection("general");
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 		// Extract parameters that are needed for the next
 		if (general.hasOption("plugin-path"))
 			PluginManager::instance().addPath(general.getOption<std::string>("plugin-path"));
@@ -230,7 +230,7 @@ void Irccd::readPlugins(const Parser &config)
 {
 	// New way of loading plugins
 	if (config.hasSection("plugins")) {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 		Section section = config.getSection("plugins");
 
 		for (auto opt : section) {
@@ -281,7 +281,7 @@ void Irccd::readIdentities(const Parser &config)
 
 void Irccd::readRules(const Parser &config)
 {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	using std::string;
 
 	config.findSections("rule", [&] (const Section &s) {
@@ -524,7 +524,7 @@ void Irccd::setForeground(bool mode)
 
 void Irccd::deferPlugin(const std::string &name)
 {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	m_wantedPlugins.push_back(name);
 #else
 	(void)name;
@@ -551,7 +551,7 @@ const Server::Identity &Irccd::findIdentity(const std::string &name)
 
 int Irccd::run()
 {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	// Start the IrcEvent thread
 	//EventQueue::instance().start();
 #endif

@@ -16,11 +16,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <config.h>
+
 #include <sstream>
 
 #include <common/Logger.h>
 
 #include <irccd/Irccd.h>
+#include <irccd/Process.h>
 
 #include "LuaLogger.h"
 

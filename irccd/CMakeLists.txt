@@ -95,7 +95,7 @@ endif ()
 # Optional Lua
 # ---------------------------------------------------------
 
-if (WITH_LUA)
+if (WITH_LUAVER)
 	set(HAVE_LUA_MESSAGE "disabled (Lua not found)" CACHE INTERNAL "")
 	set(HAVE_LUA FALSE CACHE INTERNAL "")
 

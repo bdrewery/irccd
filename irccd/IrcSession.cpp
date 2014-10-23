@@ -24,7 +24,7 @@
 #include "Server.h"
 #include "Util.h"
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 #  include "Plugin.h"
 #  include "EventQueue.h"
 
@@ -76,7 +76,7 @@ void handleChannel(irc_session_t *session,
 		   const char **params,
 		   unsigned int)
 {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	EventQueue::instance().add<Message>(IrcSession::toServer(session),
 	    strify(params[0]), strify(orig), strify(params[1]));
 #else
@@ -92,7 +92,7 @@ void handleChannelNotice(irc_session_t *session,
 			 const char **params,
 			 unsigned int)
 {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	EventQueue::instance().add<ChannelNotice>(IrcSession::toServer(session),
 	    strify(orig), strify(params[0]), strify(params[1]));
 #else
@@ -124,7 +124,7 @@ void handleConnect(irc_session_t *session,
 		s->join(c.name, c.password);
 	}
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	EventQueue::instance().add<Connect>(s);
 #endif
 }
@@ -135,7 +135,7 @@ void handleCtcpAction(irc_session_t *session,
 		      const char **params,
 		      unsigned int)
 {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	EventQueue::instance().add<Me>(IrcSession::toServer(session),
 	    strify(params[0]), strify(orig), strify(params[1]));
 #else
@@ -157,7 +157,7 @@ void handleInvite(irc_session_t *session,
 	if (s->options() & Server::OptionJoinInvite)
 		s->join(strify(params[1]), "");
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	EventQueue::instance().add<Invite>(s, strify(params[1]), strify(orig));
 #else
 	(void)orig;
@@ -170,7 +170,7 @@ void handleJoin(irc_session_t *session,
 		const char **params,
 		unsigned int)
 {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	EventQueue::instance().add<Join>(IrcSession::toServer(session),
 	    strify(params[0]), strify(orig));
 #else
@@ -196,7 +196,7 @@ void handleKick(irc_session_t *session,
 			s->join(params[0]);
 	}
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	EventQueue::instance().add<Kick>(s, strify(params[0]), strify(orig),
 	    strify(params[1]), strify(params[2]));
 #else
@@ -210,7 +210,7 @@ void handleMode(irc_session_t *session,
 		const char **params,
 		unsigned int)
 {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	EventQueue::instance().add<Mode>(IrcSession::toServer(session),
 	    strify(params[0]), strify(orig), strify(params[1]), strify(params[2]));
 #else
@@ -233,7 +233,7 @@ void handleNick(irc_session_t *session,
 	if (isMe(s, nick))
 		id.nickname = nick;
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	EventQueue::instance().add<Nick>(s, strify(orig), strify(params[0]));
 #else
 	(void)params;
@@ -246,7 +246,7 @@ void handleNotice(irc_session_t *session,
 		  const char **params,
 		  unsigned int)
 {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	EventQueue::instance().add<Notice>(IrcSession::toServer(session),
 	    strify(orig), strify(params[0]), strify(params[1]));
 #else
@@ -262,7 +262,7 @@ void handleNumeric(irc_session_t *session,
 		   const char **params,
 		   unsigned int c)
 {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	auto s = IrcSession::toServer(session);
 
 	if (event == LIBIRC_RFC_RPL_NAMREPLY) {
@@ -337,7 +337,7 @@ void handlePart(irc_session_t *session,
 	if (isMe(s, orig))
 		s->removeChannel(params[0]);
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	EventQueue::instance().add<Part>(s, strify(params[0]),
 	    strify(orig), strify(params[1]));
 #endif
@@ -349,7 +349,7 @@ void handleQuery(irc_session_t *session,
 		 const char **params,
 		 unsigned int)
 {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	EventQueue::instance().add<Query>(IrcSession::toServer(session),
 	    strify(orig), strify(params[1]));
 #else
@@ -365,7 +365,7 @@ void handleTopic(irc_session_t *session,
 		 const char **params,
 		 unsigned int)
 {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	EventQueue::instance().add<Topic>(IrcSession::toServer(session),
 	    strify(params[0]), strify(orig), strify(params[1]));
 #else
@@ -381,7 +381,7 @@ void handleUserMode(irc_session_t *session,
 		    const char **params,
 		    unsigned int)
 {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	EventQueue::instance().add<UserMode>(IrcSession::toServer(session),
 	    strify(orig), strify(params[0]));
 #else

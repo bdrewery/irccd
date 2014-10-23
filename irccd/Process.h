@@ -28,7 +28,7 @@
  
 #include <config.h>
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 
 #include <memory>
 #include <unordered_map>

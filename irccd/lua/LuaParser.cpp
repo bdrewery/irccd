@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include <irccd/Irccd.h>
+#include <irccd/Luae.h>
 
 #include "LuaParser.h"
 

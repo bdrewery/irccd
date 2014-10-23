@@ -19,7 +19,7 @@
 #include "CommandQueue.h"
 #include "Logger.h"
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 #  include "RuleManager.h"
 #endif
 
@@ -43,7 +43,7 @@ void CommandQueue::routine()
 			command = &m_cmds.front();
 		}
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 		if (!(*command)->empty()) {
 			const auto &manager = RuleManager::instance();
 			const auto result = manager.solve((*command)->server(), (*command)->target(), "", "");

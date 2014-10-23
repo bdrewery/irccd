@@ -35,7 +35,7 @@
 
 #include "Server.h"
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 #  include "Plugin.h"
 #endif
 
@@ -98,7 +98,7 @@ private:
 	 * Plugin specified by commands line that should be
 	 * loaded after initialization.
 	 */
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 	Wanted m_wantedPlugins;
 #endif
 

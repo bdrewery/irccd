@@ -30,13 +30,7 @@
 #define PREFIX			"@CMAKE_INSTALL_PREFIX@"
 
 #cmakedefine COMPAT_1_1
-
-#cmakedefine WITH_LUAJIT
-#cmakedefine WITH_LUA52
-
-#if defined(WITH_LUA52) || defined(WITH_LUAJIT)
-#  define WITH_LUA
-#endif
+#cmakedefine WITH_LUAVER
 
 // Some non portable code
 #cmakedefine	HAVE_GETOPT	1

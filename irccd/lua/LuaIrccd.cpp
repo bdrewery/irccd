@@ -17,6 +17,7 @@
  */
 
 #include <irccd/Irccd.h>
+#include <irccd/Luae.h>
 
 #include "LuaIrccd.h"
 

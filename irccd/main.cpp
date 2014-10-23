@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 			irccd.override(Options::Foreground);
 			break;
 		case 'p':
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 			PluginManager::instance().addPath(string(optarg));
 #endif
 			break;
@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 
 	if (argc > 0) {
 		if (strcmp(argv[0], "test") == 0) {
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 			test(argc, argv);
 			// NOTREACHED
 #else
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 			Logger::log("to fit your needs.");
 			Logger::log("");
 
-#if defined(WITH_LUA)
+#if defined(WITH_LUAVER)
 			auto enabled = "enabled";
 #else
 			auto enabled = "disabled";
