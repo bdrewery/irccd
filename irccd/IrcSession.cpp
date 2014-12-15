@@ -65,6 +65,11 @@ inline bool isMe(Server::Ptr s, const std::string &target)
 	return identity.nickname == tmp;
 }
 
+inline std::string strify(const char *str)
+{
+	return (str == nullptr) ? "" : str;
+}
+
 void handleChannel(irc_session_t *session,
 		   const char *,
 		   const char *orig,
@@ -74,7 +79,7 @@ void handleChannel(irc_session_t *session,
 	auto s = Server::toServer(session);
 
 	handlePlugin(
-	    IrcEventMessage(s, params[0], orig, (!params[1]) ? "" : params[1])
+	    IrcEventMessage(s, strify(params[0]), strify(orig), strify(params[1]))
 	);
 }
 
@@ -87,7 +92,7 @@ void handleChannelNotice(irc_session_t *session,
 	auto s = Server::toServer(session);
 
 	handlePlugin(
-	    IrcEventChannelNotice(s, params[0], orig, (!params[1]) ? "" : params[1])
+	    IrcEventChannelNotice(s, strify(params[0]), strify(orig), strify(params[1]))
 	);
 }
 
@@ -122,7 +127,7 @@ void handleCtcpAction(irc_session_t *session,
 	auto s = Server::toServer(session);
 
 	handlePlugin(
-	    IrcEventMe(s, params[0], orig, (!params[1]) ? "" : params[1])
+	    IrcEventMe(s, strify(params[0]), strify(orig), strify(params[1]))
 	);
 }
 
@@ -136,10 +141,10 @@ void handleInvite(irc_session_t *session,
 
 	// if join-invite is set to true join it
 	if (s->getOptions().joinInvite)
-		s->join(params[0], "");
+		s->join(strify(params[0]), "");
 
 	handlePlugin(
-	    IrcEventInvite(s, orig, params[0])
+	    IrcEventInvite(s, strify(orig), strify(params[0]))
 	);
 }
 
@@ -152,7 +157,7 @@ void handleJoin(irc_session_t *session,
 	auto s = Server::toServer(session);
 
 	handlePlugin(
-	    IrcEventJoin(s, orig, params[0])
+	    IrcEventJoin(s, strify(orig), strify(params[0]))
 	);
 }
 
@@ -165,11 +170,11 @@ void handleKick(irc_session_t *session,
 	auto s = Server::toServer(session);
 
 	// If I was kicked, I need to remove the channel list
-	if (isMe(s, params[1]))
-		s->removeChannel(params[0]);
+	if (isMe(s, strify(params[1])))
+		s->removeChannel(strify(params[0]));
 
 	handlePlugin(
-	    IrcEventKick(s, orig, params[0], params[1], (!params[2]) ? "" : params[2])
+	    IrcEventKick(s, strify(orig), strify(params[0]), strify(params[1]), strify(params[2]))
 	);
 }
 
@@ -182,7 +187,7 @@ void handleMode(irc_session_t *session,
 	auto s = Server::toServer(session);
 
 	handlePlugin(
-	    IrcEventChannelMode(s, orig, params[0], params[1], (!params[2]) ? "" : params[2])
+	    IrcEventChannelMode(s, strify(orig), strify(params[0]), strify(params[1]), strify(params[2]))
 	);
 }
 
@@ -194,13 +199,13 @@ void handleNick(irc_session_t *session,
 {
 	auto s = Server::toServer(session);
 	auto &id = s->getIdentity();
-	auto nick = std::string(orig);
+	auto nick = strify(orig);
 
 	if (isMe(s, nick))
 		id.nickname = nick;
 
 	handlePlugin(
-	    IrcEventNick(s, orig, params[0])
+	    IrcEventNick(s, strify(orig), strify(params[0]))
 	);
 }
 
@@ -213,7 +218,7 @@ void handleNotice(irc_session_t *session,
 	auto s = Server::toServer(session);
 
 	handlePlugin(
-	    IrcEventNotice(s, orig, params[0], (!params[1]) ? "" : params[1])
+	    IrcEventNotice(s, strify(orig), strify(params[0]), strify(params[1]))
 	);
 }
 
@@ -253,20 +258,20 @@ void handleNumeric(irc_session_t *session,
 	if (event == LIBIRC_RFC_RPL_WHOISUSER) {
 		IrcWhois info;
 
-		info.nick = params[1];
-		info.user = params[2];
-		info.host = params[3];
-		info.realname = params[5];
+		info.nick = strify(params[1]);
+		info.user = strify(params[2]);
+		info.host = strify(params[3]);
+		info.realname = strify(params[5]);
 
 		s->getWhoisLists()[info.nick] = info;
 	} else if (event == LIBIRC_RFC_RPL_WHOISCHANNELS) {
-		auto &info = s->getWhoisLists()[params[1]];
+		auto &info = s->getWhoisLists()[strify(params[1])];
 
 		// Add all channels
 		for (unsigned int i = 2; i < c; ++i)
 			info.channels.push_back(params[i]);
 	} else if (event == LIBIRC_RFC_RPL_ENDOFWHOIS) {
-		auto &info = s->getWhoisLists()[params[1]];
+		auto &info = s->getWhoisLists()[strify(params[1])];
 
 		handlePlugin(IrcEventWhois(s, info));
 	}
@@ -294,11 +299,11 @@ void handlePart(irc_session_t *session,
 {
 	auto s = Server::toServer(session);
 
-	if (isMe(s, orig))
-		s->removeChannel(params[0]);
+	if (isMe(s, strify(orig)))
+		s->removeChannel(strify(params[0]));
 
 	handlePlugin(
-	    IrcEventPart(s, orig, params[0], (!params[1]) ? "" : params[1])
+	    IrcEventPart(s, strify(orig), strify(params[0]), strify(params[1]))
 	);
 }
 
@@ -311,7 +316,7 @@ void handleQuery(irc_session_t *session,
 	auto s = Server::toServer(session);
 
 	handlePlugin(
-	    IrcEventQuery(s, orig, (!params[1]) ? "" : params[1])
+	    IrcEventQuery(s, strify(orig), strify(params[1]))
 	);
 }
 
@@ -324,7 +329,7 @@ void handleTopic(irc_session_t *session,
 	auto s = Server::toServer(session);
 
 	handlePlugin(
-	    IrcEventTopic(s, orig, params[0], (!params[1]) ? "" : params[1])
+	    IrcEventTopic(s, strify(orig), strify(params[0]), strify(params[1]))
 	);
 }
 
@@ -337,7 +342,7 @@ void handleUserMode(irc_session_t *session,
 	auto s = Server::toServer(session);
 
 	handlePlugin(
-	    IrcEventMode(s, orig, params[0])
+	    IrcEventMode(s, strify(orig), strify(params[0]))
 	);
 }
 
