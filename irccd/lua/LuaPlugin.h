@@ -17,7 +17,7 @@
  */
 
 #ifndef _LUA_PLUGIN_H_
-#define _LUA_PLUGIN_H
+#define _LUA_PLUGIN_H_
 
 #include <lua.hpp>
 

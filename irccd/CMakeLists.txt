@@ -195,6 +195,10 @@ else ()
 	set(FLAGS "${FLAGS} /wd4996 /wd4244")
 endif ()
 
+if (APPLE)
+	list(APPEND LIBRARIES resolv)
+endif ()
+
 set_target_properties(irccd PROPERTIES COMPILE_FLAGS "${FLAGS}")
 target_link_libraries(irccd common ${LIBRARIES})
 

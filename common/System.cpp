@@ -28,6 +28,11 @@
 #  include <cerrno>
 #  include <cstring>
 #  include <stdexcept>
+#  include <ctime>
+
+#if defined(__APPLE__)
+#  include <sys/sysctl.h>
+#endif
 
 #if defined(__linux__)
 #  include <sys/sysinfo.h>
@@ -56,7 +61,7 @@ std::string systemName()
 std::string systemVersion()
 {
 	auto version = GetVersion();
- 
+
 	auto major = (DWORD)(LOBYTE(LOWORD(version)));
 	auto minor = (DWORD)(HIBYTE(LOWORD(version)));
 
@@ -123,7 +128,17 @@ uint64_t systemUptime()
 		throw std::runtime_error(strerror(errno));
 
 	return info.uptime;
+#elif defined(__APPLE__)
+	struct timeval boottime;
+	size_t length = sizeof (boottime);
+	int mib[2] = { CTL_KERN, KERN_BOOTTIME };
 
+	if (sysctl(mib, 2, &boottime, &length, nullptr, 0) < 0)
+		throw std::runtime_error(strerror(errno));
+
+	time_t bsec = boottime.tv_sec, csec = time(nullptr);
+	
+	return difftime(csec, bsec);
 #else
 	struct timespec ts;
 
