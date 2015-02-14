@@ -107,13 +107,6 @@ void Irccd::openConfig()
 
 	Logger::log("irccd: using configuration %s", m_configPath.c_str());
 
-#if !defined(_WIN32)
-	if (!m_foreground) {
-		Logger::log("irccd: forking to background...");
-		(void)daemon(0, 0);
-	}
-#endif
-
 	/*
 	 * Order is important, load everything we can before plugins so that
 	 * they can use identities, configuration and such, but servers
@@ -123,6 +116,13 @@ void Irccd::openConfig()
 	readIdentities(config);
 	readListeners(config);
 	readPlugins(config);
+
+#if !defined(_WIN32)
+	if (!m_foreground) {
+		Logger::log("irccd: forking to background...");
+		(void)daemon(0, 0);
+	}
+#endif
 
 #if defined(WITH_LUA)
 	/* Now, we load plugins specified by command line */

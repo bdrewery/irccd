@@ -1,6 +1,12 @@
 IRC Client Daemon CHANGES
 =========================
 
+1.1.5 February 14, 2015
+---------------------------------------
+  * Fix Mac OS X build,
+  * Fix null constructed strings,
+  * Fix general.foreground option not working.
+
 1.1.4 March 28, 2014
 ---------------------------------------
   * Fix Visual C++ redistributable installation.
