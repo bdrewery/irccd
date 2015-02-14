@@ -66,7 +66,7 @@ public:
 	/**
 	 * @copydoc Event::name
 	 */
-	const char *name() const override;
+	const char *name(Plugin &p) const override;
 };
 
 } // !event

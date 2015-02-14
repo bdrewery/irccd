@@ -39,6 +39,7 @@ endif()
 set(CMAKE_MODULE_PATH ${cmake_SOURCE_DIR}/packages PARENT_SCOPE)
 
 include(CMakeParseArguments)
+include(CheckTypeSize)
 
 include(Config.cmake)
 include(Options.cmake)

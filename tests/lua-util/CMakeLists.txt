@@ -27,3 +27,5 @@ set(
 
 create_test(TestLuaUtil	"${TEST_LUA_UTIL_SOURCES}")
 create_dir(TestLuaUtil scripts)
+
+target_link_libraries(TestLuaUtil lua)

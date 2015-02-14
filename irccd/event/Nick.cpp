@@ -36,7 +36,7 @@ void Nick::call(Plugin &p)
 	p.onNick(m_server, m_oldnickname, m_newnickname);
 }
 
-const char *Nick::name() const
+const char *Nick::name(Plugin &) const
 {
 	return "onNick";
 }

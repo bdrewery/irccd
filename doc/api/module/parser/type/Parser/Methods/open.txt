@@ -1,0 +1,17 @@
+---
+name: open
+category: parser
+---
+
+Open the file and read config. This function will read and extract any section found in the file. 
+
+# Synopsis
+
+````lua
+ret, err = function Parser:open()
+````
+
+# Returns
+
+- ret, true on success or nil on failure
+- err, the error message

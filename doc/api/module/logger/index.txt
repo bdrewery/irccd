@@ -1,0 +1,14 @@
+---
+name: irccd.logger
+since: 1.1
+summary: "Logging functions"
+---
+
+# Usage
+
+You should use this module instead of Lua's print function because irccd may redirect output to a specific file depending on the user's configuration. For instance, if user has chosen to log into syslog, this module will log at syslog too.
+
+| Function          | Description    |
+|-------------------|----------------|
+| [log](log.html)   | Log a message  |
+| [warn](warn.html) | Warn a message |

@@ -1,0 +1,20 @@
+---
+name: hasSection
+category: parser
+---
+
+Checks for a section. Checks if a specific section exists. 
+
+# Synopsis
+
+````lua
+status = function Parser:hasSection(name)
+````
+
+# Arguments
+
+- name, the section name
+
+# Returns
+
+- status, true if has the section.

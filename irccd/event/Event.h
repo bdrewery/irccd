@@ -24,17 +24,30 @@
  * @brief Base event class
  */
 
+#include <utility>
+
 #include <irccd/IO.h>
 
 namespace irccd {
 
 class Plugin;
+class Server;
+
+enum class MessageType {
+	Command,
+	Message
+};
+
+using MessagePack = std::pair<std::string, MessageType>;
 
 /**
  * @class Event
  * @brief Base event class for plugins
  */
 class Event : public IO {
+protected:
+	MessagePack parseMessage(std::string message, Server &server, Plugin &plugin) const;
+
 public:
 	/**
 	 * Construct an event.
@@ -62,9 +75,17 @@ public:
 	/**
 	 * Get the event name such as onMessage, onCommand.
 	 *
+	 * The plugin is passed as parameter in case of the event may differ
+	 * from a plugin to other.
+	 *
+	 * Example:
+	 *	A channel message "!history help" will trigger history's
+	 *	onCcommand while it will call onMessage for other plugins.
+	 *
+	 * @param p the current plugin
 	 * @return the event name
 	 */
-	virtual const char *name() const = 0;
+	virtual const char *name(Plugin &p) const = 0;
 };
 
 } // !irccd

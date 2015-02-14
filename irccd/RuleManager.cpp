@@ -95,55 +95,28 @@ unsigned RuleManager::count() const
 	return static_cast<unsigned>(m_rules.size());
 }
 
-void RuleManager::enable(int index)
+bool RuleManager::solve(const std::string &server,
+			const std::string &channel,
+			const std::string &nickname,
+			const std::string &plugin,
+			const std::string &event) const
 {
-	Lock lk(m_lock);
+	Lock lock{m_lock};
+	bool result{true};
 
-	assertIndex(index);
+#if !defined(NDEBUG)
+	Logger::debug("rule: checking match for:");
+	Logger::debug("    - server: %s", server.c_str());
+	Logger::debug("    - channel: %s", channel.c_str());
+	Logger::debug("    - nickname: %s", nickname.c_str());
+	Logger::debug("    - plugin: %s", plugin.c_str());
+	Logger::debug("    - event: %s", event.c_str());
+#endif
 
-	m_rules[index].enable();
-}
-
-void RuleManager::disable(int index)
-{
-	Lock lk(m_lock);
-
-	assertIndex(index);
-
-	m_rules[index].disable();
-}
-
-RuleResult RuleManager::solve(const std::string &server,
-			      const std::string &channel,
-			      const std::string &event,
-			      const std::string &plugin) const
-{
-	Lock lk(m_lock);
-
-	RuleResult result;
-
-	try {
-		for (const auto &r : m_rules) {
-			// Skip disabled rules
-			if (!r.isEnabled())
-				continue;
-
-			const auto &match	= r.match();
-			const auto &properties	= r.properties();
-
-			/*
-			 * 1. Check first if the match is applied.
-			 */
-			if (!match.match(server, channel, plugin))
-				continue;
-
-			result.enabled = properties.isPluginEnabled(plugin, result.enabled)
-			    && properties.isEventEnabled(event, result.enabled);
-			result.encoding = properties.encoding();
+	for (const auto &r : m_rules) {
+		if (r.match(server, channel, nickname, plugin, event)) {
+			result = r.action() == RuleAction::Accept;
 		}
-	} catch (const std::invalid_argument &error) {
-		Logger::warn("rule: %s", error.what());
-		result.enabled = false;
 	}
 
 	return result;

@@ -1,0 +1,25 @@
+---
+name: irccd.parser
+summary: "Configuration files (.ini) parser"
+---
+
+# Constants
+
+| Variable                | Description                               |
+|-------------------------|-------------------------------------------|
+| **DisableVerbosity**    | Disable verbosity                         |
+| **DisableRootSection**  | Disable root section                      |
+| **DisableRedefinition** | Disallow redefinition of the same section |
+
+# Types
+
+| Type                          | Description        |
+|-------------------------------|--------------------|
+| [Parser](Parser/index.html)   | The parser object  |
+| [Section](Section/index.html) | The section object |
+
+# Functions
+
+| Function        | Description         |
+|-----------------|---------------------|
+| [new](new.html) | Create a new parser |

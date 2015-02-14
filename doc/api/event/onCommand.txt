@@ -1,0 +1,22 @@
+---
+name: onCommand
+---
+
+Special commands are not real IRC events. They are called from channel messages with a specific syntax using a delimiter and the plugin name.
+
+For instance, with default irccd parameters, saying on a channel <code>!ask foo</code> will call the special command of the plugin named *ask*, so from the file <code>ask.lua</code>.
+
+Note that the command character is not fixed to '!', it's just the default and can be set by the parameter command-char in a [[User_guide#The-section-server|server]] section.
+
+# SYNOPSIS
+
+````lua
+function onCommand(server, channel, who, message)
+````
+
+# ARGUMENTS
+
+- server, the current server.
+- channel, the channel where the message comes from.
+- who, who invoked the command.
+- message, the real message, without the "!" part.

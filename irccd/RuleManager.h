@@ -43,7 +43,8 @@ extern const std::unordered_set<std::string> RuleValidEvents;
  * @struct RuleResult
  * @brief The result
  */
-struct RuleResult {
+class RuleResult final {
+public:
 	bool		enabled = true;		//!< true if the event must be called
 	std::string	encoding;		//!< the recode information
 };
@@ -107,22 +108,6 @@ public:
 	unsigned count() const;
 
 	/**
-	 * Enable a rule.
-	 *
-	 * @param index the index
-	 * @throw std::out_of_range if index is out of bounds
-	 */
-	void enable(int index);
-
-	/**
-	 * Disable a rule.
-	 *
-	 * @param index the index
-	 * @throw std::out_of_range if index is out of bounds
-	 */
-	void disable(int index);
-
-	/**
 	 * Check the result of a plugin and event. We first make
 	 * the assumption that everything is valid and iterate over
 	 * all the rules to check if the rule disable the previous
@@ -130,14 +115,16 @@ public:
 	 *
 	 * @param server the server name
 	 * @param channel the channel
-	 * @param event the event name
+	 * @param nickname the nickname
 	 * @param plugin the plugin name
-	 * @return the rule result
+	 * @param event the event name
+	 * @return true if must proceedd
 	 */
-	RuleResult solve(const std::string &server,
-			 const std::string &channel,
-			 const std::string &event,
-			 const std::string &plugin) const;
+	bool solve(const std::string &server,
+		   const std::string &channel,
+		   const std::string &nickname,
+		   const std::string &plugin,
+		   const std::string &event) const;
 
 	/**
 	 * Remove all rules.

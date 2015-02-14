@@ -63,12 +63,14 @@ struct Luae::Convert<Rule> {
 private:
 	static void setSequence(lua_State *L, const RuleMap &map, const std::string &field)
 	{
+#if 0
 		LuaeTable::create(L);
 
 		for (const auto &r : map)
 			LuaeTable::set(L, -1, r.first, r.second);
 
 		Luae::setfield(L, -2, field);
+#endif
 	}
 
 	template <typename T>
@@ -77,6 +79,7 @@ private:
 	template <typename T>
 	static void getSequence(lua_State *L, AddFunc<T> add, T &t, const std::string &field)
 	{
+#if 0
 		Luae::getfield(L, -1, field);
 		if (Luae::type(L, -1) == LUA_TTABLE) {
 			LuaeTable::read(L, -1, [&] (lua_State *L, int tkey, int tvalue) {
@@ -85,6 +88,7 @@ private:
 			});
 		}
 		Luae::pop(L);
+#endif
 	}
 
 public:
@@ -106,6 +110,7 @@ public:
 	 */
 	static void push(lua_State *L, const Rule &rule)
 	{
+#if 0
 		const auto &match	= rule.match();
 		const auto &properties	= rule.properties();
 		const auto &encoding	= properties.encoding();
@@ -133,6 +138,7 @@ public:
 			LuaeTable::set(L, -1, "encoding", encoding);
 
 		Luae::setfield(L, -2, "set");
+#endif
 	}
 
 	/**
@@ -145,6 +151,8 @@ public:
 	 */
 	static Rule check(lua_State *L, int index)
 	{
+		return {};
+#if 0
 		RuleMatch match;
 		RuleProperties properties;
 		bool enabled = true;
@@ -183,6 +191,7 @@ public:
 		}
 
 		return Rule(match, properties, enabled);
+#endif
 	}
 };
 
@@ -192,7 +201,7 @@ int l_add(lua_State *L)
 {
 	try {
 		auto rule = Luae::check<Rule>(L, 1);
-		auto index = luaL_optint(L, 2, -1);
+		auto index = luaL_optinteger(L, 2, -1);
 
 		Luae::push(L, RuleManager::instance().add(rule, index));
 	} catch (const std::exception &ex) {
@@ -267,38 +276,6 @@ int l_list(lua_State *L)
 	return 1;
 }
 
-int l_enable(lua_State *L)
-{
-	try {
-		RuleManager::instance().enable(Luae::check<int>(L, 1) - 1);
-	} catch (const std::out_of_range &ex) {
-		Luae::push(L, nullptr);
-		Luae::push(L, ex.what());
-
-		return 2;
-	}
-
-	Luae::push(L, true);
-
-	return 0;
-}
-
-int l_disable(lua_State *L)
-{
-	try {
-		RuleManager::instance().disable(Luae::check<int>(L, 1) - 1);
-	} catch (const std::out_of_range &ex) {
-		Luae::push(L, nullptr);
-		Luae::push(L, ex.what());
-
-		return 2;
-	}
-
-	Luae::push(L, true);
-
-	return 1;
-}
-
 int l_count(lua_State *L)
 {
 	Luae::push(L, static_cast<long>(RuleManager::instance().count()));
@@ -318,8 +295,6 @@ const Luae::Reg functions {
 	{ "get",			l_get		},
 	{ "remove",			l_remove	},
 	{ "list",			l_list		},
-	{ "enable",			l_enable	},
-	{ "disable",			l_disable	},
 	{ "count",			l_count		},
 	{ "clear",			l_clear		}
 };

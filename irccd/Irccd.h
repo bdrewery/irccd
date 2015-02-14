@@ -27,6 +27,7 @@
 #include <exception>
 #include <mutex>
 #include <sstream>
+#include <unordered_set>
 
 #include <Parser.h>
 #include <Singleton.h>
@@ -35,7 +36,7 @@
 
 #include "Server.h"
 
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 #  include "Plugin.h"
 #endif
 
@@ -98,7 +99,7 @@ private:
 	 * Plugin specified by commands line that should be
 	 * loaded after initialization.
 	 */
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 	Wanted m_wantedPlugins;
 #endif
 
@@ -124,18 +125,17 @@ private:
 
 	void readRules(const Parser &config);
 
-	template <typename T>
-	void extractor(T &add, const std::string &value, void (T::*func)(std::string , bool))
+	std::unordered_set<std::string> getList(const Section &s, const std::string &name) const
 	{
-		for (const auto &s : Util::split(value, " \t")) {
-			auto copy = s;
-			auto enabled = copy.size() > 0 && copy[0] != '!';
+		std::unordered_set<std::string> result;
 
-			if (!enabled)
-				copy.erase(0, 1);
-
-			(add.*func)(copy, enabled);
+		if (s.hasOption(name)) {
+			for (const auto &i : Util::split(s.getOption<std::string>(name), " \t")) {
+				result.insert(i);
+			}
 		}
+
+		return result;
 	}
 
 	/* ------------------------------------------------

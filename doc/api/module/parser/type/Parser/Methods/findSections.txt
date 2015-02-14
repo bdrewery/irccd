@@ -1,0 +1,34 @@
+---
+name: findSections
+category: parser
+---
+
+Iterator over all sections that matches name. Note that this function will be relevant only if DisableRedefinition is not set.
+
+The functions returns an iterator which each time it is called, returns a [[irccd-Section|Section]] object.
+
+# Synopsis
+
+````lua
+iterator = function Parser:findSections(name)
+````
+
+# Arguments
+
+- name, the section name
+
+# Returns
+
+- iterator, the iterator function
+
+# Example
+
+````lua
+-- Find all sections named "socket"
+for s in p:findSections("socket") do
+	-- Play with s as a Section object
+	if s:hasOption("type") then
+		print("Type = " .. tostring(s:getOption("type")))
+	end
+end
+````

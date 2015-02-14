@@ -36,12 +36,20 @@ Message::Message(std::shared_ptr<Server> server, std::string channel, std::strin
 
 void Message::call(Plugin &p)
 {
-	p.onMessage(m_server, m_channel, m_nickname, tryEncode(m_message));
+	auto pack = parseMessage(m_message, *m_server, p);
+
+	if (pack.second == MessageType::Message) {
+		p.onMessage(m_server, m_channel, m_nickname, tryEncode(m_message));
+	} else {
+		p.onCommand(m_server, m_channel, m_nickname, tryEncode(m_message));
+	}
 }
 
-const char *Message::name() const
+const char *Message::name(Plugin &p) const
 {
-	return "onMessage";
+	auto pack = parseMessage(m_message, *m_server, p);
+
+	return (pack.second == MessageType::Message) ? "onMessage" : "onCommand";
 }
 
 } // !event

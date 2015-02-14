@@ -36,7 +36,7 @@ void UserMode::call(Plugin &p)
 	p.onUserMode(m_server, m_nickname, m_mode);
 }
 
-const char *UserMode::name() const
+const char *UserMode::name(Plugin &) const
 {
 	return "onUserMode";
 }

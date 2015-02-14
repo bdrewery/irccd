@@ -38,7 +38,7 @@ void Topic::call(Plugin &p)
 	p.onTopic(m_server, m_channel, m_who, tryEncode(m_topic));
 }
 
-const char *Topic::name() const
+const char *Topic::name(Plugin &) const
 {
 	return "onTopic";
 }

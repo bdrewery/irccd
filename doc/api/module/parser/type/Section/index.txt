@@ -1,0 +1,13 @@
+---
+title: Section object
+summary: The section object
+---
+
+# Methods
+
+| Method                              | Description                        |
+|-------------------------------------|------------------------------------|
+| [hasOption](hasOption.html)         | Check if the section has an option |
+| [getOption](getOption.html)         | Get an option                      |
+| [getOptions](getOptions.html)       | Get all options                    |
+| [requireOption](requireOption.html) | Require an option                  |

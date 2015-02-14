@@ -1,0 +1,19 @@
+---
+name: onMode
+---
+
+This event is triggered when someone changed the channel's mode.
+
+# SYNOPSIS
+
+````lua
+function onMode(server, channel, nickname, mode, modeArg)
+````
+
+# ARGUMENTS
+
+- server, the current server.
+- channel, the channel.
+- nickname, the person who changed the mode.
+- mode, the new mode.
+- modeArg, the mode argument, if supported.

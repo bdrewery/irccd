@@ -48,11 +48,13 @@ endif ()
 
 add_subdirectory(cmake)
 
-# Compatibility options
-option(COMPAT_1_1 "Be compatible with 1.1" On)
-
 # Some non portable code
 set(EXTERNDIR "${CMAKE_SOURCE_DIR}/extern")
+
+# Optional Lua
+if (WITH_LUA)
+	add_subdirectory(extern/lua)
+endif ()
 
 # Common code (static library)
 add_subdirectory(common)

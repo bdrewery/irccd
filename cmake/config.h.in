@@ -15,7 +15,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
- 
+
 #ifndef _IRCCD_CONFIG_H_
 #define _IRCCD_CONFIG_H_
 
@@ -29,8 +29,7 @@
 #define VERSION			"@VERSION@"
 #define PREFIX			"@CMAKE_INSTALL_PREFIX@"
 
-#cmakedefine COMPAT_1_1
-#cmakedefine WITH_LUAVER
+#cmakedefine WITH_LUA
 
 // Some non portable code
 #cmakedefine	HAVE_GETOPT	1

@@ -1,0 +1,23 @@
+---
+name: protocol
+since: 1.1
+summary: Socket protocol
+---
+
+# Synopsis
+
+````lua
+socket.protocol = {
+    Tcp,
+    Udp,
+    IPv4,
+    IPv6
+}
+````
+
+# Values
+
+- **Tcp**, IPPROTO_TCP
+- **Udp**, IPPROTO_UDP
+- **IPv4**, IPPROTO_IPV4
+- **IPv6**, IPPROTO_IPv6

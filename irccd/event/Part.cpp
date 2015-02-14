@@ -38,7 +38,7 @@ void Part::call(Plugin &p)
 	p.onPart(m_server, m_channel, m_nickname, tryEncode(m_reason));
 }
 
-const char *Part::name() const
+const char *Part::name(Plugin &) const
 {
 	return "onPart";
 }

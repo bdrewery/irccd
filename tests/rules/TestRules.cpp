@@ -33,7 +33,8 @@ namespace irccd {
  * [rule]	#1
  * servers	= ""
  * channels	= "#staff"
- * set-events	= "!onCommand"
+ * events	= "onCommand"
+ * action	= drop
  *
  * #
  * # However, the same onCommand on #staff is allowed on server "unsafe"
@@ -41,7 +42,8 @@ namespace irccd {
  * [rule]	#2
  * servers	= "unsafe"
  * channels	= "#staff"
- * set-events	= "onCommand"
+ * events	= "onCommand"
+ * action	= accept
  *
  * #
  * # Plugin game is only allowed on server "malikania" and "localhost",
@@ -51,14 +53,15 @@ namespace irccd {
  * # reenabled again with the #3-2.
  * #
  * [rule]	#3-1
- * set-plugins	= "!game"
+ * plugins	= "game"
+ * action	= drop
  *
  * [rule]	#3-2
- * servers	= "malikania"
+ * servers	= "malikania localhost"
  * channels	= "#games"
  * plugins	= "game"
- * set-plugins	= "game"
- * set-events	= "onMessage onCommand"
+ * events	= "onMessage onCommand"
+ * action	= accept
  */
 class RulesTest : public testing::Test {
 protected:
@@ -68,51 +71,50 @@ protected:
 
 		// #1
 		{
-			RuleMatch match;
-			RuleProperties properties;
-
-			match.addChannel("#staff");
-			properties.setEvent("onCommand", false);
-
-			manager.add(Rule(match, properties));
+			manager.add({
+				RuleMap{		},
+				RuleMap{ "#staff"	},
+				RuleMap{		},
+				RuleMap{		},
+				RuleMap{ "onCommand"	},
+				RuleAction::Drop
+			});
 		}
 
 		// #2
 		{
-			RuleMatch match;
-			RuleProperties properties;
-
-			match.addServer("unsafe");
-			match.addChannel("#staff");
-			properties.setEvent("onCommand");
-
-			manager.add(Rule(match, properties));
+			manager.add({
+				RuleMap{ "unsafe"	},
+				RuleMap{ "#staff"	},
+				RuleMap{		},
+				RuleMap{		},
+				RuleMap{ "onCommand"	},
+				RuleAction::Accept
+			});
 		}
 
 		// #3-1
 		{
-			RuleProperties properties;
-
-			properties.setPlugin("game", false);
-
-			manager.add(Rule(RuleMatch(), properties));
+			manager.add({
+				RuleMap{},
+				RuleMap{},
+				RuleMap{},
+				RuleMap{"game"},
+				RuleMap{},
+				RuleAction::Drop
+			});
 		}
 
 		// #3-2
 		{
-			RuleMatch match;
-			RuleProperties properties;
-
-			match.addServer("malikania");
-			match.addServer("localhost");
-			match.addChannel("#games");
-			match.addPlugin("game");
-
-			properties.setPlugin("game");
-			properties.setEvent("onCommand");
-			properties.setEvent("onMessage");
-
-			manager.add(Rule(match, properties));
+			manager.add({
+				RuleMap{ "malikania", "localhost"	},
+				RuleMap{ "#games"			},
+				RuleMap{ 				},
+				RuleMap{ "game"				},
+				RuleMap{ "onCommand", "onMessage"	},
+				RuleAction::Accept
+			});
 		}
 	}
 
@@ -124,49 +126,47 @@ protected:
 
 TEST_F(RulesTest, basicMatch1)
 {
-	RuleMatch m;
+	Rule m;
 
 	/*
 	 * [rule]
 	 */
-	ASSERT_TRUE(m.match("freenode", "#test", "a"));
-	ASSERT_TRUE(m.match("", "", ""));
+	ASSERT_TRUE(m.match("freenode", "#test", "a", "", ""));
+	ASSERT_TRUE(m.match("", "", "", "", ""));
 }
 
 TEST_F(RulesTest, basicMatch2)
 {
-	RuleMatch m;
+	Rule m{RuleMap{"freenode"}};
 
 	/*
 	 * [rule]
 	 * servers	= "freenode"
 	 */
-	m.addServer("freenode");
 
-	ASSERT_TRUE(m.match("freenode", "#test", "a"));
-	ASSERT_FALSE(m.match("malikania", "#test", "a"));
+	ASSERT_TRUE(m.match("freenode", "#test", "a", "", ""));
+	ASSERT_FALSE(m.match("malikania", "#test", "a", "", ""));
+	ASSERT_TRUE(m.match("freenode", "", "jean", "", "onMessage"));
 }
 
 TEST_F(RulesTest, basicMatch3)
 {
-	RuleMatch m;
+	Rule m{RuleMap{"freenode"}, RuleMap{"#staff"}};
 
 	/*
 	 * [rule]
 	 * servers	= "freenode"
 	 * channels	= "#staff"
 	 */
-	m.addServer("freenode");
-	m.addChannel("#staff");
 
-	ASSERT_TRUE(m.match("freenode", "#staff", "a"));
-	ASSERT_FALSE(m.match("freenode", "#test", "a"));
-	ASSERT_FALSE(m.match("malikania", "#staff", "a"));
+	ASSERT_TRUE(m.match("freenode", "#staff", "a", "", ""));
+	ASSERT_FALSE(m.match("freenode", "#test", "a", "", ""));
+	ASSERT_FALSE(m.match("malikania", "#staff", "a", "", ""));
 }
 
 TEST_F(RulesTest, basicMatch4)
 {
-	RuleMatch m;
+	Rule m{RuleMap{"malikania"}, RuleMap{"#staff"}, RuleMap{"a"}};
 
 	/*
 	 * [rule]
@@ -174,130 +174,24 @@ TEST_F(RulesTest, basicMatch4)
 	 * channels	= "#staff"
 	 * plugins	= "a"
 	 */
-	m.addServer("malikania");
-	m.addChannel("#staff");
-	m.addPlugin("a");
 
-	ASSERT_TRUE(m.match("malikania", "#staff", "a"));
-	ASSERT_FALSE(m.match("malikania", "#staff", "b"));
-	ASSERT_FALSE(m.match("freenode", "#staff", "a"));
+	ASSERT_TRUE(m.match("malikania", "#staff", "a", "",""));
+	ASSERT_FALSE(m.match("malikania", "#staff", "b", "", ""));
+	ASSERT_FALSE(m.match("freenode", "#staff", "a", "", ""));
 }
 
 TEST_F(RulesTest, complexMatch1)
 {
-	RuleMatch m;
+	Rule m{RuleMap{"malikania", "freenode"}};
 
 	/*
 	 * [rule]
 	 * servers	= "malikania freenode"
 	 */
-	m.addServer("malikania");
-	m.addServer("freenode");
 
-	ASSERT_TRUE(m.match("malikania", "", ""));
-	ASSERT_TRUE(m.match("freenode", "", ""));
-	ASSERT_FALSE(m.match("no", "", ""));
-}
-
-TEST_F(RulesTest, complexMatch2)
-{
-	RuleMatch m;
-
-	/*
-	 * [rule]
-	 * servers	= "malikania !freenode"
-	 */
-	m.addServer("malikania");
-	m.addServer("freenode", false);
-
-	ASSERT_TRUE(m.match("malikania", "", ""));
-	ASSERT_FALSE(m.match("freenode", "", ""));
-	ASSERT_FALSE(m.match("no", "", ""));
-}
-
-TEST_F(RulesTest, complexMatch3)
-{
-	RuleMatch m;
-
-	/*
-	 * [rule]
-	 * servers	= "malikania !freenode localhost"
-	 * channels	= "#staff !#test"
-	 */
-	m.addServer("malikania");
-	m.addServer("freenode", false);
-	m.addServer("localhost");
-	m.addChannel("#staff");
-	m.addChannel("#test", false);
-
-	ASSERT_FALSE(m.match("", "", ""));
-	ASSERT_FALSE(m.match("", "#games", ""));
-	ASSERT_FALSE(m.match("", "#test", ""));
-
-	ASSERT_TRUE(m.match("malikania", "#staff", ""));
-	ASSERT_TRUE(m.match("localhost", "#staff", ""));
-	ASSERT_FALSE(m.match("malikania", "#test", ""));
-	ASSERT_FALSE(m.match("localhost", "#test", ""));
-	ASSERT_FALSE(m.match("freenode", "#staff", ""));
-	ASSERT_FALSE(m.match("freenode", "#test", ""));
-	ASSERT_FALSE(m.match("no", "", ""));
-	ASSERT_FALSE(m.match("no", "#test", ""));
-	ASSERT_FALSE(m.match("no", "#staff", ""));
-}
-
-TEST_F(RulesTest, complexMatch4)
-{
-	RuleMatch m;
-
-	/*
-	 * [rule]
-	 * servers	= "malikania !freenode localhost"
-	 * channels	= "#games !#test"
-	 * plugins	= "a !b"
-	 */
-	m.addServer("malikania");
-	m.addServer("freenode", false);
-	m.addServer("localhost");
-	m.addChannel("#games");
-	m.addChannel("#test", false);
-	m.addPlugin("a");
-	m.addPlugin("b", false);
-
-	ASSERT_FALSE(m.match("", "", ""));
-	ASSERT_FALSE(m.match("", "", "a"));
-	ASSERT_FALSE(m.match("", "", "b"));
-	ASSERT_FALSE(m.match("", "#games", ""));
-	ASSERT_FALSE(m.match("", "#test", ""));
-	ASSERT_FALSE(m.match("", "#games", "a"));
-	ASSERT_FALSE(m.match("", "#test", "b"));
-
-	ASSERT_FALSE(m.match("malikania", "", ""));
-	ASSERT_FALSE(m.match("malikania", "#games", ""));
-	ASSERT_FALSE(m.match("malikania", "#test", ""));
-	ASSERT_FALSE(m.match("malikania", "", "a"));
-	ASSERT_FALSE(m.match("malikania", "", "b"));
-	ASSERT_TRUE(m.match("malikania", "#games", "a"));
-	ASSERT_FALSE(m.match("malikania", "#games", "b"));
-	ASSERT_FALSE(m.match("malikania", "#test", "a"));
-	ASSERT_FALSE(m.match("malikania", "#test", "b"));
-
-	ASSERT_FALSE(m.match("localhost", "", ""));
-	ASSERT_FALSE(m.match("localhost", "#games", ""));
-	ASSERT_FALSE(m.match("localhost", "#test", ""));
-	ASSERT_FALSE(m.match("localhost", "", "a"));
-	ASSERT_FALSE(m.match("localhost", "", "b"));
-	ASSERT_TRUE(m.match("localhost", "#games", "a"));
-	ASSERT_FALSE(m.match("localhost", "#games", "b"));
-	ASSERT_FALSE(m.match("localhost", "#test", "a"));
-	ASSERT_FALSE(m.match("localhost", "#test", "b"));
-
-	ASSERT_FALSE(m.match("freenode", "", ""));
-	ASSERT_FALSE(m.match("freenode", "#games", ""));
-	ASSERT_FALSE(m.match("freenode", "#test", ""));
-	ASSERT_FALSE(m.match("freenode", "#games", "a"));
-	ASSERT_FALSE(m.match("freenode", "#games", "b"));
-	ASSERT_FALSE(m.match("freenode", "#test", "a"));
-	ASSERT_FALSE(m.match("freenode", "#test", "b"));
+	ASSERT_TRUE(m.match("malikania", "", "", "", ""));
+	ASSERT_TRUE(m.match("freenode", "", "", "", ""));
+	ASSERT_FALSE(m.match("no", "", "", "", ""));
 }
 
 TEST_F(RulesTest, basicSolve)
@@ -305,24 +199,19 @@ TEST_F(RulesTest, basicSolve)
 	auto &manager = RuleManager::instance();
 
 	/* Allowed */
-	auto result = manager.solve("malikania", "#staff", "onMessage", "a");
-	ASSERT_TRUE(result.enabled);
+	ASSERT_TRUE(manager.solve("malikania", "#staff", "", "a", "onMessage"));
 
 	/* Allowed */
-	result = manager.solve("freenode", "#staff", "onTopic", "b");
-	ASSERT_TRUE(result.enabled);
+	ASSERT_TRUE(manager.solve("freenode", "#staff", "", "b", "onTopic"));
 
 	/* Not allowed */
-	result = manager.solve("malikania", "#staff", "onCommand", "c");
-	ASSERT_FALSE(result.enabled);
+	ASSERT_FALSE(manager.solve("malikania", "#staff", "", "", "onCommand"));
 
 	/* Not allowed */
-	result = manager.solve("freenode", "#staff", "onCommand", "c");
-	ASSERT_FALSE(result.enabled);
+	ASSERT_FALSE(manager.solve("freenode", "#staff", "", "c", "onCommand"));
 
 	/* Allowed */
-	result = manager.solve("unsafe", "#staff", "onCommand", "c");
-	ASSERT_TRUE(result.enabled);
+	ASSERT_TRUE(manager.solve("unsafe", "#staff", "", "c", "onCommand"));
 }
 
 TEST_F(RulesTest, gamesSolve)
@@ -330,28 +219,22 @@ TEST_F(RulesTest, gamesSolve)
 	auto &manager = RuleManager::instance();
 
 	/* Allowed */
-	auto result = manager.solve("malikania", "#games", "onMessage", "game");
-	ASSERT_TRUE(result.enabled);
+	ASSERT_TRUE(manager.solve("malikania", "#games", "", "game", "onMessage"));
 
 	/* Allowed */
-	result = manager.solve("localhost", "#games", "onMessage", "game");
-	ASSERT_TRUE(result.enabled);
+	ASSERT_TRUE(manager.solve("localhost", "#games", "", "game", "onMessage"));
 
 	/* Allowed */
-	result = manager.solve("malikania", "#games", "onCommand", "game");
-	ASSERT_TRUE(result.enabled);
+	ASSERT_TRUE(manager.solve("malikania", "#games", "", "game", "onCommand"));
 
 	/* Not allowed */
-	result = manager.solve("malikania", "#games", "onQuery", "game");
-	ASSERT_FALSE(result.enabled);
+	ASSERT_FALSE(manager.solve("malikania", "#games", "", "game", "onQuery"));
 
 	/* Not allowed */
-	result = manager.solve("freenode", "#no", "onMessage", "game");
-	ASSERT_FALSE(result.enabled);
+	ASSERT_FALSE(manager.solve("freenode", "#no", "", "game", "onMessage"));
 
 	/* Not allowed */
-	result = manager.solve("malikania", "#test", "onMessage", "game");
-	ASSERT_FALSE(result.enabled);
+	ASSERT_FALSE(manager.solve("malikania", "#test", "", "game", "onMessage"));
 }
 
 } // !irccd

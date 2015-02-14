@@ -1,0 +1,19 @@
+---
+name: onKick
+---
+
+This event is triggered when someone has been kicked from a channel.
+
+# SYNOPSIS
+
+````lua
+function onKick(server, channel, who, kicked, reason)
+````
+
+# ARGUMENTS
+
+- server, the current server.
+- channel, the channel.
+- who, who kicked the person.
+- kicked, the kicked person.
+- reason, an optional reason.

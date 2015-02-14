@@ -42,7 +42,7 @@ void EventQueue::routine()
 
 			event = &m_list.front();
 		}
-	
+
 		PluginManager::instance().forAll([=] (auto &p) {
 			const auto &manager = RuleManager::instance();
 
@@ -50,27 +50,30 @@ void EventQueue::routine()
 				auto result = manager.solve(
 				    (*event)->server(),
 				    (*event)->target(),
-				    (*event)->name(),
-				    p->getName()
+				    "",				 // TODO: ADD ORIGINATOR
+				    p->getName(),
+				    (*event)->name(*p)
 				);
 
-				if (!result.enabled) {
+				if (!result) {
 					Logger::debug("rule: skip on match %s, %s, %s, %s",
 					    (*event)->server().c_str(),
 					    (*event)->target().c_str(),
-					    (*event)->name(),
+					    (*event)->name(*p),
 					    p->getName().c_str()
 					);
 
 					return;
 				}
 
+#if 0
 				if (result.encoding.size() > 0) {
 					(*event)->encode(result.encoding);
 
 					Logger::debug("rule: encoding event %s from %s",
 					    (*event)->name(), result.encoding.c_str());
 				}
+#endif
 			}
 
 			try {

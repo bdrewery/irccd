@@ -1,0 +1,15 @@
+---
+title: Parser object
+summary: The parser object
+---
+
+# Methods
+
+| Method                                | Description                |
+|---------------------------------------|----------------------------|
+| [open](open.html)                     | Open the file              |
+| [findSections](findSections.html)     | Find sections by name      |
+| [hasSection](hasSection.html)         | Check if a section exists  |
+| [getSection](getSection.html)         | Get a section              |
+| [requireSection](requireSection.html) | Require a section          |
+| [onLog](onLog.html)                   | Specify a logging function |

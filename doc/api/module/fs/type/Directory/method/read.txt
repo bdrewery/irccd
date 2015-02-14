@@ -1,0 +1,32 @@
+---
+name: read
+category: fs
+---
+
+Iterate over the entries. This function returns an iterator which each time it is called, return 2 arguments, the entry and a boolean telling if is a directory. 
+
+# Synopsis
+
+````lua
+name, isdir function Directory:read()
+````
+
+# Returns
+
+- name, the entry name
+- isdir, true if it is a directory
+
+# Example
+
+````lua
+local d = fs.opendir("/")
+
+-- Read the directory "/"
+for e, isdir in d:read() do
+        if isdir then
+                print(e .. " is a directory")
+        else
+                print("=>" .. e)
+        end
+end
+````

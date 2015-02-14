@@ -37,7 +37,7 @@ void Join::call(Plugin &p)
 	p.onJoin(m_server, m_channel, m_nickname);
 }
 
-const char *Join::name() const
+const char *Join::name(Plugin &) const
 {
 	return "onJoin";
 }

@@ -35,7 +35,7 @@ void Whois::call(Plugin &p)
 	p.onWhois(m_server, m_info);
 }
 
-const char *Whois::name() const
+const char *Whois::name(Plugin &) const
 {
 	return "onWhois";
 }

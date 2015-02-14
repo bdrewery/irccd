@@ -19,7 +19,7 @@
 function(check_mandatory prefix list)
 	# Check mandatory arguments
 	foreach(a ${list})
-		if(NOT ${prefix}_${a})
+		if (NOT ${prefix}_${a})
 			message(FATAL_ERROR "Please specify ${a} parameter")
 		endif ()
 	endforeach()
@@ -44,7 +44,7 @@ function(apply_flags target flags)
 	endif()
 
 	# Remove Windows useless warnings
-	if(WIN32 AND MSVC)
+	if (WIN32 AND MSVC)
 		target_compile_definitions(
 			${target}
 			PRIVATE "_CRT_SECURE_NO_WARNINGS"
@@ -54,13 +54,13 @@ function(apply_flags target flags)
 			${target}
 			PRIVATE /wd4996 /wd4244 /wd4267 /wd4133
 		)
-	endif()
+	endif ()
 endfunction()
 
 function(apply_libraries target libs)
-	if(${libs})
+	if (${libs})
 		target_link_libraries(${target} ${${libs}})
-	endif()
+	endif ()
 endfunction()
 
 function(add_nsis_install command)
@@ -137,7 +137,7 @@ function(define_executable)
 			LINK_FLAGS /SAFESEH:NO
 		)
 	endif()
-	
+
 	# Install the target
 	if(EXE_INSTALL_RUNTIME)
 		install(
@@ -170,7 +170,7 @@ macro(define_plugin name file description default)
 endmacro()
 
 # ---------------------------------------------------------
-# define_man(file man)
+# irccd_define_man(file man)
 #
 # Parameters:
 #	file		- The file name to build
@@ -178,7 +178,7 @@ endmacro()
 #
 # This function configure the manual and install it if WITH_MAN is set.
 #
-function(define_man file man)
+function(irccd_define_man file man)
 	if(WITH_MAN)
 		set(path "${doc_SOURCE_DIR}/man/${file}.in")
 		set(output "${doc_BINARY_DIR}/${file}")
@@ -191,3 +191,154 @@ function(define_man file man)
 		)
 	endif()
 endfunction()
+
+# ---------------------------------------------------------
+# irccd_verify_args(prefix list)
+#
+# Parameters:
+#	prefix		- The prefix of variables (e.g FOO)
+#	list		- The list of variables that must be set(e.g. A B)
+#
+# Verify that some args are well defined.
+#
+function(irccd_verify_args prefix list)
+	foreach (v ${list})
+		if (NOT ${prefix}_${v})
+			message(FATAL_ERROR "Please define ${v}")
+		endif ()
+	endforeach ()
+endfunction()
+
+function(irccd_generate_html)
+	set(oneValueArgs MASTER TARGET PREFIX)
+	set(multiValueArgs SOURCES)
+	set(mandatory MASTER TARGET SOURCES PREFIX)
+
+	cmake_parse_arguments(HTML "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+	irccd_verify_args(HTML "${mandatory}")
+
+	foreach (s ${HTML_SOURCES})
+		get_filename_component(input ${s} ABSOLUTE)
+		file(RELATIVE_PATH base ${CMAKE_CURRENT_SOURCE_DIR} ${input})
+		string(REGEX REPLACE "^(.*)\\.txt$" "\\1.html" outputname ${base})
+
+		# Append to outputs and sources
+		list(APPEND outputs ${WITH_DOCS_DIRECTORY}/${HTML_PREFIX}/${outputname})
+		list(APPEND sources ${input})
+
+		# Update links
+		get_filename_component(directory ${input} DIRECTORY)
+
+		pandoc(
+			SOURCES ${input}
+			OUTPUT ${WITH_DOCS_DIRECTORY}/${HTML_PREFIX}/${outputname}
+			MAKE_DIRECTORY
+			FROM markdown TO html5
+			TEMPLATE ${doc_BINARY_DIR}/master/${HTML_MASTER}
+			DEPENDS docs-master
+		)
+	endforeach ()
+
+	add_custom_target(
+		${HTML_TARGET}
+		DEPENDS ${outputs} docs-master
+		SOURCES ${sources}
+		COMMENT "Generating HTML documentation `${HTML_TARGET}`"
+	)
+
+	add_dependencies(docs ${HTML_TARGET})
+endfunction()
+
+## ---------------------------------------------------------
+## irccd_generate_api(
+##	TARGET target
+##	CATEGORY category
+##	DIRECTORY directory
+##	SOURCES file ...
+##	TYPE function|enum|table
+##	[INDEX file]
+## )
+##
+## Generate Lua API documentation from markdown using pandoc. Be sure
+## that a target `api` is created before invoking this function.
+##
+#function(irccd_generate_api)
+#	set(oneValueArgs CATEGORY DIRECTORY TARGET INDEX)
+#	set(multiValueArgs SOURCES TYPE)
+#	set(mandatory TARGET DIRECTORY CATEGORY SOURCES)
+#
+#	cmake_parse_arguments(API "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+#	irccd_verify_args(API "${mandatory}")
+#
+#	if (API_TYPE MATCHES "function")
+#		set(template function.html)
+#	elseif (API_TYPE MATCHES "enum")
+#		set(template enum.html)
+#	elseif (API_TYPE MATCHES "event")
+#		set(template event.html)
+#	elseif (API_TYPE MATCHES "table")
+#		set(template table.html)
+#	elseif (API_TYPE MATCHES "method")
+#		set(template method.html)
+#	else ()
+#		message(FATAL_ERROR "invalid TYPE given: ${API_TYPE}")
+#	endif ()
+#
+#	#
+#	# Variables set:
+#	#   outputbase		- Base directory for the files
+#	#
+#	set(outputbase ${WITH_DOCS_DIRECTORY}/html/doc/api/${API_DIRECTORY})
+#
+#	#
+#	# Iterate over all sources and build them one by one
+#	#
+#	foreach (f ${API_SOURCES})
+#		get_filename_component(inputpath ${f} ABSOLUTE)
+#		get_filename_component(inputname ${f} NAME)
+#		string(REGEX REPLACE "^(.*)\\.txt$" "\\1.html" outputname ${inputname})
+#		list(APPEND depends ${outputbase}/${outputname})
+#		list(APPEND sources ${inputpath})
+#
+#		pandoc(
+#			MAKE_DIRECTORY
+#			FROM markdown
+#			TO html5
+#			OUTPUT ${outputbase}/${outputname}
+#			SOURCES ${inputpath}
+#			TEMPLATE ${WITH_DOCS_DIRECTORY}/layouts/${template}
+#			DEPENDS html
+#		)
+#	endforeach ()
+#
+#	# Optional index
+#	if (API_INDEX)
+#		get_filename_component(indexpath ${API_INDEX} ABSOLUTE)
+#
+#		list(APPEND sources ${indexpath})
+#		list(APPEND depends ${outputbase}/index.html)
+#
+#		pandoc(
+#			MAKE_DIRECTORY
+#			FROM markdown
+#			TO html5
+#			OUTPUT ${outputbase}/index.html
+#			SOURCES ${indexpath}
+#			TEMPLATE ${WITH_DOCS_DIRECTORY}/layouts/module.html
+#			DEPENDS html
+#		)
+#	endif ()
+#
+#	add_custom_target(
+#		api-${API_TARGET}
+#		COMMENT "Built Lua API ${API_CATEGORY}"
+#		DEPENDS ${depends}
+#		SOURCES ${sources}
+#	)
+#
+#	if (NOT TARGET api)
+#		message(FATAL_ERROR "No target `api' defined")
+#	endif ()
+#
+#	add_dependencies(api api-${API_TARGET})
+#endfunction()

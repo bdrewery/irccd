@@ -1,0 +1,19 @@
+# util.date
+
+This function returns a date object with a specific time from the system. If no timestamp is provided, it use the current date.
+
+## Function
+
+### SYNOPSIS
+
+````lua
+date = function util.date(timestamp)
+````
+
+### ARGUMENTS
+
+- timestamp, the optional timestamp
+
+### RETURNS
+
+- date, the date (see [[irccd-Date|Date]])

@@ -25,10 +25,10 @@
  *
  * @warning Do not rename the include guard, it conflicts with a Windows header
  */
- 
+
 #include <config.h>
 
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 
 #include <memory>
 #include <unordered_map>

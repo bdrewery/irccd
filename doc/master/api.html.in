@@ -1,0 +1,31 @@
+%header%
+
+%modules%
+
+  <div id="content">
+    <div id="info">
+      $if(enum)$
+      <h1 id="content-title">Enumeration (table): <span class="content-mononame">$enum$</span></h1>
+      $endif$
+
+      $if(method)$
+      <h1 id="content-title">Event: <span class="content-mononame">$method$</span></h1>
+      $endif$
+
+      $if(function)$
+      <h1 id="content-title">Function: <span class="content-mononame">$function$</span></h1>
+      $endif$
+
+      $if(module)$
+      <h1 id="content-title">Module: <span class="content-mononame">$module$</span></h1>
+      $endif$
+
+      $if(since)$
+      <p>Since version $since$</p>
+      $endif$
+    </div><!-- !info -->
+
+    $body$
+  </div><!-- !content -->
+
+%footer%

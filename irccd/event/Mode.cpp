@@ -39,7 +39,7 @@ void Mode::call(Plugin &p)
 	p.onMode(m_server, m_channel, m_nickname, m_mode, m_argument);
 }
 
-const char *Mode::name() const
+const char *Mode::name(Plugin &) const
 {
 	return "onMode";
 }

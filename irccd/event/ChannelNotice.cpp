@@ -38,7 +38,7 @@ void ChannelNotice::call(Plugin &p)
 	p.onChannelNotice(m_server, m_who, m_channel, tryEncode(m_notice));
 }
 
-const char *ChannelNotice::name() const
+const char *ChannelNotice::name(Plugin &) const
 {
 	return "onChannelNotice";
 }

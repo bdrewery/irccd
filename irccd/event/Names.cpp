@@ -36,7 +36,7 @@ void Names::call(Plugin &p)
 	p.onNames(m_server, m_channel, m_names);
 }
 
-const char *Names::name() const
+const char *Names::name(Plugin &) const
 {
 	return "onNames";
 }

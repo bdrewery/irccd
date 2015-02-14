@@ -1,0 +1,22 @@
+---
+category: socket
+since: 1.1
+---
+
+Receive some data. Get some data from a peer, typically UDP.
+
+# Synopsis
+
+````lua
+msg, err = function Socket:receiveFrom(howmany, from)
+````
+
+# Arguments
+
+- howmany, how much to receive
+- from, the [[irccd-SocketAddress|SocketAddress]] object from
+
+# Returns
+
+- msg, the read string or nil
+- err, the error message

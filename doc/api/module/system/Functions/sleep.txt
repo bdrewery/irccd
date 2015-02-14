@@ -1,0 +1,20 @@
+---
+category: system
+since: 1.1.
+---
+
+# system.sleep
+
+Sleep for seconds. Suspend the execution thread.
+
+## Function
+
+### SYNOPSIS
+
+````lua
+function system.sleep(sec)
+````
+
+### ARGUMENTS
+
+- sec, the number of seconds

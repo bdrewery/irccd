@@ -1,0 +1,20 @@
+---
+name: requireOption
+category: parser
+---
+
+Requires an option. This returns a value but if the option is not found it calls luaL_error, thus aborting the script.
+
+# Synopsis
+
+````lua
+value = function Section:requireOption(name)
+````
+
+# Arguments
+
+- name, the option name
+
+# Returns
+
+- value, the option value.

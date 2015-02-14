@@ -1,0 +1,20 @@
+---
+category: system
+since: 1.1
+---
+
+# system.ticks
+
+Get the time spent from start. Get how many milliseconds spent since the irccd startup.
+
+## Function
+
+### SYNOPSIS
+
+````lua
+ticks = function system.ticks()
+````
+
+### RETURNS
+
+- ticks, the number of milliseconds

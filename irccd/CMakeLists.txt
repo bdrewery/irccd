@@ -16,18 +16,10 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Project
 project(irccd)
 
-add_subdirectory(command)
-add_subdirectory(event)
-add_subdirectory(lua)
-add_subdirectory(server)
-
-source_group(command FILES ${COMMAND_SOURCES})
-source_group(event FILES ${EVENT_SOURCES})
-source_group(lua FILES ${LUA_SOURCES})
-source_group(server FILES ${SERVER_SOURCES})
+include(command/Command.cmake)
+include(server/Server.cmake)
 
 set(
 	SOURCES
@@ -52,17 +44,6 @@ set(
 	main.cpp
 	System.cpp
 	System.h
-)
-
-set(
-	LIBRARIES
-	ircclient
-	common
-)
-
-set(
-	INCLUDES
-	${CMAKE_SOURCE_DIR}
 )
 
 # ---------------------------------------------------------
@@ -95,89 +76,57 @@ endif ()
 # Optional Lua
 # ---------------------------------------------------------
 
-if (WITH_LUAVER)
-	set(HAVE_LUA_MESSAGE "disabled (Lua not found)" CACHE INTERNAL "")
-	set(HAVE_LUA FALSE CACHE INTERNAL "")
+if (WITH_LUA)
+	include(event/Event.cmake)
+	include(lua/Lua.cmake)
 
-	if (WITH_LUAVER MATCHES "5.2")
-		find_package(Lua52)
-		list(APPEND INCLUDES ${LUA52_INCLUDE_DIR})
-		list(APPEND LIBRARIES ${LUA52_LIBRARIES})
+	add_subdirectory(plugins)
 
-		if (LUA52_FOUND)
-			set(HAVE_LUA_MESSAGE "enabled (Lua 5.2)" CACHE INTERNAL "")
-			set(HAVE_LUA TRUE CACHE INTERNAL "")
-		endif ()
-	elseif (WITH_LUAVER MATCHES "5.1")
-		find_package(Lua51)
-		list(APPEND INCLUDES ${LUA_INCLUDE_DIR})
-		list(APPEND LIBRARIES ${LUA_LIBRARIES})
+	list(
+		APPEND
+		SOURCES
+		${LUA_SOURCES}
+		${EVENT_SOURCES}
+		EventQueue.cpp
+		EventQueue.h
+		Luae.cpp
+		Luae.h
+		Pipe.cpp
+		Pipe.h
+		PipeManager.cpp
+		PipeManager.h
+		Plugin.cpp
+		Plugin.h
+		PluginManager.cpp
+		PluginManager.h
+		Process.cpp
+		Process.h
+		Rule.cpp
+		Rule.h
+		RuleManager.cpp
+		RuleManager.h
+		Test.cpp
+		Test.h
+		Thread.cpp
+		Thread.h
+		Utf8.cpp
+		Utf8.h
+	)
 
-		if (LUA51_FOUND)
-			set(HAVE_LUA_MESSAGE "enabled (Lua 5.1)" CACHE INTERNAL "")
-			set(HAVE_LUA TRUE CACHE INTERNAL "")
-		endif ()
-	elseif (WITH_LUAVER MATCHES "JIT")
-		find_package(LuaJIT)
-		list(APPEND INCLUDES ${LUAJIT_INCLUDE_DIR})
-		list(APPEND LIBRARIES ${LUAJIT_LIBRARIES})
+	list(APPEND LIBRARIES lua)
 
-		if (LuaJIT_FOUND)
-			set(HAVE_LUA_MESSAGE "enabled (LuaJIT)" CACHE INTERNAL "")
-			set(HAVE_LUA TRUE CACHE INTERNAL "")
-		endif ()
-	else ()
-		message(FATAL_ERROR "Unknown Lua version selected ${WITH_LUAVER}")
-	endif ()
-
-	if (HAVE_LUA)
-		add_subdirectory(plugins)
-
-		# Optional Lua sources
-		list(
-			APPEND
-			SOURCES
-			${LUA_SOURCES}
-			${EVENT_SOURCES}
-			EventQueue.cpp
-			EventQueue.h
-			Luae.cpp
-			Luae.h
-			Pipe.cpp
-			Pipe.h
-			PipeManager.cpp
-			PipeManager.h
-			Plugin.cpp
-			Plugin.h
-			PluginManager.cpp
-			PluginManager.h
-			Process.cpp
-			Process.h
-			Rule.cpp
-			Rule.h
-			RuleManager.cpp
-			RuleManager.h
-			Test.cpp
-			Test.h
-			Thread.cpp
-			Thread.h
-			Utf8.cpp
-			Utf8.h
-		)
-
-		list(
-			APPEND
-			SOURCES
-			plugins/antiflood.lua
-			plugins/ask.lua
-			plugins/auth.lua
-			plugins/badwords.lua
-			plugins/date.lua
-			plugins/history.lua
-			plugins/logger.lua
-			plugins/roulette.lua
-		)
-	endif ()
+	list(
+		APPEND
+		SOURCES
+		plugins/antiflood.lua
+		plugins/ask.lua
+		plugins/auth.lua
+		plugins/badwords.lua
+		plugins/date.lua
+		plugins/history.lua
+		plugins/logger.lua
+		plugins/roulette.lua
+	)
 else ()
 	set(HAVE_LUA_MESSAGE "disabled by user" CACHE INTERNAL "")
 	set(HAVE_LUA FALSE CACHE INTERNAL "")
@@ -186,9 +135,8 @@ endif ()
 define_executable(
 	TARGET irccd
 	SOURCES ${SOURCES}
-	FLAGS ${FLAGS}
-	INCLUDES ${INCLUDES}
-	LIBRARIES ${LIBRARIES}
+	INCLUDES ${INCLUDES} ${CMAKE_SOURCE_DIR}
+	LIBRARIES ${LIBRARIES} ircclient common
 	INSTALL_RUNTIME bin/
 )
 

@@ -45,23 +45,7 @@ set(SOURCES
 )
 
 if(UNIX)
-	if(WITH_BUNDLE_XDGBASEDIR)
-		add_subdirectory(
-			"${CMAKE_SOURCE_DIR}/extern/libxdg-basedir"
-			"${CMAKE_BINARY_DIR}/libxdg-basedir"
-		)
-
-		list(
-			APPEND
-			LIBRARIES
-			xdg-basedir
-		)
-	else()
-		find_package(XDG REQUIRED)
-
-		list(APPEND INCLUDES ${XDG_INCLUDE_DIR})
-		list(APPEND LIBRARIES ${XDG_LIBRARY})
-	endif()
+	list(APPEND LIBRARIES xdg-basedir)
 elseif(WIN32)
 	list(APPEND LIBRARIES "ws2_32")
 	list(APPEND LIBRARIES "gdi32")

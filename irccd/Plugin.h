@@ -123,11 +123,6 @@ private:
 
 	std::string getGlobal(const std::string &name);
 
-	void parseMessage(const std::string &message, 
-			  const std::shared_ptr<Server> &server,
-			  std::string &result,
-			  bool &iscommand);
-
 	void pushObjects(lua_State *) const
 	{
 		// Dummy, stop recursion
@@ -221,6 +216,18 @@ public:
 	/* ------------------------------------------------
 	 * Plugin callbacks
 	 * ------------------------------------------------ */
+
+	/**
+	 * On channel message. This event will call onMessage or
+	 * onCommand if the messages starts with the command character
+	 * plus the plugin name.
+	 *
+	 * @param server the server
+	 * @param channel the channel
+	 * @param nick the user who sent the message
+	 * @param message the message or command
+	 */
+	void onCommand(std::shared_ptr<Server> server, std::string channel, std::string nick, std::string message);
 
 	/**
 	 * On successful connection.
@@ -348,10 +355,19 @@ public:
 	 * On user query.
 	 *
 	 * @param server the server
-	 * @param who the user who sent the notice
+	 * @param who the user who sent the query
 	 * @param message the message
 	 */
 	void onQuery(std::shared_ptr<Server> server, std::string who, std::string message);
+
+	/**
+	 * On user query command.
+	 *
+	 * @param server the server
+	 * @param who the user who sent the query
+	 * @param message the message
+	 */
+	void onQueryCommand(std::shared_ptr<Server> server, std::string who, std::string message);
 
 	/**
 	 * On reload.

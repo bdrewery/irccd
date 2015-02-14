@@ -83,10 +83,12 @@ add_subdirectory(
 	"${CMAKE_BINARY_DIR}/libircclient"
 )
 
-add_subdirectory(
-	"${CMAKE_SOURCE_DIR}/extern/libxdg-basedir"
-	"${CMAKE_BINARY_DIR}/libxdg-basedir"
-)
+if (UNIX)
+	add_subdirectory(
+		"${CMAKE_SOURCE_DIR}/extern/libxdg-basedir"
+		"${CMAKE_BINARY_DIR}/libxdg-basedir"
+	)
+endif ()
 
 add_subdirectory(
 	"${CMAKE_SOURCE_DIR}/extern/gtest"

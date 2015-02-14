@@ -24,11 +24,19 @@
 # WITH_LUA		Enable Lua (default: on)
 # WITH_TESTS		Enable unit testing (default: on)
 # WITH_DOXYGEN		Enable internal irccd documentation (default: on)
+# WITH_DOCS		Enable building of documentation (default: on)
+# WITH_DOCS_DIRECTORY	Selects the output directory for the documentation (default: ${CMAKE_BINARY_DIR}/docs)
 #
 option(WITH_IPV6 "Enable IPv6" On)
 option(WITH_SSL "Enable SSL" On)
 option(WITH_LIBICONV "Enable libiconv for reencoding" On)
+option(WITH_LUA "Enable embedded Lua (5.3)" On)
 option(WITH_TESTS "Enable unit testing" On)
+option(WITH_DOXYGEN "Enable doxygen" On)
+option(WITH_DOCS "Enable building of documentation" On)
+
+set(WITH_DOCS_DIRECTORY ${CMAKE_BINARY_DIR}/docs
+	CACHE STRING "Directory where to output docs")
 
 # Manual pages on Windows are pretty useless
 if (WIN32)
@@ -44,9 +52,3 @@ endif ()
 #
 option(WITH_MAN "Install man pages" ${USE_MAN})
 option(WITH_SYSTEMD "Install systemd service" Off)
-
-# Lua version:
-#
-# WITH_LUAVER		Selects the Lua version, allowed: 5.1, 5.2 and JIT (default: 5.2)
-#
-set(WITH_LUAVER "5.2" CACHE STRING "Lua version")

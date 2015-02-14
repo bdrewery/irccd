@@ -34,7 +34,7 @@ void Connect::call(Plugin &p)
 	p.onConnect(m_server);
 }
 
-const char *Connect::name() const
+const char *Connect::name(Plugin &) const
 {
 	return "onConnect";
 }

@@ -47,7 +47,7 @@
 #include "command/UserMode.h"
 #include "command/Whois.h"
 
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 #  include "Plugin.h"
 #endif
 

@@ -1,0 +1,18 @@
+---
+name: irccd.system
+since: 1.1
+summary: "System inspection"
+---
+
+# Functions
+
+| Function                | Description                                 |
+|-------------------------|---------------------------------------------|
+| [env](env.html)         | Get a environment variable                  |
+| [home](home.html)       | Get the home directory                      |
+| [name](name.html)       | Get the system name                         |
+| [ticks](ticks.html)     | Get the time elapsed since start up         |
+| [sleep](sleep.html)     | Sleep for a specific amount of time         |
+| [uptime](uptime.html)   | Get the system uptime                       |
+| [usleep](usleep.html)   | Sleep for a specific amount of milliseconds |
+| [version](version.html) | Get the operating system version            |

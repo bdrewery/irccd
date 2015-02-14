@@ -1,0 +1,27 @@
+---
+name: irccd.util
+since: 1.1
+summary: "Various utilities"
+---
+
+# Types
+
+| Type              | Description |
+|-------------------|-------------|
+| [Date](Date.html) | Date object |
+
+# Enums
+
+| Enum                              | Description       |
+|-----------------------------------|-------------------|
+| [Color](Enums/color.html)         | Color enumeration |
+| [Attribute](Enums/attribute.html) | Text attributes   |
+
+# Functions
+
+| Function                    | Description                            |
+|-----------------------------|----------------------------------------|
+| [date](date.html)           | Create a date                          |
+| [format](format.html)       | Format text with colors and attributes |
+| [splituser](splituser.html) | Split the username                     |
+| [splithost](splithost.html) | Split the host                         |

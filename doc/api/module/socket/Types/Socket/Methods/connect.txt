@@ -1,0 +1,21 @@
+---
+category: socket
+since: 1.1
+---
+
+Connect to an end point. Like Socket:bind, you can pass nil plus an error message as parameters. 
+
+# Synopsis
+
+````lua
+ret, err = function Socket:connect(address)
+````
+
+# Arguments
+
+- address, the [[irccd-SocketAddress|SocketAddress]] object
+
+# Returns
+
+- ret, true on success
+- err, the error message

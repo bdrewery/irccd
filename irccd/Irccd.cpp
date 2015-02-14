@@ -48,7 +48,7 @@
 #include "server/Disconnected.h"
 #include "server/Running.h"
 
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 #  include "Plugin.h"
 #  include "EventQueue.h"
 #  include "Rule.h"
@@ -72,7 +72,7 @@ void Irccd::initialize()
 	Socket::init();
 	Logger::setVerbose(false);
 
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 	// Add user's path
 	oss << Util::pathUser() << "plugins/";
 	PluginManager::instance().addPath(oss.str());
@@ -137,7 +137,7 @@ void Irccd::openConfig()
 	readListeners(config);
 	readPlugins(config);
 
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 	/* Now, we load plugins specified by command line */
 	for (auto s : m_wantedPlugins) {
 		try {
@@ -156,7 +156,7 @@ void Irccd::readGeneral(const Parser &config)
 	if (config.hasSection("general")) {
 		auto general = config.getSection("general");
 
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 		// Extract parameters that are needed for the next
 		if (general.hasOption("plugin-path"))
 			PluginManager::instance().addPath(general.getOption<std::string>("plugin-path"));
@@ -230,7 +230,7 @@ void Irccd::readPlugins(const Parser &config)
 {
 	// New way of loading plugins
 	if (config.hasSection("plugins")) {
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 		Section section = config.getSection("plugins");
 
 		for (auto opt : section) {
@@ -281,26 +281,37 @@ void Irccd::readIdentities(const Parser &config)
 
 void Irccd::readRules(const Parser &config)
 {
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 	using std::string;
 
 	config.findSections("rule", [&] (const Section &s) {
-		RuleMatch m;
-		RuleProperties p;
+		RuleMap servers = getList(s, "servers");
+		RuleMap channels = getList(s, "channels");
+		RuleMap nicknames = getList(s, "nicknames");
+		RuleMap plugins = getList(s, "plugins");
+		RuleMap events = getList(s, "events");
+		RuleAction action{RuleAction::Accept};
 
-		// Match rules
-		if (s.hasOption("servers"))
-			extractor(m, s.getOption<string>("servers"), &RuleMatch::addServer);
-		if (s.hasOption("channels"))
-			extractor(m, s.getOption<string>("channels"), &RuleMatch::addChannel);
-		if (s.hasOption("plugins"))
-			extractor(m, s.getOption<string>("plugins"), &RuleMatch::addPlugin);
+		if (!s.hasOption("action")) {
+			Logger::warn("rule: missing action");
+			return;
+		}
 
-		// Properties rules
-		if (s.hasOption("set-plugins"))
-			extractor(p, s.getOption<string>("set-plugins"), &RuleProperties::setPlugin);
-		if (s.hasOption("set-events"))
-			extractor(p, s.getOption<string>("set-events"), &RuleProperties::setEvent);
+		auto value = s.getOption<std::string>("action");
+
+		if (value == "drop") {
+			action = RuleAction::Drop;
+		} else if (value == "accept") {
+			action = RuleAction::Accept;
+		} else {
+			Logger::warn("rule: invalid action value `%s`", value.c_str());
+			return;
+		}
+
+		Logger::debug("rule: found rule (%s)", (action == RuleAction::Accept) ? "accept" : "drop");
+
+		RuleManager::instance().add(Rule{servers, channels, nicknames, plugins, events, action});
+#if 0
 		if (s.hasOption("encoding")) {
 			if (m.plugins().size() > 0) {
 				Logger::warn("rule: encoding parameter should be set only with servers and channels");
@@ -311,6 +322,7 @@ void Irccd::readRules(const Parser &config)
 		}
 
 		RuleManager::instance().add(Rule(m, p));
+#endif
 	});
 #else
 	(void)config;
@@ -330,7 +342,7 @@ void Irccd::readListeners(const Parser &config)
 			// Protocol is TCP by default
 			if (s.hasOption("protocol"))
 				proto = s.getOption<std::string>("protocol");
-	
+
 			if (proto != "tcp" && proto != "udp") {
 				Logger::warn("listener: protocol not valid, must be tcp or udp");
 				return;
@@ -376,7 +388,7 @@ void Irccd::extractInternet(const Section &s, int type)
 		else {
 			Logger::warn("listener: parameter family is one of them: ipv4, ipv6");
 			Logger::warn("listener: defaulting to ipv4");
-	
+
 			ipv4 = true;
 			ipv6 = false;
 		}
@@ -524,7 +536,7 @@ void Irccd::setForeground(bool mode)
 
 void Irccd::deferPlugin(const std::string &name)
 {
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 	m_wantedPlugins.push_back(name);
 #else
 	(void)name;
@@ -551,7 +563,7 @@ const Server::Identity &Irccd::findIdentity(const std::string &name)
 
 int Irccd::run()
 {
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 	// Start the IrcEvent thread
 	//EventQueue::instance().start();
 #endif

@@ -18,6 +18,14 @@
 
 project(doc)
 
+#
+# Meta targets `docs`
+#
+add_custom_target(
+	docs ALL
+	COMMENT "Building irccd documentation"
+)
+
 # ---------------------------------------------------------
 # Install manuals
 # ---------------------------------------------------------
@@ -27,10 +35,10 @@ set(MONTH "January")
 set(DAY 30)
 set(YEAR 2014)
 
-define_man(irccd.1 man1)
-define_man(irccd.conf.5 man5)
-define_man(irccdctl.1 man1)
-define_man(irccdctl.conf.5 man5)
+irccd_define_man(irccd.1 man1)
+irccd_define_man(irccd.conf.5 man5)
+irccd_define_man(irccdctl.1 man1)
+irccd_define_man(irccdctl.conf.5 man5)
 
 # ---------------------------------------------------------
 # Create a target for doxygen
@@ -71,4 +79,18 @@ if (WITH_DOXYGEN)
 	endif ()
 else ()
 	set(HAVE_DOXYGEN_MESSAGE "disabled by user" CACHE INTERNAL "")
+endif ()
+
+# ---------------------------------------------------------
+# Pandoc
+# ---------------------------------------------------------
+
+find_package(Pandoc REQUIRED)
+
+# Process layouts first
+if (Pandoc_FOUND)
+	add_subdirectory(linkify)
+	add_subdirectory(templator)
+	add_subdirectory(master)
+	add_subdirectory(api)
 endif ()

@@ -69,7 +69,7 @@ void loadfunction(std::shared_ptr<Thread> &thread, lua_State *owner)
 	Buffer chunk;
 
 	lua_pushvalue(owner, 1);
-	lua_dump(owner, reinterpret_cast<lua_Writer>(writer), &chunk);
+	lua_dump(owner, reinterpret_cast<lua_Writer>(writer), &chunk, true);
 	lua_pop(owner, 1);
 	lua_load(*thread, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
 }
@@ -222,7 +222,7 @@ const luaL_Reg threadMethods[] = {
 
 const luaL_Reg threadMeta[] = {
 	{ "__gc",		l_threadGc		},
-	{ "__tostring",		l_threadToString	},	
+	{ "__tostring",		l_threadToString	},
 	{ nullptr,		nullptr			}
 };
 

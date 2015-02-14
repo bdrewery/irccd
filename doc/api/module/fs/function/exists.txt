@@ -1,0 +1,21 @@
+---
+name: exists
+category: fs
+since: 1.1
+---
+
+Tests if a directory or a file exists.
+
+# Synopsis
+
+````lua
+status = function fs.exists(path)
+````
+
+# Arguments
+
+* path, the file path
+
+# Returns
+
+* status, true if exists

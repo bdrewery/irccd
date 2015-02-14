@@ -16,206 +16,93 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <iostream>
 #include <stdexcept>
 
+#include "Logger.h"
 #include "Rule.h"
 
 namespace irccd {
 
-/* ---------------------------------------------------------
- * RuleMatch
- * --------------------------------------------------------- */
-
-void RuleMatch::addServer(std::string server, bool enabled)
+Rule::Rule(RuleMap servers, RuleMap channels, RuleMap nicknames, RuleMap plugins, RuleMap events, RuleAction action)
+	: m_servers{std::move(servers)}
+	, m_channels{std::move(channels)}
+	, m_nicknames{std::move(nicknames)}
+	, m_plugins{std::move(plugins)}
+	, m_events{std::move(events)}
+	, m_action{action}
 {
-	m_servers[std::move(server)] = enabled;
 }
 
-void RuleMatch::addChannel(std::string channel, bool enabled)
+bool Rule::match(const RuleMap &map, const std::string &value) const noexcept
 {
-	m_channels[std::move(channel)] = enabled;
-}
-
-void RuleMatch::addPlugin(std::string plugin, bool enabled)
-{
-	m_plugins[std::move(plugin)] = enabled;
-}
-
-const RuleMap &RuleMatch::servers() const
-{
-	return m_servers;
-}
-
-const RuleMap &RuleMatch::channels() const
-{
-	return m_channels;
-}
-
-const RuleMap &RuleMatch::plugins() const
-{
-	return m_plugins;
-}
-
-bool RuleMatch::match(const std::string &server, const std::string &channel, const std::string &plugin) const
-{
-	if (m_servers.size() == 0 && m_channels.size() == 0 && m_plugins.size() == 0)
+	if (value.size() == 0 || map.size() == 0)
 		return true;
 
-	if (m_servers.size() > 0 && (m_servers.count(server) == 0 || !m_servers.at(server)))
-		return false;
-	if (m_channels.size() > 0 && (m_channels.count(channel) == 0 || !m_channels.at(channel)))
-		return false;
-	if (m_plugins.size() > 0 && (m_plugins.count(plugin) == 0 || !m_plugins.at(plugin)))
-		return false;
-
-	return true;
+	return map.count(value) == 1;
 }
 
-std::ostream &operator<<(std::ostream &out, const RuleMatch &match)
+bool Rule::match(const std::string &server,
+		 const std::string &channel,
+		 const std::string &nick,
+		 const std::string &plugin,
+		 const std::string &event) const noexcept
 {
-	out << "RuleMatch:" << std::endl;
+#if !defined(NDEBUG)
+	auto smatch =  match(m_servers, server);
+	auto cmatch = match(m_channels, channel);
+	auto nmatch = match(m_nicknames, nick);
+	auto pmatch = match(m_plugins, plugin);
+	auto ematch = match(m_events, event);
 
-	out << "  servers: ";
-	for (const auto &s : match.m_servers)
-		out << (s.second ? "" : "!") << s.first << " ";
-	out << std::endl;
+	Logger::debug("  rule candidate:");
+	std::cout << "    - servers: ";
+	for (const auto &s : m_servers)
+		std::cout << s << " ";
+	std::cout << std::endl;
+	std::cout << "    - channels: ";
+	for (const auto &s : m_channels)
+		std::cout << s << " ";
+	std::cout << std::endl;
+	std::cout << "    - nicknames: ";
+	for (const auto &s : m_nicknames)
+		std::cout << s << " ";
+	std::cout << std::endl;
+	std::cout << "    - plugins: ";
+	for (const auto &s : m_plugins)
+		std::cout << s << " ";
+	std::cout << std::endl;
+	std::cout << "    - events: ";
+	for (const auto &s : m_events)
+		std::cout << s << " ";
+	std::cout << std::endl;
 
-	out << "  channels: ";
-	for (const auto &c : match.m_channels)
-		out << (c.second ? "" : "!") << c.first << " ";
-	out << std::endl;
+	std::cout << std::boolalpha;
+	std::cout << "    result: smatch:" << smatch << " "
+		  << "cmatch:" << cmatch << " "
+		  << "nmatch:" << nmatch << " "
+		  << "pmatch:" << pmatch << " "
+		  << "ematch:" << ematch << std::endl;
 
-	out << "  plugins: ";
-	for (const auto &p : match.m_plugins)
-		out << (p.second ? "" : "!") << p.first << " ";
+	if (smatch && cmatch && nmatch && pmatch && ematch) {
+		std::cout << "    rule candidate match" << std::endl;
+	} else {
+		std::cout << "    rule candidate ignored" << std::endl;
+	}
 
-	return out;
+	return smatch && cmatch && nmatch && pmatch && ematch;
+#else
+	return match(m_servers, server) &&
+	       match(m_channels, channel) &&
+	       match(m_nicknames, nick) &&
+	       match(m_plugins, plugin) &&
+	       match(m_events, event);
+#endif
 }
 
-/* ---------------------------------------------------------
- * RuleProperties
- * --------------------------------------------------------- */
-
-bool RuleProperties::get(const RuleMap &map, const std::string &name, bool current) const
+RuleAction Rule::action() const noexcept
 {
-	if (map.size() == 0)
-		return true;
-
-	if (map.count(name) == 0)
-		return current;
-
-	return map.at(name);
-}
-
-void RuleProperties::setPlugin(std::string name, bool mode)
-{
-	m_setPlugins[std::move(name)] = mode;
-}
-
-void RuleProperties::setEvent(std::string name, bool mode)
-{
-	m_setEvents[std::move(name)] = mode;
-}
-
-const RuleMap &RuleProperties::plugins() const
-{
-	return m_setPlugins;
-}
-
-const RuleMap &RuleProperties::events() const
-{
-	return m_setEvents;
-}
-
-bool RuleProperties::isPluginEnabled(const std::string &name, bool current) const
-{
-	return get(m_setPlugins, name, current);
-}
-
-bool RuleProperties::isEventEnabled(const std::string &name, bool current) const
-{
-	return get(m_setEvents, name, current);
-}
-
-void RuleProperties::setEncoding(const std::string &encoding)
-{
-	if (encoding.size() == 0)
-		throw std::invalid_argument("if to is set, from can not be empty");
-
-	m_encoding = encoding;
-}
-
-const std::string &RuleProperties::encoding() const
-{
-	return m_encoding;
-}
-
-std::ostream &operator<<(std::ostream &out, const RuleProperties &properties)
-{
-	out << "RuleProperties:" << std::endl;
-
-	out << "  set-plugins: ";
-	for (const auto &sp : properties.m_setPlugins)
-		out << (sp.second ? "" : "!") << sp.first << " ";
-	out << std::endl;
-
-	out << "  set-events: ";
-	for (const auto &se : properties.m_setEvents)
-		out << (se.second ? "" : "!") << se.first << " ";
-	out << std::endl;
-
-	out << "  encoding: ";
-	if (properties.m_encoding.size() == 0)
-		out << "default";
-	else
-		out << properties.m_encoding;
-
-	return out;
-}
-
-/* ---------------------------------------------------------
- * Rule
- * --------------------------------------------------------- */
-
-Rule::Rule(const RuleMatch &match, const RuleProperties &properties, bool enabled)
-	: m_enabled(enabled)
-	, m_match(match)
-	, m_properties(properties)
-{
-}
-
-void Rule::enable()
-{
-	m_enabled = true;
-}
-
-void Rule::disable()
-{
-	m_enabled = false;
-}
-
-bool Rule::isEnabled() const
-{
-	return m_enabled;
-}
-
-const RuleMatch &Rule::match() const
-{
-	return m_match;
-}
-
-const RuleProperties &Rule::properties() const
-{
-	return m_properties;
-}
-
-std::ostream &operator<<(std::ostream &out, const Rule &rule)
-{
-	out << "Rule:" << std::endl;
-	out << rule.m_match << std::endl;
-	out << rule.m_properties;
-
-	return out;
+	return m_action;
 }
 
 } // !irccd

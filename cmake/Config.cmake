@@ -67,3 +67,20 @@ else ()
 	set(ETCDIR "etc"
 		CACHE STRING "Configuration directory")
 endif ()
+
+# ---------------------------------------------------------
+# Portability check
+# ---------------------------------------------------------
+
+check_type_size(int8_t HAVE_INT8)
+check_type_size(uint8_t HAVE_UINT8)
+check_type_size(int16_t HAVE_INT16)
+check_type_size(uint16_t HAVE_UINT16)
+check_type_size(int32_t HAVE_INT32)
+check_type_size(uint32_t HAVE_UINT32)
+check_type_size(int64_t HAVE_INT64)
+check_type_size(uint64_t HAVE_UINT64)
+
+if (NOT HAVE_STDINT_H)
+	message("irccd requires stdint.h or cstdint header")
+endif ()

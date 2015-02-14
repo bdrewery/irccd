@@ -37,7 +37,7 @@ void Invite::call(Plugin &p)
 	p.onInvite(m_server, m_channel, m_who);
 }
 
-const char *Invite::name() const
+const char *Invite::name(Plugin &) const
 {
 	return "onInvite";
 }

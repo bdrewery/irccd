@@ -129,7 +129,7 @@ void handleKick(const std::vector<std::string> &params)
 
 void handleLoad(const std::vector<std::string> &params)
 {
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 	PluginManager::instance().load(params[0]);
 #else
 	(void)params;
@@ -168,7 +168,7 @@ void handlePart(const std::vector<std::string> &params)
 
 void handleReload(const std::vector<std::string> &params)
 {
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 	PluginManager::instance().reload(params[0]);
 #else
 	(void)params;
@@ -192,7 +192,7 @@ void handleTopic(const std::vector<std::string> &params)
 
 void handleUnload(const std::vector<std::string> &params)
 {
-#if defined(WITH_LUAVER)
+#if defined(WITH_LUA)
 	PluginManager::instance().unload(params[0]);
 #else
 	(void)params;

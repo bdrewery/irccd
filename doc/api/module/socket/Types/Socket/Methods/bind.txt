@@ -1,0 +1,25 @@
+---
+category: socket
+since: 1.1
+---
+
+Bind to an address. As a convenience, this function may accept nil plus the error message for chained expression like:
+
+````lua
+s:bind(address.unix("/tmp/file.sock"))
+````
+
+# Synopsis
+
+````lua
+ret, err = function Socket:bind(address)
+````
+
+# Arguments
+
+- address, a [[irccd-SocketAddress|SocketAddress]] object.
+
+# Returns
+
+- ret, true on success
+- err, the error message

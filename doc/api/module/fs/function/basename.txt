@@ -1,0 +1,21 @@
+---
+name: basename
+category: fs
+since: 1.1
+---
+
+Get the file name of a full path. Returns the file name only from a full path. For instance, returns _foo.lua_ when calling with _/usr/local/foo.lua_.
+
+# Synopsis
+
+````lua
+name = function fs.basename(path)
+````
+
+# Arguments
+
+* path, the path
+
+# Returns
+
+* name, the file name

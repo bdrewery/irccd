@@ -39,7 +39,7 @@ void Kick::call(Plugin &p)
 	p.onKick(m_server, m_channel, m_who, m_kicked, tryEncode(m_reason));
 }
 
-const char *Kick::name() const
+const char *Kick::name(Plugin &) const
 {
 	return "onKick";
 }

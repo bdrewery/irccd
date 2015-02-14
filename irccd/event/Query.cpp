@@ -34,12 +34,20 @@ Query::Query(std::shared_ptr<Server> server, std::string who, std::string messag
 
 void Query::call(Plugin &p)
 {
-	p.onQuery(m_server, m_who, m_message);
+	auto pack = parseMessage(m_message, *m_server, p);
+
+	if (pack.second == MessageType::Message) {
+		p.onQuery(m_server, m_who, m_message);
+	} else {
+		p.onQueryCommand(m_server, m_who, m_message);
+	}
 }
 
-const char *Query::name() const
+const char *Query::name(Plugin &p) const
 {
-	return "onQuery";
+	auto pack = parseMessage(m_message, *m_server, p);
+
+	return (pack.second == MessageType::Message) ? "onQuery" : "onQueryCommand";
 }
 
 } // !event

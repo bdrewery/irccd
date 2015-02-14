@@ -1,0 +1,16 @@
+---
+name: irccd.fs
+since: 1.1
+summary: "File system advanced I/O"
+---
+
+# Functions
+
+| Function                  | Description                               |
+|---------------------------|-------------------------------------------|
+| [basename](basename.html) | Get the base name from a full path        |
+| [dirname](dirname.html)   | Get the parent directory from a full path |
+| [exists](exists.html)     | Check if a file or directory exists       |
+| [mkdir](mkdir.html)       | Create a directory                        |
+| [opendir](opendir.html)   | Open a directory                          |
+| [stat](stat.html)         | Get stats of a file or directory          |

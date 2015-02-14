@@ -1,0 +1,13 @@
+---
+name: irccd.plugin
+summary: "Plugin management"
+---
+
+| Function                | Description                      |
+|-------------------------|----------------------------------|
+| [addPath](addPath.html) | Add a path where to find plugins |
+| [info](info.html)       | Get the plugin info              |
+| [list](list.html)       | List all loaded plugins          |
+| [load](load.html)       | Load a plugin                    |
+| [reload](reload.html)   | Reload a plugin                  |
+| [unload](unload.html)   | Unload a plugin                  |

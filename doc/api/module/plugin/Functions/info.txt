@@ -1,0 +1,32 @@
+---
+category: plugin
+since: 1.1
+---
+
+# plugin.info
+
+Get the plugin information. Returns a table with the following fields:
+
+- *name*: the plugin name
+- *path*: the full path
+- *home*: the plugin home directory
+- *author*: (optional) the author
+- *comment*: (optional) the summary
+- *version*: (optional) the version
+- *license*: (optional) the license
+
+## Function
+
+### SYNOPSIS
+
+````lua
+info = function plugin.info(name)
+````
+
+### ARGUMENTS
+
+- name, the optional plugin name, otherwise this plugin
+
+### RETURNS
+
+- info, the table information

@@ -37,7 +37,7 @@ void Notice::call(Plugin &p)
 	p.onNotice(m_server, m_who, m_target, m_notice);
 }
 
-const char *Notice::name() const
+const char *Notice::name(Plugin &) const
 {
 	return "onNotice";
 }

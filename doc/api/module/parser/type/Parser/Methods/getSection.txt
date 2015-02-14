@@ -1,0 +1,21 @@
+---
+name: getSection
+category: parser
+---
+
+Get a specific section. Check if the parser has a specific section and return it, otherwise return nil plus an error message. 
+
+# Synopsis
+
+````lua
+section, err = function Parser:getSection(name)
+````
+
+# Arguments
+
+- name, the section name
+
+# Returns
+
+- section, the section or nil on failure (see [[irccd-Section|Section]])
+- err, the error message

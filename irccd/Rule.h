@@ -26,10 +26,61 @@
 
 #include <sstream>
 #include <string>
-#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 namespace irccd {
+
+using RuleMap = std::unordered_set<std::string>;
+
+enum class RuleAction {
+	Accept,
+	Drop
+};
+
+class Rule final {
+private:
+	RuleMap m_servers;
+	RuleMap m_channels;
+	RuleMap m_nicknames;
+	RuleMap m_plugins;
+	RuleMap m_events;
+	RuleAction m_action{RuleAction::Accept};
+
+	/*
+	 * Check if a map contains the value and return true if it is
+	 * or return true if value is empty (which means applicable)
+	 */
+	bool match(const RuleMap &map, const std::string &value) const noexcept;
+
+public:
+	Rule(RuleMap servers = RuleMap{},
+	     RuleMap channels = RuleMap{},
+	     RuleMap nicknames = RuleMap{},
+	     RuleMap plugins = RuleMap{},
+	     RuleMap events = RuleMap{},
+	     RuleAction = RuleAction::Accept);
+
+	/**
+	 * Check if that rule apply for the given criterias.
+	 *
+	 * @param server
+	 * @param channel
+	 * @param nick
+	 * @param plugin
+	 * @param event
+	 * @return
+	 */
+	bool match(const std::string &server,
+		   const std::string &channel,
+		   const std::string &nick,
+		   const std::string &plugin,
+		   const std::string &event) const noexcept;
+
+	RuleAction action() const noexcept;
+};
+
+#if 0
 
 /**
  * Map of param to bools. User may explicitly disable an object (e.g server,
@@ -181,7 +232,7 @@ public:
 	 * @return true, false or current
 	 */
 	bool isEventEnabled(const std::string &event, bool current) const;
-	
+
 	/**
 	 * Set the server encoding
 	 *
@@ -269,6 +320,8 @@ public:
 	 */
 	friend std::ostream &operator<<(std::ostream &out, const Rule &rule);
 };
+
+#endif
 
 } // !irccd
 

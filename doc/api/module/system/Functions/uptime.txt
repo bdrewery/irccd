@@ -1,0 +1,20 @@
+---
+category: system
+since: 1.1
+---
+
+# system.uptime
+
+Get the system uptime. This function returns the number of seconds elapsed since the system boot up.
+
+## Function
+
+### SYNOPSIS
+
+````lua
+seconds = function system.uptime()
+````
+
+### RETURNS
+
+- seconds, the number of seconds

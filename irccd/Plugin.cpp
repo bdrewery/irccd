@@ -69,48 +69,6 @@ std::string Plugin::getGlobal(const std::string &name)
 	return result;
 }
 
-void Plugin::parseMessage(const std::string &message,
-			  const std::shared_ptr<Server> &server,
-			  std::string &result,
-			  bool &iscommand)
-{
-	auto cc = server->info().command;
-	auto name = m_info.name;
-
-	result = message;
-	iscommand = false;
-
-	// handle special commands "!<plugin> command"
-	if (cc.length() > 0) {
-		auto pos = result.find_first_of(" \t");
-		auto fullcommand = cc + name;
-
-		/*
-		 * If the message that comes is "!foo" without spaces we
-		 * compare the command char + the plugin name. If there
-		 * is a space, we check until we find a space, if not
-		 * typing "!foo123123" will trigger foo plugin.
-		 */
-		if (pos == std::string::npos) {
-			iscommand = result == fullcommand;
-		} else {
-			iscommand = result.length() >= fullcommand.length() &&
-			    result.compare(0, pos, fullcommand) == 0;
-		}
-
-		if (iscommand) {
-			/*
-			 * If no space is found we just set the message to "" otherwise
-			 * the plugin name will be passed through onCommand
-			 */
-			if (pos == std::string::npos)
-				result = "";
-			else
-				result = message.substr(pos + 1);
-		}
-	}
-}
-
 /* --------------------------------------------------------
  * Public methods
  * -------------------------------------------------------- */
@@ -176,6 +134,11 @@ void Plugin::open()
  * Plugin callbacks
  * -------------------------------------------------------- */
 
+void Plugin::onCommand(std::shared_ptr<Server> server, std::string channel, std::string nick, std::string message)
+{
+	call("onCommand", std::move(server), std::move(channel), std::move(nick), std::move(message));
+}
+
 void Plugin::onConnect(std::shared_ptr<Server> server)
 {
 	call("onConnect", std::move(server));
@@ -208,15 +171,7 @@ void Plugin::onLoad()
 
 void Plugin::onMessage(std::shared_ptr<Server> server, std::string channel, std::string nick, std::string message)
 {
-	std::string result;
-	bool iscommand;
-
-	parseMessage(message, server, result, iscommand);
-
-	if (iscommand)
-		call("onCommand", std::move(server), std::move(channel), std::move(nick), std::move(result));
-	else
-		call("onMessage", std::move(server), std::move(channel), std::move(nick), std::move(result));
+	call("onMessage", std::move(server), std::move(channel), std::move(nick), std::move(message));
 }
 
 void Plugin::onMe(std::shared_ptr<Server> server, std::string channel, std::string nick, std::string message)
@@ -251,15 +206,12 @@ void Plugin::onPart(std::shared_ptr<Server> server, std::string channel, std::st
 
 void Plugin::onQuery(std::shared_ptr<Server> server, std::string who, std::string message)
 {
-	std::string result;
-	bool iscommand;
+	call("onQuery", std::move(server), std::move(who), std::move(message));
+}
 
-	parseMessage(message, server, result, iscommand);
-
-	if (iscommand)
-		call("onQueryCommand", std::move(server), std::move(who), std::move(result));
-	else
-		call("onQuery", std::move(server), std::move(who), std::move(result));
+void Plugin::onQueryCommand(std::shared_ptr<Server> server, std::string who, std::string message)
+{
+	call("onQueryCommand", std::move(server), std::move(who), std::move(message));
 }
 
 void Plugin::onReload()

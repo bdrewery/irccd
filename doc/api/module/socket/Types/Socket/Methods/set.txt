@@ -1,0 +1,50 @@
+---
+category: socket
+since: 1.1
+---
+
+Set an option. This function is a wrapper around the setsockopt function. Level and name are string which may refer to the following: 
+
+Levels available:
+
+- **socket**: the SOL_SOCKET level
+- **tcp**: the IPPROTO_TCP level
+- **ipv6**: the IPPROTO_IPV6 level
+
+The following options belong to *socket* level:
+
+- **reuse-address**: bool, reuse the address.
+- **broadcast**: bool, sending broadcast data
+- **debug**: bool, print debug information
+- **keep-alive**: bool, enable sending keep alive packets
+
+The following options belong to **tcp** level:
+
+- **no-delay**: bool, Disables the Nagle algorithm for send coalescing
+
+The following options belong to **ipv6** level:
+
+- **v6only**: bool, disable or enable the IPv6 mode only
+
+# Synopsis
+
+````lua
+ret, err = function Socket:set(level, name, arg)
+````
+
+# Arguments
+
+- level, the level
+- name, the name
+- arg, the argument (depend on above)
+
+# Returns
+
+- ret, true on success or nil
+- err, the error message
+
+# Example
+
+````lua
+s:set("socket", "reuse-address", true)
+````

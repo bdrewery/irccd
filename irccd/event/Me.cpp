@@ -38,7 +38,7 @@ void Me::call(Plugin &p)
 	p.onMe(m_server, m_channel, m_nickname, tryEncode(m_message));
 }
 
-const char *Me::name() const
+const char *Me::name(Plugin &) const
 {
 	return "onMe";
 }
