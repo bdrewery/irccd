@@ -213,4 +213,20 @@ install(
 	RENAME "irccd.conf.sample"
 )
 
+if (WIN32)
+    if (CMAKE_SIZEOF_VOID_P MATCHES "8")
+        set(WINARCH x64)
+    else ()
+        set(WINARCH x32)
+    endif ()
+
+    install(
+        FILES
+            ${CMAKE_SOURCE_DIR}/win32/${WINARCH}/lua.dll
+            ${CMAKE_SOURCE_DIR}/win32/${WINARCH}/libeay32.dll
+            ${CMAKE_SOURCE_DIR}/win32/${WINARCH}/ssleay32.dll
+        DESTINATION bin
+    )
+endif ()
+
 # vim: set syntax=cmake:

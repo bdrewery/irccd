@@ -5,7 +5,8 @@ IRC Client Daemon CHANGES
 ---------------------------------------
   * Fix Mac OS X build,
   * Fix null constructed strings,
-  * Fix general.foreground option not working.
+  * Fix general.foreground option not working,
+  * Windows: Lua and OpenSSL are built as DLL and copied to installation.
 
 1.1.4 March 28, 2014
 ---------------------------------------
