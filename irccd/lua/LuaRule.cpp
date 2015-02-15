@@ -27,70 +27,18 @@ namespace irccd {
  * Pushes a table with the following fields:
  *
  * <pre>
- * local r = {
- *	enabled = true | false,
- *
- *	match = {
- *		servers	= {
- *			["localhost"] = true,
- *			["malikania"] = true
- *		},
- *
- *		channels = {
- *			["#staff"] = true,
- *		},
- *
- *		plugins	= {
- *			["a"] = true
- *		},
- *	},
- *
- *	set = {
- *		recode = { "ISO-8859-15", "UTF-8" }
- *		plugins = {
- *			["x"] = true
- *		},
- *
- *		events = {
- *			["onCommand"] = false
- *		}
- *	}
+ * local rule = {
+ *     action,
+ *     servers = { } or ""
+ *     channels = { } or "",
+ *     nicknames = { } or "",
+ *     plugins = { } or "",
+ *     events = { } or ""
  * }
  * </pre>
  */
 template <>
 struct Luae::Convert<Rule> {
-private:
-	static void setSequence(lua_State *L, const RuleMap &map, const std::string &field)
-	{
-#if 0
-		LuaeTable::create(L);
-
-		for (const auto &r : map)
-			LuaeTable::set(L, -1, r.first, r.second);
-
-		Luae::setfield(L, -2, field);
-#endif
-	}
-
-	template <typename T>
-	using AddFunc = void (T::*)(std::string, bool);
-
-	template <typename T>
-	static void getSequence(lua_State *L, AddFunc<T> add, T &t, const std::string &field)
-	{
-#if 0
-		Luae::getfield(L, -1, field);
-		if (Luae::type(L, -1) == LUA_TTABLE) {
-			LuaeTable::read(L, -1, [&] (lua_State *L, int tkey, int tvalue) {
-				if (tkey == LUA_TSTRING && tvalue == LUA_TBOOLEAN)
-					(t.*add)(Luae::get<std::string>(L, -2), Luae::get<bool>(L, -1));
-			});
-		}
-		Luae::pop(L);
-#endif
-	}
-
 public:
 	/**
 	 * Push supported.
@@ -102,6 +50,20 @@ public:
 	 */
 	static const bool hasCheck = true;
 
+	static void pushSequence(lua_State *L, const RuleMap &map, const std::string &name)
+	{
+		lua_createtable(L, 0, 0);
+
+		int i = 1;
+		for (const auto &v : map) {
+			lua_pushinteger(L, i++);
+			lua_pushstring(L, v.c_str());
+			lua_settable(L, -3);
+		}
+
+		lua_setfield(L, -2, name.c_str());
+	}
+
 	/**
 	 * Push the rule.
 	 *
@@ -110,35 +72,42 @@ public:
 	 */
 	static void push(lua_State *L, const Rule &rule)
 	{
-#if 0
-		const auto &match	= rule.match();
-		const auto &properties	= rule.properties();
-		const auto &encoding	= properties.encoding();
+		lua_createtable(L, 0, 0);
+		lua_pushinteger(L, static_cast<int>(rule.action()));
+		lua_setfield(L, -2, "action");
 
-		// Main table
-		LuaeTable::create(L);
-		LuaeTable::set(L, -1, "enabled", rule.isEnabled());
+		pushSequence(L, rule.servers(), "servers");
+		pushSequence(L, rule.channels(), "channels");
+		pushSequence(L, rule.nicknames(), "nicknames");
+		pushSequence(L, rule.plugins(), "plugins");
+		pushSequence(L, rule.events(), "events");
+	}
 
-		// Match subtable
-		LuaeTable::create(L);
-		setSequence(L, match.servers(), "servers");
-		setSequence(L, match.channels(), "channels");
-		setSequence(L, match.plugins(), "plugins");
-		Luae::setfield(L, -2, "match");
+	static RuleMap getSequence(lua_State *L, int index, const std::string &name)
+	{
+		RuleMap result;
 
-		// Set subtable
-		LuaeTable::create(L);
-		setSequence(L, properties.plugins(), "plugins");
-		setSequence(L, properties.events(), "events");
+		LUAE_STACK_CHECKBEGIN(L);
+		lua_getfield(L, index, name.c_str());
 
-		// Encoding
-		if (encoding.size() == 0)
-			LuaeTable::set(L, -1, "encoding", "default");
-		else
-			LuaeTable::set(L, -1, "encoding", encoding);
+		if (lua_type(L, -1) == LUA_TSTRING) {
+			// only one value
+			result.insert(lua_tostring(L, -1));
+		} else if (lua_type(L, -1) == LUA_TTABLE) {
+			// multiple values
+			lua_pushnil(L);
 
-		Luae::setfield(L, -2, "set");
-#endif
+			while (lua_next(L, -2) != 0) {
+				if (lua_type(L, -1) == LUA_TSTRING)
+					result.insert(lua_tostring(L, -1));
+				lua_pop(L, 1);
+			}
+		}
+
+		lua_pop(L, 1);
+		LUAE_STACK_CHECKEQUALS(L);
+
+		return result;
 	}
 
 	/**
@@ -151,47 +120,20 @@ public:
 	 */
 	static Rule check(lua_State *L, int index)
 	{
-		return {};
-#if 0
-		RuleMatch match;
-		RuleProperties properties;
-		bool enabled = true;
+		luaL_checktype(L, index, LUA_TTABLE);
 
-		Luae::checktype(L, index, LUA_TTABLE);
+		lua_getfield(L, index, "action");
+		RuleAction action = static_cast<RuleAction>(luaL_optinteger(L, -1, static_cast<int>(RuleAction::Accept)));
+		lua_pop(L, 1);
 
-		// General
-		if (LuaeTable::type(L, index, "enabled") == LUA_TBOOLEAN)
-			enabled = LuaeTable::get<bool>(L, index, "enabled");
-
-		// Match subtable
-		if (LuaeTable::type(L, index, "match") == LUA_TTABLE) {
-			Luae::getfield(L, index, "match");
-			getSequence(L, &RuleMatch::addServer, match, "servers");
-			getSequence(L, &RuleMatch::addChannel, match, "channels");
-			getSequence(L, &RuleMatch::addPlugin, match, "plugins");
-			Luae::pop(L);
-		}
-
-		// Set subtable
-		if (LuaeTable::type(L, index, "set") == LUA_TTABLE) {
-			Luae::getfield(L, index, "set");
-			getSequence(L, &RuleProperties::setPlugin, properties, "plugins");
-			getSequence(L, &RuleProperties::setEvent, properties, "events");
-
-			if (LuaeTable::type(L, -1, "encoding") == LUA_TSTRING) {
-				if (match.plugins().size() > 0) {
-					Luae::error(L, "encoding parameter should be set only with servers and channels");
-					// NOTREACHED
-				}
-
-				properties.setEncoding(LuaeTable::get<std::string>(L, -1, "encoding"));
-			}
-
-			Luae::pop(L);
-		}
-
-		return Rule(match, properties, enabled);
-#endif
+		return Rule{
+			getSequence(L, index, "servers"),
+			getSequence(L, index, "channels"),
+			getSequence(L, index, "nicknames"),
+			getSequence(L, index, "plugins"),
+			getSequence(L, index, "events"),
+			action,
+		};
 	}
 };
 
@@ -249,7 +191,7 @@ int l_remove(lua_State *L)
 int l_list(lua_State *L)
 {
 	Luae::push(L, 0);
-	Luae::pushfunction(L, [] (lua_State *L) -> int{
+	Luae::pushfunction(L, [] (lua_State *L) -> int {
 		auto i = Luae::get<int>(L, Luae::upvalueindex(1));
 		auto l = RuleManager::instance().count();
 
@@ -266,7 +208,7 @@ int l_list(lua_State *L)
 			// Replace the counter
 			Luae::push(L, i);
 			Luae::replace(L, Luae::upvalueindex(1));
-		} catch (const std::out_of_range &) {
+		} catch (const std::exception &) {
 			return 0;
 		}
 

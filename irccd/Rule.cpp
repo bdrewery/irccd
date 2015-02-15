@@ -105,4 +105,29 @@ RuleAction Rule::action() const noexcept
 	return m_action;
 }
 
+const RuleMap &Rule::servers() const noexcept
+{
+	return m_servers;
+}
+
+const RuleMap &Rule::channels() const noexcept
+{
+	return m_channels;
+}
+
+const RuleMap &Rule::nicknames() const noexcept
+{
+	return m_nicknames;
+}
+
+const RuleMap &Rule::plugins() const noexcept
+{
+	return m_plugins;
+}
+
+const RuleMap &Rule::events() const noexcept
+{
+	return m_events;
+}
+
 } // !irccd
