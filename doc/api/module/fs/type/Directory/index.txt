@@ -1,11 +1,11 @@
 ---
+object: Directory
 title: Directory object
-summary: "Object for reading a directory"
 ---
+
+This object let you iterate a directory.
 
 # Methods
 
-| Method              | Description             |
-|---------------------|-------------------------|
-| [count](count.html) | Get the number of files |
-| [read](read.html)   | Read the directory      |
+- [count](method/count.html)
+- [read](method/read.html)

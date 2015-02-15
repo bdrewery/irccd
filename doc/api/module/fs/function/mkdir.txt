@@ -1,5 +1,6 @@
 ---
-name: mkdir
+function: mkdir
+info: yes
 category: fs
 since: 1.1
 ---

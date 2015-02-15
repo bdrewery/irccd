@@ -1,5 +1,5 @@
 ---
-name: onCommand
+event: onCommand
 ---
 
 Special commands are not real IRC events. They are called from channel messages with a specific syntax using a delimiter and the plugin name.

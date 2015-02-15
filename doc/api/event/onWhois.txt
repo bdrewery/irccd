@@ -1,5 +1,6 @@
 ---
-name: onWhois
+event: onWhois
+info: yes
 since: 1.1
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: onNotice
+event: onNotice
 ---
 
 This event is triggered when someone sent a notice to you.

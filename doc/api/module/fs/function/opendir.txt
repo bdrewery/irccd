@@ -1,5 +1,6 @@
 ---
-name: opendir
+function: opendir
+info: yes
 category: fs
 since: 1.1
 ---

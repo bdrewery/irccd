@@ -1,5 +1,5 @@
 ---
-name: onPart
+event: onPart
 ---
 
 This event is triggered when someone has left a specific channel.

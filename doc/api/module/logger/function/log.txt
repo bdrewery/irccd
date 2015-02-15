@@ -1,5 +1,5 @@
 ---
-name: log
+function: log
 category: logger
 ---
 

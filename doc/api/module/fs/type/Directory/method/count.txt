@@ -1,5 +1,5 @@
 ---
-name: count
+method: count
 category: fs
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: onInvite
+event: onInvite
 ---
 
 This callback is called when someone is inviting you to a channel.

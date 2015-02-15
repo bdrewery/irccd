@@ -1,5 +1,6 @@
 ---
-name: onLoad
+event: onLoad
+info: yes
 since: 1.1
 ---
 

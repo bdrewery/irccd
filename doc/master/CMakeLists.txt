@@ -65,6 +65,22 @@ foreach (m ${MASTER_SOURCES})
 	)
 endforeach ()
 
+# Copy all resources files
+foreach (css ${CSS_SOURCES})
+	get_filename_component(file ${css} NAME)
+
+	add_custom_command(
+		OUTPUT ${WITH_DOCS_DIRECTORY}/css/${file}
+		COMMAND
+			${CMAKE_COMMAND} -E make_directory ${WITH_DOCS_DIRECTORY}/css
+		COMMAND
+			${CMAKE_COMMAND} -E copy ${css} ${WITH_DOCS_DIRECTORY}/css/${file}
+		DEPENDS ${css}
+	)
+
+	list(APPEND outputs ${WITH_DOCS_DIRECTORY}/css/${file})
+endforeach ()
+
 add_custom_target(
 	docs-master
 	DEPENDS ${outputs}

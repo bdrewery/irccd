@@ -1,0 +1,12 @@
+---
+module: irccd.server
+---
+
+# Usage
+
+Functions for server management.
+
+# Functions
+
+- [find](function/find.html)
+- [connect](function/connect.html)

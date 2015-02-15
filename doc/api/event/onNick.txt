@@ -1,5 +1,5 @@
 ---
-name: onNick
+event: onNick
 ---
 
 This event is triggered when someone changed its nickname.

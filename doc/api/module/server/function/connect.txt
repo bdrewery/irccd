@@ -1,37 +1,35 @@
 ---
+function: connect
+info: yes
 category: server
 since: 1.1
 ---
 
-# server.connect
-
 Connect to a server. The parameters are specified like this:
 
-- *name* (string): required, the server name
-- *host* (string): required, the hostname
-- *port* (int): required, the port number
-- *password* (string): an optional password for the IRC server
-- *channels* (table): list of string or name, password pairs of channels to join
-- *identity* (table): an identity to use with fields:
-  - *name* (string): the identity name
-  - *nickname* (string): the nickname to use
-  - *username* (string): the username
-  - *realname* (string): the full name
+- **name** (string): required, the server name
+- **host** (string): required, the hostname
+- **port** (int): required, the port number
+- **password** (string): an optional password for the IRC server
+- **channels** (table): list of string or name, password pairs of channels to join
+- **identity** (table): an identity to use with fields:
+	- **name** (string): the identity name
+	- **nickname** (string): the nickname to use
+	- **username** (string): the username
+	- **realname** (string): the full name
 
-## Function
-
-### SYNOPSIS
+# Synopsis
 
 ````lua
 ret, err = function server.connect(params)
 ````
 
-### RETURNS
+# Returns
 
 - ret, true on success or false
 - err, the error message
 
-### EXAMPLE
+# Example
 
 ````lua
 local server	= require "irccd.server"

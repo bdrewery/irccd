@@ -1,5 +1,5 @@
 ---
-name: onJoin
+event: onJoin
 ---
 
 User join events, this function is called when someone join a channel.

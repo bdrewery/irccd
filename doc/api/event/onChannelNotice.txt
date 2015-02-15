@@ -1,5 +1,5 @@
 ---
-name: onChannelNotice
+event: onChannelNotice
 ---
 
 This callback is called when someone sent a notice on a channel.

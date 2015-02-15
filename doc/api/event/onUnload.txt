@@ -1,5 +1,5 @@
 ---
-name: onUserMode
+event: onUserMode
 ---
 
 This event is triggered when the server changed your mode.

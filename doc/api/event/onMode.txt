@@ -1,5 +1,5 @@
 ---
-name: onMode
+event: onMode
 ---
 
 This event is triggered when someone changed the channel's mode.

@@ -1,5 +1,5 @@
 ---
-name: onNames
+event: onNames
 since: 1.1
 ---
 

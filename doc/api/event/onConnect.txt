@@ -1,5 +1,5 @@
 ---
-name: onConnect
+event: onConnect
 ---
 
 This callback is called when the irccd instance successfully connect to a server.

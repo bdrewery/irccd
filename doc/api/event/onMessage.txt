@@ -1,5 +1,5 @@
 ---
-name: onMessage
+event: onMessage
 ---
 
 This event is triggered when someone said something on a specific channel.

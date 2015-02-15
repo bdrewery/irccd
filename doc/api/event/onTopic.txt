@@ -1,5 +1,5 @@
 ---
-name: onTopic
+event: onTopic
 ---
 
 This event is triggered when someone changed the channel's topic.

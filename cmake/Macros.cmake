@@ -218,24 +218,56 @@ function(irccd_generate_html)
 	irccd_verify_args(HTML "${mandatory}")
 
 	foreach (s ${HTML_SOURCES})
-		get_filename_component(input ${s} ABSOLUTE)
-		file(RELATIVE_PATH base ${CMAKE_CURRENT_SOURCE_DIR} ${input})
-		string(REGEX REPLACE "^(.*)\\.txt$" "\\1.html" outputname ${base})
+		#
+		# inputpath: full path to the input file
+		# inputbase: base name relative to the CMakeLists.txt invocation
+		#
+		get_filename_component(inputpath ${s} ABSOLUTE)
+		file(RELATIVE_PATH inputbase ${CMAKE_CURRENT_SOURCE_DIR} ${inputpath})
 
-		# Append to outputs and sources
-		list(APPEND outputs ${WITH_DOCS_DIRECTORY}/${HTML_PREFIX}/${outputname})
-		list(APPEND sources ${input})
+		#
+		# outputpath: full path to the generated file
+		# outputdirectory: base directory for the output file
+		#
+		string(REGEX REPLACE "^(.*)\\.txt$" "\\1.html" outputname ${inputbase})
+		set(outputpath ${WITH_DOCS_DIRECTORY}/${HTML_PREFIX}/${outputname})
+		get_filename_component(outputdirectory ${outputpath} DIRECTORY)
 
-		# Update links
-		get_filename_component(directory ${input} DIRECTORY)
+		#
+		# outputs: list of output files
+		# sources: list of input files
+		#
+		list(APPEND outputs ${outputpath})
+		list(APPEND sources ${inputpath})
 
-		pandoc(
-			SOURCES ${input}
-			OUTPUT ${WITH_DOCS_DIRECTORY}/${HTML_PREFIX}/${outputname}
-			MAKE_DIRECTORY
-			FROM markdown TO html5
-			TEMPLATE ${doc_BINARY_DIR}/master/${HTML_MASTER}
-			DEPENDS docs-master
+		set(
+			linkify_args
+			${WITH_DOCS_DIRECTORY}
+			${outputdirectory}
+		)
+
+		set(
+			pandoc_args
+			-s
+			-S
+			-f markdown
+			-t html5
+			--template ${doc_BINARY_DIR}/master/${HTML_MASTER}
+			-o ${outputpath}.tmp
+			${inputpath}
+		)
+
+		add_custom_command(
+			OUTPUT ${outputpath}
+			COMMAND
+				${CMAKE_COMMAND} -E make_directory ${outputdirectory}
+			COMMAND
+				${Pandoc_EXECUTABLE} ${pandoc_args}
+			COMMAND
+				cat ${outputpath}.tmp | $<TARGET_FILE:linkify> ${linkify_args} > ${outputpath}
+			DEPENDS
+				${inputpath}
+				docs-master
 		)
 	endforeach ()
 
@@ -248,97 +280,3 @@ function(irccd_generate_html)
 
 	add_dependencies(docs ${HTML_TARGET})
 endfunction()
-
-## ---------------------------------------------------------
-## irccd_generate_api(
-##	TARGET target
-##	CATEGORY category
-##	DIRECTORY directory
-##	SOURCES file ...
-##	TYPE function|enum|table
-##	[INDEX file]
-## )
-##
-## Generate Lua API documentation from markdown using pandoc. Be sure
-## that a target `api` is created before invoking this function.
-##
-#function(irccd_generate_api)
-#	set(oneValueArgs CATEGORY DIRECTORY TARGET INDEX)
-#	set(multiValueArgs SOURCES TYPE)
-#	set(mandatory TARGET DIRECTORY CATEGORY SOURCES)
-#
-#	cmake_parse_arguments(API "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-#	irccd_verify_args(API "${mandatory}")
-#
-#	if (API_TYPE MATCHES "function")
-#		set(template function.html)
-#	elseif (API_TYPE MATCHES "enum")
-#		set(template enum.html)
-#	elseif (API_TYPE MATCHES "event")
-#		set(template event.html)
-#	elseif (API_TYPE MATCHES "table")
-#		set(template table.html)
-#	elseif (API_TYPE MATCHES "method")
-#		set(template method.html)
-#	else ()
-#		message(FATAL_ERROR "invalid TYPE given: ${API_TYPE}")
-#	endif ()
-#
-#	#
-#	# Variables set:
-#	#   outputbase		- Base directory for the files
-#	#
-#	set(outputbase ${WITH_DOCS_DIRECTORY}/html/doc/api/${API_DIRECTORY})
-#
-#	#
-#	# Iterate over all sources and build them one by one
-#	#
-#	foreach (f ${API_SOURCES})
-#		get_filename_component(inputpath ${f} ABSOLUTE)
-#		get_filename_component(inputname ${f} NAME)
-#		string(REGEX REPLACE "^(.*)\\.txt$" "\\1.html" outputname ${inputname})
-#		list(APPEND depends ${outputbase}/${outputname})
-#		list(APPEND sources ${inputpath})
-#
-#		pandoc(
-#			MAKE_DIRECTORY
-#			FROM markdown
-#			TO html5
-#			OUTPUT ${outputbase}/${outputname}
-#			SOURCES ${inputpath}
-#			TEMPLATE ${WITH_DOCS_DIRECTORY}/layouts/${template}
-#			DEPENDS html
-#		)
-#	endforeach ()
-#
-#	# Optional index
-#	if (API_INDEX)
-#		get_filename_component(indexpath ${API_INDEX} ABSOLUTE)
-#
-#		list(APPEND sources ${indexpath})
-#		list(APPEND depends ${outputbase}/index.html)
-#
-#		pandoc(
-#			MAKE_DIRECTORY
-#			FROM markdown
-#			TO html5
-#			OUTPUT ${outputbase}/index.html
-#			SOURCES ${indexpath}
-#			TEMPLATE ${WITH_DOCS_DIRECTORY}/layouts/module.html
-#			DEPENDS html
-#		)
-#	endif ()
-#
-#	add_custom_target(
-#		api-${API_TARGET}
-#		COMMENT "Built Lua API ${API_CATEGORY}"
-#		DEPENDS ${depends}
-#		SOURCES ${sources}
-#	)
-#
-#	if (NOT TARGET api)
-#		message(FATAL_ERROR "No target `api' defined")
-#	endif ()
-#
-#	add_dependencies(api api-${API_TARGET})
-#endfunction()

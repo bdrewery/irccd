@@ -16,29 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(api)
-
-add_subdirectory(event)
-add_subdirectory(module/irccd)
-add_subdirectory(module/fs)
-add_subdirectory(module/logger)
-add_subdirectory(module/server)
-
 set(
-	SOURCES
-	${api_SOURCE_DIR}/index.txt
-	${IRCCD_SOURCES}
-	${EVENT_SOURCES}
-	${FS_SOURCES}
-	${LOGGER_SOURCES}
-	${SERVER_SOURCES}
+	IRCCD_SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/index.txt
+	PARENT_SCOPE
 )
-
-irccd_generate_html(
-	MASTER api.html
-	TARGET docs-api
-	SOURCES ${SOURCES}
-	PREFIX api
-)
-
-source_group(event FILES ${EVENT_SOURCES})

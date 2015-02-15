@@ -1,16 +1,24 @@
 ---
-name: irccd.fs
+module: irccd.fs
+info: yes
 since: 1.1
-summary: "File system advanced I/O"
 ---
+
+# Usage
+
+Bring filesystem functions.
+
+Because Lua does not offer filesystem functions, this portable module provides
+some functions for reading and creating directories.
 
 # Functions
 
-| Function                  | Description                               |
-|---------------------------|-------------------------------------------|
-| [basename](basename.html) | Get the base name from a full path        |
-| [dirname](dirname.html)   | Get the parent directory from a full path |
-| [exists](exists.html)     | Check if a file or directory exists       |
-| [mkdir](mkdir.html)       | Create a directory                        |
-| [opendir](opendir.html)   | Open a directory                          |
-| [stat](stat.html)         | Get stats of a file or directory          |
+- [basename](function/basename.html)
+- [dirname](function/dirname.html)
+- [exists](function/exists.html)
+- [mkdir](function/mkdir.html)
+- [opendir](function/opendir.html)
+
+# Types
+
+- [Directory](type/Directory/index.html)

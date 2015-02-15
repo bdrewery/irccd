@@ -1,5 +1,5 @@
 ---
-name: onQuery
+event: onQuery
 ---
 
 This event is triggered when someone sent a private message to you.

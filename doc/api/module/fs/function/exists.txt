@@ -1,5 +1,6 @@
 ---
-name: exists
+function: exists
+info: yes
 category: fs
 since: 1.1
 ---

@@ -20,6 +20,7 @@ project(fs)
 
 set(
 	FS_SOURCES
+	${fs_SOURCE_DIR}/index.txt
 	${fs_SOURCE_DIR}/function/basename.txt
 	${fs_SOURCE_DIR}/function/dirname.txt
 	${fs_SOURCE_DIR}/function/exists.txt
