@@ -23,6 +23,15 @@ add_subdirectory(module/irccd)
 add_subdirectory(module/fs)
 add_subdirectory(module/logger)
 add_subdirectory(module/server)
+add_subdirectory(module/system)
+add_subdirectory(module/plugin)
+add_subdirectory(module/parser)
+add_subdirectory(module/rule)
+add_subdirectory(module/socket)
+add_subdirectory(module/socket-address)
+add_subdirectory(module/socket-listener)
+add_subdirectory(module/thread)
+add_subdirectory(module/util)
 
 set(
 	SOURCES
@@ -32,6 +41,15 @@ set(
 	${FS_SOURCES}
 	${LOGGER_SOURCES}
 	${SERVER_SOURCES}
+	${SYSTEM_SOURCES}
+	${PLUGIN_SOURCES}
+	${PARSER_SOURCES}
+	${RULE_SOURCES}
+	${SOCKET_SOURCES}
+	${SOCKET_ADDRESS_SOURCES}
+	${SOCKET_LISTENER_SOURCES}
+	${THREAD_SOURCES}
+	${UTIL_SOURCES}
 )
 
 irccd_generate_html(
@@ -40,5 +58,3 @@ irccd_generate_html(
 	SOURCES ${SOURCES}
 	PREFIX api
 )
-
-source_group(event FILES ${EVENT_SOURCES})

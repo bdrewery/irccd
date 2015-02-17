@@ -1,0 +1,51 @@
+---
+enum: color
+info: yes
+since: 1.1
+---
+
+The color map.
+
+**Note**: not all colors are supported
+
+# Synopsis
+
+````lua
+local color = {
+    White,
+    Black,
+    Blue,
+    Green,
+    Red,
+    Brown,
+    Purple,
+    Orange,
+    Yellow,
+    LightGreen,
+    Cyan,
+    LightCyan,
+    LightBlue,
+    Pink,
+    Grey,
+    LightGrey,
+}
+````
+
+# Values
+
+- **White**, White.
+- **Black**, Black.
+- **Blue**, Blue.
+- **Green**, Green.
+- **Red**, Red.
+- **Brown**, Brown.
+- **Purple**, Purple.
+- **Orange**, Orange.
+- **Yellow**, Yellow.
+- **LightGreen**, LightGreen.
+- **Cyan**, Cyan.
+- **LightCyan**, LightCyan.
+- **LightBlue**, LightBlue.
+- **Pink**, Pink.
+- **Grey**, Grey.
+- **LightGrey**, LightGrey.

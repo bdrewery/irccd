@@ -1,0 +1,15 @@
+---
+metamethod: __tostring
+---
+
+Convert the object as a string.
+
+# Synopsis
+
+````lua
+str = function Thread:__tostring()
+````
+
+# Returns
+
+- str, the object as a string

@@ -1,0 +1,23 @@
+---
+method: receive
+info: yes
+category: socket
+since: 1.1
+---
+
+Receive some data. Get some data as a stream mode.
+
+# Synopsis
+
+````lua
+msg, err = function Socket:receive(howmany)
+````
+
+# Arguments
+
+- howmany, how much to receive
+
+# Returns
+
+- msg, the read string or nil
+- err, the error message

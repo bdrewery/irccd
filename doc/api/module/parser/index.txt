@@ -1,7 +1,9 @@
 ---
-name: irccd.parser
+module: irccd.parser
 summary: "Configuration files (.ini) parser"
 ---
+
+This module provides support for reading .ini files.
 
 # Constants
 
@@ -13,13 +15,9 @@ summary: "Configuration files (.ini) parser"
 
 # Types
 
-| Type                          | Description        |
-|-------------------------------|--------------------|
-| [Parser](Parser/index.html)   | The parser object  |
-| [Section](Section/index.html) | The section object |
+- [Parser](type/Parser/index.html)
+- [Section](type/Section/index.html)
 
 # Functions
 
-| Function        | Description         |
-|-----------------|---------------------|
-| [new](new.html) | Create a new parser |
+- [new](function/new.html)

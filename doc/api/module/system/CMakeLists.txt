@@ -16,25 +16,19 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(api-system)
+project(system)
 
 set(
-	FUNCTIONS
-	${api-system_SOURCE_DIR}/Functions/env.txt
-	${api-system_SOURCE_DIR}/Functions/home.txt
-	${api-system_SOURCE_DIR}/Functions/name.txt
-	${api-system_SOURCE_DIR}/Functions/sleep.txt
-	${api-system_SOURCE_DIR}/Functions/ticks.txt
-	${api-system_SOURCE_DIR}/Functions/uptime.txt
-	${api-system_SOURCE_DIR}/Functions/usleep.txt
-	${api-system_SOURCE_DIR}/Functions/version.txt
+	SYSTEM_SOURCES
+	${system_SOURCE_DIR}/index.txt
+	${system_SOURCE_DIR}/function/env.txt
+	${system_SOURCE_DIR}/function/home.txt
+	${system_SOURCE_DIR}/function/name.txt
+	${system_SOURCE_DIR}/function/sleep.txt
+	${system_SOURCE_DIR}/function/ticks.txt
+	${system_SOURCE_DIR}/function/uptime.txt
+	${system_SOURCE_DIR}/function/usleep.txt
+	${system_SOURCE_DIR}/function/version.txt
+	PARENT_SCOPE
 )
 
-irccd_generate_api(
-	TARGET api-system
-	DIRECTORY system
-	CATEGORY "irccd.system"
-	SOURCES ${FUNCTIONS}
-	TYPE function
-	INDEX ${api-system_SOURCE_DIR}/index.txt
-)

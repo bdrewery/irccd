@@ -16,23 +16,23 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(api-parser)
+project(parser)
 
 set(
-	FUNCTIONS
-	${api-parser_SOURCE_DIR}/Functions/new.txt
+	PARSER_SOURCES
+	${parser_SOURCE_DIR}/index.txt
+	${parser_SOURCE_DIR}/function/new.txt
+	${parser_SOURCE_DIR}/type/Parser/index.txt
+	${parser_SOURCE_DIR}/type/Parser/method/findSections.txt
+	${parser_SOURCE_DIR}/type/Parser/method/getSection.txt
+	${parser_SOURCE_DIR}/type/Parser/method/hasSection.txt
+	${parser_SOURCE_DIR}/type/Parser/method/onLog.txt
+	${parser_SOURCE_DIR}/type/Parser/method/open.txt
+	${parser_SOURCE_DIR}/type/Parser/method/requireSection.txt
+	${parser_SOURCE_DIR}/type/Section/index.txt
+	${parser_SOURCE_DIR}/type/Section/method/getOption.txt
+	${parser_SOURCE_DIR}/type/Section/method/getOptions.txt
+	${parser_SOURCE_DIR}/type/Section/method/hasOption.txt
+	${parser_SOURCE_DIR}/type/Section/method/requireOption.txt
+	PARENT_SCOPE
 )
-
-# irccd.parser
-irccd_generate_api(
-	TARGET parser
-	DIRECTORY parser
-	CATEGORY "irccd.parser"
-	SOURCES ${FUNCTIONS}
-	TYPE function
-	INDEX ${api-parser_SOURCE_DIR}/index.txt
-)	
-
-# Section and Parser objects
-add_subdirectory(Types/Parser)
-add_subdirectory(Types/Section)

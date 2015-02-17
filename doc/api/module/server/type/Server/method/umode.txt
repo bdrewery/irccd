@@ -1,0 +1,15 @@
+---
+method: umode
+---
+
+Change your own user mode.
+
+# Synopsis
+
+````lua
+function Server:umode(mode)
+````
+
+# Arguments
+
+- mode, the new mode

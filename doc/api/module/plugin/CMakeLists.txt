@@ -16,23 +16,16 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(api-plugin)
+project(plugin)
 
 set(
-	FUNCTIONS
-	${api-plugin_SOURCE_DIR}/Functions/addPath.txt
-	${api-plugin_SOURCE_DIR}/Functions/info.txt
-	${api-plugin_SOURCE_DIR}/Functions/list.txt
-	${api-plugin_SOURCE_DIR}/Functions/load.txt
-	${api-plugin_SOURCE_DIR}/Functions/reload.txt
-	${api-plugin_SOURCE_DIR}/Functions/unload.txt
-)
-
-irccd_generate_api(
-	TARGET plugin
-	DIRECTORY plugin
-	CATEGORY "irccd.plugin"
-	SOURCES ${FUNCTIONS}
-	INDEX ${api-plugin_SOURCE_DIR}/index.txt
-	TYPE function
+	PLUGIN_SOURCES
+	${plugin_SOURCE_DIR}/index.txt
+	${plugin_SOURCE_DIR}/function/addPath.txt
+	${plugin_SOURCE_DIR}/function/info.txt
+	${plugin_SOURCE_DIR}/function/list.txt
+	${plugin_SOURCE_DIR}/function/load.txt
+	${plugin_SOURCE_DIR}/function/reload.txt
+	${plugin_SOURCE_DIR}/function/unload.txt
+	PARENT_SCOPE
 )

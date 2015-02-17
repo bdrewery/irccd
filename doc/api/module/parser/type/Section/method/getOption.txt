@@ -1,0 +1,21 @@
+---
+method: getOption
+category: parser
+---
+
+Get an option value. This function returns the value if found and nil plus an error message in the other case.
+
+# Synopsis
+
+````lua
+value, err = function Section:getOption(name)
+````
+
+# Arguments
+
+- name, the option name
+
+# Returns
+
+- value, the option's value or nil
+- err, the error message

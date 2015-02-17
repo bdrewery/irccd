@@ -1,18 +1,23 @@
 ---
-name: irccd.system
+module: irccd.system
+info: yes
 since: 1.1
 summary: "System inspection"
 ---
 
+# Usage
+
+System inspection.
+
+Use this module if you want to inspect the system independently.
+
 # Functions
 
-| Function                | Description                                 |
-|-------------------------|---------------------------------------------|
-| [env](env.html)         | Get a environment variable                  |
-| [home](home.html)       | Get the home directory                      |
-| [name](name.html)       | Get the system name                         |
-| [ticks](ticks.html)     | Get the time elapsed since start up         |
-| [sleep](sleep.html)     | Sleep for a specific amount of time         |
-| [uptime](uptime.html)   | Get the system uptime                       |
-| [usleep](usleep.html)   | Sleep for a specific amount of milliseconds |
-| [version](version.html) | Get the operating system version            |
+- [env](function/env.html)
+- [home](function/home.html)
+- [name](function/name.html)
+- [ticks](function/ticks.html)
+- [sleep](function/sleep.html)
+- [uptime](function/uptime.html)
+- [usleep](function/usleep.html)
+- [version](function/version.html)

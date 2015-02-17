@@ -1,5 +1,7 @@
 %header%
 
+<body>
+
 %modules%
 
   <div id="content">
@@ -13,6 +15,10 @@
 
     $if(method)$
     <h1 id="content-title">Method: <span class="content-mononame">$method$</span></h1>
+    $endif$
+
+    $if(metamethod)$
+    <h1 id="content-title">Metamethod: <span class="content-mononame">$metamethod$</span></h1>
     $endif$
 
     $if(function)$
@@ -35,7 +41,9 @@
     </div><!-- !info -->
     $endif$
 
-    $body$
+$body$
   </div><!-- !content -->
 
-%footer%
+  %footer%
+</body>
+</html>

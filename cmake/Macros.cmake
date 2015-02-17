@@ -265,6 +265,8 @@ function(irccd_generate_html)
 				${Pandoc_EXECUTABLE} ${pandoc_args}
 			COMMAND
 				cat ${outputpath}.tmp | $<TARGET_FILE:linkify> ${linkify_args} > ${outputpath}
+			COMMAND
+				rm ${outputpath}.tmp
 			DEPENDS
 				${inputpath}
 				docs-master

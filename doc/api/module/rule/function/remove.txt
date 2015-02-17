@@ -1,0 +1,20 @@
+---
+function: remove
+---
+
+Remove an existing rule.
+
+# Synopsis
+
+````lua
+ret, err = function rule.remove(index)
+````
+
+# Arguments
+
+- index, the index of the rule (index must be in the range [1, size])
+
+# Returns
+
+- ret, true on success or nil on failure
+- err, the error message

@@ -16,35 +16,25 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(api-util)
+project(util)
 
 set(
-	FUNCTIONS
-	${api-util_SOURCE_DIR}/Functions/date.txt
-	${api-util_SOURCE_DIR}/Functions/format.txt
-	${api-util_SOURCE_DIR}/Functions/splithost.txt
-	${api-util_SOURCE_DIR}/Functions/splituser.txt
+	UTIL_SOURCES
+	${util_SOURCE_DIR}/index.txt
+	${util_SOURCE_DIR}/enum/attribute.txt
+	${util_SOURCE_DIR}/enum/color.txt
+	${util_SOURCE_DIR}/function/date.txt
+	${util_SOURCE_DIR}/function/format.txt
+	${util_SOURCE_DIR}/function/splithost.txt
+	${util_SOURCE_DIR}/function/splituser.txt
+	${util_SOURCE_DIR}/type/Date/index.txt
+	${util_SOURCE_DIR}/type/Date/method/calendar.txt
+	${util_SOURCE_DIR}/type/Date/method/format.txt
+	${util_SOURCE_DIR}/type/Date/method/timestamp.txt
+	${util_SOURCE_DIR}/type/Date/metamethod/__eq.txt
+	${util_SOURCE_DIR}/type/Date/metamethod/__le.txt
+	${util_SOURCE_DIR}/type/Date/metamethod/__tostring.txt
+	PARENT_SCOPE
 )
 
-set(
-	ENUMS
-	${api-util_SOURCE_DIR}/Enums/color.txt
-	${api-util_SOURCE_DIR}/Enums/attribute.txt
-)
 
-irccd_generate_api(
-	TARGET api-util
-	DIRECTORY util
-	CATEGORY "irccd.util"
-	SOURCES ${FUNCTIONS}
-	TYPE function
-	INDEX ${api-util_SOURCE_DIR}/index.txt
-)
-
-irccd_generate_api(
-	TARGET api-util-Enums
-	DIRECTORY util/Enums
-	CATEGORY "irccd.util/Enums"
-	SOURCES ${ENUMS}
-	TYPE enum
-)

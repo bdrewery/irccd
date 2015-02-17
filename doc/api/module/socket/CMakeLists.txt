@@ -16,37 +16,24 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(api-socket)
+project(socket)
 
 set(
-	FUNCTIONS
-	${api-socket_SOURCE_DIR}/Functions/new.txt
+	SOCKET_SOURCES
+	${socket_SOURCE_DIR}/index.txt
+	${socket_SOURCE_DIR}/enum/family.txt
+	${socket_SOURCE_DIR}/enum/protocol.txt
+	${socket_SOURCE_DIR}/enum/type.txt
+	${socket_SOURCE_DIR}/function/new.txt
+	${socket_SOURCE_DIR}/type/Socket/index.txt
+	${socket_SOURCE_DIR}/type/Socket/method/accept.txt
+	${socket_SOURCE_DIR}/type/Socket/method/bind.txt
+	${socket_SOURCE_DIR}/type/Socket/method/blockMode.txt
+	${socket_SOURCE_DIR}/type/Socket/method/close.txt
+	${socket_SOURCE_DIR}/type/Socket/method/connect.txt
+	${socket_SOURCE_DIR}/type/Socket/method/receive.txt
+	${socket_SOURCE_DIR}/type/Socket/method/receiveFrom.txt
+	${socket_SOURCE_DIR}/type/Socket/method/send.txt
+	${socket_SOURCE_DIR}/type/Socket/method/set.txt
+	PARENT_SCOPE
 )
-
-set(
-	ENUMS
-	${api-socket_SOURCE_DIR}/Enums/family.txt
-	${api-socket_SOURCE_DIR}/Enums/type.txt
-	${api-socket_SOURCE_DIR}/Enums/protocol.txt
-)
-
-# irccd.socket
-irccd_generate_api(
-	TARGET socket
-	DIRECTORY socket
-	CATEGORY "irccd.socket"
-	SOURCES ${FUNCTIONS}
-	TYPE function
-	INDEX ${api-socket_SOURCE_DIR}/index.txt
-)
-
-irccd_generate_api(
-	TARGET socket-Enums
-	DIRECTORY socket/Enums
-	CATEGORY "irccd.socket/Enums"
-	SOURCES ${ENUMS}
-	TYPE enum
-)
-
-# Socket object
-add_subdirectory(Types/Socket)

@@ -1,25 +1,19 @@
 ---
-name: irccd.socket
+module: irccd.socket
+info: yes
 since: 1.1
-summary: "Low level socket I/O"
 ---
 
 # Enums
 
-| Enum                            | Description      |
-|---------------------------------|------------------|
-| [Family](Enums/family.html)     | Family of socket |
-| [Type](Enums/type.html)         | Type of socket   |
-| [Protocol](Enums/protocol.html) | Protocol         |
+- [Family](enum/family.html)
+- [Type](enum/type.html)
+- [Protocol](enum/protocol.html)
 
 # Types
 
-| Type                        | Description     |
-|-----------------------------|-----------------|
-| [Socket](Socket/index.html) | A socket object |
+- [Socket](type/Socket/index.html)
 
 # Functions
 
-| Function        | Description     |
-|-----------------|-----------------|
-| [new](new.html) | Create a socket |
+- [new](function/new.html)

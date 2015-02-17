@@ -1,27 +1,26 @@
 ---
-name: irccd.util
+module: irccd.util
+info: yes
 since: 1.1
 summary: "Various utilities"
 ---
 
+# Usage
+
+Various utilities.
+
 # Types
 
-| Type              | Description |
-|-------------------|-------------|
-| [Date](Date.html) | Date object |
+- [Date](type/Date/index.html)
 
 # Enums
 
-| Enum                              | Description       |
-|-----------------------------------|-------------------|
-| [Color](Enums/color.html)         | Color enumeration |
-| [Attribute](Enums/attribute.html) | Text attributes   |
+- [Color](enum/color.html)
+- [Attribute](enum/attribute.html)
 
 # Functions
 
-| Function                    | Description                            |
-|-----------------------------|----------------------------------------|
-| [date](date.html)           | Create a date                          |
-| [format](format.html)       | Format text with colors and attributes |
-| [splituser](splituser.html) | Split the username                     |
-| [splithost](splithost.html) | Split the host                         |
+- [date](function/date.html)
+- [format](function/format.html)
+- [splituser](function/splituser.html)
+- [splithost](function/splithost.html)

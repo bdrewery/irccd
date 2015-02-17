@@ -1,0 +1,29 @@
+---
+object: Server
+---
+
+The server object.
+
+**Note**: all the functions are thread-safe.
+
+# Methods
+
+- [cnotice](method/cnotice.html)
+- [join](method/join.html)
+- [kick](method/kick.html)
+- [me](method/me.html)
+- [mode](method/mode.html)
+- [names](method/names.html)
+- [nick](method/nick.html)
+- [notice](method/notice.html)
+- [part](method/part.html)
+- [query](method/query.html)
+- [say](method/say.html)
+- [topic](method/topic.html)
+- [umode](method/umode.html)
+- [whois](method/whois.html)
+
+# Metamethods
+
+- [__eq](metamethod/__eq.html)
+- [__tostring](metamethod/__tostring.html)
