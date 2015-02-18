@@ -117,7 +117,6 @@ add_custom_target(
 	docs-api
 	DEPENDS ${outputs}
 	SOURCES ${sources}
-	COMMENT "Generating HTML documentation `${HTML_TARGET}`"
 )
 
 add_dependencies(docs docs-api)

@@ -208,3 +208,27 @@ function(irccd_verify_args prefix list)
 		endif ()
 	endforeach ()
 endfunction()
+
+function(irccd_generate_guide target filename sources)
+	pandoc(
+		OUTPUT ${WITH_DOCS_DIRECTORY}/guides/${filename}.html
+		SOURCES ${sources}
+		FROM markdown
+		TO html5
+		TEMPLATES ${templates_SOURCE_DIR}/template.html
+		TARGET docs-guide-${target}-html
+		TOC STANDALONE MAKE_DIRECTORY
+	)
+
+	pandoc(
+		OUTPUT ${WITH_DOCS_DIRECTORY}/guides/${filename}.pdf
+		SOURCES ${sources}
+		FROM markdown
+		TO latex
+		TARGET docs-guide-${target}-latex
+		TOC STANDALONE MAKE_DIRECTORY
+	)
+
+	add_dependencies(docs docs-guide-${target}-html)
+	add_dependencies(docs docs-guide-${target}-latex)
+endfunction()

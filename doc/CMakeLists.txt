@@ -91,5 +91,10 @@ find_package(Pandoc REQUIRED)
 if (Pandoc_FOUND)
 	add_subdirectory(linkify)
 	add_subdirectory(templates)
-	add_subdirectory(api)
+
+	if (WITH_DOCS_LUA)
+		add_subdirectory(api)
+	endif ()
+
+	add_subdirectory(guides)
 endif ()

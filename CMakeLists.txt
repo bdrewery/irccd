@@ -16,10 +16,26 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# General
-cmake_minimum_required(VERSION 2.8)
+# Where to start
+# ---------------------------------------------------------
+#
+# If you plan to modify the build systems there are several places to look
+# to do what you want.
+#
+# cmake/Config.cmake	- Contains some platforms checks and compile flags.
+# cmake/Extern.cmake	- Will be merge with Config.
+# cmake/Options.cmake	- User definable options.
+# cmake/Macros.cmake	- Functions available for the build system.
+#
+# Build system is then processed in different directories:
+#
+# irccd			- The main irccd executable.
+# irccdctl		- The irccdctl utility.
+# doc			- The documentation process.
+# tests			- The unit tests.
+# contrib		- User contributions not maintained by irccd authors.
 
-# Project
+cmake_minimum_required(VERSION 2.8)
 project(irccd)
 
 # ---------------------------------------------------------

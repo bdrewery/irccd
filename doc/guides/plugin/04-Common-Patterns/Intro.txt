@@ -1,0 +1,68 @@
+# Common patterns
+
+Some plugins can be configured, and some of them can use patterns to substitute
+variables.
+
+For instance, using the **logger** plugin, it's possible to customize the
+pattern to use when someone joins a channel like that:
+
+````
+#U joined #c
+````
+
+The keywords **#U** will be substituted to the nickname and **#c** to the
+channel name.
+
+**Note**: some keywords are obviously not available for all contexts. When
+plugins supports these patterns, they are marked as
+**Keywords supported: #c, #m**.
+
+**Warning**: common patterns are just a concept, the plugin is free to use
+different things.
+
+## Environment variables
+
+If supported, you can use environment variables like **${HOME}**. Please note
+that braces are mandatory.
+
+## Time
+
+When you can use patterns, the date and time may be used just like `strftime(3)`
+so for the hours and minutes, you can use **%H:%M**.
+
+## Home
+
+To match your user directory, you can use the famous **~**.
+
+## List of keywords supported
+
+Here's the list of keywords that a lot of plugins uses:
+
+- **#c**, the channel name
+- **#m**, a message (depending on context)
+- **#s**, the current server name
+- **#t**, the topic
+- **#T**, a target, i.e a person who gets kicked
+- **#u**, the full user, i.e `markand!~mkd@localhost`
+- **#U**, the nickname
+
+**Example with logger**
+
+Using the plugin logger, you can use a configuration like this:
+
+````ini
+[general]
+directory = "~/logs/#s/%y/%m/#c-%d.log"
+
+[formats]
+message  = "%H:%M #u: #m"
+````
+
+With this example, ~ will be substituted to the user home directory. With a server
+named **local**, a channel *#staff* everything would be stored like this:
+
+**/home/markand/local/13/07/#staff-08.log**
+
+Also the message would be stored like this:
+
+**20:50 markand: I'm watching TV.**
