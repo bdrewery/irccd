@@ -90,7 +90,6 @@ find_package(Pandoc REQUIRED)
 # Process layouts first
 if (Pandoc_FOUND)
 	add_subdirectory(linkify)
-	add_subdirectory(templator)
-	add_subdirectory(master)
+	add_subdirectory(templates)
 	add_subdirectory(api)
 endif ()

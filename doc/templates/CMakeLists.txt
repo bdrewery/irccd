@@ -16,6 +16,24 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(templator)
+project(templates)
 
-add_executable(templator main.cpp)
+add_custom_command(
+	OUTPUT ${WITH_DOCS_DIRECTORY}/css/style.css
+	COMMAND
+		${CMAKE_COMMAND} -E make_directory ${WITH_DOCS_DIRECTORY}/css
+	COMMAND
+		${CMAKE_COMMAND} -E copy ${templates_SOURCE_DIR}/css/style.css ${WITH_DOCS_DIRECTORY}/css
+	DEPENDS
+		${templates_SOURCE_DIR}/css/style.css
+)
+
+add_custom_target(
+	docs-templates
+	DEPENDS ${WITH_DOCS_DIRECTORY}/css/style.css
+	SOURCES
+		${templates_SOURCE_DIR}/css/style.css
+		${templates_SOURCE_DIR}/template.html
+)
+
+source_group(css FILES ${templates_SOURCE_DIR}/css/style.css)
