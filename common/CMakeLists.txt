@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,10 +18,8 @@
 
 project(common)
 
-# Use bundled xdg-basedir or not
-option(WITH_BUNDLE_XDGBASEDIR "Build with bundled libxdg-basedir" Off)
-
-set(SOURCES
+set(
+	SOURCES
 	Date.cpp
 	Date.h
 	Directory.cpp
@@ -30,59 +28,28 @@ set(SOURCES
 	Logger.h
 	Parser.cpp
 	Parser.h
+	Singleton.h
 	Socket.cpp
 	Socket.h
 	SocketAddress.cpp
 	SocketAddress.h
 	SocketListener.cpp
 	SocketListener.h
-	System.cpp
-	System.h
 	Util.cpp
 	Util.h
-	${EXTSOURCES}
 )
 
 if (UNIX)
-	if (WITH_BUNDLE_XDGBASEDIR)
-		add_subdirectory(
-			"${CMAKE_SOURCE_DIR}/extern/libxdg-basedir"
-			"${CMAKE_BINARY_DIR}/libxdg-basedir"
-		)
-
-		list(
-			APPEND
-			INCLUDES
-			"${CMAKE_SOURCE_DIR}/extern/libxdg-basedir/include"
-		)
-
-		list(
-			APPEND
-			LIBRARIES
-			xdg-basedir
-		)
-	else ()
-		find_package(XDG REQUIRED)
-
-		list(APPEND INCLUDES ${XDG_INCLUDE_DIR})
-		list(APPEND LIBRARIES ${XDG_LIBRARY})
-	endif ()
-endif ()
-
-if (WIN32)
+	list(APPEND SOURCES Xdg.cpp Xdg.h)
+elseif (WIN32)
 	list(APPEND LIBRARIES "ws2_32")
 	list(APPEND LIBRARIES "gdi32")
 endif ()
 
-include_directories(
-	${INCLUDES}
+define_library(
+	TARGET common
+	SOURCES ${SOURCES}
+	LIBRARIES ${LIBRARIES}
+	LOCAL_INCLUDES ${INCLUDES}
+	PUBLIC_INCLUDES ${common_SOURCE_DIR}
 )
-
-add_library(common STATIC ${SOURCES})
-
-target_link_libraries(
-	common
-	${LIBRARIES}
-)
-
-# vim: set syntax=cmake:

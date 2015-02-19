@@ -1,0 +1,19 @@
+---
+module: irccd.socket
+info: yes
+since: 1.1
+---
+
+# Enums
+
+- [Family](enum/family.html)
+- [Type](enum/type.html)
+- [Protocol](enum/protocol.html)
+
+# Types
+
+- [Socket](type/Socket/index.html)
+
+# Functions
+
+- [new](function/new.html)

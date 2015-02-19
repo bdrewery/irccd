@@ -1,7 +1,7 @@
 /*
  * Parser.h -- config file parser
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,22 +16,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cstring>
+#include <cerrno>
 #include <iostream>
 #include <fstream>
 
 #include "Parser.h"
 
 namespace irccd {
-
-/* --------------------------------------------------------
- * Option public members
- * -------------------------------------------------------- */
-
-bool operator==(const Option &o1, const Option &o2)
-{
-	return o1.m_key == o2.m_key &&
-	    o1.m_value == o2.m_value;
-}
 
 /* --------------------------------------------------------
  * Section public members
@@ -42,60 +34,11 @@ Section::Section()
 {
 }
 
-Section::Section(const Section &s)
+Section::Section(const std::string &name)
+	: m_name(name)
+	, m_allowed(true)
 {
-	m_name = s.m_name;
-	m_options = s.m_options;
-	m_allowed = s.m_allowed;
-}
 
-std::string Section::findOption(const std::string &name) const
-{
-	std::string ret;
-
-	for (const Option &o : m_options)
-		if (o.m_key == name) {
-			ret = o.m_value;
-			break;
-		}
-
-	return ret;
-}
-
-template <> bool Section::getOption(const std::string &name) const
-{
-	bool result = false;
-
-	if (hasOption(name)) {
-		std::string value = findOption(name);
-
-		if (value == "yes" || value == "true"|| value == "1")
-			result = true;
-		else if (value == "no" || value == "false" || value == "0")
-			result = false;
-	}
-
-	return result;
-}
-
-template <> int Section::getOption(const std::string &name) const
-{
-	int result = -1;
-
-	if (hasOption(name))
-		result = atoi(findOption(name).c_str());
-
-	return result;
-}
-
-template <> std::string Section::getOption(const std::string &name) const
-{
-	std::string result;
-
-	if (hasOption(name))
-		result = findOption(name);
-
-	return result;
 }
 
 const std::string &Section::getName() const
@@ -103,51 +46,43 @@ const std::string &Section::getName() const
 	return m_name;
 }
 
-const std::vector<Option> &Section::getOptions() const
-{
-	return m_options;
-}
-
 bool Section::hasOption(const std::string &name) const
 {
-	for (const Option &o : m_options)
-		if (o.m_key == name)
-			return true;
+	return m_options.count(name) >= 1;
+}
 
-	return false;
+Section::Map::iterator Section::begin()
+{
+	return m_options.begin();
+}
+
+Section::Map::const_iterator Section::cbegin() const
+{
+	return m_options.cbegin();
+}
+
+Section::Map::iterator Section::end()
+{
+	return m_options.end();
+}
+
+Section::Map::const_iterator Section::cend() const
+{
+	return m_options.end();
 }
 
 bool operator==(const Section &s1, const Section &s2)
 {
-	if (s1.m_name != s2.m_name)	
-		return false;
-
-	return s1.m_options == s2.m_options;
+	return s1.m_name == s2.m_name && s1.m_options == s2.m_options;
 }
 
 /* --------------------------------------------------------
  * Parser private members
  * -------------------------------------------------------- */
 
-void Parser::addSection(const std::string &name)
-{
-	Section section;
-
-	section.m_name = name;
-	section.m_allowed = true;
-
-	m_sections.push_back(section);
-}
-
 void Parser::addOption(const std::string &key, const std::string &value)
 {
-	Option option;
-	Section &current = m_sections.back();
-
-	option.m_key = key;
-	option.m_value = value;
-
-	current.m_options.push_back(option);
+	m_sections.back().m_options.insert(std::make_pair(key, value));
 }
 
 void Parser::readSection(int lineno, const std::string &line)
@@ -156,7 +91,7 @@ void Parser::readSection(int lineno, const std::string &line)
 
 	if ((end = line.find_first_of(']')) != std::string::npos) {
 		if (end > 1) {
-			std::string name = line.substr(1, end - 1);
+			auto name = line.substr(1, end - 1);
 
 			/*
 			 * Check if we can add a section, if redefinition is
@@ -169,7 +104,7 @@ void Parser::readSection(int lineno, const std::string &line)
 					log(lineno, name, "redefinition not allowed");
 				m_sections.back().m_allowed = false;
 			} else {
-				addSection(name);
+				m_sections.push_back(Section(name));
 			}
 		} else if (!(m_tuning & DisableVerbosity)) {
 			/*
@@ -184,9 +119,9 @@ void Parser::readSection(int lineno, const std::string &line)
 
 void Parser::readOption(int lineno, const std::string &line)
 {
+	auto &current = m_sections.back();
 	size_t epos;
 	std::string key, value;
-	Section &current = m_sections.back();
 
 	// Error on last section?
 	if (!current.m_allowed) {
@@ -274,69 +209,73 @@ void Parser::readLine(int lineno, const std::string &line)
 
 const char Parser::DEFAULT_COMMENT_CHAR = '#';
 
-Parser::Parser(const std::string &path, int tuning, char commentToken)
-	: m_path(path)
-	, m_tuning(tuning)
-	, m_commentChar(commentToken)
-{
-	Section root;
-
-	// Add a default root section
-	root.m_name = "";
-	root.m_allowed = (tuning & DisableRootSection) ? false : true;
-
-	m_sections.push_back(root);
-}
-
-Parser::Parser()
-{
-}
-
-Parser::~Parser()
-{
-}
-
-bool Parser::open()
+void Parser::open()
 {
 	std::ifstream file;
 	std::string line;
 	int lineno = 1;
 
 	file.open(m_path.c_str());
-	if (!file.is_open()) {
-		m_error = "could not open file " + m_path;	// XXX: add a real error
-		return false;
-	}
+	if (!file.is_open())
+		throw std::runtime_error(m_path + ": " + std::string(std::strerror(errno)));
 
-	// Avoid use of C getline
 	while (std::getline(file, line))
 		readLine(lineno++, line);
 
 	file.close();
-
-	return true;
 }
 
-const std::string &Parser::getError() const
+Parser::Parser()
 {
-	return m_error;
 }
 
-const std::vector<Section> &Parser::getSections() const
+Parser::Parser(const std::string &path, int tuning, char commentToken)
+	: m_path(path)
+	, m_tuning(tuning)
+	, m_commentChar(commentToken)
 {
-	return m_sections;
+	Section s("");
+
+	s.m_allowed = (tuning & DisableRootSection) ? false : true;
+
+	m_sections.push_back(s);
+	open();
+}
+
+Parser::~Parser()
+{
+}
+
+Parser::List::iterator Parser::begin()
+{
+	return m_sections.begin();
+}
+
+Parser::List::const_iterator Parser::cbegin() const
+{
+	return m_sections.cbegin();
+}
+
+Parser::List::iterator Parser::end()
+{
+	return m_sections.end();
+}
+
+Parser::List::const_iterator Parser::cend() const
+{
+	return m_sections.end();
 }
 
 void Parser::findSections(const std::string &name, FindFunc func) const
 {
-	for (const Section &s : m_sections)
+	for (const auto &s : m_sections)
 		if (s.m_name == name)
 			func(s);
 }
 
 bool Parser::hasSection(const std::string &name) const
 {
-	for (const Section &s : m_sections)
+	for (const auto &s : m_sections)
 		if (s.m_name == name)
 			return true;
 
@@ -345,11 +284,11 @@ bool Parser::hasSection(const std::string &name) const
 
 const Section &Parser::getSection(const std::string &name) const
 {
-	for (const Section &s : m_sections)
+	for (const auto &s : m_sections)
 		if (s.m_name == name)
 			return s;
 
-	throw NotFoundException(name);
+	throw std::out_of_range(name + " not found");
 }
 
 void Parser::log(int number, const std::string &, const std::string &message)
@@ -357,23 +296,12 @@ void Parser::log(int number, const std::string &, const std::string &message)
 	std::cout << "line " << number << ": " << message << std::endl;
 }
 
-void Parser::dump()
+bool operator==(const Parser &p1, const Parser &p2)
 {
-	for (auto s : m_sections) {
-		dumpSection(s);
-		for (auto o : s.m_options)
-			dumpOption(o);
-	}
-}
-
-void Parser::dumpSection(const Section &section)
-{
-	std::cout << "Section " << section.m_name << std::endl;
-}
-
-void Parser::dumpOption(const Option &option)
-{
-	std::cout << "    Option " << option.m_key << " = " << option.m_value << std::endl;
+	return p1.m_sections == p2.m_sections &&
+	    p1.m_path == p2.m_path &&
+	    p1.m_tuning == p2.m_tuning &&
+	    p1.m_commentChar == p2.m_commentChar;
 }
 
 } // !irccd

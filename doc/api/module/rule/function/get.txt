@@ -1,0 +1,24 @@
+---
+function: get
+---
+
+Get an existing rule.
+
+# Synopsis
+
+````lua
+rule, err = function rule.get(index)
+````
+
+# Arguments
+
+- index, the index of the rule (index must be in the range [1, size])
+
+# Returns
+
+- rule, the rule or nil on failure (see [[irccd-Rule|Rule]])
+- err, the error message
+
+# Remarks
+
+Assignment or modification to the returned table does not change anything.

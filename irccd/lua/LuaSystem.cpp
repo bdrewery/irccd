@@ -1,7 +1,7 @@
 /*
  * LuaSystem.cpp -- Lua bindings for system information
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,11 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Directory.h>
+#include <chrono>
+#include <thread>
 
-#include "Luae.h"
+#include <common/Directory.h>
+
+#include <irccd/Luae.h>
+#include <irccd/System.h>
+
 #include "LuaSystem.h"
-#include "System.h"
 
 namespace irccd {
 
@@ -28,74 +32,64 @@ namespace {
 
 int l_name(lua_State *L)
 {
-	auto name = System::name();
-
-	lua_pushlstring(L, name.c_str(), name.length());
+	Luae::push(L, System::name());
 
 	return 1;
 }
 
 int l_version(lua_State *L)
 {
-	auto version = System::version();
-
-	lua_pushlstring(L, version.c_str(), version.length());
+	Luae::push(L, System::version());
 
 	return 1;
 }
 
 int l_uptime(lua_State *L)
 {
-	lua_pushinteger(L, System::uptime());
+	Luae::push(L, static_cast<int>(System::uptime()));
 
 	return 1;
 }
 
 int l_sleep(lua_State *L)
 {
-	auto seconds = luaL_checkinteger(L, 1);
-
-	System::sleep(seconds);
+	std::this_thread::sleep_for(std::chrono::seconds(Luae::check<int>(L, 1)));
 
 	return 0;
 }
 
 int l_usleep(lua_State *L)
 {
-	auto ms = luaL_checkinteger(L, 1);
-
-	System::usleep(ms);
+	std::this_thread::sleep_for(std::chrono::milliseconds(Luae::check<int>(L, 1)));
 
 	return 0;
 }
 
 int l_ticks(lua_State *L)
 {
-	lua_pushinteger(L, System::ticks());
+	Luae::push(L, static_cast<int>(System::ticks()));
 
 	return 1;
 }
 
 int l_env(lua_State *L)
 {
-	auto name = luaL_checkstring(L, 1);
+	auto name = Luae::check<std::string>(L, 1);
 	auto value = System::env(name);
 
-	lua_pushlstring(L, value.c_str(), value.length());
+	Luae::push(L, value);
 
 	return 1;
 }
 
 int l_home(lua_State *L)
 {
-	auto home = System::home();
-
-	lua_pushlstring(L, home.c_str(), home.length());
+	Luae::push(L, System::home());
 
 	return 1;
 }
 
-const luaL_Reg functions[] = {
+const Luae::Reg functions {
 	{ "name",		l_name		},
 	{ "version",		l_version	},
 	{ "uptime",		l_uptime	},
@@ -103,15 +97,14 @@ const luaL_Reg functions[] = {
 	{ "usleep",		l_usleep	},
 	{ "ticks",		l_ticks		},
 	{ "env",		l_env		},
-	{ "home",		l_home		},
-	{ nullptr,		nullptr		}
+	{ "home",		l_home		}
 };
 
 }
 
 int luaopen_system(lua_State *L)
 {
-	luaL_newlib(L, functions);
+	Luae::newlib(L, functions);
 
 	return 1;
 }

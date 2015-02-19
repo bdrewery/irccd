@@ -1,0 +1,15 @@
+---
+method: remove
+---
+
+Remove the socket from the listener.
+
+# Synopsis
+
+````lua
+function Listener:remove(sock)
+````
+
+# Arguments
+
+- sock, the socket to remove

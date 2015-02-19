@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,17 +18,13 @@
 
 project(contrib)
 
-option(WITH_SYSTEMD "Install systemd service" Off)
-
 #
 # File for systemd
 #
 if (WITH_SYSTEMD)
 	# Directory for systemd
-	set(SYSTEMDDIR "/usr/lib/systemd/system"
+	set(WITH_SYSTEMDDIR "/usr/lib/systemd/system"
 	    CACHE STRING "Absolute path where to install systemd files")
 
-	install(FILES irccd.service DESTINATION ${SYSTEMDDIR})
-endif ()
-
-# vim: set syntax=cmake:
+	install(FILES irccd.service DESTINATION ${WITH_SYSTEMDDIR})
+endif()

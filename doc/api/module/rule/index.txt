@@ -1,0 +1,26 @@
+---
+module: irccd.rule
+since: 1.2
+---
+
+Rule management. All of these functions are thread-safe.
+
+# Constants
+
+| Variable   | Description                     |
+|------------|---------------------------------|
+| **Action** | Accept a rule process (default) |
+| **Drop**   | Drop the proccess               |
+
+# Types
+
+- [Rule](type/Rule/index.html)
+
+# Functions
+
+- [add](function/add.html)
+- [get](function/get.html)
+- [remove](function/remove.html)
+- [list](function/list.html)
+- [count](function/count.html)
+- [clear](function/clear.html)

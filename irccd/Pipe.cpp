@@ -1,7 +1,7 @@
 /*
  * Pipe.cpp -- share data between threads
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,24 +16,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <common/Logger.h>
+
 #include "Pipe.h"
+#include "PipeManager.h"
 
 namespace irccd {
 
-Pipe::Pipes Pipe::pipes;
-Pipe::Mutex Pipe::pipesMutex;
-
-Pipe::Ptr Pipe::get(const std::string &name)
+Pipe::Pipe(std::string name)
+	: m_name(std::move(name))
 {
-	Lock lk(pipesMutex);
-
-	if (pipes.find(name) == pipes.end())
-		pipes[name] = std::make_shared<Pipe>();
-
-	return pipes[name];
 }
 
-void Pipe::push(const LuaValue &value)
+Pipe::~Pipe()
+{
+	Logger::debug("pipe %s: destroyed", m_name.c_str());
+	PipeManager::instance().remove(m_name);
+}
+
+void Pipe::push(const LuaeValue &value)
 {
 	Lock lk(m_mutex);
 
@@ -41,10 +42,10 @@ void Pipe::push(const LuaValue &value)
 	m_cond.notify_all();
 }
 
-LuaValue Pipe::first()
+LuaeValue Pipe::first()
 {
 	Lock lk(m_mutex);
-	LuaValue v;
+	LuaeValue v;
 
 	if (m_queue.size() > 0)
 		return m_queue.front();
@@ -52,10 +53,10 @@ LuaValue Pipe::first()
 	return v;
 }
 
-LuaValue Pipe::last()
+LuaeValue Pipe::last()
 {
 	Lock lk(m_mutex);
-	LuaValue v;
+	LuaeValue v;
 
 	if (m_queue.size() > 0)
 		return m_queue.back();
@@ -73,9 +74,8 @@ void Pipe::clear()
 
 bool Pipe::wait(unsigned long ms)
 {
-	bool ret = true;
-
 	Lock lk(m_mutex);
+	bool ret = true;
 
 	if (ms == 0)
 		m_cond.wait(lk);
@@ -83,16 +83,6 @@ bool Pipe::wait(unsigned long ms)
 		ret = m_cond.wait_for(lk, std::chrono::milliseconds(ms)) != std::cv_status::timeout;
 
 	return ret;
-}
-
-void Pipe::list(Reader reader)
-{
-	Lock lk(m_mutex);
-
-	while (!m_queue.empty()) {
-		reader(m_queue.front());
-		m_queue.pop();
-	}
 }
 
 void Pipe::pop()

@@ -1,7 +1,7 @@
 /*
  * Irccdctl.cpp -- irccd controller class
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -617,7 +617,7 @@ void Irccdctl::readConfig(Parser &config)
 	using std::string;
 
 	try {
-		const Section &section= config.getSection("socket");
+		const Section &section = config.getSection("socket");
 		string type;
 		string proto;
 
@@ -643,8 +643,8 @@ void Irccdctl::readConfig(Parser &config)
 			loadInet(section);
 		else
 			Logger::fatal(1, "socket: invalid socket type %s", type.c_str());
-	} catch (NotFoundException ex) {
-		Logger::fatal(1, "socket: missing parameter %s", ex.which().c_str());
+	} catch (std::out_of_range ex) {
+		Logger::fatal(1, "socket: parameter %s", ex.what());
 	}
 }
 
@@ -658,19 +658,19 @@ void Irccdctl::openConfig()
 	 *
 	 * Otherwise, we open the default files.
 	 */
+	try {
 	if (m_configPath.length() == 0) {
 		try {
 			m_configPath = Util::findConfiguration("irccdctl.conf");
 			config = Parser(m_configPath);
-		} catch (Util::ErrorException ex) {
+		} catch (std::runtime_error ex) {
 			Logger::fatal(1, "%s: %s", getprogname(), ex.what());
 		}
 	} else
 		config = Parser(m_configPath);
-
-
-	if (!config.open())
+	} catch (std::runtime_error) {
 		Logger::fatal(1, "irccdctl: could not open %s, exiting", m_configPath.c_str());
+	}
 
 	readConfig(config);
 }

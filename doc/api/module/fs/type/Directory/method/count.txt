@@ -1,0 +1,16 @@
+---
+method: count
+category: fs
+---
+
+Count the number of entries in the directory. Note that if you didn't passed true to opendir you will have . and .. included.
+
+# Synopsis
+
+````lua
+count = function Directory:count()
+````
+
+# Returns
+
+- count, the number of entries.

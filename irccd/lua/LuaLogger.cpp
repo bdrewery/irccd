@@ -1,7 +1,7 @@
 /*
  * LuaLogger.cpp -- Lua bindings for class Logger
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,11 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <IrccdConfig.h>
+
 #include <sstream>
 
-#include <Logger.h>
+#include <common/Logger.h>
 
-#include "Irccd.h"
+#include <irccd/Irccd.h>
+#include <irccd/Process.h>
+
 #include "LuaLogger.h"
 
 namespace irccd {
@@ -39,31 +43,38 @@ std::string makeMessage(lua_State *L, const std::string &message)
 	return oss.str();
 }
 
-int log(lua_State *L)
+int l_debug(lua_State *L)
 {
-	Logger::log("%s", makeMessage(L, luaL_checkstring(L, 1)).c_str());
+	Logger::debug("%s", makeMessage(L, Luae::check<std::string>(L, 1)).c_str());
 
 	return 0;
 }
 
-int warn(lua_State *L)
+int l_log(lua_State *L)
 {
-	Logger::warn("%s", makeMessage(L, luaL_checkstring(L, 1)).c_str());
+	Logger::log("%s", makeMessage(L, Luae::check<std::string>(L, 1)).c_str());
 
 	return 0;
 }
 
-const luaL_Reg functions[] = {
-	{ "log",	log			},
-	{ "warn",	warn			},
-	{ nullptr,	nullptr			}
+int l_warn(lua_State *L)
+{
+	Logger::warn("%s", makeMessage(L, Luae::check<std::string>(L, 1)).c_str());
+
+	return 0;
+}
+
+const Luae::Reg functions {
+	{ "debug",	l_debug			},
+	{ "log",	l_log			},
+	{ "warn",	l_warn			},
 };
 
 }
 
 int luaopen_logger(lua_State *L)
 {
-	luaL_newlib(L, functions);
+	Luae::newlib(L, functions);
 
 	return 1;
 }

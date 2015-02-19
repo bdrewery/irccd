@@ -1,7 +1,7 @@
 /*
  * SocketAddress.cpp -- socket addresses management
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,14 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
+
+#if !defined(_WIN32)
+#  include <sys/un.h>
+
+#  define gai_strerrorA(s)	gai_strerror(s)
+#  define INVALID_SOCKET	-1
+#  define SOCKET_ERROR		-1
+#endif
 
 #include "SocketAddress.h"
 
@@ -88,8 +96,6 @@ ConnectAddressIP::ConnectAddressIP(const std::string &host, unsigned port, int f
  * -------------------------------------------------------- */
 
 #if !defined(_WIN32)
-
-#include <sys/un.h>
 
 AddressUnix::AddressUnix(const std::string &path, bool rm)
 {

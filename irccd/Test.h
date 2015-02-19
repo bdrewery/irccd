@@ -1,7 +1,7 @@
 /*
  * Test.h -- test plugins
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,8 +19,19 @@
 #ifndef _TEST_H_
 #define _TEST_H_
 
+/**
+ * @file Test.h
+ * @brief Irccd test interface
+ */
+
 namespace irccd {
 
+/**
+ * Test the command.
+ *
+ * @param argc the argument count
+ * @param argv the arguments
+ */
 void test(int argc, char **argv);
 
 } // !irccd

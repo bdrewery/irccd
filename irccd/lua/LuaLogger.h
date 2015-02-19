@@ -1,7 +1,7 @@
 /*
  * LuaLogger.h -- Lua bindings for class Logger
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,10 +19,21 @@
 #ifndef _LUA_LOGGER_H_
 #define _LUA_LOGGER_H_
 
+/**
+ * @file LuaLogger.h
+ * @brief Lua binfings for class Logger
+ */
+
 #include <lua.hpp>
 
 namespace irccd {
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_logger(lua_State *L);
 
 } // !irccd

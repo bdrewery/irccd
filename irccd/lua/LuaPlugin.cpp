@@ -1,7 +1,7 @@
 /*
  * LuaPlugin.cpp -- Lua bindings for class Plugin
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,81 +16,54 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <common/Logger.h>
+#include <common/Util.h>
+
+#include <irccd/Luae.h>
+#include <irccd/Plugin.h>
+#include <irccd/PluginManager.h>
+
 #include "LuaPlugin.h"
-#include "Luae.h"
-#include "Logger.h"
-#include "Plugin.h"
-#include "Util.h"
 
 namespace irccd {
 
 namespace {
 
-#if defined(COMPAT_1_0)
-
-void warn(lua_State *L, const char *func)
-{
-	auto name = Process::info(L).name;
-
-	Logger::warn("plugin %s: `%s' is deprecated, please use 'plugin.info'", name.c_str(), func);
-}
-
-int l_getName(lua_State *L)
-{
-	warn(L, "plugin.getName");
-
-	lua_pushstring(L, Process::info(L).name.c_str());
-
-	return 1;
-}
-
-int l_getHome(lua_State *L)
-{
-	warn(L, "plugin.getHome");
-
-	lua_pushstring(L, Process::info(L).home.c_str());
-
-	return 1;
-}
-
-#endif
-
 int l_addPath(lua_State *L)
 {
-	Plugin::addPath(luaL_checkstring(L, 1));
+	PluginManager::instance().addPath(Luae::check<std::string>(L, 1));
 
 	return 0;
 }
 
 int l_info(lua_State *L)
 {
-	std::string name;
 	int ret = 0;
 
 	/*
 	 * If the name is specified, search for a plugin, otherwise use
 	 * ourselve.
 	 */
-	if (lua_gettop(L) >= 1) {
-		name = luaL_checkstring(L, 1);
+	if (Luae::gettop(L) >= 1) {
+		auto name = Luae::check<std::string>(L, 1);
 
 		try {
-			auto plugin = Plugin::find(name);
+			auto plugin = PluginManager::instance().find(name);
 			auto state = plugin->getState();
 
-			lua_getfield(state, LUA_REGISTRYINDEX, Process::FieldInfo);
-			LuaValue::push(L, LuaValue::copy(state, -1));
-			lua_pop(state, 1);
+			Luae::getfield(state, LUA_REGISTRYINDEX, Process::FieldInfo);
+			LuaeValue::push(L, LuaeValue::copy(state, -1));
+			Luae::pop(state);
 
 			ret = 1;
-		} catch (std::out_of_range ex) {
-			lua_pushnil(L);
-			lua_pushstring(L, ex.what());
+		} catch (const std::exception &ex) {
+			Luae::push(L, nullptr);
+			Luae::push(L, ex.what());
 
 			ret = 2;
 		}
 	} else {
-		lua_getfield(L, LUA_REGISTRYINDEX, Process::FieldInfo);
+		Luae::getfield(L, LUA_REGISTRYINDEX, Process::FieldInfo);
 
 		ret = 1;
 	}
@@ -100,7 +73,7 @@ int l_info(lua_State *L)
 
 int l_list(lua_State *L)
 {
-	auto list = Plugin::list();
+	auto list = PluginManager::instance().list();
 	auto i = 0;
 
 	/*
@@ -109,97 +82,83 @@ int l_list(lua_State *L)
 	 * for p in plugin.list()
 	 */
 	auto iterator = [] (lua_State *L) -> int {
-		auto i = lua_tointeger(L, lua_upvalueindex(2));
-		auto length = lua_tointeger(L, lua_upvalueindex(3));
+		auto i = Luae::get<int>(L, Luae::upvalueindex(2));
+		auto length = Luae::get<int>(L, Luae::upvalueindex(3));
 
 		if (i - 1 == length)
 			return 0;
 
 		// Push the current value
-		lua_pushinteger(L, i);
-		lua_gettable(L, lua_upvalueindex(1));
+		Luae::push(L, i);
+		Luae::gettable(L, Luae::upvalueindex(1));
 
 		// Update i
-		lua_pushinteger(L, ++i);
-		lua_replace(L, lua_upvalueindex(2));
+		Luae::push(L, ++i);
+		Luae::replace(L, Luae::upvalueindex(2));
 
 		return 1;
 	};
 
 	// Create a Lua table as upvalue to keep the list.
-	lua_createtable(L, list.size(), list.size());
+	LuaeTable::create(L, list.size(), list.size());
 	for (auto s : list) {
-		lua_pushlstring(L, s.c_str(), s.length());
-		lua_rawseti(L, -2, ++i);
+		Luae::push(L, s);
+		Luae::rawset(L, -2, ++i);
 	}
 
-	lua_pushinteger(L, 1);
-	lua_pushinteger(L, list.size());
-	lua_pushcclosure(L, iterator, 3);
+	Luae::push(L, 1);
+	Luae::push(L, static_cast<int>(list.size()));
+	Luae::pushfunction(L, iterator, 3);
 
 	return 1;
 }
 
 int l_load(lua_State *L)
 {
-	std::string path = luaL_checkstring(L, 1);
+	auto path = Luae::check<std::string>(L, 1);
 
 	try {
-		Plugin::load(path, Util::isAbsolute(path));
-	} catch (std::runtime_error error) {
-		lua_pushnil(L);
-		lua_pushfstring(L, "plugin: %s", error.what());
+		PluginManager::instance().load(path, Util::isAbsolute(path));
+	} catch (const std::exception &error) {
+		Luae::push(L, nullptr);
+		Luae::pushfstring(L, "plugin: %s", error.what());
 
 		return 2;
 	}
 
-	lua_pushboolean(L, true);
+	Luae::push(L, true);
 
 	return 1;
 }
 
 int l_reload(lua_State *L)
 {
-	std::string name = luaL_checkstring(L, 1);
-
-	Plugin::reload(name);
+	PluginManager::instance().reload(Luae::check<std::string>(L, 1));
 
 	return 0;
 }
 
 int l_unload(lua_State *L)
 {
-	std::string name = luaL_checkstring(L, 1);
-
-	Plugin::unload(name);
+	PluginManager::instance().unload(Luae::check<std::string>(L, 1));
 
 	return 0;
 }
 
-const luaL_Reg functionList[] = {
-/*
- * DEPRECATION:	1.1-001
- *
- * Functions getHome() and getName() are replaced with info().
- */
-#if defined(COMPAT_1_0)
-	{ "getName",		l_getName		},
-	{ "getHome",		l_getHome		},
-#endif
+const Luae::Reg functionList {
 	{ "addPath",		l_addPath		},
 	{ "info",		l_info			},
 	{ "list",		l_list			},
 	{ "load",		l_load			},
 	{ "reload",		l_reload		},
-	{ "unload",		l_unload		},
-	{ nullptr,		nullptr			}
+	{ "unload",		l_unload		}
 };
 
-}
+} // !namespace
 
 int luaopen_plugin(lua_State *L)
 {
-	luaL_newlib(L, functionList);
+	Luae::newlib(L, functionList);
 
 	return 1;
 }

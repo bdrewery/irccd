@@ -1,0 +1,21 @@
+---
+method: calendar
+---
+
+Returns the calendar for the current date. The following fields are available:
+
+* *seconds* (int): seconds elapsed [0-60]
+* *minutes* (int): minutes elapsed [0-59]
+* *hours* (int): hours elapsed [0-23]
+* *month* (int): number of month [1-12]
+* *year* (int): the real year
+
+# Synopsis
+
+````lua
+calendar = function Date:calendar()
+````
+
+# Returns
+
+- calendar, the calendar

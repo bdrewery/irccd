@@ -1,7 +1,7 @@
 --
 -- auth.lua -- generic plugin to authenticate to services
 --
--- Copyright (c) 2013 David Demelier <markand@malikania.fr>
+-- Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 --
 -- Permission to use, copy, modify, and/or distribute this software for any
 -- purpose with or without fee is hereby granted, provided that the above
@@ -26,6 +26,7 @@ LICENSE		= "ISC"
 local logger	= require "irccd.logger"
 local parser	= require "irccd.parser"
 local plugin	= require "irccd.plugin"
+local server	= require "irccd.server"
 
 -- Authentication methods by servers
 local auth	= {}
@@ -90,10 +91,10 @@ local function loadConfig()
 	end
 end
 
-local function onConnectNickServer(server)
+local function authNickserv(server)
 	logger.log("authenticating to NickServ")
 
-	local a = auth[server:getName()]
+	local a = auth[server:info().name]
 	local cmd = "identify "
 
 	-- The username is optional
@@ -106,23 +107,31 @@ local function onConnectNickServer(server)
 	server:say("NickServ", cmd)
 end
 
-local function onConnectQuakenet(server)
+local function authQuakenet(server)
 	logger.log("authenticating to Q")
 
-	local a = auth[server:getName()]
+	local a = auth[server:info().name]
 	local cmd = string.format("AUTH %s %s", a.username, a.password)
 
 	server:say("Q@CServe.quakenet.org", cmd)
 end
 
-function onConnect(server)
-	if auth[server:getName()] then
-		if auth[server:getName()].backend == "nickserv" then
-			onConnectNickServer(server)
-		elseif auth[server:getName()].backend == "quakenet" then
-			onConnectQuakenet(server)
-		end
+local function authenticate(server)
+	local name = server:info().name
+
+	if not auth[name] then
+		return
 	end
+
+	if auth[name].backend == "nickserv" then
+		authNickserv(server)
+	elseif auth[name].backend == "quakenet" then
+		authQuakenet(server)
+	end
+end
+
+function onConnect(server)
+	authenticate(server)
 end
 
 function onReload()
@@ -131,4 +140,13 @@ end
 
 function onLoad()
 	loadConfig()
+
+	-- Authenticate now
+	for a in pairs(auth) do
+		local s = server.find(a)
+
+		if s then
+			authenticate(s)
+		end
+	end
 end

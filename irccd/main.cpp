@@ -1,7 +1,7 @@
 /*
  * main.cpp -- irccd main file
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -25,30 +25,39 @@
 
 #include "Irccd.h"
 #include "Test.h"
+#include "PluginManager.h"
 
 using namespace irccd;
 using namespace std;
 
-static void quit(int)
+namespace {
+
+void quit(int)
 {
-	Irccd::getInstance().shutdown();
+	Irccd::instance().shutdown();
+	Irccd::instance().stop();
 }
 
-static void usage()
+void usage()
 {
 	Logger::warn("usage: %s [-fv] [-c config] [-p pluginpath] [-P plugin]", getprogname());
 	Logger::fatal(1, "       %s test plugin.lua [command] [parameters...]", getprogname());
 }
 
+} // !namespace
+
 int main(int argc, char **argv)
 {
-	Irccd &irccd = Irccd::getInstance();
+	Irccd &irccd = Irccd::instance();
 	int ch;
 
 	setprogname("irccd");
+	atexit([] () {
+		quit(0);
+	});
 
 	irccd.initialize();
-	
+
 	while ((ch = getopt(argc, argv, "fc:p:P:v")) != -1) {
 		switch (ch) {
 		case 'c':
@@ -61,7 +70,7 @@ int main(int argc, char **argv)
 			break;
 		case 'p':
 #if defined(WITH_LUA)
-			Plugin::addPath(string(optarg));
+			PluginManager::instance().addPath(string(optarg));
 #endif
 			break;
 		case 'P':
@@ -93,7 +102,7 @@ int main(int argc, char **argv)
 		if (strcmp(argv[0], "version") == 0) {
 			Logger::setVerbose(true);
 			Logger::log("irccd version %s", VERSION);
-			Logger::log("Copyright (c) 2013 David Demelier <markand@malikania.fr>");
+			Logger::log("Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>");
 			Logger::log("");
 			Logger::log("Irccd is a customizable IRC bot daemon compatible with Lua plugins");
 			Logger::log("to fit your needs.");

@@ -1,7 +1,7 @@
 /*
  * Irccd.h -- main irccd class
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,12 +19,20 @@
 #ifndef _IRCCD_H_
 #define _IRCCD_H_
 
+/**
+ * @file Irccd.h
+ * @brief Main irccd class
+ */
+
 #include <exception>
 #include <mutex>
 #include <sstream>
+#include <unordered_set>
 
 #include <Parser.h>
-#include <config.h>
+#include <Singleton.h>
+#include <Util.h>
+#include <IrccdConfig.h>
 
 #include "Server.h"
 
@@ -32,12 +40,19 @@
 #  include "Plugin.h"
 #endif
 
+/**
+ * @brief The irccd namespace
+ */
 namespace irccd {
 
 /* --------------------------------------------------------
  * Irccd main class
  * -------------------------------------------------------- */
 
+/**
+ * @enum Options
+ * @brief Options
+ */
 enum Options {
 	Config		= 'c',
 	Foreground	= 'f',
@@ -46,21 +61,26 @@ enum Options {
 	PluginWanted	= 'P'
 };
 
-using IdentityList	= std::vector<
-				Server::Identity
-			  >;
+/**
+ * List of identities.
+ */
+using IdentityList	= std::vector<Server::Identity>;
 
-class Irccd {
-public:
+/**
+ * @class Irccd
+ * @brief The main irccd class
+ */
+class Irccd : public Singleton<Irccd> {
+private:
+	friend class Singleton<Irccd>;
+	friend std::unique_ptr<Irccd> std::make_unique<Irccd>();
+
 	using Wanted	= std::vector<std::string>;
 	using Overriden	= std::unordered_map<char, bool>;
 
-private:
-	static Irccd	m_instance;		//! unique instance
-
 	// Ignition
-	bool		m_running;		//! forever loop
-	bool		m_foreground;		//! run to foreground
+	bool		m_running { true };
+	bool		m_foreground { false };
 
 	// Config
 	std::string	m_configPath;		//! config file path
@@ -69,6 +89,11 @@ private:
 	// Identities
 	IdentityList	m_identities;		//! user identities
 	Server::Identity m_defaultIdentity;	//! default identity
+
+#if !defined(_WIN32)
+	uid_t		m_uid = 0;		//! uid to run
+	gid_t		m_gid = 0;		//! gid to run
+#endif
 
 	/*
 	 * Plugin specified by commands line that should be
@@ -88,8 +113,34 @@ private:
 	 */
 	void openConfig();
 	void readGeneral(const Parser &config);		// [general]
+	int parse(const Section &section, const char *name, bool isgid);
+	std::string idname(bool isgid);
+
 	void readPlugins(const Parser &config);		// [plugins]
 	void readIdentities(const Parser &config);	// [identity]
+
+	/* ------------------------------------------------
+	 * [rule]
+	 * ------------------------------------------------ */
+
+	void readRules(const Parser &config);
+
+	std::unordered_set<std::string> getList(const Section &s, const std::string &name) const
+	{
+		std::unordered_set<std::string> result;
+
+		if (s.hasOption(name)) {
+			for (const auto &i : Util::split(s.getOption<std::string>(name), " \t")) {
+				result.insert(i);
+			}
+		}
+
+		return result;
+	}
+
+	/* ------------------------------------------------
+	 * [listener]
+	 * ------------------------------------------------ */
 
 	void readListeners(const Parser &config);
 	void extractInternet(const Section &s, int type);
@@ -98,20 +149,17 @@ private:
 	void extractUnix(const Section &s, int type);
 #endif
 
+	/* ------------------------------------------------
+	 * [server]
+	 * ------------------------------------------------ */
+
 	void readServers(const Parser &config);
-	void extractChannels(const Section &section, Server::Ptr server);
+	void extractChannels(const Section &section, std::shared_ptr<Server> &server);
 
 public:
 	~Irccd();
 
 	/**
-	 * Get the unique irccd instance.
-	 *
-	 * @return the irccd instance
-	 */
-	static Irccd &getInstance();
-
-	/*
 	 * Initialize common settings.
 	 */
 	void initialize();

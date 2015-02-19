@@ -1,12 +1,12 @@
 /*
  * LuaSocket.cpp -- Lua bindings for Sockets
- * 
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
- * 
+ *
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -22,28 +22,50 @@
 #include <stdexcept>
 #include <unordered_map>
 
-#include <Socket.h>
-#include <SocketAddress.h>
-#include <SocketListener.h>
+#if !defined(_WIN32)
+#  include <sys/un.h>
+#endif
 
-#include "Luae.h"
+#include <IrccdConfig.h>
+
+#include <common/Socket.h>
+#include <common/SocketAddress.h>
+#include <common/SocketListener.h>
+
+#include <irccd/Luae.h>
+
 #include "LuaSocket.h"
-
-#define SOCKET_TYPE		"Socket"
-#define ADDRESS_TYPE		"SocketAddress"
-#define LISTENER_TYPE		"SocketListener"
 
 namespace irccd {
 
 namespace {
 
+/*
+ * This field is the one that is put into the address table for further
+ * usage. It should not be used by the end user.
+ */
+const char *AddrField		= "__address";
+
+/*
+ * This field is used to store the length of the binary sockaddr_storage
+ * data.
+ */
+const char *LengthField		= "__addrlen";
+
+/*
+ * This field is used to store addresses from recvfrom in the registry so we
+ * can return the same if the user does not discard the return value.
+ */
+const char *RegField		= "__addresses";
+
+const char *SocketType		= "Socket";
+const char *ListenerType	= "Listener";
+
 /* ---------------------------------------------------------
  * Enumerations
  * --------------------------------------------------------- */
 
-typedef std::unordered_map<std::string, int> EnumMap;
-
-EnumMap sockFamilies {
+LuaeEnum::Def sockFamilies {
 	{ "Inet",	AF_INET		},
 	{ "Inet6",	AF_INET6	},
 
@@ -52,12 +74,12 @@ EnumMap sockFamilies {
 #endif
 };
 
-EnumMap sockTypes {
+LuaeEnum::Def sockTypes {
 	{ "Stream",	SOCK_STREAM	},
 	{ "Datagram",	SOCK_DGRAM	}
 };
 
-EnumMap sockProtocols {
+LuaeEnum::Def sockProtocols {
 	{ "Tcp",	IPPROTO_TCP	},
 	{ "Udp",	IPPROTO_UDP	},
 	{ "IPv4",	IPPROTO_IP	},
@@ -75,13 +97,13 @@ EnumMap sockProtocols {
  */
 #if defined(_WIN32)
 
-typedef bool 		OptionBool;
-typedef int		OptionInteger;
+using OptionBool	= bool;
+using OptionInteger	= int;
 
 #else
 
-typedef int 		OptionBool;
-typedef int		OptionInteger;
+using OptionBool	= int;
+using OptionInteger	= int;
 
 #endif
 
@@ -111,9 +133,9 @@ struct Option {
 	}
 };
 
-typedef std::unordered_map<std::string,
-	std::unordered_map<std::string, Option>
-> OptionMap;
+using OptionMap	= std::unordered_map<std::string,
+			std::unordered_map<std::string, Option>
+		  >;
 
 /*
  * Map here the socket options from the C side to Lua. It's very
@@ -159,46 +181,297 @@ OptionMap prepareOptions()
 OptionMap options = prepareOptions();
 
 /* ---------------------------------------------------------
- * Socket functions
+ * Private helpers
  * --------------------------------------------------------- */
 
-void mapToTable(lua_State *L,
-		const EnumMap &map,
-		int index,
-		const std::string &name)
-{
-	lua_createtable(L, 0, 0);
+using SocketAddressPtr = std::unique_ptr<SocketAddress>;
 
-	for (auto p : map) {
-		lua_pushinteger(L, p.second);
-		lua_setfield(L, -2, p.first.c_str());
+/**
+ * Store the SocketAddress into the AddrField to the table at the
+ * given index.
+ *
+ * @param L the Lua state
+ * @param index the table index
+ * @param sa the socket address
+ */
+void storeAddressData(lua_State *L, int index, const SocketAddress &sa)
+{
+	if (LuaeTable::type(L, index, AddrField) == LUA_TNIL) {
+		if (index < 0)
+			-- index;
+
+		lua_pushlstring(L, reinterpret_cast<const char *>(&sa.address()), sa.length());
+		lua_setfield(L, -2, AddrField);
+
+		lua_pushinteger(L, sa.length());
+		lua_setfield(L, -2, LengthField);
+	}
+}
+
+#if !defined(WIN32)
+
+/**
+ * Check that the table at the given index can be used as a socket address
+ * for AF_UNIX family.
+ *
+ * The table must have the following fields:
+ *
+ *	path	- (string) Required, the path to the socket
+ *	remove	- (bool) Optional, tell to remove the file before usage
+ *
+ * @param L the Lua state
+ * @param index the table index
+ * @return a ready to use address
+ * @throw SocketError on errors
+ */
+SocketAddressPtr checkUnix(lua_State *L, int index, const Socket &)
+{
+	LUAE_STACK_CHECKBEGIN(L);
+
+	auto path = LuaeTable::require<std::string>(L, index, "path");
+	auto rm = false;
+
+	if (LuaeTable::type(L, index, "remove") != LUA_TNIL)
+		rm = lua_toboolean(L, index);
+
+	LUAE_STACK_CHECKEQUALS(L);
+
+	return SocketAddressPtr(new AddressUnix(path, rm));
+}
+
+#endif
+
+/**
+ * Check that a table can be used as both binding or connecting to a socket
+ * with AF_INET or AF_INET6 families.
+ *
+ * The table must have the following fields:
+ *
+ *	port	- (number) Required, the port number
+ *	family	- (enum) Optional, the family to use. Default: the same as socket
+ *	type	- (enum) Optiona, type of socket. Default: the same as socket
+ *
+ * Additional fields for connecting:
+ *	host	- (string) Required, the host to connect to
+ *
+ * Additional fields for binding:
+ *	address	- (string) Required, the address to bind to or "*" for any.
+ *
+ * @param L the Lua state
+ * @param index the table index
+ * @param sc the socket
+ * @return a ready to use address
+ * @throw SocketError on errors
+ */
+SocketAddressPtr checkInet(lua_State *L, int index, const Socket &sc)
+{
+	LUAE_STACK_CHECKBEGIN(L);
+
+	SocketAddressPtr ptr;
+
+	auto port = LuaeTable::require<int>(L, index, "port");
+	auto family = sc.getDomain();
+
+	// If no family, we use the same as the socket
+	if (LuaeTable::type(L, index, "family") == LUA_TNUMBER)
+		family = LuaeTable::require<int>(L, index, "family");
+
+	// If we have address field, we want to bind
+	if (LuaeTable::type(L, index, "address") == LUA_TSTRING) {
+		auto address = LuaeTable::require<std::string>(L, index, "address");
+
+		ptr = SocketAddressPtr(new BindAddressIP(address, port, family));
+	} else {
+		auto host = LuaeTable::require<std::string>(L, index, "host");
+		auto type = sc.getType();
+
+		// If no type, we use the same as the socket
+		if (LuaeTable::type(L, index, "type") == LUA_TNUMBER)
+			type = LuaeTable::require<int>(L, index, "type");
+
+		ptr = SocketAddressPtr(new ConnectAddressIP(host, port, family, type));
 	}
 
-	if (index < 0)
-		-- index;
+	LUAE_STACK_CHECKEQUALS(L);
 
-	lua_setfield(L, index, name.c_str());
+	return ptr;
+}
+
+/**
+ * Get an address from a table parameter.
+ *
+ * @param L the Lua state
+ * @param index the table index
+ * @param sc the socket
+ * @see checkInet
+ * @see checkUnit
+ * @return ready to use address
+ * @throw SocketError on errors
+ */
+SocketAddressPtr checkAddress(lua_State *L, int index, const Socket &sc)
+{
+	LUAE_STACK_CHECKBEGIN(L);
+
+	SocketAddressPtr address;
+
+	Luae::checktype(L, index, LUA_TTABLE);
+
+	/*
+	 * If the field AddrField is present, we create the address with that
+	 * data, otherwise, we return a new one
+	 */
+	if (LuaeTable::type(L, index, AddrField) == LUA_TSTRING) {
+		sockaddr_storage st;
+
+		auto data = LuaeTable::require<std::string>(L, index, AddrField);
+		auto length = LuaeTable::require<int>(L, index, LengthField);
+
+		std::memset(&st, 0, sizeof (sockaddr_storage));
+		std::memcpy(&st, data.c_str(), length);
+
+		address = SocketAddressPtr(new SocketAddress(st, length));
+	} else {
+#if !defined(_WIN32)
+		if (LuaeTable::type(L, index, "path") != LUA_TNIL) {
+			address = checkUnix(L, index, sc);
+		} else {
+			address = checkInet(L, index, sc);
+		}
+#else
+		address = checkInet(L, index, sc);
+#endif
+		// Store the binary data
+		storeAddressData(L, index, *address);
+	}
+
+	LUAE_STACK_CHECKEQUALS(L);
+
+	return address;
+}
+
+#if !defined(WIN32)
+
+/**
+ * Set the Unix fields for an address.
+ *
+ * The table will have the following fields:
+ *
+ *	path	- (string) the path to the socket
+ *
+ * @param L the Lua state
+ * @param address the socket address
+ */
+void pushUnix(lua_State *L, const SocketAddress &address)
+{
+	auto sun = reinterpret_cast<const sockaddr_un *>(&address.address());
+
+	Luae::push(L, sun->sun_path);
+	Luae::setfield(L, -2, "path");
+}
+
+#endif
+
+/**
+ * Set the fields for an internet socket.
+ *
+ * The table will have the following fields:
+ *
+ *	host	- (string) the hostname
+ *	service	- (string) the service (port) as a string if available
+ *	ip	- (string) the IP address
+ *	port	- (number) the port number
+ *
+ * @param L the Lua state
+ * @param address the socket address
+ */
+void pushInet(lua_State *L, const SocketAddress &address)
+{
+	char host[NI_MAXHOST], service[NI_MAXSERV];
+	auto addr = address.address();
+	auto len = address.length();
+
+	// 1. First get all info by host and service names
+	auto e = getnameinfo((sockaddr *)&addr, len, host, sizeof (host),
+	    service, sizeof (service), 0);
+
+	if (e == 0) {
+		LuaeTable::set(L, -2, "host", host);
+		LuaeTable::set(L, -2, "service", service);
+	}
+
+	// 2. Now get these info with numeric variants
+	auto flags = 0 | NI_NUMERICHOST | NI_NUMERICSERV;
+	e = getnameinfo((sockaddr *)&addr, len, host, sizeof (host),
+	    service, sizeof (service), flags);
+
+	if (e == 0) {
+		LuaeTable::set(L, -2, "ip", host);
+		LuaeTable::set(L, -2, "port", std::atoi(service));
+	}
+}
+
+/**
+ * Push an address or an existing one if any. The address are weak-valued
+ * stored in the registry so if the user wants to keep them we use existing
+ * one for performance reasons.
+ *
+ * Only addresses from Socket:accept() and Socket:recvfrom() are stored.
+ *
+ * @see pushUnix
+ * @see pushInet
+ */
+void pushAddress(lua_State *L, const SocketAddress &address)
+{
+	LUAE_STACK_CHECKBEGIN(L);
+
+	const auto &st = address.address();
+	const auto &len = address.length();
+
+	// 1. Check in the registry if we already have it.
+	lua_getfield(L, LUA_REGISTRYINDEX, RegField);
+	lua_pushlstring(L, reinterpret_cast<const char *>(&st), len);
+	lua_rawget(L, -2);
+
+	if (lua_type(L, -1) == LUA_TNIL) {
+		lua_pop(L, 1);
+		lua_createtable(L, 0, 0);
+	
+		// Store the binary data
+		storeAddressData(L, -1, address);
+
+#if !defined(WIN32)
+		// Unix
+		if (st.ss_family == AF_UNIX) {
+			pushUnix(L, address);
+		} else {
+			pushInet(L, address);
+		}
+#else
+		// Windows only
+		pushInet(L, address);
+#endif
+
+		lua_pushlstring(L, reinterpret_cast<const char *>(&st), len);
+		lua_pushvalue(L, -2);
+		lua_rawset(L, -4);
+	}
+
+	lua_replace(L, -2);
+	LUAE_STACK_CHECKEND(L, - 1);
 }
 
 int genericReceive(lua_State *L, bool udp)
 {
-	Socket *s	= Luae::toType<Socket *>(L, 1, SOCKET_TYPE);
-	int requested	= luaL_checkinteger(L, 2);
-	SocketAddress *sa;
-	int nret;
+	auto s = Luae::toType<Socket *>(L, 1, SocketType);
+	int amount = luaL_checkinteger(L, 2);
+	int ret;
 	char *data;
-	size_t nbread;
-
-	/*
-	 * This parameter only needed for UDP sockets
-	 */
-	if (udp)
-		sa = Luae::toType<SocketAddress *>(L, 2, ADDRESS_TYPE);
+	long nbread;
 
 	/*
 	 * Allocate a temporarly buffer for receiveing the data.
 	 */
-	data = static_cast<char *>(std::malloc(requested));
+	data = static_cast<char *>(std::malloc(amount));
 	if (data == nullptr) {
 		lua_pushnil(L);
 		lua_pushstring(L, std::strerror(errno));
@@ -207,44 +480,52 @@ int genericReceive(lua_State *L, bool udp)
 	}
 
 	try {
+		SocketAddress info;
+
 		if (!udp)
-			nbread = s->recv(data, requested);
+			nbread = s->recv(data, amount);
 		else
-			nbread = s->recvfrom(data, requested, *sa);
+			nbread = s->recvfrom(data, amount, info);
 
 		lua_pushlstring(L, data, nbread);
 
-		nret = 1;
+		// Push the address for UDP
+		if (udp) {
+			pushAddress(L, info);
+			ret = 2;
+		} else
+			ret = 1;
 	} catch (SocketError error) {
 		lua_pushnil(L);
-		lua_pushstring(L, error.what());
 
-		nret = 2;
+		// If UDP we push a second nil for the address
+		if (udp) {
+			lua_pushnil(L);
+			ret = 3;
+		} else
+			ret = 2;
+
+		lua_pushstring(L, error.what());
 	}
 
 	std::free(data);
 
-	return nret;
+	return ret;
 }
 
 int genericSend(lua_State *L, bool udp)
 {
-	Socket *s	= Luae::toType<Socket *>(L, 1, SOCKET_TYPE);
-	const char *msg	= luaL_checkstring(L, 2);
-	SocketAddress *sa;
+	auto s = Luae::toType<Socket *>(L, 1, SocketType);
+	auto msg = luaL_checkstring(L, 2);
 	long nbsent;
-
-	/*
-	 * This parameter only needed for UDP sockets
-	 */
-	if (udp)
-		sa = Luae::toType<SocketAddress *>(L, 3, ADDRESS_TYPE);
 
 	try {
 		if (!udp)
 			nbsent = s->send(msg, strlen(msg));
-		else
-			nbsent = s->sendto(msg, strlen(msg), *sa);
+		else {
+			auto addr = checkAddress(L, 3, *s);
+			nbsent = s->sendto(msg, strlen(msg), *addr);
+		}
 	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
@@ -257,14 +538,15 @@ int genericSend(lua_State *L, bool udp)
 	return 1;
 }
 
-int socketNew(lua_State *L)
+/* ---------------------------------------------------------
+ * Socket functions
+ * --------------------------------------------------------- */
+
+int l_new(lua_State *L)
 {
-	int domain;
+	int family = luaL_checkinteger(L, 1);
 	int type = SOCK_STREAM;
 	int protocol = 0;
-
-	// Domain is the only one mandatory
-	domain = luaL_checkinteger(L, 1);
 
 	if (lua_gettop(L) >= 2)
 		type = luaL_checkinteger(L, 2);
@@ -272,7 +554,7 @@ int socketNew(lua_State *L)
 		protocol = luaL_checkinteger(L, 3);
 
 	try {
-		new (L, SOCKET_TYPE) Socket(domain, type, protocol);
+		new (L, SocketType) Socket(family, type, protocol);
 	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
@@ -283,10 +565,10 @@ int socketNew(lua_State *L)
 	return 1;
 }
 
-int socketBlockMode(lua_State *L)
+int l_blockMode(lua_State *L)
 {
-	Socket *s	= Luae::toType<Socket *>(L, 1, SOCKET_TYPE);
-	bool mode	= lua_toboolean(L, 2) ? true : false;
+	auto s = Luae::toType<Socket *>(L, 1, SocketType);
+	auto mode = lua_toboolean(L, 2) ? true : false;
 
 	try {
 		s->blockMode(mode);
@@ -302,11 +584,9 @@ int socketBlockMode(lua_State *L)
 	return 1;
 }
 
-int socketBind(lua_State *L)
+int l_bind(lua_State *L)
 {
-	Socket *s = Luae::toType<Socket *>(L, 1, SOCKET_TYPE);
-	SocketAddress *a = Luae::toType<SocketAddress *>(L, 2, ADDRESS_TYPE);
-
+#if defined(COMPAT_1_1)
 	/*
 	 * Get nil + error message for chained expression like:
 	 * s:bind(address.bindInet { port = 80, family = 1 })
@@ -317,9 +597,13 @@ int socketBind(lua_State *L)
 
 		return 2;
 	}
+#endif
 
 	try {
-		s->bind(*a);
+		auto s = Luae::toType<Socket *>(L, 1, SocketType);
+		auto addr = checkAddress(L, 2, *s);
+
+		s->bind(*addr);
 	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
@@ -332,20 +616,21 @@ int socketBind(lua_State *L)
 	return 1;
 }
 
-int socketClose(lua_State *L)
+int l_close(lua_State *L)
 {
-	Socket *s = Luae::toType<Socket *>(L, 1, SOCKET_TYPE);
+	auto s = Luae::toType<Socket *>(L, 1, SocketType);
 
 	s->close();
 
 	return 0;
 }
 
-int socketConnect(lua_State *L)
+int l_connect(lua_State *L)
 {
-	Socket *s = Luae::toType<Socket *>(L, 1, SOCKET_TYPE);
-	SocketAddress *a = Luae::toType<SocketAddress *>(L, 2, ADDRESS_TYPE);
+	auto s = Luae::toType<Socket *>(L, 1, SocketType);
+	auto addr = checkAddress(L, 2, *s);
 
+#if defined(COMPAT_1_1)
 	/*
 	 * Get nil + error message for chained expression like:
 	 * s:bind(address.bindInet { port = 80, family = 1 })
@@ -356,9 +641,10 @@ int socketConnect(lua_State *L)
 
 		return 2;
 	}
+#endif
 
 	try {
-		s->connect(*a);
+		s->connect(*addr);
 	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error.what());
@@ -371,16 +657,17 @@ int socketConnect(lua_State *L)
 	return 1;
 }
 
-int socketAccept(lua_State *L)
+int l_accept(lua_State *L)
 {
-	Socket *s = Luae::toType<Socket *>(L, 1, SOCKET_TYPE);
-	Socket client;
-	SocketAddress info;
+	auto s = Luae::toType<Socket *>(L, 1, SocketType);
 
 	try {
+		Socket client;
+		SocketAddress info;
+
 		client = s->accept(info);
-		new (L, SOCKET_TYPE) Socket(client);
-		new (L, ADDRESS_TYPE) SocketAddress(info);
+		new (L, SocketType) Socket(client);
+		pushAddress(L, info);
 	} catch (SocketError error) {
 		lua_pushnil(L);
 		lua_pushnil(L);
@@ -392,10 +679,10 @@ int socketAccept(lua_State *L)
 	return 2;
 }
 
-int socketListen(lua_State *L)
+int l_listen(lua_State *L)
 {
-	Socket *s = Luae::toType<Socket *>(L, 1, SOCKET_TYPE);
-	int max = 64;
+	auto s = Luae::toType<Socket *>(L, 1, SocketType);
+	auto max = 64;
 
 	if (lua_gettop(L) >= 2)
 		max = luaL_checkinteger(L, 2);
@@ -414,31 +701,11 @@ int socketListen(lua_State *L)
 	return 1;
 }
 
-int socketReceive(lua_State *L)
+int l_set(lua_State *L)
 {
-	return genericReceive(L, false);
-}
-
-int socketReceiveFrom(lua_State *L)
-{
-	return genericReceive(L, true);
-}
-
-int socketSend(lua_State *L)
-{
-	return genericSend(L, false);
-}
-
-int socketSendTo(lua_State *L)
-{
-	return genericSend(L, true);
-}
-
-int socketSet(lua_State *L)
-{
-	Socket *s	= Luae::toType<Socket *>(L, 1, SOCKET_TYPE);
-	const char *lvl	= luaL_checkstring(L, 2);
-	const char *nm	= luaL_checkstring(L, 3);
+	auto s = Luae::toType<Socket *>(L, 1, SocketType);
+	auto lvl = luaL_checkstring(L, 2);
+	auto nm = luaL_checkstring(L, 3);
 	int nret;
 
 	try {
@@ -484,199 +751,273 @@ int socketSet(lua_State *L)
 	return nret;
 }
 
-int sockEq(lua_State *L)
+int l_send(lua_State *L)
 {
-	Socket *s1 = Luae::toType<Socket *>(L, 1, SOCKET_TYPE);
-	Socket *s2 = Luae::toType<Socket *>(L, 2, SOCKET_TYPE);
+#if defined(COMPAT_1_1)
+	if (lua_gettop(L) >= 2 && lua_type(L, 2) == LUA_TUSERDATA) {
+		Luae::deprecate(L, "send(data, address)", "sendto(data, address)");
+		return genericSend(L, true);
+	}
+#endif
+
+	return genericSend(L, false);
+}
+
+int l_sendto(lua_State *L)
+{
+	return genericSend(L, true);
+}
+
+int l_recv(lua_State *L)
+{
+	return genericReceive(L, false);
+}
+
+int l_recvfrom(lua_State *L)
+{
+	return genericReceive(L, true);
+}
+
+int l_eq(lua_State *L)
+{
+	auto s1 = Luae::toType<Socket *>(L, 1, SocketType);
+	auto s2 = Luae::toType<Socket *>(L, 2, SocketType);
 
 	lua_pushboolean(L, *s1 == *s2);
 
 	return 1;
 }
 
-int sockToString(lua_State *L)
+int l_tostring(lua_State *L)
 {
-	Socket *s = Luae::toType<Socket *>(L, 1, SOCKET_TYPE);
+	auto s = Luae::toType<Socket *>(L, 1, SocketType);
 
-	lua_pushfstring(L, "socket %d", s->getType());
+	Luae::pushfstring(L, "socket %d", s->getType());
 
 	return 1;
 }
 
-int sockGc(lua_State *L)
+int l_gc(lua_State *L)
 {
-	Luae::toType<Socket *>(L, 1, SOCKET_TYPE)->~Socket();
+	Luae::toType<Socket *>(L, 1, SocketType)->~Socket();
 
 	return 0;
 }
 
+#if defined(COMPAT_1_1)
+
+int l_receive(lua_State *L)
+{
+	Luae::deprecate(L, "receive", "recv");
+
+	return genericReceive(L, false);
+}
+
+int l_receiveFrom(lua_State *L)
+{
+	Luae::deprecate(L, "receiveFrom", "recvfrom");
+
+	return genericReceive(L, true);
+}
+
+#endif
+
 const luaL_Reg sockFunctions[] = {
-	{ "new",		socketNew		},
-	{ nullptr,		nullptr			}
+	{ "new",		l_new				},
+	{ nullptr,		nullptr				}
 };
 
 const luaL_Reg sockMethods[] = {
-	{ "blockMode",		socketBlockMode		},
-	{ "bind",		socketBind		},
-	{ "close",		socketClose		},
-	{ "connect",		socketConnect		},
-	{ "accept",		socketAccept		},
-	{ "listen",		socketListen		},
-	{ "receive",		socketReceive		},
-	{ "receiveFrom",	socketReceiveFrom	},
-	{ "send",		socketSend		},
-	{ "sendTo",		socketSendTo		},
-	{ "set",		socketSet		},
-	{ nullptr,		nullptr			}
+/*
+ * DEPRECATION:	1.2-002
+ *
+ * These functions have been renamed to match closer the C API.
+ */
+#if defined(COMPAT_1_1)
+	{ "receive",		l_receive			},
+	{ "receiveFrom",	l_receiveFrom			},
+#endif
+	{ "blockMode",		l_blockMode			},
+	{ "bind",		l_bind				},
+	{ "close",		l_close				},
+	{ "connect",		l_connect			},
+	{ "accept",		l_accept			},
+	{ "listen",		l_listen			},
+	{ "send",		l_send				},
+	{ "sendto",		l_sendto			},
+	{ "recv",		l_recv				},
+	{ "recvfrom",		l_recvfrom			},
+	{ "set",		l_set				},
+	{ nullptr,		nullptr				}
 };
 
 const luaL_Reg sockMeta[] = {
-	{ "__eq",		sockEq			},
-	{ "__tostring",		sockToString		},
-	{ "__gc",		sockGc			},
-	{ nullptr,		nullptr			}
+	{ "__eq",		l_eq				},
+	{ "__tostring",		l_tostring			},
+	{ "__gc",		l_gc				},
+	{ nullptr,		nullptr				}
 };
 
 /* ---------------------------------------------------------
- * Socket address functions
+ * Socket address deprecated functions
  * --------------------------------------------------------- */
 
-int addrConnectInet(lua_State *L)
+#if defined(COMPAT_1_1)
+
+int l_unix(lua_State *L)
 {
-	luaL_checktype(L, 1, LUA_TTABLE);
+#if defined(WIN32)
+	lua_pushnil(L);
+	lua_pushstring(L, "Unix address are not supported on Windows");
 
-	std::string host	= Luae::requireField<std::string>(L, 1, "host");
-	int port		= Luae::requireField<int>(L, 1, "port");
-	int family		= Luae::requireField<int>(L, 1, "family");
+	return 2;
+#else
+	Luae::deprecate(L, "unix");
 
-	try {
-		new (L, ADDRESS_TYPE) ConnectAddressIP(host, port, family);
-	} catch (SocketError error) {
-		lua_pushnil(L);
-		lua_pushstring(L, error.what());
-
-		return 2;
-	}
-
-	return 1;
-}
-
-int addrBindInet(lua_State *L)
-{
-	std::string address = "*";
-	int port, family;
-
-	luaL_checktype(L, 1, LUA_TTABLE);
-
-	// Mandatory fields
-	port = Luae::requireField<int>(L, 1, "port");
-	family = Luae::requireField<int>(L, 1, "family");
-
-	// Optional fields
-	if (Luae::typeField(L, 1, "address") == LUA_TSTRING)
-		address = Luae::requireField<std::string>(L, 1, "address");
-
-	try {
-		new (L, ADDRESS_TYPE) BindAddressIP(address, port, family);
-	} catch (SocketError error) {
-		lua_pushnil(L);
-		lua_pushstring(L, error.what());
-
-		return 2;
-	}
-
-	return 1;
-}
-
-#if !defined(_WIN32)
-
-int addrUnix(lua_State *L)
-{
-	const char *path = luaL_checkstring(L, 1);
-	bool rem = false;
+	auto path = luaL_checkstring(L, 1);
+	auto rm = false;
 
 	if (lua_gettop(L) >= 2)
-		rem = lua_toboolean(L, 2);
+		rm = lua_toboolean(L, 2);
 
-	new (L, ADDRESS_TYPE) AddressUnix(path, rem);
+	lua_createtable(L, 0, 2);
+	lua_pushstring(L, path);
+	lua_setfield(L, -2, "path");
+	lua_pushboolean(L, rm);
+	lua_setfield(L, -2, "remove");
+
+	return 1;
+#endif
+}
+
+int l_bindInet(lua_State *L)
+{
+	Luae::deprecate(L, "bindInet");
+
+	luaL_checktype(L, 1, LUA_TTABLE);
+
+	auto port = LuaeTable::require<int>(L, 1, "port");
+	auto family = LuaeTable::require<int>(L, 1, "family");
+	auto address = std::string("*");
+
+	if (LuaeTable::type(L, 1, "address") == LUA_TSTRING)
+		address = LuaeTable::require<std::string>(L, 1, "address");
+
+	lua_createtable(L, 0, 0);
+
+	try {
+		auto sa = BindAddressIP(address, port, family);
+
+		storeAddressData(L, -1, sa);
+	} catch (SocketError error) {
+		// Remove the table created just before
+		lua_pop(L, 1);
+		lua_pushnil(L);
+		lua_pushstring(L, error.what());
+
+		return 2;
+	}
+
+	lua_createtable(L, 0, 3);
+	lua_pushstring(L, address.c_str());
+	lua_setfield(L, -2, "address");
+	lua_pushinteger(L, port);
+	lua_setfield(L, -2, "port");
+	lua_pushinteger(L, family);
+	lua_setfield(L, -2, "family");
 
 	return 1;
 }
 
-#endif
-
-int addrToString(lua_State *L)
+int l_connectInet(lua_State *L)
 {
-	SocketAddress *sa = Luae::toType<SocketAddress *>(L, 1, ADDRESS_TYPE);
+	Luae::deprecate(L, "connectInet");
 
-	lua_pushfstring(L, "address of length %d", sa->length());
+	luaL_checktype(L, 1, LUA_TTABLE);
+
+	auto port = LuaeTable::require<int>(L, 1, "port");
+	auto family = LuaeTable::require<int>(L, 1, "family");
+	auto host = LuaeTable::require<std::string>(L, 1, "host");
+	auto type = SOCK_STREAM;
+
+	lua_createtable(L, 0, 0);
+
+	try {
+		auto sa = ConnectAddressIP(host, port, family, type);
+
+		storeAddressData(L, -1, sa);
+	} catch (SocketError error) {
+		// Remove the table created just before
+		lua_pop(L, 1);
+		lua_pushnil(L);
+		lua_pushstring(L, error.what());
+
+		return 2;
+	}
+
+	lua_createtable(L, 0, 3);
+	lua_pushstring(L, host.c_str());
+	lua_setfield(L, -2, "host");
+	lua_pushinteger(L, port);
+	lua_setfield(L, -2, "port");
+	lua_pushinteger(L, family);
+	lua_setfield(L, -2, "family");
+	lua_pushinteger(L, type);
+	lua_setfield(L, -2, "type");
 
 	return 1;
 }
 
-int addrGc(lua_State *L)
-{
-	Luae::toType<SocketAddress *>(L, 1, ADDRESS_TYPE)->~SocketAddress();
+const luaL_Reg addressFunctions[] = {
+	{ "unix",		l_unix				},
+	{ "bindInet",		l_bindInet			},
+	{ "connectInet",	l_connectInet			},
+	{ nullptr,		nullptr				}
+};
 
-	return 0;
-}
-
-const luaL_Reg addrFunctions[] = {
-	{ "connectInet",	addrConnectInet		},
-	{ "bindInet",		addrBindInet		},
-#if !defined(_WIN32)
-	{ "unix",		addrUnix		},
 #endif
-	{ nullptr,		nullptr			}
-};
-
-const luaL_Reg addrMeta[] = {
-	{ "__tostring",		addrToString		},
-	{ "__gc",		addrGc			},
-	{ nullptr,		nullptr			}
-};
 
 /* ---------------------------------------------------------
  * Socket listener functions
  * --------------------------------------------------------- */
 
-int listenerNew(lua_State *L)
+int l_listenerNew(lua_State *L)
 {
-	new (L, LISTENER_TYPE) SocketListener();
+	new (L, ListenerType) SocketListener();
 
 	return 1;
 }
 
-int listenerAdd(lua_State *L)
+int l_listenerAdd(lua_State *L)
 {
-	SocketListener *l = Luae::toType<SocketListener *>(L, 1, LISTENER_TYPE);
-	Socket *s = Luae::toType<Socket *>(L, 2, SOCKET_TYPE);
+	auto l = Luae::toType<SocketListener *>(L, 1, ListenerType);
+	auto s = Luae::toType<Socket *>(L, 2, SocketType);
 
 	l->add(*s);
 
 	return 0;
 }
 
-int listenerRemove(lua_State *L)
+int l_listenerRemove(lua_State *L)
 {
-	SocketListener *l = Luae::toType<SocketListener *>(L, 1, LISTENER_TYPE);
-	Socket *s = Luae::toType<Socket *>(L, 2, SOCKET_TYPE);
+	auto l = Luae::toType<SocketListener *>(L, 1, ListenerType);
+	auto s = Luae::toType<Socket *>(L, 2, SocketType);
 
 	l->remove(*s);
 
 	return 0;
 }
 
-int listenerClear(lua_State *L)
+int l_listenerClear(lua_State *L)
 {
-	Luae::toType<SocketListener *>(L, 1, LISTENER_TYPE)->clear();
+	Luae::toType<SocketListener *>(L, 1, ListenerType)->clear();
 
 	return 0;
 }
 
-int listenerSelect(lua_State *L)
+int l_listenerSelect(lua_State *L)
 {
-	SocketListener *l = Luae::toType<SocketListener *>(L, 1, LISTENER_TYPE);
+	auto l = Luae::toType<SocketListener *>(L, 1, ListenerType);
 	int seconds = 0, ms = 0, nret;
 
 	if (lua_gettop(L) >= 2)
@@ -685,8 +1026,8 @@ int listenerSelect(lua_State *L)
 		ms = luaL_checkinteger(L, 3);
 
 	try {
-		Socket selected = l->select(seconds, ms);
-		new (L, SOCKET_TYPE) Socket(selected);
+		auto selected = l->select(seconds, ms);
+		new (L, SocketType) Socket(selected);
 
 		nret = 1;
 	} catch (SocketError error) {
@@ -704,39 +1045,39 @@ int listenerSelect(lua_State *L)
 	return nret;
 }
 
-int listenerToStr(lua_State *L)
+int l_listenerToStr(lua_State *L)
 {
-	SocketListener *l = Luae::toType<SocketListener *>(L, 1, LISTENER_TYPE);
+	auto l = Luae::toType<SocketListener *>(L, 1, ListenerType);
 
-	lua_pushfstring(L, "listener of %d clients", l->size());
+	Luae::pushfstring(L, "listener of %d clients", l->size());
 
 	return 1;
 }
 
-int listenerGc(lua_State *L)
+int l_listenerGc(lua_State *L)
 {
-	Luae::toType<SocketListener *>(L, 1, LISTENER_TYPE)->~SocketListener();
+	Luae::toType<SocketListener *>(L, 1, ListenerType)->~SocketListener();
 
 	return 0;
 }
 
 const luaL_Reg listenerFunctions[] = {
-	{ "new",			listenerNew	},
-	{ nullptr,			nullptr		}
+	{ "new",			l_listenerNew		},
+	{ nullptr,			nullptr			}
 };
 
 const luaL_Reg listenerMethods[] = {
-	{ "add",			listenerAdd	},
-	{ "remove",			listenerRemove	},
-	{ "clear",			listenerClear	},
-	{ "select",			listenerSelect	},
-	{ nullptr,			nullptr		}
+	{ "add",			l_listenerAdd		},
+	{ "remove",			l_listenerRemove	},
+	{ "clear",			l_listenerClear		},
+	{ "select",			l_listenerSelect	},
+	{ nullptr,			nullptr			}
 };
 
 const luaL_Reg listenerMeta[] = {
-	{ "__tostring",			listenerToStr	},
-	{ "__gc",			listenerGc	},
-	{ nullptr,			nullptr		}
+	{ "__tostring",			l_listenerToStr		},
+	{ "__gc",			l_listenerGc		},
+	{ nullptr,			nullptr			}
 };
 
 }
@@ -744,45 +1085,51 @@ const luaL_Reg listenerMeta[] = {
 int luaopen_socket(lua_State *L)
 {
 	// Socket functions
-	luaL_newlib(L, sockFunctions);
+	Luae::newlib(L, sockFunctions);
 
 	// Map families, types
-	mapToTable(L, sockFamilies, -1, "family");
-	mapToTable(L, sockTypes, -1, "type");
-	mapToTable(L, sockProtocols, -1, "protocol");
+	LuaeEnum::create(L, sockFamilies, -1, "family");
+	LuaeEnum::create(L, sockTypes, -1, "type");
+	LuaeEnum::create(L, sockProtocols, -1, "protocol");
+
+	// Create a special table for keeping addresses
+	LuaeTable::create(L);
+	LuaeTable::create(L);
+	LuaeTable::set(L, -1, "__mode", "v");
+	Luae::setmetatable(L, -2);
+	Luae::setfield(L, LUA_REGISTRYINDEX, RegField);
 
 	// Create Socket type
-	luaL_newmetatable(L, SOCKET_TYPE);
-	luaL_setfuncs(L, sockMeta, 0);
-	luaL_newlib(L, sockMethods);
-	lua_setfield(L, -2, "__index");
-	lua_pop(L, 1);
+	Luae::newmetatable(L, SocketType);
+	Luae::setfuncs(L, sockMeta);
+	Luae::newlib(L, sockMethods);
+	Luae::setfield(L, -2, "__index");
+	Luae::pop(L, 1);
 
 	return 1;
 }
+
+#if defined(COMPAT_1_1)
 
 int luaopen_socket_address(lua_State *L)
 {
-	luaL_newlib(L, addrFunctions);
-
-	// Create SocketAddress type
-	luaL_newmetatable(L, ADDRESS_TYPE);
-	luaL_setfuncs(L, addrMeta, 0);
-	lua_pop(L, 1);
+	Luae::newlib(L, addressFunctions);
 
 	return 1;
 }
 
+#endif
+
 int luaopen_socket_listener(lua_State *L)
 {
-	luaL_newlib(L, listenerFunctions);
+	Luae::newlib(L, listenerFunctions);
 
 	// Create the SocketListener type
-	luaL_newmetatable(L, LISTENER_TYPE);
-	luaL_setfuncs(L, listenerMeta, 0);
-	luaL_newlib(L, listenerMethods);
-	lua_setfield(L, -2, "__index");
-	lua_pop(L, 1);
+	Luae::newmetatable(L, ListenerType);
+	Luae::setfuncs(L, listenerMeta);
+	Luae::newlib(L, listenerMethods);
+	Luae::setfield(L, -2, "__index");
+	Luae::pop(L, 1);
 
 	return 1;
 }

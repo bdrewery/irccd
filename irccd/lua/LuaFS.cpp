@@ -1,7 +1,7 @@
 /*
  * LuaFS.cpp -- Lua bindings for file dependent operations
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,264 +22,315 @@
 
 #include <sys/stat.h>
 
-#include <Date.h>
-#include <Directory.h>
-#include <Util.h>
+#include <IrccdConfig.h>
 
-#include "Luae.h"
+#include <common/Date.h>
+#include <common/Directory.h>
+#include <common/Util.h>
+
+#include <irccd/Luae.h>
+
 #include "LuaFS.h"
 #include "LuaUtil.h"
 
-#define DIR_TYPE "Directory"
-
 namespace irccd {
+
+/**
+ * The directory type.
+ */
+const char *DirType = "Directory";
+
+/**
+ * Overload for Directory
+ */
+template <>
+struct Luae::IsUserdata<Directory> : std::true_type {
+	/**
+	 * The metatable name.
+	 */
+	static const char *MetatableName;
+};
+
+const char *Luae::IsUserdata<Directory>::MetatableName = DirType;
 
 namespace {
 
 int l_mkdir(lua_State *L)
 {
-	auto path = luaL_checkstring(L, 1);
+	auto path = Luae::check<std::string>(L, 1);
 	auto mode = 0700;
 
-	if (lua_gettop(L) >= 2)
-		mode = luaL_checkinteger(L, 2);
+	if (Luae::gettop(L) >= 2)
+		mode = Luae::check<int>(L, 2);
 
 	try {
 		Util::mkdir(path, mode);
-	} catch (Util::ErrorException ex) {
-		lua_pushboolean(L, false);
-		lua_pushstring(L, ex.what());
+	} catch (std::runtime_error ex) {
+		Luae::push(L, false);
+		Luae::push(L, ex.what());
 
 		return 2;
 	}
 
-	lua_pushboolean(L, true);
+	Luae::push(L, true);
 
 	return 1;
 }
 
 int l_opendir(lua_State *L)
 {
-	auto path = luaL_checkstring(L, 1);
-	auto skipParents = false;
+	auto path = Luae::check<std::string>(L, 1);
+	auto flags = 0;
 
 	// Optional boolean
-	if (lua_gettop(L) >= 2) {
-		luaL_checktype(L, 2, LUA_TBOOLEAN);
-		skipParents = (lua_toboolean(L, 2) != 0);
-	}
+	if (Luae::gettop(L) >= 2 && Luae::get<bool>(L, 2))
+		flags |= Directory::NotDot | Directory::NotDotDot;
 
-	Directory d(path);
-	if (!d.open(skipParents)) {
-		lua_pushnil(L);
-		lua_pushstring(L, d.getError().c_str());
+	try {
+		Luae::push(L, Directory(path, flags));
+	} catch (std::runtime_error error) {
+		Luae::push(L, nullptr);
+		Luae::push(L, error.what());
 
 		return 2;
 	}
-
-	new (L, DIR_TYPE) Directory(d);
 
 	return 1;
 }
 
 int l_exists(lua_State *L)
 {
-	auto path = luaL_checkstring(L, 1);
-
-	lua_pushboolean(L, Util::exist(path));
+	Luae::push(L, Util::exist(Luae::check<std::string>(L, 1)));
 
 	return 1;
 }
 
 int l_basename(lua_State *L)
 {
-	auto path = luaL_checkstring(L, 1);
-	auto ret = Util::baseName(path);
-
-	lua_pushlstring(L, ret.c_str(), ret.length());
+	Luae::push(L, Util::baseName(Luae::check<std::string>(L, 1)));
 
 	return 1;
 }
 
 int l_dirname(lua_State *L)
 {
-	auto path = luaL_checkstring(L, 1);
-	auto ret = Util::dirName(path);
+	Luae::push(L, Util::dirName(Luae::check<std::string>(L, 1)));
 
-	lua_pushlstring(L, ret.c_str(), ret.length());
+	return 1;
+}
+
+int l_separator(lua_State *L)
+{
+#if defined(_WIN32)
+	Luae::push(L, "\\");
+#else
+	Luae::push(L, "/");
+#endif
 
 	return 1;
 }
 
 int l_stat(lua_State *L)
 {
-	auto path = luaL_checkstring(L, 1);
+	auto path = Luae::check<std::string>(L, 1);
 	struct stat st;
 
-	if (stat(path, &st) < 0) {
-		lua_pushnil(L);
-		lua_pushstring(L, std::strerror(errno));
+	if (stat(path.c_str(), &st) < 0) {
+		Luae::push(L, nullptr);
+		Luae::push(L, static_cast<const char *>(std::strerror(errno)));
 	}
 
-	lua_createtable(L, 0, 0);
+	LuaeTable::create(L, 0, 0);
 
 #if defined(HAVE_STAT_ST_DEV)
-	lua_pushinteger(L, st.st_dev);
-	lua_setfield(L, -2, "device");
+	LuaeTable::set(L, -1, "device", static_cast<int>(st.st_dev));
 #endif
 #if defined(HAVE_STAT_ST_INO)
-	lua_pushinteger(L, st.st_ino);
-	lua_setfield(L, -2, "inode");
+	LuaeTable::set(L, -1, "inode", static_cast<int>(st.st_ino));
 #endif
 #if defined(HAVE_STAT_ST_NLINK)
-	lua_pushinteger(L, st.st_nlink);
-	lua_setfield(L, -2, "nlink");
+	LuaeTable::set(L, -1, "nlink", static_cast<int>(st.st_nlink));
 #endif
 #if defined(HAVE_STAT_ST_ATIME)
-	new (L, DATE_TYPE) Date(st.st_atime);
-	lua_setfield(L, -2, "atime");
+	LuaeTable::set(L, -1, "atime", Date(st.st_atime));
 #endif
 #if defined(HAVE_STAT_ST_MTIME)
-	new (L, DATE_TYPE) Date(st.st_mtime);
-	lua_setfield(L, -2, "mtime");
+	LuaeTable::set(L, -1, "mtime", Date(st.st_mtime));
 #endif
 #if defined(HAVE_STAT_ST_CTIME)
-	new (L, DATE_TYPE) Date(st.st_ctime);
-	lua_setfield(L, -2, "ctime");
+	LuaeTable::set(L, -1, "ctime", Date(st.st_ctime));
 #endif
 #if defined(HAVE_STAT_ST_SIZE)
-	lua_pushinteger(L, st.st_size);
-	lua_setfield(L, -2, "size");
+	LuaeTable::set(L, -1, "size", static_cast<int>(st.st_size));
 #endif
 #if defined(HAVE_STAT_ST_BLKSIZE)
-	lua_pushinteger(L, st.st_blksize);
-	lua_setfield(L, -2, "blocksize");
+	LuaeTable::set(L, -1, "blocksize", static_cast<int>(st.st_blksize));
 #endif
 #if defined(HAVE_STAT_ST_BLOCKS)
-	lua_pushinteger(L, st.st_blocks);
-	lua_setfield(L, -2, "blocks");
+	LuaeTable::set(L, -1, "blocks", static_cast<int>(st.st_blocks));
 #endif
 
 	return 1;
 }
 
-const luaL_Reg functions[] = {
+const Luae::Reg functions {
 	{ "mkdir",		l_mkdir		},
 	{ "opendir",		l_opendir	},
 	{ "exists",		l_exists	},
 	{ "basename",		l_basename	},
 	{ "dirname",		l_dirname	},
+	{ "separator",		l_separator	},
 	{ "stat",		l_stat		},
-	{ nullptr,		nullptr		}
 };
 
 /* --------------------------------------------------------
  * Directory methods
  * -------------------------------------------------------- */
 
-namespace dir {
-
-int l_count(lua_State *L)
-{
-	Directory *d;
-
-	d = Luae::toType<Directory *>(L, 1, DIR_TYPE);
-	lua_pushinteger(L, d->getEntries().size());
-
-	return 1;
-}
+#if defined(COMPAT_1_1)
 
 int l_read(lua_State *L)
 {
-	auto d = Luae::toType<Directory *>(L, 1, DIR_TYPE);
-	auto iterator = [] (lua_State *L) -> int {
-		auto d = reinterpret_cast<const Directory *>(lua_topointer(L, lua_upvalueindex(1)));
-		auto idx = lua_tointeger(L, lua_upvalueindex(2));
+	using DirectoryIterator = Luae::Iterator<Directory::const_iterator>;
 
-		// End
-		if (static_cast<size_t>(idx) >= d->getEntries().size())
+	Luae::deprecate(L, "read", "pairs");
+
+	auto d = Luae::check<Directory>(L, 1);
+
+	new (L) DirectoryIterator(d->cbegin(), d->cend());
+	LuaeTable::create(L);
+	Luae::pushfunction(L, [] (lua_State *L) -> int {
+		Luae::toType<DirectoryIterator *>(L, Luae::upvalueindex(1))->~DirectoryIterator();
+
+		return 0;
+	});;
+	Luae::setfield(L, -2, "__gc");
+	Luae::setmetatable(L, -2);
+
+	Luae::pushfunction(L, [] (lua_State *L) -> int {
+		auto it = Luae::toType<DirectoryIterator *>(L, Luae::upvalueindex(1));
+
+		if (it->current == it->end)
 			return 0;
 
-		// Push name + isDirectory
-		lua_pushstring(L, d->getEntries()[idx].m_name.c_str());
-		lua_pushboolean(L, d->getEntries()[idx].m_isDirectory);
+		auto value = it->current++;
 
-		lua_pushinteger(L, ++idx);
-		lua_replace(L, lua_upvalueindex(2));
+		// Push name + isDirectory
+		Luae::push(L, value->name);
+		Luae::push(L, value->type == Directory::Dir);
 
 		return 2;
-	};
-
-	lua_pushlightuserdata(L, d);
-	lua_pushinteger(L, 0);
-	lua_pushcclosure(L, iterator, 2);
+	}, 1);
 
 	return 1;
 }
 
-} // !dir
+#endif
+
+int l_count(lua_State *L)
+{
+	auto d = Luae::check<Directory>(L, 1);
+
+	Luae::push(L, d->count());
+
+	return 1;
+}
 
 /* --------------------------------------------------------
  * Directory metamethods
  * -------------------------------------------------------- */
 
-namespace dirMt {
-
 int l_eq(lua_State *L)
 {
-	Directory *d1, *d2;
+	auto d1 = Luae::check<Directory>(L, 1);
+	auto d2 = Luae::check<Directory>(L, 2);
 
-	d1 = Luae::toType<Directory *>(L, 1, DIR_TYPE);
-	d2 = Luae::toType<Directory *>(L, 2, DIR_TYPE);
-
-	lua_pushboolean(L, *d1 == *d2);
+	Luae::push(L, *d1 == *d2);
 
 	return 1;
 }
 
 int l_gc(lua_State *L)
 {
-	Luae::toType<Directory *>(L, 1, DIR_TYPE)->~Directory();
+	Luae::check<Directory>(L, 1)->~Directory();
 
 	return 0;
 }
 
 int l_tostring(lua_State *L)
 {
-	auto d = Luae::toType<Directory *>(L, 1, DIR_TYPE);
-	lua_pushfstring(L, "Directory %s has %d entries", d->getPath().c_str(),
-	    d->getEntries().size());
+	auto d = Luae::check<Directory>(L, 1);
+
+	Luae::pushfstring(L, "Directory with %d entries", d->count());
 
 	return 1;
 }
 
-} // !dirMt
+int l_pairs(lua_State *L)
+{
+	using DirectoryIterator = Luae::Iterator<Directory::const_iterator>;
 
-const luaL_Reg dirMethodsList[] = {
-	{ "count",		dir::l_count		},
-	{ "read",		dir::l_read		},
-	{ nullptr,		nullptr			}
+	auto d = Luae::check<Directory>(L, 1);
+
+	new (L) DirectoryIterator(d->cbegin(), d->cend());
+	LuaeTable::create(L);
+	Luae::pushfunction(L, [] (lua_State *L) -> int {
+		Luae::toType<DirectoryIterator *>(L, Luae::upvalueindex(1))->~DirectoryIterator();
+
+		return 0;
+	});;
+	Luae::setfield(L, -2, "__gc");
+	Luae::setmetatable(L, -2);
+
+	Luae::pushfunction(L, [] (lua_State *L) -> int {
+		auto it = Luae::toType<DirectoryIterator *>(L, Luae::upvalueindex(1));
+
+		if (it->current == it->end)
+			return 0;
+
+		auto value = it->current++;
+
+		// Push name + isDirectory
+		Luae::push(L, value->name);
+		Luae::push(L, value->type == Directory::Dir);
+
+		return 2;
+	}, 1);
+
+	return 1;
+}
+
+const Luae::Reg dirMethodsList {
+	{ "count",		l_count		},
+/*
+ * DEPRECATION:	1.2-002
+ *
+ * All the following functions have been moved to the irccd.system.
+ */
+#if defined(COMPAT_1_1)
+	{ "read",		l_read		},
+#endif
 };
 
-const luaL_Reg dirMtList[] = {
-	{ "__eq",		dirMt::l_eq		},
-	{ "__gc",		dirMt::l_gc		},
-	{ "__tostring",		dirMt::l_tostring	},
-	{ nullptr,		nullptr			}
+const Luae::Reg dirMtList {
+	{ "__eq",		l_eq		},
+	{ "__gc",		l_gc		},
+	{ "__tostring",		l_tostring	},
+	{ "__pairs",		l_pairs		},
 };
 
 }
 
 int luaopen_fs(lua_State *L)
 {
-	luaL_newlib(L, functions);
+	Luae::newlib(L, functions);
 
 	// Directory type
-	luaL_newmetatable(L, DIR_TYPE);
-	luaL_setfuncs(L, dirMtList, 0);
-	luaL_newlib(L, dirMethodsList);
-	lua_setfield(L, -2, "__index");
-	lua_pop(L, 1);
+	Luae::newmetatable(L, DirType);
+	Luae::setfuncs(L, dirMtList);
+	Luae::newlib(L, dirMethodsList);
+	Luae::setfield(L, -2, "__index");
+	Luae::pop(L, 1);
 
 	return 1;
 }

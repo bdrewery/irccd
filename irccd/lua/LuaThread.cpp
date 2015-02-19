@@ -1,7 +1,7 @@
 /*
  * LuaThread.cpp -- Lua bindings for threads
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,12 +18,12 @@
 
 #include <string>
 
-#include "Irccd.h"
-#include "Logger.h"
-#include "Luae.h"
-#include "LuaThread.h"
-#include "Plugin.h"
-#include "Thread.h"
+#include <common/Logger.h>
+
+#include <irccd/Irccd.h>
+#include <irccd/Luae.h>
+#include <irccd/Plugin.h>
+#include <irccd/Thread.h>
 
 namespace irccd {
 
@@ -64,11 +64,31 @@ const char *loader(lua_State *, Buffer *buffer, size_t *size)
 	return buffer->array.data();
 }
 
+void loadfunction(std::shared_ptr<Thread> &thread, lua_State *owner)
+{
+	Buffer chunk;
+
+	lua_pushvalue(owner, 1);
+	lua_dump(owner, reinterpret_cast<lua_Writer>(writer), &chunk, true);
+	lua_pop(owner, 1);
+	lua_load(*thread, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
+}
+
+void loadfile(std::shared_ptr<Thread> &thread, const char *path)
+{
+	if (luaL_loadfile(*thread, path) != LUA_OK) {
+		auto error = lua_tostring(*thread, -1);
+		lua_pop(*thread, 1);
+
+		throw std::runtime_error(error);
+	}
+}
+
 /* ---------------------------------------------------------
  * Thread management
  * --------------------------------------------------------- */
 
-const char *THREAD_TYPE = "Thread";
+const char *ThreadType = "Thread";
 
 /* ---------------------------------------------------------
  * Functions and metamethods
@@ -76,28 +96,32 @@ const char *THREAD_TYPE = "Thread";
 
 int l_threadNew(lua_State *L)
 {
-	Thread::Ptr thread = Thread::create();
-	Buffer chunk;
+	auto thread = std::make_shared<Thread>();
 	int np;
 
-	luaL_checktype(L, 1, LUA_TFUNCTION);
-
-	// Dump the function
-	lua_pushvalue(L, 1);
-	lua_dump(L, reinterpret_cast<lua_Writer>(writer), &chunk);
-	lua_pop(L, 1);
-
-	for (auto l : Process::luaLibs)
+	for (const auto &l : Process::luaLibs)
 		Luae::require(*thread, l.first, l.second, true);
-	for (auto l : Process::irccdLibs)
+	for (const auto &l : Process::irccdLibs)
 		Luae::preload(*thread, l.first, l.second);
 
-	lua_load(*thread, reinterpret_cast<lua_Reader>(loader), &chunk, "thread", nullptr);
+	try {
+		if (lua_type(L, 1) == LUA_TFUNCTION)
+			loadfunction(thread, L);
+		else if (lua_type(L, 1) == LUA_TSTRING)
+			loadfile(thread, lua_tostring(L, 1));
+		else
+			return luaL_error(L, "expected a function or a file path");
+	} catch (std::runtime_error err) {
+		lua_pushnil(L);
+		lua_pushstring(L, err.what());
+
+		return 2;
+	}
 
 	np = 0;
 	for (int i = 2; i <= lua_gettop(L); ++i) {
-		LuaValue v = LuaValue::copy(L, i);
-		LuaValue::push(*thread, v);
+		LuaeValue v = LuaeValue::copy(L, i);
+		LuaeValue::push(*thread, v);
 		++ np;
 	}
 
@@ -109,7 +133,7 @@ int l_threadNew(lua_State *L)
 		Process::initialize(process, info);
 
 		// Create the object to push as return value
-		Thread::Ptr *ptr = new (L, THREAD_TYPE) Thread::Ptr(thread);
+		auto *ptr = new (L, ThreadType) std::shared_ptr<Thread>(thread);
 		Thread::start(*ptr, np);
 	} catch (std::out_of_range) {
 		Logger::fatal(1, "irccd: could not find plugin from Lua state %p", L);
@@ -120,7 +144,7 @@ int l_threadNew(lua_State *L)
 
 int l_threadJoin(lua_State *L)
 {
-	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
+	auto *t = Luae::toType<std::shared_ptr<Thread> *>(L, 1, ThreadType);
 
 	try {
 		(*t)->join();
@@ -138,7 +162,7 @@ int l_threadJoin(lua_State *L)
 
 int l_threadDetach(lua_State *L)
 {
-	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
+	auto *t = Luae::toType<std::shared_ptr<Thread> *>(L, 1, ThreadType);
 
 	try {
 		(*t)->detach();
@@ -156,7 +180,7 @@ int l_threadDetach(lua_State *L)
 
 int l_threadGc(lua_State *L)
 {
-	Thread::Ptr *t = Luae::toType<Thread::Ptr *>(L, 1, THREAD_TYPE);
+	auto *t = Luae::toType<std::shared_ptr<Thread> *>(L, 1, ThreadType);
 
 	/*
 	 * At this step, the thread is marked for deletion but may have not
@@ -178,9 +202,9 @@ int l_threadGc(lua_State *L)
 
 int l_threadToString(lua_State *L)
 {
-	Thread *t = Luae::toType<Thread *>(L, 1, THREAD_TYPE);
+	Thread *t = Luae::toType<Thread *>(L, 1, ThreadType);
 
-	lua_pushfstring(L, "thread %p", t);
+	Luae::pushfstring(L, "thread %p", t);
 
 	return 1;
 }
@@ -198,7 +222,7 @@ const luaL_Reg threadMethods[] = {
 
 const luaL_Reg threadMeta[] = {
 	{ "__gc",		l_threadGc		},
-	{ "__tostring",		l_threadToString	},	
+	{ "__tostring",		l_threadToString	},
 	{ nullptr,		nullptr			}
 };
 
@@ -209,7 +233,7 @@ int luaopen_thread(lua_State *L)
 	luaL_newlib(L, functions);
 
 	// Create thread object
-	luaL_newmetatable(L, THREAD_TYPE);
+	luaL_newmetatable(L, ThreadType);
 	luaL_setfuncs(L, threadMeta, 0);
 	luaL_newlib(L, threadMethods);
 	lua_setfield(L, -2, "__index");

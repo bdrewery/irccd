@@ -1,7 +1,7 @@
 /*
  * Message.h -- message handler for clients
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,11 @@
 #ifndef _MESSAGE_H_
 #define _MESSAGE_H_
 
+/**
+ * @file irccd/Message.h
+ * @brief Client messages
+ */
+
 #include <sstream>
 #include <string>
 
@@ -29,23 +34,11 @@
  * This class handles incoming data from clients and tells when a data
  * is finished.
  */
-class Message {
+class Message final {
 private:
 	std::ostringstream m_data;
 
 public:
-	/**
-	 * Default constructor.
-	 */
-	Message() = default;
-
-	/**
-	 * Copy constructor.
-	 *
-	 * @param m the old message
-	 */
-	Message(const Message &m);
-
 	/**
 	 * Tell if the client message has finished. A client message
 	 * ends with '\n'.
@@ -55,14 +48,6 @@ public:
 	 * @return true if finished
 	 */
 	bool isFinished(const std::string &msg, std::string &command);
-
-	/**
-	 * Copy assignment.
-	 *
-	 * @param m the message
-	 * @return the message
-	 */
-	Message &operator=(const Message &m);
 };
 
 #endif // !_MESSAGE_H_

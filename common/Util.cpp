@@ -1,7 +1,7 @@
 /*
  * Util.cpp -- some utilities
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <algorithm>
 #include <cerrno>
 #include <cstring>
 #include <fstream>
@@ -31,41 +32,18 @@
 #else
 #  include <libgen.h>
 
-// This is libxdg-basedir
-#  include <basedir.h>
-
 #  define _MKDIR(p, x)	::mkdir(p, x)
+
+#  include "Xdg.h"
 #endif
 
 #include <sys/stat.h>
 
-#include "config.h"
+#include "IrccdConfig.h"
 #include "Util.h"
 #include "Logger.h"
 
 namespace irccd {
-
-/* --------------------------------------------------------
- * ErrorException class
- * -------------------------------------------------------- */
-
-Util::ErrorException::ErrorException()
-{
-}
-
-Util::ErrorException::ErrorException(const std::string &error)
-	: m_error(error)
-{
-}
-
-Util::ErrorException::~ErrorException() throw()
-{
-}
-
-const char * Util::ErrorException::what() const throw()
-{
-	return m_error.c_str();
-}
 
 /* --------------------------------------------------------
  * Util class (private functions)
@@ -115,9 +93,13 @@ std::string Util::pathUser(const std::string &append)
 		oss << "\\irccd\\";
 	}
 #else
-	xdgHandle handle;
 
-	if ((xdgInitHandle(&handle)) == nullptr) {
+	try {
+		Xdg xdg;
+
+		oss << xdg.configHome();
+		oss << "/irccd/";
+	} catch (const std::exception &) {
 		const char *home = getenv("HOME");
 
 		if (home != nullptr)
@@ -125,11 +107,6 @@ std::string Util::pathUser(const std::string &append)
 
 		// append default path.
 		oss << "/.config/irccd/";
-	} else {
-		oss << xdgConfigHome(&handle);
-		oss << "/irccd/";
-
-		xdgWipeHandle(&handle);
 	}
 
 #endif
@@ -207,7 +184,7 @@ std::string Util::findConfiguration(const std::string &filename)
 	oss.str("");
 	oss << "could not find configuration file for " << filename;
 
-	throw ErrorException(oss.str());
+	throw std::runtime_error(oss.str());
 }
 
 std::string Util::findPluginHome(const std::string &name)
@@ -309,15 +286,86 @@ void Util::mkdir(const std::string &dir, int mode)
 
 		if (_MKDIR(part.c_str(), mode) == -1) {
 			oss << part << ": " << strerror(errno);
-			throw Util::ErrorException(oss.str());
+			throw std::runtime_error(oss.str());
 		}
 	}
 
 	// Last part
 	if (_MKDIR(dir.c_str(), mode) == -1) {
 		oss << dir << ": " << strerror(errno);
-		throw Util::ErrorException(oss.str());
+		throw std::runtime_error(oss.str());
 	}
+}
+
+std::string Util::convert(const std::string &line, const Args &args, int flags)
+{
+	auto copy(line);
+	auto &kw(args.keywords);
+
+	for (size_t i = 0; i < copy.size(); ++i) {
+		char tok;
+
+		if (copy[i] == '#') {
+			if (i >= copy.size() - 1)
+				continue;
+
+			// Keywords
+			if (copy[i + 1] == '#') {
+				copy.erase(i, 1);
+				continue;
+			}
+
+			if (kw.count(copy[i + 1]) > 0) {
+				tok = copy[i + 1];
+				copy.erase(i, 2);		// erase '#'
+				copy.insert(i, kw.at(tok));	// replace
+				i += kw.at(tok).size();
+			}
+		} else if (copy[i] == '$' && (flags & ConvertEnv)) {
+			if (i >= copy.size() - 1)
+				continue;
+
+			if (copy[i + 1] != '{')
+				continue;
+
+			auto pos = copy.find('}');
+
+			if (pos == std::string::npos)
+				continue;
+
+			auto name = copy.substr(i + 2, pos - (i + 2));
+			auto value = std::getenv(name.c_str());
+
+			copy.erase(i, pos - (i - 1));
+
+			if (value != nullptr) {
+				copy.insert(i, value);
+				i += strlen(value);
+			}
+		} else if (copy[i] == '~' && (flags & ConvertHome)) {
+			auto value = std::getenv("HOME");
+	
+			copy.erase(i, 1);
+
+			if (value != nullptr) {
+				copy.insert(i, value);
+				i += strlen(value);
+			}
+		}
+	}
+
+	if (flags & ConvertDate) {
+		auto tm = *std::localtime(&args.timestamp);
+	
+		auto tmp = new char[copy.size() + 2];
+
+		std::strftime(tmp, copy.size() + 2, copy.c_str(), &tm);
+		copy = tmp;
+
+		delete [] tmp;
+	}
+
+	return copy;
 }
 
 std::vector<std::string> Util::split(const std::string &list,
@@ -348,6 +396,17 @@ std::vector<std::string> Util::split(const std::string &list,
 	} while (!finished);
 
 	return result;
+}
+
+std::string Util::strip(const std::string &str)
+{
+	auto copy = str;
+	auto test = [] (char c) { return !std::isspace(c); };
+
+	copy.erase(copy.begin(), std::find_if(copy.begin(), copy.end(), test));
+	copy.erase(std::find_if(copy.rbegin(), copy.rend(), test).base(), copy.end());
+
+	return copy;
 }
 
 } // !irccd

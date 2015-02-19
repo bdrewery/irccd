@@ -1,0 +1,17 @@
+---
+event: onInvite
+---
+
+This callback is called when someone is inviting you to a channel.
+
+# SYNOPSIS
+
+````lua
+function onInvite(server, channel, who)
+````
+
+# ARGUMENTS
+
+- server, the current server.
+- channel, on which channel you are invited to.
+- who, who invited you.

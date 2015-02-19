@@ -1,0 +1,11 @@
+---
+object: Directory
+title: Directory object
+---
+
+This object let you iterate a directory.
+
+# Methods
+
+- [count](method/count.html)
+- [read](method/read.html)

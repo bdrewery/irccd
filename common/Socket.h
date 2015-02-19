@@ -1,7 +1,7 @@
 /*
  * Socket.h -- portable C++ socket wrappers
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,11 @@
 
 #ifndef _SOCKET_H_
 #define _SOCKET_H_
+
+/**
+ * @file Socket.h
+ * @brief Portable C++ low level sockets
+ */
 
 #include <exception>
 #include <memory>
@@ -39,14 +44,6 @@
 #  include <fcntl.h>
 #  include <netdb.h>
 #  include <unistd.h>
-
-#  define ioctlsocket(s, p, a)	::ioctl(s, p, a)
-#  define closesocket(s)	::close(s)
-
-#  define gai_strerrorA		gai_strerror
-
-#  define INVALID_SOCKET	-1
-#  define SOCKET_ERROR		-1
 #endif
 
 namespace irccd {
@@ -64,9 +61,19 @@ private:
 	std::string m_error;
 
 public:
+	/**
+	 * Constructor with error.
+	 *
+	 * @param error the error
+	 */
 	SocketError(const std::string &error);
 
-	virtual const char * what(void) const throw();
+	/**
+	 * Get the error.
+	 *
+	 * @return the error
+	 */
+	virtual const char * what() const throw();
 };
 
 /**
@@ -79,13 +86,13 @@ public:
 class Socket {
 public:
 #if defined(_WIN32)
-	typedef SOCKET		Type;
-	typedef const char *	ConstArg;
-	typedef char *		Arg;
+	typedef SOCKET		Type;		//!< the socket type
+	typedef const char *	ConstArg;	//!< the const argument
+	typedef char *		Arg;		//!< the argument
 #else
-	typedef int		Type;
-	typedef const void *	ConstArg;
-	typedef void *		Arg;
+	typedef int		Type;		//!< the socket type
+	typedef const void *	ConstArg;	//!< the const argument
+	typedef void *		Arg;		//!< the argument
 #endif
 
 private:
@@ -176,7 +183,7 @@ public:
 	/**
 	 * Bind the socket.
 	 *
-	 * @param location a IP or Unix location
+	 * @param address a IP or Unix location
 	 * @throw SocketError error
 	 */
 	void bind(const SocketAddress &address);
@@ -184,7 +191,7 @@ public:
 	/**
 	 * Try to connect to the specific address
 	 *
-	 * @param addr the address
+	 * @param address the address
 	 * @throw SocketError on error
 	 */
 	void connect(const SocketAddress &address);
@@ -271,7 +278,7 @@ public:
 	 *
 	 * @param data the data to send
 	 * @param dataLen the data length
-	 * @param address the address
+	 * @param info the address
 	 * @return the number of bytes sent
 	 * @throw SocketError on error
 	 */
@@ -281,7 +288,7 @@ public:
 	 * Send a message to a connection-less socket.
 	 *
 	 * @param message the message
-	 * @param address the address
+	 * @param info the address
 	 * @return the number of bytes sent
 	 * @throw SocketError on error
 	 */
@@ -293,9 +300,23 @@ public:
 	void close();
 };
 
+/**
+ * Test equality.
+ *
+ * @param s1 the first socket
+ * @param s2 the second socket
+ * @return true if equals
+ */
 bool operator==(const Socket &s1, const Socket &s2);
 
-bool operator<(const Socket &s, const Socket &s2);
+/**
+ * Less operator.
+ *
+ * @param s1 the first socket
+ * @param s2 the second socket
+ * @return true if s1 is less
+ */
+bool operator<(const Socket &s1, const Socket &s2);
 
 } // !irccd
 

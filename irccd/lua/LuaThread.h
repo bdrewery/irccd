@@ -1,7 +1,7 @@
 /*
  * LuaThread.h -- Lua bindings for threads
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,10 +19,21 @@
 #ifndef _LUA_THREAD_H_
 #define _LUA_THREAD_H_
 
+/**
+ * @file LuaThread.h
+ * @brief Lua bindings for threads
+ */
+
 #include <lua.hpp>
 
 namespace irccd {
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_thread(lua_State *L);
 
 } // !irccd

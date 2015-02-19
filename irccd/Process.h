@@ -1,7 +1,7 @@
 /*
  * Process.h -- Lua thread or plugin process
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,12 +16,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _PROCESS_H_
-#define _PROCESS_H_
+#ifndef _IRCCD_PROCESS_H_
+#define _IRCCD_PROCESS_H_
 
+/**
+ * @file Process.h
+ * @brief Lua process (thread or plugin)
+ *
+ * @warning Do not rename the include guard, it conflicts with a Windows header
+ */
+
+#include <IrccdConfig.h>
+
+#if defined(WITH_LUA)
+
+#include <memory>
 #include <unordered_map>
-
-#include "config.h"
 
 #include "Luae.h"
 
@@ -33,9 +43,11 @@ class Plugin;
  * @class Process
  * @brief A thread or / process that owns a Lua state
  */
-class Process {
+class Process final {
 public:
-	using Ptr	= std::shared_ptr<Process>;
+	/**
+	 * The libraries
+	 */
 	using Libraries	= std::unordered_map<const char *, lua_CFunction>;
 
 	/**
@@ -46,40 +58,34 @@ public:
 	 * process, thus it's possible to get it from any Lua C function.
 	 */
 	struct Info {
-		std::string	name;		//! name like "foo"
-		std::string	path;		//! the full path
-		std::string	home;		//! plugin's home
-		std::string	author;		//! the author (optional)
-		std::string	comment;	//! a summary (optional)
-		std::string	version;	//! a version (optional)
-		std::string	license;	//! a license (optional)
+		std::string	name;		//!< name like "foo"
+		std::string	path;		//!< the full path
+		std::string	home;		//!< plugin's home
+		std::string	author;		//!< the author (optional)
+		std::string	comment;	//!< a summary (optional)
+		std::string	version;	//!< a version (optional)
+		std::string	license;	//!< a license (optional)
 	};
 
 private:
-	LuaState	m_state;
-
-	Process() = default;
+	LuaeState m_state;
 
 public:
-	/*
+	/**
 	 * The following fields are store in the lua_State * registry
 	 * and may be retrieved at any time from any Lua API.
 	 */
-	static const char *	FieldInfo;
-
-	/*
-	 * The following tables are libraries to load, luaLibs are
-	 * required and irccdLibs are preloaded.
-	 */
-	static const Libraries luaLibs;
-	static const Libraries irccdLibs;
+	static const char *FieldInfo;
 
 	/**
-	 * Create a process with a new Lua state.
-	 *
-	 * @return the process
+	 * The standard Lua libraries.
 	 */
-	static Ptr create();
+	static const Libraries luaLibs;
+
+	/**
+	 * The irccd libraries.
+	 */
+	static const Libraries irccdLibs;
 
 	/**
 	 * Initialize the process, adds the name and home
@@ -87,7 +93,7 @@ public:
 	 * @param process the process
 	 * @param info the info
 	 */
-	static void initialize(Ptr process, const Info &info);
+	static void initialize(std::shared_ptr<Process> &process, const Info &info);
 
 	/**
 	 * Get the info from the registry. Calls luaL_error if any functions
@@ -105,5 +111,7 @@ public:
 };
 
 } // !irccd
+
+#endif // !_WITH_LUA
 
 #endif // !_PROCESS_H_

@@ -1,7 +1,7 @@
 /*
  * LuaServer.h -- Lua API for Server class
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,14 +19,38 @@
 #ifndef _LUA_SERVER_H_
 #define _LUA_SERVER_H_
 
-#include <lua.hpp>
+/**
+ * @file LuaServer.h
+ * @brief Lua bindings for class Server
+ */
 
-#include "Server.h"
+#include <irccd/Luae.h>
+#include <irccd/Server.h>
 
 namespace irccd {
 
+/**
+ * The server name object.
+ */
 extern const char *ServerType;
 
+/**
+ * @brief Overload for \ref Server
+ */
+template <>
+struct Luae::IsUserdata<Server> : std::true_type {
+	/**
+	 * The metatable name.
+	 */
+	static const char *MetatableName;
+};
+
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_server(lua_State *L);
 
 } // !irccd

@@ -1,0 +1,17 @@
+---
+module: irccd.plugin
+summary: "Plugin management"
+---
+
+# Usage
+
+Functions to load, read and unload plugins.
+
+# Functions
+
+- [addPath](function/addPath.html)
+- [info](function/info.html)
+- [list](function/list.html)
+- [load](function/load.html)
+- [reload](function/reload.html)
+- [unload](function/unload.html)

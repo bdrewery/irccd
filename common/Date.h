@@ -1,7 +1,7 @@
 /*
  * Date.h -- date and time manipulation
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,18 +19,36 @@
 #ifndef _DATE_H_
 #define _DATE_H_
 
+/**
+ * @file Date.h
+ * @brief Date management
+ */
+
 #include <cstdint>
 #include <ctime>
 #include <string>
 
 namespace irccd {
 
+/**
+ * @class Date
+ * @brief Date management
+ */
 class Date {
 private:
 	time_t m_timestamp;		//! time epoch
 
 public:
+	/**
+	 * Default constructor to now.
+	 */
 	Date();
+
+	/**
+	 * Constructor with specific timestamp.
+	 *
+	 * @param timestamp the timestamp
+	 */
 	Date(time_t timestamp);
 
 	/**
@@ -50,9 +68,23 @@ public:
 	std::string format(const std::string &format);
 };
 
-bool operator==(const Date &, const Date &);
+/**
+ * Test equality.
+ *
+ * @param d1 the first date
+ * @param d2 the second date
+ * @return true if equals
+ */
+bool operator==(const Date &d1, const Date &d2);
 
-bool operator<=(const Date &, const Date &);
+/**
+ * Less or equal operator.
+ *
+ * @param d1 the first date
+ * @param d2 the second date
+ * @return true if d1 is less or equals than d2
+ */
+bool operator<=(const Date &d1, const Date &d2);
 
 } // !irccd
 

@@ -1,7 +1,7 @@
 /*
  * LuaUtil.h -- Lua bindings for class Util
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,12 +19,40 @@
 #ifndef _LUA_UTIL_H_
 #define _LUA_UTIL_H_
 
-#include <lua.hpp>
+/**
+ * @file LuaUtil.h
+ * @brief Lua bindings for class Util
+ */
 
-#define DATE_TYPE	"Date"
+#include <common/Date.h>
+#include <irccd/Luae.h>
 
 namespace irccd {
 
+/**
+ * The date type.
+ */
+extern const char *DateType;
+
+/**
+ * @brief Overload for Date
+ *
+ * The object is used as userdata.
+ */
+template <>
+struct Luae::IsUserdata<Date> : std::true_type {
+	/**
+	 * The metatable name.
+	 */
+	static const char *MetatableName;
+};
+
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_util(lua_State *L);
 
 } // !irccd

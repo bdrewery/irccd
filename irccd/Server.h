@@ -1,7 +1,7 @@
 /*
  * Server.h -- a IRC server to connect to
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,17 +19,24 @@
 #ifndef _SERVER_H_
 #define _SERVER_H_
 
+/**
+ * @file Server.h
+ * @brief Irccd servers
+ */
+
 #include <map>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <thread>
-#include <mutex>
 #include <unordered_map>
 #include <vector>
 
-#include <config.h>
+#include <IrccdConfig.h>
 
+#include "CommandQueue.h"
 #include "IrcSession.h"
+
 #include "server/ServerState.h"
 
 namespace irccd {
@@ -39,11 +46,11 @@ namespace irccd {
  * @brief Prefixes for channels
  */
 enum class IrcChanNickMode {
-	Creator		= 'O',				//! channel creator
-	HalfOperator	= 'h',				//! half operator
-	Operator	= 'o',				//! channel operator
-	Protection	= 'a',				//! unkillable
-	Voiced		= 'v'				//! voice power
+	Creator		= 'O',				//!< channel creator
+	HalfOperator	= 'h',				//!< half operator
+	Operator	= 'o',				//!< channel operator
+	Protection	= 'a',				//!< unkillable
+	Voiced		= 'v'				//!< voice power
 };
 
 /**
@@ -51,15 +58,17 @@ enum class IrcChanNickMode {
  * @brief Describe a whois information
  */
 struct IrcWhois {
-	bool found = false;				//! if no such nick
-	std::string nick;				//! user's nickname
-	std::string user;				//! user's user
-	std::string host;				//! hostname
-	std::string realname;				//! realname
-	std::vector<std::string> channels;		//! channels
+	bool found = false;				//!< if no such nick
+	std::string nick;				//!< user's nickname
+	std::string user;				//!< user's user
+	std::string host;				//!< hostname
+	std::string realname;				//!< realname
+	std::vector<std::string> channels;		//!< channels
 };
 
-using IrcEventParams	= std::vector<std::string>;
+/**
+ * Map for IRC prefixes to the character.
+ */
 using IrcPrefixes	= std::map<IrcChanNickMode, char>;
 
 /**
@@ -76,21 +85,24 @@ public:
 	 * @brief A channel joined or to join
 	 */
 	struct Channel {
-		std::string	name;			//! channel name
-		std::string	password;		//! channel optional password
+		std::string	name;			//!< channel name
+		std::string	password;		//!< channel optional password
 	};
 
-	using ChanList	= std::vector<Channel>;
+	/**
+	 * List of channels.
+	 */
+	using ChannelList	= std::vector<Channel>;
 
 	/**
 	 * @struct RetryInfo
 	 * @brief The reconnection mechanism
 	 */
 	struct RetryInfo {
-		bool		enabled = true;		//! enable the reconnection mechanism
-		int		maxretries = 0;		//! max number of test (0 = forever)
-		int		noretried = 0;		//! current number of test
-		int		timeout = 30;		//! seconds to wait before testing
+		bool		enabled = true;		//!< enable the reconnection mechanism
+		unsigned	maxretries = 0;		//!< max number of test (0 = forever)
+		unsigned	noretried = 0;		//!< current number of test
+		unsigned	timeout = 30;		//!< seconds to wait before testing
 
 		/*
 		 * The following variables are only used in the
@@ -98,17 +110,8 @@ public:
 		 * we check if the irccdctl wanted to stop / restart
 		 * the server.
 		 */
-		bool		restarting = false;	//! tells if we are restarting
-		bool		stopping = false;	//! tells that we want to stop
-	};
-
-	/**
-	 * @struct Options
-	 * @brief Options for the server
-	 */
-	struct Options {
-		std::string	commandChar = "!";	//! command token
-		bool		joinInvite = true;	//! auto join on invites
+		bool		restarting = false;	//!< tells if we are restarting
+		bool		stopping = false;	//!< tells that we want to stop
 	};
 
 	/**
@@ -116,14 +119,13 @@ public:
 	 * @brief Server information
 	 */
 	struct Info {
-		std::string	name;			//! server's name
-		std::string	host;			//! hostname
-		std::string	password;		//! optional server password
-		ChanList	channels;		//! list of channels
-		IrcPrefixes	prefixes;		//! comes with event 5
-		unsigned	port = 0;		//! server's port
-		bool		ssl = false;		//! SSL usage
-		bool		sslVerify = true;	//! SSL verification
+		std::string	name;			//!< server's name
+		std::string	host;			//!< hostname
+		std::string	password;		//!< optional server password
+		std::string	command = "!";		//!< the command character
+		ChannelList	channels;		//!< list of channels
+		IrcPrefixes	prefixes;		//!< comes with event 5
+		unsigned	port = 0;		//!< server's port
 	};
 
 	/**
@@ -131,9 +133,9 @@ public:
 	 * @brief An identity used for the server
 	 */
 	struct Identity {
-		std::string	name = "__irccd__";	//! identity name
-		std::string	nickname = "irccd";	//! user nickname
-		std::string	username = "irccd";	//! IRC client user
+		std::string	name = "__irccd__";	//!< identity name
+		std::string	nickname = "irccd";	//!< user nickname
+		std::string	username = "irccd";	//!< IRC client user
 
 		//! The realname
 		std::string	realname = "IRC Client Daemon";
@@ -142,105 +144,66 @@ public:
 		std::string	ctcpVersion = "Irccd " VERSION;
 	};
 
+	/**
+	 * @enum Options
+	 * @brief Some options for the server
+	 */
+	enum Options {
+		OptionJoinInvite	= (1 << 0),	//! join on invite
+		OptionAutoRejoin	= (1 << 1),	//! auto rejoin after kick
+		OptionSsl		= (1 << 2),	//! use SSL
+		OptionSslNoVerify	= (1 << 3)	//! do not verify SSL
+	};
+
+	/**
+	 * List of NAMES being built.
+	 */
 	using NameList	= std::unordered_map<
 				std::string,
 				std::vector<std::string>
 			  >;
 
-	using WhoisList	= std::unordered_map<
-				std::string,
-				IrcWhois
-			  >;
-
-	using Ptr	= std::shared_ptr<Server>;
-	using List	= std::unordered_map<
-				std::string,
-				Server::Ptr
-			  >;
-
-
-	using Mutex	= std::recursive_mutex;
-	using Lock	= std::lock_guard<Mutex>;
-	using MapFunc	= std::function<void (Server::Ptr)>;
+	/**
+	 * List of WHOIS being built.
+	 */
+	using WhoisList	= std::unordered_map<std::string, IrcWhois>;
 
 private:
-	static List	servers;		//! all servers
-	static Mutex	serverLock;		//! lock for server management
+	using Thread	= std::thread;
+	using Mutex	= std::recursive_mutex;
+	using Lock	= std::lock_guard<Mutex>;
+	using State	= std::unique_ptr<ServerState>;
 
-	// For deferred events
-	NameList	m_nameLists;		//! channels names to receive
-	WhoisList	m_whoisLists;		//! list of whois
+private:
+	NameList	m_nameLists;		//!< channels names to receive
+	WhoisList	m_whoisLists;		//!< list of whois
+	Mutex		m_lock;			//!< lock for client operation
+	IrcSession	m_session;		//!< the current session
+	Thread		m_thread;		//!< the thread
+	CommandQueue	m_queue;		//!< command queue
+	State		m_state;		//!< the current state
+	State		m_nextState;		//!< the next state
+	bool		m_running { true };	//!< should we stop running the server
 
-	Mutex		m_lock;			//! lock for client operation
-	IrcSession	m_session;		//! the current session
+	Server(const Server &) = delete;
+	Server &operator=(const Server &) = delete;
 
-	// State
-	ServerState::Ptr m_state;		//! the current state
-	std::thread	m_thread;		//! the thread
+	Server(Server &&) = delete;
+	Server &operator=(Server &&) = delete;
+
+	void routine();
 
 protected:
-	Info		m_info;			//! server info
-	Identity	m_identity;		//! identity to use
-	Options		m_options;		//! some options
-	RetryInfo	m_reco;			//! reconnection settings
+	Info		m_info;			//!< server info
+	Identity	m_identity;		//!< identity to use
+	RetryInfo	m_reco;			//!< reconnection settings
+	unsigned	m_options;		//!< the options
 
 public:
 	/**
-	 * Add a new server to the registry. It also start the server
-	 * immediately.
-	 *
-	 * @param server the server to add
-	 */
-	static void add(Ptr server);
-
-	/**
-	 * Remove the server from the registry.
-	 *
-	 * @param server
-	 */
-	static void remove(Ptr server);
-
-	/**
-	 * Get an existing server.
-	 *
-	 * @param name the server name
-	 * @return the server
-	 * @throw std::out_of_range if not found
-	 */
-	static Server::Ptr get(const std::string &name);
-
-	/**
-	 * Check if a server exists
-	 *
-	 * @param name the server name
-	 * @return true if the server by this name is loaded
-	 */
-	static bool has(const std::string &name);
-
-	/**
-	 * Call a function for all servers.
-	 *
-	 * @param func the function
-	 */
-	static void forAll(MapFunc func);
-
-	/**
-	 * Remove dead servers.
-	 */
-	static void flush();
-
-	/**
-	 * Convert the s context to a shared_ptr<Server>.
-	 *
-	 * @param s the session
-	 * @return the shared_ptr.
-	 */
-	static Ptr toServer(irc_session_t *s);
-
-	/**
 	 * Convert a channel line to Channel. The line must be in the
 	 * following form:
-	 *	#channel:password
+	 *	\#channel:password
 	 *
 	 * Password is optional and : must be removed.
 	 *
@@ -254,13 +217,10 @@ public:
 	 *
 	 * @param info the host info
 	 * @param identity the identity
-	 * @param options some options
 	 * @param reco the reconnection options
+	 * @param options some options
 	 */
-	Server(const Info &info,
-	       const Identity &identity,
-	       const Options &options,
-	       const RetryInfo &reco);
+	Server(Info info, Identity identity, RetryInfo reco, unsigned options = 0);
 
 	/**
 	 * Default destructor.
@@ -280,56 +240,56 @@ public:
 	 *
 	 * @return the current list
 	 */
-	NameList &getNameLists();
+	NameList &nameLists();
 
 	/**
 	 * Get the whois lists to build /whois reporting.
 	 *
 	 * @return the current list
 	 */
-	WhoisList &getWhoisLists();
+	WhoisList &whoisLists();
 
 	/**
 	 * Get the server information.
 	 *
 	 * @return the server information
 	 */
-	Info &getInfo();
+	Info &info();
 
 	/**
 	 * Get the identity used for that server
 	 *
 	 * @return the identity
 	 */
-	Identity &getIdentity();
-
-	/**
-	 * Get the server options.
-	 *
-	 * @return the options
-	 */
-	Options &getOptions();
+	Identity &identity();
 
 	/**
 	 * Get the reconnection settings.
 	 *
 	 * @return the reconnection settings
 	 */
-	RetryInfo &getRecoInfo();
+	RetryInfo &reco();
 
 	/**
 	 * Get the current IrcSession.
 	 *
 	 * @return the session
 	 */
-	IrcSession &getSession();
+	IrcSession &session();
+
+	/**
+	 * Get options.
+	 *
+	 * @return the options
+	 */
+	unsigned options() const;
 
 	/**
 	 * Get all channels that will be auto joined
 	 *
 	 * @return the list of channels
 	 */
-	const ChanList &getChannels() const;
+	const ChannelList &channels() const;
 
 	/**
 	 * Add a channel that the server will connect to when the
@@ -363,17 +323,52 @@ public:
 	void removeChannel(const std::string &name);
 
 	/**
-	 * Start the server thread and state machine.
+	 * Change the state. Set a new state that will be called almost
+	 * immediately after the current state.
+	 *
+	 * @param args the arguments
+	 */
+	template <typename State, typename... Args>
+	void next(Args&&... args)
+	{
+		Lock lk(m_lock);
+
+		m_nextState = std::make_unique<State>(std::forward<Args>(args)...);
+	}
+
+	/**
+	 * Stop the state server.
+	 *
+	 * @param null the nullptr value
+	 */
+	inline void next(std::nullptr_t null)
+	{
+		(void)null;
+
+		Lock lk(m_lock);
+
+		m_running = false;
+	}
+
+	/**
+	 * Check if the server is dead.
+	 *
+	 * @return true if no state
+	 */
+	bool isDead() const;
+
+	/**
+	 * Start the server thread.
 	 */
 	void start();
 
 	/**
-	 * Restart a connection if it is running.
+	 * Force a reconnection.
 	 */
-	void restart();
+	void reconnect();
 
 	/**
-	 * Request for stopping the server.
+	 * Stop the server, disconnect and close everything.
 	 */
 	void stop();
 
@@ -381,140 +376,89 @@ public:
 	 * IRC commands
 	 * ------------------------------------------------ */
 
-	/**
-	 * Send a notice to a public channel.
-	 *
-	 * @param channel the target channel
-	 * @param message the message to send
+	/*
+	 * The following functions are just wrappers around the IrcSession
+	 * so it becomes thread safe and any change in IrcSession or
+	 * libircclient library does not impact this class.
 	 */
-	virtual void cnotice(const std::string &channel,
-			     const std::string &message);
 
 	/**
-	 * Invite someone to a channel.
-	 *
-	 * @param target the target nickname
-	 * @param channel the channel
+	 * @copydoc IrcSession::cnotice
 	 */
-	virtual void invite(const std::string &target,
-			    const std::string &channel);
+	virtual void cnotice(const std::string &channel, const std::string &message);
 
 	/**
-	 * Join a channel.
-	 *
-	 * @param channel the channel name
-	 * @param password an optional password
+	 * @copydoc IrcSession::invite
 	 */
-	virtual void join(const std::string &name,
-			  const std::string &password = "");
+	virtual void invite(const std::string &target, const std::string &channel);
 
 	/**
-	 * Kick someone from a channel.
-	 *
-	 * @param name the nick name
-	 * @param channel the channel from
-	 * @param reason an optional reason
+	 * @copydoc IrcSession::join
 	 */
-	virtual void kick(const std::string &name,
-			  const std::string &channel,
-			  const std::string &reason = "");
+	virtual void join(const std::string &channel, const std::string &password = "");
 
 	/**
-	 * Send a CTCP ACTION known as /me.
-	 *
-	 * @param target the nickname or channel
-	 * @param message the message to send
+	 * @copydoc IrcSession::kick
 	 */
-	virtual void me(const std::string &target,
-			const std::string &message);
+	virtual void kick(const std::string &name, const std::string &channel, const std::string &reason = "");
 
 	/**
-	 * Change the channel mode.
-	 *
-	 * @param channel the target channel
-	 * @param mode the mode
+	 * @copydoc IrcSession::me
 	 */
-	virtual void mode(const std::string &channel,
-			  const std::string &mode);
+	virtual void me(const std::string &target, const std::string &message);
 
 	/**
-	 * Get the list of names as a deferred call.
-	 *
-	 * @param channel which channel
-	 * @param plugin the plugin to call on end of list
-	 * @param ref the function reference
+	 * @copydoc IrcSession::mode
+	 */
+	virtual void mode(const std::string &channel, const std::string &mode);
+
+	/**
+	 * @copydoc IrcSession::names
 	 */
 	virtual void names(const std::string &channel);
 
 	/**
-	 * Change your nickname.
-	 *
-	 * @param nick the new nickname
+	 * @copydoc IrcSession::nick
 	 */
-	virtual void nick(const std::string &nick);
+	virtual void nick(const std::string &newnick);
 
 	/**
-	 * Send a notice to someone.
-	 *
-	 * @param nickname the target nickname
-	 * @param message the message
+	 * @copydoc IrcSession::notice
 	 */
-	virtual void notice(const std::string &nickname,
-			    const std::string &message);
+	virtual void notice(const std::string &target, const std::string &message);
 
 	/**
-	 * Leave a channel.
-	 *
-	 * @param channel the channel to leave
-	 * @param reason an optional reason
+	 * @copydoc IrcSession::part
 	 */
 	virtual void part(const std::string &channel, const std::string &reason = "");
 
 	/**
-	 * Send a query message.
-	 *
-	 * @param who the target nickname
-	 * @param message the message
+	 * @copydoc IrcSession::say
 	 */
-	virtual void query(const std::string &who,
-			   const std::string &message);
+	virtual void query(const std::string &target, const std::string &message);
 
 	/**
-	 * Say something to a channel or to a nickname.
-	 *
-	 * @param target the nickname or channel
-	 * @param message the message to send
+	 * @copydoc IrcSession::say
 	 */
-	virtual void say(const std::string &target,
-			 const std::string &message);
+	virtual void say(const std::string &target, const std::string &message);
 
 	/**
-	 * Send a raw message to the server.
-	 *
-	 * @param message the message
+	 * @copydoc IrcSession::send
 	 */
-	virtual void sendRaw(const std::string &msg);
+	virtual void send(const std::string &raw);
 
 	/**
-	 * Change a channel topic.
-	 *
-	 * @param channel the channel target
-	 * @param topic the new topic
+	 * @copydoc IrcSession::topic
 	 */
-	virtual void topic(const std::string &channel,
-			   const std::string &topic);
+	virtual void topic(const std::string &channel, const std::string &topic);
 
 	/**
-	 * Change your own user mode.
-	 *
-	 * @param mode the mode
+	 * @copydoc IrcSession::umode
 	 */
 	virtual void umode(const std::string &mode);
 
 	/**
-	 * Get the whois information from a user.
-	 *
-	 * @param target the nickname target
+	 * @copydoc IrcSession::whois
 	 */
 	virtual void whois(const std::string &target);
 };

@@ -1,0 +1,16 @@
+# Running irccd
+
+Just launch irccd from your terminal.
+
+## Available options
+
+You can pass the following parameters at the command line, they override
+your configuration.
+
+The following options are available:
+
+- **-f**, do not run as a daemon, keep irccd to the foreground
+- **-c config.conf**, load a specific config file, exit if not found
+- **-p pluginpath**, add a directory to find plugins
+- **-P plugin**, load a plugin, can be specified more than one time
+- **-v**, be verbose

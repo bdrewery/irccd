@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2013 David Demelier <markand@malikania.fr>
+.\" Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 .\"
 .\" Permission to use, copy, modify, and/or distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -56,8 +56,6 @@ This section covers general options.
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
 .It foreground
 (bool) Keep irccd to foreground, default: false.
-.It plugins
-(DEPRECATED) (string list) A list of plugins to load, default: empty.
 .It plugin-path
 (string) A path to local plugins, default: empty.
 .It syslog
@@ -148,6 +146,8 @@ in the file.
 default: 0.
 .It reconnect-timeout
 (int) Number of seconds to wait before retrying, default: 30.
+.It auto-rejoin
+(bool) Rejoin a channel if the bot has been kicked, default: false.
 .El
 .\" PLUGINS
 .Ss plugins

@@ -1,7 +1,7 @@
 /*
  * Thread.h -- thread interface for Lua
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,11 @@
 #ifndef _THREAD_H_
 #define _THREAD_H_
 
+/**
+ * @file Thread.h
+ * @brief Irccd thread interface
+ */
+
 #include <thread>
 
 #include "Luae.h"
@@ -30,26 +35,15 @@ namespace irccd {
  * @class Thread
  * @brief A thread inside a plugin
  */
-class Thread {
+class Thread final {
 private:
-	std::thread	m_thread;
-	bool		m_joined;
-	Process::Ptr	m_process;
-
-	Thread();
-
-public:
-	using Ptr	= std::shared_ptr<Thread>;
-
 	friend class Plugin;
 
-	/**
-	 * Create a new thread as a shared pointer.
-	 *
-	 * @return a thread object (nothing running)
-	 */
-	static Ptr create();
+	std::thread m_thread;
+	std::shared_ptr<Process> m_process;
+	bool m_joined;
 
+public:
 	/**
 	 * Start a thread by calling the function already pushed
 	 * with its parameters.
@@ -57,7 +51,14 @@ public:
 	 * @param thread the thread to start
 	 * @param np the number of parameters pushed
 	 */
-	static void start(Thread::Ptr thread, int np);
+	static void start(std::shared_ptr<Thread> &thread, int np);
+
+	/**
+	 * Create a new thread as a shared pointer.
+	 *
+	 * @return a thread object (nothing running)
+	 */
+	Thread();
 
 	/**
 	 * Default destructor.
@@ -86,8 +87,11 @@ public:
 	 *
 	 * @return the process
 	 */
-	Process::Ptr process() const;
+	std::shared_ptr<Process> process() const;
 
+	/**
+	 * Convert to lua_State *
+	 */
 	operator lua_State *();
 };
 

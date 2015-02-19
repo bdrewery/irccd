@@ -1,0 +1,26 @@
+---
+module: irccd.util
+info: yes
+since: 1.1
+summary: "Various utilities"
+---
+
+# Usage
+
+Various utilities.
+
+# Types
+
+- [Date](type/Date/index.html)
+
+# Enums
+
+- [Color](enum/color.html)
+- [Attribute](enum/attribute.html)
+
+# Functions
+
+- [date](function/date.html)
+- [format](function/format.html)
+- [splituser](function/splituser.html)
+- [splithost](function/splithost.html)

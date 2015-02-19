@@ -1,0 +1,24 @@
+---
+function: new
+---
+
+Create a new thread. Use the function as the thread function. You can pass any parameter you like to the thread just after the function itself.
+
++Note+: userdata and functions are not supported as parameters.
+
+You may discard the return value, the thread will automatically be deleted when its execution has finished but it's not recommended.
+
+# Synopsis
+
+````lua
+thread = function thread.new(func, ...)
+````
+
+# Arguments
+
+- func, the thread function
+- ..., the arguments to pass to the thread function
+
+# Returns
+
+- thread, the thread (see [[irccd-Thread|Thread]])

@@ -1,0 +1,24 @@
+---
+function: new
+category: socket
+since: 1.1
+info: yes
+---
+
+Create a new socket.
+
+# Synopsis
+
+````lua
+s, err = function socket.new(family, type)
+````
+
+# Arguments
+
+- family, one of the [[irccd-socket-Family|socket.family]]
+- type, one of the [[irccd-socket-Type|socket.type]]
+
+# Returns
+
+- s, the socket or nil on failure (see [[irccd-Socket|Socket]])
+- err, the error message

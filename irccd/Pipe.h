@@ -1,7 +1,7 @@
 /*
  * Pipe.h -- share data between threads
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,11 @@
 
 #ifndef _PIPE_H_
 #define _PIPE_H_
+
+/**
+ * @file Pipe.h
+ * @brief Pipe for sharing data between threads
+ */
 
 #include <condition_variable>
 #include <functional>
@@ -38,59 +43,58 @@ namespace irccd {
  *
  * This class is an helper to share data between threads.
  */
-class Pipe {
+class Pipe final {
 private:
-	using Pipes	= std::unordered_map<
-				std::string,
-				std::shared_ptr<Pipe>
-			  >;
-
 	using Lock	= std::unique_lock<std::mutex>;
 	using Mutex	= std::mutex;
 	using Cond	= std::condition_variable;
-	using Reader	= std::function<void (const LuaValue &)>;
-
-public:
-	using Ptr	= std::shared_ptr<Pipe>;
-	using Queue	= std::queue<LuaValue>;
-
-private:
-	static Pipes pipes;
-	static Mutex pipesMutex;
-
-	Cond m_cond;
-	Mutex m_mutex;
-	Queue m_queue;
+	using Reader	= std::function<void (const LuaeValue &)>;
 
 public:
 	/**
-	 * Get (or create) a pipe.
+	 * The queue of values.
+	 */
+	using Queue	= std::queue<LuaeValue>;
+
+private:
+	std::string	m_name;
+	Cond		m_cond;
+	Mutex		m_mutex;
+	Queue		m_queue;
+
+public:
+	/**
+	 * Construct a named pipe.
 	 *
 	 * @param name the name
-	 * @return the pipe ready to be used
 	 */
-	static Ptr get(const std::string &name);
+	Pipe(std::string name);
+
+	/**
+	 * Destroy the pipe.
+	 */
+	~Pipe();
 
 	/**
 	 * Push some data to the pipe.
 	 *
 	 * @param value the value to push
 	 */
-	void push(const LuaValue &value);
+	void push(const LuaeValue &value);
 
 	/**
 	 * Get the first value.
 	 *
 	 * @return the first value
 	 */
-	LuaValue first();
+	LuaeValue first();
 
 	/**
 	 * Get the last value.
 	 *
 	 * @return the last value
 	 */
-	LuaValue last();
+	LuaeValue last();
 
 	/**
 	 * Completely clear the queue.
@@ -110,7 +114,16 @@ public:
 	 *
 	 * @param reader the function to be called
 	 */
-	void list(Reader reader);
+	template <typename Func>
+	void list(Func reader)
+	{
+		Lock lk(m_mutex);
+
+		while (!m_queue.empty()) {
+			reader(m_queue.front());
+			m_queue.pop();
+		}
+	}
 
 	/**
 	 * Pop one value.

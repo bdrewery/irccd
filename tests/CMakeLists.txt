@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -19,26 +19,19 @@
 # Project
 project(tests)
 
-# Option to enable / disable them
-option(WITH_TESTS "Enable unit testing" Off)
-
-# Set globally so message() can get it
-set(UNIT_TESTS "disabled" PARENT_SCOPE)
-
-# cppunit generate some warnings
-if (UNIX)
-	set(FLAGS "-Wno-unused-parameter")
-endif ()
-
 # Function to create a test
 function(create_test name sources)
 	include_directories(
 		${CPPUNIT_INCLUDE_DIR}
+		${CMAKE_BINARY_DIR}
 		${CMAKE_SOURCE_DIR}
+		${irccd_SOURCE_DIR}
+		${LUA52_INCLUDE_DIR}
+		${LUAJIT_INCLUDE_DIR}
+		${extern_SOURCE_DIR}
 	)
 
 	add_executable(${name} ${sources})
-	set_target_properties(${name} PROPERTIES COMPILE_FLAGS ${FLAGS})
 
 	add_test(
 		NAME ${name}
@@ -48,8 +41,15 @@ function(create_test name sources)
 	target_link_libraries(
 		${name}
 		common
-		${CPPUNIT_LIBRARY}
+		ircclient
+		gtest
+		${LUA52_LIBRARIES}
+		${LUAJIT_LIBRARIES}
 	)
+
+	if (UNIX)
+		set_target_properties(${name} PROPERTIES LINK_FLAGS "-pthread")
+	endif ()
 endfunction()
 
 # Create and copy a directory
@@ -59,28 +59,19 @@ function(create_dir target dirname)
 		POST_BUILD
 
 		COMMAND
-		    cmake -E make_directory
-		    ${CMAKE_CURRENT_BINARY_DIR}/${dirname}
+			${CMAKE_COMMAND} -E make_directory
+			${CMAKE_CURRENT_BINARY_DIR}/${dirname}
 		COMMAND
-		    cmake -E copy_directory
-		    ${CMAKE_CURRENT_SOURCE_DIR}/${dirname}
-		    ${CMAKE_CURRENT_BINARY_DIR}/${dirname}
+			${CMAKE_COMMAND} -E copy_directory
+			${CMAKE_CURRENT_SOURCE_DIR}/${dirname}
+			${CMAKE_CURRENT_BINARY_DIR}/${dirname}
 	)
 endfunction()
 
 if (WITH_TESTS)
-	find_package(Cppunit QUIET)
-
-	if (CPPUNIT_FOUND)	
-		set(UNIT_TESTS "enabled" PARENT_SCOPE)
-
-		# Parser tests
-		create_test(TestParser parser/TestParser.cpp)	
-		create_dir(TestParser parser/configs)
-
-		# Sockets
-		create_test(TestSocket sockets/TestSockets.cpp)
-	endif ()
+	add_subdirectory(converter)
+	add_subdirectory(lua-util)
+	add_subdirectory(rules)
+	add_subdirectory(split)
+	add_subdirectory(strip)
 endif ()
-
-# vim: set syntax=cmake:

@@ -1,0 +1,18 @@
+---
+function: name
+info: yes
+category: system
+since: 1.1
+---
+
+Get the operating system name. Usually Windows, FreeBSD, Linux and such.
+
+# Synopsis
+
+````lua
+name = function system.name()
+````
+
+# Returns
+
+name, the operating system name

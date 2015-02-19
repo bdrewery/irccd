@@ -1,7 +1,7 @@
 /*
  * LuaIrccd.h -- Lua bindings for class Irccd
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,10 +19,21 @@
 #ifndef _LUA_IRCCD_H_
 #define _LUA_IRCCD_H_
 
+/**
+ * @file LuaIrccd.h
+ * @brief Lua bindings for Irccd
+ */
+
 #include <lua.hpp>
 
 namespace irccd {
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_irccd(lua_State *L);
 	
 } // !irccd

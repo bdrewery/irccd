@@ -1,7 +1,7 @@
 --
 -- history.lua -- track nickname's history
 --
--- Copyright (c) 2013 David Demelier <markand@malikania.fr>
+-- Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 --
 -- Permission to use, copy, modify, and/or distribute this software for any
 -- purpose with or without fee is hereby granted, provided that the above
@@ -31,10 +31,11 @@ local system	= require "irccd.system"
 local util	= require "irccd.util"
 
 local format = {
-	error	= "I could not open my database file",
-	seen	= "I've seen #U for the last time on %m/%d/%y %H:%M",
-	said	= "The last message that #U said is: #m",
-	unknown	= "I've never known #U"
+	error	= "#U, I could not open my database file",
+	seen	= "#U, I've seen #U for the last time on %m/%d/%y %H:%M",
+	said	= "#U, the last message that #U said is: #m",
+	unknown	= "#U, i've never known #U",
+	usage	= "#U, usage: #m seen target | #m said target. Type #m help <command> for more information"
 }
 
 local function loadFormats()
@@ -80,9 +81,7 @@ local function openFile(server, channel, mode)
 	end
 
 	-- Open the file
-	local f, err = io.open(srvdir .. "/" .. channel, mode)
-
-	return f, err
+	return io.open(srvdir .. "/" .. channel, mode)
 end
 
 local function loadFile(f)
@@ -90,8 +89,7 @@ local function loadFile(f)
 	local result = { }
 
 	for l in f:lines() do
-		local n, t, m = l:match("(%w+):(%w+):(.*)")
-		table.insert(result, { n, t, m })
+		table.insert(result, { l:match("(%S+):(%d+):(.*)") })
 	end
 
 	return result
@@ -104,30 +102,9 @@ local function findEntry(list, nickname)
 
 	for i, t in pairs(list) do
 		if t[1] == nickname then
-			return t, i	
+			return t, i
 		end
 	end
-
-	return nil
-end
-
--- Formatter, used to convert % and # variables
-local function convert(what, keywords, date)
-	local line = what
-
-	-- First convert dates from % with date:format.
-	if date ~= nil then
-		line = date:format(line)
-	end
-
-	-- Remove ~ if found.
-	line = line:gsub("~", system.home)
-
-	-- Add environment variable.
-	line = line:gsub("%${(%w+)}", system.env)
-
-	-- Now convert the # with gsub.
-	return line:gsub("#(.)", keywords)
 end
 
 local function updateDatabase(server, channel, nickname, message)
@@ -167,11 +144,26 @@ local function updateDatabase(server, channel, nickname, message)
 		logger.warn(err)
 	else
 		for _, t in pairs(list) do
-			f:write(string.format("%s:%s:%s\n", t[1], t[2], t[3]))
+			f:write(string.format("%s:%d:%s\n", t[1], t[2], t[3]))
 		end
 
 		f:close()
 	end
+end
+
+local function seen(server, channel, who, args)
+	local target = args:match "^%s(%S)%s$"
+	local kw = {
+	}
+
+	if not target then
+		util.convert(formats.usage, kw)
+	else
+
+	end
+end
+
+local function said(server, channel, who, args)
 end
 
 function onCommand(server, channel, who, message)
@@ -181,7 +173,7 @@ function onCommand(server, channel, who, message)
 	if f == nil then
 		server:say(channel, who .. ", " .. format.error)
 	else
-		local c, U = message:match("%s*(%w+)%s+(%w+)%s*")
+		local command, args = message:match "^%s*(%w+)%s+(%S+)%s*$"
 		local list = loadFile(f)
 		local entry = findEntry(list, U)
 
@@ -192,17 +184,17 @@ function onCommand(server, channel, who, message)
 		}
 
 		if entry == nil then
-			server:say(channel, who .. ", " .. convert(format.unknown, kw))
+			server:say(channel, who .. ", " .. util.convert(format.unknown, kw))
 		else
 			local d = util.date(entry[2])
 
 			if c == "seen" then
-				server:say(channel, who .. ", " .. convert(format.seen, kw, d))
+				server:say(channel, who .. ", " .. util.convert(format.seen, kw, d))
 			elseif c == "said" then
 				-- Add the message in case of said
 				kw.m = entry[3]
 
-				server:say(channel, who .. ", " .. convert(format.said, kw, d))
+				server:say(channel, who .. ", " .. util.convert(format.said, kw, d))
 			end
 		end
 	end

@@ -1,7 +1,7 @@
 /*
  * ServerState.h -- current server state
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,11 @@
 #ifndef _SERVER_STATE_H_
 #define _SERVER_STATE_H_
 
+/**
+ * @file ServerState.h
+ * @brief Server state
+ */
+
 #include <memory>
 #include <string>
 
@@ -35,21 +40,17 @@ class Server;
  */
 class ServerState {
 public:
-	using Ptr = std::unique_ptr<ServerState>;
-
 	/**
 	 * Default destructor.
 	 */
-	virtual ~ServerState();
+	virtual ~ServerState() = default;
 
 	/**
-	 * Execute the current state command. Returns the next transition
-	 * if needed.
+	 * Execute the current state command.
 	 *
 	 * @param server the owner
-	 * @return the next transition
 	 */
-	virtual Ptr exec(std::shared_ptr<Server> server) = 0;
+	virtual void exec(Server &server) = 0;
 
 	/**
 	 * Get the current state identity.

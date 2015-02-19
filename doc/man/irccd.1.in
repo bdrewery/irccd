@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2013 David Demelier <markand@malikania.fr>
+.\" Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 .\"
 .\" Permission to use, copy, modify, and/or distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -337,6 +337,23 @@ The current server.
 The person that said something.
 .It message
 The message sent.
+.El
+.\" Query Command
+.Ss Query Command
+This event is triggered when someone sent a private message to you as a plugin
+command. It works exactly like onCommand.
+.Bd -literal -offset indent
+function onQueryCommand(server, who, message)
+.Ed
+.Pp
+Parameters:
+.Bl -tag -compact -width PARAMETERXXXX -offset indent
+.It server
+The current server.
+.It who
+The person that said something.
+.It message
+The command content.
 .El
 .\" Reload
 .Ss Reload

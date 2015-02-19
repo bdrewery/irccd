@@ -1,0 +1,16 @@
+---
+method: join
+---
+
+Join a channel. Note: the channel must starts with a hash '#'.
+
+# Synopsis
+
+````lua
+function Server:join(channel, password)
+````
+
+# Arguments
+
+- channel, the channel to join
+- password, an optional password

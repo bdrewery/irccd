@@ -1,7 +1,7 @@
 /*
  * Test.cpp -- test plugins
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -24,25 +24,6 @@
 #include <Logger.h>
 #include <Util.h>
 
-#if defined(WITH_LUA)
-#  include "event/IrcEventChannelMode.h"
-#  include "event/IrcEventChannelNotice.h"
-#  include "event/IrcEventConnect.h"
-#  include "event/IrcEventInvite.h"
-#  include "event/IrcEventJoin.h"
-#  include "event/IrcEventKick.h"
-#  include "event/IrcEventMe.h"
-#  include "event/IrcEventMessage.h"
-#  include "event/IrcEventMode.h"
-#  include "event/IrcEventNames.h"
-#  include "event/IrcEventNick.h"
-#  include "event/IrcEventNotice.h"
-#  include "event/IrcEventPart.h"
-#  include "event/IrcEventQuery.h"
-#  include "event/IrcEventTopic.h"
-#  include "event/IrcEventWhois.h"
-#endif
-
 #include "Irccd.h"
 #include "Plugin.h"
 #include "Server.h"
@@ -53,12 +34,12 @@ namespace irccd {
 namespace {
 
 using HelpFunction	= std::function<void ()>;
-using TestFunction	= std::function<void (Plugin::Ptr, Server::Ptr, int, char **)>;
+using TestFunction	= std::function<void (std::shared_ptr<Plugin>, std::shared_ptr<Server>, int, char **)>;
 
 class FakeServer : public Server {
 public:
 	FakeServer(const Info &info, const Identity &identity)
-		: Server(info, identity, Options(), RetryInfo())
+		: Server(info, identity, RetryInfo())
 	{
 	}
 
@@ -303,7 +284,7 @@ std::unordered_map<std::string, HelpFunction> helpCommands {
 
 // {{{ Test functions
 
-void testCommand(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testCommand(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onCommand requires 3 arguments");
@@ -313,40 +294,40 @@ void testCommand(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		 */
 		auto command = "!" + Process::info(p->getState()).name + " " + std::string(argv[2]);
 
-		IrcEventMessage(s, argv[0], argv[1], command).action(p->getState());
+		p->onMessage(s, argv[0], argv[1], command);
 	}
 }
 
-void testConnect(Plugin::Ptr p, Server::Ptr s, int, char **)
+void testConnect(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int, char **)
 {
-	IrcEventConnect(s).action(p->getState());
+	p->onConnect(s);
 }
 
-void testChannelNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testChannelNotice(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onChannelNotice requires 3 arguments");
 	else
-		IrcEventChannelNotice(s, argv[1], argv[0], argv[2]).action(p->getState());
+		p->onChannelNotice(s, argv[0], argv[1], argv[2]);
 }
 
-void testInvite(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testInvite(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onInvite requires 2 arguments");
 	else
-		IrcEventInvite(s, argv[1], argv[0]).action(p->getState());
+		p->onInvite(s, argv[0], argv[1]);
 }
 
-void testJoin(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testJoin(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onJoin requires 2 arguments");
 	else
-		IrcEventJoin(s, argv[1], argv[0]).action(p->getState());
+		p->onJoin(s, argv[0], argv[1]);
 }
 
-void testKick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testKick(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	std::string reason;
 
@@ -356,27 +337,27 @@ void testKick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		if (argc >= 4)
 			reason = argv[3];
 
-		IrcEventKick(s, argv[1], argv[0], argv[2], reason).action(p->getState());
+		p->onKick(s, argv[0], argv[1], argv[2], reason);
 	}
 }
 
-void testMe(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testMe(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onMessage requires 3 arguments");
 	else
-		IrcEventMe(s, argv[0], argv[1], argv[2]).action(p->getState());
+		p->onMe(s, argv[0], argv[1], argv[2]);
 }
 
-void testMessage(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testMessage(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onMessage requires 3 arguments");
 	else
-		IrcEventMessage(s, argv[0], argv[1], argv[2]).action(p->getState());
+		p->onMessage(s, argv[0], argv[1], argv[2]);
 }
 
-void testMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testMode(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	std::string modeArg;
 
@@ -386,27 +367,27 @@ void testMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		if (argc >= 4)
 			modeArg = argv[3];
 
-		IrcEventChannelMode(s, argv[1], argv[0], argv[2], modeArg).action(p->getState());
+		p->onMode(s, argv[0], argv[1], argv[2], modeArg);
 	}
 }
 
-void testNick(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testNick(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onNick requires 2 arguments");
 	else
-		IrcEventNick(s, argv[0], argv[1]).action(p->getState());
+		p->onNick(s, argv[0], argv[1]);
 }
 
-void testNotice(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testNotice(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onNotice requires 3 arguments");
 	else
-		IrcEventNotice(s, argv[0], argv[1], argv[2]).action(p->getState());
+		p->onNotice(s, argv[0], argv[1], argv[2]);
 }
 
-void testPart(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testPart(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	std::string reason;
 
@@ -416,32 +397,32 @@ void testPart(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
 		if (argc >= 3)
 			reason = argv[2];
 
-		IrcEventPart(s, argv[1], argv[0], reason).action(p->getState());
+		p->onPart(s, argv[0], argv[1], reason);
 	}
 }
 
-void testQuery(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testQuery(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onQuery requires 2 arguments");
 	else
-		IrcEventQuery(s, argv[0], argv[1]).action(p->getState());
+		p->onQuery(s, argv[0], argv[1]);
 }
 
-void testTopic(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testTopic(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 3)
 		Logger::warn("test: onTopic requires 3 arguments");
 	else
-		IrcEventTopic(s, argv[1], argv[0], argv[2]).action(p->getState());
+		p->onTopic(s, argv[0], argv[1], argv[2]);
 }
 
-void testUserMode(Plugin::Ptr p, Server::Ptr s, int argc, char **argv)
+void testUserMode(std::shared_ptr<Plugin> p, std::shared_ptr<Server> s, int argc, char **argv)
 {
 	if (argc < 2)
 		Logger::warn("test: onUserMode requires 2 arguments");
 	else
-		IrcEventMode(s, argv[0], argv[1]).action(p->getState());
+		p->onUserMode(s, argv[0], argv[1]);
 }
 
 std::unordered_map<std::string, TestFunction> testCommands {
@@ -472,7 +453,8 @@ void testPlugin(const char *file, int argc, char **argv)
 	info.name = "local";
 	info.host = "local";
 	info.port = 6667;
-	std::shared_ptr<FakeServer> server = std::make_shared<FakeServer>(info, ident);
+
+	auto server = std::make_shared<FakeServer>(info, ident);
 
 	if (strcmp(argv[0], "help") == 0) {
 		if (argc > 1) {
@@ -487,8 +469,8 @@ void testPlugin(const char *file, int argc, char **argv)
 	}
 
 	// Always push before calling it
-	std::string name = Util::baseName(std::string(file));
-	size_t epos = name.find(".lua");
+	auto name = Util::baseName(std::string(file));
+	auto epos = name.find(".lua");
 	if (epos != std::string::npos)
 		name = name.erase(epos);
 
@@ -534,6 +516,7 @@ void test(int argc, char **argv)
 		Logger::warn("\tonMode\t\t\tTest a public channel change");
 		Logger::warn("\tonNick\t\t\tChange your nickname");
 		Logger::warn("\tonPart\t\t\tLeave a channel");
+		Logger::warn("\tonQuery\t\t\tSend a private message");
 		Logger::warn("\tonTopic\t\t\tTest a topic channel change");
 		Logger::fatal(1, "\tonUserMode\t\tTest a user mode change");
 	}

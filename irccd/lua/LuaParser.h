@@ -1,7 +1,7 @@
 /*
  * LuaParser.h -- Lua bindings for class Parser
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,12 +19,21 @@
 #ifndef _LUA_PARSER_H_
 #define _LUA_PARSER_H_
 
+/**
+ * @file LuaParser.h
+ * @brief Lua bindings for class Parser
+ */
+
 #include <lua.hpp>
 
 #include <Parser.h>
 
 namespace irccd {
 
+/**
+ * @class LuaParser
+ * @brief Special override for \ref Parser
+ */
 class LuaParser : public Parser {
 private:
 	lua_State *m_state;	//! back pointer for log
@@ -86,6 +95,12 @@ public:
 	virtual void log(int number, const std::string &section, const std::string &message);
 };
 
+/**
+ * The open function.
+ *
+ * @param L the Lua state
+ * @return the number of args pushed
+ */
 int luaopen_parser(lua_State *L);
 
 } // !irccd

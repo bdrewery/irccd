@@ -1,7 +1,7 @@
 /*
  * LuaIrccd.cpp -- Lua bindings for class Irccd
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,26 +16,23 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "Irccd.h"
+#include <irccd/Irccd.h>
+#include <irccd/Luae.h>
+
 #include "LuaIrccd.h"
 
 namespace irccd {
 
 int luaopen_irccd(lua_State *L)
 {
-	lua_createtable(L, 3, 3);
+	LuaeTable::create(L);
 
-	lua_pushinteger(L, MAJOR);
-	lua_setfield(L, -2, "VERSION_MAJOR");
+	LuaeTable::set(L, -1, "VERSION_MAJOR", IRCCD_VERSION_MAJOR);
+	LuaeTable::set(L, -1, "VERSION_MINOR", IRCCD_VERSION_MINOR);
+	LuaeTable::set(L, -1, "VERSION_PATCH", IRCCD_VERSION_PATCH);
 
-	lua_pushinteger(L, MINOR);
-	lua_setfield(L, -2, "VERSION_MINOR");
-
-	lua_pushinteger(L, PATCH);
-	lua_setfield(L, -2, "VERSION_PATCH");
-
-	lua_pushfstring(L, "%d.%d", MAJOR, MINOR);
-	lua_setfield(L, -2, "VERSION");
+	Luae::pushfstring(L, "%d.%d.%d", IRCCD_VERSION_MAJOR, IRCCD_VERSION_MINOR, IRCCD_VERSION_PATCH);
+	Luae::setfield(L, -2, "VERSION");
 
 	return 1;
 }

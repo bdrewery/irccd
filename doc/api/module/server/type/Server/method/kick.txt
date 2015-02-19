@@ -1,0 +1,17 @@
+---
+method: kick
+---
+
+Kick someone from a channel.
+
+# Synopsis
+
+````lua
+function Server:kick(nickname, channel, reason)
+````
+
+# Arguments
+
+- nickname, the person to kick
+- channel, from which channel
+- reason, an optional reason

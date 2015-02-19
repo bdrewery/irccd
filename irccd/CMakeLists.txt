@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -16,32 +16,23 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Project
 project(irccd)
 
-# Optional Lua support
-option(WITH_LUA52 "Build with Lua plugin support" On)
-option(WITH_LUAJIT "Build with LuaJIT plugin support" Off)
+include(command/Command.cmake)
+include(server/Server.cmake)
 
-if (WITH_LUA52 AND WITH_LUAJIT)
-	message(FATAL_ERROR "Please select WITH_LUA52 or WITH_LUAJIT")
-endif ()
-
-set(SOURCES
-	server/ServerConnecting.cpp
-	server/ServerConnecting.h
-	server/ServerDead.cpp
-	server/ServerDead.h
-	server/ServerDisconnected.cpp
-	server/ServerDisconnected.h
-	server/ServerRunning.cpp
-	server/ServerRunning.h
-	server/ServerState.cpp
-	server/ServerState.h
-	server/ServerUninitialized.cpp
-	server/ServerUninitialized.h
+set(
+	SOURCES
+	${SERVER_SOURCES}
+	${COMMAND_SOURCES}
+	CommandQueue.cpp
+	CommandQueue.h
+	IO.cpp
+	IO.h
 	Server.cpp
 	Server.h
+	ServerManager.cpp
+	ServerManager.h
 	Irccd.cpp
 	Irccd.h
 	IrcSession.cpp
@@ -51,161 +42,96 @@ set(SOURCES
 	Listener.cpp
 	Listener.h
 	main.cpp
+	System.cpp
+	System.h
 )
 
-set(LUA_SUPPORT "disabled" PARENT_SCOPE)
+# ---------------------------------------------------------
+# Optional libiconv
+# ---------------------------------------------------------
 
-if (WITH_LUA52 OR WITH_LUAJIT)
-	if (WITH_LUA52)
-		find_package(Lua52)
-	elseif (WITH_LUAJIT)
-		find_package(LuaJIT)
-	endif ()
+# Not yet supported.
+if (WITH_LIBICONV)
+	find_package(Libiconv)
 
-	if (LUA52_FOUND OR LUAJIT_FOUND)
-		add_subdirectory(plugins)
-
-		# Optional Lua sources
+	if (Libiconv_FOUND)
 		list(
 			APPEND
 			SOURCES
-			event/IrcEventChannelMode.cpp
-			event/IrcEventChannelMode.h
-			event/IrcEventChannelNotice.cpp
-			event/IrcEventChannelNotice.h
-			event/IrcEventConnect.cpp
-			event/IrcEventConnect.h
-			event/IrcEventInvite.cpp
-			event/IrcEventInvite.h
-			event/IrcEventJoin.cpp
-			event/IrcEventJoin.h
-			event/IrcEventKick.cpp
-			event/IrcEventKick.h
-			event/IrcEventLoad.cpp
-			event/IrcEventLoad.h
-			event/IrcEventMe.cpp
-			event/IrcEventMe.h
-			event/IrcEventMessage.cpp
-			event/IrcEventMessage.h
-			event/IrcEventMode.cpp
-			event/IrcEventMode.h
-			event/IrcEventNames.cpp
-			event/IrcEventNames.h
-			event/IrcEventNick.cpp
-			event/IrcEventNick.h
-			event/IrcEventNotice.cpp
-			event/IrcEventNotice.h
-			event/IrcEventPart.cpp
-			event/IrcEventPart.h
-			event/IrcEventQuery.cpp
-			event/IrcEventQuery.h
-			event/IrcEventReload.cpp
-			event/IrcEventReload.h
-			event/IrcEventTopic.cpp
-			event/IrcEventTopic.h
-			event/IrcEventUnload.cpp
-			event/IrcEventUnload.h
-			event/IrcEventWhois.cpp
-			event/IrcEventWhois.h
-			IrcEvent.cpp
-			IrcEvent.h
-			lua/LuaIrccd.cpp
-			lua/LuaIrccd.h
-			lua/LuaLogger.cpp
-			lua/LuaLogger.h
-			lua/LuaFS.cpp
-			lua/LuaFS.h
-			lua/LuaParser.cpp
-			lua/LuaParser.h
-			lua/LuaPipe.cpp
-			lua/LuaPipe.h
-			lua/LuaPlugin.cpp
-			lua/LuaPlugin.h
-			lua/LuaServer.cpp
-			lua/LuaServer.h
-			lua/LuaSocket.cpp
-			lua/LuaSocket.h
-			lua/LuaSystem.cpp
-			lua/LuaSystem.h
-			lua/LuaThread.cpp
-			lua/LuaThread.h
-			lua/LuaUtil.cpp
-			lua/LuaUtil.h
-			Luae.cpp
-			Luae.h
-			Pipe.cpp
-			Pipe.h
-			Plugin.cpp
-			Plugin.h
-			Process.cpp
-			Process.h
-			Test.cpp
-			Test.h
-			Thread.cpp
-			Thread.h
+			Converter.cpp
+			Converter.h
 		)
-
-		if (WITH_LUA52)
-			list(APPEND INCLUDES ${LUA52_INCLUDE_DIR})
-			list(APPEND LIBRARIES ${LUA52_LIBRARIES})
-			set(LUA_SUPPORT "enabled (Lua 5.2)" PARENT_SCOPE)
-		elseif (WITH_LUAJIT)
-			list(APPEND INCLUDES ${LUAJIT_INCLUDE_DIR})
-			list(APPEND LIBRARIES ${LUAJIT_LIBRARIES})
-			set(LUA_SUPPORT "enabled (LuaJIT)" PARENT_SCOPE)
-		endif ()
-	else ()
-		set(WITH_LUA52 OFF CACHE INTERNAL "" FORCE)
-		set(WITH_LUAJIT OFF CACHE INTERNAL "" FORCE)
 	endif ()
 endif ()
 
-#
-# Compile libircclient as internal
-#
-add_subdirectory(
-	"${CMAKE_SOURCE_DIR}/extern/libircclient"
-	"${CMAKE_BINARY_DIR}/libircclient"
-)
+# ---------------------------------------------------------
+# Optional Lua
+# ---------------------------------------------------------
 
-list(
-	APPEND
-	INCLUDES
-	"${CMAKE_SOURCE_DIR}/extern/libircclient/include"
-)
+if (WITH_LUA)
+	include(event/Event.cmake)
+	include(lua/Lua.cmake)
 
-list(APPEND LIBRARIES ircclient)
+	add_subdirectory(plugins)
 
-include_directories(
-	${INCLUDES}
-	${CMAKE_CURRENT_SOURCE_DIR}
-)
+	list(
+		APPEND
+		SOURCES
+		${LUA_SOURCES}
+		${EVENT_SOURCES}
+		EventQueue.cpp
+		EventQueue.h
+		Luae.cpp
+		Luae.h
+		Pipe.cpp
+		Pipe.h
+		PipeManager.cpp
+		PipeManager.h
+		Plugin.cpp
+		Plugin.h
+		PluginManager.cpp
+		PluginManager.h
+		Process.cpp
+		Process.h
+		Rule.cpp
+		Rule.h
+		RuleManager.cpp
+		RuleManager.h
+		Test.cpp
+		Test.h
+		Thread.cpp
+		Thread.h
+		Utf8.cpp
+		Utf8.h
+	)
 
-add_executable(irccd ${SOURCES})
+	list(APPEND LIBRARIES lua)
 
-#
-# When Lua is disabled, a lot of variables are unused, disable warnings.
-#
-if (NOT WITH_LUA52 OR NOT WITH_LUAJIT)
-	if (UNIX)
-		set(FLAGS "-Wno-unused-parameter -Wno-unused-variable")
-	endif ()
+	list(
+		APPEND
+		SOURCES
+		plugins/antiflood.lua
+		plugins/ask.lua
+		plugins/auth.lua
+		plugins/badwords.lua
+		plugins/date.lua
+		plugins/history.lua
+		plugins/logger.lua
+		plugins/roulette.lua
+	)
 endif ()
+
+define_executable(
+	TARGET irccd
+	SOURCES ${SOURCES}
+	INCLUDES ${INCLUDES} ${CMAKE_SOURCE_DIR}
+	LIBRARIES ${LIBRARIES} ircclient common
+	INSTALL_RUNTIME bin/
+)
 
 if (UNIX)
-	list(APPEND LIBRARIES "pthread")
-else ()
-	set(FLAGS "${FLAGS} /wd4996 /wd4244")
+	set_target_properties(irccd PROPERTIES LINK_FLAGS "-pthread")
 endif ()
-
-if (APPLE)
-	list(APPEND LIBRARIES resolv)
-endif ()
-
-set_target_properties(irccd PROPERTIES COMPILE_FLAGS "${FLAGS}")
-target_link_libraries(irccd common ${LIBRARIES})
-
-install(TARGETS irccd RUNTIME DESTINATION bin)
 
 install(
 	FILES "${CMAKE_SOURCE_DIR}/doc/examples/irccd.conf"
@@ -213,20 +139,18 @@ install(
 	RENAME "irccd.conf.sample"
 )
 
+
 if (WIN32)
-    if (CMAKE_SIZEOF_VOID_P MATCHES "8")
-        set(WINARCH x64)
-    else ()
-        set(WINARCH x32)
-    endif ()
+	if (CMAKE_SIZEOF_VOID_P MATCHES "8")
+		set(WINARCH x64)
+	else ()
+		set(WINARCH x32)
+	endif ()
 
-    install(
-        FILES
-            ${CMAKE_SOURCE_DIR}/win32/${WINARCH}/lua.dll
-            ${CMAKE_SOURCE_DIR}/win32/${WINARCH}/libeay32.dll
-            ${CMAKE_SOURCE_DIR}/win32/${WINARCH}/ssleay32.dll
-        DESTINATION bin
-    )
+	install(
+		FILES
+			${CMAKE_SOURCE_DIR}/win32/${WINARCH}/libeay32.dll
+			${CMAKE_SOURCE_DIR}/win32/${WINARCH}/ssleay32.dll
+		DESTINATION bin
+	)
 endif ()
-
-# vim: set syntax=cmake:

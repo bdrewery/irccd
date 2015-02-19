@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    $if(title)$<title>$title$</title>$endif$
+
+    <style type="text/css">code{white-space: pre;}</style>
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    $if(highlighting-css)$
+    <style type="text/css">
+    $highlighting-css$
+    </style>
+    $endif$
+
+    $for(css)$
+    <link rel="stylesheet" href="$css$" />
+    $endfor$
+    <link rel="stylesheet" href="@baseurl@css/style.css" />
+  </head>

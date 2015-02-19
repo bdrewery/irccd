@@ -46,7 +46,7 @@
 
 #include <stdlib.h>
 
-#if !defined (WIN32)
+#if !defined (_WIN32)
 	#include <sys/select.h>	/* fd_set */
 #else
 	#include <winsock2.h>

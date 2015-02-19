@@ -1,7 +1,7 @@
 /*
  * Util.h -- some utilities
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,28 +19,58 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
+/**
+ * @file Util.h
+ * @brief Utilities
+ */
+
 #include <cstdint>
+#include <ctime>
 #include <exception>
 #include <functional>
+#include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <vector>
-
-#include <config.h>
 
 namespace irccd {
 
+/**
+ * @class Util
+ * @brief Some utilities
+ */
 class Util {
 public:
-	class ErrorException : public std::exception {
-	private:
-		std::string m_error;
+	/**
+	 * @enum Flags
+	 * @brief Flags for \ref convert
+	 */
+	enum Flags {
+		ConvertEnv	= (1 << 0),	//!< Convert ${} environnement
+		ConvertHome	= (1 << 1),	//!< Convert ~ as home
+		ConvertDate	= (1 << 2),	//!< Convert % as strftime
+	};
 
-	public:
-		ErrorException();
-		ErrorException(const std::string &error);
-		~ErrorException() throw();
+	/**
+	 * @struct Args
+	 * @brief Arguments for \ref convert
+	 */
+	struct Args {
+		/**
+		 * Map of keywords.
+		 */
+		using Keywords	= std::unordered_map<char, std::string>;
 
-		virtual const char * what() const throw();
+		std::time_t	timestamp;	//!< timestamp date
+		Keywords	keywords;	//!< keywords
+
+		/**
+		 * Default constructor, use the current date.
+		 */
+		Args()
+			: timestamp(std::time(nullptr))
+		{
+		}
 	};
 
 public:
@@ -92,8 +122,8 @@ public:
 	 * 2. System
 	 *
 	 * Example:
-	 * 	~/.config/irccd || C:\Users\jean\irccd
-	 * 	/usr/local/etc/ || Path\To\Irccd\etc
+	 * 	~/.config/irccd || C:/Users/jean/irccd
+	 * 	/usr/local/etc/ || Path/To/Irccd/etc
 	 *
 	 * @param filename the filename to append
 	 * @return the found path
@@ -108,8 +138,8 @@ public:
 	 * 2. System
 	 *
 	 * Example:
-	 * 	~/.config/irccd/<name> || C:\Users\jean\irccd\<name>
-	 * 	/usr/local/etc/irccd/<name> || Path\To\Irccd\etc\irccd\<name>
+	 * 	~/.config/irccd/name || C:/Users/jean/irccd/name
+	 * 	/usr/local/etc/irccd/name || Path/To/Irccd/etc/irccd/name
 	 *
 	 * @param name the plugin name
 	 * @return the found path or system one
@@ -149,6 +179,19 @@ public:
 	static void mkdir(const std::string &dir, int mode);
 
 	/**
+	 * Convert a string from a common patterns, date, environnement
+	 * and such.
+	 *
+	 * @param line the line to convert
+	 * @param args the args
+	 * @param flags the flags
+	 * @return the new string
+	 */
+	static std::string convert(const std::string &line,
+				   const Args &args,
+				   int flags = 0);
+
+	/**
 	 * Split a string by delimiters.
 	 *
 	 * @param list the string to split
@@ -159,6 +202,14 @@ public:
 	static std::vector<std::string> split(const std::string &list,
 					      const std::string &delimiter,
 					      int max = -1);
+
+	/**
+	 * Remove leading and trailing spaces.
+	 *
+	 * @param str the string
+	 * @return the removed white spaces
+	 */
+	static std::string strip(const std::string &str);
 };
 
 } // !irccd

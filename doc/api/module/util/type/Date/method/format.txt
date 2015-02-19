@@ -1,0 +1,33 @@
+---
+method: format
+---
+
+Format the date. Use the same syntax of "strftime(3)":http://man7.org/linux/man-pages/man3/strftime.3.html, because it relies on the operating system <code>strftime</code> C function, some keywords may not be available.
+
+# Synopsis
+
+````lua
+str = function Date:format(fmt)
+````
+
+# Arguments
+
+- fmt, the format
+
+# Returns
+
+- str, the formatted string
+
+# Example
+
+````lua
+local util = require "irccd.util"
+local logger = require "irccd.logger"
+
+function onLoad()
+    local date = util.date()
+    local str = date:format("%H:%M")
+
+    logger.log("Plugin loaded at: " .. str)
+end
+````
