@@ -16,6 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+include(CMakeParseArguments)
+
 function(check_mandatory prefix list)
 	# Check mandatory arguments
 	foreach(a ${list})
@@ -61,6 +63,8 @@ function(apply_libraries target libs)
 	if (${libs})
 		target_link_libraries(${target} ${${libs}})
 	endif ()
+
+	target_link_libraries(${target} port)
 endfunction()
 
 function(add_nsis_install command)
@@ -209,26 +213,39 @@ function(irccd_verify_args prefix list)
 	endforeach ()
 endfunction()
 
+# ---------------------------------------------------------
+# irccd_generate_guide(target filename sources)
+#
+# Parameters:
+#	target		- Generate docs-guide-${target}-html|latex
+#	filename	- The filename generated without extension
+#	sources		- The sources files
+#
 function(irccd_generate_guide target filename sources)
-	pandoc(
-		OUTPUT ${WITH_DOCS_DIRECTORY}/guides/${filename}.html
-		SOURCES ${sources}
-		FROM markdown
-		TO html5
-		TEMPLATES ${templates_SOURCE_DIR}/template.html
-		TARGET docs-guide-${target}-html
-		TOC STANDALONE MAKE_DIRECTORY
-	)
+	if (WITH_DOCS_GUIDES_HTML)
+		pandoc(
+			OUTPUT ${WITH_DOCS_DIRECTORY}/guides/${filename}.html
+			SOURCES ${sources}
+			FROM markdown
+			TO html5
+			TEMPLATES ${templates_SOURCE_DIR}/template.html
+			TARGET docs-guide-${target}-html
+			TOC STANDALONE MAKE_DIRECTORY
+		)
 
-	pandoc(
-		OUTPUT ${WITH_DOCS_DIRECTORY}/guides/${filename}.pdf
-		SOURCES ${sources}
-		FROM markdown
-		TO latex
-		TARGET docs-guide-${target}-latex
-		TOC STANDALONE MAKE_DIRECTORY
-	)
+		add_dependencies(docs docs-guide-${target}-html)
+	endif ()
 
-	add_dependencies(docs docs-guide-${target}-html)
-	add_dependencies(docs docs-guide-${target}-latex)
+	if (WITH_DOCS_GUIDES_PDF)
+		pandoc(
+			OUTPUT ${WITH_DOCS_DIRECTORY}/guides/${filename}.pdf
+			SOURCES ${sources}
+			FROM markdown
+			TO latex
+			TARGET docs-guide-${target}-latex
+			TOC STANDALONE MAKE_DIRECTORY
+		)
+
+		add_dependencies(docs docs-guide-${target}-latex)
+	endif ()
 endfunction()

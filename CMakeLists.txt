@@ -22,10 +22,11 @@
 # If you plan to modify the build systems there are several places to look
 # to do what you want.
 #
-# cmake/Config.cmake	- Contains some platforms checks and compile flags.
-# cmake/Extern.cmake	- Will be merge with Config.
-# cmake/Options.cmake	- User definable options.
-# cmake/Macros.cmake	- Functions available for the build system.
+# cmake/CMake.cmake		- Sources files for cmake/ directory
+# cmake/IrccdSystem.cmake	- Contains some platforms checks and compile flags.
+# cmake/IrccdVersion.cmake	- Defines the Irccd version.
+# cmake/IrccdOptions.cmake	- User definable options.
+# cmake/IrccdFunctions.cmake	- Functions available for the build system.
 #
 # Build system is then processed in different directories:
 #
@@ -34,57 +35,25 @@
 # doc			- The documentation process.
 # tests			- The unit tests.
 # contrib		- User contributions not maintained by irccd authors.
+# extern		- External libraries.
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 project(irccd)
 
-# ---------------------------------------------------------
-# Irccd project version
-# ---------------------------------------------------------
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${irccd_SOURCE_DIR}/cmake/packages)
 
-set(MAJOR "1")
-set(MINOR "2")
-set(PATCH "0")
-set(VERSION "${MAJOR}.${MINOR}-dev")
+include(cmake/CMake.cmake)
+include(cmake/IrccdFunctions.cmake)
+include(cmake/IrccdVersion.cmake)
+include(cmake/IrccdOptions.cmake)
+include(cmake/IrccdSystem.cmake)
 
-# ---------------------------------------------------------
-# Package name
-# ---------------------------------------------------------
+add_subdirectory(extern/libircclient)
 
-#
-# The following settings are used for the doc/ directory and CPack.
-#
-if (WIN32)
-	if (CMAKE_CL_64)
-		set(IRCCD_PACKAGE_NAME "Irccd (x64)")
-	else ()
-		set(IRCCD_PACKAGE_NAME "Irccd")
-	endif ()
-endif ()
-
-add_subdirectory(cmake)
-
-# Some non portable code
-set(EXTERNDIR "${CMAKE_SOURCE_DIR}/extern")
-
-# Optional Lua
-if (WITH_LUA)
-	add_subdirectory(extern/lua)
-endif ()
-
-# Common code (static library)
 add_subdirectory(common)
-
-# For documentation and man pages
 add_subdirectory(doc)
-
-# irccd main application
 add_subdirectory(irccd)
-
-# irccd controller
 add_subdirectory(irccdctl)
-
-# Contributions
 add_subdirectory(contrib)
 
 # Tests
@@ -104,15 +73,29 @@ message("    Release flags:    ${CMAKE_CXX_FLAGS_RELEASE}")
 message("")
 
 message("Compiling irccd with following options:")
-message("    Build type:       ${CMAKE_BUILD_TYPE}")
-message("    Lua support:      ${HAVE_LUA_MESSAGE}")
-message("    Tests:            ${HAVE_TESTS_MESSAGE}")
-message("    Iconv:            ${HAVE_LIBICONV_MESSAGE}")
-message("    Doxygen:          ${HAVE_DOXYGEN_MESSAGE}")
+message("    OpenSSL:          ${WITH_SSL_MSG}")
+message("    Lua:              ${WITH_LUA_MSG}")
+message("    Tests:            ${WITH_TESTS_MSG}")
+message("    User docs (HTML): ${WITH_DOCS_GUIDES_HTML_MSG}")
+message("    User docs (PDF):  ${WITH_DOCS_GUIDES_PDF_MSG}")
+message("    Lua docs:         ${WITH_DOCS_LUA_MSG}")
+message("    Doxygen:          ${WITH_DOCS_DOXYGEN_MSG}")
 message("    irccd config:     ${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccd.conf")
 message("    irccdctl config:  ${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccdctl.conf")
 message("")
 
+message("Installing plugins:")
+message("    antiflood:        ${WITH_PLUGIN_ANTIFLOOD_MSG}")
+message("    ask:              ${WITH_PLUGIN_ASK_MSG}")
+message("    auth:             ${WITH_PLUGIN_AUTH_MSG}")
+message("    badwords:         ${WITH_PLUGIN_BADWORDS_MSG}")
+message("    date:             ${WITH_PLUGIN_DATE_MSG}")
+message("    history:          ${WITH_PLUGIN_HISTORY_MSG}")
+message("    logger:           ${WITH_PLUGIN_LOGGER_MSG}")
+message("    plugin:           ${WITH_PLUGIN_PLUGIN_MSG}")
+message("    reminder:         ${WITH_PLUGIN_REMINDER_MSG}")
+message("    roulette:         ${WITH_PLUGIN_ROULETTE_MSG}")
+
 # CPack
-include(cmake/CPackConfig.cmake)
+include(cmake/IrccdCPackConfig.cmake)
 include(CPack)

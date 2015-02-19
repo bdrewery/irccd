@@ -25,4 +25,4 @@ set(
 	TestRules.cpp
 )
 
-create_test(TestRules "${RULES_SOURCES}")
+create_test(test-rules "${RULES_SOURCES}")

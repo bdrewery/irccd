@@ -38,10 +38,10 @@
 #  include <sys/time.h>
 #endif
 
+#include "IrccdConfig.h"
+
 #include "Logger.h"
 #include "System.h"
-
-#include "config.h"
 
 namespace irccd {
 

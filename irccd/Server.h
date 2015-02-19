@@ -32,7 +32,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <config.h>
+#include <IrccdConfig.h>
 
 #include "CommandQueue.h"
 #include "IrcSession.h"
@@ -341,8 +341,10 @@ public:
 	 *
 	 * @param null the nullptr value
 	 */
-	inline void next(std::nullptr_t)
+	inline void next(std::nullptr_t null)
 	{
+		(void)null;
+
 		Lock lk(m_lock);
 
 		m_running = false;

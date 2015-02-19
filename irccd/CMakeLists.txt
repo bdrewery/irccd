@@ -50,16 +50,11 @@ set(
 # Optional libiconv
 # ---------------------------------------------------------
 
+# Not yet supported.
 if (WITH_LIBICONV)
-	set(HAVE_LIBICONV_MESSAGE "disabled (iconv not found)" CACHE INTERNAL "")
-	set(HAVE_LIBICONV FALSE CACHE INTERNAL "")
-
 	find_package(Libiconv)
 
 	if (Libiconv_FOUND)
-		set(HAVE_LIBICONV_MESSAGE "enabled" CACHE INTERNAL "")
-		set(HAVE_LIBICONV TRUE CACHE INTERNAL "")
-
 		list(
 			APPEND
 			SOURCES
@@ -67,9 +62,6 @@ if (WITH_LIBICONV)
 			Converter.h
 		)
 	endif ()
-else ()
-	set(HAVE_LIBICONV_MESSAGE "disabled by user" CACHE INTERNAL "")
-	set(HAVE_LIBICONV FALSE CACHE INTERNAL "")
 endif ()
 
 # ---------------------------------------------------------
@@ -127,9 +119,6 @@ if (WITH_LUA)
 		plugins/logger.lua
 		plugins/roulette.lua
 	)
-else ()
-	set(HAVE_LUA_MESSAGE "disabled by user" CACHE INTERNAL "")
-	set(HAVE_LUA FALSE CACHE INTERNAL "")
 endif ()
 
 define_executable(

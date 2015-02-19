@@ -20,7 +20,7 @@
 #define _COMMAND_H_
 
 /**
- * @file event/Comand.h
+ * @file event/Command.h
  * @brief On message
  */
 
@@ -67,7 +67,7 @@ public:
 	/**
 	 * @copydoc Event::name
 	 */
-	const char *name() const override;
+	const char *name(Plugin &p) const override;
 };
 
 } // !event

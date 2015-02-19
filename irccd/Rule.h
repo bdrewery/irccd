@@ -31,13 +31,24 @@
 
 namespace irccd {
 
+/**
+ * List of criterias.
+ */
 using RuleMap = std::unordered_set<std::string>;
 
+/**
+ * @enum RuleAction
+ * @brief Rule action
+ */
 enum class RuleAction {
-	Accept,
-	Drop
+	Accept,			//!< The event is accepted (default)
+	Drop			//!< The event is dropped
 };
 
+/**
+ * @class Rule
+ * @brief Manage rule to activate or deactive events.
+ */
 class Rule final {
 private:
 	RuleMap m_servers;
@@ -54,22 +65,32 @@ private:
 	bool match(const RuleMap &map, const std::string &value) const noexcept;
 
 public:
+	/**
+	 * Rule constructor.
+	 *
+	 * @param servers the server list
+	 * @param channels the channels
+	 * @param nicknames the nicknames
+	 * @param plugins the plugins
+	 * @param events the events
+	 * @param action the rule action
+	 */
 	Rule(RuleMap servers = RuleMap{},
 	     RuleMap channels = RuleMap{},
 	     RuleMap nicknames = RuleMap{},
 	     RuleMap plugins = RuleMap{},
 	     RuleMap events = RuleMap{},
-	     RuleAction = RuleAction::Accept);
+	     RuleAction action = RuleAction::Accept);
 
 	/**
 	 * Check if that rule apply for the given criterias.
 	 *
-	 * @param server
-	 * @param channel
-	 * @param nick
-	 * @param plugin
-	 * @param event
-	 * @return
+	 * @param server the server
+	 * @param channel the channel
+	 * @param nick the origin
+	 * @param plugin the plugin
+	 * @param event the event
+	 * @return true if match
 	 */
 	bool match(const std::string &server,
 		   const std::string &channel,
@@ -77,11 +98,46 @@ public:
 		   const std::string &plugin,
 		   const std::string &event) const noexcept;
 
+	/**
+	 * Get the action.
+	 *
+	 * @return the action
+	 */
 	RuleAction action() const noexcept;
+
+	/**
+	 * Get the servers.
+	 *
+	 * @return the servers
+	 */
 	const RuleMap &servers() const noexcept;
+
+	/**
+	 * Get the channels.
+	 *
+	 * @return the channels
+	 */
 	const RuleMap &channels() const noexcept;
+
+	/**
+	 * Get the nicknames.
+	 *
+	 * @return the nicknames
+	 */
 	const RuleMap &nicknames() const noexcept;
+
+	/**
+	 * Get the plugins.
+	 *
+	 * @return the plugins
+	 */
 	const RuleMap &plugins() const noexcept;
+
+	/**
+	 * Get the events.
+	 *
+	 * @return the events
+	 */
 	const RuleMap &events() const noexcept;
 };
 

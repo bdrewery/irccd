@@ -39,17 +39,7 @@ namespace irccd {
  */
 template <>
 struct Luae::Convert<Rule> {
-public:
-	/**
-	 * Push supported.
-	 */
-	static const bool hasPush = true;
-
-	/**
-	 * Check supported.
-	 */
-	static const bool hasCheck = true;
-
+private:
 	static void pushSequence(lua_State *L, const RuleMap &map, const std::string &name)
 	{
 		lua_createtable(L, 0, 0);
@@ -62,25 +52,6 @@ public:
 		}
 
 		lua_setfield(L, -2, name.c_str());
-	}
-
-	/**
-	 * Push the rule.
-	 *
-	 * @param L the Lua state
-	 * @param rule the rule
-	 */
-	static void push(lua_State *L, const Rule &rule)
-	{
-		lua_createtable(L, 0, 0);
-		lua_pushinteger(L, static_cast<int>(rule.action()));
-		lua_setfield(L, -2, "action");
-
-		pushSequence(L, rule.servers(), "servers");
-		pushSequence(L, rule.channels(), "channels");
-		pushSequence(L, rule.nicknames(), "nicknames");
-		pushSequence(L, rule.plugins(), "plugins");
-		pushSequence(L, rule.events(), "events");
 	}
 
 	static RuleMap getSequence(lua_State *L, int index, const std::string &name)
@@ -108,6 +79,36 @@ public:
 		LUAE_STACK_CHECKEQUALS(L);
 
 		return result;
+	}
+
+public:
+	/**
+	 * Push supported.
+	 */
+	static const bool hasPush = true;
+
+	/**
+	 * Check supported.
+	 */
+	static const bool hasCheck = true;
+
+	/**
+	 * Push the rule.
+	 *
+	 * @param L the Lua state
+	 * @param rule the rule
+	 */
+	static void push(lua_State *L, const Rule &rule)
+	{
+		lua_createtable(L, 0, 0);
+		lua_pushinteger(L, static_cast<int>(rule.action()));
+		lua_setfield(L, -2, "action");
+
+		pushSequence(L, rule.servers(), "servers");
+		pushSequence(L, rule.channels(), "channels");
+		pushSequence(L, rule.nicknames(), "nicknames");
+		pushSequence(L, rule.plugins(), "plugins");
+		pushSequence(L, rule.events(), "events");
 	}
 
 	/**

@@ -19,9 +19,17 @@
 #ifndef _IRCCD_CONFIG_H_
 #define _IRCCD_CONFIG_H_
 
-#cmakedefine01 MAJOR
-#cmakedefine01 MINOR
-#cmakedefine01 PATCH
+/* --------------------------------------------------------
+ * Auto generated from CMake
+ * -------------------------------------------------------- */
+
+#define IRCCD_VERSION_MAJOR	@IRCCD_VERSION_MAJOR@
+#define IRCCD_VERSION_MINOR	@IRCCD_VERSION_MINOR@
+#define IRCCD_VERSION_PATCH	@IRCCD_VERSION_PATCH@
+
+/* --------------------------------------------------------
+ * User definable options
+ * -------------------------------------------------------- */
 
 #define ETCDIR			"@ETCDIR@"
 #define MODDIR			"@MODDIR@"
@@ -31,24 +39,25 @@
 
 #cmakedefine WITH_LUA
 
-// Some non portable code
+/* --------------------------------------------------------
+ * Platform checks
+ * -------------------------------------------------------- */
+
 #cmakedefine	HAVE_GETOPT	1
-#ifndef HAVE_GETOPT
+#if !defined(HAVE_GETOPT)
 #  include <getopt.h>
 #endif
 
 #cmakedefine	HAVE_SETPROGNAME 1
-#ifndef HAVE_SETPROGNAME
+#if !defined(HAVE_SETPROGNAME)
 #  include <setprogname.h>
 #endif
 
-// Some includes
 #cmakedefine	HAVE_UNISTD_H	1
-#ifdef HAVE_UNISTD_H
+#if defined(HAVE_UNISTD_H)
 #  include <unistd.h>
 #endif
 
-// Tests for sys/stat.h
 #cmakedefine HAVE_STAT_ST_DEV
 #cmakedefine HAVE_STAT_ST_INO
 #cmakedefine HAVE_STAT_ST_NLINK

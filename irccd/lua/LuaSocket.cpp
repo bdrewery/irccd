@@ -26,7 +26,7 @@
 #  include <sys/un.h>
 #endif
 
-#include <config.h>
+#include <IrccdConfig.h>
 
 #include <common/Socket.h>
 #include <common/SocketAddress.h>

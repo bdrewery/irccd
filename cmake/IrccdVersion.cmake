@@ -16,11 +16,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Libxdg-basedir bundled
-project(extern-libxdg-basedir)
-
-define_library(
-	TARGET xdg-basedir
-	SOURCES src/basedir.c
-	PUBLIC_INCLUDES "${extern-libxdg-basedir_SOURCE_DIR}/include"
-)
+set(IRCCD_VERSION_MAJOR "1")
+set(IRCCD_VERSION_MINOR "2")
+set(IRCCD_VERSION_PATCH "0")
+set(IRCCD_VERSION "${IRCCD_VERSION_MAJOR}.${IRCCD_VERSION_MINOR}-dev")

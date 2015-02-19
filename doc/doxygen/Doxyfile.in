@@ -1,16 +1,16 @@
--#
--# Doxyfile.in -- doxygen configuration file for irccd
--#
--
--#
--# The following variables are set by CMake:
--#
--# VERSION		- The project version
--# DOXYGEN_INPUT		- The source directory
--# DOXYGEN_OUTPUT	- The output directory (doc/generated/doxygen)
--# DOXYGEN_HAVE_DOT	- True if have dot
--# DOXYGEN_DOT_PATH	- The path to dot
--#
+#
+# Doxyfile.in -- doxygen configuration file for irccd
+#
+
+#
+# The following variables are set by CMake:
+#
+# VERSION		- The project version
+# DOXYGEN_INPUT		- The source directory
+# DOXYGEN_OUTPUT	- The output directory (doc/generated/doxygen)
+# DOXYGEN_HAVE_DOT	- True if have dot
+# DOXYGEN_DOT_PATH	- The path to dot
+#
 
 #---------------------------------------------------------------------------
 # Project related configuration options
@@ -57,7 +57,7 @@ PROJECT_LOGO           =
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = @DOXYGEN_OUTPUT@
+OUTPUT_DIRECTORY       = @WITH_DOCS_DIRECTORY@/doxygen
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 4096 sub-
 # directories (in 2 levels) under the output directory of each output format and
@@ -743,8 +743,8 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = @DOXYGEN_INPUT@/irccd \
-                         @DOXYGEN_INPUT@/irccdctl \
-                         @DOXYGEN_INPUT@/common
+			 @DOXYGEN_INPUT@/irccdctl \
+			 @DOXYGEN_INPUT@/common
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1789,18 +1789,6 @@ GENERATE_XML           = NO
 # This tag requires that the tag GENERATE_XML is set to YES.
 
 XML_OUTPUT             = xml
-
-# The XML_SCHEMA tag can be used to specify a XML schema, which can be used by a
-# validating XML parser to check the syntax of the XML files.
-# This tag requires that the tag GENERATE_XML is set to YES.
-
-XML_SCHEMA             =
-
-# The XML_DTD tag can be used to specify a XML DTD, which can be used by a
-# validating XML parser to check the syntax of the XML files.
-# This tag requires that the tag GENERATE_XML is set to YES.
-
-XML_DTD                =
 
 # If the XML_PROGRAMLISTING tag is set to YES doxygen will dump the program
 # listings (including syntax highlighting and cross-referencing information) to

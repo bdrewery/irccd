@@ -31,16 +31,10 @@
 
 namespace irccd {
 
-/**
- * @struct Deleter
- * @brief The iconv descriptor deleter
- */
+namespace {
+
 struct Deleter {
-	/**
-	 * Destroy the iconv descriptor.
-	 *
-	 * @param desc the descriptor
-	 */
+
 	void operator()(iconv_t desc)
 	{
 		iconv_close(desc);
@@ -48,6 +42,8 @@ struct Deleter {
 };
 
 using Iconv = std::unique_ptr<std::remove_pointer<iconv_t>::type, Deleter>;
+
+} // !namespace
 
 std::string Converter::convert(const char *from,
 			       const char *to,

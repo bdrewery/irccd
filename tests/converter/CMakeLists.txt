@@ -16,4 +16,4 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-create_test(TestConverter TestConverter.cpp)
+create_test(test-converter TestConverter.cpp)

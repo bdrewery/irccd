@@ -76,7 +76,7 @@ public:
 	/**
 	 * Add a new event in the queue.
 	 *
-	 * @param command the command
+	 * @param args the arguments
 	 */
 	template <typename Cmd, typename... Args>
 	void add(Args&&... args)

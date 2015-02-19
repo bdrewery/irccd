@@ -27,7 +27,7 @@
 #include <string>
 #include <unordered_map>
 
-#include <config.h>
+#include <IrccdConfig.h>
 
 #include <Parser.h>
 #include <SocketAddress.h>

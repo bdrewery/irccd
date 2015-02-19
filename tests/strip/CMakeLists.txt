@@ -16,4 +16,4 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-create_test(TestStrip TestStrip.cpp)
+create_test(test-strip TestStrip.cpp)

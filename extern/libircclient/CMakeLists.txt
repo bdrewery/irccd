@@ -19,21 +19,19 @@
 # Libircclient bundled
 project(extern-libircclient)
 
-set(FLAGS "ENABLE_THREADS")
+set (FLAGS "ENABLE_THREADS")
 
 # SSL is optional
-if(WITH_SSL)
-	find_package(OpenSSL REQUIRED)
-
+if (WITH_SSL)
 	list(APPEND INCLUDES ${OPENSSL_INCLUDE_DIR})
 	list(APPEND LIBRARIES ${OPENSSL_LIBRARIES})
 	list(APPEND FLAGS "ENABLE_SSL")
-endif()
+endif ()
 
 # Enable or disable IPv6
-if(WITH_IPV6)
+if (WITH_IPV6)
 	list(APPEND FLAGS "ENABLE_IPV6")
-endif()
+endif ()
 
 define_library(
 	TARGET ircclient

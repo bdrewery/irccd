@@ -66,7 +66,6 @@ std::unique_ptr<T> Singleton<T>::s_instance;
  * Needed if you make your class constructor private.
  *
  * @param cls the class name
- * @example SINGLETON(MyObject)
  */
 #define SINGLETON(cls)							\
 	friend std::unique_ptr<cls> std::make_unique<cls>()

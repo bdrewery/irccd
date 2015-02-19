@@ -33,11 +33,18 @@ namespace irccd {
 class Plugin;
 class Server;
 
+/**
+ * @enum MessageType
+ * @brief Standard message or plugin command
+ */
 enum class MessageType {
-	Command,
-	Message
+	Command,			//!< Message is a command
+	Message				//!< Message is a standard IRC message
 };
 
+/**
+ * Pair of message and its category
+ */
 using MessagePack = std::pair<std::string, MessageType>;
 
 /**
@@ -46,6 +53,14 @@ using MessagePack = std::pair<std::string, MessageType>;
  */
 class Event : public IO {
 protected:
+	/**
+	 * Parse IRC message depending on the command char and the plugin name.
+	 *
+	 * @param message the message content
+	 * @param server which server
+	 * @param plugin which plugin
+	 * @return the parsed message as a command or a standard message
+	 */
 	MessagePack parseMessage(std::string message, Server &server, Plugin &plugin) const;
 
 public:

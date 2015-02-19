@@ -69,13 +69,9 @@ function(create_dir target dirname)
 endfunction()
 
 if (WITH_TESTS)
-	set(HAVE_TESTS_MESSAGE "enabled" CACHE INTERNAL "")
-
 	add_subdirectory(converter)
 	add_subdirectory(lua-util)
 	add_subdirectory(rules)
 	add_subdirectory(split)
 	add_subdirectory(strip)
-else ()
-	set(HAVE_TESTS_MESSAGE "enabled" CACHE INTERNAL "")
 endif ()

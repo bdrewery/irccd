@@ -27,11 +27,11 @@ int luaopen_irccd(lua_State *L)
 {
 	LuaeTable::create(L);
 
-	LuaeTable::set(L, -1, "VERSION_MAJOR", MAJOR);
-	LuaeTable::set(L, -1, "VERSION_MINOR", MINOR);
-	LuaeTable::set(L, -1, "VERSION_PATCH", PATCH);
+	LuaeTable::set(L, -1, "VERSION_MAJOR", IRCCD_VERSION_MAJOR);
+	LuaeTable::set(L, -1, "VERSION_MINOR", IRCCD_VERSION_MINOR);
+	LuaeTable::set(L, -1, "VERSION_PATCH", IRCCD_VERSION_PATCH);
 
-	Luae::pushfstring(L, "%d.%d", MAJOR, MINOR);
+	Luae::pushfstring(L, "%d.%d.%d", IRCCD_VERSION_MAJOR, IRCCD_VERSION_MINOR, IRCCD_VERSION_PATCH);
 	Luae::setfield(L, -2, "VERSION");
 
 	return 1;

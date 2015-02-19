@@ -26,14 +26,12 @@
  * @warning Do not rename the include guard, it conflicts with a Windows header
  */
 
-#include <config.h>
+#include <IrccdConfig.h>
 
 #if defined(WITH_LUA)
 
 #include <memory>
 #include <unordered_map>
-
-#include "config.h"
 
 #include "Luae.h"
 

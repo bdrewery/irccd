@@ -32,7 +32,7 @@
 #include <Parser.h>
 #include <Singleton.h>
 #include <Util.h>
-#include <config.h>
+#include <IrccdConfig.h>
 
 #include "Server.h"
 

@@ -32,15 +32,14 @@
 #else
 #  include <libgen.h>
 
-// This is libxdg-basedir
-#  include <basedir.h>
-
 #  define _MKDIR(p, x)	::mkdir(p, x)
+
+#  include "Xdg.h"
 #endif
 
 #include <sys/stat.h>
 
-#include "config.h"
+#include "IrccdConfig.h"
 #include "Util.h"
 #include "Logger.h"
 
@@ -94,9 +93,13 @@ std::string Util::pathUser(const std::string &append)
 		oss << "\\irccd\\";
 	}
 #else
-	xdgHandle handle;
 
-	if ((xdgInitHandle(&handle)) == nullptr) {
+	try {
+		Xdg xdg;
+
+		oss << xdg.configHome();
+		oss << "/irccd/";
+	} catch (const std::exception &) {
 		const char *home = getenv("HOME");
 
 		if (home != nullptr)
@@ -104,11 +107,6 @@ std::string Util::pathUser(const std::string &append)
 
 		// append default path.
 		oss << "/.config/irccd/";
-	} else {
-		oss << xdgConfigHome(&handle);
-		oss << "/irccd/";
-
-		xdgWipeHandle(&handle);
 	}
 
 #endif

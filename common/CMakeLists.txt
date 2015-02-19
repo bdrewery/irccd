@@ -18,12 +18,8 @@
 
 project(common)
 
-#
-# The variable EXTSOURCES is defined in cmake/Extern.cmake and contains
-# some portable source files.
-#
-
-set(SOURCES
+set(
+	SOURCES
 	Date.cpp
 	Date.h
 	Directory.cpp
@@ -41,20 +37,19 @@ set(SOURCES
 	SocketListener.h
 	Util.cpp
 	Util.h
-	${EXTSOURCES}
 )
 
-if(UNIX)
-	list(APPEND LIBRARIES xdg-basedir)
-elseif(WIN32)
+if (UNIX)
+	list(APPEND SOURCES Xdg.cpp Xdg.h)
+elseif (WIN32)
 	list(APPEND LIBRARIES "ws2_32")
 	list(APPEND LIBRARIES "gdi32")
-endif()
+endif ()
 
 define_library(
 	TARGET common
 	SOURCES ${SOURCES}
 	LIBRARIES ${LIBRARIES}
 	LOCAL_INCLUDES ${INCLUDES}
-	PUBLIC_INCLUDES ${common_SOURCE_DIR} ${EXTINCLUDES}
+	PUBLIC_INCLUDES ${common_SOURCE_DIR}
 )

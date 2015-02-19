@@ -72,7 +72,7 @@ public:
 	/**
 	 * Add a function to the event queue.
 	 *
-	 * @param event the event function
+	 * @param args the arguments
 	 */
 	template <typename Evt, typename... Args>
 	void add(Args&&... args)

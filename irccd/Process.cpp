@@ -16,7 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <config.h>
+#include <IrccdConfig.h>
+
+#if defined(WITH_LUA)
 
 #include "lua/LuaIrccd.h"
 #include "lua/LuaLogger.h"
@@ -135,3 +137,5 @@ Process::operator lua_State *()
 }
 
 } // !irccd
+
+#endif // !_WITH_LUA_

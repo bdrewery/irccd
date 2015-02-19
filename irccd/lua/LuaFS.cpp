@@ -22,7 +22,7 @@
 
 #include <sys/stat.h>
 
-#include <config.h>
+#include <IrccdConfig.h>
 
 #include <common/Date.h>
 #include <common/Directory.h>

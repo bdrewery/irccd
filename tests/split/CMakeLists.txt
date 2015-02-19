@@ -16,4 +16,4 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-create_test(TestSplit TestSplit.cpp)
+create_test(test-split TestSplit.cpp)

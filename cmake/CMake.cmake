@@ -17,15 +17,35 @@
 #
 
 set(
-	TEST_LUA_UTIL_SOURCES
-	${irccd_SOURCE_DIR}/Luae.cpp
-	${irccd_SOURCE_DIR}/Luae.h
-	${irccd_SOURCE_DIR}/lua/LuaUtil.cpp
-	${irccd_SOURCE_DIR}/lua/LuaUtil.h
-	TestLuaUtil.cpp
+	CMAKE_SOURCES
+	${CMAKE_CURRENT_LIST_DIR}/CMake.cmake
+	${CMAKE_CURRENT_LIST_DIR}/IrccdCPackConfig.cmake
+	${CMAKE_CURRENT_LIST_DIR}/IrccdFunctions.cmake
+	${CMAKE_CURRENT_LIST_DIR}/IrccdOptions.cmake
+	${CMAKE_CURRENT_LIST_DIR}/IrccdSystem.cmake
+	${CMAKE_CURRENT_LIST_DIR}/IrccdVersion.cmake
 )
 
-create_test(test-lua-util "${TEST_LUA_UTIL_SOURCES}")
-create_dir(test-lua-util scripts)
+set(
+	CMAKE_INTERNAL_SOURCES
+	${CMAKE_CURRENT_LIST_DIR}/internal/IrccdConfig.h.in
+)
 
-target_link_libraries(test-lua-util lua)
+set(
+	CMAKE_PACKAGES_SOURCES
+	${CMAKE_CURRENT_LIST_DIR}/packages/FindLibiconv.cmake
+	${CMAKE_CURRENT_LIST_DIR}/packages/FindPandoc.cmake
+)
+
+add_custom_target(
+	cmake
+	COMMENT "CMake sources files"
+	SOURCES
+		${CMAKE_SOURCES}
+		${CMAKE_INTERNAL_SOURCES}
+		${CMAKE_PACKAGES_SOURCES}
+)
+
+source_group(cmake FILES ${CMAKE_SOURCES})
+source_group(cmake\\internal FILES ${CMAKE_INTERNAL_SOURCES})
+source_group(cmake\\packages FILES ${CMAKE_PACKAGES_SOURCES})

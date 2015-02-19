@@ -33,8 +33,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <config.h>
-
 namespace irccd {
 
 /**

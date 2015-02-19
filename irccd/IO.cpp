@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <config.h>
+#include <IrccdConfig.h>
 
 #include "IO.h"
 #include "Logger.h"

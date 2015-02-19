@@ -20,7 +20,7 @@
 #define _COMMAND_H_
 
 /**
- * @file Command.h
+ * @file command/Command.h
  * @brief Base class for server commands
  */
 
