@@ -1,0 +1,21 @@
+---
+function: isupper
+since: 1.2
+info: yes
+---
+
+Check if the unicode character is upper case.
+
+# Synopsis
+
+````lua
+function isupper(code)
+````
+
+# Arguments
+
+- code, the code point
+
+# Returns
+
+True if upper case.

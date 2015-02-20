@@ -1,0 +1,28 @@
+---
+function: list
+since: 1.2
+info: yes
+---
+
+Iterate over the individual characters in a UTF-8 string.
+
+# Synopsis
+
+````lua
+function list(str)
+````
+
+# Returns
+
+- An iterator function
+
+# Example
+
+````lua
+local utf8 = require "irccd.utf8"
+
+-- This assumes that the file / string is UTF-8
+for c in utf8.read("Gérard") do
+    print(c)
+end
+````

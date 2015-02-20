@@ -16,5 +16,22 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(socketaddress)
+project(utf8)
 
+set(
+	UTF8_SOURCES
+	${utf8_SOURCE_DIR}/index.txt
+	${utf8_SOURCE_DIR}/function/isdigit.txt
+	${utf8_SOURCE_DIR}/function/isletter.txt
+	${utf8_SOURCE_DIR}/function/islower.txt
+	${utf8_SOURCE_DIR}/function/isspace.txt
+	${utf8_SOURCE_DIR}/function/istitle.txt
+	${utf8_SOURCE_DIR}/function/isupper.txt
+	${utf8_SOURCE_DIR}/function/length.txt
+	${utf8_SOURCE_DIR}/function/list.txt
+	${utf8_SOURCE_DIR}/function/toarray.txt
+	${utf8_SOURCE_DIR}/function/tolower.txt
+	${utf8_SOURCE_DIR}/function/tostring.txt
+	${utf8_SOURCE_DIR}/function/toupper.txt
+	PARENT_SCOPE
+)
