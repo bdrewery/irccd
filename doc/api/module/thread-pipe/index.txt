@@ -1,0 +1,17 @@
+---
+module: irccd.thread.pipe
+since: 1.1
+info: yes
+---
+
+# Usage
+
+Module for communicating between different Irccd threads.
+
+# Types
+
+- [Pipe](type/Pipe/index.html)
+
+# Functions
+
+- [get](function/get)

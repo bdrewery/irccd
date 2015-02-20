@@ -228,7 +228,7 @@ function(irccd_generate_guide target filename sources)
 			SOURCES ${sources}
 			FROM markdown
 			TO html5
-			TEMPLATES ${templates_SOURCE_DIR}/template.html
+			TEMPLATE ${templates_SOURCE_DIR}/template.html
 			TARGET docs-guide-${target}-html
 			TOC STANDALONE MAKE_DIRECTORY
 		)

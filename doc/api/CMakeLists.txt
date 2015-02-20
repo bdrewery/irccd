@@ -30,6 +30,7 @@ add_subdirectory(module/rule)
 add_subdirectory(module/socket)
 add_subdirectory(module/socket-listener)
 add_subdirectory(module/thread)
+add_subdirectory(module/thread-pipe)
 add_subdirectory(module/utf8)
 add_subdirectory(module/util)
 
@@ -48,6 +49,7 @@ set(
 	${SOCKET_SOURCES}
 	${SOCKET_LISTENER_SOURCES}
 	${THREAD_SOURCES}
+	${THREAD_PIPE_SOURCES}
 	${UTF8_SOURCES}
 	${UTIL_SOURCES}
 )
