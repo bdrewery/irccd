@@ -16,7 +16,8 @@ CURRENT
   * Add logger.debug,
   * Add fs.separator,
   * Create brand new documentation with Pandoc,
-  * Lua 5.3 is now imported and the only available option.
+  * Lua 5.3 is now imported and the only available option,
+  * Add new irccd.timer API.
 
 1.1.5 February 14, 2015
 ---------------------------------------

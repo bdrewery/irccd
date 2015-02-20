@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <algorithm>
+
 #include <IrccdConfig.h>
 
 #if defined(WITH_LUA)
@@ -31,8 +33,11 @@
 #include "lua/LuaSocket.h"
 #include "lua/LuaSystem.h"
 #include "lua/LuaThread.h"
+#include "lua/LuaTimer.h"
 #include "lua/LuaUtf8.h"
 #include "lua/LuaUtil.h"
+
+#include <Logger.h>
 
 #include "Plugin.h"
 #include "Process.h"
@@ -77,13 +82,11 @@ const Process::Libraries Process::irccdLibs = {
 	{ "irccd.plugin",		luaopen_plugin		},
 	{ "irccd.rule",			luaopen_rule		},
 	{ "irccd.socket",		luaopen_socket		},
-#if defined(COMPAT_1_1)
-	{ "irccd.socket.address",	luaopen_socket_address	},
-#endif
 	{ "irccd.socket.listener",	luaopen_socket_listener	},
 	{ "irccd.system",		luaopen_system		},
 	{ "irccd.thread",		luaopen_thread		},
 	{ "irccd.thread.pipe",		luaopen_thread_pipe	},
+	{ "irccd.timer",		luaopen_timer		},
 	{ "irccd.utf8",			luaopen_utf8		},
 	{ "irccd.util",			luaopen_util		}
 };
@@ -131,9 +134,59 @@ Process::Info Process::info(lua_State *L)
 	return info;
 }
 
+Process::~Process()
+{
+	for (auto &timer : m_timers)
+		timer->stop();
+}
+
 Process::operator lua_State *()
 {
 	return m_state;
+}
+
+void Process::timerCall(Timer &timer)
+{
+	Lock lock(m_mutex);
+
+	lua_rawgeti(m_state, LUA_REGISTRYINDEX, timer.reference());
+
+	if (lua_pcall(m_state, 0, 1, 0) != 0) {
+		Logger::warn("plugin %s: %s", Process::info(m_state).name.c_str(), lua_tostring(m_state, -1));
+		lua_pop(m_state, 1);
+	} else {
+		int result = luaL_optinteger(m_state, -1, 0);
+
+		if (result == -1) {
+			timer.stop();
+		}
+
+		lua_pop(m_state, 1);
+	}
+}
+
+bool Process::timerIsDead(const std::unique_ptr<Timer> &timer) const noexcept
+{
+	return !timer->alive();
+}
+
+void Process::addTimer(TimerType type, int delay, int reference)
+{
+	using namespace std;
+	using namespace std::placeholders;
+
+	Lock lock(m_mutex);
+
+	m_timers.erase(remove_if(m_timers.begin(), m_timers.end(), bind(&Process::timerIsDead, this, _1)), m_timers.end());
+	m_timers.push_back(make_unique<Timer>(type, delay, reference));
+	m_timers.back()->start(bind(&Process::timerCall, this, ref(*m_timers.back())));
+}
+
+void Process::clearTimers()
+{
+	for (auto &timer : m_timers) {
+		timer->stop();
+	}
 }
 
 } // !irccd

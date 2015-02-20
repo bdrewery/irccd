@@ -22,7 +22,6 @@
 /**
  * @file Process.h
  * @brief Lua process (thread or plugin)
- *
  * @warning Do not rename the include guard, it conflicts with a Windows header
  */
 
@@ -30,10 +29,12 @@
 
 #if defined(WITH_LUA)
 
+#include <mutex>
 #include <memory>
 #include <unordered_map>
 
 #include "Luae.h"
+#include "Timer.h"
 
 namespace irccd {
 
@@ -49,6 +50,9 @@ public:
 	 * The libraries
 	 */
 	using Libraries	= std::unordered_map<const char *, lua_CFunction>;
+	using Timers = std::vector<std::unique_ptr<Timer>>;
+	using Mutex = std::mutex;
+	using Lock = std::lock_guard<Mutex>;
 
 	/**
 	 * @struct Info
@@ -69,6 +73,11 @@ public:
 
 private:
 	LuaeState m_state;
+	Timers m_timers;
+	Mutex m_mutex;
+
+	void timerCall(Timer &);
+	bool timerIsDead(const std::unique_ptr<Timer> &timer) const noexcept;
 
 public:
 	/**
@@ -105,9 +114,28 @@ public:
 	static Info info(lua_State *L);
 
 	/**
+	 * Destroy all timers.
+	 */
+	~Process();
+
+	/**
 	 * Convert the process to a C lua_State.
 	 */
 	operator lua_State *();
+
+	/**
+	 * Add a new timer in that process.
+	 *
+	 * @param type the type
+	 * @param delay the delay in milliseconds
+	 * @param reference the Lua function
+	 */
+	void addTimer(TimerType type, int delay, int reference);
+
+	/**
+	 * Stop all timers.
+	 */
+	void clearTimers();
 };
 
 } // !irccd

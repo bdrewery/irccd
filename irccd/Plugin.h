@@ -213,6 +213,16 @@ public:
 	 */
 	void open();
 
+	/**
+	 * Get the process for that plugin.
+	 *
+	 * @return the plugin
+	 */
+	inline const std::shared_ptr<Process> &process() const noexcept
+	{
+		return m_process;
+	}
+
 	/* ------------------------------------------------
 	 * Plugin callbacks
 	 * ------------------------------------------------ */

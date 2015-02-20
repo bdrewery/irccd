@@ -51,18 +51,18 @@ set(
 # ---------------------------------------------------------
 
 # Not yet supported.
-if (WITH_LIBICONV)
-	find_package(Libiconv)
-
-	if (Libiconv_FOUND)
-		list(
-			APPEND
-			SOURCES
-			Converter.cpp
-			Converter.h
-		)
-	endif ()
-endif ()
+# if (WITH_LIBICONV)
+# 	find_package(Libiconv)
+#
+# 	if (Libiconv_FOUND)
+# 		list(
+# 			APPEND
+# 			SOURCES
+# 			Converter.cpp
+# 			Converter.h
+# 		)
+# 	endif ()
+# endif ()
 
 # ---------------------------------------------------------
 # Optional Lua
@@ -101,6 +101,8 @@ if (WITH_LUA)
 		Test.h
 		Thread.cpp
 		Thread.h
+		Timer.cpp
+		Timer.h
 		Utf8.cpp
 		Utf8.h
 	)
