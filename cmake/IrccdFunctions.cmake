@@ -277,6 +277,7 @@ function(irccd_generate_guide target filename sources)
 			TO latex
 			TARGET docs-guide-${target}-latex
 			TOC STANDALONE MAKE_DIRECTORY
+			TEMPLATE ${templates_SOURCE_DIR}/template.tex
 		)
 
 		add_dependencies(docs docs-guide-${target}-latex)

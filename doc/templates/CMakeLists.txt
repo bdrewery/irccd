@@ -34,6 +34,7 @@ add_custom_target(
 	SOURCES
 		${templates_SOURCE_DIR}/css/style.css
 		${templates_SOURCE_DIR}/template.html
+		${templates_SOURCE_DIR}/template.tex
 )
 
 source_group(css FILES ${templates_SOURCE_DIR}/css/style.css)
