@@ -24,8 +24,17 @@
 
   <body>
 
+  $if(guide)$
+  <div id="sidebar-guide" class="sidebar-common">
+  <h3 style="margin-left: 10px">Table of contents</h3>
+  <nav id="$idprefix$TOC">
+  $toc$
+  </nav>
+  </div>
+  $endif$
+
   $if(lua)$
-  <div id="sidebar">
+  <div id="sidebar-lua" class="sidebar-common">
     <div class="section">
       <a id="index" href="@baseurl@api/index.html">Index</a>
     </div>
@@ -78,47 +87,53 @@
   </div>
   $endif$
 
-  <div id="content">
-    $if(lua)$
-    $if(event)$
-    <h1 id="content-title">Event: <span class="content-mononame">$event$</span></h1>
-    $endif$
+  $if(lua)$
+  <div id="content-lua" class="content-common">
+  $if(event)$
+  <h1 id="content-title">Event: <span class="content-mononame">$event$</span></h1>
+  $endif$
 
-    $if(enum)$
-    <h1 id="content-title">Enumeration (table): <span class="content-mononame">$enum$</span></h1>
-    $endif$
+  $if(enum)$
+  <h1 id="content-title">Enumeration (table): <span class="content-mononame">$enum$</span></h1>
+  $endif$
 
-    $if(method)$
-    <h1 id="content-title">Method: <span class="content-mononame">$method$</span></h1>
-    $endif$
+  $if(method)$
+  <h1 id="content-title">Method: <span class="content-mononame">$method$</span></h1>
+  $endif$
 
-    $if(metamethod)$
-    <h1 id="content-title">Metamethod: <span class="content-mononame">$metamethod$</span></h1>
-    $endif$
+  $if(metamethod)$
+  <h1 id="content-title">Metamethod: <span class="content-mononame">$metamethod$</span></h1>
+  $endif$
 
-    $if(function)$
-    <h1 id="content-title">Function: <span class="content-mononame">$function$</span></h1>
-    $endif$
+  $if(function)$
+  <h1 id="content-title">Function: <span class="content-mononame">$function$</span></h1>
+  $endif$
 
-    $if(module)$
-    <h1 id="content-title">Module: <span class="content-mononame">$module$</span></h1>
-    $endif$
+  $if(module)$
+  <h1 id="content-title">Module: <span class="content-mononame">$module$</span></h1>
+  $endif$
 
-    $if(object)$
-    <h1 id="content-title">Object: <span class="content-mononame">$object$</span></h1>
-    $endif$
+  $if(object)$
+  <h1 id="content-title">Object: <span class="content-mononame">$object$</span></h1>
+  $endif$
 
-    $if(info)$
-    <div id="info">
-      $if(since)$
-      <p>Since version $since$</p>
-      $endif$
-    </div><!-- !info -->
+  $if(info)$
+  <div id="info">
+    $if(since)$
+    <p>Since version $since$</p>
     $endif$
-    $endif$
+  </div><!-- !info -->
+  $endif$
 
 $body$
+    </div><!-- !content -->
+  $endif$
+
+  $if(guide)$
+  <div id="content-guide" class="content-common">
+$body$
   </div><!-- !content -->
+  $endif$
 
   <div id="footer">
     <p>irccd was written by David Demelier</p>

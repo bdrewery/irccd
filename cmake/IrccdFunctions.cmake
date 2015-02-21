@@ -223,14 +223,47 @@ endfunction()
 #
 function(irccd_generate_guide target filename sources)
 	if (WITH_DOCS_GUIDES_HTML)
-		pandoc(
+		set(outputtmp ${WITH_DOCS_DIRECTORY}/guides/${filename}.html.tmp)
+		set(output ${WITH_DOCS_DIRECTORY}/guides/${filename}.html)
+
+		set(
+			args
+			-s
+			-S
+			-f markdown
+			-t html5
+			--template ${templates_SOURCE_DIR}/template.html
+			-V guide:yes
+			--toc
+			-o ${outputtmp}
+			${sources}
+		)
+
+		set(
+			linkify_args
+			${WITH_DOCS_DIRECTORY}
+			${WITH_DOCS_DIRECTORY}/guides
+		)
+
+		add_custom_command(
 			OUTPUT ${WITH_DOCS_DIRECTORY}/guides/${filename}.html
+			DEPENDS
+				${sources}
+				${templates_SOURCE_DIR}/template.html
+			COMMAND
+				${CMAKE_COMMAND} -E make_directory ${WITH_DOCS_DIRECTORY}/guides
+			COMMAND
+				${Pandoc_EXECUTABLE} ${args}
+			COMMAND
+				cat ${outputtmp} | $<TARGET_FILE:linkify> ${linkify_args} > ${output}
+			COMMAND
+				rm ${outputtmp}
+		)
+
+		add_custom_target(
+			docs-guide-${target}-html
+			DEPENDS ${output}
 			SOURCES ${sources}
-			FROM markdown
-			TO html5
-			TEMPLATE ${templates_SOURCE_DIR}/template.html
-			TARGET docs-guide-${target}-html
-			TOC STANDALONE MAKE_DIRECTORY
 		)
 
 		add_dependencies(docs docs-guide-${target}-html)

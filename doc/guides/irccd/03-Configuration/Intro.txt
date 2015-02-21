@@ -18,7 +18,7 @@ On Windows, the files are loaded in the following order:
 1. **C:\\Users\\YourUser\\irccd\\irccd.conf**
 2. **Path\\To\\Irccd\\Directory\\etc\\irccd.conf**
 
-### Specify at the command line
+**Specify at the command line**
 
 **Note**: on every operating systems, it's possible to pass a specific
 configuration file at the command line, this will only try to open that
