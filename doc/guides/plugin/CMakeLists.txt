@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -24,7 +24,7 @@ set(
 	${guide-plugin_SOURCE_DIR}/02-Syntax/Intro.txt
 	${guide-plugin_SOURCE_DIR}/03-Paths/Intro.txt
 	${guide-plugin_SOURCE_DIR}/04-Common-Patterns/Intro.txt
-	${guide-plugin_SOURCE_DIR}/05-First-Plugin/Intro.txt	
+	${guide-plugin_SOURCE_DIR}/05-First-Plugin/Intro.txt
 )
 
 irccd_generate_guide(plugin Plugin "${PLUGIN_SOURCES}")
