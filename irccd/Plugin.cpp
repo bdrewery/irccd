@@ -97,6 +97,7 @@ lua_State *Plugin::getState()
 
 void Plugin::open()
 {
+	auto lock = m_process->lock();
 	auto L = static_cast<lua_State *>(*m_process);
 
 	// Load default library as it was done by require.

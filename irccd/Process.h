@@ -51,8 +51,8 @@ public:
 	 */
 	using Libraries	= std::unordered_map<const char *, lua_CFunction>;
 	using Timers = std::vector<std::unique_ptr<Timer>>;
-	using Mutex = std::mutex;
-	using Lock = std::lock_guard<Mutex>;
+	using Mutex = std::recursive_mutex;
+	using Lock = std::unique_lock<Mutex>;
 
 	/**
 	 * @struct Info
@@ -136,6 +136,16 @@ public:
 	 * Stop all timers.
 	 */
 	void clearTimers();
+
+	/**
+	 * Lock the process until the returned object is destroyed.
+	 *
+	 * @return the lock object
+	 */
+	inline Lock lock()
+	{
+		return Lock(m_mutex);
+	}
 };
 
 } // !irccd

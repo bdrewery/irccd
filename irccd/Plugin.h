@@ -146,6 +146,8 @@ private:
 	template <typename... Args>
 	void call(const std::string &func, Args&&... args) const
 	{
+		Process::Lock lock = m_process->lock();
+
 		Luae::getglobal(*m_process, func);
 
 		if (Luae::type(*m_process, -1) != LUA_TFUNCTION) {
