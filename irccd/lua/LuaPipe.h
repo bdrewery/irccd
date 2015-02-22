@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LUA_PIPE_H_
-#define _LUA_PIPE_H_
+#ifndef _IRCCD_LUA_PIPE_H_
+#define _IRCCD_LUA_PIPE_H_
 
 /**
  * @file LuaPipe.h
@@ -38,4 +38,4 @@ int luaopen_thread_pipe(lua_State *L);
 
 } // !irccd
 
-#endif // !_LUA_PIPE_H_
+#endif // !_IRCCD_LUA_PIPE_H_

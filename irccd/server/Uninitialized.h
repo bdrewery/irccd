@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _UNINITIALIZED_H_
-#define _UNINITIALIZED_H_
+#ifndef _IRCCD_UNINITIALIZED_H_
+#define _IRCCD_UNINITIALIZED_H_
 
 /**
  * @file Uninitialized.h
@@ -60,4 +60,4 @@ public:
 
 } // !irccd
 
-#endif // !_UNINITIALIZED_H_
+#endif // !_IRCCD_UNINITIALIZED_H_

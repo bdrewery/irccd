@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _KICK_H_
-#define _KICK_H_
+#ifndef _IRCCD_KICK_H_
+#define _IRCCD_KICK_H_
 
 /**
  * @file command/Kick.h
@@ -66,4 +66,4 @@ public:
 
 } // !irccd
 
-#endif // !_KICK_H_
+#endif // !_IRCCD_KICK_H_

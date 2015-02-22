@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SOCKET_H_
-#define _SOCKET_H_
+#ifndef _IRCCD_SOCKET_H_
+#define _IRCCD_SOCKET_H_
 
 /**
  * @file Socket.h
@@ -320,4 +320,4 @@ bool operator<(const Socket &s1, const Socket &s2);
 
 } // !irccd
 
-#endif // !_SOCKET_H_
+#endif // !_IRCCD_SOCKET_H_

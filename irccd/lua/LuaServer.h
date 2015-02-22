@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LUA_SERVER_H_
-#define _LUA_SERVER_H_
+#ifndef _IRCCD_LUA_SERVER_H_
+#define _IRCCD_LUA_SERVER_H_
 
 /**
  * @file LuaServer.h
@@ -55,4 +55,4 @@ int luaopen_server(lua_State *L);
 
 } // !irccd
 
-#endif // !_LUA_SERVER_H_
+#endif // !_IRCCD_LUA_SERVER_H_

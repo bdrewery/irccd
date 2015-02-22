@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _COMMAND_QUEUE_H_
-#define _COMMAND_QUEUE_H_
+#ifndef _IRCCD_COMMAND_QUEUE_H_
+#define _IRCCD_COMMAND_QUEUE_H_
 
 /**
  * @file CommandQueue.h
@@ -98,4 +98,4 @@ public:
 
 } // !irccd
 
-#endif // !_COMMAND_QUEUE_H_
+#endif // !_IRCCD_COMMAND_QUEUE_H_

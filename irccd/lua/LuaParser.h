@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LUA_PARSER_H_
-#define _LUA_PARSER_H_
+#ifndef _IRCCD_LUA_PARSER_H_
+#define _IRCCD_LUA_PARSER_H_
 
 /**
  * @file LuaParser.h
@@ -105,4 +105,4 @@ int luaopen_parser(lua_State *L);
 
 } // !irccd
 
-#endif // !_LUA_PARSER_H_
+#endif // !_IRCCD_LUA_PARSER_H_

@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _UTF8_H_
-#define _UTF8_H_
+#ifndef _IRCCD_UTF8_H_
+#define _IRCCD_UTF8_H_
 
 /**
  * @file Utf8.h
@@ -213,4 +213,4 @@ public:
 
 } // !irccd
 
-#endif // !_UTF8_H_
+#endif // !_IRCCD_UTF8_H_

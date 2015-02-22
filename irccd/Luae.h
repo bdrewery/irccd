@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LUAE_H_
-#define _LUAE_H_
+#ifndef _IRCCD_LUAE_H_
+#define _IRCCD_LUAE_H_
 
 /**
  * @file Luae.h
@@ -253,7 +253,7 @@ public:
 			lua_pop(L, 1);
 
 			new (L, name.c_str()) std::shared_ptr<T>(o);
-			
+
 			lua_pushvalue(L, -1);
 			lua_rawsetp(L, -3, o.get());
 		}
@@ -285,7 +285,7 @@ public:
 	static Ptr<T> getShared(lua_State *L, int index, const char *meta)
 	{
 		testShared(L, index, meta);
-		
+
 		return *static_cast<Ptr<T> *>(lua_touserdata(L, index));
 	}
 
@@ -1282,7 +1282,7 @@ public:
 	   int index,
 	   typename std::enable_if<IsSharedUserdata<T>::value, T>::type * = 0)
 	{
-		return LuaeClass::getShared<Type>(L, index); 
+		return LuaeClass::getShared<Type>(L, index);
 	}
 
 	/**
@@ -1333,7 +1333,7 @@ public:
 	      int index,
 	      typename std::enable_if<IsSharedUserdata<T>::value, T>::type * = 0)
 	{
-		return LuaeClass::getShared<Type>(L, index, IsUserdata<Type>::MetatableName); 
+		return LuaeClass::getShared<Type>(L, index, IsUserdata<Type>::MetatableName);
 	}
 
 	/**
@@ -1382,7 +1382,7 @@ public:
 		}, 1);
 
 		LUAE_STACK_CHECKEND(L, -1);
-		
+
 		return 1;
 	}
 
@@ -1705,7 +1705,7 @@ struct Luae::Convert<std::u32string> {
 				-- index;
 
 			lua_pushnil(L);
-			while (lua_next(L, index)) { 
+			while (lua_next(L, index)) {
 				if (lua_type(L, -1) == LUA_TNUMBER)
 					result.push_back(lua_tonumber(L, -1));
 
@@ -1774,7 +1774,7 @@ struct Luae::Convert<std::vector<std::string>> {
 			-- index;
 
 		lua_pushnil(L);
-		while (lua_next(L, index)) { 
+		while (lua_next(L, index)) {
 			if (lua_type(L, -1) == LUA_TSTRING)
 				list.push_back(lua_tostring(L, -1));
 
@@ -2158,4 +2158,4 @@ void operator delete(void *ptr, lua_State *L);
  */
 void operator delete(void *ptr, lua_State *L, const char *metaname);
 
-#endif // !_LUAE_H_
+#endif // !_IRCCD_LUAE_H_

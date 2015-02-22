@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _DATE_H_
-#define _DATE_H_
+#ifndef _IRCCD_DATE_H_
+#define _IRCCD_DATE_H_
 
 /**
  * @file Date.h
@@ -88,4 +88,4 @@ bool operator<=(const Date &d1, const Date &d2);
 
 } // !irccd
 
-#endif // !_DATE_H_
+#endif // !_IRCCD_DATE_H_

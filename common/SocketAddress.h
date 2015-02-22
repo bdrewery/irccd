@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SOCKET_ADDRESS_H_
-#define _SOCKET_ADDRESS_H_
+#ifndef _IRCCD_SOCKET_ADDRESS_H_
+#define _IRCCD_SOCKET_ADDRESS_H_
 
 /**
  * @file SocketAddress.h
@@ -171,4 +171,4 @@ bool operator<(const irccd::SocketAddress &sa1, const irccd::SocketAddress &sa2)
 
 } // !irccd
 
-#endif // !_SOCKET_ADDRESS_H_
+#endif // !_IRCCD_SOCKET_ADDRESS_H_

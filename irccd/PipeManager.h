@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _PIPE_MANAGER_H_
-#define _PIPE_MANAGER_H_
+#ifndef _IRCCD_PIPE_MANAGER_H_
+#define _IRCCD_PIPE_MANAGER_H_
 
 #include <memory>
 #include <mutex>
@@ -69,4 +69,4 @@ public:
 
 } // !irccd
 
-#endif // !_PIPE_MANAGER_H_
+#endif // !_IRCCD_PIPE_MANAGER_H_

@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _RUNNING_H_
-#define _RUNNING_H_
+#ifndef _IRCCD_RUNNING_H_
+#define _IRCCD_RUNNING_H_
 
 /**
  * @file Running.h
@@ -63,4 +63,4 @@ public:
 
 } // !irccd
 
-#endif // !_RUNNING_H_
+#endif // !_IRCCD_RUNNING_H_

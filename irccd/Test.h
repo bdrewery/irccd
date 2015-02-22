@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _TEST_H_
-#define _TEST_H_
+#ifndef _IRCCD_TEST_H_
+#define _IRCCD_TEST_H_
 
 /**
  * @file Test.h
@@ -36,4 +36,4 @@ void test(int argc, char **argv);
 
 } // !irccd
 
-#endif // !_TEST_H_
+#endif // !_IRCCD_TEST_H_

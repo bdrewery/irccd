@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _EVENT_H_
-#define _EVENT_H_
+#ifndef _IRCCD_EVENT_H_
+#define _IRCCD_EVENT_H_
 
 /**
  * @file Event.h
@@ -105,4 +105,4 @@ public:
 
 } // !irccd
 
-#endif // !_EVENT_H_
+#endif // !_IRCCD_EVENT_H_

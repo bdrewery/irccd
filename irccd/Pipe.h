@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _PIPE_H_
-#define _PIPE_H_
+#ifndef _IRCCD_PIPE_H_
+#define _IRCCD_PIPE_H_
 
 /**
  * @file Pipe.h
@@ -133,4 +133,4 @@ public:
 
 } // !irccd
 
-#endif // !_PIPE_H_
+#endif // !_IRCCD_PIPE_H_

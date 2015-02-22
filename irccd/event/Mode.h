@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _MODE_H_
-#define _MODE_H_
+#ifndef _IRCCD_MODE_H_
+#define _IRCCD_MODE_H_
 
 /**
  * @file event/Mode.h
@@ -73,4 +73,4 @@ public:
 
 } // !irccd
 
-#endif // !_MODE_H_
+#endif // !_IRCCD_MODE_H_

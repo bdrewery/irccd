@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SYSTEM_H_
-#define _SYSTEM_H_
+#ifndef _IRCCD_SYSTEM_H_
+#define _IRCCD_SYSTEM_H_
 
 /**
  * @file System.h
@@ -81,4 +81,4 @@ public:
 
 } // !irccd
 
-#endif // !_SYSTEM_H_
+#endif // !_IRCCD_SYSTEM_H_

@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SERVER_MANAGER_H_
-#define _SERVER_MANAGER_H_
+#ifndef _IRCCD_SERVER_MANAGER_H_
+#define _IRCCD_SERVER_MANAGER_H_
 
 /**
  * @file ServerManager.h
@@ -108,4 +108,4 @@ public:
 
 } // !irccd
 
-#endif // _SERVER_MANAGER_H_
+#endif // _IRCCD_SERVER_MANAGER_H_

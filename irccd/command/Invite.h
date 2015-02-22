@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _INVITE_H_
-#define _INVITE_H_
+#ifndef _IRCCD_INVITE_H_
+#define _IRCCD_INVITE_H_
 
 /**
  * @file command/Invite.h
@@ -64,4 +64,4 @@ public:
 
 } // !irccd
 
-#endif // !_INVITE_H_
+#endif // !_IRCCD_INVITE_H_

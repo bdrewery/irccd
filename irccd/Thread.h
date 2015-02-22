@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _THREAD_H_
-#define _THREAD_H_
+#ifndef _IRCCD_THREAD_H_
+#define _IRCCD_THREAD_H_
 
 /**
  * @file Thread.h
@@ -97,4 +97,4 @@ public:
 
 } // !irccd
 
-#endif // !_THREAD_H_
+#endif // !_IRCCD_THREAD_H_

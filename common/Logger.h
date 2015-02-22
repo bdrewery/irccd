@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LOGGER_H_
-#define _LOGGER_H_
+#ifndef _IRCCD_LOGGER_H_
+#define _IRCCD_LOGGER_H_
 
 /**
  * @file Logger.h
@@ -104,4 +104,4 @@ public:
 
 } // !irccd
 
-#endif // !_LOGGER_H_
+#endif // !_IRCCD_LOGGER_H_

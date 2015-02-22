@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LUA_LOGGER_H_
-#define _LUA_LOGGER_H_
+#ifndef _IRCCD_LUA_LOGGER_H_
+#define _IRCCD_LUA_LOGGER_H_
 
 /**
  * @file LuaLogger.h
@@ -38,4 +38,4 @@ int luaopen_logger(lua_State *L);
 
 } // !irccd
 
-#endif // !_LUA_LOGGER_H_
+#endif // !_IRCCD_LUA_LOGGER_H_

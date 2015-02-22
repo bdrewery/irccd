@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _RULE_MANAGER_H_
-#define _RULE_MANAGER_H_
+#ifndef _IRCCD_RULE_MANAGER_H_
+#define _IRCCD_RULE_MANAGER_H_
 
 /**
  * @file RuleManager.h
@@ -134,4 +134,4 @@ public:
 
 } // !irccd
 
-#endif // !_RULE_MANAGER_H_
+#endif // !_IRCCD_RULE_MANAGER_H_

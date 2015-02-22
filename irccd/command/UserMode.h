@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _USER_MODE_H_
-#define _USER_MODE_H_
+#ifndef _IRCCD_USER_MODE_H_
+#define _IRCCD_USER_MODE_H_
 
 /**
  * @file command/UserMode.h
@@ -62,4 +62,4 @@ public:
 
 } // !irccd
 
-#endif // !_USER_MODE_H_
+#endif // !_IRCCD_USER_MODE_H_

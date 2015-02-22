@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _XDG_H_
-#define _XDG_H_
+#ifndef _IRCCD_XDG_H_
+#define _IRCCD_XDG_H_
 
 /**
  * @file Xdg.h
@@ -109,4 +109,4 @@ public:
 
 } // !irccd
 
-#endif // !_XDG_H_
+#endif // !_IRCCD_XDG_H_

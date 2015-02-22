@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SEND_H_
-#define _SEND_H_
+#ifndef _IRCCD_SEND_H_
+#define _IRCCD_SEND_H_
 
 /**
  * @file command/Send.h
@@ -62,4 +62,4 @@ public:
 
 } // !irccd
 
-#endif // !_SEND_H_
+#endif // !_IRCCD_SEND_H_

@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRC_SESSION_H_
-#define _IRC_SESSION_H_
+#ifndef _IRCCD_IRC_SESSION_H_
+#define _IRCCD_IRC_SESSION_H_
 
 /**
  * @file IrcSession.h
@@ -235,4 +235,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRC_SESSION_H_
+#endif // !_IRCCD_IRC_SESSION_H_

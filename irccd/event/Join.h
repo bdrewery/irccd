@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _JOIN_H_
-#define _JOIN_H_
+#ifndef _IRCCD_JOIN_H_
+#define _IRCCD_JOIN_H_
 
 /**
  * @file event/Join.h
@@ -69,4 +69,4 @@ public:
 
 } // !irccd
 
-#endif // !_JOIN_H_
+#endif // !_IRCCD_JOIN_H_

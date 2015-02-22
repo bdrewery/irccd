@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SINGLETON_H_
-#define _SINGLETON_H_
+#ifndef _IRCCD_SINGLETON_H_
+#define _IRCCD_SINGLETON_H_
 
 /**
  * @file Singleton.h
@@ -70,4 +70,4 @@ std::unique_ptr<T> Singleton<T>::s_instance;
 #define SINGLETON(cls)							\
 	friend std::unique_ptr<cls> std::make_unique<cls>()
 
-#endif // !_SINGLETON_H_
+#endif // !_IRCCD_SINGLETON_H_

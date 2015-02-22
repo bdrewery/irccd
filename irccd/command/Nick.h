@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _NICK_H_
-#define _NICK_H_
+#ifndef _IRCCD_NICK_H_
+#define _IRCCD_NICK_H_
 
 /**
  * @file command/Nick.h
@@ -62,4 +62,4 @@ public:
 
 } // !irccd
 
-#endif // !_NICK_H_
+#endif // !_IRCCD_NICK_H_

@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _RULE_H_
-#define _RULE_H_
+#ifndef _IRCCD_RULE_H_
+#define _IRCCD_RULE_H_
 
 /**
  * @file Rule.h
@@ -143,4 +143,4 @@ public:
 
 } // !irccd
 
-#endif // !_RULE_H_
+#endif // !_IRCCD_RULE_H_

@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _TOPIC_H_
-#define _TOPIC_H_
+#ifndef _IRCCD_TOPIC_H_
+#define _IRCCD_TOPIC_H_
 
 /**
  * @file command/Topic.h
@@ -64,4 +64,4 @@ public:
 
 } // !irccd
 
-#endif // !_TOPIC_H_
+#endif // !_IRCCD_TOPIC_H_

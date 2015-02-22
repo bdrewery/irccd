@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _PLUGIN_H_
-#define _PLUGIN_H_
+#ifndef _IRCCD_PLUGIN_H_
+#define _IRCCD_PLUGIN_H_
 
 /**
  * @file Plugin.h
@@ -421,4 +421,4 @@ public:
 
 } // !irccd
 
-#endif // !_PLUGIN_H_
+#endif // !_IRCCD_PLUGIN_H_

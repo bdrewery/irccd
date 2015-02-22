@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _MESSAGE_H_
-#define _MESSAGE_H_
+#ifndef _IRCCD_MESSAGE_H_
+#define _IRCCD_MESSAGE_H_
 
 /**
  * @file command/Message.h
@@ -64,4 +64,4 @@ public:
 
 } // !irccd
 
-#endif // !_MESSAGE_H_
+#endif // !_IRCCD_MESSAGE_H_

@@ -17,7 +17,7 @@
  */
 
 #ifndef _IRCCD_LUA_TIMER_H_
-#define _IRCCD_LUA_TIMER_H
+#define _IRCCD_LUA_TIMER_H_
 
 /**
  * @file LuaTimer.h
@@ -38,5 +38,5 @@ int luaopen_timer(lua_State *L);
 
 } // !irccd
 
-#endif // !_IRCCD_LUA_TIMER_H
+#endif // !_IRCCD_LUA_TIMER_H_
 

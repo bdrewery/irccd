@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _DIRECTORY_H_
-#define _DIRECTORY_H_
+#ifndef _IRCCD_DIRECTORY_H_
+#define _IRCCD_DIRECTORY_H_
 
 /**
  * @file Directory.h
@@ -162,4 +162,4 @@ public:
 
 } // !irccd
 
-#endif // !_DIRECTORY_H_
+#endif // !_IRCCD_DIRECTORY_H_

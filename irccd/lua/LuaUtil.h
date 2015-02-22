@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LUA_UTIL_H_
-#define _LUA_UTIL_H_
+#ifndef _IRCCD_LUA_UTIL_H_
+#define _IRCCD_LUA_UTIL_H_
 
 /**
  * @file LuaUtil.h
@@ -57,4 +57,4 @@ int luaopen_util(lua_State *L);
 
 } // !irccd
 
-#endif // !_LUA_UTIL_H_
+#endif // !_IRCCD_LUA_UTIL_H_

@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _EVENT_QUEUE_H_
-#define _EVENT_QUEUE_H_
+#ifndef _IRCCD_EVENT_QUEUE_H_
+#define _IRCCD_EVENT_QUEUE_H_
 
 /**
  * @file EventQueue.h
@@ -89,4 +89,4 @@ public:
 
 } // !irccd
 
-#endif // !_EVENT_QUEUE_H_
+#endif // !_IRCCD_EVENT_QUEUE_H_

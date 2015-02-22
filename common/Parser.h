@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _PARSER_H_
-#define _PARSER_H_
+#ifndef _IRCCD_PARSER_H_
+#define _IRCCD_PARSER_H_
 
 /**
  * @file Parser.h
@@ -127,7 +127,7 @@ public:
 	 * @return the iterator.
 	 */
 	Map::iterator end();
-	
+
 	/**
 	 * Return a const iterator to the end.
 	 *
@@ -395,7 +395,7 @@ public:
 	 * @return the iterator.
 	 */
 	List::iterator end();
-	
+
 	/**
 	 * Return a const iterator to the end.
 	 *
@@ -407,7 +407,7 @@ public:
 	 * Find all sections matching the name.
 	 *
 	 * @param name the sections name
-	 * @param func the function 
+	 * @param func the function
 	 * @return a list of section with the options
 	 */
 	void findSections(const std::string &name, FindFunc func) const;
@@ -452,4 +452,4 @@ public:
 
 } // !irccd
 
-#endif // !_PARSER_H_
+#endif // !_IRCCD_PARSER_H_

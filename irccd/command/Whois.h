@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _WHOIS_H_
-#define _WHOIS_H_
+#ifndef _IRCCD_WHOIS_H_
+#define _IRCCD_WHOIS_H_
 
 /**
  * @file command/Whois.h
@@ -62,4 +62,4 @@ public:
 
 } // !irccd
 
-#endif // !_WHOIS_H_
+#endif // !_IRCCD_WHOIS_H_

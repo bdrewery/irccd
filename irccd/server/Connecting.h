@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _CONNECTING_H_
-#define _CONNECTING_H_
+#ifndef _IRCCD_CONNECTING_H_
+#define _IRCCD_CONNECTING_H_
 
 /**
  * @file Connecting.h
@@ -59,4 +59,4 @@ public:
 
 } // !irccd
 
-#endif // !_CONNECTING_H_
+#endif // !_IRCCD_CONNECTING_H_

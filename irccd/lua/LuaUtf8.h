@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LUA_UTF8_H_
-#define _LUA_UTF8_H_
+#ifndef _IRCCD_LUA_UTF8_H_
+#define _IRCCD_LUA_UTF8_H_
 
 /**
  * @file LuaUtf8.h
@@ -38,4 +38,4 @@ int luaopen_utf8(lua_State *L);
 
 } // !irccd
 
-#endif // !_LUA_UTF8_H_
+#endif // !_IRCCD_LUA_UTF8_H_

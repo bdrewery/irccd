@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _WAITING_H_
-#define _WAITING_H_
+#ifndef _IRCCD_WAITING_H_
+#define _IRCCD_WAITING_H_
 
 /**
  * @file Waiting.h
@@ -55,4 +55,4 @@ public:
 
 } // !irccd
 
-#endif // !_WAITING_H_
+#endif // !_IRCCD_WAITING_H_

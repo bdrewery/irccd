@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _PART_H_
-#define _PART_H_
+#ifndef _IRCCD_PART_H_
+#define _IRCCD_PART_H_
 
 /**
  * @file command/Part.h
@@ -64,4 +64,4 @@ public:
 
 } // !irccd
 
-#endif // !_PART_H_
+#endif // !_IRCCD_PART_H_

@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LUA_IRCCD_H_
-#define _LUA_IRCCD_H_
+#ifndef _IRCCD_LUA_IRCCD_H_
+#define _IRCCD_LUA_IRCCD_H_
 
 /**
  * @file LuaIrccd.h
@@ -35,7 +35,7 @@ namespace irccd {
  * @return the number of args pushed
  */
 int luaopen_irccd(lua_State *L);
-	
+
 } // !irccd
 
-#endif // !_LUA_IRCCD_H_
+#endif // !_IRCCD_LUA_IRCCD_H_

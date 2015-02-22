@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _NAMES_H_
-#define _NAMES_H_
+#ifndef _IRCCD_NAMES_H_
+#define _IRCCD_NAMES_H_
 
 /**
  * @file command/Names.h
@@ -62,4 +62,4 @@ public:
 
 } // !irccd
 
-#endif // !_NAMES_H_
+#endif // !_IRCCD_NAMES_H_

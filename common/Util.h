@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _UTIL_H_
-#define _UTIL_H_
+#ifndef _IRCCD_UTIL_H_
+#define _IRCCD_UTIL_H_
 
 /**
  * @file Util.h
@@ -214,4 +214,4 @@ public:
 
 } // !irccd
 
-#endif // !_UTIL_H_
+#endif // !_IRCCD_UTIL_H_

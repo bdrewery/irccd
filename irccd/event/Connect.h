@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _CONNECT_H_
-#define _CONNECT_H_
+#ifndef _IRCCD_CONNECT_H_
+#define _IRCCD_CONNECT_H_
 
 /**
  * @file event/Connect.h
@@ -65,4 +65,4 @@ public:
 
 } // !irccd
 
-#endif // !_CONNECT_H_
+#endif // !_IRCCD_CONNECT_H_

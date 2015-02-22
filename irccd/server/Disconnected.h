@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _DISCONNECTED_H_
-#define _DISCONNECTED_H_
+#ifndef _IRCCD_DISCONNECTED_H_
+#define _IRCCD_DISCONNECTED_H_
 
 /**
  * @file Disconnected.h
@@ -58,4 +58,4 @@ public:
 
 } // !irccd
 
-#endif // !_DISCONNECTED_H_
+#endif // !_IRCCD_DISCONNECTED_H_

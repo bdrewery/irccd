@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _NOTICE_H_
-#define _NOTICE_H_
+#ifndef _IRCCD_NOTICE_H_
+#define _IRCCD_NOTICE_H_
 
 /**
  * @file command/Notice.h
@@ -64,4 +64,4 @@ public:
 
 } // !irccd
 
-#endif // !_NOTICE_H_
+#endif // !_IRCCD_NOTICE_H_

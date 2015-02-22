@@ -152,4 +152,4 @@ public:
 
 #endif // !_WITH_LUA
 
-#endif // !_PROCESS_H_
+#endif // !_IRCCD_PROCESS_H_

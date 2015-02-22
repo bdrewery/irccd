@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LUA_PLUGIN_H_
-#define _LUA_PLUGIN_H_
+#ifndef _IRCCD_LUA_PLUGIN_H_
+#define _IRCCD_LUA_PLUGIN_H_
 
 /**
  * @file LuaPlugin.h
@@ -36,6 +36,6 @@ namespace irccd {
  */
 int luaopen_plugin(lua_State *L);
 
-};
+} // !irccd
 
-#endif // !_LUA_PLUGIN_H_
+#endif // !_IRCCD_LUA_PLUGIN_H_

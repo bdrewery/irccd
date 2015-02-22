@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _ME_H_
-#define _ME_H_
+#ifndef _IRCCD_ME_H_
+#define _IRCCD_ME_H_
 
 /**
  * @file command/Me.h
@@ -64,4 +64,4 @@ public:
 
 } // !irccd
 
-#endif // !_ME_H_
+#endif // !_IRCCD_ME_H_

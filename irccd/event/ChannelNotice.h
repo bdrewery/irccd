@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _CHANNEL_NOTICE_H_
-#define _CHANNEL_NOTICE_H_
+#ifndef _IRCCD_CHANNEL_NOTICE_H_
+#define _IRCCD_CHANNEL_NOTICE_H_
 
 /**
  * @file event/ChannelNotice.h
@@ -71,4 +71,4 @@ public:
 
 } // !irccd
 
-#endif // !_CHANNEL_NOTICE_H
+#endif // !_IRCCD_CHANNEL_NOTICE_H

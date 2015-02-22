@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LUA_RULE_H_
-#define _LUA_RULE_H_
+#ifndef _IRCCD_LUA_RULE_H_
+#define _IRCCD_LUA_RULE_H_
 
 /**
  * @file LuaRule.h
@@ -38,4 +38,4 @@ int luaopen_rule(lua_State *L);
 
 } // !irccd
 
-#endif // !_LUA_RULE_H_
+#endif // !_IRCCD_LUA_RULE_H_

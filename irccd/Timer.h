@@ -112,4 +112,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_TIMER_H
+#endif // !_IRCCD_TIMER_H_

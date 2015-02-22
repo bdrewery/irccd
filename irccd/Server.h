@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SERVER_H_
-#define _SERVER_H_
+#ifndef _IRCCD_SERVER_H_
+#define _IRCCD_SERVER_H_
 
 /**
  * @file Server.h
@@ -465,4 +465,4 @@ public:
 
 } // !irccd
 
-#endif // !_SERVER_H_
+#endif // !_IRCCD_SERVER_H_

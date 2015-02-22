@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SOCKET_LISTENER_H_
-#define _SOCKET_LISTENER_H_
+#ifndef _IRCCD_SOCKET_LISTENER_H_
+#define _IRCCD_SOCKET_LISTENER_H_
 
 /**
  * @file SocketListener.h
@@ -95,4 +95,4 @@ public:
 
 } // !irccd
 
-#endif // !_SOCKET_LISTENER_H_
+#endif // !_IRCCD_SOCKET_LISTENER_H_

@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _QUERY_H_
-#define _QUERY_H_
+#ifndef _IRCCD_QUERY_H_
+#define _IRCCD_QUERY_H_
 
 /**
  * @file event/Query.h
@@ -69,4 +69,4 @@ public:
 
 } // !irccd
 
-#endif // !_QUERY_H_
+#endif // !_IRCCD_QUERY_H_

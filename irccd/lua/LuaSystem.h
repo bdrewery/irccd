@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LUA_SYSTEM_H_
-#define _LUA_SYSTEM_H_
+#ifndef _IRCCD_LUA_SYSTEM_H_
+#define _IRCCD_LUA_SYSTEM_H_
 
 /**
  * @file LuaSystem.h
@@ -38,4 +38,4 @@ int luaopen_system(lua_State *L);
 
 } // !irccd
 
-#endif // !_LUA_SYSTEM_H_
+#endif // !_IRCCD_LUA_SYSTEM_H_

@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _COMMAND_H_
-#define _COMMAND_H_
+#ifndef _IRCCD_COMMAND_H_
+#define _IRCCD_COMMAND_H_
 
 /**
  * @file command/Command.h
@@ -60,4 +60,4 @@ public:
 
 } // !irccd
 
-#endif // !_COMMAND_H_
+#endif // !_IRCCD_COMMAND_H_

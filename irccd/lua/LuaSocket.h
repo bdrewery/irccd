@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _LUA_SOCKET_H_
-#define _LUA_SOCKET_H_
+#ifndef _IRCCD_LUA_SOCKET_H_
+#define _IRCCD_LUA_SOCKET_H_
 
 /**
  * @file LuaSocket.h
@@ -58,4 +58,4 @@ int luaopen_socket_address(lua_State *L);
 
 } // !irccd
 
-#endif // !_LUA_SOCKET_H_
+#endif // !_IRCCD_LUA_SOCKET_H_
