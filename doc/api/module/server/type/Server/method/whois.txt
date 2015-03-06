@@ -1,0 +1,15 @@
+---
+method: whois
+---
+
+Get whois information from a user. The function will generate the [[irccd-event-onWhois|onWhois]] event.
+
+# Synopsis
+
+````lua
+function Server:whois(target)
+````
+
+# Arguments
+
+- target, the target

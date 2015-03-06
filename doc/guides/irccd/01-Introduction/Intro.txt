@@ -1,0 +1,40 @@
+---
+title: Irccd user guide
+author: David Demelier <markand@malikania.fr>
+date: February 18, 2015
+---
+
+# Introduction
+
+Irccd is a IRC bot written in [C++14](http://en.wikipedia.org/wiki/C%2B%2B14) and [Lua](http://www.lua.org).
+
+It is developed in mind of being as portable as possible.
+
+Irccd also tries to be small and efficient. It is not uncommon to see more than
+twenty plugins loaded without eating all your memory.
+
+Irccd also tries to have the best API for writing the funniest plugins ever.
+
+## History
+
+At the beginning, irccd was initially created to teach me advanced C++11 and Lua
+integration.
+
+In less than two months starting from its initial creation, irccd was already
+able to load multiple plugins, connect to multiple servers and such.
+
+Quickly, a clean but powerful API was added in order to create funny scripts.
+
+Now the API has grown almost by two times and let you create independant
+plugins which continue running even if there are no events.
+
+## Features
+
+- Use Lua plugin to catch IRC events,
+- Support multiple,
+- Support multiple identities,
+- Can be controled by sockets,
+- Run on Linux, Windows and *BSD,
+- Well documented,
+- Clean and powerful Lua API,
+- Very fast and light.

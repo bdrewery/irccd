@@ -1,0 +1,12 @@
+---
+title: Irccd plugin guide
+author: David Demelier <markand@malikania.fr>
+date: February 18, 2015
+---
+
+# Plugin introduction
+
+This guide will help you writing your first plugin.
+
+Plugins are very easy to write, they use a clean and powerful API combined with
+the stable and well tested [Lua](http://lua.org) language.

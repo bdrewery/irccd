@@ -1,0 +1,16 @@
+---
+method: say
+---
+
+Send a message to a channel.
+
+# Synopsis
+
+````lua
+function Server:say(channel, message)
+````
+
+# Arguments
+
+- channel, the channel
+- message, the message to send

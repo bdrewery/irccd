@@ -1,0 +1,25 @@
+---
+event: onWhois
+info: yes
+since: 1.1
+---
+
+This event is triggered when irccd get information from a user. The info is a table with the following fields:
+
+- **nickname**, the user nickname.
+- **user**, the user name.
+- **host**, the hostname.
+- **realname**, the real name used.
+- **channels**, an optional sequences of channels joined.
+
+# SYNOPSIS
+
+````lua
+function onWhois(server, info)
+````
+
+# ARGUMENTS
+
+- server, the current server
+- info, the whois information
+

@@ -1,0 +1,12 @@
+---
+object: SocketListener
+---
+
+The listener object.
+
+# Methods
+
+- [add](method/add.html)
+- [remove](method/remove.html)
+- [clear](method/clear.html)
+- [select](method/select.html)

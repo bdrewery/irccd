@@ -1,0 +1,15 @@
+---
+method: timestamp
+---
+
+Return the system timestamp for the date.
+
+# Synopsis
+
+````lua
+timestamp = function Date:timestamp()
+````
+
+# Returns
+
+- timestamp, the date timestamp

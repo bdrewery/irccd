@@ -1,0 +1,17 @@
+---
+event: onJoin
+---
+
+User join events, this function is called when someone join a channel.
+
+# SYNOPSIS
+
+````lua
+function onJoin(server, channel, nickname)
+````
+
+# ARGUMENTS
+
+- server, the current server.
+- channel, the channel the user has joined.
+- nickname, the user nickname.

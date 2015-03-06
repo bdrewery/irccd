@@ -1,0 +1,20 @@
+---
+enum: type
+info: yes
+since: 1.1
+summary: Type of socket
+---
+
+# Synopsis
+
+````lua
+socket.type = {
+    Stream,
+    Datagram
+}
+````
+
+# Values
+
+- **Stream**, SOCK_STREAM sockets
+- **Datagram**, SOCK_DGRAM sockets

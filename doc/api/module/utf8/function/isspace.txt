@@ -1,0 +1,21 @@
+---
+function: isspace
+since: 1.2
+info: yes
+---
+
+Check if the unicode character is a space.
+
+# Synopsis
+
+````lua
+function isspace(code)
+````
+
+# Arguments
+
+- code, the code point
+
+# Returns
+
+True if space.

@@ -1,0 +1,57 @@
+# Configuration
+
+Configuration of irccdctl is done in the same rules than `irccd`.
+
+## The general section
+
+This section defines the global irccdctl parameters.
+
+Available options:
+
+- **verbose**: (bool) enable verbose message, default: false.
+
+**Example**
+
+````ini
+[general]
+verbose = true
+````
+
+## The socket section
+
+The section socket permit irccdctl to connect to a specific irccd listener,
+only one may be defined. Just like listeners you can connect to Unix or
+internet sockets.
+
+### Available options for both
+
+- **type**: (string) Required. type of listener "internet" or "unix"
+- **protocol**: (string) Required. Protocol to use, "tcp" or "udp".
+
+### Using internet sockets
+
+- **host**: (string) Required. Host to connect.
+- **family**: (string) Required. Internet family: ipv6 or ipv4.
+- **port**: (int) Required: port number.
+
+**Example**
+
+````ini
+[socket]
+type = "internet"
+host = "localhost"
+port = "9999"
+family = "ipv6"
+````
+
+### Using unix sockets
+
+- **path**: (string) Required. The file path to the socket.
+
+**Example**
+
+````ini
+[socket]
+type = "unix"
+path = "/tmp/irccd.sock"
+````

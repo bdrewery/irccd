@@ -1,0 +1,22 @@
+---
+name: new
+category: parser
+---
+
+Create a new parser object. This function does not open any file, you need to call [[irccd-Parser-open|open]].
+
+# Synopsis
+
+````lua
+parser = function parser.new(path, tuning, commentChar)
+````
+
+# Arguments
+
+- path, the path
+- tuning, optional table of tuning options
+- commentChar, optional comment delimiter
+
+# Returns
+
+- parser, the parser object (see [Parser](Parser/index.html))

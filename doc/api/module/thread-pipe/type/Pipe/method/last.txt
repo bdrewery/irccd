@@ -1,0 +1,17 @@
+---
+method: last
+since: 1.1
+info: yes
+---
+
+Get the last value. This function does not remove the value from the pipe.
+
+# Synopsis
+
+````lua
+value = function Pipe:last()
+````
+
+# Returns
+
+- value, the last value

@@ -1,0 +1,21 @@
+---
+function: isdigit
+since: 1.2
+info: yes
+---
+
+Check if the unicode character is a digit.
+
+# Synopsis
+
+````lua
+function isdigit(code)
+````
+
+# Arguments
+
+- code, the code point
+
+# Returns
+
+True if digit.

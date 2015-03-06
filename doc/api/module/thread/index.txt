@@ -1,0 +1,16 @@
+---
+module: irccd.thread
+since: 1.1
+---
+
+Real thread management.
+
+Thread are a very different thing than Lua's coroutines. They are real threads which are completely detached from the host script. Because of the nature of Lua, threads are also executed in a separate Lua's context. That is, if you need to pass data betweens threads, you must use the dedicated [[api-irccd-thread-pipe|pipe]] API.
+
+# Types
+
+- [Thread](type/Thread/index.html)
+
+# Functions
+
+- [new](function/new.html)

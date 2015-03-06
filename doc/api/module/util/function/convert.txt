@@ -1,0 +1,43 @@
+---
+function: convert
+since: 1.2
+info: yes
+---
+Convert a formatted string with Irccd's common pattern..
+
+The params argument may or must have the following fields:
+
+- **\<x\>**, the pattern to replace (to replace `#u`, add `u` field)
+- **date**, an optional timestamp, if not the current time is used
+
+# Synopsis
+
+````lua
+function convert(str, params, flags)
+````
+
+# Arguments
+
+- str, the formatted string
+- params, the params
+- flags, the optional flags (see [irccd.util.flags](@baseurl@/api/module/util/enum/flags.html))
+
+# Example
+
+````lua
+local util      = require "irccd.util"
+local logger    = require "irccd.logger"
+
+function onMessage(s, c, n, m)
+    local str = "#U said #m at %H:%M"
+    local kw  = {
+        U = util.splituser(n),
+        m = m
+    }
+    local flags = {
+        util.flags.ConvertDate
+    }
+
+    logger.log(util.convert(str, kw, flags))
+end
+````

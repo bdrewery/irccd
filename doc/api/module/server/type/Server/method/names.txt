@@ -1,0 +1,15 @@
+---
+method: names
+---
+
+Get the list of names. This function will generate the [[irccd-event-onNames|onNames]] event.
+
+# Synopsis
+
+````lua
+function Server:names(channel)
+````
+
+# Arguments
+
+- channel, the channel name

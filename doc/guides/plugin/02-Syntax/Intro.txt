@@ -1,0 +1,32 @@
+# Syntax
+
+In this paragraph, you will learn the basic [Lua](http://lua.org) syntax.
+
+## Why Lua?
+
+Lua is a very fast, light and extensible language. It has been proven and widely
+used in the game industry. Lua also offers a very great sandboxing system to
+avoid script to alter or even worse, to destroy the system.
+
+This is possible because individual parts of Lua can be enabled or disabled in
+the host application. For instance, irccd disable the `os` Lua module because
+it has unsafe functions such as
+[os.execute](http://www.lua.org/manual/5.2/manual.html#pdf-os.execute) or simply
+[os.exit](http://www.lua.org/manual/5.2/manual.html#pdf-os.exit) which will
+abort the daemon.
+
+Lua also have a clean syntax, consider the following:
+
+````lua
+local info = {
+    host   = "localhost",
+    port   = 9960,
+    ssl    = true
+}
+````
+
+This create a new table value which is the most powerful data type in Lua, its
+syntax is so clean that it is sometimes used as application configuration files.
+
+For more information, have a look at [this page](http://www.lua.org/about.html)
+

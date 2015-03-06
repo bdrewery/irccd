@@ -1,0 +1,18 @@
+---
+event: onChannelNotice
+---
+
+This callback is called when someone sent a notice on a channel.
+
+# SYNOPSIS
+
+````lua
+function onChannelNotice(server, who, channel, notice)
+````
+
+# ARGUMENTS
+
+- server, the current server.
+- who, the one that sent the notice.
+- channel, the target channel.
+- message, the notice message.

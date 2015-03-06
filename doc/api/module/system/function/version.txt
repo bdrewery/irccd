@@ -1,0 +1,18 @@
+---
+function: version
+info: yes
+category: system
+since: 1.1
+---
+
+Get the operating system version. This function is completely system dependent.
+
+# Synopsis
+
+````lua
+version = function system.version()
+````
+
+# Returns
+
+- version, the version as a string

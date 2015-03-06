@@ -1,0 +1,16 @@
+---
+function: warn
+category: logger
+---
+
+Log a warning. The message will always be logged.
+
+# Synopsis
+
+````lua
+function logger.warn(message)
+````
+
+# Arguments
+
+* message, the message
