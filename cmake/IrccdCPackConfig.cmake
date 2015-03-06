@@ -73,7 +73,7 @@ if (WIN32)
 	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Irccd")
 
 	# Read from file the extra commands
-	file(READ ${CMAKE_BINARY_DIR}/nsis_extra_install.txt INSTALL_COMMANDS)
+#	file(READ ${CMAKE_BINARY_DIR}/nsis_extra_install.txt INSTALL_COMMANDS)
 
 	# Startup menu for documentation
 	set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS ${CPACK_NSIS_EXTRA_INSTALL_COMMANDS} ${INSTALL_COMMANDS})
