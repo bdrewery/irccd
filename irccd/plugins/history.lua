@@ -35,12 +35,12 @@ local format = {
 	seen	= "#U, I've seen #U for the last time on %m/%d/%y %H:%M",
 	said	= "#U, the last message that #U said is: #m",
 	unknown	= "#U, i've never known #U",
-	usage	= "#U, usage: #m seen target | #m said target. Type #m help <command> for more information"
+	usage	= "#U, usage: #P seen target | #P said target. Type #P help <command> for more information"
 }
 
 local help = {
-	seen	= "#U, report the most recent time the user was seen. Usage: #m seen <target>",
-	said	= "#U, get the last message said from the target. Usage: #m said <target>"
+	seen	= "#U, report the most recent time the user was seen. Usage: #P seen <target>",
+	said	= "#U, get the last message said from the target. Usage: #P said <target>"
 }
 
 local function loadFormats()
@@ -162,7 +162,8 @@ function onCommand(server, channel, who, message)
 	local kw = {
 		c = channel,
 		U = orig,
-		m = server:info().commandChar .. plugin.info().name,
+		p = plugin.info().name,
+		P = server:info().commandChar .. plugin.info().name,
 		s = server:info().name
 	}
 

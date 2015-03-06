@@ -42,7 +42,7 @@ local formats	= {
 }
 
 local helps	= {
-	usage	= "#U, usage: #P list | info <name>"
+	usage	= "#U, usage: #P list | #P info <name>"
 }
 
 local function loadconfig()
@@ -140,7 +140,7 @@ local function info(server, channel, who, args)
 					else
 						kw.M = info[item]
 					end
-	
+
 					str = str .. util.convert(formats[item], kw)
 				end
 			end

@@ -119,6 +119,7 @@ if (WITH_LUA)
 		plugins/date.lua
 		plugins/history.lua
 		plugins/logger.lua
+		plugins/plugin.lua
 		plugins/roulette.lua
 	)
 endif ()
