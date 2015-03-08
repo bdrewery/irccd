@@ -61,7 +61,7 @@ if (WITH_DOCS_DOXYGEN)
 	)
 
 	add_custom_target(
-		docs-doxygen ALL
+		docs-doxygen
 		COMMENT "Generating doxygen documentation"
 		COMMAND
 			${CMAKE_COMMAND} -E make_directory ${WITH_DOCS_DIRECTORY}/doxygen
@@ -70,6 +70,8 @@ if (WITH_DOCS_DOXYGEN)
 		WORKING_DIRECTORY
 			${CMAKE_SOURCE_DIR}
 	)
+
+	add_dependencies(docs docs-doxygen)
 endif ()
 
 # ---------------------------------------------------------

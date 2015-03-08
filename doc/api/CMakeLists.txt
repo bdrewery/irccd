@@ -105,9 +105,9 @@ foreach (s ${SOURCES})
 		COMMAND
 			${Pandoc_EXECUTABLE} ${pandoc_args}
 		COMMAND
-			cat ${outputpath}.tmp | $<TARGET_FILE:linkify> ${linkify_args} > ${outputpath}
+			$<TARGET_FILE:linkify> ${outputpath}.tmp ${outputpath} ${WITH_DOCS_DIRECTORY} ${outputdirectory}
 		COMMAND
-			rm ${outputpath}.tmp
+			${CMAKE_COMMAND} -E remove ${outputpath}.tmp
 		DEPENDS
 			${inputpath}
 			${templates_SOURCE_DIR}/template.html

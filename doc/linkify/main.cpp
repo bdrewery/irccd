@@ -17,6 +17,7 @@
  */
 
 #include <algorithm>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <iterator>
@@ -101,7 +102,7 @@ string replace(string content, const string &replacement)
 			content.erase(position, /* @baseurl@ */ 9);
 			content.insert(position, replacement);
 		}
-	} while (!done);	
+	} while (!done);
 
 	return content;
 }
@@ -110,19 +111,24 @@ string replace(string content, const string &replacement)
 
 int main(int argc, char **argv)
 {
-	if (argc < 3)
+	-- argc;
+	++ argv;
+
+	if (argc < 4)
 		usage();
 		// NOTREACHED
 
-	string replacement = relative(argv[1], argv[2]);
+	string replacement = relative(argv[2], argv[3]);
 	string content;
+	ifstream input(argv[0]);
 
-	// Read stdin as input
-	copy(istreambuf_iterator<char>(cin), istreambuf_iterator<char>(), back_inserter(content));
+	copy(istreambuf_iterator<char>(input), istreambuf_iterator<char>(), back_inserter(content));
 
 	try {
-		cout << replace(move(content), move(replacement)) << endl;
-	} catch (const exception &ex) {
+		ofstream out(argv[1], ofstream::out);
+
+		out << replace(move(content), move(replacement)) << endl;
+	} catch (const exception &) {
 		return 1;
 	}
 

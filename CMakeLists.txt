@@ -22,7 +22,8 @@
 # If you plan to modify the build systems there are several places to look
 # to do what you want.
 #
-# cmake/CMake.cmake		- Sources files for cmake/ directory
+# cmake/CMake.cmake		- Sources files for cmake/ directory.
+# cmake/IrccdPackage.cmake	- Package creation.
 # cmake/IrccdSystem.cmake	- Contains some platforms checks and compile flags.
 # cmake/IrccdVersion.cmake	- Defines the Irccd version.
 # cmake/IrccdOptions.cmake	- User definable options.

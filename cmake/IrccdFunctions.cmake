@@ -67,22 +67,6 @@ function(apply_libraries target libs)
 	target_link_libraries(${target} port)
 endfunction()
 
-function(add_nsis_install command)
-	file(
-		APPEND
-		${CMAKE_BINARY_DIR}/nsis_extra_install.txt
-		${command}\n
-	)
-endfunction()
-
-function(add_nsis_uninstall command)
-	file(
-		APPEND
-		${CMAKE_BINARY_DIR}/nsis_extra_uninstall.txt
-		${command}\n
-	)
-endfunction()
-
 # ---------------------------------------------------------
 # define_library(
 #	TARGET target name
@@ -134,21 +118,21 @@ function(define_executable)
 	apply_flags(${EXE_TARGET} EXE_FLAGS)
 	apply_libraries(${EXE_TARGET} EXE_LIBRARIES)
 
-	if(WIN32 AND MSVC)
-		set_target_properties(
-			${EXE_TARGET}
-			PROPERTIES
-			LINK_FLAGS /SAFESEH:NO
-		)
-	endif()
+	set_target_properties(
+		${EXE_TARGET}
+		PROPERTIES
+			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+			RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}
+			RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}
+	)
 
 	# Install the target
-	if(EXE_INSTALL_RUNTIME)
+	if (EXE_INSTALL_RUNTIME)
 		install(
 			TARGETS ${EXE_TARGET}
 			RUNTIME DESTINATION ${EXE_INSTALL_RUNTIME}
 		)
-	endif()
+	endif ()
 endfunction()
 
 # ---------------------------------------------------------
@@ -239,12 +223,6 @@ function(irccd_generate_guide target filename sources)
 			${sources}
 		)
 
-		set(
-			linkify_args
-			${WITH_DOCS_DIRECTORY}
-			${WITH_DOCS_DIRECTORY}/guides
-		)
-
 		add_custom_command(
 			OUTPUT ${WITH_DOCS_DIRECTORY}/guides/${filename}.html
 			DEPENDS
@@ -255,9 +233,9 @@ function(irccd_generate_guide target filename sources)
 			COMMAND
 				${Pandoc_EXECUTABLE} ${args}
 			COMMAND
-				cat ${outputtmp} | $<TARGET_FILE:linkify> ${linkify_args} > ${output}
+				$<TARGET_FILE:linkify> ${outputtmp} ${output} ${WITH_DOCS_DIRECTORY} ${WITH_DOCS_DIRECTORY}/guides
 			COMMAND
-				rm ${outputtmp}
+				${CMAKE_COMMAND} -E remove ${outputtmp}
 		)
 
 		add_custom_target(

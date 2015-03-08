@@ -16,77 +16,96 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+#
+# Irccd uses InnoSetup instead of NSIS so we are using CPack only for
+# source package, we do provide package_inno target though.
+#
+
+set(
+	plugins
+	antiflood
+	ask
+	auth
+	badwords
+	date
+	history
+	logger
+	plugin
+	reminder
+	roulette
+)
+
 if (WIN32)
-	set (CPACK_NSIS_PACKAGE_NAME ${IRCCD_PACKAGE_NAME})
+	find_package(InnoSetup)
 
-	# Visual Studio is currently not supported
-#	if (CMAKE_CL_64)
-#		set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
-#		set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION} (x64)")
-#	else ()
-#		set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES")
-#		set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}")
-#	endif ()
+	macro(irccd_list_to_inno list var)
+		#
+		# We can't replace ';' directly because it is a reserved
+		# character in InnoSetup syntax.
+		#
+		foreach (l ${list})
+			set(${var} "${${var}}${l}\n")
+		endforeach()
+	endmacro ()
 
-	# This determine the *target* architecture
-	if (CMAKE_SIZEOF_VOID_P MATCHES "8")
-		set(WINARCH "amd64")
+	if (IRCCD_64BIT)
+		set(IRCCD_PACKAGE_NAME "Irccd (x64)")
+		set(IRCCD_PACKAGE_FILENAME "irccd-Windows-amd64")
+		set(IRCCD_PACKAGE_SETUP_EXTRA "ArchitecturesAllowed=x64\nArchitecturesInstallIn64BitMode=x64")
+
+		set(
+			DLL_FILES
+			"Source: \"${CMAKE_SOURCE_DIR}/win32/amd64/libeay32.dll\"\; DestDir: \"{app}\\\\bin\""
+			"Source: \"${CMAKE_SOURCE_DIR}/win32/amd64/libgcc_s_seh-1.dll\"\; DestDir: \"{app}\\\\bin\""
+			"Source: \"${CMAKE_SOURCE_DIR}/win32/amd64/ssleay32.dll\"\; DestDir: \"{app}\\\\bin\""
+		)
 	else ()
-		set(WINARCH "x86")
+		set(IRCCD_PACKAGE_NAME "Irccd")
+		set(IRCCD_PACKAGE_FILENAME "irccd-Windows-x86")
+
+		set(
+			DLL_FILES
+			"Source: \"${CMAKE_SOURCE_DIR}/win32/x86/libeay32.dll\"\; DestDir: \"{app}\\\\bin\""
+			"Source: \"${CMAKE_SOURCE_DIR}/win32/x86/libgcc_s_dw2-1.dll\"\; DestDir: \"{app}\\\\bin\""
+			"Source: \"${CMAKE_SOURCE_DIR}/win32/x86/ssleay32.dll\"\; DestDir: \"{app}\\\\bin\""
+		)
 	endif ()
 
-	# Visual Studio is currently not supported
-#	if (${WINARCH} MATCHES "amd64")
-#		set(REDIST_FILE "vcredist_x64.exe")
-#	else ()
-#		set(REDIST_FILE "vcredist_x86.exe")
-#	endif ()
+	foreach (p ${plugins})
+		list(
+			APPEND
+			PLUGIN_COMPONENTS
+			"Name: \"plugins\\\\${p}\"\; Description: \"Irccd ${p} plugin\"\; Types: full"
+		)
 
-#	install(
-#		PROGRAMS
-#		"${CMAKE_SOURCE_DIR}/win32/${REDIST_FILE}"
-#		DESTINATION tmp
-#	)
+		list(
+			APPEND
+			PLUGIN_FILES
+			"Source: \"${irccd_SOURCE_DIR}/plugins/${p}.lua\"\; DestDir: \"{app}\\\\${MODDIR}\"\; Components: plugins\\\\${p}"
+		)
+	endforeach ()
 
-#	list(
-#		APPEND
-#		CPACK_NSIS_EXTRA_INSTALL_COMMANDS
-#		"ExecWait '$INSTDIR\\\\tmp\\\\${REDIST_FILE} /quiet'"
-#	)
+	irccd_list_to_inno("${PLUGIN_COMPONENTS}" IRCCD_PACKAGE_COMPONENTS_EXTRA)
+	irccd_list_to_inno("${PLUGIN_FILES}" IRCCD_PACKAGE_FILES_EXTRA)
+	irccd_list_to_inno("${DLL_FILES}" IRCCD_PACKAGE_DLL_EXTRA)
 
-	set(CPACK_GENERATOR "NSIS")
-	set(CPACK_MONOLITHIC_INSTALL FALSE)
+	configure_file(
+		${CMAKE_SOURCE_DIR}/cmake/internal/setup.iss.in
+		${CMAKE_BINARY_DIR}/setup.iss
+	)
 
-	set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
-	set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README")
+	add_custom_target(
+		package_inno
+		DEPENDS
+			irccd
+			irccdctl
+			docs
+			${CMAKE_BINARY_DIR}/setup.iss
+		COMMAND	${InnoSetup_COMPILER} ${CMAKE_BINARY_DIR}/setup.iss
+	)
+endif ()
 
-	set(CPACK_NSIS_DISPLAY_NAME "Irccd")
-	set(CPACK_NSIS_EXECUTABLES_DIRECTORY "bin")
-	set(CPACK_NSIS_CONTACT "markand@malikania.fr")
-
-	set(CPACK_PACKAGE_VENDOR "Malikania")
-	set(CPACK_PACKAGE_VERSION "${IRCCD_VERSION}")
-	set(CPACK_PACKAGE_VERSION_MAJOR ${MAJOR})
-	set(CPACK_PACKAGE_VERSION_MINOR ${MINOR})
-	set(CPACK_PACKAGE_FILE_NAME "irccd-${IRCCD_VERSION}-${CMAKE_SYSTEM_NAME}-${WINARCH}")
-	set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
-	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Irccd")
-
-	# Read from file the extra commands
-#	file(READ ${CMAKE_BINARY_DIR}/nsis_extra_install.txt INSTALL_COMMANDS)
-
-	# Startup menu for documentation
-	set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS ${CPACK_NSIS_EXTRA_INSTALL_COMMANDS} ${INSTALL_COMMANDS})
-	set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS ${CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS} ${UNINSTALL_COMMANDS})
-
-	# Wizards images (currently not working)
-	set(CPACK_PACKAGE_NAME "Irccd")
-	set(CPACK_NSIS_WELCOME_BITMAP "${CMAKE_SOURCE_DIR}/win32/left.bmp")
-	set(CPACK_NSIS_HEADER_BITMAP "${CMAKE_SOURCE_DIR}/win32/top.bmp")
-else()
-	set(CPACK_GENERATOR "TGZ")
-endif()
-
+set(CPACK_GENERATOR "TGZ")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "irccd-${IRCCD_VERSION}-source")
 set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
 set(CPACK_SOURCE_IGNORE_FILES ".hg;_build_")

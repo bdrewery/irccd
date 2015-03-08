@@ -270,7 +270,7 @@ bool Util::hasAccess(const std::string &path)
 	return ret;
 }
 
-void Util::mkdir(const std::string &dir, int mode)
+void Util::mkdir(const std::string &dir, int)
 {
 	std::ostringstream oss;
 

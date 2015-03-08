@@ -31,17 +31,17 @@ if (UNIX)
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 ${CMAKE_CXX_FLAGS}")
 elseif (WIN32)
 	if (MINGW)
-		set(CMAKE_C_FLAGS "-Wall -Wextra ${CMAKE_C_FLAGS}")
-		set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 ${CMAKE_CXX_FLAGS}")
+		set(CMAKE_C_FLAGS "-Wall -Wextra -D_WIN32_WINNT=0x0600 ${CMAKE_C_FLAGS}")
+		set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 -D_WIN32_WINNT=0x0600 ${CMAKE_CXX_FLAGS}")
 	else ()
-		#
-		# /!\ MSVC not supported until Visual Studio 2015 /!\
-		#
 		message(FATAL_ERROR "Irccd does not support Visual Studio yet")
-
-		# set(CMAKE_C_FLAGS "/D _CRT_SECURE_NO_WARNINGS ${CMAKE_C_FLAGS}")
-		# set(CMAKE_CXX_FLAGS "/D _CRT_SECURE_NO_WARNINGS ${CMAKE_CXX_FLAGS}")
 	endif ()
+endif ()
+
+if (CMAKE_SIZEOF_VOID_P MATCHES "8")
+	set(IRCCD_64BIT TRUE)
+else ()
+	set(IRCCD_64BIT FALSE)
 endif ()
 
 # ---------------------------------------------------------

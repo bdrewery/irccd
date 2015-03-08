@@ -17,3 +17,5 @@
 #
 
 create_test(test-converter TestConverter.cpp)
+
+target_link_libraries(test-converter lua)

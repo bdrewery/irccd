@@ -29,10 +29,12 @@ set(
 set(
 	CMAKE_INTERNAL_SOURCES
 	${CMAKE_CURRENT_LIST_DIR}/internal/IrccdConfig.h.in
+	${CMAKE_CURRENT_LIST_DIR}/internal/setup.iss.in
 )
 
 set(
 	CMAKE_PACKAGES_SOURCES
+	${CMAKE_CURRENT_LIST_DIR}/packages/FindInnoSetup.cmake
 	${CMAKE_CURRENT_LIST_DIR}/packages/FindLibiconv.cmake
 	${CMAKE_CURRENT_LIST_DIR}/packages/FindPandoc.cmake
 )

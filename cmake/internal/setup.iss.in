@@ -1,0 +1,50 @@
+;
+; setup.iss -- CMake configured InnoSetup file
+;
+; Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
+;
+; Permission to use, copy, modify, and/or distribute this software for any
+; purpose with or without fee is hereby granted, provided that the above
+; copyright notice and this permission notice appear in all copies.
+;
+; THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+; WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+; MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+; ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+; WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+; ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+; OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+;
+
+[Setup]
+AppName = Irccd
+AppVersion = @IRCCD_VERSION@
+DefaultDirName = {pf}\@IRCCD_PACKAGE_NAME@
+DefaultGroupName = @IRCCD_PACKAGE_NAME@
+OutputDir = @CMAKE_BINARY_DIR@
+OutputBaseFilename = @IRCCD_PACKAGE_FILENAME@
+WizardImageFile = @CMAKE_SOURCE_DIR@/win32/left.bmp
+@IRCCD_PACKAGE_SETUP_EXTRA@
+
+[Types]
+Name: "full"; Description: "Full installation"
+Name: "compact"; Description: "Compact installation"
+Name: "custom"; Description: "Custom installation"; Flags: iscustom
+
+[Components]
+Name: "doc"; Description: "Install Irccd documentation"; Types: full
+Name: "doc\api"; Description: "Install Irccd Lua API documentation"; Types: full
+Name: "doc\doxygen"; Description: "Install internal irccd doxygen documentation"; Types: full
+Name: "doc\guides"; Description: "Install Irccd guies"; Types: full
+Name: "plugins"; Description: "Irccd Lua plugins"; Types: full
+@IRCCD_PACKAGE_COMPONENTS_EXTRA@
+
+[Files]
+Source: "irccd.exe"; DestDir: "{app}\bin"
+Source: "irccdctl.exe"; DestDir: "{app}\bin"
+Source: "docs\css\*"; DestDir: "{app}\doc\css"; Components: "doc"; Flags: recursesubdirs createallsubdirs
+Source: "docs\api\*"; DestDir: "{app}\doc\api"; Components: "doc\api"; Flags: recursesubdirs createallsubdirs
+Source: "docs\doxygen\*"; DestDir: "{app}\doc\doxygen"; Components: "doc\doxygen"; Flags: recursesubdirs createallsubdirs
+Source: "docs\guides\*"; DestDir: "{app}\doc\guides"; Components: "doc\guides"; Flags: recursesubdirs createallsubdirs
+@IRCCD_PACKAGE_FILES_EXTRA@
+@IRCCD_PACKAGE_DLL_EXTRA@
