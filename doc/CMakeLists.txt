@@ -31,9 +31,9 @@ add_custom_target(
 # ---------------------------------------------------------
 
 # Update man pages date
-set(MONTH "January")
-set(DAY 30)
-set(YEAR 2014)
+set(MONTH "March")
+set(DAY 09)
+set(YEAR 2015)
 
 irccd_define_man(irccd.1 man1)
 irccd_define_man(irccd.conf.5 man5)

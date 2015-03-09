@@ -42,6 +42,8 @@
 # WITH_PLUGIN_REMINDER	Enable reminder plugin
 # WITH_PLUGIN_ROULETTE	Enable roulette plugin
 #
+# Note: the option() commands for WITH_PLUGIN_<name> variables are defined in plugins/CMakeLists.txt
+#
 
 # Manual pages on Windows are pretty useless
 if (WIN32)
@@ -62,19 +64,37 @@ option(WITH_DOCS_GUIDES_HTML "Enable building of HTML guides" On)
 option(WITH_DOCS_DOXYGEN "Enable doxygen" On)
 option(WITH_DOCS_MAN "Install man pages" ${DEFAULT_MAN})
 option(WITH_DOCS_LUA "Enable building of Lua documentation" On)
-option(WITH_PLUGIN_ANTIFLOOD "Enable antiflood plugin" On)
-option(WITH_PLUGIN_ASK "Enable ask plugin" On)
-option(WITH_PLUGIN_AUTH "Enable auth plugin" On)
-option(WITH_PLUGIN_BADWORDS "Enable badwords plugin" On)
-option(WITH_PLUGIN_DATE "Enable date plugin" On)
-option(WITH_PLUGIN_HISTORY "Enable history plugin" On)
-option(WITH_PLUGIN_LOGGER "Enable logger plugin" On)
-option(WITH_PLUGIN_PLUGIN "Enable plugin plugin" On)
-option(WITH_PLUGIN_REMINDER "Enable reminder plugin" On)
-option(WITH_PLUGIN_ROULETTE "Enable roulette plugin" On)
 
 set(WITH_DOCS_DIRECTORY ${CMAKE_BINARY_DIR}/docs
 	CACHE STRING "Directory where to output docs")
+
+# ---------------------------------------------------------
+# Installation paths
+# ---------------------------------------------------------
+
+#
+# Installation paths. On Windows, we just use the suffix relative
+# to the installation path.
+#
+if (WIN32)
+	set(MODDIR "plugins"
+		CACHE STRING "Module prefix where to install")
+	set(DOCDIR "doc"
+		CACHE STRING "Documentation directory")
+	set(MANDIR "man"
+		CACHE STRING "Man directory")
+	set(ETCDIR "etc"
+		CACHE STRING "Configuration directory")
+else ()
+	set(MODDIR "share/irccd/plugins"
+		CACHE STRING "Module prefix where to install")
+	set(DOCDIR "share/doc/irccd"
+		CACHE STRING "Documentation directory")
+	set(MANDIR "share/man"
+		CACHE STRING "Man directory")
+	set(ETCDIR "etc"
+		CACHE STRING "Configuration directory")
+endif ()
 
 # ---------------------------------------------------------
 # Internal dependencies

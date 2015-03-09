@@ -19,15 +19,12 @@
 # Project
 project(irccdctl)
 
-set(SOURCES
-	main.cpp
-	Irccdctl.cpp
-	Irccdctl.h
-)
-
-define_executable(
+irccd_define_executable(
 	TARGET irccdctl
-	SOURCES ${SOURCES}
+	SOURCES
+		main.cpp
+		Irccdctl.cpp
+		Irccdctl.h
 	LIBRARIES common
 	INSTALL_RUNTIME bin/
 )

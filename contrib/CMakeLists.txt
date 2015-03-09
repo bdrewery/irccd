@@ -18,9 +18,6 @@
 
 project(contrib)
 
-#
-# File for systemd
-#
 if (WITH_SYSTEMD)
 	# Directory for systemd
 	set(WITH_SYSTEMDDIR "/usr/lib/systemd/system"

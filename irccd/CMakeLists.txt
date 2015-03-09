@@ -47,32 +47,12 @@ set(
 )
 
 # ---------------------------------------------------------
-# Optional libiconv
-# ---------------------------------------------------------
-
-# Not yet supported.
-# if (WITH_LIBICONV)
-# 	find_package(Libiconv)
-#
-# 	if (Libiconv_FOUND)
-# 		list(
-# 			APPEND
-# 			SOURCES
-# 			Converter.cpp
-# 			Converter.h
-# 		)
-# 	endif ()
-# endif ()
-
-# ---------------------------------------------------------
 # Optional Lua
 # ---------------------------------------------------------
 
 if (WITH_LUA)
 	include(event/Event.cmake)
 	include(lua/Lua.cmake)
-
-	add_subdirectory(plugins)
 
 	list(
 		APPEND
@@ -108,23 +88,9 @@ if (WITH_LUA)
 	)
 
 	list(APPEND LIBRARIES lua)
-
-	list(
-		APPEND
-		SOURCES
-		plugins/antiflood.lua
-		plugins/ask.lua
-		plugins/auth.lua
-		plugins/badwords.lua
-		plugins/date.lua
-		plugins/history.lua
-		plugins/logger.lua
-		plugins/plugin.lua
-		plugins/roulette.lua
-	)
 endif ()
 
-define_executable(
+irccd_define_executable(
 	TARGET irccd
 	SOURCES ${SOURCES}
 	INCLUDES ${INCLUDES} ${CMAKE_SOURCE_DIR}
@@ -141,19 +107,3 @@ install(
 	DESTINATION "${ETCDIR}"
 	RENAME "irccd.conf.sample"
 )
-
-
-if (WIN32)
-	if (CMAKE_SIZEOF_VOID_P MATCHES "8")
-		set(WINARCH x64)
-	else ()
-		set(WINARCH x32)
-	endif ()
-
-	install(
-		FILES
-			${CMAKE_SOURCE_DIR}/win32/${WINARCH}/libeay32.dll
-			${CMAKE_SOURCE_DIR}/win32/${WINARCH}/ssleay32.dll
-		DESTINATION bin
-	)
-endif ()

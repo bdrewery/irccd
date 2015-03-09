@@ -19,7 +19,7 @@
 # Libircclient bundled
 project(extern-libircclient)
 
-set (FLAGS "ENABLE_THREADS")
+set(FLAGS "ENABLE_THREADS")
 
 # SSL is optional
 if (WITH_SSL)
@@ -33,7 +33,7 @@ if (WITH_IPV6)
 	list(APPEND FLAGS "ENABLE_IPV6")
 endif ()
 
-define_library(
+irccd_define_library(
 	TARGET ircclient
 	SOURCES src/libircclient.c
 	FLAGS ${FLAGS}

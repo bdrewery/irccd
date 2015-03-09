@@ -22,8 +22,6 @@ add_library(gtest src/gtest-all.cc)
 
 target_include_directories(
 	gtest
-	PUBLIC
-		${GoogleTest_SOURCE_DIR}/include
-	PRIVATE
-		${GoogleTest_SOURCE_DIR}
+	PUBLIC ${GoogleTest_SOURCE_DIR}/include
+	PRIVATE ${GoogleTest_SOURCE_DIR}
 )

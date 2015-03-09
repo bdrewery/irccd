@@ -37,6 +37,7 @@
 # tests			- The unit tests.
 # contrib		- User contributions not maintained by irccd authors.
 # extern		- External libraries.
+# plugins		- Official irccd plugins.
 
 cmake_minimum_required(VERSION 3.0)
 project(irccd)
@@ -56,6 +57,7 @@ add_subdirectory(doc)
 add_subdirectory(irccd)
 add_subdirectory(irccdctl)
 add_subdirectory(contrib)
+add_subdirectory(plugins)
 
 # Tests
 include(CTest)
@@ -96,6 +98,7 @@ message("    logger:           ${WITH_PLUGIN_LOGGER_MSG}")
 message("    plugin:           ${WITH_PLUGIN_PLUGIN_MSG}")
 message("    reminder:         ${WITH_PLUGIN_REMINDER_MSG}")
 message("    roulette:         ${WITH_PLUGIN_ROULETTE_MSG}")
+message("")
 
 # CPack
 include(cmake/IrccdCPackConfig.cmake)

@@ -22,6 +22,10 @@ include(CheckStructHasMember)
 include(CheckSymbolExists)
 include(CheckTypeSize)
 
+if (WIN32)
+	find_package(InnoSetup)
+endif ()
+
 # ---------------------------------------------------------
 # Global compile flags
 # ---------------------------------------------------------
@@ -45,34 +49,6 @@ else ()
 endif ()
 
 # ---------------------------------------------------------
-# Installation paths
-# ---------------------------------------------------------
-
-#
-# Installation paths. On Windows, we just use the suffix relative
-# to the installation path.
-#
-if (WIN32)
-	set(MODDIR "plugins"
-		CACHE STRING "Module prefix where to install")
-	set(DOCDIR "doc"
-		CACHE STRING "Documentation directory")
-	set(MANDIR "man"
-		CACHE STRING "Man directory")
-	set(ETCDIR "etc"
-		CACHE STRING "Configuration directory")
-else ()
-	set(MODDIR "share/irccd/plugins"
-		CACHE STRING "Module prefix where to install")
-	set(DOCDIR "share/doc/irccd"
-		CACHE STRING "Documentation directory")
-	set(MANDIR "share/man"
-		CACHE STRING "Man directory")
-	set(ETCDIR "etc"
-		CACHE STRING "Configuration directory")
-endif ()
-
-# ---------------------------------------------------------
 # Portability requirements
 # ---------------------------------------------------------
 
@@ -87,17 +63,6 @@ check_type_size(uint64_t HAVE_UINT64)
 
 if (NOT HAVE_STDINT_H)
 	message("irccd requires stdint.h or cstdint header")
-endif ()
-
-#
-# The following settings are used for the doc/ directory and CPack.
-#
-if (WIN32)
-	if (CMAKE_CL_64)
-		set(IRCCD_PACKAGE_NAME "Irccd (x64)")
-	else ()
-		set(IRCCD_PACKAGE_NAME "Irccd")
-	endif ()
 endif ()
 
 # ---------------------------------------------------------
@@ -128,8 +93,6 @@ endif ()
 # HAVE_STAT_ST_BLKSIZE	- The struct stat has st_blksize field,
 # HAVE_STAT_ST_BLOCKS	- The struct stat has st_blocks field.
 #
-
-set(EXTERNDIR ${CMAKE_SOURCE_DIR}/extern)
 
 # Check of getopt(3) function.
 check_function_exists(getopt HAVE_GETOPT)
@@ -190,7 +153,7 @@ configure_file(
 )
 
 # Port library that every target links to
-add_library(port STATIC ${PORT_SOURCES})
+add_library(port STATIC ${PORT_SOURCES} ${CMAKE_SOURCE_DIR}/cmake/internal/dummy.c)
 
 target_include_directories(
 	port

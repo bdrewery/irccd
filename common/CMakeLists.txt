@@ -46,7 +46,7 @@ elseif (WIN32)
 	list(APPEND LIBRARIES "gdi32")
 endif ()
 
-define_library(
+irccd_define_library(
 	TARGET common
 	SOURCES ${SOURCES}
 	LIBRARIES ${LIBRARIES}

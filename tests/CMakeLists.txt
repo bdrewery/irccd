@@ -22,12 +22,9 @@ project(tests)
 # Function to create a test
 function(create_test name sources)
 	include_directories(
-		${CPPUNIT_INCLUDE_DIR}
 		${CMAKE_BINARY_DIR}
 		${CMAKE_SOURCE_DIR}
 		${irccd_SOURCE_DIR}
-		${LUA52_INCLUDE_DIR}
-		${LUAJIT_INCLUDE_DIR}
 		${extern_SOURCE_DIR}
 	)
 
@@ -43,8 +40,7 @@ function(create_test name sources)
 		common
 		ircclient
 		gtest
-		${LUA52_LIBRARIES}
-		${LUAJIT_LIBRARIES}
+		lua
 	)
 
 	if (UNIX)
@@ -57,7 +53,6 @@ function(create_dir target dirname)
 	add_custom_command(
 		TARGET ${target}
 		POST_BUILD
-
 		COMMAND
 			${CMAKE_COMMAND} -E make_directory
 			${CMAKE_CURRENT_BINARY_DIR}/${dirname}

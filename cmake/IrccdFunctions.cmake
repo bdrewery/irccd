@@ -18,68 +18,24 @@
 
 include(CMakeParseArguments)
 
-function(check_mandatory prefix list)
-	# Check mandatory arguments
-	foreach(a ${list})
-		if (NOT ${prefix}_${a})
-			message(FATAL_ERROR "Please specify ${a} parameter")
-		endif ()
-	endforeach()
-endfunction()
-
-function(apply_includes target local public)
-	# We always add CMake's binary dir for config.h
-	target_include_directories(${target} PRIVATE ${CMAKE_BINARY_DIR})
-
-	if(${local})
-		target_include_directories(${target} PRIVATE ${${local}})
-	endif()
-
-	if(${public})
-		target_include_directories(${target} PUBLIC ${${public}})
-	endif()
-endfunction()
-
-function(apply_flags target flags)
-	if(${flags})
-		target_compile_definitions(${target} PRIVATE ${${flags}})
-	endif()
-
-	# Remove Windows useless warnings
-	if (WIN32 AND MSVC)
-		target_compile_definitions(
-			${target}
-			PRIVATE "_CRT_SECURE_NO_WARNINGS"
-		)
-
-		target_compile_options(
-			${target}
-			PRIVATE /wd4996 /wd4244 /wd4267 /wd4133
-		)
-	endif ()
-endfunction()
-
-function(apply_libraries target libs)
-	if (${libs})
-		target_link_libraries(${target} ${${libs}})
-	endif ()
-
-	target_link_libraries(${target} port)
-endfunction()
+# ---------------------------------------------------------
+# Public functions
+# ---------------------------------------------------------
 
 # ---------------------------------------------------------
-# define_library(
+# irccd_define_library(
 #	TARGET target name
 #	SOURCES src1, src2, srcn
-#	FLAGS optional C/C++ flags (without -D)
-#	LIBRARIES optional libraries to link
-#	LOCAL_INCLUDES optional local includes for the target only
-#	PUBLIC_INCLUDES optional includes to share with target dependencies
+#	FLAGS (Optional) C/C++ flags (without -D)
+#	LIBRARIES (Optional) libraries to link
+#	LOCAL_INCLUDES (Optional) local includes for the target only
+#	PUBLIC_INCLUDES (Optional) includes to share with target dependencies
 # )
 #
-# Create a static library.
-#
-function(define_library)
+# Create a static library for internal use.
+# ---------------------------------------------------------
+
+function(irccd_define_library)
 	set(oneValueArgs TARGET)
 	set(multiValueArgs SOURCES FLAGS LIBRARIES LOCAL_INCLUDES PUBLIC_INCLUDES)
 	set(mandatory TARGET SOURCES)
@@ -94,18 +50,19 @@ function(define_library)
 endfunction()
 
 # ---------------------------------------------------------
-# define_executable(
+# irccd_define_executable(
 #	TARGET target name
 #	SOURCES src1, src2, srcn
-#	FLAGS optional C/C++ flags (without -D)
-#	LIBRARIES optional libraries to link
-#	INCLUDES optional includes for the target
-#	INSTALL_RUNTIME optional relative path where to install the executable
+#	FLAGS (Optional) C/C++ flags (without -D)
+#	LIBRARIES (Optional) libraries to link
+#	INCLUDES (Optional) includes for the target
+#	INSTALL_RUNTIME (Optional) relative path where to install the executable
 # )
 #
-# Create an executable.
-#
-function(define_executable)
+# Create an executable that can be installed or not.
+# ---------------------------------------------------------
+
+function(irccd_define_executable)
 	set(oneValueArgs TARGET INSTALL_RUNTIME)
 	set(multiValueArgs SOURCES FLAGS LIBRARIES INCLUDES)
 	set(mandatory TARGET)
@@ -121,9 +78,9 @@ function(define_executable)
 	set_target_properties(
 		${EXE_TARGET}
 		PROPERTIES
-			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-			RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}
-			RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}
+			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/fakeroot/${EXE_INSTALL_RUNTIME}
+			RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/fakeroot/${EXE_INSTALL_RUNTIME}
+			RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/fakeroot/${EXE_INSTALL_RUNTIME}
 	)
 
 	# Install the target
@@ -136,28 +93,6 @@ function(define_executable)
 endfunction()
 
 # ---------------------------------------------------------
-# define_plugin(name file description default)
-#
-# Parameters:
-#	name		- The plugin name, an automatic option
-#			  WITH_PLUGIN_<name> will be created using the default
-#			  as On or Off value.
-#	file		- The file (excluding its extension)
-#	description	- The option description
-#	default		- Default option (on or off)
-#
-# This function create a new option to install or not the plugin and its
-# documentation.
-#
-macro(define_plugin name file description default)
-	option(WITH_PLUGIN_${name} ${description} ${default})
-
-	if(WITH_PLUGIN_${name})
-		install(FILES ${file}.lua DESTINATION ${MODDIR})
-	endif()
-endmacro()
-
-# ---------------------------------------------------------
 # irccd_define_man(file man)
 #
 # Parameters:
@@ -165,9 +100,10 @@ endmacro()
 #	man		- The man section
 #
 # This function configure the manual and install it if WITH_MAN is set.
-#
+# ---------------------------------------------------------
+
 function(irccd_define_man file man)
-	if(WITH_MAN)
+	if (WITH_MAN)
 		set(path "${doc_SOURCE_DIR}/man/${file}.in")
 		set(output "${doc_BINARY_DIR}/${file}")
 
@@ -177,7 +113,7 @@ function(irccd_define_man file man)
 			FILES ${output}
 			DESTINATION ${MANDIR}/${man}
 		)
-	endif()
+	endif ()
 endfunction()
 
 # ---------------------------------------------------------
@@ -187,8 +123,9 @@ endfunction()
 #	prefix		- The prefix of variables (e.g FOO)
 #	list		- The list of variables that must be set(e.g. A B)
 #
-# Verify that some args are well defined.
-#
+# Verify that some args are well defined when using CMakeParseArguments.
+# ---------------------------------------------------------
+
 function(irccd_verify_args prefix list)
 	foreach (v ${list})
 		if (NOT ${prefix}_${v})
@@ -205,6 +142,9 @@ endfunction()
 #	filename	- The filename generated without extension
 #	sources		- The sources files
 #
+# Generate a guide in both PDF and HTML formats.
+# ---------------------------------------------------------
+
 function(irccd_generate_guide target filename sources)
 	if (WITH_DOCS_GUIDES_HTML)
 		set(outputtmp ${WITH_DOCS_DIRECTORY}/guides/${filename}.html.tmp)
@@ -260,4 +200,44 @@ function(irccd_generate_guide target filename sources)
 
 		add_dependencies(docs docs-guide-${target}-latex)
 	endif ()
+endfunction()
+
+# ---------------------------------------------------------
+# Private functions
+# ---------------------------------------------------------
+
+function(check_mandatory prefix list)
+	# Check mandatory arguments
+	foreach(a ${list})
+		if (NOT ${prefix}_${a})
+			message(FATAL_ERROR "Please specify ${a} parameter")
+		endif ()
+	endforeach()
+endfunction()
+
+function(apply_includes target local public)
+	# We always add CMake's binary dir for config.h
+	target_include_directories(${target} PRIVATE ${CMAKE_BINARY_DIR})
+
+	if (${local})
+		target_include_directories(${target} PRIVATE ${${local}})
+	endif ()
+
+	if (${public})
+		target_include_directories(${target} PUBLIC ${${public}})
+	endif ()
+endfunction()
+
+function(apply_flags target flags)
+	if (${flags})
+		target_compile_definitions(${target} PRIVATE ${${flags}})
+	endif ()
+endfunction()
+
+function(apply_libraries target libs)
+	if (${libs})
+		target_link_libraries(${target} ${${libs}})
+	endif ()
+
+	target_link_libraries(${target} port)
 endfunction()

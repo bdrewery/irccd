@@ -36,10 +36,16 @@ set(
 )
 
 if (WIN32)
-	find_package(InnoSetup)
-
 	if (NOT InnoSetup_FOUND)
 		message("Note: InnoSetup not found, no package_inno target provided")
+	elseif (NOT WITH_DOCS_LUA)
+		message("Note: Lua documentation disabled, no package_inno target provided")
+	elseif (NOT WITH_DOCS_DOXYGEN)
+		message("Note: Doxygen documentation disabled, no package_inno target provided")
+	elseif (NOT WITH_DOCS_GUIDES_PDF)
+		message("Note: PDF guides documentation disabled, no package_inno target provided")
+	elseif (NOT WITH_DOCS_GUIDES_HTML)
+		message("Note: HTML guides documentation disabled, no package_inno target provided")
 	endif ()
 endif ()
 
