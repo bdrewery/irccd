@@ -38,6 +38,12 @@ set(
 if (WIN32)
 	find_package(InnoSetup)
 
+	if (NOT InnoSetup_FOUND)
+		message("Note: InnoSetup not found, no package_inno target provided")
+	endif ()
+endif ()
+
+if (InnoSetup_FOUND)
 	macro(irccd_list_to_inno list var)
 		#
 		# We can't replace ';' directly because it is a reserved
@@ -50,23 +56,27 @@ if (WIN32)
 
 	if (IRCCD_64BIT)
 		set(IRCCD_PACKAGE_NAME "Irccd (x64)")
-		set(IRCCD_PACKAGE_FILENAME "irccd-Windows-amd64")
+		set(IRCCD_PACKAGE_FILENAME "irccd-Windows-amd64-${IRCCD_VERSION}")
 		set(IRCCD_PACKAGE_SETUP_EXTRA "ArchitecturesAllowed=x64\nArchitecturesInstallIn64BitMode=x64")
 
 		set(
 			DLL_FILES
 			"Source: \"${CMAKE_SOURCE_DIR}/win32/amd64/libeay32.dll\"\; DestDir: \"{app}\\\\bin\""
 			"Source: \"${CMAKE_SOURCE_DIR}/win32/amd64/libgcc_s_seh-1.dll\"\; DestDir: \"{app}\\\\bin\""
+			"Source: \"${CMAKE_SOURCE_DIR}/win32/amd64/libstdc++-6.dll\"\; DestDir: \"{app}\\\\bin\""
+			"Source: \"${CMAKE_SOURCE_DIR}/win32/amd64/libwinpthread-1.dll\"\; DestDir: \"{app}\\\\bin\""
 			"Source: \"${CMAKE_SOURCE_DIR}/win32/amd64/ssleay32.dll\"\; DestDir: \"{app}\\\\bin\""
 		)
 	else ()
 		set(IRCCD_PACKAGE_NAME "Irccd")
-		set(IRCCD_PACKAGE_FILENAME "irccd-Windows-x86")
+		set(IRCCD_PACKAGE_FILENAME "irccd-Windows-x86-${IRCCD_VERSION}")
 
 		set(
 			DLL_FILES
 			"Source: \"${CMAKE_SOURCE_DIR}/win32/x86/libeay32.dll\"\; DestDir: \"{app}\\\\bin\""
 			"Source: \"${CMAKE_SOURCE_DIR}/win32/x86/libgcc_s_dw2-1.dll\"\; DestDir: \"{app}\\\\bin\""
+			"Source: \"${CMAKE_SOURCE_DIR}/win32/x86/libstdc++-6.dll\"\; DestDir: \"{app}\\\\bin\""
+			"Source: \"${CMAKE_SOURCE_DIR}/win32/x86/libwinpthread-1.dll\"\; DestDir: \"{app}\\\\bin\""
 			"Source: \"${CMAKE_SOURCE_DIR}/win32/x86/ssleay32.dll\"\; DestDir: \"{app}\\\\bin\""
 		)
 	endif ()
@@ -106,6 +116,6 @@ if (WIN32)
 endif ()
 
 set(CPACK_GENERATOR "TGZ")
-set(CPACK_SOURCE_PACKAGE_FILE_NAME "irccd-${IRCCD_VERSION}-source")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "irccd-${IRCCD_VERSION}")
 set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
 set(CPACK_SOURCE_IGNORE_FILES ".hg;_build_")
