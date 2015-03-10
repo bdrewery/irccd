@@ -97,7 +97,7 @@ if (InnoSetup_FOUND)
 		list(
 			APPEND
 			PLUGIN_FILES
-			"Source: \"${irccd_SOURCE_DIR}/plugins/${p}.lua\"\; DestDir: \"{app}\\\\${MODDIR}\"\; Components: plugins\\\\${p}"
+			"Source: \"${CMAKE_SOURCE_DIR}/plugins/${p}.lua\"\; DestDir: \"{app}\\\\${MODDIR}\"\; Components: plugins\\\\${p}"
 		)
 	endforeach ()
 

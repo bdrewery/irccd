@@ -40,8 +40,8 @@ Name: "plugins"; Description: "Irccd Lua plugins"; Types: full
 @IRCCD_PACKAGE_COMPONENTS_EXTRA@
 
 [Files]
-Source: "irccd.exe"; DestDir: "{app}\bin"
-Source: "irccdctl.exe"; DestDir: "{app}\bin"
+Source: "fakeroot\bin\irccd.exe"; DestDir: "{app}\bin"
+Source: "fakeroot\bin\irccdctl.exe"; DestDir: "{app}\bin"
 Source: "docs\css\*"; DestDir: "{app}\doc\css"; Components: "doc"; Flags: recursesubdirs createallsubdirs
 Source: "docs\api\*"; DestDir: "{app}\doc\api"; Components: "doc\api"; Flags: recursesubdirs createallsubdirs
 Source: "docs\doxygen\*"; DestDir: "{app}\doc\doxygen"; Components: "doc\doxygen"; Flags: recursesubdirs createallsubdirs
