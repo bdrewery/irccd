@@ -19,6 +19,10 @@
 #include <algorithm>
 #include <cstring>
 
+#if !defined(_WIN32)
+#  include <sys/un.h>
+#endif
+
 #include "Socket.h"
 #include "SocketAddress.h"
 
@@ -70,8 +74,6 @@ Internet::Internet(const std::string &host, unsigned port, int domain)
  * -------------------------------------------------------- */
 
 #if !defined(_WIN32)
-
-#include <sys/un.h>
 
 Unix::Unix(const std::string &path, bool rm)
 {

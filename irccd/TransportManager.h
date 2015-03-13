@@ -19,8 +19,11 @@
 #include "TransportClient.h"
 
 class JsonObject;
+class JsonValue;
 
 namespace irccd {
+
+class TransportCommand;
 
 /**
  * @class TransportManager
@@ -64,6 +67,7 @@ private:
 #endif
 
 	CommandMap m_commandMap;
+	std::function<void (std::unique_ptr<TransportCommand>)> m_onEvent;
 	std::atomic<bool> m_running{false};
 	std::map<Socket, std::unique_ptr<TransportAbstract>> m_transports;
 	std::map<Socket, std::shared_ptr<TransportClientAbstract>> m_clients;
@@ -75,9 +79,19 @@ private:
 	void connect(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 	void disconnect(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 	void invite(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void join(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void kick(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 	void load(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void me(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void mode(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void notice(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void nick(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void part(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void reconnect(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 	void reload(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 	void say(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void topic(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void umode(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 	void unload(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	// transport slot
@@ -86,6 +100,8 @@ private:
 	void onDie(const std::shared_ptr<TransportClientAbstract> &);
 
 	// private helpers
+	JsonValue want(const JsonObject &, const std::string &name) const;
+	JsonValue optional(const JsonObject &, const std::string &name, const JsonValue &def) const;
 	void accept(const Socket &s);
 	void process(const Socket &s, int direction);
 	bool isTransport(const Socket &s) const noexcept;
@@ -116,14 +132,26 @@ public:
 		assert(!m_running);
 
 		try {
-			auto ptr = std::make_unique<T>(std::forward<Args>(args)...);
+			std::unique_ptr<TransportAbstract> ptr = std::make_unique<T>(std::forward<Args>(args)...);
 
 			ptr->bind();
 
 			m_transports.emplace(ptr->socket(), std::move(ptr));
 		} catch (const std::exception &ex) {
-			printf("FAIL: %s\n", ex.what());
 		}
+	}
+
+	/**
+	 * Set the event handler.
+	 *
+	 * @pre isRunning() must return false
+	 * @param func the handler function
+	 */
+	inline void onEvent(std::function<void (std::unique_ptr<TransportCommand>)> func) noexcept
+	{
+		assert(!m_running);
+
+		m_onEvent = std::move(func);
 	}
 
 	/**
@@ -150,7 +178,7 @@ public:
 	/**
 	 * Tell if the transport manager is currently running.
 	 *
-	 * @return 
+	 * @return
 	 */
 	inline bool isRunning() const noexcept
 	{

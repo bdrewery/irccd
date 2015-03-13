@@ -155,7 +155,9 @@ public:
 		, m_port(port)
 		, m_host(std::move(host))
 	{
-		Transport<Sock>::m_socket.set(IPPROTO_IPV6, IPV6_V6ONLY, static_cast<int>(domain == TransportAbstract::IPv6));
+		if (m_domain == AF_INET6) {
+			Transport<Sock>::m_socket.set(IPPROTO_IPV6, IPV6_V6ONLY, static_cast<int>(domain == TransportAbstract::IPv6));
+		}
 	}
 
 	/**
@@ -182,20 +184,21 @@ public:
 
 #if !defined(_WIN32)
 
-class TransportUnix : public TransportAbstract<SocketTcp> {
+class TransportUnix : public Transport<SocketTcp> {
 private:
 	std::string m_path;
 
 public:
 	inline TransportUnix(std::string path)
-		: TransportAbstract<SocketTcp>(AF_UNIX)
+		: Transport<SocketTcp>(AF_UNIX)
+		, m_path(std::move(path))
 	{
 	}
 
 	void bind()
 	{
-		TransportAbstract<Sock>::m_socket.bind(address::Unix(m_path, true));
-		TransportAbstract<Sock>::m_socket.listen();
+		m_socket.bind(address::Unix(m_path, true));
+		m_socket.listen();
 	}
 };
 

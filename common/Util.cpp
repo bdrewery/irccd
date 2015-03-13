@@ -68,7 +68,7 @@ std::string Util::pathBase(const std::string &append)
 	pos = base.find("bin");
 	if (pos != std::string::npos)
 		base.erase(pos);
-	
+
 	oss << base << "\\";
 #else
 	oss << PREFIX << "/";
@@ -270,7 +270,7 @@ bool Util::hasAccess(const std::string &path)
 	return ret;
 }
 
-void Util::mkdir(const std::string &dir, int)
+void Util::mkdir(const std::string &dir, int mode)
 {
 	std::ostringstream oss;
 
@@ -295,6 +295,9 @@ void Util::mkdir(const std::string &dir, int)
 		oss << dir << ": " << strerror(errno);
 		throw std::runtime_error(oss.str());
 	}
+
+	// Windows's macro does not use mode.
+	(void)mode;
 }
 
 std::string Util::convert(const std::string &line, const Args &args, int flags)
@@ -344,7 +347,7 @@ std::string Util::convert(const std::string &line, const Args &args, int flags)
 			}
 		} else if (copy[i] == '~' && (flags & ConvertHome)) {
 			auto value = std::getenv("HOME");
-	
+
 			copy.erase(i, 1);
 
 			if (value != nullptr) {
@@ -356,7 +359,7 @@ std::string Util::convert(const std::string &line, const Args &args, int flags)
 
 	if (flags & ConvertDate) {
 		auto tm = *std::localtime(&args.timestamp);
-	
+
 		auto tmp = new char[copy.size() + 2];
 
 		std::strftime(tmp, copy.size() + 2, copy.c_str(), &tm);
