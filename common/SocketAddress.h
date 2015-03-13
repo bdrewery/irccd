@@ -1,7 +1,7 @@
 /*
  * SocketAddress.h -- socket addresses management
  *
- * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,17 +16,17 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_SOCKET_ADDRESS_H_
-#define _IRCCD_SOCKET_ADDRESS_H_
+#ifndef _SOCKET_ADDRESS_NG_H_
+#define _SOCKET_ADDRESS_NG_H_
 
-/**
- * @file SocketAddress.h
- * @brief Portable C++ socket addresses management
- */
+#include <string>
 
-#include "Socket.h"
-
-namespace irccd {
+#if defined(_WIN32)
+#  include <Winsock2.h>
+#  include <Ws2tcpip.h>
+#else
+#  include <sys/socket.h>
+#endif
 
 /**
  * @class SocketAddress
@@ -35,19 +35,15 @@ namespace irccd {
  * This class is mostly used to bind, connect or getting information
  * on socket clients.
  *
- * @see BindAddressIP
- * @see ConnectAddressIP
- * @see AddressUnix
+ * @see Internet
+ * @see Unix
  */
 class SocketAddress {
 protected:
-	sockaddr_storage m_addr;	//!< the address
-	socklen_t m_addrlen;		//!< the address length
+	sockaddr_storage m_addr;
+	socklen_t m_addrlen;
 
 public:
-	// Friends.
-	friend class Socket;
-
 	/**
 	 * Default constructor.
 	 */
@@ -64,7 +60,7 @@ public:
 	/**
 	 * Default destructor.
 	 */
-	virtual ~SocketAddress();
+	virtual ~SocketAddress() = default;
 
 	/**
 	 * Get the address length
@@ -79,66 +75,57 @@ public:
 	 * @return the address
 	 */
 	const sockaddr_storage &address() const;
-};
 
-/**
- * @class BindAddressIP
- * @brief internet protocol bind class
- *
- * Create a bind address for internet protocol,
- * IPv4 or IPv6.
- */
-class BindAddressIP : public SocketAddress
-{
-private:
-	std::string m_host;
-	int m_family;
-	unsigned m_port;
-
-public:
 	/**
-	 * Create a bind end point.
+	 * Compare the addresses. The check is lexicographical.
 	 *
-	 * @param addr the interface to bind
-	 * @param port the port
-	 * @param family AF_INET or AF_INET6
-	 * @throw SocketError on error
+	 * @param s1 the first address
+	 * @param s2 the second address
+	 * @return true if s1 is less than s2
 	 */
-	BindAddressIP(const std::string &addr, unsigned port, int family);
+	friend bool operator<(const SocketAddress &s1, const SocketAddress &s2);
+
+	/**
+	 * Compare the addresses.
+	 *
+	 * @param s1 the first address
+	 * @param s2 the second address
+	 * @return true if s1 == s2
+	 */
+	friend bool operator==(const SocketAddress &s1, const SocketAddress &s2);
 };
 
+namespace address {
+
 /**
- * @class ConnectAddressIP
+ * @class Internet
  * @brief internet protocol connect class
  *
  * Create a connect address for internet protocol,
  * using getaddrinfo(3).
  */
-class ConnectAddressIP : public SocketAddress
-{
+class Internet : public SocketAddress {
 public:
 	/**
-	 * Create a connect end point.
+	 * Create an IPv4 or IPV6 end point.
 	 *
 	 * @param host the hostname
 	 * @param port the port
 	 * @param family AF_INET, AF_INET6, ...
-	 * @param type of socket SOCK_STREAM, SOCK_DGRAM, ...
 	 * @throw SocketError on error
 	 */
-	ConnectAddressIP(const std::string &host, unsigned port, int family, int type = SOCK_STREAM);
+	Internet(const std::string &host, unsigned port, int family);
 };
 
 #if !defined(_WIN32)
 
 /**
- * @class AddressUnix
+ * @class Unix
  * @brief unix family sockets
  *
  * Create an address to a specific path. Only available on Unix.
  */
-class AddressUnix : public SocketAddress
-{
+class Unix : public SocketAddress {
 public:
 	/**
 	 * Construct an address to a path.
@@ -146,29 +133,11 @@ public:
 	 * @param path the path
 	 * @param rm remove the file before (default: false)
 	 */
-	AddressUnix(const std::string &path, bool rm = false);
+	Unix(const std::string &path, bool rm = false);
 };
 
 #endif // ! !_WIN32
 
-/**
- * Test equality.
- *
- * @param sa1 the first socket address
- * @param sa2 the second socket address
- * @return true if equals
- */
-bool operator==(const irccd::SocketAddress &sa1, const irccd::SocketAddress &sa2);
+} // !address
 
-/**
- * Less operator.
- *
- * @param sa1 the first socket
- * @param sa2 the second socket
- * @return true if sa1 is less
- */
-bool operator<(const irccd::SocketAddress &sa1, const irccd::SocketAddress &sa2);
-
-} // !irccd
-
-#endif // !_IRCCD_SOCKET_ADDRESS_H_
+#endif // !_SOCKET_ADDRESS_NG_H_

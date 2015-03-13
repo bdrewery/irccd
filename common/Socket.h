@@ -1,7 +1,7 @@
 /*
  * Socket.h -- portable C++ socket wrappers
  *
- * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,22 +16,44 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_SOCKET_H_
-#define _IRCCD_SOCKET_H_
+#ifndef _SOCKET_NG_H_
+#define _SOCKET_NG_H_
 
 /**
  * @file Socket.h
- * @brief Portable C++ low level sockets
+ * @brief Portable socket abstraction
+ *
+ * User may set the following variables before compiling these files:
+ *
+ * SOCKET_NO_WSA_INIT	- (bool) Set to false if you don't want Socket class to
+ *			  automatically calls WSAStartup() when creating sockets.
+ *
+ *			  Otherwise, you will need to call Socket::init,
+ *			  Socket::finish yourself.
+ *
+ * SOCKET_NO_SSL_INIT	- (bool) Set to false if you don't want OpenSSL to be
+ *			  initialized when the first SocketSsl object is created.
+ *
+ * SOCKET_HAVE_POLL	- (bool) Set to true if poll(2) function is available.
+ *
+ *			  Note: on Windows, this is automatically set if the
+ *			  _WIN32_WINNT variable is greater or equal to 0x0600.
  */
 
+#include <cstring>
 #include <exception>
-#include <memory>
 #include <string>
 
 #if defined(_WIN32)
+#  include <atomic>
+#  include <cstdlib>
+#  include <mutex>
+
 #  include <WinSock2.h>
 #  include <WS2tcpip.h>
 #else
+#  include <cerrno>
+
 #  include <sys/ioctl.h>
 #  include <sys/socket.h>
 #  include <sys/types.h>
@@ -39,128 +61,247 @@
 #  include <arpa/inet.h>
 
 #  include <netinet/in.h>
-#  include <netinet/tcp.h>
 
 #  include <fcntl.h>
 #  include <netdb.h>
 #  include <unistd.h>
 #endif
 
-namespace irccd {
-
 class SocketAddress;
 
 /**
  * @class SocketError
- * @brief socket error reporting
- *
- * This class is mainly used in all socket operations that may fail.
+ * @brief Base class for sockets error
  */
 class SocketError : public std::exception {
-private:
+public:
+	enum Code {
+		WouldBlockRead,		///!< The operation would block for reading
+		WouldBlockWrite,	///!< The operation would block for writing
+		Timeout,		///!< The action did timeout
+		System			///!< There is a system error
+	};
+
+	Code m_code;
+	std::string m_function;
 	std::string m_error;
 
-public:
 	/**
-	 * Constructor with error.
+	 * Constructor that use the last system error.
 	 *
-	 * @param error the error
+	 * @param code which kind of error
+	 * @param function the function name
 	 */
-	SocketError(const std::string &error);
+	SocketError(Code code, std::string function);
 
 	/**
-	 * Get the error.
+	 * Constructor that use the system error set by the user.
+	 *
+	 * @param code which kind of error
+	 * @param function the function name
+	 * @param error the error
+	 */
+	SocketError(Code code, std::string function, int error);
+
+	/**
+	 * Constructor that set the error specified by the user.
+	 *
+	 * @param code which kind of error
+	 * @param function the function name
+	 * @param error the error
+	 */
+	SocketError(Code code, std::string function, std::string error);
+
+	/**
+	 * Get which function has triggered the error.
+	 *
+	 * @return the function name (e.g connect)
+	 */
+	inline const std::string &function() const noexcept
+	{
+		return m_function;
+	}
+
+	/**
+	 * The error code.
+	 *
+	 * @return the code
+	 */
+	inline Code code() const noexcept
+	{
+		return m_code;
+	}
+
+	/**
+	 * Get the error (only the error content).
 	 *
 	 * @return the error
 	 */
-	virtual const char * what() const throw();
+	const char *what() const noexcept
+	{
+		return m_error.c_str();
+	}
+};
+
+/**
+ * @enum SocketState
+ * @brief Category of error
+ */
+enum class SocketState {
+	Opened,				///!< Socket is opened
+	Closed,				///!< Socket has been closed
+	Bound,				///!< Socket is bound to address
+	Connected,			///!< Socket is connected to an end point
+	Disconnected,			///!< Socket is disconnected
+	Timeout				///!< Timeout has occured in a waiting operation
 };
 
 /**
  * @class Socket
- * @brief socket abstraction
- *
- * This class is a big wrapper around sockets functions but portable,
- * there is some functions that helps for getting error reporting.
+ * @brief Base socket class for socket operations
  */
 class Socket {
 public:
+	/* {{{ Portable types */
+
+	/*
+	 * The following types are defined differently between Unix
+	 * and Windows.
+	 */
 #if defined(_WIN32)
-	typedef SOCKET		Type;		//!< the socket type
-	typedef const char *	ConstArg;	//!< the const argument
-	typedef char *		Arg;		//!< the argument
+	using Handle	= SOCKET;
+	using ConstArg	= const char *;
+	using Arg	= char *;
 #else
-	typedef int		Type;		//!< the socket type
-	typedef const void *	ConstArg;	//!< the const argument
-	typedef void *		Arg;		//!< the argument
+	using Handle	= int;
+	using ConstArg	= const void *;
+	using Arg	= void *;
 #endif
 
+	/* }}} */
+
+	/* {{{ Portable constants */
+
+	/*
+	 * The following constants are defined differently from Unix
+	 * to Windows.
+	 */
+#if defined(_WIN32)
+	static constexpr const Handle Invalid	= INVALID_SOCKET;
+	static constexpr const int Error	= SOCKET_ERROR;
+#else
+	static constexpr const int Invalid	= -1;
+	static constexpr const int Error	= -1;
+#endif
+
+	/* }}} */
+
+	/* {{{ Portable initialization */
+
+	/*
+	 * Initialization stuff.
+	 *
+	 * The function init and finish are threadsafe.
+	 */
+#if defined(_WIN32)
 private:
-	Socket::Type m_socket;
-	int m_domain;
-	int m_type;
-	int m_protocol;
+	static std::mutex s_mutex;
+	static std::atomic<bool> s_initialized;
+
+public:
+	static inline void finish() noexcept
+	{
+		WSACleanup();
+	}
+
+	static inline void initialize() noexcept
+	{
+		std::lock_guard<std::mutex> lock(s_mutex);
+
+		if (!s_initialized) {
+			s_initialized = true;
+
+			WSADATA wsa;
+			WSAStartup(MAKEWORD(2, 2), &wsa);
+
+			/*
+			 * If SOCKET_WSA_NO_INIT is not set then the user
+			 * must also call finish himself.
+			 */
+#if !defined(SOCKET_WSA_NO_INIT)
+			std::atexit(finish);
+#endif
+		}
+	}
+#else
+public:
+	/**
+	 * no-op.
+	 */
+	static inline void init() noexcept {}
+
+	/**
+	 * no-op.
+	 */
+	static inline void finish() noexcept {}
+#endif
+
+	/* }}} */
+
+protected:
+	Handle m_handle;
+	SocketState m_state{SocketState::Opened};
 
 public:
 	/**
-	 * To be called before any socket operation.
-	 */
-	static void init();
-
-	/**
-	 * Get the last socket system error.
+	 * Get the last socket system error. The error is set from errno or from
+	 * WSAGetLastError on Windows.
 	 *
 	 * @return a string message
 	 */
-	static std::string getLastSysError();
+	static std::string syserror();
 
 	/**
-	 * To be called before exiting.
-	 */
-	static void finish();
-
-	/**
-	 * Default constructor.
-	 */
-	Socket();
-
-	/**
-	 * Constructor to create a new socket.
+	 * Get the last system error.
 	 *
-	 * @param domain the domain
-	 * @param type the type
+	 * @param errn the error number (errno or WSAGetLastError)
+	 * @return the error
+	 */
+	static std::string syserror(int errn);
+
+	/**
+	 * Construct a socket with an already created descriptor.
+	 *
+	 * @param handle the native descriptor
+	 */
+	inline Socket(Handle handle)
+		: m_handle(handle)
+		, m_state(SocketState::Opened)
+	{
+	}
+
+	/**
+	 * Create a socket handle.
+	 *
+	 * @param domain the domain AF_*
+	 * @param type the type SOCK_*
 	 * @param protocol the protocol
-	 * @throw SocketError on error
+	 * @throw SocketError on failures
 	 */
 	Socket(int domain, int type, int protocol);
 
 	/**
-	 * Get the socket.
-	 *
-	 * @return the socket
+	 * Default destructor.
 	 */
-	Type getSocket() const;
+	virtual ~Socket() = default;
 
 	/**
-	 * Get the domain.
+	 * Get the local name. This is a wrapper of getsockname().
 	 *
-	 * @return the domain
+	 * @return the address
+	 * @throw SocketError on failures
 	 */
-	int getDomain() const;
-
-	/**
-	 * Get the type of socket.
-	 *
-	 * @return the type
-	 */
-	int getType() const;
-
-	/**
-	 * Get the protocol.
-	 *
-	 * @return the protocol
-	 */
-	int getProtocol() const;
+	SocketAddress address() const;
 
 	/**
 	 * Set an option for the socket.
@@ -168,156 +309,104 @@ public:
 	 * @param level the setting level
 	 * @param name the name
 	 * @param arg the value
-	 * @param argLen the argument length
 	 * @throw SocketError on error
 	 */
-	void set(int level, int name, const void *arg, unsigned argLen);
+	template <typename Argument>
+	inline void set(int level, int name, const Argument &arg)
+	{
+#if defined(_WIN32)
+		if (setsockopt(m_handle, level, name, (Socket::ConstArg)&arg, sizeof (arg)) == Error)
+#else
+		if (setsockopt(m_handle, level, name, (Socket::ConstArg)&arg, sizeof (arg)) < 0)
+#endif
+			throw SocketError(SocketError::System, "set");
+	}
 
 	/**
-	 * Enable or disable blocking mode.
+	 * Get an option for the socket.
 	 *
-	 * @param block the mode
+	 * @param level the setting level
+	 * @param name the name
+	 * @throw SocketError on error
 	 */
-	void blockMode(bool block = true);
+	template <typename Argument>
+	inline Argument get(int level, int name)
+	{
+		Argument desired, result{};
+		socklen_t size = sizeof (result);
+
+#if defined(_WIN32)
+		if (getsockopt(m_handle, level, name, (Socket::Arg)&desired, &size) == Error)
+#else
+		if (getsockopt(m_handle, level, name, (Socket::Arg)&desired, &size) < 0)
+#endif
+			throw SocketError(SocketError::System, "get");
+
+		std::memcpy(&result, &desired, size);
+
+		return result;
+	}
 
 	/**
-	 * Bind the socket.
+	 * Get the native handle.
 	 *
-	 * @param address a IP or Unix location
-	 * @throw SocketError error
+	 * @return the handle
+	 * @warning Not portable
+	 */
+	inline Handle handle() const noexcept
+	{
+		return m_handle;
+	}
+
+	/**
+	 * Get the socket state.
+	 *
+	 * @return
+	 */
+	inline SocketState state() const noexcept
+	{
+		return m_state;
+	}
+
+	/**
+	 * Bind to an address.
+	 *
+	 * @param address the address
+	 * @throw SocketError on any error
 	 */
 	void bind(const SocketAddress &address);
 
 	/**
-	 * Try to connect to the specific address
+	 * Set the blocking mode, if set to false, the socket will be marked
+	 * **non-blocking**.
 	 *
-	 * @param address the address
-	 * @throw SocketError on error
+	 * @param block set to false to mark **non-blocking**
+	 * @throw SocketError on any error
 	 */
-	void connect(const SocketAddress &address);
-
-	/**
-	 * Accept a client without getting its info.
-	 *
-	 * @return a client ready to use
-	 * @throw SocketError on error
-	 */
-	Socket accept();
-
-	/**
-	 * Accept a client.
-	 *
-	 * @param info the optional client info
-	 * @return a client ready to use
-	 * @throw SocketError on error
-	 */
-	Socket accept(SocketAddress &info);
-
-	/**
-	 * Listen to a specific number of pending connections.
-	 *
-	 * @param max the max number of clients
-	 * @throw SocketError on error
-	 */
-	void listen(int max);
-
-	/**
-	 * Receive some data.
-	 *
-	 * @param data the destination pointer
-	 * @param dataLen max length to receive
-	 * @return the number of bytes received
-	 * @throw SocketError on error
-	 */
-	unsigned recv(void *data, unsigned dataLen);
-
-	/**
-	 * Send some data.
-	 *
-	 * @param data the data to send
-	 * @param dataLen the data length
-	 * @return the number of bytes sent
-	 * @throw SocketError on error
-	 */
-	unsigned send(const void *data, unsigned dataLen);
-
-	/**
-	 * Send a message as a string.
-	 *
-	 * @param message the message
-	 * @return the number of bytes sent
-	 * @throw SocketError on error
-	 */
-	unsigned send(const std::string &message);
-
-	/**
-	 * Receive from a connection-less socket without getting
-	 * client information.
-	 *
-	 * @param data the destination pointer
-	 * @param dataLen max length to receive
-	 * @return the number of bytes received
-	 * @throw SocketError on error
-	 */
-	unsigned recvfrom(void *data, unsigned dataLen);
-
-	/**
-	 * Receive from a connection-less socket and get the client
-	 * information.
-	 *
-	 * @param data the destination pointer
-	 * @param dataLen max length to receive
-	 * @param info the client info
-	 * @return the number of bytes received
-	 * @throw SocketError on error
-	 */
-	unsigned recvfrom(void *data, unsigned dataLen, SocketAddress &info);
-
-	/**
-	 * Send some data to a connection-less socket.
-	 *
-	 * @param data the data to send
-	 * @param dataLen the data length
-	 * @param info the address
-	 * @return the number of bytes sent
-	 * @throw SocketError on error
-	 */
-	unsigned sendto(const void *data, unsigned dataLen, const SocketAddress &info);
-
-	/**
-	 * Send a message to a connection-less socket.
-	 *
-	 * @param message the message
-	 * @param info the address
-	 * @return the number of bytes sent
-	 * @throw SocketError on error
-	 */
-	unsigned sendto(const std::string &message, const SocketAddress &info);
+	void setBlockMode(bool block);
 
 	/**
 	 * Close the socket.
 	 */
-	void close();
+	virtual void close();
 };
 
 /**
- * Test equality.
+ * Compare two sockets.
  *
  * @param s1 the first socket
  * @param s2 the second socket
- * @return true if equals
+ * @return true if they equals
  */
 bool operator==(const Socket &s1, const Socket &s2);
 
 /**
- * Less operator.
+ * Compare two sockets, ideal for putting in a std::map.
  *
  * @param s1 the first socket
  * @param s2 the second socket
- * @return true if s1 is less
+ * @return true if s1 < s2
  */
 bool operator<(const Socket &s1, const Socket &s2);
 
-} // !irccd
-
-#endif // !_IRCCD_SOCKET_H_
+#endif // !_SOCKET_NG_H_

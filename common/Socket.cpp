@@ -1,7 +1,7 @@
 /*
  * Socket.cpp -- portable C++ socket wrappers
  *
- * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,44 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cerrno>
 #include <cstring>
-
-#if !defined(WIN32)
-#  define INVALID_SOCKET	-1
-#  define SOCKET_ERROR		-1
-#endif
 
 #include "Socket.h"
 #include "SocketAddress.h"
-
-namespace irccd {
-
-/* --------------------------------------------------------
- * SocketError implementation
- * -------------------------------------------------------- */
-
-SocketError::SocketError(const std::string &error)
-{
-	m_error = error;
-}
-
-const char *SocketError::what() const throw()
-{
-	return m_error.c_str();
-}
-
-/* --------------------------------------------------------
- * Socket implementation
- * -------------------------------------------------------- */
-
-void Socket::init()
-{
-#if defined(_WIN32)
-	WSADATA wsa;
-	WSAStartup(MAKEWORD(2, 2), &wsa);
-#endif
-}
 
 /* --------------------------------------------------------
  * System dependent code
@@ -61,7 +27,7 @@ void Socket::init()
 
 #if defined(_WIN32)
 
-std::string Socket::getLastSysError()
+std::string Socket::syserror(int errn)
 {
 	LPSTR str = nullptr;
 	std::string errmsg = "Unknown error";
@@ -69,7 +35,7 @@ std::string Socket::getLastSysError()
 	FormatMessageA(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
 		NULL,
-		WSAGetLastError(),
+		errn,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		(LPSTR)&str, 0, NULL);
 
@@ -84,217 +50,147 @@ std::string Socket::getLastSysError()
 
 #else
 
-std::string Socket::getLastSysError()
+#include <cerrno>
+
+std::string Socket::syserror(int errn)
 {
-	return strerror(errno);
+	return strerror(errn);
 }
 
 #endif
 
-void Socket::finish()
+std::string Socket::syserror()
 {
 #if defined(_WIN32)
-	WSACleanup();
+	return syserror(WSAGetLastError());
+#else
+	return syserror(errno);
 #endif
 }
 
-Socket::Socket()
-	: m_domain(0)
-	, m_type(0)
-	, m_protocol(0)
+/* --------------------------------------------------------
+ * SocketError class
+ * -------------------------------------------------------- */
+
+SocketError::SocketError(Code code, std::string function)
+	: m_code(code)
+	, m_function(std::move(function))
+	, m_error(Socket::syserror())
 {
 }
+
+SocketError::SocketError(Code code, std::string function, int error)
+	: m_code(code)
+	, m_function(std::move(function))
+	, m_error(Socket::syserror(error))
+{
+}
+
+SocketError::SocketError(Code code, std::string function, std::string error)
+	: m_code(code)
+	, m_function(std::move(function))
+	, m_error(std::move(error))
+{
+}
+
+/* --------------------------------------------------------
+ * Socket class
+ * -------------------------------------------------------- */
+
+#if defined(_WIN32)
+std::mutex Socket::s_mutex;
+std::atomic<bool> Socket::s_initialized{false};
+#endif
 
 Socket::Socket(int domain, int type, int protocol)
-	: m_domain(domain)
-	, m_type(type)
-	, m_protocol(protocol)
 {
-	m_socket = socket(domain, type, protocol);
-
-	if (m_socket == INVALID_SOCKET)
-		throw SocketError(getLastSysError());
-}
-
-Socket::Type Socket::getSocket() const
-{
-	return m_socket;
-}
-
-int Socket::getDomain() const
-{
-	return m_domain;
-}
-
-int Socket::getType() const
-{
-	return m_type;
-}
-
-int Socket::getProtocol() const
-{
-	return m_protocol;
-}
-
-void Socket::set(int level, int name, const void *arg, unsigned argLen)
-{
-	if (setsockopt(m_socket, level, name, (Socket::ConstArg)arg, argLen) == SOCKET_ERROR)
-		throw SocketError(getLastSysError());
-}
-
-void Socket::blockMode(bool block)
-{
-#if defined(O_NONBLOCK) && !defined(_WIN32)
-	int flags;
-
-	if ((flags = fcntl(m_socket, F_GETFL, 0)) == -1)
-		flags = 0;
-
-	if (!block)
-		flags &= ~(O_NONBLOCK);
-	else
-		flags |= O_NONBLOCK;
-
-	if (fcntl(m_socket, F_SETFL, flags) == -1)
-		throw SocketError(getLastSysError());
-#else
-	unsigned long flags = (block) ? 0 : 1;
-
-	if (ioctlsocket(m_socket, FIONBIO, &flags) == SOCKET_ERROR)
-		throw SocketError(getLastSysError());
+#if defined(_WIN32) && !defined(SOCKET_NO_WSA_INIT)
+	if (!s_initialized) {
+		initialize();
+	}
 #endif
+
+	m_handle = ::socket(domain, type, protocol);
+
+	if (m_handle == Invalid) {
+		throw SocketError(SocketError::System, "socket");
+	}
+
+	m_state = SocketState::Opened;
 }
 
-void Socket::bind(const SocketAddress &addr)
+SocketAddress Socket::address() const
 {
-	const sockaddr_storage &sa = addr.address();
-	size_t addrlen = addr.length();
+#if defined(_WIN32)
+	int length;
+#else
+	socklen_t length;
+#endif
 
-	if (::bind(m_socket, (sockaddr *)&sa, addrlen) == SOCKET_ERROR)
-		throw SocketError(getLastSysError());
+	sockaddr_storage ss;
+
+	if (getsockname(m_handle, (sockaddr *)&ss, &length) == Error)
+		throw SocketError(SocketError::System, "getsockname");
+
+	return SocketAddress(ss, length);
 }
 
-void Socket::connect(const SocketAddress &addr)
+void Socket::bind(const SocketAddress &address)
 {
-	const sockaddr_storage &sa = addr.address();
-	size_t addrlen = addr.length();
+	const auto &sa = address.address();
+	const auto addrlen = address.length();
 
-	if (::connect(m_socket, (sockaddr *)&sa, addrlen) == SOCKET_ERROR)
-		throw SocketError(getLastSysError());
-}
+	if (::bind(m_handle, reinterpret_cast<const sockaddr *>(&sa), addrlen) == Error) {
+		throw SocketError(SocketError::System, "bind");
+	}
 
-Socket Socket::accept()
-{
-	SocketAddress dummy;
-
-	return accept(dummy);
-}
-
-Socket Socket::accept(SocketAddress &info)
-{
-	Socket s;
-
-	info.m_addrlen = sizeof (sockaddr_storage);
-	s.m_socket = ::accept(m_socket, (sockaddr *)&info.m_addr, &info.m_addrlen);
-
-	// Usually accept works only with SOCK_STREAM
-	s.m_domain	= info.m_addr.ss_family;
-	s.m_type	= SOCK_STREAM;
-
-	if (s.m_socket == INVALID_SOCKET)
-		throw SocketError(getLastSysError());
-
-	return s;
-}
-
-void Socket::listen(int max)
-{
-	if (::listen(m_socket, max) == SOCKET_ERROR)
-		throw SocketError(getLastSysError());
-}
-
-unsigned Socket::recv(void *data, unsigned dataLen)
-{
-	int nbread;
-
-	nbread = ::recv(m_socket, (Socket::Arg)data, dataLen, 0);
-	if (nbread == SOCKET_ERROR)
-		throw SocketError(getLastSysError());
-
-	return (unsigned)nbread;
-}
-
-unsigned Socket::send(const void *data, unsigned dataLen)
-{
-	int nbsent;
-
-	nbsent = ::send(m_socket, (Socket::ConstArg)data, dataLen, 0);
-	if (nbsent == SOCKET_ERROR)
-		throw SocketError(getLastSysError());
-
-	return (unsigned)nbsent;
-}
-
-unsigned Socket::send(const std::string &message)
-{
-	return Socket::send(message.c_str(), message.length());
-}
-
-unsigned Socket::recvfrom(void *data, unsigned dataLen)
-{
-	SocketAddress dummy;
-
-	return recvfrom(data, dataLen, dummy);
-}
-
-unsigned Socket::recvfrom(void *data, unsigned dataLen, SocketAddress &info)
-{
-	int nbread;
-
-	info.m_addrlen = sizeof (struct sockaddr_storage);
-	nbread = ::recvfrom(m_socket, (Socket::Arg)data, dataLen, 0,
-	    (sockaddr *)&info.m_addr, &info.m_addrlen);
-
-	if (nbread == SOCKET_ERROR)
-		throw SocketError(getLastSysError());
-
-	return (unsigned)nbread;
-}
-
-unsigned Socket::sendto(const void *data, unsigned dataLen, const SocketAddress &info)
-{
-	int nbsent;
-
-	nbsent = ::sendto(m_socket, (Socket::ConstArg)data, dataLen, 0,
-	    (const sockaddr *)&info.m_addr, info.m_addrlen);
-	if (nbsent == SOCKET_ERROR)
-		throw SocketError(getLastSysError());
-
-	return (unsigned)nbsent;
-}
-
-unsigned Socket::sendto(const std::string &message, const SocketAddress &info)
-{
-	return sendto(message.c_str(), message.length(), info);
+	m_state = SocketState::Bound;
 }
 
 void Socket::close()
 {
-#if defined(WIN32)
-	(void)::closesocket(m_socket);
+#if defined(_WIN32)
+	::closesocket(m_handle);
 #else
-	(void)::close(m_socket);
+	::close(m_handle);
+#endif
+
+	m_state = SocketState::Closed;
+}
+
+void Socket::setBlockMode(bool block)
+{
+#if defined(O_NONBLOCK) && !defined(_WIN32)
+	int flags;
+
+	if ((flags = fcntl(m_handle, F_GETFL, 0)) == -1) {
+		flags = 0;
+	}
+
+	if (block) {
+		flags &= ~(O_NONBLOCK);
+	} else {
+		flags |= O_NONBLOCK;
+	}
+
+	if (fcntl(m_handle, F_SETFL, flags) == Error) {
+		throw SocketError(SocketError::System, "setBlockMode");
+	}
+#else
+	unsigned long flags = (block) ? 0 : 1;
+
+	if (ioctlsocket(m_handle, FIONBIO, &flags) == Error) {
+		throw SocketError(SocketError::System, "setBlockMode");
+	}
 #endif
 }
 
 bool operator==(const Socket &s1, const Socket &s2)
 {
-	return s1.getSocket() == s2.getSocket();
+	return s1.handle() == s2.handle();
 }
 
 bool operator<(const Socket &s1, const Socket &s2)
 {
-	return s1.getSocket() < s2.getSocket();
+	return s1.handle() < s2.handle();
 }
-
-} // !irccd

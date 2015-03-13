@@ -24,10 +24,10 @@ set(
 	Date.h
 	Directory.cpp
 	Directory.h
+	Json.cpp
+	Json.h
 	Logger.cpp
 	Logger.h
-	Parser.cpp
-	Parser.h
 	Singleton.h
 	Socket.cpp
 	Socket.h
@@ -35,6 +35,10 @@ set(
 	SocketAddress.h
 	SocketListener.cpp
 	SocketListener.h
+	SocketTcp.cpp
+	SocketTcp.h
+	SocketUdp.cpp
+	SocketUdp.h
 	Util.cpp
 	Util.h
 )
@@ -46,10 +50,16 @@ elseif (WIN32)
 	list(APPEND LIBRARIES "gdi32")
 endif ()
 
+find_package(Jansson REQUIRED)
+
 irccd_define_library(
 	TARGET common
 	SOURCES ${SOURCES}
-	LIBRARIES ${LIBRARIES}
+	LIBRARIES
+		${LIBRARIES}
+		${Jansson_LIBRARIES}
 	LOCAL_INCLUDES ${INCLUDES}
-	PUBLIC_INCLUDES ${common_SOURCE_DIR}
+	PUBLIC_INCLUDES
+		${common_SOURCE_DIR}
+		${Jansson_INCLUDE_DIRS}
 )

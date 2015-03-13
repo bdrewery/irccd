@@ -1,7 +1,7 @@
 /*
  * SocketAddress.cpp -- socket addresses management
  *
- * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,94 +16,71 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cerrno>
-#include <cstdio>
+#include <algorithm>
 #include <cstring>
 
-#if !defined(_WIN32)
-#  include <sys/un.h>
-
-#  define gai_strerrorA(s)	gai_strerror(s)
-#  define INVALID_SOCKET	-1
-#  define SOCKET_ERROR		-1
-#endif
-
+#include "Socket.h"
 #include "SocketAddress.h"
 
-namespace irccd {
+namespace address {
 
 /* --------------------------------------------------------
- * BindAddressIP implementation
+ * Internet implementation
  * -------------------------------------------------------- */
 
-BindAddressIP::BindAddressIP(const std::string &iface, unsigned port, int family)
-	: m_host(iface)
-	, m_family(family)
-	, m_port(port)
+Internet::Internet(const std::string &host, unsigned port, int domain)
 {
-	if (m_family == AF_INET6) {
-		sockaddr_in6 *ptr = (sockaddr_in6 *)&m_addr;
+	if (host == "*") {
+		if (domain == AF_INET6) {
+			sockaddr_in6 *ptr = (sockaddr_in6 *)&m_addr;
 
-		ptr->sin6_family = AF_INET6;
-		ptr->sin6_port = htons(m_port);
-
-		if (m_host == "*")
 			ptr->sin6_addr = in6addr_any;
-		else if (inet_pton(AF_INET6, m_host.c_str(), &ptr->sin6_addr) <= 0)
-			throw SocketError(Socket::getLastSysError());
+			ptr->sin6_family = AF_INET6;
+			ptr->sin6_port = htons(port);
 
-		m_addrlen = sizeof (sockaddr_in6);
-	} else {
-		sockaddr_in *ptr = (sockaddr_in *)&m_addr;
+			m_addrlen = sizeof (sockaddr_in6);
+		} else {
+			sockaddr_in *ptr = (sockaddr_in *)&m_addr;
 
-		ptr->sin_family = AF_INET;
-		ptr->sin_port = htons(m_port);
-
-		if (m_host == "*")
 			ptr->sin_addr.s_addr = INADDR_ANY;
-		else if (inet_pton(AF_INET, m_host.c_str(), &ptr->sin_addr) <= 0)
-			throw SocketError(Socket::getLastSysError());
+			ptr->sin_family = AF_INET;
+			ptr->sin_port = htons(port);
 
-		m_addrlen = sizeof (sockaddr_in);
+			m_addrlen = sizeof (sockaddr_in);
+		}
+	} else {
+		addrinfo hints, *res;
+
+		std::memset(&hints, 0, sizeof (addrinfo));
+		hints.ai_family = domain;
+
+		auto error = getaddrinfo(host.c_str(), std::to_string(port).c_str(), &hints, &res);
+		if (error != 0) {
+			throw SocketError(SocketError::System, "getaddrinfo", gai_strerror(error));
+		}
+
+		std::memcpy(&m_addr, res->ai_addr, res->ai_addrlen);
+		m_addrlen = res->ai_addrlen;
+		freeaddrinfo(res);
 	}
 }
 
 /* --------------------------------------------------------
- * ConnectAddressIP implementation
- * -------------------------------------------------------- */
-
-ConnectAddressIP::ConnectAddressIP(const std::string &host, unsigned port, int family, int type)
-{
-	addrinfo hints, *res;
-	int error;
-
-	memset(&hints, 0, sizeof (hints));
-	hints.ai_family = family;
-	hints.ai_socktype = type;
-
-	error = getaddrinfo(host.c_str(), std::to_string(port).c_str(), &hints, &res);
-	if (error)
-		throw SocketError(gai_strerrorA(error));
-
-	memcpy(&m_addr, res->ai_addr, res->ai_addrlen);
-	m_addrlen = res->ai_addrlen;
-
-	freeaddrinfo(res);
-}
-
-/* --------------------------------------------------------
- * AddressUnix implementation
+ * Unix implementation
  * -------------------------------------------------------- */
 
 #if !defined(_WIN32)
 
-AddressUnix::AddressUnix(const std::string &path, bool rm)
+#include <sys/un.h>
+
+Unix::Unix(const std::string &path, bool rm)
 {
 	sockaddr_un *sun = (sockaddr_un *)&m_addr;
 
 	// Silently remove the file even if it fails
-	if (rm)
+	if (rm) {
 		::remove(path.c_str());
+	}
 
 	// Copy the path
 	memset(sun->sun_path, 0, sizeof (sun->sun_path));
@@ -115,6 +92,8 @@ AddressUnix::AddressUnix(const std::string &path, bool rm)
 }
 
 #endif // _WIN32
+
+} // !address
 
 /* --------------------------------------------------------
  * SocketAddress implementation
@@ -132,10 +111,6 @@ SocketAddress::SocketAddress(const sockaddr_storage &addr, socklen_t length)
 {
 }
 
-SocketAddress::~SocketAddress()
-{
-}
-
 const sockaddr_storage &SocketAddress::address() const
 {
 	return m_addr;
@@ -146,15 +121,18 @@ socklen_t SocketAddress::length() const
 	return m_addrlen;
 }
 
-bool operator==(const SocketAddress &sa1, const SocketAddress &sa2)
+bool operator<(const SocketAddress &s1, const SocketAddress &s2)
 {
-	return sa1.length() == sa2.length() &&
-	    memcmp(&sa1.address(), &sa2.address(), sizeof (sockaddr_storage)) == 0;
+	const auto &array1 = reinterpret_cast<const unsigned char *>(&s1.address());
+	const auto &array2 = reinterpret_cast<const unsigned char *>(&s2.address());
+
+	return std::lexicographical_compare(array1, array1 + s1.length(), array2, array2 + s2.length());
 }
 
-bool operator<(const SocketAddress &sa1, const SocketAddress &sa2)
+bool operator==(const SocketAddress &s1, const SocketAddress &s2)
 {
-	return sa1.length() < sa2.length();
-}
+	const auto &array1 = reinterpret_cast<const unsigned char *>(&s1.address());
+	const auto &array2 = reinterpret_cast<const unsigned char *>(&s2.address());
 
-} // !irccd
+	return std::equal(array1, array1 + s1.length(), array2, array2 + s2.length());
+}

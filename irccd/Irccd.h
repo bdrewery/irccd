@@ -19,6 +19,44 @@
 #ifndef _IRCCD_H_
 #define _IRCCD_H_
 
+#include <condition_variable>
+#include <memory>
+#include <mutex>
+#include <vector>
+
+#include "TransportCommand.h"
+
+namespace irccd {
+
+class Irccd {
+private:
+	std::condition_variable m_condition;
+	std::mutex m_mutex;
+	std::vector<std::unique_ptr<TransportCommand>> m_transportCommands;
+
+public:
+	/**
+	 * Add a new transport event. Called from the TransportManager thread,
+	 * MUST not be called somewhere else.
+	 *
+	 * @param args the arguments to pass to the command constructor.
+	 */
+	template <typename T, typename... Args>
+	void addTransportCommand(Args&&... args)
+	{
+		m_transportCommands.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+	}
+};
+
+/**
+ * Unique and global instance.
+ */
+extern Irccd irccd;
+
+} // !irccd
+
+#if 0
+
 /**
  * @file Irccd.h
  * @brief Main irccd class
@@ -227,5 +265,7 @@ public:
 };
 
 } // !irccd
+
+#endif
 
 #endif // !_IRCCD_H_

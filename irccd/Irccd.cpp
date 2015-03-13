@@ -16,6 +16,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "Irccd.h"
+
+namespace irccd {
+
+Irccd irccd;
+
+} // !irccd
+
+#if 0
+
 #if !defined(_WIN32)
 #  include <sys/types.h>
 #  include <grp.h>
@@ -581,3 +591,5 @@ void Irccd::stop()
 }
 
 } // !irccd
+
+#endif

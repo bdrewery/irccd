@@ -16,6 +16,39 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <thread>
+
+#include "TransportManager.h"
+#include "Transport.h"
+
+using namespace std::literals::chrono_literals;
+
+using namespace irccd;
+
+int main(void)
+{
+	TransportManager manager;
+
+	manager.add<TransportInet>(TransportAbstract::IPv4, 24000);
+	manager.start();
+
+	while (true) {
+		std::this_thread::sleep_for(1s);
+	}
+
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+ 
+#if 0
 #include <cstdlib>
 #include <cstring>
 
@@ -127,3 +160,5 @@ int main(int argc, char **argv)
 
 	return irccd.run();
 }
+
+#endif
