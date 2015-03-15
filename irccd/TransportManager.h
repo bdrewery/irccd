@@ -84,8 +84,8 @@ private:
 	void load(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 	void me(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 	void mode(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
-	void notice(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 	void nick(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void notice(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 	void part(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 	void reconnect(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 	void reload(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
@@ -178,7 +178,8 @@ public:
 	/**
 	 * Tell if the transport manager is currently running.
 	 *
-	 * @return
+	 * @note Thread-safe
+	 * @return true if running
 	 */
 	inline bool isRunning() const noexcept
 	{
@@ -186,7 +187,11 @@ public:
 	}
 
 	/**
-	 * Send a message to all connected clients.
+	 * Send a message to all connected clients. Do not append \r\n\r\n,
+	 * the function does it automatically.
+	 *
+	 * @note Thread-safe
+	 * @param msg the message (without \r\n\r\n)
 	 */
 	inline void broadcast(const std::string &msg)
 	{

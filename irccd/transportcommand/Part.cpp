@@ -1,5 +1,5 @@
 /*
- * Invite.cpp -- invite transport command
+ * Part.cpp -- part transport command
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,27 +16,27 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "Invite.h"
+#include "Part.h"
 
 namespace irccd {
 
 namespace transport {
 
-Invite::Invite(std::shared_ptr<TransportClientAbstract> client, std::string server, std::string target, std::string channel)
+Part::Part(std::shared_ptr<TransportClientAbstract> client, std::string server, std::string channel, std::string reason)
 	: TransportCommand(std::move(client))
 	, m_server(std::move(server))
-	, m_target(std::move(target))
 	, m_channel(std::move(channel))
+	, m_reason(std::move(reason))
 {
 }
 
-void Invite::exec(Irccd &)
+void Part::exec(Irccd &)
 {
 }
 
-std::string Invite::ident() const
+std::string Part::ident() const
 {
-	return "invite:" + m_server + ":" + m_target + ":" + m_channel;
+	return "part:" + m_server + ":" + m_channel + ":" + m_reason;
 }
 
 } // !transport

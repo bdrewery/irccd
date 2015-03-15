@@ -1,5 +1,5 @@
 /*
- * Invite.cpp -- invite transport command
+ * Reconnect.cpp -- part transport command
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,27 +16,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "Invite.h"
+#include "Reconnect.h"
 
 namespace irccd {
 
 namespace transport {
 
-Invite::Invite(std::shared_ptr<TransportClientAbstract> client, std::string server, std::string target, std::string channel)
+Reconnect::Reconnect(std::shared_ptr<TransportClientAbstract> client, std::string server)
 	: TransportCommand(std::move(client))
 	, m_server(std::move(server))
-	, m_target(std::move(target))
-	, m_channel(std::move(channel))
 {
 }
 
-void Invite::exec(Irccd &)
+void Reconnect::exec(Irccd &)
 {
 }
 
-std::string Invite::ident() const
+std::string Reconnect::ident() const
 {
-	return "invite:" + m_server + ":" + m_target + ":" + m_channel;
+	return "reconnect:" + m_server;
 }
 
 } // !transport

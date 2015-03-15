@@ -16,22 +16,17 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+include(${irccd_SOURCE_DIR}/transportcommand/TransportCommand.cmake)
+
 set(
 	TRANSPORT_SOURCES
+	${TRANSPORT_COMMAND_SOURCES}
 	${irccd_SOURCE_DIR}/Transport.h
 	${irccd_SOURCE_DIR}/TransportManager.cpp
 	${irccd_SOURCE_DIR}/TransportManager.h
 	${irccd_SOURCE_DIR}/TransportClient.cpp
 	${irccd_SOURCE_DIR}/TransportClient.h
 	${irccd_SOURCE_DIR}/TransportCommand.h
-	${irccd_SOURCE_DIR}/transportcommand/ChannelNotice.cpp
-	${irccd_SOURCE_DIR}/transportcommand/ChannelNotice.h
-	${irccd_SOURCE_DIR}/transportcommand/Connect.cpp
-	${irccd_SOURCE_DIR}/transportcommand/Connect.h
-	${irccd_SOURCE_DIR}/transportcommand/Disconnect.cpp
-	${irccd_SOURCE_DIR}/transportcommand/Disconnect.h
-	${irccd_SOURCE_DIR}/transportcommand/Invite.cpp
-	${irccd_SOURCE_DIR}/transportcommand/Invite.h
 	TestTransport.cpp
 )
 

@@ -72,6 +72,9 @@ public:
 	/**
 	 * Send some data, it will be pushed to the outgoing buffer.
 	 *
+	 * This function appends "\r\n\r\n" after the message so you don't have
+	 * to do it manually.
+	 *
 	 * @note Thread-safe
 	 * @param message the message
 	 */

@@ -1,5 +1,5 @@
 /*
- * Invite.cpp -- invite transport command
+ * Topic.h -- topic transport command
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,31 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "Invite.h"
+#ifndef _IRCCD_TRANSPORT_COMMAND_TOPIC_H_
+#define _IRCCD_TRANSPORT_COMMAND_TOPIC_H_
+
+#include "TransportCommand.h"
 
 namespace irccd {
 
 namespace transport {
 
-Invite::Invite(std::shared_ptr<TransportClientAbstract> client, std::string server, std::string target, std::string channel)
-	: TransportCommand(std::move(client))
-	, m_server(std::move(server))
-	, m_target(std::move(target))
-	, m_channel(std::move(channel))
-{
-}
+class Topic : public TransportCommand {
+private:
+	std::string m_server;
+	std::string m_channel;
+	std::string m_topic;
 
-void Invite::exec(Irccd &)
-{
-}
+public:
+	Topic(std::shared_ptr<TransportClientAbstract> client, std::string server, std::string channel, std::string topic);
 
-std::string Invite::ident() const
-{
-	return "invite:" + m_server + ":" + m_target + ":" + m_channel;
-}
+	void exec(Irccd &) override;
+
+	std::string ident() const override;
+};
 
 } // !transport
 
 } // !irccd
+
+#endif // _IRCCD_TRANSPORT_COMMAND_TOPIC_H_

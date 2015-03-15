@@ -1,5 +1,5 @@
 /*
- * Invite.cpp -- invite transport command
+ * Say.cpp -- say transport command
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,27 +16,27 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "Invite.h"
+#include "Say.h"
 
 namespace irccd {
 
 namespace transport {
 
-Invite::Invite(std::shared_ptr<TransportClientAbstract> client, std::string server, std::string target, std::string channel)
+Say::Say(std::shared_ptr<TransportClientAbstract> client, std::string server, std::string target, std::string message)
 	: TransportCommand(std::move(client))
 	, m_server(std::move(server))
 	, m_target(std::move(target))
-	, m_channel(std::move(channel))
+	, m_message(std::move(message))
 {
 }
 
-void Invite::exec(Irccd &)
+void Say::exec(Irccd &)
 {
 }
 
-std::string Invite::ident() const
+std::string Say::ident() const
 {
-	return "invite:" + m_server + ":" + m_target + ":" + m_channel;
+	return "say:" + m_server + ":" + m_target + ":" + m_message;
 }
 
 } // !transport

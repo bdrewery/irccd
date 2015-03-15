@@ -1,5 +1,5 @@
 /*
- * Invite.cpp -- invite transport command
+ * UserMode.cpp -- user mode transport command
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,29 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "Invite.h"
+#include "UserMode.h"
 
 namespace irccd {
 
 namespace transport {
 
-Invite::Invite(std::shared_ptr<TransportClientAbstract> client, std::string server, std::string target, std::string channel)
+UserMode::UserMode(std::shared_ptr<TransportClientAbstract> client, std::string server, std::string mode)
 	: TransportCommand(std::move(client))
 	, m_server(std::move(server))
-	, m_target(std::move(target))
-	, m_channel(std::move(channel))
+	, m_mode(std::move(mode))
 {
 }
 
-void Invite::exec(Irccd &)
+void UserMode::exec(Irccd &)
 {
 }
 
-std::string Invite::ident() const
+std::string UserMode::ident() const
 {
-	return "invite:" + m_server + ":" + m_target + ":" + m_channel;
+	return "umode:" + m_server + ":" + m_mode;
 }
 
 } // !transport
 
 } // !irccd
+

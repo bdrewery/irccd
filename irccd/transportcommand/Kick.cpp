@@ -1,5 +1,5 @@
 /*
- * Invite.cpp -- invite transport command
+ * Kick.cpp -- kick transport command
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,27 +16,32 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "Invite.h"
+#include "Kick.h"
 
 namespace irccd {
 
 namespace transport {
 
-Invite::Invite(std::shared_ptr<TransportClientAbstract> client, std::string server, std::string target, std::string channel)
+Kick::Kick(std::shared_ptr<TransportClientAbstract> client,
+	   std::string server,
+	   std::string target,
+	   std::string channel,
+	   std::string reason)
 	: TransportCommand(std::move(client))
 	, m_server(std::move(server))
 	, m_target(std::move(target))
 	, m_channel(std::move(channel))
+	, m_reason(std::move(reason))
 {
 }
 
-void Invite::exec(Irccd &)
+void Kick::exec(Irccd &)
 {
 }
 
-std::string Invite::ident() const
+std::string Kick::ident() const
 {
-	return "invite:" + m_server + ":" + m_target + ":" + m_channel;
+	return "kick:" + m_server + ":" + m_target + ":" + m_channel + ":" + m_reason;
 }
 
 } // !transport

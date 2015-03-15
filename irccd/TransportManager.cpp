@@ -6,6 +6,20 @@
 #include "transportcommand/Connect.h"
 #include "transportcommand/Disconnect.h"
 #include "transportcommand/Invite.h"
+#include "transportcommand/Join.h"
+#include "transportcommand/Kick.h"
+#include "transportcommand/Load.h"
+#include "transportcommand/Me.h"
+#include "transportcommand/Mode.h"
+#include "transportcommand/Nick.h"
+#include "transportcommand/Notice.h"
+#include "transportcommand/Part.h"
+#include "transportcommand/Reconnect.h"
+#include "transportcommand/Reload.h"
+#include "transportcommand/Say.h"
+#include "transportcommand/Topic.h"
+#include "transportcommand/Unload.h"
+#include "transportcommand/UserMode.h"
 
 namespace irccd {
 
@@ -86,10 +100,7 @@ void TransportManager::connect(const std::shared_ptr<TransportClientAbstract> &c
  */
 void TransportManager::disconnect(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
-	m_onEvent(std::make_unique<Disconnect>(
-		client,
-		want(object, "server").toString()
-	));
+	m_onEvent(std::make_unique<Disconnect>(client, want(object, "server").toString()));
 }
 
 /*
@@ -128,8 +139,14 @@ void TransportManager::invite(const std::shared_ptr<TransportClientAbstract> &cl
  *   "password": "the password"		(Optional)
  * }
  */
-void TransportManager::join(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportManager::join(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
+	m_onEvent(std::make_unique<Join>(
+		client,
+		want(object, "server").toString(),
+		want(object, "channel").toString(),
+		optional(object, "password", "").toString()
+	));
 }
 
 /*
@@ -146,8 +163,15 @@ void TransportManager::join(const std::shared_ptr<TransportClientAbstract> &, co
  *   "reason": "the optional reason"	(Optional)
  * }
  */
-void TransportManager::kick(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportManager::kick(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
+	m_onEvent(std::make_unique<Kick>(
+		client,
+		want(object, "server").toString(),
+		want(object, "target").toString(),
+		want(object, "channel").toString(),
+		optional(object, "reason", "").toString()
+	));
 }
 
 /*
@@ -173,8 +197,15 @@ void TransportManager::kick(const std::shared_ptr<TransportClientAbstract> &, co
  * Responses:
  *   - Error if the plugin failed to load or was not found
  */
-void TransportManager::load(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportManager::load(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
+	if (object.contains("name")) {
+		m_onEvent(std::make_unique<Load>(client, want(object, "name").toString(), true));
+	} else if (object.contains("path")) {
+		m_onEvent(std::make_unique<Load>(client, want(object, "path").toString(), false));
+	} else {
+		client->send("{ \"error\": \"load command requires `path' or `name' property\" }");
+	}
 }
 
 /*
@@ -190,8 +221,14 @@ void TransportManager::load(const std::shared_ptr<TransportClientAbstract> &, co
  *   "message": "the message"		(Optional)
  * }
  */
-void TransportManager::me(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportManager::me(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
+	m_onEvent(std::make_unique<Me>(
+		client,
+		want(object, "server").toString(),
+		want(object, "channel").toString(),
+		optional(object, "message", "").toString()
+	));
 }
 
 /*
@@ -207,8 +244,35 @@ void TransportManager::me(const std::shared_ptr<TransportClientAbstract> &, cons
  *   "mode": "mode and its arguments"
  * }
  */
-void TransportManager::mode(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportManager::mode(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
+	m_onEvent(std::make_unique<Mode>(
+		client,
+		want(object, "server").toString(),
+		want(object, "channel").toString(),
+		want(object, "mode").toString()
+	));
+}
+
+/*
+ * Change the bot nickname
+ * --------------------------------------------------------
+ *
+ * Change the daemon nickname.
+ *
+ * {
+ *   "command": "nick",
+ *   "server: "the server name",
+ *   "nickname": "the new nickname"
+ * }
+ */
+void TransportManager::nick(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+{
+	m_onEvent(std::make_unique<Nick>(
+		client,
+		want(object, "server").toString(),
+		want(object, "nickname").toString()
+	));
 }
 
 /**
@@ -224,24 +288,14 @@ void TransportManager::mode(const std::shared_ptr<TransportClientAbstract> &, co
  *   "message": "the message"
  * }
  */
-void TransportManager::notice(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportManager::notice(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
-}
-
-/*
- * Change the bot nickname
- * --------------------------------------------------------
- *
- * Change the daemon nickname.
- *
- * {
- *   "command": "nick",
- *   "server: "the server name",
- *   "nickname": "the new nickname"
- * }
- */
-void TransportManager::nick(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
-{
+	m_onEvent(std::make_unique<Notice>(
+		client,
+		want(object, "server").toString(),
+		want(object, "target").toString(),
+		want(object, "message").toString()
+	));
 }
 
 /*
@@ -258,8 +312,14 @@ void TransportManager::nick(const std::shared_ptr<TransportClientAbstract> &, co
  *   "reason": "the reason"		(Optional)
  * }
  */
-void TransportManager::part(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportManager::part(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
+	m_onEvent(std::make_unique<Part>(
+		client,
+		want(object, "server").toString(),
+		want(object, "channel").toString(),
+		optional(object, "reason", "").toString()
+	));
 }
 
 /*
@@ -269,17 +329,19 @@ void TransportManager::part(const std::shared_ptr<TransportClientAbstract> &, co
  * May be used to force the reconnexion of a server if Irccd didn't catch
  * the disconnection.
  *
+ * If no server has been specified, all servers are marked for reconnection.
+ *
  * {
  *   "command": "reconnect",
- *   "server: "the server name",
- *   "name": "the server name"
+ *   "server": "the server name",	(Optional)
  * }
  *
  * Responses:
  *   - Error if the server does not exist
  */
-void TransportManager::reconnect(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportManager::reconnect(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
+	m_onEvent(std::make_unique<Reconnect>(client, optional(object, "server", "").toString()));
 }
 
 /*
@@ -291,14 +353,15 @@ void TransportManager::reconnect(const std::shared_ptr<TransportClientAbstract> 
  *
  * {
  *   "command": "reload",
- *   "name": "crazygame"
+ *   "plugin": "crazygame"
  * }
  *
  * Responses:
  *   - Error if the plugin does not exists
  */
-void TransportManager::reload(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportManager::reload(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
+	m_onEvent(std::make_unique<transport::Reload>(client, want(object, "plugin").toString()));
 }
 
 /*
@@ -314,8 +377,14 @@ void TransportManager::reload(const std::shared_ptr<TransportClientAbstract> &, 
  *   "message": "The message"
  * }
  */
-void TransportManager::say(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportManager::say(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
+	m_onEvent(std::make_unique<Say>(
+		client,
+		want(object, "server").toString(),
+		want(object, "target").toString(),
+		optional(object, "message", "").toString()
+	));
 }
 
 /*
@@ -331,8 +400,14 @@ void TransportManager::say(const std::shared_ptr<TransportClientAbstract> &, con
  *   "topic": "the new topic"		(Optional)
  * }
  */
-void TransportManager::topic(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportManager::topic(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
+	m_onEvent(std::make_unique<Topic>(
+		client,
+		want(object, "server").toString(),
+		want(object, "channel").toString(),
+		optional(object, "topic", "").toString()
+	));
 }
 
 /*
@@ -347,8 +422,13 @@ void TransportManager::topic(const std::shared_ptr<TransportClientAbstract> &, c
  *   "mode": "the mode"
  * }
  */
-void TransportManager::umode(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportManager::umode(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
+	m_onEvent(std::make_unique<UserMode>(
+		client,
+		want(object, "server").toString(),
+		want(object, "mode").toString()
+	));
 }
 
 /*
@@ -360,14 +440,15 @@ void TransportManager::umode(const std::shared_ptr<TransportClientAbstract> &, c
  *
  * {
  *   "command": "unload",
- *   "name": "crazygame"
+ *   "plugin": "crazygame"
  * }
  *
  * Responses:
  *   - Error if the plugin does not exists
  */
-void TransportManager::unload(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportManager::unload(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
+	m_onEvent(std::make_unique<Unload>(client, want(object, "plugin").toString()));
 }
 
 /* --------------------------------------------------------
@@ -533,14 +614,15 @@ TransportManager::TransportManager()
 		{ "load",	&TransportManager::load		},
 		{ "me",		&TransportManager::me		},
 		{ "mode",	&TransportManager::mode		},
-		{ "notice",	&TransportManager::notice	},
 		{ "nick",	&TransportManager::nick		},
+		{ "notice",	&TransportManager::notice	},
 		{ "part",	&TransportManager::part		},
 		{ "reconnect",	&TransportManager::reconnect	},
 		{ "reload",	&TransportManager::reload	},
 		{ "say",	&TransportManager::say		},
 		{ "topic",	&TransportManager::topic	},
-		{ "unload",	&TransportManager::reload	}
+		{ "umode",	&TransportManager::umode	},
+		{ "unload",	&TransportManager::unload	}
 	}
 {
 	m_signal.set(SOL_SOCKET, SO_REUSEADDR, 1);
