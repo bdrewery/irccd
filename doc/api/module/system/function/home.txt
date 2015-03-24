@@ -1,0 +1,18 @@
+---
+function: home
+info: yes
+category: system
+since: 1.1
+---
+
+Get the home directory. This function should be used with care, plugin should not use user's home to store files.
+
+# Synopsis
+
+````lua
+home = function system.home()
+````
+
+# Returns
+
+- home, the user home directory

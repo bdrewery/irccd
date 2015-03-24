@@ -1,0 +1,13 @@
+---
+method: clear
+since: 1.1
+info: yes
+---
+
+Remove all values from the pipe.
+
+# Synopsis
+
+````lua
+function Pipe:clear()
+````

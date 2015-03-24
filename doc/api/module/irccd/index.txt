@@ -1,0 +1,26 @@
+---
+module: irccd
+---
+
+# Usage
+
+Contains general irccd variables and functions.
+
+# Constants
+
+| Variable          | Description              | Version |
+|-------------------|--------------------------|---------|
+| **VERSION**       | Full version as a string |         |
+| **VERSION_MAJOR** | Major version number     |         |
+| **VERSION_MINOR** | Minor version number     |         |
+| **VERSION_PATCH** | Patch version number     | 1.1     |
+
+# Example
+
+````lua
+local irccd = require "irccd"
+
+function onLoad()
+	print(irccd.VERSION)
+end
+````

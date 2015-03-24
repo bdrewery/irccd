@@ -1,0 +1,11 @@
+---
+function: clear
+---
+
+Remove all rules.
+
+# Synopsis
+
+````lua
+function rule.clear()
+````

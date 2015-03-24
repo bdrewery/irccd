@@ -1,0 +1,27 @@
+---
+function: find
+info: yes
+category: server
+since: 1.1
+---
+
+Find a server by name.
+
+# Synopsis
+
+````lua
+server, err = function server.find(name)
+````
+
+# Arguments
+
+- name, the server name
+
+# Returns
+
+- server, the server or nil if not found (see [Server](Server))
+- err, the error message
+
+# Remarks
+
+Avoid using this function in the [onLoad](@baseurl@api/event/onLoad.html) event because plugins are loaded before servers.

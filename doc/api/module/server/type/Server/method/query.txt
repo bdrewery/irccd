@@ -1,0 +1,16 @@
+---
+method: query
+---
+
+Send a private message to the specified target.
+
+# Synopsis
+
+````lua
+function Server:query(nickname, message)
+````
+
+# Arguments
+
+- nickname, the target
+- message, the message

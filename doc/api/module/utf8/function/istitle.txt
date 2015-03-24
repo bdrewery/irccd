@@ -1,0 +1,21 @@
+---
+function: istitle
+since: 1.2
+info: yes
+---
+
+Check if the unicode character is title case.
+
+# Synopsis
+
+````lua
+function istitle(code)
+````
+
+# Arguments
+
+- code, the code point
+
+# Returns
+
+True if title case.

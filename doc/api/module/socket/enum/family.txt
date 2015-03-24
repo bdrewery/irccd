@@ -1,0 +1,25 @@
+---
+enum: family
+since: 1.1
+info: yes
+summary: Socket address family
+---
+
+**Note**: Unix family is not supported on Windows.
+
+# Synopsis
+
+````lua
+socket.family = {
+    Inet,
+    Inet6,
+    Unix
+}
+````
+
+# Values
+
+- **Inet**, AF_INET (IPv4) family.
+- **Inet6**, AF_INET6 (IPv6) family.
+- **Unix**, AF_LOCAL (Unix) family, only on Unix.
+

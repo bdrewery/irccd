@@ -1,0 +1,23 @@
+---
+event: onMe
+since: 1.1
+---
+
+This is an event most known as /me. What you usually see like this:
+
+````
+* markand loves irccd
+````
+
+# SYNOPSIS
+
+````lua
+function onMe(server, channel, nickname, message)
+````
+
+# ARGUMENTS
+
+- server, the current server.
+- channel, the channel.
+- nickname, the person that said something.
+- message, the message sent.

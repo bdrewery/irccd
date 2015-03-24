@@ -1,0 +1,13 @@
+---
+object: Parser
+summary: The parser object
+---
+
+# Methods
+
+- [open](method/open.html)
+- [findSections](method/findSections.html)
+- [hasSection](method/hasSection.html)
+- [getSection](method/getSection.html)
+- [requireSection](method/requireSection.html)
+- [onLog](method/onLog.html)

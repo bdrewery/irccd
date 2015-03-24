@@ -1,0 +1,11 @@
+---
+object: Section
+summary: The section object
+---
+
+# Methods
+
+- [hasOption](method/hasOption.html)
+- [getOption](method/getOption.html)
+- [getOptions](method/getOptions.html)
+- [requireOption](method/requireOption.html)

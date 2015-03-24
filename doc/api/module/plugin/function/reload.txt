@@ -1,0 +1,18 @@
+---
+function: relaod
+info: yes
+category: plugin
+since: 1.1
+---
+
+Reload a plugin. This only calls the [onReload](@baseurl@/api/event/onReload.html) callback, the Lua file is not reopened.
+
+# Synopsis
+
+````lua
+function plugin.reload(name)
+````
+
+# Arguments
+
+- name, the plugin name

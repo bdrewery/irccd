@@ -1,0 +1,17 @@
+---
+function: list
+category: plugin
+since: 1.1
+---
+
+Return an iterator for all plugins which each time it is called, returns the plugin name.
+
+# Synopsis
+
+````lua
+iterator = function plugin.list()
+````
+
+# Returns
+
+- iterator, the iterator function

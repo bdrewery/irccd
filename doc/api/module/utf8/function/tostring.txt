@@ -1,0 +1,22 @@
+---
+function: tostring
+since: 1.2
+info: yes
+---
+
+Convert some unicode data to UTF-8 string.
+
+# Synopsis
+
+````lua
+function tostring(data)
+````
+
+# Arguments
+
+- data, a sequence of code point or a unique code point integer
+
+# Returns
+
+1. The UTF-8 string or nil on failure
+2. The error message
