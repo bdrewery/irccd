@@ -21,41 +21,17 @@
 
 #include <js/Js.h>
 
-using namespace std::chrono_literals;
-
-std::atomic<bool> g_running{true};
-
-void quit(int)
-{
-	g_running = false;
-}
-
 int main(void)
 {
 	duk_context *ctx = duk_create_heap_default();
 	duk_push_c_function(ctx, dukopen_filesystem, 0);
 	duk_call(ctx, 0);
 	duk_put_global_string(ctx, "fs");
-	irccd::ServerSettings settings;
 
 	if (duk_peval_file(ctx, "test.js") != 0) {
 		printf("%s\n", duk_safe_to_string(ctx, -1));
-	info.port = 6667;
-
-	settings.recotimeout = 3;
-	settings.channels = {
-		{ "#staff", "" },
-		{ "#test", "" }
-	};
-
-	smanager.add(std::move(info), irccd::Identity(), std::move(settings));
-
-	while (g_running) {
-	}
 
 	duk_destroy_heap(ctx);
-
-	printf("Quitting...\n");
 
 	return 0;
 }
