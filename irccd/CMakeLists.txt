@@ -22,6 +22,7 @@ project(irccd)
 include(command/Command.cmake)
 include(server/Server.cmake)
 include(transportcommand/TransportCommand.cmake)
+include(js/Js.cmake)
 
 set(
 	SOURCES
@@ -42,6 +43,11 @@ set(
 	TransportManager.h
 )
 
+if (WITH_JS)
+	list(APPEND SOURCES ${JS_SOURCES})
+	list(APPEND LIBRARIES duktape)
+endif ()
+
 irccd_define_executable(
 	TARGET irccd
 	SOURCES
@@ -53,97 +59,8 @@ irccd_define_executable(
 	INCLUDES
 		${irccd_SOURCE_DIR}
 	LIBRARIES
+		${LIBRARIES}
 		ircclient
 		common
 	INSTALL_RUNTIME bin/
 )
-
-#include(command/Command.cmake)
-#include(server/Server.cmake)
-#
-#set(
-#	SOURCES
-#	${SERVER_SOURCES}
-#	${COMMAND_SOURCES}
-#	CommandQueue.cpp
-#	CommandQueue.h
-#	IO.cpp
-#	IO.h
-#	Server.cpp
-#	Server.h
-#	ServerManager.cpp
-#	ServerManager.h
-#	Irccd.cpp
-#	Irccd.h
-#	IrcSession.cpp
-#	IrcSession.h
-#	Message.cpp
-#	Message.h
-#	Listener.cpp
-#	Listener.h
-#	main.cpp
-#	System.cpp
-#	System.h
-#)
-#
-## ---------------------------------------------------------
-## Optional Lua
-## ---------------------------------------------------------
-#
-#if (WITH_LUA)
-#	include(event/Event.cmake)
-#	include(lua/Lua.cmake)
-#
-#	list(
-#		APPEND
-#		SOURCES
-#		${LUA_SOURCES}
-#		${EVENT_SOURCES}
-#		EventQueue.cpp
-#		EventQueue.h
-#		Luae.cpp
-#		Luae.h
-#		Pipe.cpp
-#		Pipe.h
-#		PipeManager.cpp
-#		PipeManager.h
-#		Plugin.cpp
-#		Plugin.h
-#		PluginManager.cpp
-#		PluginManager.h
-#		Process.cpp
-#		Process.h
-#		Rule.cpp
-#		Rule.h
-#		RuleManager.cpp
-#		RuleManager.h
-#		Test.cpp
-#		Test.h
-#		Thread.cpp
-#		Thread.h
-#		Timer.cpp
-#		Timer.h
-#		Utf8.cpp
-#		Utf8.h
-#	)
-#
-#	list(APPEND LIBRARIES lua)
-#endif ()
-#
-#irccd_define_executable(
-#	TARGET irccd
-#	SOURCES ${SOURCES}
-#	INCLUDES ${INCLUDES} ${CMAKE_SOURCE_DIR}
-#	LIBRARIES ${LIBRARIES} ircclient common
-#	INSTALL_RUNTIME bin/
-#)
-#
-#if (UNIX)
-#	set_target_properties(irccd PROPERTIES LINK_FLAGS "-pthread")
-#endif ()
-#
-#install(
-#	FILES "${CMAKE_SOURCE_DIR}/doc/examples/irccd.conf"
-#	DESTINATION "${ETCDIR}"
-#	RENAME "irccd.conf.sample"
-#)

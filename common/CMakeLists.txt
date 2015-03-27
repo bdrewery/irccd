@@ -26,6 +26,8 @@ set(
 	Directory.h
 	ElapsedTimer.cpp
 	ElapsedTimer.h
+	Filesystem.cpp
+	Filesystem.h
 	Json.cpp
 	Json.h
 	Logger.cpp
@@ -48,8 +50,9 @@ set(
 if (UNIX)
 	list(APPEND SOURCES Xdg.cpp Xdg.h)
 elseif (WIN32)
-	list(APPEND LIBRARIES "ws2_32")
-	list(APPEND LIBRARIES "gdi32")
+	list(APPEND LIBRARIES ws2_32)
+	list(APPEND LIBRARIES gdi32)
+	list(APPEND LIBRARIES shlwapi)
 endif ()
 
 find_package(Jansson REQUIRED)

@@ -38,7 +38,7 @@ set(
 if (WIN32)
 	if (NOT InnoSetup_FOUND)
 		message("Note: InnoSetup not found, no package_inno target provided")
-	elseif (NOT WITH_DOCS_LUA)
+	elseif (NOT WITH_DOCS_JS)
 		message("Note: Lua documentation disabled, no package_inno target provided")
 	elseif (NOT WITH_DOCS_DOXYGEN)
 		message("Note: Doxygen documentation disabled, no package_inno target provided")

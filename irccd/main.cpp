@@ -16,13 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <atomic>
+#include <iostream>
 #include <chrono>
-#include <thread>
 
-#include <signal.h>
-
-#include "ServerManager.h"
+#include <js/Js.h>
 
 using namespace std::chrono_literals;
 
@@ -35,16 +32,14 @@ void quit(int)
 
 int main(void)
 {
-	signal(SIGINT, quit);
-	signal(SIGQUIT, quit);
-	signal(SIGTERM, quit);
-
-	irccd::ServerManager smanager;
-	irccd::ServerInfo info;
+	duk_context *ctx = duk_create_heap_default();
+	duk_push_c_function(ctx, dukopen_filesystem, 0);
+	duk_call(ctx, 0);
+	duk_put_global_string(ctx, "fs");
 	irccd::ServerSettings settings;
 
-	info.host = "localhost";
-	info.name = "localhost";
+	if (duk_peval_file(ctx, "test.js") != 0) {
+		printf("%s\n", duk_safe_to_string(ctx, -1));
 	info.port = 6667;
 
 	settings.recotimeout = 3;
@@ -56,8 +51,9 @@ int main(void)
 	smanager.add(std::move(info), irccd::Identity(), std::move(settings));
 
 	while (g_running) {
-		std::this_thread::sleep_for(1s);
 	}
+
+	duk_destroy_heap(ctx);
 
 	printf("Quitting...\n");
 
