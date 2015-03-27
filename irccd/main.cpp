@@ -16,25 +16,24 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <thread>
+#include <iostream>
 
-#include "TransportManager.h"
-#include "Transport.h"
-
-using namespace std::literals::chrono_literals;
+#include <js/Js.h>
 
 using namespace irccd;
 
 int main(void)
 {
-	TransportManager manager;
+	duk_context *ctx = duk_create_heap_default();
+	duk_push_c_function(ctx, dukopen_filesystem, 0);
+	duk_call(ctx, 0);
+	duk_put_global_string(ctx, "fs");
 
-	manager.add<TransportInet>(TransportAbstract::IPv4, 24000);
-	manager.start();
-
-	while (true) {
-		std::this_thread::sleep_for(1s);
+	if (duk_peval_file(ctx, "test.js") != 0) {
+		printf("%s\n", duk_safe_to_string(ctx, -1));
 	}
+
+	duk_destroy_heap(ctx);
 
 	return 0;
 }

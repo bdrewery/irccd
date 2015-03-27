@@ -40,7 +40,6 @@ function(create_test name sources)
 		common
 		ircclient
 		gtest
-		lua
 	)
 
 	if (UNIX)
@@ -63,7 +62,10 @@ function(create_dir target dirname)
 	)
 endfunction()
 
+make_directory(${CMAKE_BINARY_DIR}/testassets)
+
 if (WITH_TESTS)
+	add_subdirectory(js-filesystem)
 	add_subdirectory(transport)
 
 	#add_subdirectory(converter)

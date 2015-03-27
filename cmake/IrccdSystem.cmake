@@ -80,7 +80,8 @@ endif ()
 #
 # HAVE_GETOPT		- True if getopt(3) is available from C library,
 # HAVE_SETPROGNAME	- True if setprogname(3) is available from C library,
-# HAVE_UNISTD_H		- True if unistd.h include file is available,
+# HAVE_SYS_STAT_H	- True if sys/stat.h is available
+# HAVE_STAT		- True if stat() is also available
 # HAVE_STAT_ST_DEV	- The struct stat has st_dev field,
 # HAVE_STAT_ST_INO	- The struct stat has st_ino field,
 # HAVE_STAT_ST_NLINK	- The struct stat has st_nlink field,
@@ -130,21 +131,27 @@ if (NOT HAVE_SETPROGNAME)
 	)
 endif ()
 
-# unistd.h has some useful routines.
-check_include_file(unistd.h HAVE_UNISTD_H)
+# access() POSIX function
+check_function_exists(access HAVE_ACCESS)
+
+# stat(2) function
+check_include_file(sys/stat.h HAVE_SYS_STAT_H)
+check_function_exists(stat HAVE_STAT)
 
 # Check for struct stat fields.
-check_struct_has_member("struct stat" st_dev sys/stat.h HAVE_STAT_ST_DEV)
-check_struct_has_member("struct stat" st_ino sys/stat.h HAVE_STAT_ST_INO)
-check_struct_has_member("struct stat" st_nlink sys/stat.h HAVE_STAT_ST_NLINK)
-check_struct_has_member("struct stat" st_uid sys/stat.h HAVE_STAT_ST_UID)
-check_struct_has_member("struct stat" st_gid sys/stat.h HAVE_STAT_ST_GID)
 check_struct_has_member("struct stat" st_atime sys/stat.h HAVE_STAT_ST_ATIME)
-check_struct_has_member("struct stat" st_mtime sys/stat.h HAVE_STAT_ST_MTIME)
-check_struct_has_member("struct stat" st_ctime sys/stat.h HAVE_STAT_ST_CTIME)
-check_struct_has_member("struct stat" st_size sys/stat.h HAVE_STAT_ST_SIZE)
 check_struct_has_member("struct stat" st_blksize sys/stat.h HAVE_STAT_ST_BLKSIZE)
 check_struct_has_member("struct stat" st_blocks sys/stat.h HAVE_STAT_ST_BLOCKS)
+check_struct_has_member("struct stat" st_ctime sys/stat.h HAVE_STAT_ST_CTIME)
+check_struct_has_member("struct stat" st_dev sys/stat.h HAVE_STAT_ST_DEV)
+check_struct_has_member("struct stat" st_gid sys/stat.h HAVE_STAT_ST_GID)
+check_struct_has_member("struct stat" st_ino sys/stat.h HAVE_STAT_ST_INO)
+check_struct_has_member("struct stat" st_mode sys/stat.h HAVE_STAT_ST_MODE)
+check_struct_has_member("struct stat" st_mtime sys/stat.h HAVE_STAT_ST_MTIME)
+check_struct_has_member("struct stat" st_nlink sys/stat.h HAVE_STAT_ST_NLINK)
+check_struct_has_member("struct stat" st_rdev sys/stat.h HAVE_STAT_ST_RDEV)
+check_struct_has_member("struct stat" st_size sys/stat.h HAVE_STAT_ST_SIZE)
+check_struct_has_member("struct stat" st_uid sys/stat.h HAVE_STAT_ST_UID)
 
 # Configuration file
 configure_file(
@@ -153,11 +160,18 @@ configure_file(
 )
 
 # Port library that every target links to
-add_library(port STATIC ${PORT_SOURCES} ${CMAKE_SOURCE_DIR}/cmake/internal/dummy.c)
+if (PORT_SOURCES)
+	add_library(port STATIC ${PORT_SOURCES})
 
-target_include_directories(
-	port
-	PUBLIC
-		${PORT_INCLUDES}
-		${CMAKE_BINARY_DIR}
-)
+	target_include_directories(
+		port
+		PUBLIC
+			${PORT_INCLUDES}
+			${CMAKE_BINARY_DIR}
+	)
+else ()
+	# dummy target
+	set(port)
+endif ()
+
+

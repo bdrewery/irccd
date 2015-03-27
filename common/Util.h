@@ -76,6 +76,8 @@ public:
 public:
 	/**
 	 * Directory separator, / on unix, \ on Windows.
+	 *
+	 * @deprecated Use Filesystem::Separator instead
 	 */
 	static const char DIR_SEP;
 
@@ -102,6 +104,7 @@ public:
 	 *
 	 * @param path the full file path
 	 * @return the file name
+	 * @deprecated Use Filesystem::baseName instead
 	 */
 	static std::string baseName(const std::string &path);
 
@@ -111,6 +114,7 @@ public:
 	 *
 	 * @param file the filename to check
 	 * @return the parent directory
+	 * @deprecated Use Filesystem::dirName instead
 	 */
 	static std::string dirName(const std::string &file);
 
@@ -151,6 +155,7 @@ public:
 	 *
 	 * @param path the file / directory to check
 	 * @return true on success
+	 * @deprecated Use Filesystem::exists instead
 	 */
 	static bool exist(const std::string &path);
 
@@ -159,6 +164,7 @@ public:
 	 *
 	 * @param path the path
 	 * @return true if it is
+	 * @deprecated Use Filesystem::isAbsolute instead
 	 */
 	static bool isAbsolute(const std::string &path);
 
@@ -167,6 +173,7 @@ public:
 	 *
 	 * @param path the path
 	 * @return true if has
+	 * @deprecated Don't use this function
 	 */
 	static bool hasAccess(const std::string &path);
 
@@ -175,6 +182,7 @@ public:
 	 *
 	 * @param dir the directory path
 	 * @param mode the mode
+	 * @deprecated Use Filesystem::mkdir instead
 	 */
 	static void mkdir(const std::string &dir, int mode);
 
