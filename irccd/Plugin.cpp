@@ -20,81 +20,44 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <Logger.h>
-#include <Util.h>
-
-#include "Irccd.h"
+/*
+ * Keep this ordered like this, on Windows we get some errors saying that windows.h
+ * must be included before winsock2.h
+ */
+#include "Server.h"
 #include "Plugin.h"
 
 namespace irccd {
 
-/* --------------------------------------------------------
- * Plugin exception
- * -------------------------------------------------------- */
-
-Plugin::ErrorException::ErrorException(std::string which, std::string error)
-	: m_error(std::move(error))
-	, m_which(std::move(which))
-{
-}
-
-const std::string &Plugin::ErrorException::which() const
-{
-	return m_which;
-}
-
-const std::string &Plugin::ErrorException::error() const
-{
-	return m_error;
-}
-
-const char *Plugin::ErrorException::what() const throw()
-{
-	return m_error.c_str();
-}
-
-/* --------------------------------------------------------
- * private methods and members
- * -------------------------------------------------------- */
-
-std::string Plugin::getGlobal(const std::string &name)
+std::string Plugin::global(const std::string &name) const
 {
 	std::string result;
 
-	Luae::getglobal(*m_process, name);
-	if (Luae::type(*m_process, -1) == LUA_TSTRING)
-		result = Luae::get<std::string>(*m_process, -1);
-	Luae::pop(*m_process, 1);
+	duk_push_global_object(m_context);
+	duk_get_prop_string(m_context, -1, name.c_str());
+	result = duk_to_string(m_context, -1);
+	duk_pop_2(m_context);
 
 	return result;
 }
 
-/* --------------------------------------------------------
- * Public methods
- * -------------------------------------------------------- */
-
 Plugin::Plugin(std::string name, std::string path)
+	: m_context()
 {
 	m_info.name = std::move(name);
 	m_info.path = std::move(path);
-	m_process = std::make_shared<Process>();
+
+	if (duk_peval_file(m_context, m_info.path.c_str()) != 0) {
+		printf("FAILURE: %s\n", duk_safe_to_string(m_context, -1));
+	}
 }
 
-const std::string &Plugin::getName() const
+const PluginInfo &Plugin::info() const
 {
-	return m_info.name;
+	return m_info;
 }
 
-const std::string &Plugin::getHome() const
-{
-	return m_info.home;
-}
-
-lua_State *Plugin::getState()
-{
-	return static_cast<lua_State *>(*m_process);
-}
-
+#if 0
 void Plugin::open()
 {
 	auto lock = m_process->lock();
@@ -131,38 +94,69 @@ void Plugin::open()
 	call("onLoad");
 }
 
-/* --------------------------------------------------------
- * Plugin callbacks
- * -------------------------------------------------------- */
+#endif
 
-void Plugin::onCommand(std::shared_ptr<Server> server, std::string channel, std::string nick, std::string message)
+void Plugin::onCommand(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
 {
-	call("onCommand", std::move(server), std::move(channel), std::move(nick), std::move(message));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, origin.c_str());
+	duk_push_string(m_context, channel.c_str());
+	duk_push_string(m_context, message.c_str());
 }
 
 void Plugin::onConnect(std::shared_ptr<Server> server)
 {
-	call("onConnect", std::move(server));
+	dukx_push_shared(m_context, server);
 }
 
-void Plugin::onChannelNotice(std::shared_ptr<Server> server, std::string who, std::string channel, std::string notice)
+void Plugin::onChannelNotice(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string notice)
 {
-	call("onChannelNotice", std::move(server), std::move(who), std::move(channel), std::move(notice));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, origin.c_str());
+	duk_push_string(m_context, channel.c_str());
+	duk_push_string(m_context, notice.c_str());
 }
 
-void Plugin::onInvite(std::shared_ptr<Server> server, std::string channel, std::string who)
+void Plugin::onInvite(std::shared_ptr<Server> server, std::string origin, std::string channel)
 {
-	call("onInvite", std::move(server), std::move(channel), std::move(who));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, origin.c_str());
+	duk_push_string(m_context, channel.c_str());
 }
 
-void Plugin::onJoin(std::shared_ptr<Server> server, std::string channel, std::string nickname)
+void Plugin::onJoin(std::shared_ptr<Server> server, std::string origin, std::string channel)
 {
-	call("onJoin", std::move(server), std::move(channel), std::move(nickname));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, origin.c_str());
+	duk_push_string(m_context, channel.c_str());
 }
 
-void Plugin::onKick(std::shared_ptr<Server> server, std::string channel, std::string who, std::string kicked, std::string reason)
+void Plugin::onKick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason)
 {
-	call("onKick", std::move(server), std::move(channel), std::move(who), std::move(kicked), std::move(reason));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, origin.c_str());
+	duk_push_string(m_context, channel.c_str());
+	duk_push_string(m_context, target.c_str());
+	duk_push_string(m_context, reason.c_str());
+}
+
+void Plugin::call(const char *name, int nargs)
+{
+	duk_push_global_object(m_context);
+	duk_get_prop_string(m_context, -1, name);
+
+	if (duk_get_type(m_context, -1) == DUK_TYPE_UNDEFINED) {
+		duk_pop_2(m_context);
+	} else {
+		duk_remove(m_context, -2);
+		duk_insert(m_context, -1 -nargs);
+
+		if (duk_pcall(m_context, nargs) != 0) {
+			printf("failed to call function: %s\n", duk_safe_to_string(m_context, -1));
+		}
+
+		duk_pop(m_context);
+	}
 }
 
 void Plugin::onLoad()
@@ -170,74 +164,97 @@ void Plugin::onLoad()
 	call("onLoad");
 }
 
-void Plugin::onMessage(std::shared_ptr<Server> server, std::string channel, std::string nick, std::string message)
+void Plugin::onMessage(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
 {
-	call("onMessage", std::move(server), std::move(channel), std::move(nick), std::move(message));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, origin.c_str());
+	duk_push_string(m_context, channel.c_str());
+	duk_push_string(m_context, message.c_str());
+	call("onMessage", 4);
 }
 
-void Plugin::onMe(std::shared_ptr<Server> server, std::string channel, std::string nick, std::string message)
+void Plugin::onMe(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
 {
-	call("onMe", std::move(server), std::move(channel), std::move(nick), std::move(message));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, origin.c_str());
+	duk_push_string(m_context, channel.c_str());
+	duk_push_string(m_context, message.c_str());
 }
 
-void Plugin::onMode(std::shared_ptr<Server> server, std::string channel, std::string nickname, std::string mode, std::string arg)
+void Plugin::onMode(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string arg)
 {
-	call("onMode", std::move(server), std::move(channel), std::move(nickname), std::move(mode), std::move(arg));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, origin.c_str());
+	duk_push_string(m_context, channel.c_str());
+	duk_push_string(m_context, mode.c_str());
+	duk_push_string(m_context, arg.c_str());
 }
 
-void Plugin::onNames(std::shared_ptr<Server> server, std::string channel, std::vector<std::string> list)
+void Plugin::onNames(std::shared_ptr<Server>, std::string, std::vector<std::string>)
 {
-	call("onNames", std::move(server), std::move(channel), std::move(list));
 }
 
 void Plugin::onNick(std::shared_ptr<Server> server, std::string oldnick, std::string newnick)
 {
-	call("onNick", std::move(server), std::move(oldnick), std::move(newnick));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, oldnick.c_str());
+	duk_push_string(m_context, newnick.c_str());
 }
 
-void Plugin::onNotice(std::shared_ptr<Server> server, std::string who, std::string target, std::string notice)
+void Plugin::onNotice(std::shared_ptr<Server> server, std::string origin, std::string notice)
 {
-	call("onNotice", std::move(server), std::move(who), std::move(target), std::move(notice));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, origin.c_str());
+	duk_push_string(m_context, notice.c_str());
 }
 
-void Plugin::onPart(std::shared_ptr<Server> server, std::string channel, std::string nickname, std::string reason)
+void Plugin::onPart(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string reason)
 {
-	call("onPart", std::move(server), std::move(channel), std::move(nickname), std::move(reason));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, origin.c_str());
+	duk_push_string(m_context, channel.c_str());
+	duk_push_string(m_context, reason.c_str());
 }
 
-void Plugin::onQuery(std::shared_ptr<Server> server, std::string who, std::string message)
+void Plugin::onQuery(std::shared_ptr<Server> server, std::string origin, std::string message)
 {
-	call("onQuery", std::move(server), std::move(who), std::move(message));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, origin.c_str());
+	duk_push_string(m_context, message.c_str());
 }
 
-void Plugin::onQueryCommand(std::shared_ptr<Server> server, std::string who, std::string message)
+void Plugin::onQueryCommand(std::shared_ptr<Server> server, std::string origin, std::string message)
 {
-	call("onQueryCommand", std::move(server), std::move(who), std::move(message));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, origin.c_str());
+	duk_push_string(m_context, message.c_str());
 }
 
 void Plugin::onReload()
 {
-	call("onReload");
 }
 
-void Plugin::onTopic(std::shared_ptr<Server> server, std::string channel, std::string who, std::string topic)
+void Plugin::onTopic(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string topic)
 {
-	call("onTopic", std::move(server), std::move(channel), std::move(who), std::move(topic));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, origin.c_str());
+	duk_push_string(m_context, channel.c_str());
+	duk_push_string(m_context, topic.c_str());
 }
 
 void Plugin::onUnload()
 {
-	call("onUnload");
 }
 
-void Plugin::onUserMode(std::shared_ptr<Server> server, std::string who, std::string mode)
+void Plugin::onUserMode(std::shared_ptr<Server> server, std::string origin, std::string mode)
 {
-	call("onUserMode", std::move(server), std::move(who), std::move(mode));
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, origin.c_str());
+	duk_push_string(m_context, mode.c_str());
 }
 
-void Plugin::onWhois(std::shared_ptr<Server> server, IrcWhois info)
+void Plugin::onWhois(std::shared_ptr<Server>, ServerWhois)
 {
-	call("onWhois", std::move(server), std::move(info));
 }
 
 } // !irccd

@@ -17,21 +17,20 @@
  */
 
 #include <iostream>
-#include <chrono>
+#include <memory>
 
-#include <js/Js.h>
+#include "Server.h"
+#include "Plugin.h"
+
+using namespace irccd;
 
 int main(void)
 {
-	duk_context *ctx = duk_create_heap_default();
-	duk_push_c_function(ctx, dukopen_filesystem, 0);
-	duk_call(ctx, 0);
-	duk_put_global_string(ctx, "fs");
+	Plugin plugin("test", "test.js");
+	auto s = std::make_shared<Server>(ServerInfo{});
 
-	if (duk_peval_file(ctx, "test.js") != 0) {
-		printf("%s\n", duk_safe_to_string(ctx, -1));
-
-	duk_destroy_heap(ctx);
+	puts("calling");
+	plugin.onMessage(s, "markand", "#staff", "Salut al compagnie");
 
 	return 0;
 }

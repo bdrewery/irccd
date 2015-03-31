@@ -29,8 +29,10 @@ set(
 	Irccd.cpp
 	Irccd.h
 	main.cpp
-	Server.h
+	Plugin.cpp
+	Plugin.h
 	Server.cpp
+	Server.h
 	ServerCommand.h
 	ServerManager.cpp
 	ServerManager.h

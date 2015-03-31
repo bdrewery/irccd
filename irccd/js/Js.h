@@ -112,6 +112,9 @@ void dukx_with_this(duk_context *ctx, Func func)
  * Convenient function to push a class that will be deleted by Duktape,
  * you can use dukx_with_this in the object methods.
  *
+ * This function is best used when the object is constructed *from* ECMAScript
+ * using function constructor.
+ *
  * @class ctx the duktape context
  * @param methods the methods
  * @param ptr the the object
@@ -145,6 +148,47 @@ void dukx_set_class(duk_context *ctx, Type *ptr)
 
 	// data pointer
 	duk_push_pointer(ctx, ptr);
+	duk_put_prop_string(ctx, -2, "\xff\xff" "data");
+}
+
+/**
+ * Similar to dukx_set_class but this function push an object instead.
+ *
+ */
+template <typename Type>
+void dukx_push_shared(duk_context *ctx, std::shared_ptr<Type> ptr)
+{
+	// Object itself
+	duk_push_object(ctx);
+
+	// TODO: PROTOTYPE HERE
+
+	// deletion flag
+	duk_push_false(ctx);
+	duk_put_prop_string(ctx, -2, "\xff\xff" "deleted");
+
+	// deleter function
+	duk_push_c_function(ctx, [] (auto ctx) -> duk_ret_t {
+		duk_get_prop_string(ctx, 0, "\xff\xff" "deleted");
+
+		if (!duk_to_boolean(ctx, -1)) {
+			duk_pop(ctx);
+			duk_get_prop_string(ctx, 0, "\xff\xff" "data");
+			delete static_cast<std::shared_ptr<Type> *>(duk_to_pointer(ctx, -1));
+
+			duk_pop(ctx);
+			duk_push_true(ctx);
+			duk_put_prop_string(ctx, 0, "\xff\xff" "deleted");
+		} else {
+			duk_pop(ctx);
+		}
+
+		return 0;
+	}, 1);
+	duk_set_finalizer(ctx, -2);
+
+	// data pointer
+	duk_push_pointer(ctx, new std::shared_ptr<Type>(ptr));
 	duk_put_prop_string(ctx, -2, "\xff\xff" "data");
 }
 

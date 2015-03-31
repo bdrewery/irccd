@@ -27,40 +27,19 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
-#include <mutex>
+#include <vector>
 
-#include "Luae.h"
-#include "Process.h"
-#include "Server.h"
-
-#include "lua/LuaServer.h"
+#include "js/Js.h"
 
 namespace irccd {
 
-class IrcEvent;
+class Server;
+class ServerWhois;
 
-/**
- * @brief Overload for IrcWhois
- */
-template <>
-struct Luae::Convert<IrcWhois> {
-	static const bool hasPush = true;	//!< is supported
-
-	/**
-	 * Push the whois information.
-	 *
-	 * @param L the Lua state
-	 * @param whois the whois information
-	 */
-	static void push(lua_State *L, const IrcWhois &whois)
-	{
-		LuaeTable::create(L);
-		LuaeTable::set(L, -1, "nickname", whois.nick);
-		LuaeTable::set(L, -1, "user", whois.user);
-		LuaeTable::set(L, -1, "host", whois.host);
-		LuaeTable::set(L, -1, "realname", whois.realname);
-		LuaeTable::set(L, -1, "channels", whois.channels);
-	}
+class PluginInfo {
+public:
+	std::string name;
+	std::string path;
 };
 
 /**
@@ -71,163 +50,26 @@ struct Luae::Convert<IrcWhois> {
  * at runtime.
  */
 class Plugin final {
-public:
-	/**
-	 * @class ErrorException
-	 * @brief Error in plugins
-	 */
-	class ErrorException : public std::exception {
-	private:
-		std::string m_error;
-		std::string m_which;
-
-	public:
-		/**
-		 * Default constructor.
-		 */
-		ErrorException() = default;
-
-		/**
-		 * Construct an error.
-		 *
-		 * @param which the plugin name
-		 * @param error the error
-		 */
-		ErrorException(std::string which, std::string error);
-
-		/**
-		 * Tells which plugin name has failed.
-		 *
-		 * @return the plugin name
-		 */
-		const std::string &which() const;
-
-		/**
-		 * Get the error.
-		 *
-		 * @return the error
-		 */
-		const std::string &error() const;
-
-		/**
-		 * Get the error.
-		 *
-		 * @return the error
-		 */
-		virtual const char *what() const noexcept;
-	};
-
 private:
-	std::shared_ptr<Process> m_process;
-	Process::Info m_info;
+	DukContext m_context;
+	PluginInfo m_info;
 
-	std::string getGlobal(const std::string &name);
-
-	void pushObjects(lua_State *) const
-	{
-		// Dummy, stop recursion
-	}
-
-	template <typename T, typename... Args>
-	void pushObjects(lua_State *L, const T &value, Args&&... args) const
-	{
-		Luae::push(L, value);
-		pushObjects(L, args...);
-	}
-
-	/**
-	 * Call a function and push arguments before.
-	 *
-	 * @param L the Lua state
-	 * @param func the function to call
-	 * @param args the arguments
-	 * @throw Plugin::ErrorException on error
-	 */
-	template <typename... Args>
-	void call(const std::string &func, Args&&... args) const
-	{
-		Process::Lock lock = m_process->lock();
-
-		Luae::getglobal(*m_process, func);
-
-		if (Luae::type(*m_process, -1) != LUA_TFUNCTION) {
-			lua_pop(*m_process, 1);
-		} else {
-			auto before = lua_gettop(*m_process);
-			auto after = 0;
-
-			pushObjects(*m_process, std::forward<Args>(args)...);
-			after = lua_gettop(*m_process);
-
-			try {
-				Luae::pcall(*m_process, after - before, 0);
-			} catch (const std::runtime_error &error) {
-				throw Plugin::ErrorException(m_info.name, error.what());
-			}
-		}
-	}
+	std::string global(const std::string &name) const;
+	void call(const char *name, int nargs = 0);
 
 public:
-	/**
-	 * Default constructor. (Forbidden)
-	 */
-	Plugin() = delete;
-
 	/**
 	 * Correct constructor.
 	 *
 	 * @param name the plugin name
-	 * @param path the path to the plugin
+	 * @param path the fully resolved path to the plugin
 	 */
 	Plugin(std::string name, std::string path);
 
 	/**
-	 * Get the plugin name.
-	 *
-	 * @return the name
+	 * Get the plugin information.
 	 */
-	const std::string &getName() const;
-
-	/**
-	 * Get the plugin home directory.
-	 *
-	 * @return the directory
-	 */
-	const std::string &getHome() const;
-
-	/**
-	 * Find the plugin's home. It first tries to load user's one
-	 * and system after.
-	 */
-	void setHome();
-
-	/**
-	 * Get the plugin Lua state.
-	 *
-	 * @return the Lua state
-	 */
-	lua_State *getState();
-
-	/**
-	 * Open the plugin.
-	 *
-	 * @throw ErrorException on error
-	 */
-	void open();
-
-	/**
-	 * Get the process for that plugin.
-	 *
-	 * @return the plugin
-	 */
-	inline const std::shared_ptr<Process> &process() const noexcept
-	{
-		return m_process;
-	}
-
-	/* ------------------------------------------------
-	 * Plugin callbacks
-	 * ------------------------------------------------ */
+	const PluginInfo &info() const;
 
 	/**
 	 * On channel message. This event will call onMessage or
@@ -235,11 +77,11 @@ public:
 	 * plus the plugin name.
 	 *
 	 * @param server the server
+	 * @param origin the user who sent the message
 	 * @param channel the channel
-	 * @param nick the user who sent the message
 	 * @param message the message or command
 	 */
-	void onCommand(std::shared_ptr<Server> server, std::string channel, std::string nick, std::string message);
+	void onCommand(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message);
 
 	/**
 	 * On successful connection.
@@ -252,78 +94,76 @@ public:
 	 * On a channel notice.
 	 *
 	 * @param server the server
-	 * @param who the user who sent the notice
+	 * @param origin the user who sent the notice
 	 * @param channel on which channel
 	 * @param notice the message
 	 */
-	void onChannelNotice(std::shared_ptr<Server> server, std::string who, std::string channel, std::string notice);
+	void onChannelNotice(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string notice);
 
 	/**
 	 * On invitation.
 	 *
 	 * @param server the server
+	 * @param origin the user who invited you
 	 * @param channel the channel
-	 * @param who the user who invited you
 	 */
-	void onInvite(std::shared_ptr<Server> server, std::string channel, std::string who);
+	void onInvite(std::shared_ptr<Server> server, std::string origin, std::string channel);
 
 	/**
 	 * On join.
 	 *
 	 * @param server the server
+	 * @param origin the user who joined
 	 * @param channel the channel
-	 * @param nickname the user who joined
 	 */
-	void onJoin(std::shared_ptr<Server> server, std::string channel, std::string nickname);
+	void onJoin(std::shared_ptr<Server> server, std::string origin, std::string channel);
 
 	/**
 	 * On kick.
 	 *
 	 * @param server the server
+	 * @param origin the user who kicked the target
 	 * @param channel the channel
-	 * @param who the user who kicked
-	 * @param kicked the kicked target
+	 * @param target the kicked target
 	 * @param reason the optional reason
 	 */
-	void onKick(std::shared_ptr<Server> server, std::string channel, std::string who, std::string kicked, std::string reason);
+	void onKick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason);
 
 	/**
-	 * On unload.
+	 * On load.
 	 */
 	void onLoad();
 
 	/**
-	 * On channel message. This event will call onMessage or
-	 * onCommand if the messages starts with the command character
-	 * plus the plugin name.
+	 * On channel message.
 	 *
 	 * @param server the server
+	 * @param origin the user who sent the message
 	 * @param channel the channel
-	 * @param nick the user who sent the message
 	 * @param message the message or command
 	 */
-	void onMessage(std::shared_ptr<Server> server, std::string channel, std::string nick, std::string message);
+	void onMessage(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message);
 
 	/**
 	 * On CTCP Action.
 	 *
 	 * @param server the server
-	 * @param channel the channel
-	 * @param nick the user who sent the message
+	 * @param origin the user who sent the message
+	 * @param channel the channel (may also be your nickname)
 	 * @param message the message
 	 */
-	void onMe(std::shared_ptr<Server> server, std::string channel, std::string nick, std::string message);
+	void onMe(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message);
 
 	/**
 	 * On channel mode.
 	 *
 	 * @param server the server
+	 * @param origin the ouser who has changed the mode
 	 * @param channel the channel
-	 * @param nickname the nickname
 	 * @param mode the mode
 	 * @param arg the optional mode argument
 	 */
-	void onMode(std::shared_ptr<Server> server, std::string channel, std::string nickname, std::string mode, std::string arg);
+	void onMode(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string arg);
 
 	/**
 	 * On names listing.
@@ -347,39 +187,38 @@ public:
 	 * On user notice.
 	 *
 	 * @param server the server
-	 * @param who the user who sent the notice
-	 * @param target the target, usually your nickname
+	 * @param origin the user who sent the notice
 	 * @param notice the notice
 	 */
-	void onNotice(std::shared_ptr<Server> server, std::string who, std::string target, std::string notice);
+	void onNotice(std::shared_ptr<Server> server, std::string origin, std::string notice);
 
 	/**
 	 * On part.
 	 *
 	 * @param server the server
+	 * @param origin the user who left
 	 * @param channel the channel
-	 * @param nickname the user who left
 	 * @param reason the optional reason
 	 */
-	void onPart(std::shared_ptr<Server> server, std::string channel, std::string nickname, std::string reason);
+	void onPart(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string reason);
 
 	/**
 	 * On user query.
 	 *
 	 * @param server the server
-	 * @param who the user who sent the query
+	 * @param origin the user who sent the query
 	 * @param message the message
 	 */
-	void onQuery(std::shared_ptr<Server> server, std::string who, std::string message);
+	void onQuery(std::shared_ptr<Server> server, std::string origin, std::string message);
 
 	/**
 	 * On user query command.
 	 *
 	 * @param server the server
-	 * @param who the user who sent the query
+	 * @param origin the user who sent the query
 	 * @param message the message
 	 */
-	void onQueryCommand(std::shared_ptr<Server> server, std::string who, std::string message);
+	void onQueryCommand(std::shared_ptr<Server> server, std::string origin, std::string message);
 
 	/**
 	 * On reload.
@@ -390,11 +229,11 @@ public:
 	 * On topic change.
 	 *
 	 * @param server the server
+	 * @param origin the user who sent the topic
 	 * @param channel the channel
-	 * @param who the user who sent the topic
 	 * @param topic the new topic
 	 */
-	void onTopic(std::shared_ptr<Server> server, std::string channel, std::string who, std::string topic);
+	void onTopic(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string topic);
 
 	/**
 	 * On unload.
@@ -405,10 +244,10 @@ public:
 	 * On user mode change.
 	 *
 	 * @param server the server
-	 * @param who the person who changed the mode
+	 * @param origin the person who changed the mode
 	 * @param mode the new mode
 	 */
-	void onUserMode(std::shared_ptr<Server> server, std::string who, std::string mode);
+	void onUserMode(std::shared_ptr<Server> server, std::string origin, std::string mode);
 
 	/**
 	 * On whois information.
@@ -416,7 +255,7 @@ public:
 	 * @param server the server
 	 * @param info the info
 	 */
-	void onWhois(std::shared_ptr<Server> server, IrcWhois info);
+	void onWhois(std::shared_ptr<Server> server, ServerWhois info);
 };
 
 } // !irccd

@@ -43,6 +43,9 @@ namespace {
  * File utilities
  * -------------------------------------------------------- */
 
+/*
+ * File object that is used by File constructor.
+ */
 class File {
 public:
 	enum {
@@ -65,8 +68,6 @@ public:
 			throw std::runtime_error(std::strerror(errno));
 		}
 	}
-
-	virtual ~File() = default;
 
 	inline const std::string &path() const noexcept
 	{
@@ -139,7 +140,10 @@ public:
 
 #if defined(HAVE_STAT)
 
-int pushStat(duk_context *ctx, const struct stat &st)
+/*
+ * Push the struct stat as an object to JS.
+ */
+duk_ret_t filePushStat(duk_context *ctx, const struct stat &st)
 {
 	duk_push_object(ctx);
 
@@ -205,8 +209,17 @@ int pushStat(duk_context *ctx, const struct stat &st)
  * Directory utilities
  * -------------------------------------------------------- */
 
+/*
+ * Find an entry recursively (or not) in a directory using a predicate
+ * which can be used to test for regular expression, equality.
+ *
+ * Do not use this function directly, use:
+ *
+ * - directoryFindName
+ * - directoryFindRegex
+ */
 template <typename Pred>
-std::string findPath(const std::string &base, const std::string &destination, bool recursive, Pred pred)
+std::string directoryFindPath(const std::string &base, const std::string &destination, bool recursive, Pred pred)
 {
 	/*
 	 * For performance reason, we first iterate over all entries that are
@@ -229,9 +242,9 @@ std::string findPath(const std::string &base, const std::string &destination, bo
 		std::string path;
 
 		if (entry.type == DirectoryEntry::Dir) {
-			path = findPath(base + entry.name + Filesystem::Separator,
-					destination + entry.name + Filesystem::Separator,
-					true, pred);
+			path = directoryFindPath(base + entry.name + Filesystem::Separator,
+						destination + entry.name + Filesystem::Separator,
+						true, pred);
 		}
 
 		if (!path.empty()) {
@@ -242,18 +255,24 @@ std::string findPath(const std::string &base, const std::string &destination, bo
 	throw std::out_of_range("entry not found");
 }
 
-std::string findName(std::string base, const std::string &pattern, bool recursive, const std::string &destination = "")
+/*
+ * Helper for finding by equality.
+ */
+std::string directoryFindName(std::string base, const std::string &pattern, bool recursive, const std::string &destination = "")
 {
 	if (base.size() > 0 && base.back() != Filesystem::Separator) {
 		base.push_back(Filesystem::Separator);
 	}
 
-	return findPath(base, destination, recursive, [&] (const std::string &entryname) -> bool {
+	return directoryFindPath(base, destination, recursive, [&] (const std::string &entryname) -> bool {
 		return pattern == entryname;
 	});
 }
 
-std::string findRegex(std::string base, std::string pattern, bool recursive, const std::string &destination = "")
+/*
+ * Helper for finding by regular expression
+ */
+std::string directoryFindRegex(std::string base, std::string pattern, bool recursive, const std::string &destination = "")
 {
 	if (base.size() > 0 && base.back() != Filesystem::Separator) {
 		base.push_back(Filesystem::Separator);
@@ -270,11 +289,32 @@ std::string findRegex(std::string base, std::string pattern, bool recursive, con
 	std::regex regexp(pattern, std::regex::ECMAScript);
 	std::smatch smatch;
 
-	return findPath(base, destination, recursive, [&] (const std::string &entryname) -> bool {
+	return directoryFindPath(base, destination, recursive, [&] (const std::string &entryname) -> bool {
 		return std::regex_match(entryname, smatch, regexp);
 	});
 }
 
+/*
+ * Get the path stored in the directory object.
+ */
+const char *directoryPath(duk_context *ctx)
+{
+	const char *path;
+
+	duk_push_this(ctx);
+	duk_get_prop_string(ctx, -1, "path");
+	path = duk_to_string(ctx, -1);
+	duk_pop_2(ctx);
+
+	return path;
+}
+
+/*
+ * Generic find function for:
+ *
+ * - Directory.find
+ * - Directory.prototype.find
+ */
 duk_ret_t directoryFind(duk_context *ctx, const char *base, int beginindex)
 {
 	bool recursive = false;
@@ -287,9 +327,9 @@ duk_ret_t directoryFind(duk_context *ctx, const char *base, int beginindex)
 		std::string path;
 
 		if (duk_is_string(ctx, beginindex)) {
-			path = findName(base, duk_to_string(ctx, beginindex), recursive);
+			path = directoryFindName(base, duk_to_string(ctx, beginindex), recursive);
 		} else if (duk_is_object(ctx, beginindex)) {
-			path = findRegex(base, duk_to_string(ctx, beginindex), recursive);
+			path = directoryFindRegex(base, duk_to_string(ctx, beginindex), recursive);
 		} else {
 			dukx_throw(ctx, -1, "pattern must be a string or a regex expression");
 		}
@@ -306,6 +346,12 @@ duk_ret_t directoryFind(duk_context *ctx, const char *base, int beginindex)
 	return 1;
 }
 
+/*
+ * Generic find function for:
+ *
+ * - Directory.find
+ * - Directory.prototype.find
+ */
 duk_ret_t directoryRemove(duk_context *ctx, const std::string &path, int beginindex)
 {
 	bool recursive = false;
@@ -331,23 +377,6 @@ duk_ret_t directoryRemove(duk_context *ctx, const std::string &path, int beginin
 		} catch (const std::exception &ex) {
 			// TODO: put the error in a log.
 		}
-	}
-
-	return 0;
-}
-
-duk_ret_t directoryMkdir(duk_context *ctx, const char *path, int beginindex)
-{
-	int mode = 0700;
-
-	if (duk_get_top(ctx) == beginindex + 1) {
-		mode = duk_require_int(ctx, beginindex);
-	}
-
-	try {
-		Filesystem::mkdir(path, mode);
-	} catch (const std::exception &ex) {
-		dukx_throw(ctx, -1, ex.what());
 	}
 
 	return 0;
@@ -502,7 +531,7 @@ duk_ret_t File_prototype_stat(duk_context *ctx)
 			dukx_throw_syserror(ctx, errno);
 		}
 
-		(void)pushStat(ctx, st);
+		(void)filePushStat(ctx, st);
 	});
 
 	return 1;
@@ -738,7 +767,7 @@ duk_ret_t File_stat(duk_context *ctx)
 		dukx_throw_syserror(ctx, errno);
 	}
 
-	return pushStat(ctx, st);
+	return filePushStat(ctx, st);
 }
 
 #endif // !HAVE_STAT
@@ -762,52 +791,47 @@ constexpr const duk_number_list_entry fileConstants[] = {
 };
 
 /* --------------------------------------------------------
- * Directory methods
+ * Directory object
  * -------------------------------------------------------- */
 
 /*
  * Method: Directory.find(pattern, recursive)
  * --------------------------------------------------------
  *
- * TODO
+ * Synonym of Directory.find(path, pattern, recursive) but the path is taken
+ * from the directory object.
+ *
+ * Arguments:
+ *   - pattern, the regular expression or file name
+ *   - recursive, set to true to search recursively (default: false)
+ * Returns:
+ *   - the path to the file or undefined on errors or not found
  */
 duk_ret_t Directory_prototype_find(duk_context *ctx)
 {
-	const char *path;
-
-	duk_push_this(ctx);
-	duk_get_prop_string(ctx, -1, "path");
-	path = duk_to_string(ctx, -1);
-	duk_pop_2(ctx);
-
-	return directoryFind(ctx, path, 0);
-}
-
-/*
- * Method: Directory.mkdir(recursive)
- * --------------------------------------------------------
- *
- * TODO
- */
-duk_ret_t Directory_prototype_mkdir(duk_context *)
-{
-	return 0;
+	return directoryFind(ctx, directoryPath(ctx), 0);
 }
 
 /*
  * Method: Directory.remove(recursive)
  * --------------------------------------------------------
  *
- * TODO
+ * Synonym of Directory.remove(recursive) but the path is taken from the
+ * directory object.
+ *
+ * Arguments:
+ *   - path, the path to the directory
+ *   - recursive, recursively or not (default: false)
+ * Throws:
+ *   Any exception on error
  */
-duk_ret_t Directory_prototype_remove(duk_context *)
+duk_ret_t Directory_prototype_remove(duk_context *ctx)
 {
-	return 0;
+	return directoryRemove(ctx, directoryPath(ctx), 0);
 }
 
 constexpr const duk_function_list_entry directoryMethods[] = {
 	{ "find",		Directory_prototype_find,	DUK_VARARGS	},
-	{ "mkdir",		Directory_prototype_mkdir,	2		},
 	{ "remove",		Directory_prototype_remove,	1		},
 	{ nullptr,		nullptr,			0		}
 };
@@ -882,10 +906,10 @@ duk_ret_t Directory_Directory(duk_context *ctx)
  *
  * Arguments:
  *   - path, the base path
- *   - pattern, the regular expression or the entry name
- *   - recursive, if true, search recursively (default: false)
+ *   - pattern, the regular expression or file name
+ *   - recursive, set to true to search recursively (default: false)
  * Returns:
- *   - the path to the file
+ *   - the path to the file or undefined on errors or not found
  */
 duk_ret_t Directory_find(duk_context *ctx)
 {
@@ -901,6 +925,8 @@ duk_ret_t Directory_find(duk_context *ctx)
  * Arguments:
  *   - path, the path to the directory
  *   - recursive, recursively or not (default: false)
+ * Throws:
+ *   Any exception on error
  */
 duk_ret_t Directory_remove(duk_context *ctx)
 {
@@ -922,7 +948,20 @@ duk_ret_t Directory_remove(duk_context *ctx)
  */
 duk_ret_t Directory_mkdir(duk_context *ctx)
 {
-	return directoryMkdir(ctx, duk_require_string(ctx, 0), 1);
+	const char *path = duk_require_string(ctx, 0);
+	int mode = 0700;
+
+	if (duk_get_top(ctx) == 2) {
+		mode = duk_require_int(ctx, 1);
+	}
+
+	try {
+		Filesystem::mkdir(path, mode);
+	} catch (const std::exception &ex) {
+		dukx_throw(ctx, -1, ex.what());
+	}
+
+	return 0;
 }
 
 constexpr const duk_function_list_entry directoryFunctions[] = {

@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cerrno>
+#include <cstring>
 #include <fstream>
 #include <sstream>
 
@@ -123,7 +125,6 @@ TEST_F(TestJsFilesystem, symbols)
 
 	// Directory object
 	checkSymbol("fs.Directory.prototype.find", "function");
-	checkSymbol("fs.Directory.prototype.mkdir", "function");
 	checkSymbol("fs.Directory.prototype.remove", "function");
 
 	// Directory constants
@@ -275,7 +276,11 @@ TEST_F(TestJsFilesystem, directoryFind2)
 	execute("fs.Directory.find(BINARY + \"/testassets\", \"file-1.txt\", true)");
 
 	ASSERT_EQ(DUK_TYPE_STRING, duk_get_type(m_ctx, -1));
+#if defined(IRCCD_SYSTEM_WINDOWS)
+	ASSERT_STREQ("level-1\\file-1.txt", duk_to_string(m_ctx, -1));
+#else
 	ASSERT_STREQ("level-1/file-1.txt", duk_to_string(m_ctx, -1));
+#endif
 }
 
 TEST_F(TestJsFilesystem, directoryFind3)
@@ -289,17 +294,22 @@ TEST_F(TestJsFilesystem, directoryFind3)
 
 TEST_F(TestJsFilesystem, directoryMkdir)
 {
+#if !defined(IRCCD_SYSTEM_WINDOWS)
 	execute("fs.Directory.mkdir(BINARY + \"/testassets/tmpdir\")");
 
 	ASSERT_TRUE(Filesystem::exists(std::string(BINARY) + "/testassets/tmpdir"));
 
+	// Problem on Windows with this
 	if (::remove(BINARY "/testassets/tmpdir") < 0) {
-		FAIL() << "Failed to remove testassets/tmpdir directory";
+		FAIL() << "Failed to remove testassets/tmpdir directory: " << std::strerror(errno);
 	}
+#endif
 }
 
 TEST_F(TestJsFilesystem, directoryRemove1)
 {
+	// Problem on Windows
+#if !defined(IRCCD_SYSTEM_WINDOWS)
 	// not recursive
 	execute(
 		"fs.Directory.mkdir(BINARY + \"/testassets/tmpdir\");"
@@ -307,16 +317,20 @@ TEST_F(TestJsFilesystem, directoryRemove1)
 	);
 
 	ASSERT_FALSE(Filesystem::exists(BINARY "/testassets/tmpdir"));
+#endif
 }
 
 TEST_F(TestJsFilesystem, directoryRemove2)
 {
+	// Problem on Windows
+#if !defined(IRCCD_SYSTEM_WINDOWS)
 	execute(
 		"fs.Directory.mkdir(BINARY + \"/testassets/tmpdir1/tmpdir2\");"
 		"fs.Directory.remove(BINARY + \"/testassets/tmpdir1\", true);"
 	);
 
 	ASSERT_FALSE(Filesystem::exists(BINARY "/testassets/tmpdir1"));
+#endif
 }
 
 TEST_F(TestJsFilesystem, directoryMethodFind1)
@@ -333,7 +347,11 @@ TEST_F(TestJsFilesystem, directoryMethodFind2)
 	execute("(new fs.Directory(BINARY + \"/testassets\")).find(\"file-1.txt\", true)");
 
 	ASSERT_EQ(DUK_TYPE_STRING, duk_get_type(m_ctx, -1));
+#if defined(IRCCD_SYSTEM_WINDOWS)
+	ASSERT_STREQ("level-1\\file-1.txt", duk_to_string(m_ctx, -1));
+#else
 	ASSERT_STREQ("level-1/file-1.txt", duk_to_string(m_ctx, -1));
+#endif
 }
 
 TEST_F(TestJsFilesystem, directoryMethodFind3)
@@ -343,19 +361,6 @@ TEST_F(TestJsFilesystem, directoryMethodFind3)
 
 	ASSERT_EQ(DUK_TYPE_STRING, duk_get_type(m_ctx, -1));
 	ASSERT_STREQ("file-2.txt", duk_to_string(m_ctx, -1));
-}
-
-TEST_F(TestJsFilesystem, directoryMethodMkdir)
-{
-#if 0
-	execute("(new Directory.mkdir(BINARY + \"/testassets/\")");
-
-	ASSERT_TRUE(Filesystem::exists(std::string(BINARY) + "/testassets/tmpdir"));
-
-	if (::remove(BINARY "/testassets/tmpdir") < 0) {
-		FAIL() << "Failed to remove testassets/tmpdir directory";
-	}
-#endif
 }
 
 int main(int argc, char **argv)
