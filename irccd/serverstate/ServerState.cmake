@@ -17,7 +17,7 @@
 #
 
 set(
-	SERVER_SOURCES
+	SERVER_STATE_SOURCES
 	${CMAKE_CURRENT_LIST_DIR}/Connected.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Connected.h
 	${CMAKE_CURRENT_LIST_DIR}/Connecting.cpp
@@ -28,4 +28,4 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/Disconnected.h
 )
 
-source_group(server FILES ${SERVER_SOURCES})
+source_group(serverstate FILES ${SERVER_STATE_SOURCES})

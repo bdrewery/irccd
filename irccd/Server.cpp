@@ -23,8 +23,8 @@
 #include <Logger.h>
 
 #include "Server.h"
-#include "server/Connected.h"
-#include "server/Connecting.h"
+#include "serverstate/Connected.h"
+#include "serverstate/Connecting.h"
 
 namespace irccd {
 

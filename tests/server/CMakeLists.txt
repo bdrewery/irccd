@@ -16,13 +16,13 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-include(${irccd_SOURCE_DIR}/server/Server.cmake)
-include(${irccd_SOURCE_DIR}/command/Command.cmake)
+include(${irccd_SOURCE_DIR}/serverstate/ServerState.cmake)
+include(${irccd_SOURCE_DIR}/servercommand/ServerCommand.cmake)
 
 set(
 	TEST_SERVER_SOURCES
-	${COMMAND_SOURCES}
-	${SERVER_SOURCES}
+	${SERVER_COMMAND_SOURCES}
+	${SERVER_STATE_SOURCES}
 	${irccd_SOURCE_DIR}/Server.cpp
 	${irccd_SOURCE_DIR}/Server.h
 	${irccd_SOURCE_DIR}/ServerManager.cpp

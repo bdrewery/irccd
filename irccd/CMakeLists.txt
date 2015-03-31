@@ -18,9 +18,9 @@
 
 project(irccd)
 
-#include(event/Event.cmake)
-include(command/Command.cmake)
-include(server/Server.cmake)
+include(servercommand/ServerCommand.cmake)
+include(serverevent/ServerEvent.cmake)
+include(serverstate/ServerState.cmake)
 include(transportcommand/TransportCommand.cmake)
 include(js/Js.cmake)
 
@@ -61,9 +61,8 @@ irccd_define_executable(
 	TARGET irccd
 	SOURCES
 		${SOURCES}
-		${COMMAND_SOURCES}
-		${EVENT_SOURCES}
-		${SERVER_SOURCES}
+		${SERVER_COMMAND_SOURCES}
+		${SERVER_STATE_SOURCES}
 		${TRANSPORT_COMMAND_SOURCES}
 	INCLUDES
 		${irccd_SOURCE_DIR}
