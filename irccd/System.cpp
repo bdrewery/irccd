@@ -20,7 +20,9 @@
 #include <ctime>
 #include <stdexcept>
 
-#if defined(_WIN32)
+#include <IrccdConfig.h>
+
+#if defined(IRCCD_SYSTEM_WINDOWS)
 #  include <sys/types.h>
 #  include <sys/timeb.h>
 #  include <Windows.h>
@@ -31,11 +33,11 @@
 #  include <stdexcept>
 #  include <ctime>
 
-#if defined(__APPLE__)
+#if defined(IRCCD_SYSTEM_MAC)
 #  include <sys/sysctl.h>
 #endif
 
-#if defined(__linux__)
+#if defined(IRCCD_SYSTEM_LINUX)
 #  include <sys/sysinfo.h>
 #endif
 
@@ -43,88 +45,61 @@
 #  include <sys/time.h>
 #endif
 
-#include "IrccdConfig.h"
-
 #include "Logger.h"
 #include "System.h"
 
 namespace irccd {
 
-namespace {
-
-#if defined(_WIN32)
-
-std::string systemName()
+std::string System::name()
 {
+#if defined(IRCCD_SYSTEM_LINUX)
+	return "Linux";
+#elif defined(IRCCD_SYSTEM_WINDOWS)
 	return "Windows";
+#elif defined(IRCCD_SYSTEM_FREEBSD)
+	return "FreeBSD";
+#elif defined(IRCCD_SYSTEM_OPENBSD)
+	return "OpenBSD";
+#elif defined(IRCCD_SYSTEM_NETBSD)
+	return "NetBSD";
+#elif defined(IRCCD_SYSTEM_MAC)
+	return "Mac";
+#else
+	return "Unknown";
+#endif
 }
 
-std::string systemVersion()
+std::string System::version()
 {
+#if defined(IRCCD_SYSTEM_WINDOWS)
 	auto version = GetVersion();
 
 	auto major = (DWORD)(LOBYTE(LOWORD(version)));
 	auto minor = (DWORD)(HIBYTE(LOWORD(version)));
 
 	return std::to_string(major) + "." + std::to_string(minor);
-}
-
-uint64_t systemUptime()
-{
-	return ::GetTickCount64() / 1000;
-}
-
-uint64_t systemTicks()
-{
-	_timeb tp;
-
-	_ftime(&tp);
-
-	return tp.time * 1000LL + tp.millitm;
-}
-
-std::string systemHome()
-{
-	char path[MAX_PATH];
-
-	if (SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path) != S_OK)
-		return "";
-
-	return std::string(path);
-}
-
 #else
-
-std::string systemName()
-{
-	struct utsname uts;
-
-	if (uname(&uts) < 0)
-		throw std::runtime_error(strerror(errno));
-
-	return std::string(uts.sysname);
-}
-
-std::string systemVersion()
-{
 	struct utsname uts;
 
 	if (uname(&uts) < 0)
 		throw std::runtime_error(strerror(errno));
 
 	return std::string(uts.release);
+#endif
 }
 
-uint64_t systemUptime()
+uint64_t System::uptime()
 {
-#if defined(__linux__)
+#if defined(IRCCD_SYSTEM_WINDOWS)
+	return ::GetTickCount64() / 1000;
+#elif defined(IRCCD_SYSTEM_LINUX)
 	struct sysinfo info;
 
 	if (sysinfo(&info) < 0)
 		throw std::runtime_error(strerror(errno));
 
 	return info.uptime;
-#elif defined(__APPLE__)
+#elif defined(IRCCD_SYSTEM_MAC)
 	struct timeval boottime;
 	size_t length = sizeof (boottime);
 	int mib[2] = { CTL_KERN, KERN_BOOTTIME };
@@ -133,9 +108,10 @@ uint64_t systemUptime()
 		throw std::runtime_error(strerror(errno));
 
 	time_t bsec = boottime.tv_sec, csec = time(nullptr);
-	
+
 	return difftime(csec, bsec);
 #else
+	/* BSD */
 	struct timespec ts;
 
 	if (clock_gettime(CLOCK_UPTIME, &ts) < 0)
@@ -145,52 +121,35 @@ uint64_t systemUptime()
 #endif
 }
 
-uint64_t systemTicks()
-{
-        struct timeval tp;
-
-        gettimeofday(&tp, NULL);
-
-        return tp.tv_sec * 1000LL + tp.tv_usec / 1000;
-}
-
-std::string systemHome()
-{
-	return std::string(getenv("HOME"));
-}
-
-#endif
-
-}
-
-std::string System::name()
-{
-	try {
-		return systemName();
-	} catch (std::runtime_error error) {
-		Logger::warn("%s: %s", getprogname(), error.what());
-		return "Unknown";
-	}
-}
-
-std::string System::version()
-{
-	try {
-		return systemVersion();
-	} catch (std::runtime_error error) {
-		Logger::warn("%s: %s", getprogname(), error.what());
-		return "Unknown";
-	}
-}
-
-uint64_t System::uptime()
-{
-	return systemUptime();
-}
-
 uint64_t System::ticks()
 {
-	return systemTicks();
+#if defined(IRCCD_SYSTEM_WINDOWS)
+	_timeb tp;
+
+	_ftime(&tp);
+
+	return tp.time * 1000LL + tp.millitm;
+#else
+	struct timeval tp;
+
+	gettimeofday(&tp, NULL);
+
+	return tp.tv_sec * 1000LL + tp.tv_usec / 1000;
+#endif
+}
+
+std::string System::home()
+{
+#if defined(IRCCD_SYSTEM_WINDOWS)
+	char path[MAX_PATH];
+
+	if (SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path) != S_OK)
+		return "";
+
+	return std::string(path);
+#else
+	return env("HOME");
+#endif
 }
 
 std::string System::env(const std::string &var)
@@ -201,11 +160,6 @@ std::string System::env(const std::string &var)
 		return "";
 
 	return value;
-}
-
-std::string System::home()
-{
-	return systemHome();
 }
 
 } // !irccd

@@ -1,7 +1,7 @@
 /*
  * Directory.h -- open and read directories
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,19 +16,37 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_DIRECTORY_H_
-#define _IRCCD_DIRECTORY_H_
-
-/**
- * @file Directory.h
- * @brief Directory management
- */
+#ifndef _DIRECTORY_H_
+#define _DIRECTORY_H_
 
 #include <cstddef>
 #include <string>
 #include <vector>
 
 namespace irccd {
+
+/**
+ * @class Entry
+ * @brief entry in the directory list
+ */
+class DirectoryEntry {
+public:
+	/**
+	 * @enum Type
+	 * @brief Describe the type of an entry
+	 */
+	enum Type {
+		Unknown		= 0,
+		File,
+		Dir,
+		Link
+	};
+
+	std::string	name;		//! name of entry (base name)
+	Type		type{Unknown};	//! type of file
+
+	friend bool operator==(const DirectoryEntry &e1, const DirectoryEntry &e2);
+};
 
 /**
  * @class Directory
@@ -44,57 +62,15 @@ public:
 	 * @brief optional flags to read directories
 	 */
 	enum Flags {
-		NotDot		= (1 << 0),
-		NotDotDot	= (1 << 1)
+		Dot	= (1 << 0),	//!< If set, lists "." too
+		DotDot	= (1 << 1)	//!< If set, lists ".." too
 	};
 
-	/**
-	 * @enum Type
-	 * @brief Describe the type of an entry
-	 */
-	enum Type {
-		Unknown		= 0,
-		File,
-		Dir,
-		Link
-	};
+	using List = std::vector<DirectoryEntry>;
 
-	/**
-	 * @struct Entry
-	 * @brief entry in the directory list
-	 */
-	struct Entry {
-		std::string	name;		//!< name of entry (base name)
-		Type		type = Unknown;	//!< type of file
-
-		/**
-		 * Test equality.
-		 *
-		 * @param e1 the first entry
-		 * @param e2 the second entry
-		 * @return true if equals
-		 */
-		friend bool operator==(const Entry &e1, const Entry &e2);
-	};
-
-	/**
-	 * The list of entries.
-	 */
-	using List = std::vector<Entry>;
-
-	/**
-	 * The type of value.
-	 */
+	// C++ Container compatibility
 	using value_type	= List::value_type;
-
-	/**
-	 * The iterator object.
-	 */
 	using iterator		= List::iterator;
-
-	/**
-	 * The const iterator object.
-	 */
 	using const_iterator	= List::const_iterator;
 
 private:
@@ -150,16 +126,9 @@ public:
 	 */
 	int count() const;
 
-	/**
-	 * Test equality.
-	 *
-	 * @param d1 the first directory
-	 * @param d2 the second directory
-	 * @return true if equals
-	 */
 	friend bool operator==(const Directory &d1, const Directory &d2);
 };
 
 } // !irccd
 
-#endif // !_IRCCD_DIRECTORY_H_
+#endif // !_DIRECTORY_H_

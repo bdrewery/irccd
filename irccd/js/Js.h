@@ -19,11 +19,47 @@
 #ifndef _IRCCD_JS_H_
 #define _IRCCD_JS_H_
 
+#include <memory>
 #include <string>
 
 #include <duktape.h>
 
 namespace irccd {
+
+/**
+ * @class DukContext
+ * @brief C++ Wrapper for Duktape context
+ */
+class DukContext : public std::unique_ptr<duk_context, void (*)(duk_context *)> {
+public:
+	/**
+	 * Create a Duktape context prepared for irccd, it will contains the
+	 * using() and require() functions specialized for irccd.
+	 *
+	 * @return the ready to use Duktape context
+	 */
+	DukContext();
+
+	/**
+	 * Convert the context to the native Duktape/C type.
+	 *
+	 * @return the duk_context
+	 */
+	inline operator duk_context *() noexcept
+	{
+		return get();
+	}
+
+	/**
+	 * Convert the context to the native Duktape/C type.
+	 *
+	 * @return the duk_context
+	 */
+	inline operator duk_context *() const noexcept
+	{
+		return get();
+	}
+};
 
 /**
  * Throw a javascript error object that contains the following fields:
@@ -38,6 +74,13 @@ namespace irccd {
  */
 void dukx_throw_syserror(duk_context *ctx, int code);
 
+/**
+ * Throw an error with a specified code and error message.
+ *
+ * @param ctx the context
+ * @param code the code
+ * @param msg the message
+ */
 void dukx_throw(duk_context *ctx, int code, const std::string &msg);
 
 /**
@@ -83,19 +126,19 @@ void dukx_set_class(duk_context *ctx, Type *ptr)
 	// deleter function
 	duk_push_c_function(ctx, [] (auto ctx) -> duk_ret_t {
 		duk_get_prop_string(ctx, 0, "\xff\xff" "deleted");
-	
+
 		if (!duk_to_boolean(ctx, -1)) {
 			duk_pop(ctx);
 			duk_get_prop_string(ctx, 0, "\xff\xff" "data");
 			delete static_cast<Type *>(duk_to_pointer(ctx, -1));
-	
+
 			duk_pop(ctx);
 			duk_push_true(ctx);
 			duk_put_prop_string(ctx, 0, "\xff\xff" "deleted");
 		} else {
 			duk_pop(ctx);
 		}
-	
+
 		return 0;
 	}, 1);
 	duk_set_finalizer(ctx, -2);
@@ -106,6 +149,7 @@ void dukx_set_class(duk_context *ctx, Type *ptr)
 }
 
 duk_ret_t dukopen_filesystem(duk_context *ctx) noexcept;
+duk_ret_t dukopen_system(duk_context *ctx) noexcept;
 
 } // !irccd
 

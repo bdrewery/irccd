@@ -19,6 +19,7 @@
 set(
 	JS_SOURCES
 	${CMAKE_CURRENT_LIST_DIR}/JsFilesystem.cpp
+	${CMAKE_CURRENT_LIST_DIR}/JsSystem.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Js.cpp
 	${CMAKE_CURRENT_LIST_DIR}/Js.h
 )

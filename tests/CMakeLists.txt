@@ -66,6 +66,7 @@ make_directory(${CMAKE_BINARY_DIR}/testassets)
 
 if (WITH_TESTS)
 	add_subdirectory(js-filesystem)
+	add_subdirectory(js-system)
 	add_subdirectory(transport)
 	add_subdirectory(server)
 

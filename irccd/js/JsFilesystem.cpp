@@ -20,6 +20,7 @@
 #include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <regex>
 #include <stdexcept>
 #include <string>
 
@@ -38,6 +39,10 @@ namespace irccd {
 
 namespace {
 
+/* --------------------------------------------------------
+ * File utilities
+ * -------------------------------------------------------- */
+
 class File {
 public:
 	enum {
@@ -51,7 +56,7 @@ protected:
 	int m_type;
 
 public:
-	inline File(std::string path, std::fstream::openmode mode, int type) noexcept
+	inline File(std::string path, std::fstream::openmode mode, int type)
 		: m_path(std::move(path))
 		, m_stream(m_path, mode)
 		, m_type(type)
@@ -71,6 +76,15 @@ public:
 	inline int type() const noexcept
 	{
 		return m_type;
+	}
+
+	inline void seek(std::fstream::off_type amount, std::fstream::seekdir dir)
+	{
+		m_stream.seekg(amount, dir);
+
+		if (!m_stream) {
+			throw std::runtime_error(std::strerror(errno));
+		}
 	}
 
 	inline unsigned tell()
@@ -188,6 +202,158 @@ int pushStat(duk_context *ctx, const struct stat &st)
 #endif // !HAVE_STAT
 
 /* --------------------------------------------------------
+ * Directory utilities
+ * -------------------------------------------------------- */
+
+template <typename Pred>
+std::string findPath(const std::string &base, const std::string &destination, bool recursive, Pred pred)
+{
+	/*
+	 * For performance reason, we first iterate over all entries that are
+	 * not directories to avoid going deeper recursively if the requested
+	 * file is in the current directory.
+	 */
+	Directory directory(base);
+
+	for (const DirectoryEntry &entry : directory) {
+		if (entry.type != DirectoryEntry::Dir && pred(entry.name)) {
+			return destination + entry.name;
+		}
+	}
+
+	if (!recursive) {
+		throw std::out_of_range("entry not found");
+	}
+
+	for (const DirectoryEntry &entry : directory) {
+		std::string path;
+
+		if (entry.type == DirectoryEntry::Dir) {
+			path = findPath(base + entry.name + Filesystem::Separator,
+					destination + entry.name + Filesystem::Separator,
+					true, pred);
+		}
+
+		if (!path.empty()) {
+			return path;
+		}
+	}
+
+	throw std::out_of_range("entry not found");
+}
+
+std::string findName(std::string base, const std::string &pattern, bool recursive, const std::string &destination = "")
+{
+	if (base.size() > 0 && base.back() != Filesystem::Separator) {
+		base.push_back(Filesystem::Separator);
+	}
+
+	return findPath(base, destination, recursive, [&] (const std::string &entryname) -> bool {
+		return pattern == entryname;
+	});
+}
+
+std::string findRegex(std::string base, std::string pattern, bool recursive, const std::string &destination = "")
+{
+	if (base.size() > 0 && base.back() != Filesystem::Separator) {
+		base.push_back(Filesystem::Separator);
+	}
+
+	// Duktape keeps leading and trailing '/' remove them if any.
+	if (pattern.size() > 0 && pattern.front() == '/') {
+		pattern.erase(0, 1);
+	}
+	if (pattern.size() > 0 && pattern.back() == '/') {
+		pattern.erase(pattern.length() - 1, 1);
+	}
+
+	std::regex regexp(pattern, std::regex::ECMAScript);
+	std::smatch smatch;
+
+	return findPath(base, destination, recursive, [&] (const std::string &entryname) -> bool {
+		return std::regex_match(entryname, smatch, regexp);
+	});
+}
+
+duk_ret_t directoryFind(duk_context *ctx, const char *base, int beginindex)
+{
+	bool recursive = false;
+
+	if (duk_get_top(ctx) == beginindex + 2) {
+		recursive = duk_require_boolean(ctx, beginindex + 1);
+	}
+
+	try {
+		std::string path;
+
+		if (duk_is_string(ctx, beginindex)) {
+			path = findName(base, duk_to_string(ctx, beginindex), recursive);
+		} else if (duk_is_object(ctx, beginindex)) {
+			path = findRegex(base, duk_to_string(ctx, beginindex), recursive);
+		} else {
+			dukx_throw(ctx, -1, "pattern must be a string or a regex expression");
+		}
+
+		if (path.empty()) {
+			return 0;
+		}
+
+		duk_push_string(ctx, path.c_str());
+	} catch (const std::exception &ex) {
+		dukx_throw(ctx, -1, ex.what());
+	}
+
+	return 1;
+}
+
+duk_ret_t directoryRemove(duk_context *ctx, const std::string &path, int beginindex)
+{
+	bool recursive = false;
+
+	if (duk_get_top(ctx) == beginindex + 1) {
+		recursive = duk_require_boolean(ctx, beginindex);
+	}
+	if (!recursive) {
+		::remove(path.c_str());
+	} else {
+		try {
+			Directory directory(path);
+
+			for (const DirectoryEntry &entry : directory) {
+				if (entry.type == DirectoryEntry::Dir) {
+					(void)directoryRemove(ctx, path + Filesystem::Separator + entry.name, true);
+				} else {
+					::remove((path + Filesystem::Separator + entry.name).c_str());
+				}
+			}
+
+			::remove(path.c_str());
+		} catch (const std::exception &ex) {
+			// TODO: put the error in a log.
+		}
+	}
+
+	return 0;
+}
+
+duk_ret_t directoryMkdir(duk_context *ctx, const char *path, int beginindex)
+{
+	int mode = 0700;
+
+	if (duk_get_top(ctx) == beginindex + 1) {
+		mode = duk_require_int(ctx, beginindex);
+	}
+
+	try {
+		Filesystem::mkdir(path, mode);
+	} catch (const std::exception &ex) {
+		dukx_throw(ctx, -1, ex.what());
+	}
+
+	return 0;
+}
+
+/* --------------------------------------------------------
  * File methods
  * -------------------------------------------------------- */
 
@@ -200,7 +366,7 @@ int pushStat(duk_context *ctx, const struct stat &st)
  * Returns:
  *   The base file name
  */
-File_prototype_basename(duk_context *ctx)
+duk_ret_t File_prototype_basename(duk_context *ctx)
 {
 	dukx_with_this<File>(ctx, [&] (File *file) {
 		duk_push_string(ctx, Filesystem::baseName(file->path()).c_str());
@@ -218,7 +384,7 @@ File_prototype_basename(duk_context *ctx)
  * Returns:
  *   The base directory name
  */
-File_prototype_dirname(duk_context *ctx)
+duk_ret_t File_prototype_dirname(duk_context *ctx)
 {
 	dukx_with_this<File>(ctx, [&] (File *file) {
 		duk_push_string(ctx, Filesystem::dirName(file->path()).c_str());
@@ -242,7 +408,7 @@ File_prototype_dirname(duk_context *ctx)
  * Throws:
  *   - Any exception on error
  */
-File_prototype_read(duk_context *ctx)
+duk_ret_t File_prototype_read(duk_context *ctx)
 {
 	dukx_with_this<File>(ctx, [&] (File *file) {
 		if (file->type() == File::Output) {
@@ -274,7 +440,7 @@ File_prototype_read(duk_context *ctx)
  * Throws:
  *   - Any exception on error
  */
-File_prototype_remove(duk_context *ctx)
+duk_ret_t File_prototype_remove(duk_context *ctx)
 {
 	dukx_with_this<File>(ctx, [&] (File *file) {
 		if (remove(file->path().c_str()) < 0) {
@@ -297,8 +463,20 @@ File_prototype_remove(duk_context *ctx)
  * Throws:
  *   - Any exception on error
  */
-File_prototype_seek(duk_context *)
+duk_ret_t File_prototype_seek(duk_context *ctx)
 {
+	dukx_with_this<File>(ctx, [&] (File *file) {
+		int type = duk_require_int(ctx, 0);
+		int amount = duk_require_int(ctx, 1);
+
+		try {
+			file->seek(static_cast<std::fstream::off_type>(amount),
+				   static_cast<std::fstream::seekdir>(type));
+		} catch (const std::exception &ex) {
+			dukx_throw(ctx, -1, ex.what());
+		}
+	});
+
 	return 0;
 }
 
@@ -315,15 +493,15 @@ File_prototype_seek(duk_context *)
  * Throws:
  *   - Any exception on error
  */
-File_prototype_stat(duk_context *ctx)
+duk_ret_t File_prototype_stat(duk_context *ctx)
 {
 	dukx_with_this<File>(ctx, [&] (File *file) {
 		struct stat st;
-	
+
 		if (stat(file->path().c_str(), &st) < 0) {
 			dukx_throw_syserror(ctx, errno);
 		}
-	
+
 		(void)pushStat(ctx, st);
 	});
 
@@ -343,7 +521,7 @@ File_prototype_stat(duk_context *ctx)
  * Throws:
  *   - Any exception on error
  */
-File_prototype_tell(duk_context *ctx)
+duk_ret_t File_prototype_tell(duk_context *ctx)
 {
 	dukx_with_this<File>(ctx, [&] (File *file) {
 		try {
@@ -367,7 +545,7 @@ File_prototype_tell(duk_context *ctx)
  * Throws:
  *   - Any exception on error
  */
-File_prototype_write(duk_context *ctx)
+duk_ret_t File_prototype_write(duk_context *ctx)
 {
 	const char *data = duk_require_string(ctx, 0);
 
@@ -426,34 +604,36 @@ duk_ret_t File_File(duk_context *ctx)
 	const char *path = duk_require_string(ctx, 0);
 	const char *modestring = duk_require_string(ctx, 1);
 
-	std::ios_base::openmode mode = static_cast<std::ios_base::openmode>(0);
+	std::fstream::openmode mode = static_cast<std::fstream::openmode>(0);
 
 	for (const char *p = modestring; *p != '\0'; ++p) {
 		if (*p == 'w') {
-			mode |= std::ios_base::out;
+			mode |= std::fstream::out;
 		} else if (*p == 'r') {
-			mode |= std::ios_base::in;
+			mode |= std::fstream::in;
 		} else if (*p == 'a') {
-			mode |= (std::ios_base::app);
+			mode |= (std::fstream::app);
 		}
 	}
 
-	if (((mode & std::ios_base::out) || (mode & std::ios_base::app)) && (mode & std::ios_base::in)) {
+	if (((mode & std::fstream::out) || (mode & std::fstream::app)) && (mode & std::fstream::in)) {
 		dukx_throw(ctx, -1, "can not open for both reading and writing");
 	}
 
 	duk_push_this(ctx);
 
 	try {
-		if (mode & std::ios_base::out) {
+		if (mode & std::fstream::out) {
 			dukx_set_class<File>(ctx, new File(path, mode, File::Output));
 		} else {
 			dukx_set_class<File>(ctx, new File(path, mode, File::Input));
 		}
-	} catch (const std::exception &ex) {
+	} catch (...) {
 		duk_pop(ctx);
 		dukx_throw_syserror(ctx, errno);
 	}
+
+	duk_pop(ctx);
 
 	return 0;
 }
@@ -495,6 +675,26 @@ duk_ret_t File_dirname(duk_context *ctx)
 }
 
 /*
+ * Function: fs.File.exists(path)
+ * --------------------------------------------------------
+ *
+ * Check if the file exists.
+ *
+ * Arguments:
+ *   - path, the path to the file
+ * Returns:
+ *   - true if exists
+ * Throws:
+ *   - Any exception if we don't have access
+ */
+duk_ret_t File_exists(duk_context *ctx)
+{
+	duk_push_boolean(ctx, Filesystem::exists(duk_require_string(ctx, 0)));
+
+	return 1;
+}
+
+/*
  * function fs.File.remove(path)
  * --------------------------------------------------------
  *
@@ -504,7 +704,7 @@ duk_ret_t File_dirname(duk_context *ctx)
  *   - path, the path to the file
  * Throws:
  *   - Any exception on error
- */ 
+ */
 duk_ret_t File_remove(duk_context *ctx)
 {
 	if (remove(duk_require_string(ctx, 0)) < 0) {
@@ -546,6 +746,7 @@ duk_ret_t File_stat(duk_context *ctx)
 constexpr const duk_function_list_entry fileFunctions[] = {
 	{ "basename",	File_basename,	1			},
 	{ "dirname",	File_dirname,	1			},
+	{ "exists",	File_exists,	1			},
 	{ "remove",	File_remove,	1			},
 #if defined(HAVE_STAT)
 	{ "stat",	File_stat,	1			},
@@ -570,9 +771,16 @@ constexpr const duk_number_list_entry fileConstants[] = {
  *
  * TODO
  */
-duk_ret_t Directory_prototype_find(duk_context *)
+duk_ret_t Directory_prototype_find(duk_context *ctx)
 {
-	return 0;
+	const char *path;
+
+	duk_push_this(ctx);
+	duk_get_prop_string(ctx, -1, "path");
+	path = duk_to_string(ctx, -1);
+	duk_pop_2(ctx);
+
+	return directoryFind(ctx, path, 0);
 }
 
 /*
@@ -598,10 +806,10 @@ duk_ret_t Directory_prototype_remove(duk_context *)
 }
 
 constexpr const duk_function_list_entry directoryMethods[] = {
-	{ "find",		Directory_prototype_find,	1	},
-	{ "mkdir",		Directory_prototype_mkdir,	2	},
-	{ "remove",		Directory_prototype_remove,	1	},
-	{ nullptr,		nullptr,			0	}
+	{ "find",		Directory_prototype_find,	DUK_VARARGS	},
+	{ "mkdir",		Directory_prototype_mkdir,	2		},
+	{ "remove",		Directory_prototype_remove,	1		},
+	{ nullptr,		nullptr,			0		}
 };
 
 /* --------------------------------------------------------
@@ -637,17 +845,19 @@ duk_ret_t Directory_Directory(duk_context *ctx)
 		Directory directory(path, flags);
 
 		duk_push_this(ctx);
-		duk_push_string(ctx, path);
-		duk_put_prop_string(ctx, -2, "\xff""\xff" "path");
 		duk_push_string(ctx, "count");
 		duk_push_int(ctx, directory.count());
 		duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
+		duk_push_string(ctx, "path");
+		duk_push_string(ctx, path);
+		duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
 
 		// add entries
+		duk_push_string(ctx, "entries");
 		duk_push_array(ctx);
 
 		int i = 0;
-		for (const Directory::Entry &entry : directory) {
+		for (const DirectoryEntry &entry : directory) {
 			duk_push_object(ctx);
 			duk_push_string(ctx, entry.name.c_str());
 			duk_put_prop_string(ctx, -2, "name");
@@ -656,7 +866,7 @@ duk_ret_t Directory_Directory(duk_context *ctx)
 			duk_put_prop_index(ctx, -2, i++);
 		}
 
-		duk_put_prop_string(ctx, -2, "entries");
+		duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
 	} catch (const std::exception &ex) {
 		dukx_throw(ctx, -1, ex.what());
 	}
@@ -668,55 +878,68 @@ duk_ret_t Directory_Directory(duk_context *ctx)
  * Function: fs.Directory.find(path, pattern, recursive)
  * --------------------------------------------------------
  *
- * TODO
+ * Find an entry by a pattern or a regular expression.
+ *
+ * Arguments:
+ *   - path, the base path
+ *   - pattern, the regular expression or the entry name
+ *   - recursive, if true, search recursively (default: false)
+ * Returns:
+ *   - the path to the file
  */
-duk_ret_t Directory_find(duk_context *)
+duk_ret_t Directory_find(duk_context *ctx)
 {
-#if 0
-	const char *base = duk_require_string(ctx, 0);
-	const char *pattern = duk_require_string(ctx, 1);
-#endif
-
-	return 0;
+	return directoryFind(ctx, duk_require_string(ctx, 0), 1);
 }
 
 /*
  * Function: fs.Directory.remove(path, recursive)
  * --------------------------------------------------------
  *
- * TODO
+ * Remove the directory optionally recursively.
+ *
+ * Arguments:
+ *   - path, the path to the directory
+ *   - recursive, recursively or not (default: false)
  */
-duk_ret_t Directory_remove(duk_context *)
+duk_ret_t Directory_remove(duk_context *ctx)
 {
-	return 0;
+	return directoryRemove(ctx, duk_require_string(ctx, 0), 1);
 }
 
 /*
- * Function: fs.Directory.mkdir(path, recursive)
+ * Function: fs.Directory.mkdir(path, mode = 0700)
  * --------------------------------------------------------
  *
- * TODO
+ * Create a directory specified by path. It will created needed subdirectories
+ * just like you have invoked mkdir -p.
+ *
+ * Arguments:
+ *   - path, the path to the directory
+ *   - mode, the mode, not available on all platforms
+ * Throws:
+ *   - Any exception on error
  */
-duk_ret_t Directory_mkdir(duk_context *)
+duk_ret_t Directory_mkdir(duk_context *ctx)
 {
-	return 0;
+	return directoryMkdir(ctx, duk_require_string(ctx, 0), 1);
 }
 
 constexpr const duk_function_list_entry directoryFunctions[] = {
-	{ "find",		Directory_find,		2		},
-	{ "remove",		Directory_remove,	DUK_VARARGS	},
-	{ "mkdir",		Directory_mkdir,	2		},
-	{ nullptr,		nullptr,		0		}
+	{ "find",		Directory_find,		DUK_VARARGS		},
+	{ "remove",		Directory_remove,	DUK_VARARGS		},
+	{ "mkdir",		Directory_mkdir,	DUK_VARARGS		},
+	{ nullptr,		nullptr,		0			}
 };
 
 constexpr const duk_number_list_entry directoryConstants[] = {
-	{ "NoDot",		static_cast<int>(Directory::NotDot)	},
-	{ "NoDotDot",		static_cast<int>(Directory::NotDotDot)	},
-	{ "TypeUnknown",	static_cast<int>(Directory::Unknown)	},
-	{ "TypeDir",		static_cast<int>(Directory::Dir)	},
-	{ "TypeFile",		static_cast<int>(Directory::File)	},
-	{ "TypeLink",		static_cast<int>(Directory::Link)	},
-	{ nullptr, 		0					}
+	{ "Dot",		static_cast<int>(Directory::Dot)		},
+	{ "DotDot",		static_cast<int>(Directory::DotDot)		},
+	{ "TypeUnknown",	static_cast<int>(DirectoryEntry::Unknown)	},
+	{ "TypeDir",		static_cast<int>(DirectoryEntry::Dir)		},
+	{ "TypeFile",		static_cast<int>(DirectoryEntry::File)		},
+	{ "TypeLink",		static_cast<int>(DirectoryEntry::Link)		},
+	{ nullptr, 		0						}
 };
 
 } // !namespace
@@ -739,9 +962,14 @@ duk_ret_t dukopen_filesystem(duk_context *ctx) noexcept
 	duk_put_prop_string(ctx, -2, "File");
 
 	// irccd.fs.Directory
+	char separator[] = { Filesystem::Separator, '\0' };
+
 	duk_push_c_function(ctx, Directory_Directory, DUK_VARARGS);
 	duk_put_function_list(ctx, -1, directoryFunctions);
 	duk_put_number_list(ctx, -1, directoryConstants);
+	duk_push_string(ctx, "Separator");
+	duk_push_string(ctx, separator);
+	duk_def_prop(ctx, -3, DUK_DEFPROP_HAVE_VALUE);
 	duk_push_object(ctx);
 	duk_put_function_list(ctx, -1, directoryMethods);
 	duk_put_prop_string(ctx, -2, "prototype");

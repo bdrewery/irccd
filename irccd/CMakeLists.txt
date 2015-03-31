@@ -44,7 +44,14 @@ set(
 )
 
 if (WITH_JS)
-	list(APPEND SOURCES ${JS_SOURCES})
+	list(
+		APPEND
+		SOURCES
+		${JS_SOURCES}
+		System.h
+		System.cpp
+	)
+
 	list(APPEND LIBRARIES duktape)
 endif ()
 

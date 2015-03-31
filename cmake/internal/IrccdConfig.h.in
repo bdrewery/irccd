@@ -28,6 +28,18 @@
 #define IRCCD_VERSION_PATCH	@IRCCD_VERSION_PATCH@
 
 /* --------------------------------------------------------
+ * System identification
+ * -------------------------------------------------------- */
+
+#cmakedefine IRCCD_SYSTEM_WINDOWS
+#cmakedefine IRCCD_SYSTEM_MAC
+#cmakedefine IRCCD_SYSTEM_FREEBSD
+#cmakedefine IRCCD_SYSTEM_NETBSD
+#cmakedefine IRCCD_SYSTEM_OPENBSD
+#cmakedefine IRCCD_SYSTEM_LINUX
+#cmakedefine IRCCD_SYSTEM_UNKNOWN
+
+/* --------------------------------------------------------
  * User definable options
  * -------------------------------------------------------- */
 

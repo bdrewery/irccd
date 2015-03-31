@@ -1,7 +1,7 @@
 /*
  * Directory.cpp -- open and read directories
  *
- * Copyright (c) 2013 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013, 2014 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdexcept>
 #include <sstream>
 #include <stdexcept>
 
@@ -73,23 +72,23 @@ void Directory::systemLoad(const std::string &path, int flags)
 		throw std::runtime_error(systemError());
 
 	do {
-		Entry entry;
+		DirectoryEntry entry;
 
 		entry.name = fdata.cFileName;
-		if ((flags & Directory::NotDot) && entry.name == ".")
+		if (entry.name == "." && !(flags & Directory::Dot))
 			continue;
-		if ((flags & Directory::NotDotDot) && entry.name == "..")
+		if (entry.name == ".." && !(flags & Directory::DotDot))
 			continue;
 
 		switch (fdata.dwFileAttributes) {
 		case FILE_ATTRIBUTE_DIRECTORY:
-			entry.type = Dir;
+			entry.type = DirectoryEntry::Dir;
 			break;
 		case FILE_ATTRIBUTE_NORMAL:
-			entry.type = File;
+			entry.type = DirectoryEntry::File;
 			break;
 		case FILE_ATTRIBUTE_REPARSE_POINT:
-			entry.type = Link;
+			entry.type = DirectoryEntry::Link;
 			break;
 		default:
 			break;
@@ -112,23 +111,23 @@ void Directory::systemLoad(const std::string &path, int flags)
 		throw std::runtime_error(strerror(errno));
 
 	while ((ent = readdir(dp)) != nullptr) {
-		Entry entry;
+		DirectoryEntry entry;
 
 		entry.name = ent->d_name;
-		if ((flags & Directory::NotDot) && entry.name == ".")
+		if (entry.name == "." && !(flags & Directory::Dot))
 			continue;
-		if ((flags & Directory::NotDotDot) && entry.name == "..")
+		if (entry.name == ".." && !(flags & Directory::DotDot))
 			continue;
 
 		switch (ent->d_type) {
 		case DT_DIR:
-			entry.type = Dir;
+			entry.type = DirectoryEntry::Dir;
 			break;
 		case DT_REG:
-			entry.type = File;
+			entry.type = DirectoryEntry::File;
 			break;
 		case DT_LNK:
-			entry.type = Link;
+			entry.type = DirectoryEntry::Link;
 			break;
 		default:
 			break;
@@ -142,7 +141,7 @@ void Directory::systemLoad(const std::string &path, int flags)
 
 #endif
 
-bool operator==(const Directory::Entry &e1, const Directory::Entry &e2)
+bool operator==(const DirectoryEntry &e1, const DirectoryEntry &e2)
 {
 	return e1.name == e2.name && e1.type == e2.type;
 }

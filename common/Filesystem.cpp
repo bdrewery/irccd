@@ -18,6 +18,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <stdexcept>
 #include <sstream>
 
@@ -45,8 +46,9 @@ std::string Filesystem::baseName(std::string path)
 	if (pos == std::string::npos)
 		pos = path.find_last_of('/');
 
-	if (pos == std::string::npos)
+	if (pos == std::string::npos) {
 		return path;
+	}
 
 	return path.substr(pos + 1);
 #else
@@ -56,15 +58,17 @@ std::string Filesystem::baseName(std::string path)
 
 std::string Filesystem::dirName(std::string path)
 {
-#if defined(_WIN32) || defined(_MSC_VER)
+#if defined(_WIN32)
 	std::size_t pos;
 
 	pos = path.find_last_of('\\');
-	if (pos == std::string::npos)
+	if (pos == std::string::npos) {
 		pos = path.find_last_of('/');
+	}
 
-	if (pos == std::string::npos)
+	if (pos == std::string::npos) {
 		return path;
+	}
 
 	return path.substr(0, pos);
 #else
@@ -133,7 +137,7 @@ void Filesystem::mkdir(const std::string &dir, int mode)
 #else
 		if (::mkdir(part.c_str(), mode) < 0) {
 #endif
-			oss << part << ": " << strerror(errno);
+			oss << part << ": " << std::strerror(errno);
 			throw std::runtime_error(oss.str());
 		}
 	}
@@ -144,7 +148,7 @@ void Filesystem::mkdir(const std::string &dir, int mode)
 #else
 	if (::mkdir(dir.c_str(), mode) < 0) {
 #endif
-		oss << dir << ": " << strerror(errno);
+		oss << dir << ": " << std::strerror(errno);
 		throw std::runtime_error(oss.str());
 	}
 

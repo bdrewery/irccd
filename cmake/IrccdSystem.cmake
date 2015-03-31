@@ -49,6 +49,24 @@ else ()
 endif ()
 
 # ---------------------------------------------------------
+# System identification
+# ---------------------------------------------------------
+
+if (WIN32)
+	set(IRCCD_SYSTEM_WINDOWS TRUE)
+elseif (APPLE)
+	set(IRCCD_SYSTEM_MAC TRUE)
+elseif (CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+	set(IRCCD_SYSTEM_FREEBSD TRUE)
+elseif (CMAKE_SYSTEM_NAME MATCHES "NetBSD")
+	set(IRCCD_SYSTEM_NETBSD TRUE)
+elseif (CMAKE_SYSTEM_NAME MATCHES "OpenBSD")
+	set(IRCCD_SYSTEM_OPENBSD TRUE)
+elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
+	set(IRCCD_SYSTEM_LINUX TRUE)
+endif ()
+
+# ---------------------------------------------------------
 # Portability requirements
 # ---------------------------------------------------------
 
@@ -173,5 +191,3 @@ else ()
 	# dummy target
 	set(port)
 endif ()
-
-

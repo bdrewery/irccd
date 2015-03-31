@@ -28,6 +28,8 @@ set(
 	ElapsedTimer.h
 	Filesystem.cpp
 	Filesystem.h
+	Ini.cpp
+	Ini.h
 	Json.cpp
 	Json.h
 	Logger.cpp

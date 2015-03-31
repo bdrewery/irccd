@@ -21,9 +21,32 @@ include(${irccd_SOURCE_DIR}/js/Js.cmake)
 set(
 	JS_FILESYSTEM_SOURCES
 	${JS_SOURCES}
+	${irccd_SOURCE_DIR}/System.cpp
+	${irccd_SOURCE_DIR}/System.h
 	TestJsFilesystem.cpp
 )
 
 create_test(test-js-filesystem "${JS_FILESYSTEM_SOURCES}")
 
 target_link_libraries(test-js-filesystem duktape)
+target_compile_definitions(
+	test-js-filesystem
+	PRIVATE
+		BINARY=\"${CMAKE_BINARY_DIR}\"
+)
+
+#
+# Create following tree:
+#
+# CMAKE_BINARY_DIR
+#	| testassets
+#	|	|-- file.txt
+#	|	|-- level-1
+#	|	|	| -- file-1.txt
+#	|	|	| -- level-2
+#	|	|	|	| -- file-2.txt
+#
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/testassets/level-1/level-2)
+file(WRITE ${CMAKE_BINARY_DIR}/testassets/file.txt "file.txt")
+file(WRITE ${CMAKE_BINARY_DIR}/testassets/level-1/file-1.txt "file-1.txt")
+file(WRITE ${CMAKE_BINARY_DIR}/testassets/level-1/level-2/file-2.txt "file-2.txt")
