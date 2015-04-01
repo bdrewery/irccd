@@ -26,7 +26,7 @@
 
 #include <memory>
 
-#include "Event.h"
+#include <ServerEvent.h>
 
 namespace irccd {
 
@@ -38,7 +38,7 @@ namespace event {
  * @class Topic
  * @brief On topic change
  */
-class Topic final : public Event {
+class Topic final : public ServerEvent {
 private:
 	std::shared_ptr<Server>	m_server;
 	std::string		m_channel;

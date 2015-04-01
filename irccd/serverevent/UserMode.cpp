@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/Plugin.h>
+#include <Plugin.h>
 
 #include "UserMode.h"
 

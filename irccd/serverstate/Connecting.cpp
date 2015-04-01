@@ -35,7 +35,7 @@ namespace state {
 
 Connecting::Connecting()
 {
-	Logger::debug("server: switching to state \"Connecting\"");
+	Logger::debug() << "server: switching to state \"Connecting\"" << std::endl;
 }
 
 Connecting::~Connecting()
@@ -92,14 +92,14 @@ void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, in
 		const ServerSettings &settings = server.settings();
 
 		if (m_timer.elapsed() > static_cast<unsigned>(settings.recotimeout * 1000)) {
-			Logger::warn("server %s: timeout while connecting", info.name.c_str());
+			Logger::warning() << "server " << info.name << ": timeout while connecting" << std::endl;
 			server.next<state::Disconnected>();
 		} else if (!irc_is_connected(server.session())) {
-			Logger::warn("server %s: error while connecting: %s",
-				     info.name.c_str(), irc_strerror(irc_errno(server.session())));
+			Logger::warning() << "server " << info.name << ": error while connecting: "
+					  << irc_strerror(irc_errno(server.session())) << std::endl;
 
 			if (settings.recotimeout > 0) {
-				Logger::warn("server %s: retrying in %d seconds", info.name.c_str(), settings.recotimeout);
+				Logger::warning() << "server " << info.name << ": retrying in " << settings.recotimeout << " seconds" << std::endl;
 			}
 
 			server.next<state::Disconnected>();
@@ -116,12 +116,11 @@ void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, in
 #if !defined(_WIN32)
 		(void)res_init();
 #endif
-		Logger::log("server %s: trying to connect to %s, port %d",
-			    info.name.c_str(), info.host.c_str(), info.port);
+		Logger::info() << "server " << info.name << ": trying to connect to " << info.host << ", port " << info.port << std::endl;
 
 		if (!connect(server)) {
-			Logger::warn("server %s: disconnected while connecting: %s",
-				     info.name.c_str(), irc_strerror(irc_errno(server.session())));
+			Logger::warning() << "server " << info.name << ": disconnected while connecting: "
+					  << irc_strerror(irc_errno(server.session())) << std::endl;
 			server.next<state::Disconnected>();
 		} else {
 			m_started = true;

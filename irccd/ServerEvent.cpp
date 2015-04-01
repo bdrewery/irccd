@@ -1,5 +1,5 @@
 /*
- * Event.cpp -- base event class for plugins
+ * ServerEvent.cpp -- base event class for server events
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,22 +16,21 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/Plugin.h>
-#include <irccd/Server.h>
+#include <Server.h>
+#include <Plugin.h>
 
-#include "Event.h"
+#include "ServerEvent.h"
 
 namespace irccd {
 
-Event::Event(const std::string &serverName, const std::string &targetName)
-	: IO(serverName, targetName)
+ServerEvent::ServerEvent(const std::string &serverName, const std::string &targetName)
 {
 }
 
-MessagePack Event::parseMessage(std::string message, Server &server, Plugin &plugin) const
+MessagePack ServerEvent::parseMessage(std::string message, Server &server, Plugin &plugin) const
 {
-	auto cc = server.info().command;
-	auto name = plugin.getName();
+	auto cc = server.settings().command;
+	auto name = plugin.info().name;
 	auto result = message;
 	auto iscommand = false;
 
@@ -66,14 +65,6 @@ MessagePack Event::parseMessage(std::string message, Server &server, Plugin &plu
 	}
 
 	return {result, ((iscommand) ? MessageType::Command : MessageType::Message)};
-}
-
-std::string Event::tryEncode(const std::string &input)
-{
-	if (m_mustEncode)
-		return tryEncodeFull(m_encoding, "UTF-8", input);
-
-	return input;
 }
 
 } // !irccd

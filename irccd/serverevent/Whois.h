@@ -26,7 +26,8 @@
 
 #include <memory>
 
-#include "Event.h"
+#include <Server.h>
+#include <ServerEvent.h>
 
 namespace irccd {
 
@@ -36,10 +37,10 @@ namespace event {
  * @class Whois
  * @brief On whois
  */
-class Whois final : public Event {
+class Whois final : public ServerEvent {
 private:
 	std::shared_ptr<Server>	m_server;
-	IrcWhois		m_info;
+	ServerWhois		m_info;
 
 public:
 	/**
@@ -48,7 +49,7 @@ public:
 	 * @param server the server
 	 * @param info the whois information
 	 */
-	Whois(std::shared_ptr<Server> server, IrcWhois info);
+	Whois(std::shared_ptr<Server> server, ServerWhois info);
 
 	/**
 	 * @copydoc Event::call

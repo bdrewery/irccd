@@ -45,6 +45,12 @@
 # Note: the option() commands for WITH_PLUGIN_<name> variables are defined in plugins/CMakeLists.txt
 #
 
+# Options for unit tests only:
+#
+# WITH_TEST_IRCHOST	Which IRC server to use for tests (default: 127.0.0.1)
+# WITH_TEST_IRCPORT	Which IRC server port to use for tests (default: 6667)
+#
+
 # Manual pages on Windows are pretty useless
 if (WIN32)
 	set(DEFAULT_MAN "No")
@@ -67,6 +73,11 @@ option(WITH_DOCS_JS "Enable building of JavaScript documentation" On)
 
 set(WITH_DOCS_DIRECTORY ${CMAKE_BINARY_DIR}/docs
 	CACHE STRING "Directory where to output docs")
+
+set(WITH_TEST_IRCHOST "127.0.0.1"
+	CACHE STRING "IRC host for tests")
+set(WITH_TEST_IRCPORT 6667
+	CACHE STRING "IRC port for test")
 
 # ---------------------------------------------------------
 # Installation paths

@@ -23,7 +23,10 @@
 
 #include <gtest/gtest.h>
 
+#include <IrccdConfig.h>
+
 #include <ElapsedTimer.h>
+#include <Logger.h>
 #include <Server.h>
 #include <Socket.h>
 
@@ -34,10 +37,15 @@ using namespace std::chrono;
 using namespace std::chrono_literals;
 
 /*
- * For this test, you must have a IRC server running on localhost and an empty
- * channel named #irccd-test.
+ * For this tests you need to have an IRC server running:
  *
- * You must also not have the following nicknames used:
+ * - at host WITH_TEST_IRCHOST
+ * - on port WITH_TEST_IRCPORT
+ *
+ * You must also keep an empty channel #irccd-test where the first user
+ * get operator status.
+ *
+ * You must also not have the following nicknames / usernames used:
  *
  * irct, pvd.
  *
@@ -62,9 +70,9 @@ public:
 		Identity identityClient("pvd", "pvd", "pvd");
 		Identity identityIrccd("irct", "irct", "irct");
 
-		info.name = "localhost";
-		info.host = "localhost";
-		info.port = 6667;
+		info.name = WITH_TEST_IRCHOST;
+		info.host = WITH_TEST_IRCHOST;
+		info.port = WITH_TEST_IRCPORT;
 
 		settings.recotimeout = 3;
 		settings.channels = {
@@ -110,7 +118,7 @@ public:
 			tv.tv_usec = 250;
 
 			int code = select(m_maxfd + 1, &m_setinput, &m_setoutput, nullptr, &tv);
-			if (code < 0) {
+			if (code < Socket::Error) {
 				FAIL() << "Error while selecting: " << Socket::syserror();
 			} else if (code > 0) {
 				m_serverIrccd->process(m_setinput, m_setoutput);
@@ -309,6 +317,10 @@ TEST_F(ServerTest, message)
 
 int main(int argc, char **argv)
 {
+	// Disable logging
+	Logger::setStandard<LoggerSilent>();
+	Logger::setError<LoggerSilent>();
+	Socket::initialize();
 	testing::InitGoogleTest(&argc, argv);
 
 	return RUN_ALL_TESTS();

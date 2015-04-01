@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/Plugin.h>
+#include <Server.h>
+#include <Plugin.h>
 
 #include "Notice.h"
 
@@ -25,7 +26,8 @@ namespace irccd {
 namespace event {
 
 Notice::Notice(std::shared_ptr<Server> server, std::string who, std::string target, std::string notice)
-	: m_server(std::move(server))
+	: ServerEvent(server->info().name, target)
+	, m_server(std::move(server))
 	, m_who(std::move(who))
 	, m_target(std::move(target))
 	, m_notice(std::move(notice))
@@ -34,7 +36,7 @@ Notice::Notice(std::shared_ptr<Server> server, std::string who, std::string targ
 
 void Notice::call(Plugin &p)
 {
-	p.onNotice(m_server, m_who, m_target, m_notice);
+	p.onNotice(m_server, m_who, m_notice);
 }
 
 const char *Notice::name(Plugin &) const

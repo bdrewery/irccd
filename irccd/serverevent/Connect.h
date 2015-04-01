@@ -26,7 +26,7 @@
 
 #include <memory>
 
-#include "Event.h"
+#include <ServerEvent.h>
 
 namespace irccd {
 
@@ -38,7 +38,7 @@ namespace event {
  * @class Connect
  * @brief On connect
  */
-class Connect final : public Event {
+class Connect final : public ServerEvent {
 private:
 	std::shared_ptr<Server>	m_server;
 

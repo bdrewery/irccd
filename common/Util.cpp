@@ -163,7 +163,7 @@ std::string Util::findConfiguration(const std::string &filename)
 	oss << pathUser() << filename;
 	fpath = oss.str();
 
-	Logger::log("%s: checking for %s", getprogname(), fpath.c_str());
+	Logger::info() << getprogname() << ": checking for " << fpath << std::endl;
 	if (hasAccess(fpath))
 		return fpath;
 
@@ -176,7 +176,7 @@ std::string Util::findConfiguration(const std::string &filename)
 	oss << ETCDIR << Util::DIR_SEP << filename;
 	fpath = oss.str();
 
-	Logger::log("%s: checking for %s", getprogname(), fpath.c_str());
+	Logger::info() << getprogname() << ": checking for " << fpath << std::endl;
 	if (hasAccess(fpath))
 		return fpath;
 

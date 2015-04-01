@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/Plugin.h>
-#include <irccd/Server.h>
+#include <Server.h>
+#include <Plugin.h>
 
 #include "Command.h"
 
@@ -26,7 +26,7 @@ namespace irccd {
 namespace event {
 
 Command::Command(std::shared_ptr<Server> server, std::string channel, std::string nickname, std::string message)
-	: Event(server->info().name, channel)
+	: ServerEvent(server->info().name, channel)
 	, m_server(std::move(server))
 	, m_channel(std::move(channel))
 	, m_nickname(std::move(nickname))

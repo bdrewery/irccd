@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/Plugin.h>
+#include <Plugin.h>
 
 #include "Query.h"
 
@@ -25,8 +25,7 @@ namespace irccd {
 namespace event {
 
 Query::Query(std::shared_ptr<Server> server, std::string who, std::string message)
-	: Event()
-	, m_server(std::move(server))
+	: m_server(std::move(server))
 	, m_who(std::move(who))
 	, m_message(std::move(message))
 {

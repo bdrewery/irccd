@@ -1,5 +1,5 @@
 /*
- * Logger.h -- common logger routines
+ * Logger.h -- irccd logging
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -19,87 +19,89 @@
 #ifndef _IRCCD_LOGGER_H_
 #define _IRCCD_LOGGER_H_
 
-/**
- * @file Logger.h
- * @brief Logging routines
- */
-
-#include <cstdio>
-#include <cstdlib>
-#include <cstdarg>
-#include <string>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <utility>
 
 namespace irccd {
 
 /**
- * @class Logger
- * @brief Logging utilities
+ * @class LoggerBase
+ *
+ * Base class for logging output.
  */
-class Logger {
+class LoggerBase : public std::ostream {
+public:
+	LoggerBase(std::streambuf *buf);
+	virtual ~LoggerBase() = default;
+};
+
+/**
+ * @class LoggerConsole
+ * @brief Logger implementation for console output
+ */
+class LoggerConsole : public LoggerBase {
+public:
+	LoggerConsole(const std::ostream &stream = std::cout);
+};
+
+/**
+ * @class LoggerFile
+ * @brief Output to a file
+ */
+class LoggerFile : public LoggerBase {
 private:
-	static bool m_verbose;
-
-#if !defined(_WIN32)
-	static bool m_syslog;
-	static bool m_syslogLoaded;
-#endif
-
-	static void printFile(FILE *fp, std::string fmt, va_list ap);
+	std::filebuf m_buffer;
 
 public:
-	/**
-	 * Enable or disable the verbosity of further
-	 * log() calls.
-	 *
-	 * @see log
-	 * @param verbose enable or disable
-	 */
-	static void setVerbose(bool verbose);
+	LoggerFile(const std::string &path);
+};
 
-#if !defined(_WIN32)
-	/**
-	 * Tells to use syslog. Only on Unix.
-	 *
-	 * @param syslog enable or disable
-	 */
-	static void setSyslog(bool syslog);
-#endif
+/**
+ * @class LoggerSilent
+ * @brief Use to disable logs
+ *
+ * Useful for unit tests when some classes may emits log.
+ */
+class LoggerSilent : public LoggerBase {
+private:
+	class Fake : public std::streambuf {
+		char m_dummy;
+	} m_buffer;
 
-	/**
-	 * Log an additional verbose message.
-	 *
-	 * @param fmt format
-	 * @param ... arguments
-	 */
-	static void log(std::string fmt, ...);
+public:
+	LoggerSilent();
+};
 
-	/**
-	 * Write a warning message, it will be printed
-	 * whenever the verbosity is set to false.
-	 *
-	 * @param fmt format
-	 * @param ... arguments
-	 */
-	static void warn(std::string fmt, ...);
+class Logger {
+private:
+	static std::unique_ptr<LoggerBase> m_output;
+	static std::unique_ptr<LoggerBase> m_error;
+	static bool m_verbose;
 
-	/**
-	 * Write a message and then exits with a specific error code.
-	 *
-	 * @param code the code to exit
-	 * @param fmt the format
-	 * @param ... arguments
-	 */
-	static void fatal(int code, std::string fmt, ...);
+public:
+	template <typename T, typename... Args>
+	static inline void setStandard(Args&&... args)
+	{
+		m_output = std::make_unique<T>(std::forward<Args>(args)...);
+	}
 
-	/**
-	 * Write a message used as debugging, messages will
-	 * only be shown if the application has been build with
-	 * without NDEBUG macro set.
-	 *
-	 * @param fmt format
-	 * @param ... arguments
-	 */
-	static void debug(std::string fmt, ...);
+	template <typename T, typename... Args>
+	static inline void setError(Args&&... args)
+	{
+		m_error = std::make_unique<T>(std::forward<Args>(args)...);
+	}
+
+	static void setVerbose(bool mode) noexcept;
+
+	static std::ostream &info() noexcept;
+
+	static std::ostream &warning() noexcept;
+
+	static std::ostream &error() noexcept;
+
+	static std::ostream &debug() noexcept;
 };
 
 } // !irccd

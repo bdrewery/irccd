@@ -27,7 +27,7 @@ namespace state {
 
 Dead::Dead()
 {
-	Logger::debug("server: switching to state \"Dead\"");
+	Logger::debug() << "server: switching to state \"Dead\"" << std::endl;
 }
 
 void Dead::prepare(Server &, fd_set &, fd_set &, int &)

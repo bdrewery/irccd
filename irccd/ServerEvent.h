@@ -1,5 +1,5 @@
 /*
- * Event.h -- base event class for plugins
+ * ServerEvent.h -- base event class for server events
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,17 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_EVENT_H_
-#define _IRCCD_EVENT_H_
+#ifndef _IRCCD_SERVER_EVENT_H_
+#define _IRCCD_SERVER_EVENT_H_
 
 /**
- * @file Event.h
+ * @file ServerEvent.h
  * @brief Base event class
  */
 
 #include <utility>
-
-#include <irccd/IO.h>
 
 namespace irccd {
 
@@ -51,7 +49,7 @@ using MessagePack = std::pair<std::string, MessageType>;
  * @class Event
  * @brief Base event class for plugins
  */
-class Event : public IO {
+class ServerEvent {
 protected:
 	/**
 	 * Parse IRC message depending on the command char and the plugin name.
@@ -70,15 +68,7 @@ public:
 	 * @param serverName the server name
 	 * @param targetName the target name
 	 */
-	Event(const std::string &serverName = "", const std::string &targetName = "");
-
-	/**
-	 * Try to encode the plugin to UTF-8 from the server encoding.
-	 *
-	 * @param input the input
-	 * @return the converted string or input on failures
-	 */
-	std::string tryEncode(const std::string &input);
+	ServerEvent(const std::string &serverName = "", const std::string &targetName = "");
 
 	/**
 	 * Execute the plugin command.
@@ -105,4 +95,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_EVENT_H_
+#endif // !_IRCCD_SERVER_EVENT_H_

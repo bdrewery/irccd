@@ -46,7 +46,7 @@ void ServerManager::run() noexcept
 			// 2. Remove dead servers
 			for (auto it = m_servers.begin(); it != m_servers.end(); ) {
 				if (it->second->state() == ServerState::Dead) {
-					Logger::debug("server %s: destroyed", it->second->info().name.c_str());
+					Logger::debug() << "server " << it->second->info().name << ": destroyed" << std::endl;
 					it = m_servers.erase(it);
 				} else {
 					++ it;
@@ -72,7 +72,7 @@ void ServerManager::run() noexcept
 			std::lock_guard<std::mutex> lock(m_mutex);
 
 			if (error < 0) {
-				Logger::warn("irccd: %s", Socket::syserror().c_str());
+				Logger::warning() << "irccd: " << Socket::syserror() << std::endl;
 			} else {
 				for (auto &pair : m_servers) {
 					pair.second->process(setinput, setoutput);
@@ -84,79 +84,79 @@ void ServerManager::run() noexcept
 
 void ServerManager::onChannelNotice(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string notice)
 {
-	Logger::debug("server %s: onChannelNotice: origin=%s, channel=%s, notice=%s",
-		      server->info().name.c_str(), origin.c_str(), channel.c_str(), notice.c_str());
+	Logger::debug() << "server " << server->info().name << ": onChannelNotice: "
+			<< "origin=" << origin << ", channel=" << channel <<", notice=" << notice << std::endl;
 }
 
 void ServerManager::onConnect(std::shared_ptr<Server> server)
 {
-	Logger::debug("server %s: onConnect", server->info().name.c_str());
+	Logger::debug() << "server " << server->info().name << ": onConnect" << std::endl;
 }
 
 void ServerManager::onInvite(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target)
 {
-	Logger::debug("server %s: onInvite: origin=%s, channel=%s, target=%s",
-		      server->info().name.c_str(), origin.c_str(), channel.c_str(), target.c_str());
+	Logger::debug() << "server " << server->info().name << ": onInvite: "
+			<< "origin=" << origin << ", channel=" << channel << ", target=" << target << std::endl;
 }
 
 void ServerManager::onJoin(std::shared_ptr<Server> server, std::string origin, std::string channel)
 {
-	Logger::debug("server %s: onJoin: origin=%s, channel=%s",
-		      server->info().name.c_str(), origin.c_str(), channel.c_str());
+	Logger::debug() << "server " << server->info().name << ": onJoin: "
+			<< "origin=" << origin << ", channel=" << channel << std::endl;
 }
 
 void ServerManager::onKick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason)
 {
-	Logger::debug("server %s: onKick: origin=%s, channel=%s, target=%s, reason=%s",
-		      server->info().name.c_str(), origin.c_str(), channel.c_str(), target.c_str(), reason.c_str());
+	Logger::debug() << "server " << server->info().name << ": onKick: "
+			<< "origin=" << origin << ", channel=" << channel << ", target=" << target << ", reason=" << reason << std::endl;
 }
 
 void ServerManager::onMessage(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
 {
-	Logger::debug("server %s: onMessage: origin=%s, channel=%s, message=%s",
-		      server->info().name.c_str(), origin.c_str(), channel.c_str(), message.c_str());
+	Logger::debug() << "server " << server->info().name << ": onMessage: "
+			<< "origin=" << origin << ", channel=" << channel << ", message=" << message << std::endl;
 }
 
 void ServerManager::onMe(std::shared_ptr<Server> server, std::string origin, std::string target, std::string message)
 {
-	Logger::debug("server %s: onMe: origin=%s, target=%s, message=%s",
-		      server->info().name.c_str(), origin.c_str(), target.c_str(), message.c_str());
+	Logger::debug() << "server " << server->info().name << ": onMe: "
+			<< "origin=" << origin << ", target=" << target << ", message=" << message << std::endl;
 }
 
 void ServerManager::onMode(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string arg)
 {
-	Logger::debug("server %s: onMode: origin=%s, channel=%s, mode=%s, argument=%s",
-		      server->info().name.c_str(), origin.c_str(), channel.c_str(), mode.c_str(), arg.c_str());
+	Logger::debug() << "server " << server->info().name << ": onMode: "
+			<< "origin=" << origin << ", channel=" << channel << ", mode=" << mode << ", argument=" << arg << std::endl;
 }
 
 void ServerManager::onNick(std::shared_ptr<Server> server, std::string origin, std::string nickname)
 {
-	Logger::debug("server %s: onNick: origin=%s, nickname=%s",
-		      server->info().name.c_str(), origin.c_str(), nickname.c_str());
+	Logger::debug() << "server " << server->info().name << ": onNick: "
+			<< "origin=" << origin << ", nickname=" << nickname << std::endl;
 }
 
 void ServerManager::onNotice(std::shared_ptr<Server> server, std::string origin, std::string message)
 {
-	Logger::debug("server %s: onNotice: origin=%s, message=%s",
-		      server->info().name.c_str(), origin.c_str(), message.c_str());
+	Logger::debug() << "server " << server->info().name << ": onNotice: "
+			<< "origin=" << origin << ", message=" << message << std::endl;
 }
 
 void ServerManager::onPart(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string reason)
 {
-	Logger::debug("server %s: onPart: origin=%s, channel=%s, reason=%s",
-		      server->info().name.c_str(), origin.c_str(), channel.c_str(), reason.c_str());
+	Logger::debug() << "server " << server->info().name << ": onPart: "
+			<< "origin=" << origin << ", channel=" << channel << ", reason=" << reason << std::endl;
 }
 
 void ServerManager::onQuery(std::shared_ptr<Server> server, std::string origin, std::string message)
 {
-	Logger::debug("server %s: onQuery: origin=%s, message=%s",
-		      server->info().name.c_str(), origin.c_str(), message.c_str());
+	Logger::debug() << "server " << server->info().name << ": onQuery: "
+			<< "origin=" << origin << ", message=" << message << std::endl;
 }
 
 void ServerManager::onTopic(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string topic)
 {
-	Logger::debug("server %s: onTopic: origin=%s, channel=%s, topic=%s",
-		      server->info().name.c_str(), origin.c_str(), channel.c_str(), topic.c_str());
+	Logger::debug() << "server " << server->info().name << ": onTopic: "
+			<< "origin=" << origin << ", channel=" << channel << ", topic=" << topic << std::endl;
 }
 
 void ServerManager::onUserMode(std::shared_ptr<Server>, std::string, std::string)

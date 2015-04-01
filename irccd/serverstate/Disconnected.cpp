@@ -29,7 +29,7 @@ namespace state {
 
 Disconnected::Disconnected()
 {
-	Logger::debug("server: switching to state \"Disconnected\"");
+	Logger::debug() << "server: switching to state \"Disconnected\"" << std::endl;
 }
 
 void Disconnected::prepare(Server &server, fd_set &, fd_set &, int &)
@@ -39,10 +39,10 @@ void Disconnected::prepare(Server &server, fd_set &, fd_set &, int &)
 
 	// if ServerSettings::recotries it set to -1, reconnection is completely disabled.
 	if (settings.recotries < 0) {
-		Logger::warn("server %s: reconnection disabled, skipping", info.name.c_str());
+		Logger::warning() << "server " << info.name << ": reconnection disabled, skipping" << std::endl;
 		server.next<state::Dead>();
 	} else if ((settings.recocurrent + 1) > settings.recotries) {
-		Logger::warn("server %s: giving up", info.name.c_str());
+		Logger::warning() << "server " << info.name << ": giving up" << std::endl;
 		server.next<state::Dead>();
 	} else {
 		if (m_timer.elapsed() > static_cast<unsigned>(settings.recotimeout * 1000)) {

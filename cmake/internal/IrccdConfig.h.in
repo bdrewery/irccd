@@ -50,6 +50,13 @@
 #define PREFIX			"@CMAKE_INSTALL_PREFIX@"
 
 /* --------------------------------------------------------
+ * IRC tests
+ * -------------------------------------------------------- */
+
+#define WITH_TEST_IRCHOST	"@WITH_TEST_IRCHOST@"
+#define WITH_TEST_IRCPORT	@WITH_TEST_IRCPORT@
+
+/* --------------------------------------------------------
  * Platform checks
  * -------------------------------------------------------- */
 

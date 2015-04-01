@@ -34,6 +34,8 @@ set(
 	Server.cpp
 	Server.h
 	ServerCommand.h
+	ServerEvent.cpp
+	ServerEvent.h
 	ServerManager.cpp
 	ServerManager.h
 	ServerState.h
@@ -62,6 +64,7 @@ irccd_define_executable(
 	SOURCES
 		${SOURCES}
 		${SERVER_COMMAND_SOURCES}
+		${SERVER_EVENT_SOURCES}
 		${SERVER_STATE_SOURCES}
 		${TRANSPORT_COMMAND_SOURCES}
 	INCLUDES

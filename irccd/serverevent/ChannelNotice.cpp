@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/Plugin.h>
+#include <Server.h>
+#include <Plugin.h>
 
 #include "ChannelNotice.h"
 
@@ -25,7 +26,7 @@ namespace irccd {
 namespace event {
 
 ChannelNotice::ChannelNotice(std::shared_ptr<Server> server, std::string who, std::string channel, std::string notice)
-	: Event(server->info().name, channel)
+	: ServerEvent(server->info().name, channel)
 	, m_server(std::move(server))
 	, m_who(std::move(who))
 	, m_channel(std::move(channel))
@@ -35,7 +36,7 @@ ChannelNotice::ChannelNotice(std::shared_ptr<Server> server, std::string who, st
 
 void ChannelNotice::call(Plugin &p)
 {
-	p.onChannelNotice(m_server, m_who, m_channel, tryEncode(m_notice));
+	p.onChannelNotice(m_server, m_who, m_channel, m_notice);
 }
 
 const char *ChannelNotice::name(Plugin &) const

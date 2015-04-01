@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_COMMAND_H_
-#define _IRCCD_COMMAND_H_
+#ifndef _IRCCD_SERVER_COMMAND_H_
+#define _IRCCD_SERVER_COMMAND_H_
 
 /**
  * @file ServerCommand.h
@@ -67,4 +67,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_COMMAND_H_
+#endif // !_IRCCD_SERVER_COMMAND_H_

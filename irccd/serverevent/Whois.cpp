@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/Plugin.h>
+#include <Plugin.h>
 
 #include "Whois.h"
 
@@ -24,7 +24,7 @@ namespace irccd {
 
 namespace event {
 
-Whois::Whois(std::shared_ptr<Server> server, IrcWhois info)
+Whois::Whois(std::shared_ptr<Server> server, ServerWhois info)
 	: m_server(std::move(server))
 	, m_info(std::move(info))
 {

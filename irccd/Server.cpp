@@ -39,7 +39,7 @@ void Server::handleConnect(const char *, const char **) noexcept
 
 	// Auto join listed channels
 	for (const ServerChannel &channel : m_settings.channels) {
-		Logger::log("server %s: auto joining %s", m_info.name.c_str(), channel.name.c_str());
+		Logger::info() << "server " << m_info.name << ": auto joining " << channel.name << std::endl;
 		join(channel.name, channel.password);
 	}
 }
@@ -200,7 +200,7 @@ Server::Server(ServerInfo info, Identity identity, ServerSettings settings)
 
 Server::~Server()
 {
-	Logger::debug("server %s: disconnecting...", m_info.name.c_str());
+	Logger::debug() << "server " << m_info.name << ": disconnecting..." << std::endl;
 
 	irc_disconnect(m_session.get());
 }

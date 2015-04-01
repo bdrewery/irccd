@@ -28,7 +28,7 @@ namespace state {
 
 Connected::Connected()
 {
-	Logger::debug("server: switching to state \"Connected\"");
+	Logger::debug() << "server: switching to state \"Connected\"" << std::endl;
 }
 
 void Connected::prepare(Server &server, fd_set &setinput, fd_set &setoutput, int &maxfd)
@@ -36,10 +36,11 @@ void Connected::prepare(Server &server, fd_set &setinput, fd_set &setoutput, int
 	if (!irc_is_connected(server.session())) {
 		const ServerSettings &settings = server.settings();
 
-		Logger::warn("server %s: disconnected", server.info().name.c_str());
+		Logger::warning() << "server " << server.info().name << ": disconnected" << std::endl;
 
 		if (settings.recotimeout > 0) {
-			Logger::warn("server %s: retrying in %d seconds", settings.recotimeout);
+			Logger::warning() << "server " << server.info().name << ": retrying in "
+					  << settings.recotimeout << " seconds" << std::endl;
 		}
 
 		server.next<state::Disconnected>();

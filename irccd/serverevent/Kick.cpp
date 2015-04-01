@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/Plugin.h>
+#include <Server.h>
+#include <Plugin.h>
 
 #include "Kick.h"
 
@@ -25,7 +26,7 @@ namespace irccd {
 namespace event {
 
 Kick::Kick(std::shared_ptr<Server> server, std::string channel, std::string who, std::string kicked, std::string reason)
-	: Event(server->info().name, channel)
+	: ServerEvent(server->info().name, channel)
 	, m_server(std::move(server))
 	, m_channel(std::move(channel))
 	, m_who(std::move(who))
@@ -36,7 +37,7 @@ Kick::Kick(std::shared_ptr<Server> server, std::string channel, std::string who,
 
 void Kick::call(Plugin &p)
 {
-	p.onKick(m_server, m_channel, m_who, m_kicked, tryEncode(m_reason));
+	p.onKick(m_server, m_channel, m_who, m_kicked, m_reason);
 }
 
 const char *Kick::name(Plugin &) const

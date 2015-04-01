@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/Plugin.h>
+#include <Server.h>
+#include <Plugin.h>
 
 #include "Topic.h"
 
@@ -25,7 +26,7 @@ namespace irccd {
 namespace event {
 
 Topic::Topic(std::shared_ptr<Server> server, std::string channel, std::string who, std::string topic)
-	: Event(server->info().name, channel)
+	: ServerEvent(server->info().name, channel)
 	, m_server(std::move(server))
 	, m_channel(std::move(channel))
 	, m_who(std::move(who))
@@ -35,7 +36,7 @@ Topic::Topic(std::shared_ptr<Server> server, std::string channel, std::string wh
 
 void Topic::call(Plugin &p)
 {
-	p.onTopic(m_server, m_channel, m_who, tryEncode(m_topic));
+	p.onTopic(m_server, m_channel, m_who, m_topic);
 }
 
 const char *Topic::name(Plugin &) const
