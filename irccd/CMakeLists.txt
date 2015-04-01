@@ -39,6 +39,8 @@ set(
 	ServerManager.cpp
 	ServerManager.h
 	ServerState.h
+	Timer.cpp
+	Timer.h
 	Transport.h
 	TransportCommand.h
 	TransportClient.cpp

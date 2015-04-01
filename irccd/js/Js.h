@@ -194,6 +194,7 @@ void dukx_push_shared(duk_context *ctx, std::shared_ptr<Type> ptr)
 
 duk_ret_t dukopen_filesystem(duk_context *ctx) noexcept;
 duk_ret_t dukopen_system(duk_context *ctx) noexcept;
+duk_ret_t dukopen_timer(duk_context *ctx) noexcept;
 
 } // !irccd
 

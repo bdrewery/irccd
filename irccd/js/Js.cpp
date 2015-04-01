@@ -26,7 +26,9 @@ namespace irccd {
 namespace {
 
 const std::unordered_map<std::string, duk_c_function> modules {
-	{ "irccd.fs",	dukopen_filesystem	}
+	{ "irccd.fs",		dukopen_filesystem	},
+	{ "irccd.timer",	dukopen_timer		},
+	{ "irccd.system",	dukopen_system		}
 };
 
 /*

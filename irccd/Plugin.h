@@ -31,6 +31,8 @@
 
 #include "js/Js.h"
 
+#include "Timer.h"
+
 namespace irccd {
 
 class Server;
@@ -49,10 +51,15 @@ public:
  * A plugin is identified by name and can be loaded and unloaded
  * at runtime.
  */
-class Plugin final {
+class Plugin {
 private:
 	DukContext m_context;
 	PluginInfo m_info;
+	Timers m_timers;
+
+	/* Timer notifiers */
+	std::function<void (std::shared_ptr<Timer>)> m_onTimerSignal;
+	std::function<void (std::shared_ptr<Timer>)> m_onTimerEnd;
 
 	std::string global(const std::string &name) const;
 	void call(const char *name, int nargs = 0);
@@ -70,6 +77,40 @@ public:
 	 * Get the plugin information.
 	 */
 	const PluginInfo &info() const;
+
+	/**
+	 * Add a timer to the plugin.
+	 *
+	 * @param timer the timer to add
+	 */
+	inline void timerAdd(std::shared_ptr<Timer> timer)
+	{
+		timer->onSignal([this, timer] () {
+			m_onTimerSignal(std::move(timer));
+		});
+		timer->onEnd([this, timer] () {
+			m_onTimerEnd(std::move(timer));
+		});
+
+		m_timers.insert(std::move(timer));
+	}
+
+	inline void timerRemove(const std::shared_ptr<Timer> &timer)
+	{
+		m_timers.erase(timer);
+	}
+
+	inline void onTimerSignal(std::function<void (std::shared_ptr<Timer>)> func)
+	{
+		m_onTimerSignal = std::move(func);
+	}
+
+	inline void onTimerEnd(std::function<void (std::shared_ptr<Timer>)> func)
+	{
+		m_onTimerEnd = std::move(func);
+	}
+
+	// TODO: probably rename those on* functions
 
 	/**
 	 * On channel message. This event will call onMessage or

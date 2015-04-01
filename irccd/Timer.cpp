@@ -18,49 +18,79 @@
 
 #include <chrono>
 
-#include <common/Logger.h>
+#include <Logger.h>
 
 #include "Timer.h"
 
 namespace irccd {
 
-Timer::Timer(TimerType type, int delay, int reference)
-	: m_type{type}
-	, m_delay{delay}
-	, m_reference{reference}
+void Timer::run()
 {
+	while (m_running) {
+		std::unique_lock<std::mutex> lock(m_mutex);
+
+		// Wait the timer delay or the interrupt
+		m_condition.wait_for(lock, std::chrono::milliseconds(m_delay), [&] () {
+			return m_running == false;
+		});
+
+		if (m_running) {
+			// Signal process
+			m_onSignal();
+
+			if (m_type == TimerType::Single) {
+				m_running = false;
+			}
+		}
+	}
+
+	// Finished
+	m_onEnd();
+}
+
+Timer::Timer(TimerType type, int delay)
+	: m_type(type)
+	, m_delay(delay)
+	, m_reference(-1)
+{
+	assert(!m_running);
 }
 
 Timer::~Timer()
 {
-	Logger::debug("timer: destroyed");
+	Logger::debug() << "timer: destroyed" << std::endl;
 
-	try {
-		m_thread.join();
-	} catch (const std::exception &) {
+	if (m_running) {
+		try {
+			m_running = false;
+			m_condition.notify_one();
+			m_thread.join();
+		} catch (const std::exception &ex) {
+			Logger::debug() << "timer: error: " << ex.what() << std::endl;
+		}
 	}
 }
 
-void Timer::start(TimerSignal func)
+void Timer::start()
 {
-	m_signal = std::move(func);
+	assert(!m_running);
+	assert(m_onSignal);
+	assert(m_onEnd);
 
-	m_thread = std::thread{[&] () {
-		while (m_alive) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(m_delay));
+	m_running = true;
+	m_thread = std::thread(std::bind(&Timer::run, this));
 
-			// Signal process
-			m_signal();
-
-			if (m_type == TimerType::Single)
-				m_alive = false;
-		}
-	}};
+	assert(m_running);
 }
 
 void Timer::stop()
 {
-	m_alive = false;
+	assert(m_running);
+
+	m_running = false;
+	m_condition.notify_one();
+
+	assert(!m_running);
 }
 
 } // !irccd

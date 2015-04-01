@@ -16,9 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Plugin.h>
-
 #include "Whois.h"
+
+#include <Plugin.h>
 
 namespace irccd {
 

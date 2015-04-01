@@ -48,8 +48,14 @@ Plugin::Plugin(std::string name, std::string path)
 	m_info.path = std::move(path);
 
 	if (duk_peval_file(m_context, m_info.path.c_str()) != 0) {
-		printf("FAILURE: %s\n", duk_safe_to_string(m_context, -1));
+		throw std::runtime_error(duk_safe_to_string(m_context, -1));
 	}
+
+	// Safe a reference to this
+	duk_push_global_object(m_context);
+	duk_push_pointer(m_context, this);
+	duk_put_prop_string(m_context, -2, "\xff""\xff""plugin");
+	duk_pop(m_context);
 }
 
 const PluginInfo &Plugin::info() const
