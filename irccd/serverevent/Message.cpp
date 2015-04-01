@@ -25,11 +25,11 @@ namespace irccd {
 
 namespace event {
 
-Message::Message(std::shared_ptr<Server> server, std::string channel, std::string nickname, std::string message)
+Message::Message(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
 	: ServerEvent(server->info().name, channel)
 	, m_server(std::move(server))
+	, m_origin(std::move(origin))
 	, m_channel(std::move(channel))
-	, m_nickname(std::move(nickname))
 	, m_message(std::move(message))
 {
 }
@@ -39,9 +39,9 @@ void Message::call(Plugin &p)
 	auto pack = parseMessage(m_message, *m_server, p);
 
 	if (pack.second == MessageType::Message) {
-		p.onMessage(m_server, m_channel, m_nickname, pack.first);
+		p.onMessage(std::move(m_server), std::move(m_origin), std::move(m_channel), std::move(pack.first));
 	} else {
-		p.onCommand(m_server, m_channel, m_nickname, pack.first);
+		p.onCommand(std::move(m_server), std::move(m_origin), std::move(m_channel), std::move(pack.first));
 	}
 }
 
@@ -50,6 +50,11 @@ const char *Message::name(Plugin &p) const
 	auto pack = parseMessage(m_message, *m_server, p);
 
 	return (pack.second == MessageType::Message) ? "onMessage" : "onCommand";
+}
+
+std::string Message::ident() const
+{
+	return "Message:" + m_server->info().name + ":" + m_origin + ":" + m_channel + ":" + m_message;
 }
 
 } // !event

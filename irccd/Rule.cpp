@@ -55,7 +55,8 @@ bool Rule::match(const std::string &server,
 	auto pmatch = match(m_plugins, plugin);
 	auto ematch = match(m_events, event);
 
-	Logger::debug("  rule candidate:");
+#if 0
+	Logger::debug() << "  rule candidate:";
 	std::cout << "    - servers: ";
 	for (const auto &s : m_servers)
 		std::cout << s << " ";
@@ -89,6 +90,7 @@ bool Rule::match(const std::string &server,
 	} else {
 		std::cout << "    rule candidate ignored" << std::endl;
 	}
+#endif
 
 	return smatch && cmatch && nmatch && pmatch && ematch;
 #else

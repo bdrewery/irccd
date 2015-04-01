@@ -25,24 +25,29 @@ namespace irccd {
 
 namespace event {
 
-Kick::Kick(std::shared_ptr<Server> server, std::string channel, std::string who, std::string kicked, std::string reason)
+Kick::Kick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason)
 	: ServerEvent(server->info().name, channel)
 	, m_server(std::move(server))
+	, m_origin(std::move(origin))
 	, m_channel(std::move(channel))
-	, m_who(std::move(who))
-	, m_kicked(std::move(kicked))
+	, m_target(std::move(target))
 	, m_reason(std::move(reason))
 {
 }
 
 void Kick::call(Plugin &p)
 {
-	p.onKick(m_server, m_channel, m_who, m_kicked, m_reason);
+	p.onKick(std::move(m_server), std::move(m_origin), std::move(m_channel), std::move(m_target), std::move(m_reason));
 }
 
 const char *Kick::name(Plugin &) const
 {
 	return "onKick";
+}
+
+std::string Kick::ident() const
+{
+	return "Kick:" + m_server->info().name + ":" + m_origin + ":" + m_channel + ":" + m_target + ":" + m_reason;
 }
 
 } // !event

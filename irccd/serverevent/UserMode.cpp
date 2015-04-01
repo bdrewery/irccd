@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <Server.h>
 #include <Plugin.h>
 
 #include "UserMode.h"
@@ -24,21 +25,26 @@ namespace irccd {
 
 namespace event {
 
-UserMode::UserMode(std::shared_ptr<Server> server, std::string nickname, std::string mode)
+UserMode::UserMode(std::shared_ptr<Server> server, std::string origin, std::string mode)
 	: m_server(std::move(server))
-	, m_nickname(std::move(nickname))
+	, m_origin(std::move(origin))
 	, m_mode(std::move(mode))
 {
 }
 
 void UserMode::call(Plugin &p)
 {
-	p.onUserMode(m_server, m_nickname, m_mode);
+	p.onUserMode(std::move(m_server), std::move(m_origin), std::move(m_mode));
 }
 
 const char *UserMode::name(Plugin &) const
 {
 	return "onUserMode";
+}
+
+std::string UserMode::ident() const
+{
+	return "UserMode" + m_server->info().name + ":" + m_origin + ":" + m_mode;
 }
 
 } // !event

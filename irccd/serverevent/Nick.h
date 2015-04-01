@@ -63,6 +63,11 @@ public:
 	 * @copydoc Event::name
 	 */
 	const char *name(Plugin &p) const override;
+
+	/**
+	 * @copydoc ServerEvent::ident
+	 */
+	std::string ident() const override;
 };
 
 } // !event

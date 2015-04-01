@@ -91,6 +91,16 @@ public:
 	 * @return the event name
 	 */
 	virtual const char *name(Plugin &p) const = 0;
+
+	/**
+	 * Provide a ident string for unit tests.
+	 *
+	 * Derived classes should just concat their name plus all fields
+	 * separated by ':'.
+	 *
+	 * @return the ident
+	 */
+	virtual std::string ident() const = 0;
 };
 
 } // !irccd

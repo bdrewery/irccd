@@ -41,8 +41,7 @@ namespace event {
 class Notice final : public ServerEvent {
 private:
 	std::shared_ptr<Server>	m_server;
-	std::string		m_who;
-	std::string		m_target;
+	std::string		m_origin;
 	std::string		m_notice;
 
 public:
@@ -50,11 +49,10 @@ public:
 	 * Event constructor.
 	 *
 	 * @param server the server
-	 * @param who the nickname
-	 * @param target the target (you)
+	 * @param origin the nickname
 	 * @param notice the notice
 	 */
-	Notice(std::shared_ptr<Server> server, std::string who, std::string target, std::string notice);
+	Notice(std::shared_ptr<Server> server, std::string origin, std::string notice);
 
 	/**
 	 * @copydoc Event::call
@@ -65,6 +63,11 @@ public:
 	 * @copydoc Event::name
 	 */
 	const char *name(Plugin &p) const override;
+
+	/**
+	 * @copydoc ServerEvent::ident
+	 */
+	std::string ident() const override;
 };
 
 } // !event

@@ -105,12 +105,14 @@ bool RuleManager::solve(const std::string &server,
 	bool result{true};
 
 #if !defined(NDEBUG)
+#if 0
 	Logger::debug("rule: checking match for:");
 	Logger::debug("    - server: %s", server.c_str());
 	Logger::debug("    - channel: %s", channel.c_str());
 	Logger::debug("    - nickname: %s", nickname.c_str());
 	Logger::debug("    - plugin: %s", plugin.c_str());
 	Logger::debug("    - event: %s", event.c_str());
+#endif
 #endif
 
 	for (const auto &r : m_rules) {

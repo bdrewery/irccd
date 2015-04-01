@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <Server.h>
 #include <Plugin.h>
 
 #include "Connect.h"
@@ -37,6 +38,11 @@ void Connect::call(Plugin &p)
 const char *Connect::name(Plugin &) const
 {
 	return "onConnect";
+}
+
+std::string Connect::ident() const
+{
+	return "Connect:" + m_server->info().name;
 }
 
 } // !event

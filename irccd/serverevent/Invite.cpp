@@ -25,22 +25,27 @@ namespace irccd {
 
 namespace event {
 
-Invite::Invite(std::shared_ptr<Server> server, std::string channel, std::string who)
+Invite::Invite(std::shared_ptr<Server> server, std::string origin, std::string channel)
 	: ServerEvent(server->info().name, channel)
 	, m_server(std::move(server))
+	, m_origin(std::move(origin))
 	, m_channel(std::move(channel))
-	, m_who(std::move(who))
 {
 }
 
 void Invite::call(Plugin &p)
 {
-	p.onInvite(m_server, m_channel, m_who);
+	p.onInvite(std::move(m_server), std::move(m_origin), std::move(m_channel));
 }
 
 const char *Invite::name(Plugin &) const
 {
 	return "onInvite";
+}
+
+std::string Invite::ident() const
+{
+	return "Invite:" + m_server->info().name + ":" + m_origin + ":" + m_channel;
 }
 
 } // !event

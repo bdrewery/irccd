@@ -19,6 +19,7 @@
 #ifndef _IRCCD_SERVER_MANAGER_H_
 #define _IRCCD_SERVER_MANAGER_H_
 
+#include <cassert>
 #include <atomic>
 #include <memory>
 #include <string>
@@ -29,10 +30,13 @@
 
 namespace irccd {
 
+class ServerEvent;
+
 class ServerManager {
 private:
+	std::function<void (std::unique_ptr<ServerEvent>)> m_onEvent;
 	std::unordered_map<std::string, std::shared_ptr<Server>> m_servers;
-	std::atomic<bool> m_running{true};
+	std::atomic<bool> m_running{false};
 	std::thread m_thread;
 	mutable std::mutex m_mutex;
 
@@ -55,9 +59,33 @@ private:
 	void onUserMode(std::shared_ptr<Server>, std::string, std::string);
 
 public:
-	ServerManager();
+	/**
+	 * Default constructor, does nothing.
+	 */
+	ServerManager() = default;
 
+	/**
+	 * Destructor, close the thread.
+	 */
 	~ServerManager();
+
+	/**
+	 * Start the thread.
+	 */
+	void start();
+
+	/**
+	 * Set the event handler.
+	 *
+	 * @param func the function
+	 * @pre the thread must not be started
+	 */
+	inline void onEvent(std::function<void (std::unique_ptr<ServerEvent>)> func) noexcept
+	{
+		assert(!m_running);
+
+		m_onEvent = std::move(func);
+	}
 
 	/**
 	 * Add a server. Pass exactly the same arguments as you would pass
@@ -95,98 +123,5 @@ public:
 };
 
 } // !irccd
-
-#if 0
-
-/**
- * @file ServerManager.h
- * @brief Manage all servers
- */
-
-#include <thread>
-
-#include <Singleton.h>
-
-#include "Server.h"
-
-namespace irccd {
-
-/**
- * @class ServerManager
- * @brief Manages the connected servers
- */
-class ServerManager final : public Singleton<ServerManager> {
-private:
-	SINGLETON(ServerManager);
-
-	using Thread	= std::thread;
-	using Mutex	= std::recursive_mutex;
-	using Map	= std::unordered_map<std::string, std::shared_ptr<Server>>;
-	using Lock	= std::lock_guard<Mutex>;
-
-	mutable Mutex	m_lock;
-	Map		m_servers;
-	Thread		m_thread;
-
-	void cleaner();
-
-	ServerManager();
-
-public:
-	/**
-	 * Default destructor.
-	 */
-	~ServerManager() override;
-
-	/**
-	 * Add a new server to the registry. It also start the server
-	 * immediately.
-	 *
-	 * @param server the server to add
-	 */
-	void add(std::shared_ptr<Server> &&server);
-
-	/**
-	 * Remove the server from the registry.
-	 *
-	 * @param server
-	 */
-	void remove(const std::shared_ptr<Server> &server);
-
-	/**
-	 * Get an existing server.
-	 *
-	 * @param name the server name
-	 * @return the server
-	 * @throw std::out_of_range if not found
-	 */
-	std::shared_ptr<Server> get(const std::string &name) const;
-
-	/**
-	 * Check if a server exists
-	 *
-	 * @param name the server name
-	 * @return true if the server by this name is loaded
-	 */
-	bool has(const std::string &name) const;
-
-	/**
-	 * Call a function for all servers.
-	 *
-	 * @param func the function
-	 */
-	template <typename Func>
-	void forAll(Func func)
-	{
-		Lock lk(m_lock);
-
-		for (const auto &s : m_servers)
-			func(s.second);
-	}
-};
-
-} // !irccd
-
-#endif
 
 #endif // _IRCCD_SERVER_MANAGER_H_

@@ -25,23 +25,28 @@ namespace irccd {
 
 namespace event {
 
-Me::Me(std::shared_ptr<Server> server, std::string channel, std::string nickname, std::string message)
-	: ServerEvent(server->info().name, channel)
+Me::Me(std::shared_ptr<Server> server, std::string origin, std::string target, std::string message)
+	: ServerEvent(server->info().name, target)
 	, m_server(std::move(server))
-	, m_channel(std::move(channel))
-	, m_nickname(std::move(nickname))
+	, m_origin(std::move(origin))
+	, m_target(std::move(target))
 	, m_message(std::move(message))
 {
 }
 
 void Me::call(Plugin &p)
 {
-	p.onMe(m_server, m_channel, m_nickname, m_message);
+	p.onMe(std::move(m_server), std::move(m_origin), std::move(m_target), std::move(m_message));
 }
 
 const char *Me::name(Plugin &) const
 {
 	return "onMe";
+}
+
+std::string Me::ident() const
+{
+	return "Me:" + m_server->info().name + ":" + m_origin + ":" + m_target + ":" + m_message;
 }
 
 } // !event

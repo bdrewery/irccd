@@ -25,22 +25,27 @@ namespace irccd {
 
 namespace event {
 
-Join::Join(std::shared_ptr<Server> server, std::string channel, std::string nickname)
+Join::Join(std::shared_ptr<Server> server, std::string origin, std::string channel)
 	: ServerEvent(server->info().name, channel)
 	, m_server(std::move(server))
+	, m_origin(std::move(origin))
 	, m_channel(std::move(channel))
-	, m_nickname(std::move(nickname))
 {
 }
 
 void Join::call(Plugin &p)
 {
-	p.onJoin(m_server, m_channel, m_nickname);
+	p.onJoin(std::move(m_server), std::move(m_origin), std::move(m_channel));
 }
 
 const char *Join::name(Plugin &) const
 {
 	return "onJoin";
+}
+
+std::string Join::ident() const
+{
+	return "Join:" + m_server->info().name + ":" + m_origin + ":" + m_channel;
 }
 
 } // !event

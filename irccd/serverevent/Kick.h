@@ -41,9 +41,9 @@ namespace event {
 class Kick final : public ServerEvent {
 private:
 	std::shared_ptr<Server>	m_server;
+	std::string		m_origin;
 	std::string		m_channel;
-	std::string		m_who;
-	std::string		m_kicked;
+	std::string		m_target;
 	std::string		m_reason;
 
 public:
@@ -51,12 +51,12 @@ public:
 	 * Event constructor.
 	 *
 	 * @param server the server
+	 * @param origin the user who kicked
 	 * @param channel from which channel
-	 * @param who the user who kicked
-	 * @param kicked the kicked person
+	 * @param target the kicked person
 	 * @param reason the reason
 	 */
-	Kick(std::shared_ptr<Server> server, std::string channel, std::string who, std::string kicked, std::string reason);
+	Kick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason);
 
 	/**
 	 * @copydoc Event::call
@@ -67,6 +67,11 @@ public:
 	 * @copydoc Event::name
 	 */
 	const char *name(Plugin &p) const override;
+
+	/**
+	 * @copydoc ServerEvent::ident
+	 */
+	std::string ident() const override;
 };
 
 } // !event

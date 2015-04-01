@@ -41,8 +41,8 @@ namespace event {
 class Message final : public ServerEvent {
 private:
 	std::shared_ptr<Server>	m_server;
+	std::string		m_origin;
 	std::string		m_channel;
-	std::string		m_nickname;
 	std::string		m_message;
 
 public:
@@ -50,11 +50,11 @@ public:
 	 * Event constructor.
 	 *
 	 * @param server the server
+	 * @param origin the user who sent the message
 	 * @param channel the channel
-	 * @param nickname the user who sent the message
 	 * @param message the message
 	 */
-	Message(std::shared_ptr<Server> server, std::string channel, std::string nickname, std::string message);
+	Message(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message);
 
 	/**
 	 * @copydoc Event::call
@@ -65,6 +65,11 @@ public:
 	 * @copydoc Event::name
 	 */
 	const char *name(Plugin &p) const override;
+
+	/**
+	 * @copydoc ServerEvent::ident
+	 */
+	std::string ident() const override;
 };
 
 } // !event

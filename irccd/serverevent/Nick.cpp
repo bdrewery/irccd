@@ -42,6 +42,11 @@ const char *Nick::name(Plugin &) const
 	return "onNick";
 }
 
+std::string Nick::ident() const
+{
+	return "Nick:" + m_server->info().name + ":" + m_oldnickname + ":" + m_newnickname;
+}
+
 } // !event
 
 } // !irccd

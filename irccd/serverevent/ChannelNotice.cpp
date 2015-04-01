@@ -25,10 +25,10 @@ namespace irccd {
 
 namespace event {
 
-ChannelNotice::ChannelNotice(std::shared_ptr<Server> server, std::string who, std::string channel, std::string notice)
+ChannelNotice::ChannelNotice(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string notice)
 	: ServerEvent(server->info().name, channel)
 	, m_server(std::move(server))
-	, m_who(std::move(who))
+	, m_origin(std::move(origin))
 	, m_channel(std::move(channel))
 	, m_notice(std::move(notice))
 {
@@ -36,12 +36,17 @@ ChannelNotice::ChannelNotice(std::shared_ptr<Server> server, std::string who, st
 
 void ChannelNotice::call(Plugin &p)
 {
-	p.onChannelNotice(m_server, m_who, m_channel, m_notice);
+	p.onChannelNotice(m_server, m_origin, m_channel, m_notice);
 }
 
 const char *ChannelNotice::name(Plugin &) const
 {
 	return "onChannelNotice";
+}
+
+std::string ChannelNotice::ident() const
+{
+	return "ChannelNotice:" + m_server->info().name + ":" + m_origin + ":" + m_channel + ":" + m_notice;
 }
 
 } // !event

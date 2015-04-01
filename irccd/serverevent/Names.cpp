@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <Server.h>
 #include <Plugin.h>
 
 #include "Names.h"
@@ -39,6 +40,11 @@ void Names::call(Plugin &p)
 const char *Names::name(Plugin &) const
 {
 	return "onNames";
+}
+
+std::string Names::ident() const
+{
+	return "Names:" + m_server->info().name;
 }
 
 } // !event

@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <Server.h>
 #include <Plugin.h>
 
 #include "Query.h"
@@ -24,9 +25,9 @@ namespace irccd {
 
 namespace event {
 
-Query::Query(std::shared_ptr<Server> server, std::string who, std::string message)
+Query::Query(std::shared_ptr<Server> server, std::string origin, std::string message)
 	: m_server(std::move(server))
-	, m_who(std::move(who))
+	, m_origin(std::move(origin))
 	, m_message(std::move(message))
 {
 }
@@ -36,9 +37,9 @@ void Query::call(Plugin &p)
 	auto pack = parseMessage(m_message, *m_server, p);
 
 	if (pack.second == MessageType::Message) {
-		p.onQuery(m_server, m_who, pack.first);
+		p.onQuery(m_server, m_origin, pack.first);
 	} else {
-		p.onQueryCommand(m_server, m_who, pack.first);
+		p.onQueryCommand(m_server, m_origin, pack.first);
 	}
 }
 
@@ -47,6 +48,11 @@ const char *Query::name(Plugin &p) const
 	auto pack = parseMessage(m_message, *m_server, p);
 
 	return (pack.second == MessageType::Message) ? "onQuery" : "onQueryCommand";
+}
+
+std::string Query::ident() const
+{
+	return "Query:" + m_server->info().name + ":" + m_origin + ":" + m_message;
 }
 
 } // !event

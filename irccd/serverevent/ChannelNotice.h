@@ -41,7 +41,7 @@ namespace event {
 class ChannelNotice final : public ServerEvent {
 private:
 	std::shared_ptr<Server>	m_server;
-	std::string		m_who;
+	std::string		m_origin;
 	std::string		m_channel;
 	std::string		m_notice;
 
@@ -54,7 +54,7 @@ public:
 	 * @param channel the channel
 	 * @param notice the notice message
 	 */
-	ChannelNotice(std::shared_ptr<Server> server, std::string who, std::string channel, std::string notice);
+	ChannelNotice(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string notice);
 
 	/**
 	 * @copydoc Event::call
@@ -65,6 +65,11 @@ public:
 	 * @copydoc Event::name
 	 */
 	const char *name(Plugin &p) const override;
+
+	/**
+	 * @copydoc ServerEvent::ident
+	 */
+	std::string ident() const override;
 };
 
 } // !event

@@ -460,7 +460,7 @@ private:
 		}
 	}
 
-	void handleChannel(const char *orig, const char **params) noexcept;
+	void handleChannel(const char *, const char **) noexcept;
 	void handleChannelNotice(const char *, const char **) noexcept;
 	void handleConnect(const char *, const char **) noexcept;
 	void handleCtcpAction(const char *, const char **) noexcept;
@@ -478,7 +478,7 @@ private:
 	/*
 	 * Return a string even if s is nullptr.
 	 */
-	static inline std::string strify(const char *s)
+	inline std::string strify(const char *s)
 	{
 		return (s == nullptr) ? "" : std::string(s);
 	}

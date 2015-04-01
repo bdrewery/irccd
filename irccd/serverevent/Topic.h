@@ -41,8 +41,8 @@ namespace event {
 class Topic final : public ServerEvent {
 private:
 	std::shared_ptr<Server>	m_server;
+	std::string		m_origin;
 	std::string		m_channel;
-	std::string		m_who;
 	std::string		m_topic;
 
 public:
@@ -50,11 +50,11 @@ public:
 	 * Event constructor.
 	 *
 	 * @param server the server
+	 * @param origin the one who changed the topic
 	 * @param channel the channel
-	 * @param who the one who changed the topic
 	 * @param topic the new topic
 	 */
-	Topic(std::shared_ptr<Server> server, std::string channel, std::string who, std::string topic);
+	Topic(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string topic);
 
 	/**
 	 * @copydoc Event::call
@@ -65,6 +65,11 @@ public:
 	 * @copydoc Event::name
 	 */
 	const char *name(Plugin &p) const override;
+
+	/**
+	 * @copydoc ServerEvent::ident
+	 */
+	std::string ident() const override;
 };
 
 } // !event

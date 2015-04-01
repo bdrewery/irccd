@@ -320,7 +320,11 @@ int main(int argc, char **argv)
 	// Disable logging
 	Logger::setStandard<LoggerSilent>();
 	Logger::setError<LoggerSilent>();
+
+#if defined(IRCCD_SYSTEM_WINDOWS)
 	Socket::initialize();
+#endif
+
 	testing::InitGoogleTest(&argc, argv);
 
 	return RUN_ALL_TESTS();

@@ -40,6 +40,11 @@ const char *Whois::name(Plugin &) const
 	return "onWhois";
 }
 
+std::string Whois::ident() const
+{
+	return "Whois:" + m_server->info().name;
+}
+
 } // !event
 
 } // !irccd

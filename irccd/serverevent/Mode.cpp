@@ -25,11 +25,11 @@ namespace irccd {
 
 namespace event {
 
-Mode::Mode(std::shared_ptr<Server> server, std::string channel, std::string nickname, std::string mode, std::string argument)
+Mode::Mode(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string argument)
 	: ServerEvent(server->info().name, channel)
 	, m_server(std::move(server))
+	, m_origin(std::move(origin))
 	, m_channel(std::move(channel))
-	, m_nickname(std::move(nickname))
 	, m_mode(std::move(mode))
 	, m_argument(std::move(argument))
 {
@@ -37,12 +37,17 @@ Mode::Mode(std::shared_ptr<Server> server, std::string channel, std::string nick
 
 void Mode::call(Plugin &p)
 {
-	p.onMode(m_server, m_channel, m_nickname, m_mode, m_argument);
+	p.onMode(std::move(m_server), std::move(m_origin), std::move(m_channel), std::move(m_mode), std::move(m_argument));
 }
 
 const char *Mode::name(Plugin &) const
 {
 	return "onMode";
+}
+
+std::string Mode::ident() const
+{
+	return "Mode:" + m_server->info().name + ":" + m_origin + ":" + m_channel + ":" + m_mode + ":" + m_argument;
 }
 
 } // !event

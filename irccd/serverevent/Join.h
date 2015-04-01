@@ -41,18 +41,18 @@ namespace event {
 class Join final : public ServerEvent {
 private:
 	std::shared_ptr<Server>	m_server;
+	std::string		m_origin;
 	std::string		m_channel;
-	std::string		m_nickname;
 
 public:
 	/**
 	 * Event constructor.
 	 *
 	 * @param server the server
+	 * @param origin the nickname who joined the channel (may be you)
 	 * @param channel the channel
-	 * @param nickname the nickname
 	 */
-	Join(std::shared_ptr<Server> server, std::string channel, std::string nickname);
+	Join(std::shared_ptr<Server> server, std::string origin, std::string channel);
 
 	/**
 	 * @copydoc Event::call
@@ -63,6 +63,11 @@ public:
 	 * @copydoc Event::name
 	 */
 	const char *name(Plugin &p) const override;
+
+	/**
+	 * @copydoc ServerEvent::ident
+	 */
+	std::string ident() const override;
 };
 
 } // !event

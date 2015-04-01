@@ -25,23 +25,28 @@ namespace irccd {
 
 namespace event {
 
-Part::Part(std::shared_ptr<Server> server, std::string channel, std::string nickname, std::string reason)
+Part::Part(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string reason)
 	: ServerEvent(server->info().name, channel)
 	, m_server(std::move(server))
+	, m_origin(std::move(origin))
 	, m_channel(std::move(channel))
-	, m_nickname(std::move(nickname))
 	, m_reason(std::move(reason))
 {
 }
 
 void Part::call(Plugin &p)
 {
-	p.onPart(m_server, m_channel, m_nickname, m_reason);
+	p.onPart(std::move(m_server), std::move(m_origin), std::move(m_channel), std::move(m_reason));
 }
 
 const char *Part::name(Plugin &) const
 {
 	return "onPart";
+}
+
+std::string Part::ident() const
+{
+	return "Part:" + m_server->info().name + ":" + m_origin + ":" + m_channel + ":" + m_reason;
 }
 
 } // !event

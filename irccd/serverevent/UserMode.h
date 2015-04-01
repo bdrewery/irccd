@@ -41,7 +41,7 @@ namespace event {
 class UserMode final : public ServerEvent {
 private:
 	std::shared_ptr<Server>	m_server;
-	std::string		m_nickname;
+	std::string		m_origin;
 	std::string		m_mode;
 
 public:
@@ -49,10 +49,10 @@ public:
 	 * Event constructor.
 	 *
 	 * @param server the server
-	 * @param nickname the one who changed your mode
+	 * @param origin the one who changed your mode
 	 * @param mode the mode
 	 */
-	UserMode(std::shared_ptr<Server> server, std::string nickname, std::string mode);
+	UserMode(std::shared_ptr<Server> server, std::string origin, std::string mode);
 
 	/**
 	 * @copydoc Event::call
@@ -63,6 +63,11 @@ public:
 	 * @copydoc Event::name
 	 */
 	const char *name(Plugin &p) const override;
+
+	/**
+	 * @copydoc ServerEvent::ident
+	 */
+	std::string ident() const override;
 };
 
 } // !event

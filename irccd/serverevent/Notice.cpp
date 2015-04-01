@@ -25,23 +25,27 @@ namespace irccd {
 
 namespace event {
 
-Notice::Notice(std::shared_ptr<Server> server, std::string who, std::string target, std::string notice)
-	: ServerEvent(server->info().name, target)
+Notice::Notice(std::shared_ptr<Server> server, std::string origin, std::string notice)
+	: ServerEvent(server->info().name, "")
 	, m_server(std::move(server))
-	, m_who(std::move(who))
-	, m_target(std::move(target))
+	, m_origin(std::move(origin))
 	, m_notice(std::move(notice))
 {
 }
 
 void Notice::call(Plugin &p)
 {
-	p.onNotice(m_server, m_who, m_notice);
+	p.onNotice(std::move(m_server), std::move(m_origin), std::move(m_notice));
 }
 
 const char *Notice::name(Plugin &) const
 {
 	return "onNotice";
+}
+
+std::string Notice::ident() const
+{
+	return "Notice:" + m_server->info().name + ":" + m_origin + ":" + m_notice;
 }
 
 } // !event

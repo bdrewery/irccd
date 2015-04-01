@@ -25,23 +25,28 @@ namespace irccd {
 
 namespace event {
 
-Topic::Topic(std::shared_ptr<Server> server, std::string channel, std::string who, std::string topic)
+Topic::Topic(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string topic)
 	: ServerEvent(server->info().name, channel)
 	, m_server(std::move(server))
+	, m_origin(std::move(origin))
 	, m_channel(std::move(channel))
-	, m_who(std::move(who))
 	, m_topic(std::move(topic))
 {
 }
 
 void Topic::call(Plugin &p)
 {
-	p.onTopic(m_server, m_channel, m_who, m_topic);
+	p.onTopic(std::move(m_server), std::move(m_origin), std::move(m_channel), std::move(m_topic));
 }
 
 const char *Topic::name(Plugin &) const
 {
 	return "onTopic";
+}
+
+std::string Topic::ident() const
+{
+	return "Topic:" + m_server->info().name + ":" + m_origin + ":" + m_channel + ":" + m_topic;
 }
 
 } // !event

@@ -21,7 +21,26 @@
 
 #include "ServerManager.h"
 
+#include "serverevent/ChannelNotice.h"
+#include "serverevent/Connect.h"
+#include "serverevent/Invite.h"
+#include "serverevent/Join.h"
+#include "serverevent/Kick.h"
+#include "serverevent/Me.h"
+#include "serverevent/Message.h"
+#include "serverevent/Mode.h"
+#include "serverevent/Names.h"
+#include "serverevent/Nick.h"
+#include "serverevent/Notice.h"
+#include "serverevent/Part.h"
+#include "serverevent/Query.h"
+#include "serverevent/Topic.h"
+#include "serverevent/UserMode.h"
+#include "serverevent/Whois.h"
+
 namespace irccd {
+
+using namespace event;
 
 void ServerManager::run() noexcept
 {
@@ -86,86 +105,172 @@ void ServerManager::onChannelNotice(std::shared_ptr<Server> server, std::string 
 {
 	Logger::debug() << "server " << server->info().name << ": onChannelNotice: "
 			<< "origin=" << origin << ", channel=" << channel <<", notice=" << notice << std::endl;
+
+	m_onEvent(std::make_unique<ChannelNotice>(
+		std::move(server),
+		std::move(origin),
+		std::move(channel),
+		std::move(notice)
+	));
 }
 
 void ServerManager::onConnect(std::shared_ptr<Server> server)
 {
 	Logger::debug() << "server " << server->info().name << ": onConnect" << std::endl;
+
+	m_onEvent(std::make_unique<Connect>(std::move(server)));
 }
 
 void ServerManager::onInvite(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target)
 {
 	Logger::debug() << "server " << server->info().name << ": onInvite: "
 			<< "origin=" << origin << ", channel=" << channel << ", target=" << target << std::endl;
+
+	m_onEvent(std::make_unique<Invite>(
+		std::move(server),
+		std::move(origin),
+		std::move(channel)
+	));
 }
 
 void ServerManager::onJoin(std::shared_ptr<Server> server, std::string origin, std::string channel)
 {
 	Logger::debug() << "server " << server->info().name << ": onJoin: "
 			<< "origin=" << origin << ", channel=" << channel << std::endl;
+
+	m_onEvent(std::make_unique<Join>(
+		std::move(server),
+		std::move(origin),
+		std::move(channel)
+	));
 }
 
 void ServerManager::onKick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason)
 {
 	Logger::debug() << "server " << server->info().name << ": onKick: "
 			<< "origin=" << origin << ", channel=" << channel << ", target=" << target << ", reason=" << reason << std::endl;
+
+	m_onEvent(std::make_unique<Kick>(
+		std::move(server),
+		std::move(origin),
+		std::move(channel),
+		std::move(target),
+		std::move(reason)
+	));
 }
 
 void ServerManager::onMessage(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
 {
 	Logger::debug() << "server " << server->info().name << ": onMessage: "
 			<< "origin=" << origin << ", channel=" << channel << ", message=" << message << std::endl;
+
+	m_onEvent(std::make_unique<Message>(
+		std::move(server),
+		std::move(origin),
+		std::move(channel),
+		std::move(message)
+	));
 }
 
 void ServerManager::onMe(std::shared_ptr<Server> server, std::string origin, std::string target, std::string message)
 {
 	Logger::debug() << "server " << server->info().name << ": onMe: "
 			<< "origin=" << origin << ", target=" << target << ", message=" << message << std::endl;
+
+	m_onEvent(std::make_unique<Me>(
+		std::move(server),
+		std::move(origin),
+		std::move(target),
+		std::move(message)
+	));
 }
 
 void ServerManager::onMode(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string arg)
 {
 	Logger::debug() << "server " << server->info().name << ": onMode: "
 			<< "origin=" << origin << ", channel=" << channel << ", mode=" << mode << ", argument=" << arg << std::endl;
+
+	m_onEvent(std::make_unique<Mode>(
+		std::move(server),
+		std::move(origin),
+		std::move(channel),
+		std::move(mode),
+		std::move(arg)
+	));
 }
 
 void ServerManager::onNick(std::shared_ptr<Server> server, std::string origin, std::string nickname)
 {
 	Logger::debug() << "server " << server->info().name << ": onNick: "
 			<< "origin=" << origin << ", nickname=" << nickname << std::endl;
+
+	m_onEvent(std::make_unique<Nick>(
+		std::move(server),
+		std::move(origin),
+		std::move(nickname)
+	));
 }
 
 void ServerManager::onNotice(std::shared_ptr<Server> server, std::string origin, std::string message)
 {
 	Logger::debug() << "server " << server->info().name << ": onNotice: "
 			<< "origin=" << origin << ", message=" << message << std::endl;
+
+	m_onEvent(std::make_unique<Notice>(
+		std::move(server),
+		std::move(origin),
+		std::move(message)
+	));
 }
 
 void ServerManager::onPart(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string reason)
 {
 	Logger::debug() << "server " << server->info().name << ": onPart: "
 			<< "origin=" << origin << ", channel=" << channel << ", reason=" << reason << std::endl;
+
+	m_onEvent(std::make_unique<Part>(
+		std::move(server),
+		std::move(origin),
+		std::move(channel),
+		std::move(reason)
+	));
 }
 
 void ServerManager::onQuery(std::shared_ptr<Server> server, std::string origin, std::string message)
 {
 	Logger::debug() << "server " << server->info().name << ": onQuery: "
 			<< "origin=" << origin << ", message=" << message << std::endl;
+
+	m_onEvent(std::make_unique<Query>(
+		std::move(server),
+		std::move(origin),
+		std::move(message)
+	));
 }
 
 void ServerManager::onTopic(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string topic)
 {
 	Logger::debug() << "server " << server->info().name << ": onTopic: "
 			<< "origin=" << origin << ", channel=" << channel << ", topic=" << topic << std::endl;
+
+	m_onEvent(std::make_unique<Topic>(
+		std::move(server),
+		std::move(origin),
+		std::move(channel),
+		std::move(topic)
+	));
 }
 
-void ServerManager::onUserMode(std::shared_ptr<Server>, std::string, std::string)
+void ServerManager::onUserMode(std::shared_ptr<Server> server, std::string origin, std::string mode)
 {
-}
+	Logger::debug() << "server " << server->info().name << ": onUserMode: "
+			<< "origin=" << origin << ", mode=" << mode << std::endl;
 
-ServerManager::ServerManager()
-	: m_thread(std::bind(&ServerManager::run, this))
-{
+	m_onEvent(std::make_unique<UserMode>(
+		std::move(server),
+		std::move(origin),
+		std::move(mode)
+	));
 }
 
 ServerManager::~ServerManager()
@@ -174,93 +279,15 @@ ServerManager::~ServerManager()
 
 	try {
 		m_thread.join();
-	} catch (const std::exception &) {
-		// TODO, show debug error
-	}
-}
-
-} // !irccd
-
-#if 0
-
-#include <chrono>
-
-#include <common/Logger.h>
-
-#include "Irccd.h"
-#include "ServerManager.h"
-
-using namespace std::literals::chrono_literals;
-
-namespace irccd {
-
-void ServerManager::cleaner()
-{
-	// cleanup dead servers
-	while (Irccd::instance().isRunning()) {
-		{
-			Lock lk(m_lock);
-
-			for (auto s = std::begin(m_servers); s != std::end(m_servers); ) {
-				if (s->second->isDead()) {
-					Logger::debug("server %s: removed", s->second->info().name.c_str());
-					s = m_servers.erase(s);
-				} else
-					s++;
-			}
-		}
-
-		std::this_thread::sleep_for(50ms);
-	}
-}
-
-ServerManager::ServerManager()
-	: m_thread(&ServerManager::cleaner, this)
-{
-}
-
-ServerManager::~ServerManager()
-{
-	try {
-		m_thread.join();
 	} catch (const std::exception &ex) {
-		Logger::warn("irccd: %s", ex.what());
+		Logger::debug() << "irccd: " << ex.what() << std::endl;
 	}
 }
 
-void ServerManager::add(std::shared_ptr<Server> &&server)
+void ServerManager::start()
 {
-	Lock lk(m_lock);
-	auto name = server->info().name;
-
-	m_servers[name] = std::move(server);
-	m_servers[name]->start();
-}
-
-void ServerManager::remove(const std::shared_ptr<Server> &server)
-{
-	Lock lk(m_lock);
-
-	m_servers.erase(server->info().name);
-}
-
-bool ServerManager::has(const std::string &name) const
-{
-	Lock lk(m_lock);
-
-	return m_servers.count(name) > 0;
-}
-
-std::shared_ptr<Server> ServerManager::get(const std::string &name) const
-{
-	Lock lk(m_lock);
-
-	if (m_servers.count(name) == 0)
-		throw std::out_of_range("server" + name + " not found");
-
-	return m_servers.at(name);
+	m_running = true;
+	m_thread = std::thread(std::bind(&ServerManager::run, this));
 }
 
 } // !irccd
-
-#endif

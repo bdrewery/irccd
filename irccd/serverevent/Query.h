@@ -41,7 +41,7 @@ namespace event {
 class Query final : public ServerEvent {
 private:
 	std::shared_ptr<Server>	m_server;
-	std::string		m_who;
+	std::string		m_origin;
 	std::string		m_message;
 
 public:
@@ -49,10 +49,10 @@ public:
 	 * Event constructor.
 	 *
 	 * @param server the server
-	 * @param who the nickname
+	 * @param origin the nickname
 	 * @param message the message
 	 */
-	Query(std::shared_ptr<Server> server, std::string who, std::string message);
+	Query(std::shared_ptr<Server> server, std::string origin, std::string message);
 
 	/**
 	 * @copydoc Event::call
@@ -63,6 +63,11 @@ public:
 	 * @copydoc Event::name
 	 */
 	const char *name(Plugin &p) const override;
+
+	/**
+	 * @copydoc ServerEvent::ident
+	 */
+	std::string ident() const override;
 };
 
 } // !event
