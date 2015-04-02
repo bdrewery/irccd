@@ -41,6 +41,7 @@ set(
 	ServerState.h
 	Timer.cpp
 	Timer.h
+	TimerEvent.h
 	Transport.h
 	TransportCommand.h
 	TransportClient.cpp

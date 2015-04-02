@@ -19,20 +19,18 @@
 #include <iostream>
 #include <memory>
 
-#include "Server.h"
-#include "Plugin.h"
-
-using namespace irccd;
+#include "Logger.h"
+#include "Irccd.h"
 
 int main(void)
 {
-	Plugin plugin("test", "test.js");
-	auto s = std::make_shared<Server>(ServerInfo{});
+	try {
+		irccd::irccd.pluginLoad("test.js");
+	} catch (const std::exception &ex) {
+		irccd::Logger::warning() << "failed to load plugin: " << ex.what() << std::endl;
+	}
 
-	puts("calling");
-	plugin.onMessage(s, "markand", "#staff", "Salut al compagnie");
-
-	return 0;
+	irccd::irccd.run();
 }
 
 

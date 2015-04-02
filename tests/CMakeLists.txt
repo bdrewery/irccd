@@ -62,11 +62,13 @@ function(create_dir target dirname)
 	)
 endfunction()
 
-make_directory(${CMAKE_BINARY_DIR}/testassets)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/testassets)
 
 if (WITH_TESTS)
 	add_subdirectory(js-filesystem)
-	#add_subdirectory(js-system)
+	add_subdirectory(js-system)
+	add_subdirectory(js-timer)
+	add_subdirectory(timer)
 	add_subdirectory(transport)
 	add_subdirectory(server)
 

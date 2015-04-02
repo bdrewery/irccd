@@ -131,16 +131,6 @@ public:
 		m_onEnd = std::move(func);
 	}
 
-	inline bool hasSignal() const noexcept
-	{
-		return m_onSignal != nullptr;
-	}
-
-	inline bool hasEnd() const noexcept
-	{
-		return m_onEnd != nullptr;
-	}
-
 	/**
 	 * Start the thread.
 	 *

@@ -17,31 +17,16 @@
 #
 
 include(${irccd_SOURCE_DIR}/js/Js.cmake)
-include(${irccd_SOURCE_DIR}/servercommand/ServerCommand.cmake)
-include(${irccd_SOURCE_DIR}/serverevent/ServerEvent.cmake)
-include(${irccd_SOURCE_DIR}/serverstate/ServerState.cmake)
 
 set(
-	TEST_SERVER_SOURCES
+	JS_SYSTEM_SOURCES
 	${JS_SOURCES}
-	${SERVER_COMMAND_SOURCES}
-	${SERVER_EVENT_SOURCES}
-	${SERVER_STATE_SOURCES}
-	${irccd_SOURCE_DIR}/Server.cpp
-	${irccd_SOURCE_DIR}/Server.h
-	${irccd_SOURCE_DIR}/ServerEvent.cpp
-	${irccd_SOURCE_DIR}/ServerEvent.h
-	${irccd_SOURCE_DIR}/ServerManager.cpp
-	${irccd_SOURCE_DIR}/ServerManager.h
-	${irccd_SOURCE_DIR}/ServerState.h
-	${irccd_SOURCE_DIR}/Plugin.cpp
-	${irccd_SOURCE_DIR}/Plugin.h
 	${irccd_SOURCE_DIR}/System.cpp
 	${irccd_SOURCE_DIR}/System.h
 	${irccd_SOURCE_DIR}/Timer.cpp
 	${irccd_SOURCE_DIR}/Timer.h
-	TestServer.cpp
+	TestJsSystem.cpp
 )
 
-create_test(test-server "${TEST_SERVER_SOURCES}")
-target_link_libraries(test-server duktape)
+create_test(test-js-system "${JS_SYSTEM_SOURCES}")
+target_link_libraries(test-js-system duktape)

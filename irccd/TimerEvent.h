@@ -16,15 +16,19 @@ enum class TimerEventType {
 
 class TimerEvent {
 private:
+#if 0
 	std::shared_ptr<Plugin> m_plugin;
 	std::shared_ptr<Timer> m_timer;
+#endif
 	TimerEventType m_type;
 
 public:
-	inline TimerEvent(std::shared_ptr<Plugin> plugin, std::shared_ptr<Timer> timer, TimerEventType type = TimerEventType::Signal) noexcept
-		: m_plugin(plugin)
-		, m_timer(timer)
-		, m_type(TimerEventType::Signal)
+	inline TimerEvent(std::shared_ptr<Plugin> plugin,
+			  std::shared_ptr<Timer> timer,
+			  TimerEventType type = TimerEventType::Signal) noexcept
+		: m_plugin(std::move(plugin))
+		, m_timer(std::move(timer))
+		, m_type(type)
 	{
 	}
 

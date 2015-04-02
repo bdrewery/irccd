@@ -19,20 +19,27 @@
 #ifndef _IRCCD_H_
 #define _IRCCD_H_
 
+#include <atomic>
 #include <condition_variable>
 #include <memory>
 #include <mutex>
+#include <queue>
 #include <vector>
 
+#include "Plugin.h"
 #include "TransportCommand.h"
+#include "TimerEvent.h"
 
 namespace irccd {
 
 class Irccd {
 private:
+	std::atomic<bool> m_running{true};
 	std::condition_variable m_condition;
 	std::mutex m_mutex;
 	std::vector<std::unique_ptr<TransportCommand>> m_transportCommands;
+	std::queue<TimerEvent> m_timerEvents;
+	std::vector<std::unique_ptr<Plugin> m_plugins;
 
 public:
 	/**
@@ -46,6 +53,35 @@ public:
 	{
 		m_transportCommands.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
 	}
+
+	//void addTimerEvent()
+
+	/* Plugin management */
+
+	void pluginLoad(std::string path);
+
+	/* Timer management */
+
+	/**
+	 * Add a timer event.
+	 *
+	 * @param event the timer event
+	 */
+	inline void addTimerEvent(TimerEvent event)
+	{
+		{
+			std::lock_guard<std::mutex> lock(m_mutex);
+
+			m_timerEvents.push(std::move(event));
+		}
+
+		m_condition.notify_one();
+	}
+
+	/**
+	 * Start the main loop.
+	 */
+	void run();
 };
 
 /**

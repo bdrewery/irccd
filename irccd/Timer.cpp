@@ -60,14 +60,15 @@ Timer::~Timer()
 {
 	Logger::debug() << "timer: destroyed" << std::endl;
 
-	if (m_running) {
-		try {
+	try {
+		if (m_running) {
 			m_running = false;
 			m_condition.notify_one();
-			m_thread.join();
-		} catch (const std::exception &ex) {
-			Logger::debug() << "timer: error: " << ex.what() << std::endl;
 		}
+
+		m_thread.join();
+	} catch (const std::exception &ex) {
+		Logger::debug() << "timer: error: " << ex.what() << std::endl;
 	}
 }
 

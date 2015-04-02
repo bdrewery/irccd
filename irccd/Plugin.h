@@ -46,13 +46,14 @@ public:
 
 /**
  * @class Plugin
- * @brief Lua plugin
+ * @brief JavaScript plugin
  *
  * A plugin is identified by name and can be loaded and unloaded
  * at runtime.
  */
 class Plugin {
 private:
+	/* Plugin data */
 	DukContext m_context;
 	PluginInfo m_info;
 	Timers m_timers;
@@ -70,6 +71,7 @@ public:
 	 *
 	 * @param name the plugin name
 	 * @param path the fully resolved path to the plugin
+	 * @throws std::runtime_error on errors
 	 */
 	Plugin(std::string name, std::string path);
 
@@ -79,12 +81,43 @@ public:
 	const PluginInfo &info() const;
 
 	/**
+	 * Set the timer signal associated to a plugin.
+	 *
+	 * @param func the function
+	 * @pre the list of timers must be empty
+	 */
+	inline void setOnTimerSignal(std::function<void (std::shared_ptr<Timer>)> func) noexcept
+	{
+		assert(m_timers.empty());
+
+		m_onTimerSignal = std::move(func);
+	}
+
+	/**
+	 * Set the timer end signal associated to a plugin.
+	 *
+	 * @param func the function
+	 * @pre the list of timers must be empty
+	 */
+	inline void setOnTimerEnd(std::function<void (std::shared_ptr<Timer>)> func) noexcept
+	{
+		assert(m_timers.empty());
+
+		m_onTimerEnd = std::move(func);
+	}
+
+	/**
 	 * Add a timer to the plugin.
 	 *
+	 * @pre setOnTimerSignal must have been called
+	 * @pre setOnTimerEnd must have been called
 	 * @param timer the timer to add
 	 */
-	inline void timerAdd(std::shared_ptr<Timer> timer)
+	inline void timerAdd(std::shared_ptr<Timer> timer) noexcept
 	{
+		assert(m_onTimerSignal != nullptr);
+		assert(m_onTimerEnd != nullptr);
+
 		timer->onSignal([this, timer] () {
 			m_onTimerSignal(std::move(timer));
 		});
@@ -95,22 +128,14 @@ public:
 		m_timers.insert(std::move(timer));
 	}
 
-	inline void timerRemove(const std::shared_ptr<Timer> &timer)
+	/**
+	 * @brief timerRemove
+	 * @param timer
+	 */
+	inline void timerRemove(const std::shared_ptr<Timer> &timer) noexcept
 	{
 		m_timers.erase(timer);
 	}
-
-	inline void onTimerSignal(std::function<void (std::shared_ptr<Timer>)> func)
-	{
-		m_onTimerSignal = std::move(func);
-	}
-
-	inline void onTimerEnd(std::function<void (std::shared_ptr<Timer>)> func)
-	{
-		m_onTimerEnd = std::move(func);
-	}
-
-	// TODO: probably rename those on* functions
 
 	/**
 	 * On channel message. This event will call onMessage or

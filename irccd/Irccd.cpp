@@ -16,9 +16,49 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <Logger.h>
+
 #include "Irccd.h"
 
 namespace irccd {
+
+void Irccd::pluginLoad(std::string path)
+{
+	std::shared_ptr<Plugin> plugin = std::make_shared<Plugin>("test", path);
+
+	plugin->setOnTimerSignal([this, plugin] (std::shared_ptr<Timer> timer) {
+		addTimerEvent(TimerEvent(std::move(plugin), std::move(timer)));
+	});
+	plugin->setOnTimerEnd([this, plugin] (std::shared_ptr<Timer> timer) {
+		addTimerEvent(TimerEvent(std::move(plugin), std::move(timer), TimerEventType::End));
+	});
+	plugin->onLoad();
+
+	m_plugins.push_back(std::move(plugin));
+}
+
+void Irccd::run()
+{
+	while (m_running) {
+		std::unique_lock<std::mutex> lock(m_mutex);
+
+		m_condition.wait(lock, [this] () {
+			return !m_running || m_timerEvents.size() > 0;
+		});
+
+		puts("waiting done");
+		if (!m_running) {
+			continue;
+		}
+
+		// Call timers
+		{
+			TimerEvent &event = m_timerEvents.front();
+			puts("call event");
+			m_timerEvents.pop();
+		}
+	}
+}
 
 Irccd irccd;
 

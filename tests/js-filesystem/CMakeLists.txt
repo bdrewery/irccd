@@ -23,6 +23,8 @@ set(
 	${JS_SOURCES}
 	${irccd_SOURCE_DIR}/System.cpp
 	${irccd_SOURCE_DIR}/System.h
+	${irccd_SOURCE_DIR}/Timer.cpp
+	${irccd_SOURCE_DIR}/Timer.h
 	TestJsFilesystem.cpp
 )
 

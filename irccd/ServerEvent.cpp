@@ -23,7 +23,7 @@
 
 namespace irccd {
 
-ServerEvent::ServerEvent(const std::string &serverName, const std::string &targetName)
+ServerEvent::ServerEvent(const std::string &, const std::string &)
 {
 }
 

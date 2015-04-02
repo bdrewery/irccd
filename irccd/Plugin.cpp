@@ -42,7 +42,6 @@ std::string Plugin::global(const std::string &name) const
 }
 
 Plugin::Plugin(std::string name, std::string path)
-	: m_context()
 {
 	m_info.name = std::move(name);
 	m_info.path = std::move(path);
