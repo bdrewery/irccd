@@ -1,5 +1,5 @@
 /*
- * LuaServer.cpp -- Lua API for Server class
+ * JsServer.cpp -- server management for irccd JS API
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -19,11 +19,9 @@
 #include <sstream>
 #include <unordered_map>
 
-#include <irccd/Irccd.h>
-#include <irccd/Luae.h>
-#include <irccd/ServerManager.h>
+#include "Js.h"
 
-#include "LuaServer.h"
+#if 0
 
 namespace irccd {
 
@@ -58,7 +56,7 @@ void extractChannels(lua_State *L, Server::Info &info)
 				if (Luae::type(L, -1) == LUA_TSTRING)
 					c.password = Luae::get<std::string>(L, -1);
 				Luae::pop(L, 1);
-	
+
 				info.channels.push_back(c);
 			}
 		});
@@ -144,51 +142,6 @@ void pushChannels(lua_State *L, const Server::ChannelList &list)
 /* --------------------------------------------------------
  * Public methods
  * -------------------------------------------------------- */
-
-#if defined(COMPAT_1_1)
-
-int l_getChannels(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-
-	Luae::deprecate(L, "getChannels", "info");
-	pushChannels(L, s->channels());
-
-	return 1;
-}
-
-int l_getIdentity(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-
-	Luae::deprecate(L, "getIdentity", "info");
-	pushIdentity(L, s->identity());
-
-	return 1;
-}
-
-int l_getInfo(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-
-	Luae::deprecate(L, "getInfo", "info");
-	LuaeTable::create(L);
-	pushGeneralInfo(L, s->info(), s->options());
-
-	return 1;
-}
-
-int l_getName(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-
-	Luae::deprecate(L, "getName", "info");
-	Luae::push(L, s->info().name);
-
-	return 1;
-}
-
-#endif
 
 int l_cnotice(lua_State *L)
 {
@@ -539,3 +492,5 @@ int luaopen_server(lua_State *L)
 }
 
 } // !irccd
+
+#endif

@@ -19,6 +19,7 @@
 #ifndef _IRCCD_JS_H_
 #define _IRCCD_JS_H_
 
+#include <cassert>
 #include <memory>
 #include <string>
 
@@ -61,6 +62,27 @@ public:
 	}
 };
 
+#if !defined(NDEBUG)
+#define dukx_assert_begin(ctx)						\
+	int _topstack = duk_get_top(ctx)
+#else
+#define dukx_assert_begin(ctx)
+#endif
+
+#if !defined(NDEBUG)
+#define dukx_assert_equals(ctx)						\
+	assert(_topstack == duk_get_top(ctx))
+#else
+#define dukx_assert_equals(ctx)
+#endif
+
+#if !defined(NDEBUG)
+#define dukx_assert_end(ctx, count)					\
+	assert(_topstack == (duk_get_top(ctx) - count))
+#else
+#define dukx_assert-end(ctx, count)
+#endif
+
 /**
  * Throw a javascript error object that contains the following fields:
  *
@@ -99,13 +121,16 @@ void dukx_throw(duk_context *ctx, int code, const std::string &msg);
 template <typename Type, typename Func>
 void dukx_with_this(duk_context *ctx, Func func)
 {
+	Type *type;
+
+	dukx_assert_begin(ctx);
 	duk_push_this(ctx);
 	duk_get_prop_string(ctx, -1, "\xff\xff" "data");
+	type = static_cast<Type *>(duk_to_pointer(ctx, -1));
+	duk_pop_2(ctx);
+	dukx_assert_equals(ctx);
 
-	func(static_cast<Type *>(duk_to_pointer(ctx, -1)));
-
-	duk_remove(ctx, 0);	// remove "this"
-	duk_remove(ctx, 0);	// remove the pointer
+	func(type);
 }
 
 /**
@@ -122,6 +147,8 @@ void dukx_with_this(duk_context *ctx, Func func)
 template <typename Type>
 void dukx_set_class(duk_context *ctx, Type *ptr)
 {
+	dukx_assert_begin(ctx);
+
 	// deletion flag
 	duk_push_false(ctx);
 	duk_put_prop_string(ctx, -2, "\xff\xff" "deleted");
@@ -149,6 +176,8 @@ void dukx_set_class(duk_context *ctx, Type *ptr)
 	// data pointer
 	duk_push_pointer(ctx, ptr);
 	duk_put_prop_string(ctx, -2, "\xff\xff" "data");
+
+	dukx_assert_equals(ctx);
 }
 
 /**
@@ -158,10 +187,10 @@ void dukx_set_class(duk_context *ctx, Type *ptr)
 template <typename Type>
 void dukx_push_shared(duk_context *ctx, std::shared_ptr<Type> ptr)
 {
+	dukx_assert_begin(ctx);
+
 	// Object itself
 	duk_push_object(ctx);
-
-	// TODO: PROTOTYPE HERE
 
 	// deletion flag
 	duk_push_false(ctx);
@@ -190,11 +219,15 @@ void dukx_push_shared(duk_context *ctx, std::shared_ptr<Type> ptr)
 	// data pointer
 	duk_push_pointer(ctx, new std::shared_ptr<Type>(ptr));
 	duk_put_prop_string(ctx, -2, "\xff\xff" "data");
+
+	dukx_assert_end(ctx, 1);
 }
 
 duk_ret_t dukopen_filesystem(duk_context *ctx) noexcept;
+duk_ret_t dukopen_logger(duk_context *ctx) noexcept;
 duk_ret_t dukopen_system(duk_context *ctx) noexcept;
 duk_ret_t dukopen_timer(duk_context *ctx) noexcept;
+duk_ret_t dukopen_utf8(duk_context *ctx) noexcept;
 
 } // !irccd
 

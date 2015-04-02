@@ -80,7 +80,7 @@ public:
 	 * @param func the function
 	 * @pre the thread must not be started
 	 */
-	inline void onEvent(std::function<void (std::unique_ptr<ServerEvent>)> func) noexcept
+	inline void setOnEvent(std::function<void (std::unique_ptr<ServerEvent>)> func) noexcept
 	{
 		assert(!m_running);
 

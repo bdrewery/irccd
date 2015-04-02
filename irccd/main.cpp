@@ -24,10 +24,23 @@
 
 int main(void)
 {
+	irccd::Logger::setVerbose(true);
+	irccd::ServerInfo info;
+
+	info.name = "localhost";
+	info.host = "localhost";
+	info.port = 6667;
+
 	try {
 		irccd::irccd.pluginLoad("test.js");
 	} catch (const std::exception &ex) {
 		irccd::Logger::warning() << "failed to load plugin: " << ex.what() << std::endl;
+	}
+
+	try {
+		irccd::irccd.serverAdd(info);
+	} catch (const std::exception &ex) {
+		irccd::Logger::warning() << "failed to add a server: " << ex.what() << std::endl;
 	}
 
 	irccd::irccd.run();

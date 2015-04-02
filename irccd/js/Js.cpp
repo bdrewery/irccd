@@ -27,8 +27,10 @@ namespace {
 
 const std::unordered_map<std::string, duk_c_function> modules {
 	{ "irccd.fs",		dukopen_filesystem	},
+	{ "irccd.logger",	dukopen_logger		},
 	{ "irccd.timer",	dukopen_timer		},
-	{ "irccd.system",	dukopen_system		}
+	{ "irccd.system",	dukopen_system		},
+	{ "irccd.utf8",		dukopen_utf8		}
 };
 
 /*
@@ -76,10 +78,28 @@ duk_ret_t irccdRequire(duk_context *ctx)
 DukContext::DukContext()
 	: std::unique_ptr<duk_context, void (*)(duk_context *)>(duk_create_heap_default(), duk_destroy_heap)
 {
+	dukx_assert_begin(get());
+
+	/* Set our "using" and "require" keyword */
 	duk_push_c_function(get(), irccdUsing, 1);
 	duk_put_global_string(get(), "using");
 	duk_push_c_function(get(), irccdRequire, 1);
 	duk_put_global_string(get(), "require");
+
+	/* Disable alert, print */
+	duk_push_undefined(get());
+	duk_put_global_string(get(), "alert");
+	duk_push_undefined(get());
+	duk_put_global_string(get(), "print");
+
+	/* This is needed for timers */
+	duk_push_global_object(get());
+	duk_push_object(get());
+	duk_put_prop_string(get(), -2, "\xff" "irccd-timers");
+	duk_pop(get());
+
+	dukx_assert_equals(get());
+
 }
 
 void dukx_throw_syserror(duk_context *ctx, int code)

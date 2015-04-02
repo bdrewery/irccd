@@ -113,20 +113,7 @@ public:
 	 * @pre setOnTimerEnd must have been called
 	 * @param timer the timer to add
 	 */
-	inline void timerAdd(std::shared_ptr<Timer> timer) noexcept
-	{
-		assert(m_onTimerSignal != nullptr);
-		assert(m_onTimerEnd != nullptr);
-
-		timer->onSignal([this, timer] () {
-			m_onTimerSignal(std::move(timer));
-		});
-		timer->onEnd([this, timer] () {
-			m_onTimerEnd(std::move(timer));
-		});
-
-		m_timers.insert(std::move(timer));
-	}
+	void timerAdd(std::shared_ptr<Timer> timer) noexcept;
 
 	/**
 	 * @brief timerRemove
@@ -135,6 +122,11 @@ public:
 	inline void timerRemove(const std::shared_ptr<Timer> &timer) noexcept
 	{
 		m_timers.erase(timer);
+	}
+
+	inline DukContext &context() noexcept
+	{
+		return m_context;
 	}
 
 	/**

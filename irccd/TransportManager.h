@@ -125,20 +125,18 @@ public:
 	 *
 	 * @pre isRunning() must return false
 	 * @param args the arguments to the transport constructor
+	 * @throw std::exception on failures
 	 */
 	template <typename T, typename... Args>
-	void add(Args&&... args) noexcept
+	void add(Args&&... args)
 	{
 		assert(!m_running);
 
-		try {
-			std::unique_ptr<TransportAbstract> ptr = std::make_unique<T>(std::forward<Args>(args)...);
+		std::unique_ptr<TransportAbstract> ptr = std::make_unique<T>(std::forward<Args>(args)...);
 
-			ptr->bind();
+		ptr->bind();
 
-			m_transports.emplace(ptr->socket(), std::move(ptr));
-		} catch (const std::exception &ex) {
-		}
+		m_transports.emplace(ptr->socket(), std::move(ptr));
 	}
 
 	/**
@@ -147,7 +145,7 @@ public:
 	 * @pre isRunning() must return false
 	 * @param func the handler function
 	 */
-	inline void onEvent(std::function<void (std::unique_ptr<TransportCommand>)> func) noexcept
+	inline void setOnEvent(std::function<void (std::unique_ptr<TransportCommand>)> func) noexcept
 	{
 		assert(!m_running);
 

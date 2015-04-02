@@ -29,8 +29,6 @@ set(
 	Irccd.cpp
 	Irccd.h
 	main.cpp
-	Plugin.cpp
-	Plugin.h
 	Server.cpp
 	Server.h
 	ServerCommand.h
@@ -39,9 +37,6 @@ set(
 	ServerManager.cpp
 	ServerManager.h
 	ServerState.h
-	Timer.cpp
-	Timer.h
-	TimerEvent.h
 	Transport.h
 	TransportCommand.h
 	TransportClient.cpp
@@ -55,8 +50,16 @@ if (WITH_JS)
 		APPEND
 		SOURCES
 		${JS_SOURCES}
+		Plugin.cpp
+		Plugin.h
 		System.h
 		System.cpp
+		Timer.cpp
+		Timer.h
+		TimerEvent.cpp
+		TimerEvent.h
+		Utf8.cpp
+		Utf8.h
 	)
 
 	list(APPEND LIBRARIES duktape)

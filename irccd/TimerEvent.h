@@ -4,10 +4,10 @@
 #include <cstdint>
 #include <memory>
 
-namespace irccd {
+#include "Plugin.h"
+#include "Timer.h"
 
-class Plugin;
-class Timer;
+namespace irccd {
 
 enum class TimerEventType {
 	Signal,
@@ -16,21 +16,14 @@ enum class TimerEventType {
 
 class TimerEvent {
 private:
-#if 0
 	std::shared_ptr<Plugin> m_plugin;
 	std::shared_ptr<Timer> m_timer;
-#endif
 	TimerEventType m_type;
 
 public:
-	inline TimerEvent(std::shared_ptr<Plugin> plugin,
-			  std::shared_ptr<Timer> timer,
-			  TimerEventType type = TimerEventType::Signal) noexcept
-		: m_plugin(std::move(plugin))
-		, m_timer(std::move(timer))
-		, m_type(type)
-	{
-	}
+	TimerEvent(std::shared_ptr<Plugin> plugin,
+		   std::shared_ptr<Timer> timer,
+		   TimerEventType type = TimerEventType::Signal) noexcept;
 
 	inline const std::shared_ptr<Plugin> &plugin() const noexcept
 	{
@@ -46,6 +39,8 @@ public:
 	{
 		return m_type;
 	}
+
+	void call() noexcept;
 };
 
 } // !irccd

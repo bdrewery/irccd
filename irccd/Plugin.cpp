@@ -41,6 +41,26 @@ std::string Plugin::global(const std::string &name) const
 	return result;
 }
 
+void Plugin::call(const char *name, int nargs)
+{
+	duk_push_global_object(m_context);
+	duk_get_prop_string(m_context, -1, name);
+
+	if (duk_get_type(m_context, -1) == DUK_TYPE_UNDEFINED) {
+		duk_pop_2(m_context);
+	} else {
+		duk_remove(m_context, -2);
+		duk_insert(m_context, -1 -nargs);
+
+		// TODO, throw instead
+		if (duk_pcall(m_context, nargs) != 0) {
+			printf("failed to call function: %s\n", duk_safe_to_string(m_context, -1));
+		}
+
+		duk_pop(m_context);
+	}
+}
+
 Plugin::Plugin(std::string name, std::string path)
 {
 	m_info.name = std::move(name);
@@ -60,6 +80,24 @@ Plugin::Plugin(std::string name, std::string path)
 const PluginInfo &Plugin::info() const
 {
 	return m_info;
+}
+
+void Plugin::timerAdd(std::shared_ptr<Timer> timer) noexcept
+{
+	assert(m_onTimerSignal != nullptr);
+	assert(m_onTimerEnd != nullptr);
+
+	/*
+	 * These signals are called from the Timer thread.
+	 */
+	timer->onSignal([this, timer] () {
+		m_onTimerSignal(std::move(timer));
+	});
+	timer->onEnd([this, timer] () {
+		m_onTimerEnd(std::move(timer));
+	});
+
+	m_timers.insert(std::move(timer));
 }
 
 #if 0
@@ -107,11 +145,13 @@ void Plugin::onCommand(std::shared_ptr<Server> server, std::string origin, std::
 	duk_push_string(m_context, origin.c_str());
 	duk_push_string(m_context, channel.c_str());
 	duk_push_string(m_context, message.c_str());
+	call("onCommand", 4);
 }
 
 void Plugin::onConnect(std::shared_ptr<Server> server)
 {
 	dukx_push_shared(m_context, server);
+	call("onConnect", 1);
 }
 
 void Plugin::onChannelNotice(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string notice)
@@ -120,6 +160,7 @@ void Plugin::onChannelNotice(std::shared_ptr<Server> server, std::string origin,
 	duk_push_string(m_context, origin.c_str());
 	duk_push_string(m_context, channel.c_str());
 	duk_push_string(m_context, notice.c_str());
+	call("onChannelNotice", 4);
 }
 
 void Plugin::onInvite(std::shared_ptr<Server> server, std::string origin, std::string channel)
@@ -127,6 +168,7 @@ void Plugin::onInvite(std::shared_ptr<Server> server, std::string origin, std::s
 	dukx_push_shared(m_context, server);
 	duk_push_string(m_context, origin.c_str());
 	duk_push_string(m_context, channel.c_str());
+	call("onInvite", 3);
 }
 
 void Plugin::onJoin(std::shared_ptr<Server> server, std::string origin, std::string channel)
@@ -143,25 +185,7 @@ void Plugin::onKick(std::shared_ptr<Server> server, std::string origin, std::str
 	duk_push_string(m_context, channel.c_str());
 	duk_push_string(m_context, target.c_str());
 	duk_push_string(m_context, reason.c_str());
-}
-
-void Plugin::call(const char *name, int nargs)
-{
-	duk_push_global_object(m_context);
-	duk_get_prop_string(m_context, -1, name);
-
-	if (duk_get_type(m_context, -1) == DUK_TYPE_UNDEFINED) {
-		duk_pop_2(m_context);
-	} else {
-		duk_remove(m_context, -2);
-		duk_insert(m_context, -1 -nargs);
-
-		if (duk_pcall(m_context, nargs) != 0) {
-			printf("failed to call function: %s\n", duk_safe_to_string(m_context, -1));
-		}
-
-		duk_pop(m_context);
-	}
+	call("onKick", 5);
 }
 
 void Plugin::onLoad()
@@ -184,6 +208,7 @@ void Plugin::onMe(std::shared_ptr<Server> server, std::string origin, std::strin
 	duk_push_string(m_context, origin.c_str());
 	duk_push_string(m_context, channel.c_str());
 	duk_push_string(m_context, message.c_str());
+	call("onMe", 4);
 }
 
 void Plugin::onMode(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string arg)
@@ -193,6 +218,7 @@ void Plugin::onMode(std::shared_ptr<Server> server, std::string origin, std::str
 	duk_push_string(m_context, channel.c_str());
 	duk_push_string(m_context, mode.c_str());
 	duk_push_string(m_context, arg.c_str());
+	call("onMode", 5);
 }
 
 void Plugin::onNames(std::shared_ptr<Server>, std::string, std::vector<std::string>)
@@ -204,6 +230,7 @@ void Plugin::onNick(std::shared_ptr<Server> server, std::string oldnick, std::st
 	dukx_push_shared(m_context, server);
 	duk_push_string(m_context, oldnick.c_str());
 	duk_push_string(m_context, newnick.c_str());
+	call("onNick", 3);
 }
 
 void Plugin::onNotice(std::shared_ptr<Server> server, std::string origin, std::string notice)
@@ -211,6 +238,7 @@ void Plugin::onNotice(std::shared_ptr<Server> server, std::string origin, std::s
 	dukx_push_shared(m_context, server);
 	duk_push_string(m_context, origin.c_str());
 	duk_push_string(m_context, notice.c_str());
+	call("onNotice", 3);
 }
 
 void Plugin::onPart(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string reason)
@@ -219,6 +247,7 @@ void Plugin::onPart(std::shared_ptr<Server> server, std::string origin, std::str
 	duk_push_string(m_context, origin.c_str());
 	duk_push_string(m_context, channel.c_str());
 	duk_push_string(m_context, reason.c_str());
+	call("onPart", 4);
 }
 
 void Plugin::onQuery(std::shared_ptr<Server> server, std::string origin, std::string message)
@@ -226,6 +255,7 @@ void Plugin::onQuery(std::shared_ptr<Server> server, std::string origin, std::st
 	dukx_push_shared(m_context, server);
 	duk_push_string(m_context, origin.c_str());
 	duk_push_string(m_context, message.c_str());
+	call("onQuery", 3);
 }
 
 void Plugin::onQueryCommand(std::shared_ptr<Server> server, std::string origin, std::string message)
@@ -233,10 +263,12 @@ void Plugin::onQueryCommand(std::shared_ptr<Server> server, std::string origin, 
 	dukx_push_shared(m_context, server);
 	duk_push_string(m_context, origin.c_str());
 	duk_push_string(m_context, message.c_str());
+	call("onQueryCommand", 3);
 }
 
 void Plugin::onReload()
 {
+	call("onReload");
 }
 
 void Plugin::onTopic(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string topic)
@@ -245,10 +277,12 @@ void Plugin::onTopic(std::shared_ptr<Server> server, std::string origin, std::st
 	duk_push_string(m_context, origin.c_str());
 	duk_push_string(m_context, channel.c_str());
 	duk_push_string(m_context, topic.c_str());
+	call("onTopic", 4);
 }
 
 void Plugin::onUnload()
 {
+	call("onUnload");
 }
 
 void Plugin::onUserMode(std::shared_ptr<Server> server, std::string origin, std::string mode)
@@ -256,6 +290,7 @@ void Plugin::onUserMode(std::shared_ptr<Server> server, std::string origin, std:
 	dukx_push_shared(m_context, server);
 	duk_push_string(m_context, origin.c_str());
 	duk_push_string(m_context, mode.c_str());
+	call("onUserMode", 3);
 }
 
 void Plugin::onWhois(std::shared_ptr<Server>, ServerWhois)

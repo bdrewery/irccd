@@ -29,50 +29,85 @@
 #include "Plugin.h"
 #include "TransportCommand.h"
 #include "TimerEvent.h"
+#include "ServerEvent.h"
+#include "ServerManager.h"
 
 namespace irccd {
 
 class Irccd {
 private:
+	/* Main loop */
 	std::atomic<bool> m_running{true};
 	std::condition_variable m_condition;
 	std::mutex m_mutex;
-	std::vector<std::unique_ptr<TransportCommand>> m_transportCommands;
+
+	/* Events */
+	std::queue<std::unique_ptr<TransportCommand>> m_transportCommands;
+	std::queue<std::unique_ptr<ServerEvent>> m_serverEvents;
 	std::queue<TimerEvent> m_timerEvents;
-	std::vector<std::unique_ptr<Plugin> m_plugins;
+
+	/* Loaded plugins */
+	std::vector<std::shared_ptr<Plugin>> m_plugins;
+
+	/* Server and Transport threads */
+	ServerManager m_serverManager;
 
 public:
-	/**
-	 * Add a new transport event. Called from the TransportManager thread,
-	 * MUST not be called somewhere else.
-	 *
-	 * @param args the arguments to pass to the command constructor.
-	 */
-	template <typename T, typename... Args>
-	void addTransportCommand(Args&&... args)
-	{
-		m_transportCommands.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
-	}
-
-	//void addTimerEvent()
-
-	/* Plugin management */
+	Irccd();
 
 	void pluginLoad(std::string path);
 
-	/* Timer management */
+	template <typename... Args>
+	inline void serverAdd(Args&&... args)
+	{
+		m_serverManager.add(std::forward<Args>(args)...);
+	}
+
+	/* ------------------------------------------------
+	 * For threads only
+	 * ------------------------------------------------ */
+
+	/**
+	 * Add a new transport event.
+	 *
+	 * @param args the arguments to pass to the command constructor.
+	 * @note Thread-safe
+	 */
+	template <typename T, typename... Args>
+	inline void transportAddCommand(Args&&... args)
+	{
+		{
+			std::lock_guard<std::mutex> lock(m_mutex);
+
+			m_transportCommands.push(std::make_unique<T>(std::forward<Args>(args)...));
+		}
+
+		m_condition.notify_one();
+	}
 
 	/**
 	 * Add a timer event.
 	 *
 	 * @param event the timer event
+	 * @note Thread-safe
 	 */
-	inline void addTimerEvent(TimerEvent event)
+	inline void timerAddEvent(TimerEvent event)
 	{
 		{
 			std::lock_guard<std::mutex> lock(m_mutex);
 
 			m_timerEvents.push(std::move(event));
+		}
+
+		m_condition.notify_one();
+	}
+
+	inline void serverAddEvent(std::unique_ptr<ServerEvent> event)
+	{
+		{
+			std::lock_guard<std::mutex> lock(m_mutex);
+
+			m_serverEvents.push(std::move(event));
 		}
 
 		m_condition.notify_one();

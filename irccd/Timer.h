@@ -93,13 +93,10 @@ public:
 	 * Set the reference.
 	 *
 	 * @param reference the JS function reference
-	 * @pre isRunning() must return false
 	 * @note Not thread-safe
 	 */
 	inline void setReference(int reference)
 	{
-		assert(!m_running);
-
 		m_reference = reference;
 	}
 

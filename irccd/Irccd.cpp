@@ -22,15 +22,28 @@
 
 namespace irccd {
 
+Irccd::Irccd()
+{
+	/*
+	 * This signal is called from the ServerManager.
+	 */
+	m_serverManager.setOnEvent([this] (std::unique_ptr<ServerEvent> event) {
+		serverAddEvent(std::move(event));
+	});
+}
+
 void Irccd::pluginLoad(std::string path)
 {
 	std::shared_ptr<Plugin> plugin = std::make_shared<Plugin>("test", path);
 
+	/*
+	 * These signals will be called from the Timer thread.
+	 */
 	plugin->setOnTimerSignal([this, plugin] (std::shared_ptr<Timer> timer) {
-		addTimerEvent(TimerEvent(std::move(plugin), std::move(timer)));
+		timerAddEvent(TimerEvent(std::move(plugin), std::move(timer)));
 	});
 	plugin->setOnTimerEnd([this, plugin] (std::shared_ptr<Timer> timer) {
-		addTimerEvent(TimerEvent(std::move(plugin), std::move(timer), TimerEventType::End));
+		timerAddEvent(TimerEvent(std::move(plugin), std::move(timer), TimerEventType::End));
 	});
 	plugin->onLoad();
 
@@ -39,22 +52,30 @@ void Irccd::pluginLoad(std::string path)
 
 void Irccd::run()
 {
+	m_serverManager.start();
+
 	while (m_running) {
 		std::unique_lock<std::mutex> lock(m_mutex);
 
 		m_condition.wait(lock, [this] () {
-			return !m_running || m_timerEvents.size() > 0;
+			return !m_running || m_serverEvents.size() > 0 || m_timerEvents.size() > 0;
 		});
 
-		puts("waiting done");
 		if (!m_running) {
 			continue;
 		}
 
+		// Call server events
+		while (!m_serverEvents.empty()) {
+			for (auto &plugin : m_plugins) {
+				m_serverEvents.front()->call(*plugin);
+				m_serverEvents.pop();
+			}
+		}
+
 		// Call timers
-		{
-			TimerEvent &event = m_timerEvents.front();
-			puts("call event");
+		while (!m_timerEvents.empty()) {
+			m_timerEvents.front().call();
 			m_timerEvents.pop();
 		}
 	}
