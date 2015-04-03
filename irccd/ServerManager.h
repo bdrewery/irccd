@@ -103,20 +103,20 @@ public:
 		lock_guard<mutex> lock(m_mutex);
 		shared_ptr<Server> server = make_shared<Server>(forward<Args>(args)...);
 
-		server->onChannelNotice(bind(&ServerManager::onChannelNotice, this, server, _1, _2, _3));
-		server->onConnect(bind(&ServerManager::onConnect, this, server));
-		server->onInvite(bind(&ServerManager::onInvite, this, server, _1, _2, _3));
-		server->onJoin(bind(&ServerManager::onJoin, this, server, _1, _2));
-		server->onKick(bind(&ServerManager::onKick, this, server, _1, _2, _3, _4));
-		server->onMessage(bind(&ServerManager::onMessage, this, server, _1, _2, _3));
-		server->onMe(bind(&ServerManager::onMe, this, server, _1, _2, _3));
-		server->onMode(bind(&ServerManager::onMode, this, server, _1, _2, _3, _4));
-		server->onNick(bind(&ServerManager::onNick, this, server, _1, _2));
-		server->onNotice(bind(&ServerManager::onNotice, this, server, _1, _2));
-		server->onPart(bind(&ServerManager::onPart, this, server, _1, _2, _3));
-		server->onQuery(bind(&ServerManager::onQuery, this, server, _1, _2));
-		server->onTopic(bind(&ServerManager::onTopic, this, server, _1, _2, _3));
-		server->onUserMode(bind(&ServerManager::onUserMode, this, server, _1, _2));
+		server->setOnChannelNotice(bind(&ServerManager::onChannelNotice, this, server, _1, _2, _3));
+		server->setOnConnect(bind(&ServerManager::onConnect, this, server));
+		server->setOnInvite(bind(&ServerManager::onInvite, this, server, _1, _2, _3));
+		server->setOnJoin(bind(&ServerManager::onJoin, this, server, _1, _2));
+		server->setOnKick(bind(&ServerManager::onKick, this, server, _1, _2, _3, _4));
+		server->setOnMessage(bind(&ServerManager::onMessage, this, server, _1, _2, _3));
+		server->setOnMe(bind(&ServerManager::onMe, this, server, _1, _2, _3));
+		server->setOnMode(bind(&ServerManager::onMode, this, server, _1, _2, _3, _4));
+		server->setOnNick(bind(&ServerManager::onNick, this, server, _1, _2));
+		server->setOnNotice(bind(&ServerManager::onNotice, this, server, _1, _2));
+		server->setOnPart(bind(&ServerManager::onPart, this, server, _1, _2, _3));
+		server->setOnQuery(bind(&ServerManager::onQuery, this, server, _1, _2));
+		server->setOnTopic(bind(&ServerManager::onTopic, this, server, _1, _2, _3));
+		server->setOnUserMode(bind(&ServerManager::onUserMode, this, server, _1, _2));
 
 		m_servers.emplace(server->info().name, std::move(server));
 	}

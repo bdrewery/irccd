@@ -56,17 +56,17 @@ void TransportClientAbstract::send()
 	m_output.erase(0, socket().send(m_output));
 }
 
-void TransportClientAbstract::onComplete(std::function<void (const std::string &)> func)
+void TransportClientAbstract::setOnComplete(std::function<void (const std::string &)> func)
 {
 	m_onComplete = std::move(func);
 }
 
-void TransportClientAbstract::onWrite(std::function<void ()> func)
+void TransportClientAbstract::setOnWrite(std::function<void ()> func)
 {
 	m_onWrite = std::move(func);
 }
 
-void TransportClientAbstract::onDie(std::function<void ()> func)
+void TransportClientAbstract::setOnDie(std::function<void ()> func)
 {
 	m_onDie = std::move(func);
 }

@@ -16,15 +16,21 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+include(${irccd_SOURCE_DIR}/servercommand/ServerCommand.cmake)
 include(${irccd_SOURCE_DIR}/js/Js.cmake)
 
 set(
 	JS_SYSTEM_SOURCES
 	${JS_SOURCES}
+	${SERVER_COMMAND_SOURCES}
+	${irccd_SOURCE_DIR}/Plugin.cpp
+	${irccd_SOURCE_DIR}/Plugin.h
 	${irccd_SOURCE_DIR}/System.cpp
 	${irccd_SOURCE_DIR}/System.h
 	${irccd_SOURCE_DIR}/Timer.cpp
 	${irccd_SOURCE_DIR}/Timer.h
+	${irccd_SOURCE_DIR}/Utf8.cpp
+	${irccd_SOURCE_DIR}/Utf8.h
 	TestJsSystem.cpp
 )
 

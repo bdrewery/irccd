@@ -61,7 +61,7 @@ public:
 	 *
 	 * @param func the function to move
 	 */
-	void onComplete(std::function<void (const std::string &)> func);
+	void setOnComplete(std::function<void (const std::string &)> func);
 
 	/**
 	 * Set the onWrite callback. The callback will be called when some
@@ -69,7 +69,7 @@ public:
 	 *
 	 * @param func the funciton to move
 	 */
-	void onWrite(std::function<void ()> func);
+	void setOnWrite(std::function<void ()> func);
 
 	/**
 	 * Set the onDie callback. The callback will be called when the
@@ -78,7 +78,7 @@ public:
 	 * @param func the function to move
 	 * @note It is still safe to use the object as it is a shared_ptr
 	 */
-	void onDie(std::function<void ()> func);
+	void setOnDie(std::function<void ()> func);
 
 	/**
 	 * Flush pending data to send and try to receive if possible.

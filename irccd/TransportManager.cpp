@@ -511,7 +511,7 @@ void TransportManager::onDie(const std::shared_ptr<TransportClientAbstract> &cli
 {
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
-	// TODO: debug message
+	Logger::debug() << "transport: client disconnected" << std::endl;
 
 	m_clients.erase(client->socket());
 }
@@ -546,11 +546,11 @@ void TransportManager::accept(const Socket &s)
 
 	std::shared_ptr<TransportClientAbstract> client = m_transports.at(s)->accept();
 
-	// TODO: debug log
+	Logger::debug() << "transport: new client" << std::endl;
 
-	client->onComplete(bind(&TransportManager::onMessage, this, client, _1));
-	client->onWrite(bind(&TransportManager::onWrite, this));
-	client->onDie(bind(&TransportManager::onDie, this, client));
+	client->setOnComplete(bind(&TransportManager::onMessage, this, client, _1));
+	client->setOnWrite(bind(&TransportManager::onWrite, this));
+	client->setOnDie(bind(&TransportManager::onDie, this, client));
 
 	// Add for listening
 	std::lock_guard<std::recursive_mutex> lock(m_mutex);
@@ -611,7 +611,9 @@ void TransportManager::run() noexcept
 				process(status.socket, status.direction);
 			}
 		} catch (const SocketError &ex) {
-			// TODO: log
+			if (ex.code() != SocketError::Timeout) {
+				Logger::debug() << "transport: error: " << ex.what() << std::endl;
+			}
 		}
 	}
 }

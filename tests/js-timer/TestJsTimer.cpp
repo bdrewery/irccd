@@ -18,13 +18,59 @@
 
 #include <gtest/gtest.h>
 
+#include <ElapsedTimer.h>
 #include <Plugin.h>
 #include <Timer.h>
 
+using namespace irccd;
+using namespace std::chrono_literals;
+
+/* --------------------------------------------------------
+ * Timer object itself
+ * -------------------------------------------------------- */
+
 TEST(Basic, single)
 {
+	Timer timer(TimerType::Single, 1000);
+	ElapsedTimer elapsed;
+	int count = 0;
 
+	timer.onSignal([&] () {
+		count = elapsed.elapsed();
+	});
+	timer.onEnd([] () {});
+
+	elapsed.reset();
+	timer.start();
+
+	std::this_thread::sleep_for(3s);
+
+	ASSERT_TRUE(count >= 950 && count <= 1050);
 }
+
+TEST(Basic, repeat)
+{
+	Timer timer(TimerType::Repeat, 500);
+	int max = 0;
+
+	timer.onSignal([&] () {
+		max ++;
+	});
+	timer.onEnd([] () {});
+
+	timer.start();
+
+	// Should be at least 5
+	std::this_thread::sleep_for(3s);
+
+	ASSERT_TRUE(max >= 5);
+}
+
+/* --------------------------------------------------------
+ * JS Timer API
+ * -------------------------------------------------------- */
+
+// TODO
 
 int main(int argc, char **argv)
 {

@@ -680,7 +680,7 @@ public:
 	 *
 	 * @param func the function
 	 */
-	inline void onConnect(OnConnect func) noexcept
+	inline void setOnConnect(OnConnect func) noexcept
 	{
 		m_onConnect = std::move(func);
 	}
@@ -690,7 +690,7 @@ public:
 	 *
 	 * @param func the function
 	 */
-	inline void onChannelNotice(OnChannelNotice func) noexcept
+	inline void setOnChannelNotice(OnChannelNotice func) noexcept
 	{
 		m_onChannelNotice = std::move(func);
 	}
@@ -700,7 +700,7 @@ public:
 	 *
 	 * @param func the function
 	 */
-	inline void onInvite(OnInvite func) noexcept
+	inline void setOnInvite(OnInvite func) noexcept
 	{
 		m_onInvite = std::move(func);
 	}
@@ -710,7 +710,7 @@ public:
 	 *
 	 * @param func the function
 	 */
-	inline void onJoin(OnJoin func) noexcept
+	inline void setOnJoin(OnJoin func) noexcept
 	{
 		m_onJoin = std::move(func);
 	}
@@ -720,7 +720,7 @@ public:
 	 *
 	 * @param func the function
 	 */
-	inline void onKick(OnKick func) noexcept
+	inline void setOnKick(OnKick func) noexcept
 	{
 		m_onKick = std::move(func);
 	}
@@ -730,7 +730,7 @@ public:
 	 *
 	 * @param func the function
 	 */
-	inline void onMessage(OnMessage func) noexcept
+	inline void setOnMessage(OnMessage func) noexcept
 	{
 		m_onMessage = std::move(func);
 	}
@@ -740,7 +740,7 @@ public:
 	 *
 	 * @param func the function
 	 */
-	inline void onMe(OnMe func) noexcept
+	inline void setOnMe(OnMe func) noexcept
 	{
 		m_onMe = std::move(func);
 	}
@@ -750,7 +750,7 @@ public:
 	 *
 	 * @param func the function
 	 */
-	inline void onMode(OnMode func) noexcept
+	inline void setOnMode(OnMode func) noexcept
 	{
 		m_onMode = std::move(func);
 	}
@@ -760,7 +760,7 @@ public:
 	 *
 	 * @param func the function
 	 */
-	inline void onNick(OnNick func) noexcept
+	inline void setOnNick(OnNick func) noexcept
 	{
 		m_onNick = std::move(func);
 	}
@@ -770,7 +770,7 @@ public:
 	 *
 	 * @param func the function
 	 */
-	inline void onNotice(OnNotice func) noexcept
+	inline void setOnNotice(OnNotice func) noexcept
 	{
 		m_onNotice = std::move(func);
 	}
@@ -780,7 +780,7 @@ public:
 	 *
 	 * @param func the function
 	 */
-	inline void onPart(OnPart func) noexcept
+	inline void setOnPart(OnPart func) noexcept
 	{
 		m_onPart = std::move(func);
 	}
@@ -790,7 +790,7 @@ public:
 	 *
 	 * @param func the function
 	 */
-	inline void onQuery(OnQuery func) noexcept
+	inline void setOnQuery(OnQuery func) noexcept
 	{
 		m_onQuery = std::move(func);
 	}
@@ -800,7 +800,7 @@ public:
 	 *
 	 * @param func the function
 	 */
-	inline void onTopic(OnTopic func) noexcept
+	inline void setOnTopic(OnTopic func) noexcept
 	{
 		m_onTopic = std::move(func);
 	}
@@ -810,7 +810,7 @@ public:
 	 *
 	 * @param func the function
 	 */
-	inline void onUserMode(OnUserMode func) noexcept
+	inline void setOnUserMode(OnUserMode func) noexcept
 	{
 		m_onUserMode = std::move(func);
 	}

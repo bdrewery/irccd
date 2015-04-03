@@ -2,4 +2,3 @@
 - Test all JS API
 - Test server events -> transports
 - Create a Service class that provide a socket for polling interrupt (like TransportManager)
-- Rename all Server.on* functions to Server.setOn*

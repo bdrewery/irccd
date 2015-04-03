@@ -16,22 +16,23 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+include(${irccd_SOURCE_DIR}/servercommand/ServerCommand.cmake)
 include(${irccd_SOURCE_DIR}/js/Js.cmake)
 
 set(
 	JS_TIMER_SOURCES
 	${JS_SOURCES}
+	${SERVER_COMMAND_SOURCES}
+	${irccd_SOURCE_DIR}/Plugin.cpp
+	${irccd_SOURCE_DIR}/Plugin.h
 	${irccd_SOURCE_DIR}/System.cpp
 	${irccd_SOURCE_DIR}/System.h
 	${irccd_SOURCE_DIR}/Timer.cpp
 	${irccd_SOURCE_DIR}/Timer.h
+	${irccd_SOURCE_DIR}/Utf8.cpp
+	${irccd_SOURCE_DIR}/Utf8.h
 	TestJsTimer.cpp
 )
-
-#file(
-#	COPY test-timer.js
-#	DESTINATION ${CMAKE_BINARY_DIR}
-#)
 
 create_test(test-js-timer "${JS_TIMER_SOURCES}")
 target_link_libraries(test-js-timer duktape)

@@ -146,7 +146,7 @@ TEST_F(ServerTest, connect)
 
 	bool connected = false;
 
-	m_serverIrccd->onConnect([&] () {
+	m_serverIrccd->setOnConnect([&] () {
 		connected = true;
 	});
 
@@ -164,13 +164,13 @@ TEST_F(ServerTest, channelNotice)
 	std::string rchannel;
 	std::string rmessage;
 
-	m_serverIrccd->onChannelNotice([&] (auto origin, auto channel, auto message) {
+	m_serverIrccd->setOnChannelNotice([&] (auto origin, auto channel, auto message) {
 		rorigin = std::move(origin);
 		rchannel = std::move(channel);
 		rmessage = std::move(message);
 	});
 
-	m_serverClient->onJoin([&] (auto, auto) {
+	m_serverClient->setOnJoin([&] (auto, auto) {
 		m_serverClient->cnotice("#irccd-test", "please don't flood");
 	});
 
@@ -197,18 +197,18 @@ TEST_F(ServerTest, invite)
 	 * Step 1: wait that irccd is connected and client has joined
 	 * #test-invite.
 	 */
-	m_serverClient->onJoin([&] (auto, auto channel) {
+	m_serverClient->setOnJoin([&] (auto, auto channel) {
 		if (channel == "#test-invite") {
 			joined = true;
 		}
 	});
-	m_serverClient->onConnect([&] () {
+	m_serverClient->setOnConnect([&] () {
 		m_serverClient->join("#test-invite");
 	});
-	m_serverIrccd->onConnect([&] () {
+	m_serverIrccd->setOnConnect([&] () {
 		connected = true;
 	});
-	m_serverIrccd->onInvite([&] (auto origin, auto channel, auto) {
+	m_serverIrccd->setOnInvite([&] (auto origin, auto channel, auto) {
 		invited = true;
 		rorigin = std::move(origin);
 		rchannel = std::move(channel);
@@ -235,7 +235,7 @@ TEST_F(ServerTest, join)
 	std::string rorigin;
 	std::string rchannel;
 
-	m_serverIrccd->onJoin([&] (auto origin, auto channel) {
+	m_serverIrccd->setOnJoin([&] (auto origin, auto channel) {
 		rorigin = std::move(origin);
 		rchannel = std::move(channel);
 	});
@@ -258,10 +258,10 @@ TEST_F(ServerTest, kick)
 	/*
 	 * Step 1: wait that client is connected before to gain +o.
 	 */
-	m_serverClient->onConnect([&] () {
+	m_serverClient->setOnConnect([&] () {
 		m_serverClient->join("#test-kick");
 	});
-	m_serverClient->onJoin([&] (auto origin, auto) {
+	m_serverClient->setOnJoin([&] (auto origin, auto) {
 		joined = true;
 
 		if (origin.compare(0, 4, "irct") == 0) {
@@ -277,7 +277,7 @@ TEST_F(ServerTest, kick)
 	 * Step 2: just wait that user is being kicked.
 	 */
 	m_serverIrccd->join("#test-kick");
-	m_serverIrccd->onKick([&] (auto origin, auto channel, auto target, auto reason) {
+	m_serverIrccd->setOnKick([&] (auto origin, auto channel, auto target, auto reason) {
 		kicked = true;
 		rorigin = std::move(origin);
 		rchannel = std::move(channel);
@@ -298,13 +298,13 @@ TEST_F(ServerTest, message)
 	std::string rchannel;
 	std::string rmessage;
 
-	m_serverIrccd->onMessage([&] (auto origin, auto channel, auto message) {
+	m_serverIrccd->setOnMessage([&] (auto origin, auto channel, auto message) {
 		rorigin = std::move(origin);
 		rchannel = std::move(channel);
 		rmessage = std::move(message);
 	});
 
-	m_serverClient->onJoin([&] (auto, auto) {
+	m_serverClient->setOnJoin([&] (auto, auto) {
 		m_serverClient->message("#irccd-test", "hello irct!");
 	});
 

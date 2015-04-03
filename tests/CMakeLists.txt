@@ -65,16 +65,17 @@ endfunction()
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/testassets)
 
 if (WITH_TESTS)
+	# JS API
 	add_subdirectory(js-filesystem)
 	add_subdirectory(js-system)
 	add_subdirectory(js-timer)
-	add_subdirectory(timer)
-	add_subdirectory(transport)
-	add_subdirectory(server)
 
+	# Server stuff
+	add_subdirectory(server)
+	add_subdirectory(transport)
+	add_subdirectory(rules)
 	#add_subdirectory(converter)
 	#add_subdirectory(lua-util)
-	add_subdirectory(rules)
 	add_subdirectory(split)
 	add_subdirectory(strip)
 endif ()
