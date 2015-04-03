@@ -42,6 +42,20 @@ const char *UserMode::name(Plugin &) const
 	return "onUserMode";
 }
 
+std::string UserMode::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"UserMode\","
+	    << "\"server\":\"" << m_server->info().name << "\","
+	    << "\"origin\":\"" << m_origin << "\","
+	    << "\"mode\":\"" << m_mode << "\""
+	    << "}";
+
+	return oss.str();
+}
+
 std::string UserMode::ident() const
 {
 	return "UserMode" + m_server->info().name + ":" + m_origin + ":" + m_mode;

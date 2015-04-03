@@ -40,6 +40,18 @@ const char *Connect::name(Plugin &) const
 	return "onConnect";
 }
 
+std::string Connect::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"connect\","
+	    << "\"server\":\"" << m_server->info().name << "\""
+	    << "}";
+
+	return oss.str();
+}
+
 std::string Connect::ident() const
 {
 	return "Connect:" + m_server->info().name;

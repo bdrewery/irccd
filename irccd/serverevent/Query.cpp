@@ -50,6 +50,20 @@ const char *Query::name(Plugin &p) const
 	return (pack.second == MessageType::Message) ? "onQuery" : "onQueryCommand";
 }
 
+std::string Query::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"Query\""
+	    << "\"server\":\"" << m_server->info().name << "\","
+	    << "\"origin\":\"" << m_origin << "\","
+	    << "\"message\":\"" << m_message << "\""
+	    << "}";
+
+	return oss.str();
+}
+
 std::string Query::ident() const
 {
 	return "Query:" + m_server->info().name + ":" + m_origin + ":" + m_message;

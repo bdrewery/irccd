@@ -26,9 +26,9 @@ namespace {
 
 duk_ret_t Timer_prototype_start(duk_context *ctx)
 {
-	dukx_with_this<std::shared_ptr<Timer>>(ctx, [&] (std::shared_ptr<Timer> *timer) {
-		if (!(*timer)->isRunning()) {
-			(*timer)->start();
+	dukx_with_this<std::shared_ptr<Timer>>(ctx, [&] (std::shared_ptr<Timer> &timer) {
+		if (!timer->isRunning()) {
+			timer->start();
 		}
 
 		return 0;
@@ -39,9 +39,9 @@ duk_ret_t Timer_prototype_start(duk_context *ctx)
 
 duk_ret_t Timer_prototype_stop(duk_context *ctx)
 {
-	dukx_with_this<std::shared_ptr<Timer>>(ctx, [&] (std::shared_ptr<Timer> *timer) {
-		if ((*timer)->isRunning()) {
-			(*timer)->stop();
+	dukx_with_this<std::shared_ptr<Timer>>(ctx, [&] (std::shared_ptr<Timer> &timer) {
+		if (timer->isRunning()) {
+			timer->stop();
 		}
 	});
 
@@ -75,10 +75,10 @@ duk_ret_t Timer_Timer(duk_context *ctx)
 			return 0;
 		}
 
-		dukx_with_this<std::shared_ptr<Timer>>(ctx, [&] (auto timer) -> duk_ret_t {
+		dukx_with_this<std::shared_ptr<Timer>>(ctx, [&] (std::shared_ptr<Timer> &timer) -> duk_ret_t {
 			duk_push_global_object(ctx);
 			duk_get_prop_string(ctx, -1, "\xff" "irccd-timers");
-			duk_push_pointer(ctx, timer->get());
+			duk_push_pointer(ctx, timer.get());
 			duk_dup(ctx, 0);
 			duk_put_prop(ctx, -3);
 			duk_pop_2(ctx);

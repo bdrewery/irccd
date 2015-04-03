@@ -49,6 +49,8 @@
 #define VERSION			"@IRCCD_VERSION@"
 #define PREFIX			"@CMAKE_INSTALL_PREFIX@"
 
+#cmakedefine WITH_JS
+
 /* --------------------------------------------------------
  * IRC tests
  * -------------------------------------------------------- */

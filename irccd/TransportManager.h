@@ -32,7 +32,9 @@
 #include <thread>
 #include <unordered_map>
 
-#include "SocketUdp.h"
+#include <Logger.h>
+#include <SocketUdp.h>
+
 #include "Transport.h"
 #include "TransportClient.h"
 
@@ -90,7 +92,7 @@ private:
 	std::map<Socket, std::unique_ptr<TransportAbstract>> m_transports;
 	std::map<Socket, std::shared_ptr<TransportClientAbstract>> m_clients;
 	std::thread m_thread;
-	std::mutex m_mutex;
+	std::recursive_mutex m_mutex;
 
 	// commands
 	void cnotice(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
@@ -153,6 +155,7 @@ public:
 		std::unique_ptr<TransportAbstract> ptr = std::make_unique<T>(std::forward<Args>(args)...);
 
 		ptr->bind();
+		Logger::info() << "transport: listening on " << ptr->info() << std::endl;
 
 		m_transports.emplace(ptr->socket(), std::move(ptr));
 	}
@@ -211,7 +214,7 @@ public:
 	 */
 	inline void broadcast(const std::string &msg)
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
+		std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 		for (auto &tc : m_clients) {
 			tc.second->send(msg);

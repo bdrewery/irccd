@@ -45,6 +45,22 @@ const char *Kick::name(Plugin &) const
 	return "onKick";
 }
 
+std::string Kick::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"Kick\","
+	    << "\"server\":\"" << m_server->info().name << "\","
+	    << "\"origin\":\"" << m_origin << "\","
+	    << "\"channel\":\"" << m_channel << "\","
+	    << "\"target\":\"" << m_target << "\","
+	    << "\"reason\":\"" << m_reason << "\""
+	    << "}";
+
+	return oss.str();
+}
+
 std::string Kick::ident() const
 {
 	return "Kick:" + m_server->info().name + ":" + m_origin + ":" + m_channel + ":" + m_target + ":" + m_reason;

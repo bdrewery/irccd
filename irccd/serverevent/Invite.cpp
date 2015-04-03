@@ -43,6 +43,20 @@ const char *Invite::name(Plugin &) const
 	return "onInvite";
 }
 
+std::string Invite::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"Invite\","
+	    << "\"server\":\"" << m_server->info().name << "\","
+	    << "\"origin\":\"" << m_origin << "\","
+	    << "\"channel\":\"" << m_channel << "\""
+	    << "}";
+
+	return oss.str();
+}
+
 std::string Invite::ident() const
 {
 	return "Invite:" + m_server->info().name + ":" + m_origin + ":" + m_channel;

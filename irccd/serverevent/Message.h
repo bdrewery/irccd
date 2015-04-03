@@ -67,6 +67,11 @@ public:
 	const char *name(Plugin &p) const override;
 
 	/**
+	 * @copydoc ServerEvent::toJson
+	 */
+	std::string toJson() const override;
+
+	/**
 	 * @copydoc ServerEvent::ident
 	 */
 	std::string ident() const override;

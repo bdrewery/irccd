@@ -501,7 +501,7 @@ void TransportManager::onWrite()
 	static constexpr char command = Reload;
 	static constexpr int size = sizeof (char);
 
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	// Signal select() to reload its set.
 	m_signal.sendto(&command, size, m_signalAddress);
@@ -509,7 +509,7 @@ void TransportManager::onWrite()
 
 void TransportManager::onDie(const std::shared_ptr<TransportClientAbstract> &client)
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	// TODO: debug message
 
@@ -553,7 +553,7 @@ void TransportManager::accept(const Socket &s)
 	client->onDie(bind(&TransportManager::onDie, this, client));
 
 	// Add for listening
-	std::lock_guard<std::mutex> lock(m_mutex);
+	std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 	m_clients.emplace(client->socket(), std::move(client));
 }
@@ -594,7 +594,7 @@ void TransportManager::run() noexcept
 				static int size = sizeof (char);
 				static SocketAddress address;
 
-				std::lock_guard<std::mutex> lock(m_mutex);
+				std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 				m_signal.recvfrom(&command, size, address);
 
@@ -686,7 +686,7 @@ void TransportManager::stop()
 		 * to wait that the listener timeout.
 		 */
 		try {
-			std::lock_guard<std::mutex> lock(m_mutex);
+			std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
 			m_signal.sendto(&command, size, m_signalAddress);
 		} catch (const std::exception &) {

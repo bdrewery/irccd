@@ -110,7 +110,7 @@ void dukx_throw(duk_context *ctx, int code, const std::string &msg);
  * only if the object contains the "\xff\xff" "data" field pointer.
  *
  * The function must have the following signature:
- *	void (Type *)
+ *	void (Type &)
  *
  * This function let the stack as it was before the call (except if the user
  * function push arguments).
@@ -130,7 +130,7 @@ void dukx_with_this(duk_context *ctx, Func func)
 	duk_pop_2(ctx);
 	dukx_assert_equals(ctx);
 
-	func(type);
+	func(*type);
 }
 
 /**
@@ -181,7 +181,8 @@ void dukx_set_class(duk_context *ctx, Type *ptr)
 }
 
 /**
- * Similar to dukx_set_class but this function push an object instead.
+ * Similar to dukx_set_class but this function push an object instead which is
+ * allocated frmo the C++ side.
  *
  */
 template <typename Type>
@@ -191,6 +192,13 @@ void dukx_push_shared(duk_context *ctx, std::shared_ptr<Type> ptr)
 
 	// Object itself
 	duk_push_object(ctx);
+
+	// Set its prototype
+	duk_push_global_object(ctx);
+	duk_get_prop_string(ctx, -1, "\xff" "irccd-proto");
+	duk_get_prop_string(ctx, -1, Type::JsName);
+	duk_set_prototype(ctx, -4);
+	duk_pop_2(ctx);
 
 	// deletion flag
 	duk_push_false(ctx);
@@ -223,11 +231,16 @@ void dukx_push_shared(duk_context *ctx, std::shared_ptr<Type> ptr)
 	dukx_assert_end(ctx, 1);
 }
 
+/* Modules */
 duk_ret_t dukopen_filesystem(duk_context *ctx) noexcept;
 duk_ret_t dukopen_logger(duk_context *ctx) noexcept;
+duk_ret_t dukopen_server(duk_context *ctx) noexcept;
 duk_ret_t dukopen_system(duk_context *ctx) noexcept;
 duk_ret_t dukopen_timer(duk_context *ctx) noexcept;
 duk_ret_t dukopen_utf8(duk_context *ctx) noexcept;
+
+/* Preload is needed for settings up objects allocated from C++ */
+void dukpreload_server(duk_context *ctx) noexcept;
 
 } // !irccd
 

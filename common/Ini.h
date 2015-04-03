@@ -144,8 +144,9 @@ private:
 			return o.key() == key;
 		});
 
-		if (it == m_options.end())
+		if (it == m_options.end()) {
 			throw std::out_of_range("option " + key + " not found");
+		}
 
 		return const_cast<T>(*it);
 	}
@@ -266,6 +267,23 @@ public:
 	inline unsigned size() const noexcept
 	{
 		return m_options.size();
+	}
+
+	/**
+	 * Tells if an option exists in the section.
+	 *
+	 * @param name option name
+	 * @return true if exists
+	 */
+	inline bool contains(const std::string &name) const noexcept
+	{
+		try {
+			(void)find<IniOption &>(name);
+		} catch (...) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

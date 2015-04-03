@@ -24,6 +24,7 @@
  * @brief Base event class
  */
 
+#include <sstream>
 #include <utility>
 
 namespace irccd {
@@ -91,6 +92,13 @@ public:
 	 * @return the event name
 	 */
 	virtual const char *name(Plugin &p) const = 0;
+
+	/**
+	 * Return the event as JSon to be sent to transports.
+	 *
+	 * @return the event description in JSON
+	 */
+	virtual std::string toJson() const = 0;
 
 	/**
 	 * Provide a ident string for unit tests.

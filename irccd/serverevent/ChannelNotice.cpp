@@ -44,6 +44,21 @@ const char *ChannelNotice::name(Plugin &) const
 	return "onChannelNotice";
 }
 
+std::string ChannelNotice::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"ChannelNotice\","
+	    << "\"server\":\"" << m_server->info().name << "\","
+	    << "\"origin\":\"" << m_origin << "\","
+	    << "\"channel\":\"" << m_channel << "\","
+	    << "\"notice\":\"" << m_notice << "\""
+	    << "}";
+
+	return oss.str();
+}
+
 std::string ChannelNotice::ident() const
 {
 	return "ChannelNotice:" + m_server->info().name + ":" + m_origin + ":" + m_channel + ":" + m_notice;

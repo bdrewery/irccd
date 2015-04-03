@@ -21,13 +21,19 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <queue>
 #include <vector>
 
+#include <Logger.h>
+
+#include "Identity.h"
 #include "Plugin.h"
+#include "Transport.h"
 #include "TransportCommand.h"
+#include "TransportManager.h"
 #include "TimerEvent.h"
 #include "ServerEvent.h"
 #include "ServerManager.h"
@@ -49,18 +55,62 @@ private:
 	/* Loaded plugins */
 	std::vector<std::shared_ptr<Plugin>> m_plugins;
 
+	/* Identities */
+	std::map<std::string, Identity> m_identities;
+
 	/* Server and Transport threads */
 	ServerManager m_serverManager;
+	TransportManager m_transportManager;
 
 public:
 	Irccd();
 
+	/* ------------------------------------------------
+	 * Identity management
+	 * ------------------------------------------------ */
+
+	/**
+	 * Add an identity.
+	 *
+	 * @param identity the identity
+	 * @note If the identity already exists, it is overriden
+	 */
+	inline void identityAdd(Identity identity) noexcept
+	{
+		m_identities.emplace(identity.name(), std::move(identity));
+	}
+
+	/**
+	 * Get an identity, if not found, the default one is used.
+	 *
+	 * @param name the identity name
+	 * @return the identity or default one
+	 */
+	inline Identity identityFind(const std::string &name) const noexcept
+	{
+		return m_identities.count(name) > 0 ? Identity() : m_identities.at(name);
+	}
+
 	void pluginLoad(std::string path);
 
 	template <typename... Args>
-	inline void serverAdd(Args&&... args)
+	inline void serverAdd(Args&&... args) noexcept
 	{
-		m_serverManager.add(std::forward<Args>(args)...);
+		try {
+			m_serverManager.add(std::forward<Args>(args)...);
+		} catch (const std::exception &ex) {
+			Logger::warning() << "server: " << ex.what() << std::endl;
+		}
+	}
+
+	template <typename T, typename... Args>
+	inline void transportAdd(Args&&... args)
+	{
+		try {
+			m_transportManager.add<T>(std::forward<Args>(args)...);
+		} catch (const std::exception &ex) {
+			Logger::warning() << "transport: " << ex.what() << std::endl;
+		}
 	}
 
 	/* ------------------------------------------------
@@ -77,6 +127,7 @@ public:
 	inline void transportAddCommand(Args&&... args)
 	{
 		{
+			puts("Adding command");
 			std::lock_guard<std::mutex> lock(m_mutex);
 
 			m_transportCommands.push(std::make_unique<T>(std::forward<Args>(args)...));

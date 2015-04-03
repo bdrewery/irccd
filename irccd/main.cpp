@@ -19,17 +19,129 @@
 #include <iostream>
 #include <memory>
 
+#include <Ini.h>
+
 #include "Logger.h"
 #include "Irccd.h"
+
+namespace irccd {
+
+void loadServer(const IniSection &sc)
+{
+	ServerInfo info;
+	if (!sc.contains("name")) {
+		throw std::invalid_argument("missing name");
+	}
+	if (!sc.contains("host")) {
+		throw std::invalid_argument("missing host");
+	}
+
+	info.name = sc["name"].value();
+	if (info.name.empty()) {
+		throw std::invalid_argument("name can not be empty");
+	}
+}
+
+void loadServers(const Ini &config)
+{
+	for (const IniSection &section : config) {
+		if (section.key() == "server") {
+			try {
+				loadServer(section);
+			} catch (const std::exception &ex) {
+				Logger::warning() << "server: " << ex.what() << std::endl;
+			}
+		}
+	}
+}
+
+void loadIdentity(const IniSection &sc)
+{
+	using std::move;
+	using std::string;
+
+	Identity id;
+	string name;
+	string username = id.username();
+	string realname = id.username();
+	string nickname = id.nickname();
+	string ctcpversion = id.ctcpversion();
+
+	if (!sc.contains("name")) {
+		throw std::invalid_argument("missing name");
+	}
+
+	name = sc["name"].value();
+	if (name.empty()) {
+		throw std::invalid_argument("name can not be empty");
+	}
+
+	/* Optional stuff */
+	if (sc.contains("username")) {
+		username = sc["username"].value();
+	}
+	if (sc.contains("realname")) {
+		realname = sc["realname"].value();
+	}
+	if (sc.contains("nickname")) {
+		nickname = sc["nickname"].value();
+	}
+	if (sc.contains("ctcp-version")) {
+		ctcpversion = sc["ctcp-version"].value();
+	}
+
+	Logger::debug() << "identity " << name << ": "
+			<< "nickname=" << nickname << ", username=" << username << ", "
+			<< "realname=" << realname << ", ctcp-version=" << ctcpversion << std::endl;
+
+	irccd.identityAdd(Identity(move(name), move(nickname), move(username), move(realname), move(ctcpversion)));
+}
+
+void loadIdentities(const Ini &config)
+{
+	for (const IniSection &section : config) {
+		if (section.key() == "identity") {
+			try {
+				loadIdentity(section);
+			} catch (const std::exception &ex) {
+				Logger::warning() << "identity: " << ex.what() << std::endl;
+			}
+		}
+	}
+}
+
+void openConfig(const std::string &path)
+{
+	try {
+		/*
+		 * Order matters, take care changing this.
+		 */
+		Ini config(path);
+
+		loadIdentities(config);
+		loadServers(config);
+	} catch (const std::exception &ex) {
+		Logger::warning() << "irccd: " << ex.what() << std::endl;
+		Logger::warning() << "irccd: exiting." << std::endl;
+	}
+}
+
+} // !irccd
 
 int main(void)
 {
 	irccd::Logger::setVerbose(true);
 	irccd::ServerInfo info;
+	irccd::ServerSettings settings;
+
+	irccd::openConfig("test.conf");
 
 	info.name = "localhost";
 	info.host = "localhost";
 	info.port = 6667;
+	settings.channels = {
+		{ "#staff", "" }
+	};
 
 	try {
 		irccd::irccd.pluginLoad("test.js");
@@ -38,9 +150,16 @@ int main(void)
 	}
 
 	try {
-		irccd::irccd.serverAdd(info);
+		irccd::irccd.serverAdd(info, irccd::Identity(), settings);
 	} catch (const std::exception &ex) {
 		irccd::Logger::warning() << "failed to add a server: " << ex.what() << std::endl;
+	}
+
+	try {
+		irccd::irccd.transportAdd<irccd::TransportUnix>("/tmp/irccd.sock");
+		irccd::irccd.transportAdd<irccd::TransportInet>(AF_INET6, 40000);
+	} catch (const std::exception &ex) {
+		irccd::Logger::warning() << "failed: " << ex.what() << std::endl;
 	}
 
 	irccd::irccd.run();

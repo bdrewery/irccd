@@ -40,6 +40,18 @@ const char *Whois::name(Plugin &) const
 	return "onWhois";
 }
 
+std::string Whois::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"Whois\","
+	    // TODO
+	    << "}";
+
+	return oss.str();
+}
+
 std::string Whois::ident() const
 {
 	return "Whois:" + m_server->info().name;

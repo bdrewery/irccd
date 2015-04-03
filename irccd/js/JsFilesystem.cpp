@@ -398,8 +398,8 @@ duk_ret_t directoryRemove(duk_context *ctx, const std::string &path, int beginin
 duk_ret_t File_prototype_basename(duk_context *ctx)
 {
 	dukx_assert_begin(ctx);
-	dukx_with_this<File>(ctx, [&] (File *file) {
-		duk_push_string(ctx, Filesystem::baseName(file->path()).c_str());
+	dukx_with_this<File>(ctx, [&] (File &file) {
+		duk_push_string(ctx, Filesystem::baseName(file.path()).c_str());
 	});
 	dukx_assert_end(ctx, 1);
 
@@ -418,8 +418,8 @@ duk_ret_t File_prototype_basename(duk_context *ctx)
 duk_ret_t File_prototype_dirname(duk_context *ctx)
 {
 	dukx_assert_begin(ctx);
-	dukx_with_this<File>(ctx, [&] (File *file) {
-		duk_push_string(ctx, Filesystem::dirName(file->path()).c_str());
+	dukx_with_this<File>(ctx, [&] (File &file) {
+		duk_push_string(ctx, Filesystem::dirName(file.path()).c_str());
 	});
 	dukx_assert_end(ctx, 1);
 
@@ -444,8 +444,8 @@ duk_ret_t File_prototype_dirname(duk_context *ctx)
 duk_ret_t File_prototype_read(duk_context *ctx)
 {
 	dukx_assert_begin(ctx);
-	dukx_with_this<File>(ctx, [&] (File *file) {
-		if (file->type() == File::Output) {
+	dukx_with_this<File>(ctx, [&] (File &file) {
+		if (file.type() == File::Output) {
 			dukx_throw(ctx, -1, "file is opened for writing");
 		}
 
@@ -456,7 +456,7 @@ duk_ret_t File_prototype_read(duk_context *ctx)
 		}
 
 		try {
-			duk_push_string(ctx, file->read(amount).c_str());
+			duk_push_string(ctx, file.read(amount).c_str());
 		} catch (const std::exception &ex) {
 			dukx_throw(ctx, -1, ex.what());
 		}
@@ -478,8 +478,8 @@ duk_ret_t File_prototype_read(duk_context *ctx)
 duk_ret_t File_prototype_remove(duk_context *ctx)
 {
 	dukx_assert_begin(ctx);
-	dukx_with_this<File>(ctx, [&] (File *file) {
-		if (remove(file->path().c_str()) < 0) {
+	dukx_with_this<File>(ctx, [&] (File &file) {
+		if (remove(file.path().c_str()) < 0) {
 			dukx_throw_syserror(ctx, errno);
 		}
 	});
@@ -503,13 +503,13 @@ duk_ret_t File_prototype_remove(duk_context *ctx)
 duk_ret_t File_prototype_seek(duk_context *ctx)
 {
 	dukx_assert_begin(ctx);
-	dukx_with_this<File>(ctx, [&] (File *file) {
+	dukx_with_this<File>(ctx, [&] (File &file) {
 		int type = duk_require_int(ctx, 0);
 		int amount = duk_require_int(ctx, 1);
 
 		try {
-			file->seek(static_cast<std::fstream::off_type>(amount),
-				   static_cast<std::fstream::seekdir>(type));
+			file.seek(static_cast<std::fstream::off_type>(amount),
+				  static_cast<std::fstream::seekdir>(type));
 		} catch (const std::exception &ex) {
 			dukx_throw(ctx, -1, ex.what());
 		}
@@ -535,10 +535,10 @@ duk_ret_t File_prototype_seek(duk_context *ctx)
 duk_ret_t File_prototype_stat(duk_context *ctx)
 {
 	dukx_assert_begin(ctx);
-	dukx_with_this<File>(ctx, [&] (File *file) {
+	dukx_with_this<File>(ctx, [&] (File &file) {
 		struct stat st;
 
-		if (stat(file->path().c_str(), &st) < 0) {
+		if (stat(file.path().c_str(), &st) < 0) {
 			dukx_throw_syserror(ctx, errno);
 		}
 
@@ -565,9 +565,9 @@ duk_ret_t File_prototype_stat(duk_context *ctx)
 duk_ret_t File_prototype_tell(duk_context *ctx)
 {
 	dukx_assert_begin(ctx);
-	dukx_with_this<File>(ctx, [&] (File *file) {
+	dukx_with_this<File>(ctx, [&] (File &file) {
 		try {
-			duk_push_int(ctx, file->tell());
+			duk_push_int(ctx, file.tell());
 		} catch (const std::exception &ex) {
 			dukx_throw(ctx, -1, ex.what());
 		}
@@ -593,13 +593,13 @@ duk_ret_t File_prototype_write(duk_context *ctx)
 	const char *data = duk_require_string(ctx, 0);
 
 	dukx_assert_begin(ctx);
-	dukx_with_this<File>(ctx, [&] (File *file) {
-		if (file->type() == File::Input) {
+	dukx_with_this<File>(ctx, [&] (File &file) {
+		if (file.type() == File::Input) {
 			dukx_throw(ctx, -1, "file is opened for reading");
 		}
 
 		try {
-			file->write(data);
+			file.write(data);
 		} catch (const std::exception &ex) {
 			dukx_throw(ctx, -1, ex.what());
 		}

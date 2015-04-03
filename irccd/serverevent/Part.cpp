@@ -44,6 +44,21 @@ const char *Part::name(Plugin &) const
 	return "onPart";
 }
 
+std::string Part::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"Part\","
+	    << "\"server\":\"" << m_server->info().name << "\","
+	    << "\"origin\":\"" << m_origin << "\","
+	    << "\"channel\":\"" << m_channel << "\","
+	    << "\"reason\":\"" << m_reason << "\""
+	    << "}";
+
+	return oss.str();
+}
+
 std::string Part::ident() const
 {
 	return "Part:" + m_server->info().name + ":" + m_origin + ":" + m_channel + ":" + m_reason;

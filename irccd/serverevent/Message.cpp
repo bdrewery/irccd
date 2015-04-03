@@ -52,6 +52,21 @@ const char *Message::name(Plugin &p) const
 	return (pack.second == MessageType::Message) ? "onMessage" : "onCommand";
 }
 
+std::string Message::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"Message\","
+	    << "\"server\":\"" << m_server->info().name << "\","
+	    << "\"origin\":\"" << m_origin << "\","
+	    << "\"channel\":\"" << m_channel << "\","
+	    << "\"message\":\"" << m_message << "\""
+	    << "}";
+
+	return oss.str();
+}
+
 std::string Message::ident() const
 {
 	return "Message:" + m_server->info().name + ":" + m_origin + ":" + m_channel + ":" + m_message;

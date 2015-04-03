@@ -26,6 +26,7 @@ include(js/Js.cmake)
 
 set(
 	SOURCES
+	Identity.h
 	Irccd.cpp
 	Irccd.h
 	main.cpp

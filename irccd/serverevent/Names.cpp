@@ -42,6 +42,29 @@ const char *Names::name(Plugin &) const
 	return "onNames";
 }
 
+std::string Names::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"Names\","
+	    << "\"server\":\"" << m_server->info().name << "\","
+	    << "\"channel\":\"" << m_channel << "\","
+	    << "\"names\":[";
+
+	for (auto it = m_names.begin(); it != m_names.end(); ++it) {
+		oss << *it;
+
+		if (it != m_names.end()) {
+			oss << ",";
+		}
+	}
+
+	oss << "]}";
+
+	return oss.str();
+}
+
 std::string Names::ident() const
 {
 	return "Names:" + m_server->info().name;

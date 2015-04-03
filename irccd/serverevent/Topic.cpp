@@ -43,6 +43,20 @@ const char *Topic::name(Plugin &) const
 {
 	return "onTopic";
 }
+std::string Topic::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"Topic\""
+	    << "\"server\":\"" << m_server->info().name << "\","
+	    << "\"origin\":\"" << m_origin << "\","
+	    << "\"channel\":\"" << m_channel << "\","
+	    << "\"topic\":\"" << m_topic << "\""
+	    << "}";
+
+	return oss.str();
+}
 
 std::string Topic::ident() const
 {

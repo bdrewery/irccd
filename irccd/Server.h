@@ -30,6 +30,8 @@
 
 #include <libircclient.h>
 
+#include <IrccdConfig.h>
+
 #include "Identity.h"
 #include "ServerState.h"
 #include "ServerCommand.h"
@@ -234,6 +236,13 @@ public:
  */
 class Server {
 public:
+#if defined(WITH_JS)
+	/**
+	 * Object name for JS API.
+	 */
+	static constexpr const char *JsName{"Server"};
+#endif
+
 	/**
 	 * ServerEvent: onConnect
 	 * ------------------------------------------------

@@ -44,6 +44,21 @@ const char *Me::name(Plugin &) const
 	return "onMe";
 }
 
+std::string Me::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"Me\","
+	    << "\"server\":\"" << m_server->info().name << "\""
+	    << "\"origin\":\"" << m_origin << "\","
+	    << "\"target\":\"" << m_target << "\","
+	    << "\"message\":\"" << m_message << "\""
+	    << "}";
+
+	return oss.str();
+}
+
 std::string Me::ident() const
 {
 	return "Me:" + m_server->info().name + ":" + m_origin + ":" + m_target + ":" + m_message;

@@ -45,6 +45,21 @@ const char *Mode::name(Plugin &) const
 	return "onMode";
 }
 
+std::string Mode::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"Mode\","
+	    << "\"server\":\"" << m_server->info().name << "\","
+	    << "\"origin\":\"" << m_origin << "\","
+	    << "\"mode\":\"" << m_mode << "\","
+	    << "\"argument\":\"" << m_argument << "\""
+	    << "}";
+
+	return oss.str();
+}
+
 std::string Mode::ident() const
 {
 	return "Mode:" + m_server->info().name + ":" + m_origin + ":" + m_channel + ":" + m_mode + ":" + m_argument;

@@ -43,6 +43,20 @@ const char *Notice::name(Plugin &) const
 	return "onNotice";
 }
 
+std::string Notice::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"Notice\","
+	    << "\"server\":\"" << m_server->info().name << "\","
+	    << "\"origin\":\"" << m_origin << "\","
+	    << "\"notice\":\"" << m_notice << "\""
+	    << "}";
+
+	return oss.str();
+}
+
 std::string Notice::ident() const
 {
 	return "Notice:" + m_server->info().name + ":" + m_origin + ":" + m_notice;

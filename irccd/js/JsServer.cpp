@@ -19,478 +19,409 @@
 #include <sstream>
 #include <unordered_map>
 
+#include "Server.h"
 #include "Js.h"
-
-#if 0
 
 namespace irccd {
 
 namespace {
 
-/* --------------------------------------------------------
- * Private helpers
- * -------------------------------------------------------- */
-
-void extractChannels(lua_State *L, Server::Info &info)
+/*
+ * Method: Server.cnotice(channel, message)
+ * --------------------------------------------------------
+ *
+ * Send a channel notice.
+ *
+ * Arguments:
+ *   - channel, the channel
+ *   - message, the message
+ */
+duk_ret_t Server_prototype_cnotice(duk_context *ctx)
 {
-	LUAE_STACK_CHECKBEGIN(L);
-
-	if (LuaeTable::type(L, 1, "channels") == LUA_TTABLE) {
-		Luae::getfield(L, 1, "channels");
-		LuaeTable::read(L, -1, [&] (lua_State *L, int, int tvalue) {
-			Server::Channel c;
-
-			// Standard string channel (no password)
-			if (tvalue == LUA_TSTRING) {
-				c.name = Luae::get<std::string>(L, -1);
-				info.channels.push_back(c);
-			} else if (tvalue == LUA_TTABLE) {
-				// First index is channel name
-				Luae::rawget(L, -1, 1);
-				if (Luae::type(L, -1) == LUA_TSTRING)
-					c.name = Luae::get<std::string>(L, -1);
-				Luae::pop(L, 1);
-
-				// Second index is channel password
-				Luae::rawget(L, -1, 2);
-				if (Luae::type(L, -1) == LUA_TSTRING)
-					c.password = Luae::get<std::string>(L, -1);
-				Luae::pop(L, 1);
-
-				info.channels.push_back(c);
-			}
-		});
-		Luae::pop(L, 1);
-	}
-
-	LUAE_STACK_CHECKEQUALS(L);
-}
-
-void extractIdentity(lua_State *L, Server::Identity &ident)
-{
-	LUAE_STACK_CHECKBEGIN(L);
-
-	std::unordered_map<std::string, std::string *> table {
-		{ "name",		&ident.name	},
-		{ "nickname",		&ident.nickname	},
-		{ "username",		&ident.username	},
-		{ "realname",		&ident.realname	},
-	};
-
-	std::string key;
-
-	if (LuaeTable::type(L, 1, "identity") == LUA_TTABLE) {
-		Luae::getfield(L, 1, "identity");
-		LuaeTable::read(L, -1, [&] (lua_State *L, int tkey, int tvalue) {
-			if (tkey == LUA_TSTRING && tvalue == LUA_TSTRING) {
-				key = Luae::get<std::string>(L, -2);
-
-				if (table.count(key) > 0)
-					*table[key] = Luae::get<std::string>(L, -1);
-			}
-		});
-		Luae::pop(L, 1);
-	}
-
-	LUAE_STACK_CHECKEQUALS(L);
-}
-
-void pushIdentity(lua_State *L, const Server::Identity &ident)
-{
-	LUAE_STACK_CHECKBEGIN(L);
-
-	// Create the identity table result
-	LuaeTable::create(L, 5, 5);
-
-	LuaeTable::set(L, -1, "name", ident.name);
-	LuaeTable::set(L, -1, "nickname", ident.nickname);
-	LuaeTable::set(L, -1, "username", ident.username);
-	LuaeTable::set(L, -1, "realname", ident.realname);
-
-	LUAE_STACK_CHECKEND(L, - 1);
-}
-
-void pushGeneralInfo(lua_State *L, const Server::Info &info, unsigned options)
-{
-	LUAE_STACK_CHECKBEGIN(L);
-
-	LuaeTable::set(L, -1, "name", info.name);
-	LuaeTable::set(L, -1, "hostname", info.host);
-	LuaeTable::set(L, -1, "port", static_cast<int>(info.port));
-	LuaeTable::set(L, -1, "ssl", (options & Server::OptionSsl) == 1);
-	LuaeTable::set(L, -1, "sslVerify", (options & Server::OptionSslNoVerify) == 0);
-	LuaeTable::set(L, -1, "commandChar", info.command);
-
-	LUAE_STACK_CHECKEQUALS(L);
-}
-
-void pushChannels(lua_State *L, const Server::ChannelList &list)
-{
-	LUAE_STACK_CHECKBEGIN(L);
-
-	// Create table even if no channels
-	LuaeTable::create(L, list.size());
-	auto i = 0;
-	for (const auto &c : list) {
-		Luae::push(L, c.name);
-		Luae::rawset(L, -2, ++i);
-	}
-
-	LUAE_STACK_CHECKEND(L, - 1);
-}
-
-/* --------------------------------------------------------
- * Public methods
- * -------------------------------------------------------- */
-
-int l_cnotice(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-
-	s->cnotice(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
-
-	return 0;
-}
-
-int l_info(lua_State *L)
-{
-	LUAE_STACK_CHECKBEGIN(L);
-
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-
-	LuaeTable::create(L);
-
-	// Store the following fields
-	pushGeneralInfo(L, s->info(), s->options());
-
-	// Table for channels
-	pushChannels(L, s->channels());
-	Luae::setfield(L, -2, "channels");
-
-	// Table for identity
-	pushIdentity(L, s->identity());
-	Luae::setfield(L, -2, "identity");
-
-	LUAE_STACK_CHECKEND(L, - 1);
-
-	return 1;
-}
-
-int l_invite(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-
-	s->invite(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
-
-	return 0;
-}
-
-int l_join(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-	std::string password = "";
-
-	// optional password
-	if (Luae::gettop(L) == 3)
-		password = Luae::check<std::string>(L, 3);
-
-	s->join(Luae::check<std::string>(L, 2), password);
-
-	return 0;
-}
-
-int l_kick(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-	auto target = Luae::check<std::string>(L, 2);
-	auto channel = Luae::check<std::string>(L, 3);
-	std::string reason = "";
-
-	// optional reason
-	if (Luae::gettop(L) == 4)
-		reason = Luae::check<std::string>(L, 4);
-
-	s->kick(target, channel, reason);
-
-	return 0;
-}
-
-int l_me(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-
-	s->me(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
-
-	return 0;
-}
-
-int l_mode(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-
-	s->mode(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
-
-	return 0;
-}
-
-int l_names(lua_State *L)
-{
-	Luae::check<std::shared_ptr<Server>>(L, 1)->names(Luae::check<std::string>(L, 2));
-
-	return 0;
-}
-
-int l_nick(lua_State *L)
-{
-	Luae::check<std::shared_ptr<Server>>(L, 1)->nick(Luae::check<std::string>(L, 2));
-
-	return 0;
-}
-
-int l_notice(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-
-	s->notice(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
-
-	return 0;
-}
-
-int l_part(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-	auto channel = Luae::check<std::string>(L, 2);
-	std::string reason = "";
-
-	if (Luae::gettop(L) >= 3)
-		reason = Luae::check<std::string>(L, 3);
-
-	s->part(channel, reason);
-
-	return 0;
-}
-
-int l_query(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-
-	s->query(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
-
-	return 0;
-}
-
-int l_say(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-
-	s->say(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
-
-	return 0;
-}
-
-int l_send(lua_State *L)
-{
-	Luae::check<std::shared_ptr<Server>>(L, 1)->send(Luae::check<std::string>(L, 2));
-
-	return 0;
-}
-
-int l_topic(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-
-	s->topic(Luae::check<std::string>(L, 2), Luae::check<std::string>(L, 3));
-
-	return 0;
-}
-
-int l_umode(lua_State *L)
-{
-	Luae::check<std::shared_ptr<Server>>(L, 1)->umode(Luae::check<std::string>(L, 2));
-
-	return 0;
-}
-
-int l_whois(lua_State *L)
-{
-	Luae::check<std::shared_ptr<Server>>(L, 1)->whois(Luae::check<std::string>(L, 2));
-
-	return 0;
-}
-
-int l_tostring(lua_State *L)
-{
-	auto s = Luae::check<std::shared_ptr<Server>>(L, 1);
-	std::ostringstream oss;
-
-	oss << "Server " << s->info().name;
-	oss << " at " << s->info().host;
-
-	if (s->options() & Server::OptionSsl)
-		oss << " (using SSL)" << std::endl;
-
-	Luae::push(L, oss.str());
-
-	return 1;
-}
-
-int l_equals(lua_State *L)
-{
-	Luae::push(L, Luae::check<std::shared_ptr<Server>>(L, 1) == Luae::check<std::shared_ptr<Server>>(L, 2));
-
-	return 1;
-}
-
-int l_gc(lua_State *L)
-{
-	return LuaeClass::deleteShared<Server>(L, 1);
-}
-
-const LuaeClass::Def serverDef {
-	ServerType,
-	{
-	/*
-	 * DEPRECATION:	1.2-001
-	 * REMOVAL:	1.3
-	 *
-	 * These functions has been deprecated in favor of Server:info().
-	 */
-#if defined(COMPAT_1_1)
-		{ "getChannels",	l_getChannels		},
-		{ "getIdentity",	l_getIdentity		},
-		{ "getInfo",		l_getInfo		},
-		{ "getName",		l_getName		},
-#endif
-		{ "cnotice",		l_cnotice		},
-		{ "info",		l_info			},
-		{ "invite",		l_invite		},
-		{ "join",		l_join			},
-		{ "kick",		l_kick			},
-		{ "me",			l_me			},
-		{ "mode",		l_mode			},
-		{ "names",		l_names			},
-		{ "nick",		l_nick			},
-		{ "notice",		l_notice		},
-		{ "part",		l_part			},
-		{ "query",		l_query			},
-		{ "say",		l_say			},
-		{ "send",		l_send			},
-		{ "topic",		l_topic			},
-		{ "umode",		l_umode			},
-		{ "whois",		l_whois			},
-	},
-	{
-		{ "__tostring",		l_tostring		},
-		{ "__eq",		l_equals		},
-		{ "__gc",		l_gc			},
-	},
-	nullptr
-};
-
-int l_connect(lua_State *L)
-{
-	Server::Info info;
-	Server::Identity ident;
-	Server::RetryInfo reco;
-	unsigned options = 0;
-
-	Luae::checktype(L, 1, LUA_TTABLE);
-
-	info.name	= LuaeTable::require<std::string>(L, 1, "name");
-	info.host	= LuaeTable::require<std::string>(L, 1, "host");
-	info.port	= LuaeTable::require<int>(L, 1, "port");
-
-	if (ServerManager::instance().has(info.name)) {
-		Luae::push(L, false);
-		Luae::pushfstring(L, "server %s already connected", info.name.c_str());
-
-		return 2;
-	}
-
-	if (LuaeTable::type(L, 1, "password") == LUA_TSTRING)
-		info.password = LuaeTable::require<std::string>(L, 1, "password");
-
-	extractChannels(L, info);
-	extractIdentity(L, ident);
-
-	ServerManager::instance().add(std::make_shared<Server>(info, ident, reco, options));
-	Luae::push(L, true);
-
-	return 1;
-}
-
-int l_find(lua_State *L)
-{
-	auto name = Luae::check<std::string>(L, 1);
-	int ret;
-
-	try {
-		auto server = ServerManager::instance().get(name);
-
-		Luae::push(L, server);
-
-		ret = 1;
-	} catch (const std::out_of_range &ex) {
-		Luae::push(L, nullptr);
-		Luae::push(L, ex.what());
-
-		ret = 2;
-	}
-
-	return ret;
-}
-
-int l_list(lua_State *L)
-{
-	int i = 0;
-
-	lua_createtable(L, 0, 0);
-	ServerManager::instance().forAll([&] (const auto &server) {
-		lua_pushstring(L, server->info().name.c_str());
-		lua_rawseti(L, -2, ++i);
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		s->cnotice(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
 	});
+	dukx_assert_equals(ctx);
 
-	lua_pushinteger(L, 0);
-	lua_pushinteger(L, i);
+	return 0;
+}
 
-	lua_pushcclosure(L, [] (lua_State *L) {
-		auto index = lua_tointeger(L, lua_upvalueindex(2));
-		auto count = lua_tointeger(L, lua_upvalueindex(3));
+/*
+ * Method: Server.invite(target, channel)
+ * --------------------------------------------------------
+ *
+ * Invite someone to a channel.
+ *
+ * Arguments:
+ *   - target, the target to invite
+ *   - channel, the channel
+ */
+duk_ret_t Server_prototype_invite(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		s->invite(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
+	});
+	dukx_assert_equals(ctx);
 
-		if (index >= count)
-			return 0;
+	return 0;
+}
 
-		lua_rawgeti(L, lua_upvalueindex(1), index + 1);
-		lua_pushinteger(L, index + 1);
-		lua_replace(L, lua_upvalueindex(2));
+/*
+ * Method: Server.join(channel, password = undefined)
+ * --------------------------------------------------------
+ *
+ * Join a channel with an optional password.
+ *
+ * Arguments:
+ *   - channel, the channel to join
+ *   - password, the password or undefined to not use
+ */
+duk_ret_t Server_prototype_join(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		const char *channel = duk_require_string(ctx, 0);
+		const char *password = "";
 
-		return 1;
-	}, 3);
+		if (duk_get_top(ctx) == 2) {
+			password = duk_require_string(ctx, 1);
+		}
+
+		s->join(channel, password);
+	});
+	dukx_assert_equals(ctx);
+
+	return 0;
+}
+
+/*
+ * Method: Server.kick(target, channel, reason = undefined)
+ * --------------------------------------------------------
+ *
+ * Kick someone from a channel.
+ *
+ * Arguments:
+ *   - target, the target to kick
+ *   - channel, the channel
+ *   - reason, the optional reason or undefined to not set
+ */
+duk_ret_t Server_prototype_kick(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		const char *target = duk_require_string(ctx, 0);
+		const char *channel = duk_require_string(ctx, 1);
+		const char *reason = "";
+
+		if (duk_get_top(ctx) == 3) {
+			reason = duk_require_string(ctx, 2);
+		}
+
+		s->kick(target, channel, reason);
+	});
+	dukx_assert_equals(ctx);
+
+	return 0;
+}
+
+/*
+ * Method: Server.me(target, message)
+ * --------------------------------------------------------
+ *
+ * Send a CTCP Action.
+ *
+ * Arguments:
+ *   - target, the target or a channel
+ *   - message, the message
+ */
+duk_ret_t Server_prototype_me(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		s->me(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
+	});
+	dukx_assert_equals(ctx);
+
+	return 0;
+}
+
+/*
+ * Method: Server.message(target, message)
+ * --------------------------------------------------------
+ *
+ * Send a message.
+ *
+ * Arguments:
+ *   - target, the target or a channel
+ *   - message, the message
+ */
+duk_ret_t Server_prototype_message(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		s->message(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
+	});
+	dukx_assert_equals(ctx);
+
+	return 0;
+}
+
+/*
+ * Method: Server.mode(channel, mode)
+ * --------------------------------------------------------
+ *
+ * Change a channel mode.
+ *
+ * Arguments:
+ *   - channel, the channel
+ *   - mode, the mode
+ */
+duk_ret_t Server_prototype_mode(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		s->mode(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
+	});
+	dukx_assert_equals(ctx);
+
+	return 0;
+}
+
+/*
+ * Method: Server.names(channel)
+ * --------------------------------------------------------
+ *
+ * Get the list of names from a channel.
+ *
+ * Arguments:
+ *   - channel, the channel
+ */
+duk_ret_t Server_prototype_names(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		s->names(duk_require_string(ctx, 0));
+	});
+	dukx_assert_equals(ctx);
+
+	return 0;
+}
+
+/*
+ * Method: Server.nick(nickname)
+ * --------------------------------------------------------
+ *
+ * Change the nickname.
+ *
+ * Arguments:
+ *   - nickname, the nickname
+ */
+duk_ret_t Server_prototype_nick(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		s->nick(duk_require_string(ctx, 0));
+	});
+	dukx_assert_equals(ctx);
+
+	return 0;
+}
+
+/*
+ * Method: Server.notice(target, message)
+ * --------------------------------------------------------
+ *
+ * Send a private notice.
+ *
+ * Arguments:
+ *   - target, the target
+ *   - message, the notice message
+ */
+duk_ret_t Server_prototype_notice(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		s->notice(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
+	});
+	dukx_assert_equals(ctx);
+
+	return 0;
+}
+
+/*
+ * Method: Server.part(channel, reason = undefined)
+ * --------------------------------------------------------
+ *
+ * Leave a channel.
+ *
+ * Arguments:
+ *   - channel, the channel to leave
+ *   - reason, the optional reason, keep undefined for portability
+ */
+duk_ret_t Server_prototype_part(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		const char *channel = duk_require_string(ctx, 0);
+		const char *reason = "";
+
+		if (duk_get_top(ctx) == 2) {
+			reason = duk_require_string(ctx, 1);
+		}
+
+		s->part(channel, reason);
+	});
+	dukx_assert_equals(ctx);
+
+	return 0;
+}
+
+/*
+ * Method: Server.send(raw)
+ * --------------------------------------------------------
+ *
+ * Send a raw message to the IRC server.
+ *
+ * Arguments:
+ *   - raw, the raw message (without terminators)
+ */
+duk_ret_t Server_prototype_send(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		s->send(duk_require_string(ctx, 0));
+	});
+	dukx_assert_equals(ctx);
+
+	return 0;
+}
+
+/*
+ * Method: Server.topic(channel, topic)
+ * --------------------------------------------------------
+ *
+ * Change a channel topic.
+ *
+ * Arguments:
+ *   - channel, the channel
+ *   - topic, the new topic
+ */
+duk_ret_t Server_prototype_topic(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		s->topic(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
+	});
+	dukx_assert_equals(ctx);
+
+	return 0;
+}
+
+/*
+ * Method: Server.umode(mode)
+ * --------------------------------------------------------
+ *
+ * Change your mode.
+ *
+ * Arguments:
+ *   - mode, the new mode
+ */
+duk_ret_t Server_prototype_umode(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		s->umode(duk_require_string(ctx, 0));
+	});
+	dukx_assert_equals(ctx);
+
+	return 0;
+}
+
+/*
+ * Method: Server.whois(target)
+ * --------------------------------------------------------
+ *
+ * Get whois information.
+ *
+ * Arguments:
+ *   - target, the target
+ */
+duk_ret_t Server_prototype_whois(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		s->whois(duk_require_string(ctx, 0));
+	});
+	dukx_assert_equals(ctx);
+
+	return 0;
+}
+
+/*
+ * Method: toString()
+ * --------------------------------------------------------
+ *
+ * Convert the object to string, convenience for adding the object
+ * as property key.
+ *
+ * Returns:
+ *   - the server name (unique)
+ */
+duk_ret_t Server_prototype_toString(duk_context *ctx)
+{
+	dukx_assert_begin(ctx);
+	dukx_with_this<std::shared_ptr<Server>>(ctx, [&] (std::shared_ptr<Server> &s) {
+		duk_push_string(ctx, s->info().name.c_str());
+	});
+	dukx_assert_end(ctx, 1);
 
 	return 1;
 }
 
-const Luae::Reg functions {
-	{ "connect",		l_connect			},
-	{ "find",		l_find				},
-	{ "list",		l_list				}
+const duk_function_list_entry serverMethods[] = {
+	/* Server methods */
+	{ "cnotice",	Server_prototype_cnotice,	2		},
+	{ "invite",	Server_prototype_invite,	2		},
+	{ "join",	Server_prototype_join,		DUK_VARARGS	},
+	{ "kick",	Server_prototype_kick,		DUK_VARARGS	},
+	{ "me",		Server_prototype_me,		2		},
+	{ "message",	Server_prototype_message,	2		},
+	{ "mode",	Server_prototype_mode,		2		},
+	{ "names",	Server_prototype_names,		1		},
+	{ "nick",	Server_prototype_nick,		1		},
+	{ "notice",	Server_prototype_notice,	2		},
+	{ "part",	Server_prototype_part,		DUK_VARARGS	},
+	{ "send",	Server_prototype_send,		1		},
+	{ "topic",	Server_prototype_topic,		2		},
+	{ "umode",	Server_prototype_umode,		1		},
+	{ "whois",	Server_prototype_whois,		1		},
+
+	/* Special */
+	{ "toString",	Server_prototype_toString,	0		},
+	{ nullptr,	nullptr,			0		}
 };
 
-}
+} // !namespace
 
-const char *ServerType = "Server";
-
-const char *Luae::IsUserdata<Server>::MetatableName = ServerType;
-
-int luaopen_server(lua_State *L)
+duk_ret_t dukopen_server(duk_context *ctx) noexcept
 {
-	Luae::newlib(L, functions);
-
-	LuaeClass::create(L, serverDef);
+	duk_push_object(ctx);
 
 	return 1;
+}
+
+void dukpreload_server(duk_context *ctx) noexcept
+{
+	dukx_assert_begin(ctx);
+	duk_push_global_object(ctx);
+	duk_get_prop_string(ctx, -1, "\xff" "irccd-proto");
+	duk_push_object(ctx);
+	duk_put_function_list(ctx, -1, serverMethods);
+	duk_put_prop_string(ctx, -2, "Server");
+	duk_pop_2(ctx);
+	dukx_assert_equals(ctx);
 }
 
 } // !irccd
-
-#endif

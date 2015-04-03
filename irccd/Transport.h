@@ -25,6 +25,7 @@
  */
 
 #include <memory>
+#include <sstream>
 #include <string>
 #include <type_traits>
 
@@ -86,6 +87,13 @@ public:
 	 * @return the new client
 	 */
 	virtual std::unique_ptr<TransportClientAbstract> accept() = 0;
+
+	/**
+	 * Get information about the transport.
+	 *
+	 * @return the info
+	 */
+	virtual std::string info() const noexcept = 0;
 };
 
 /**
@@ -183,6 +191,7 @@ public:
 	 */
 	void bind() override
 	{
+		Transport<Sock>::m_socket.set(SOL_SOCKET, SO_REUSEADDR, 1);
 		Transport<Sock>::m_socket.bind(address::Internet(m_host, m_port, m_domain));
 		Transport<Sock>::m_socket.listen();
 	}
@@ -198,6 +207,20 @@ public:
 	 * Inherited constructors.
 	 */
 	using TransportAbstractInet::TransportAbstractInet;
+
+	/**
+	 * @copydoc TransportAbstract::info
+	 */
+	std::string info() const noexcept override
+	{
+		std::ostringstream oss;
+
+		oss << ((m_host == "*") ? "\"all\"" : m_host)
+		    << ", port " << m_port << ", "
+		    << ((m_domain == AF_INET6) ? "IPv6" : "IPv4");
+
+		return oss.str();
+	}
 };
 
 #if !defined(_WIN32)
@@ -217,6 +240,14 @@ public:
 	{
 		m_socket.bind(address::Unix(m_path, true));
 		m_socket.listen();
+	}
+
+	/**
+	 * @copydoc TransportAbstract::info
+	 */
+	std::string info() const noexcept override
+	{
+		return m_path;
 	}
 };
 

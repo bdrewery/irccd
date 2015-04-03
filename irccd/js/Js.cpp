@@ -29,6 +29,7 @@ const std::unordered_map<std::string, duk_c_function> modules {
 	{ "irccd.fs",		dukopen_filesystem	},
 	{ "irccd.logger",	dukopen_logger		},
 	{ "irccd.timer",	dukopen_timer		},
+	{ "irccd.server",	dukopen_server		},
 	{ "irccd.system",	dukopen_system		},
 	{ "irccd.utf8",		dukopen_utf8		}
 };
@@ -98,8 +99,16 @@ DukContext::DukContext()
 	duk_put_prop_string(get(), -2, "\xff" "irccd-timers");
 	duk_pop(get());
 
-	dukx_assert_equals(get());
+	/* This is needed for storing prototypes */
+	duk_push_global_object(get());
+	duk_push_object(get());
+	duk_put_prop_string(get(), -2, "\xff" "irccd-proto");
+	duk_pop(get());
 
+	/* This is the server object, allocated from here */
+	dukpreload_server(get());
+
+	dukx_assert_equals(get());
 }
 
 void dukx_throw_syserror(duk_context *ctx, int code)

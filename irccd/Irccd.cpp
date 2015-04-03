@@ -53,8 +53,10 @@ void Irccd::pluginLoad(std::string path)
 void Irccd::run()
 {
 	m_serverManager.start();
+	m_transportManager.start();
 
 	while (m_running) {
+		// Wait
 		std::unique_lock<std::mutex> lock(m_mutex);
 
 		m_condition.wait(lock, [this] () {
@@ -67,6 +69,9 @@ void Irccd::run()
 
 		// Call server events
 		while (!m_serverEvents.empty()) {
+			// Broadcast
+			m_transportManager.broadcast(m_serverEvents.front()->toJson());
+
 			for (auto &plugin : m_plugins) {
 				m_serverEvents.front()->call(*plugin);
 				m_serverEvents.pop();

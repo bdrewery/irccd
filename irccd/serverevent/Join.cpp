@@ -43,6 +43,19 @@ const char *Join::name(Plugin &) const
 	return "onJoin";
 }
 
+std::string Join::toJson() const
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    << "\"event\":\"Join\","
+	    << "\"origin\":\"" << m_origin << "\","
+	    << "\"channel\":\"" << m_channel << "\""
+	    << "}";
+
+	return oss.str();
+}
+
 std::string Join::ident() const
 {
 	return "Join:" + m_server->info().name + ":" + m_origin + ":" + m_channel;
