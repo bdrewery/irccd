@@ -24,6 +24,13 @@ namespace irccd {
 
 namespace {
 
+/*
+ * Method: Timer.start()
+ * --------------------------------------------------------
+ *
+ * Start the timer. If the timer is already started the method
+ * is a no-op.
+ */
 duk_ret_t Timer_prototype_start(duk_context *ctx)
 {
 	dukx_with_this<std::shared_ptr<Timer>>(ctx, [&] (std::shared_ptr<Timer> &timer) {
@@ -37,6 +44,12 @@ duk_ret_t Timer_prototype_start(duk_context *ctx)
 	return 0;
 }
 
+/*
+ * Method: Timer.stop()
+ * --------------------------------------------------------
+ *
+ * Stop the timer.
+ */
 duk_ret_t Timer_prototype_stop(duk_context *ctx)
 {
 	dukx_with_this<std::shared_ptr<Timer>>(ctx, [&] (std::shared_ptr<Timer> &timer) {
@@ -54,6 +67,17 @@ const duk_function_list_entry timerMethods[] = {
 	{ nullptr,	nullptr,		0	}
 };
 
+/*
+ * Function: Timer(type, delay) [constructor]
+ * --------------------------------------------------------
+ *
+ * Create a new timer, the timer is not created automatically and the function
+ * can be set by assigning to the onTimeout property.
+ *
+ * Arguments:
+ *   - type, the type (Timer.Single or Timer.Repeat)
+ *   - delay, the delay in milliseconds
+ */
 duk_ret_t Timer_Timer(duk_context *ctx)
 {
 	int type = duk_require_int(ctx, 0);

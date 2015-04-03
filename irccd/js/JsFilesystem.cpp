@@ -636,7 +636,6 @@ constexpr const duk_function_list_entry fileMethods[] = {
  * Arguments:
  *   - path, the path to the file
  *   - mode, the mode, can be "r" "w" or "a"
- *
  * Throws:
  *   - Any exception on error
  */

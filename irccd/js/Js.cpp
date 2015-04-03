@@ -31,7 +31,7 @@ const std::unordered_map<std::string, duk_c_function> modules {
 	{ "irccd.timer",	dukopen_timer		},
 	{ "irccd.server",	dukopen_server		},
 	{ "irccd.system",	dukopen_system		},
-	{ "irccd.utf8",		dukopen_utf8		}
+	{ "irccd.unicode",	dukopen_unicode		}
 };
 
 /*

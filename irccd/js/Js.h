@@ -237,7 +237,7 @@ duk_ret_t dukopen_logger(duk_context *ctx) noexcept;
 duk_ret_t dukopen_server(duk_context *ctx) noexcept;
 duk_ret_t dukopen_system(duk_context *ctx) noexcept;
 duk_ret_t dukopen_timer(duk_context *ctx) noexcept;
-duk_ret_t dukopen_utf8(duk_context *ctx) noexcept;
+duk_ret_t dukopen_unicode(duk_context *ctx) noexcept;
 
 /* Preload is needed for settings up objects allocated from C++ */
 void dukpreload_server(duk_context *ctx) noexcept;

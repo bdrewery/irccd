@@ -38,16 +38,43 @@ int print(duk_context *ctx, std::ostream &out)
 	return 0;
 }
 
+/*
+ * Function: Logger.info(message)
+ * --------------------------------------------------------
+ *
+ * Write a verbose message.
+ *
+ * Arguments:
+ *   - message, the message
+ */
 duk_ret_t Logger_info(duk_context *ctx)
 {
 	return print(ctx, Logger::info());
 }
 
+/*
+ * Function: Logger.warning(message)
+ * --------------------------------------------------------
+ *
+ * Write a warning message.
+ *
+ * Arguments:
+ *   - message, the warning
+ */
 duk_ret_t Logger_warning(duk_context *ctx)
 {
 	return print(ctx, Logger::warning());
 }
 
+/*
+ * Function: Logger.debug(message)
+ * --------------------------------------------------------
+ *
+ * Write a debug message, only shown if irccd is compiled in debug.
+ *
+ * Arguments:
+ *   - message, the message
+ */
 duk_ret_t Logger_debug(duk_context *ctx)
 {
 	return print(ctx, Logger::debug());

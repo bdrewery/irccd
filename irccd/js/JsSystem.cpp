@@ -30,6 +30,19 @@ namespace irccd {
 
 namespace {
 
+/*
+ * Function: System.env(key)
+ * --------------------------------------------------------
+ *
+ * Get an environment system variable.
+ *
+ * Arguments:
+ *   - key, the environment variable
+ * Returns:
+ *   - The value
+ * Throws:
+ *   - Any exception on error
+ */
 duk_ret_t System_env(duk_context *ctx)
 {
 	const char *key = duk_require_string(ctx, 0);
@@ -44,6 +57,15 @@ duk_ret_t System_env(duk_context *ctx)
 	return 1;
 }
 
+/*
+ * Function: System.home()
+ * --------------------------------------------------------
+ *
+ * Get the operating system user's home.
+ *
+ * Returns:
+ *   - The user home directory
+ */
 duk_ret_t System_home(duk_context *ctx)
 {
 	duk_push_string(ctx, System::home().c_str());
@@ -51,6 +73,15 @@ duk_ret_t System_home(duk_context *ctx)
 	return 1;
 }
 
+/*
+ * Function: System.name()
+ * --------------------------------------------------------
+ *
+ * Get the operating system name.
+ *
+ * Returns:
+ *   - The system name
+ */
 duk_ret_t System_name(duk_context *ctx)
 {
 	duk_push_string(ctx, System::name().c_str());
@@ -58,6 +89,15 @@ duk_ret_t System_name(duk_context *ctx)
 	return 1;
 }
 
+/*
+ * Function: System.ticks()
+ * --------------------------------------------------------
+ *
+ * Get the number of milliseconds since irccd was started.
+ *
+ * Returns:
+ *   - The number of milliseconds
+ */
 duk_ret_t System_ticks(duk_context *ctx)
 {
 	duk_push_int(ctx, System::ticks());
@@ -65,6 +105,12 @@ duk_ret_t System_ticks(duk_context *ctx)
 	return 1;
 }
 
+/*
+ * Function: System.sleep(delay)
+ * --------------------------------------------------------
+ *
+ * Sleep the main loop for the specific delay in seconds.
+ */
 duk_ret_t System_sleep(duk_context *ctx)
 {
 	std::this_thread::sleep_for(std::chrono::seconds(duk_require_int(ctx, 0)));
@@ -72,6 +118,12 @@ duk_ret_t System_sleep(duk_context *ctx)
 	return 0;
 }
 
+/*
+ * Function: System.usleep(delay)
+ * --------------------------------------------------------
+ *
+ * Sleep the main loop for the specific delay in microseconds.
+ */
 duk_ret_t System_usleep(duk_context *ctx)
 {
 	std::this_thread::sleep_for(std::chrono::microseconds(duk_require_int(ctx, 0)));
@@ -79,6 +131,15 @@ duk_ret_t System_usleep(duk_context *ctx)
 	return 0;
 }
 
+/*
+ * Function: System.version()
+ * --------------------------------------------------------
+ *
+ * Get the operating system version.
+ *
+ * Returns:
+ *   - The system version
+ */
 duk_ret_t System_version(duk_context *ctx)
 {
 	duk_push_string(ctx, System::version().c_str());
