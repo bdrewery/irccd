@@ -16,9 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Utf8.h>
-
 #include "Js.h"
+#include "Utf8.h"
 
 namespace irccd {
 

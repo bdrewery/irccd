@@ -35,7 +35,7 @@ time_t Date::getTimestamp() const
 	return m_timestamp;
 }
 
-std::string Date::format(const std::string &format)
+std::string Date::format(const std::string &format) const
 {
 	char buffer[512];
 	struct tm *tm;

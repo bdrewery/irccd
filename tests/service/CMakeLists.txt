@@ -16,15 +16,11 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-include(${irccd_SOURCE_DIR}/servercommand/ServerCommand.cmake)
-include(${irccd_SOURCE_DIR}/js/Js.cmake)
-
 set(
-	JS_SYSTEM_SOURCES
-	${JS_SOURCES}
-	${SERVER_COMMAND_SOURCES}
-	TestJsSystem.cpp
+	TEST_SERVICE_SOURCES
+	${irccd_SOURCE_DIR}/Service.cpp
+	${irccd_SOURCE_DIR}/Service.h
+	TestService.cpp
 )
 
-create_test(test-js-system "${JS_SYSTEM_SOURCES}")
-target_link_libraries(test-js-system duktape)
+create_test(test-service "${TEST_SERVICE_SOURCES}")

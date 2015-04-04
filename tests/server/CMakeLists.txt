@@ -34,14 +34,6 @@ set(
 	${irccd_SOURCE_DIR}/ServerManager.cpp
 	${irccd_SOURCE_DIR}/ServerManager.h
 	${irccd_SOURCE_DIR}/ServerState.h
-	${irccd_SOURCE_DIR}/Plugin.cpp
-	${irccd_SOURCE_DIR}/Plugin.h
-	${irccd_SOURCE_DIR}/System.cpp
-	${irccd_SOURCE_DIR}/System.h
-	${irccd_SOURCE_DIR}/Timer.cpp
-	${irccd_SOURCE_DIR}/Timer.h
-	${irccd_SOURCE_DIR}/Utf8.cpp
-	${irccd_SOURCE_DIR}/Utf8.h
 	TestServer.cpp
 )
 

@@ -35,6 +35,7 @@
 #include <Logger.h>
 #include <SocketUdp.h>
 
+#include "Service.h"
 #include "Transport.h"
 #include "TransportClient.h"
 
@@ -57,42 +58,16 @@ class TransportCommand;
  * manager. This allows large timeout but quick reload of the listener
  * set in case of changes.
  */
-class TransportManager {
+class TransportManager : public Service {
 public:
 	using CommandHandler = void (TransportManager::*)(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 	using CommandMap = std::unordered_map<std::string, CommandHandler>;
 
-	/**
-	 * @class Code
-	 * @brief Command to control TransportManager
-	 */
-	enum Code {
-		Reload,		//!< Reload the SocketListener set immediately
-		Stop		//!< Stop the thread
-	};
-
 private:
-	SocketUdp m_signal;
-	SocketAddress m_signalAddress;
-
-	/*
-	 * Windows does not support Unix sockets and we require socket so we
-	 * use a AF_INET address with a random port stored here.
-	 *
-	 * Otherwise, we use a Unix socket at a random path in the temporary
-	 * directory.
-	 */
-#if !defined(_WIN32)
-	std::string m_path;
-#endif
-
 	CommandMap m_commandMap;
 	std::function<void (std::unique_ptr<TransportCommand>)> m_onEvent;
-	std::atomic<bool> m_running{false};
 	std::map<Socket, std::unique_ptr<TransportAbstract>> m_transports;
 	std::map<Socket, std::shared_ptr<TransportClientAbstract>> m_clients;
-	std::thread m_thread;
-	std::recursive_mutex m_mutex;
 
 	// commands
 	void cnotice(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
@@ -125,7 +100,9 @@ private:
 	void accept(const Socket &s);
 	void process(const Socket &s, int direction);
 	bool isTransport(const Socket &s) const noexcept;
-	void run() noexcept;
+
+protected:
+	void run() override;
 
 public:
 	/**
@@ -136,7 +113,9 @@ public:
 	TransportManager();
 
 	/**
-	 * Destructor, closes the thread and all sockets.
+	 * Destructor.
+	 *
+	 * @pre stop() must have been called.
 	 */
 	~TransportManager();
 
@@ -150,7 +129,7 @@ public:
 	template <typename T, typename... Args>
 	void add(Args&&... args)
 	{
-		assert(!m_running);
+		assert(!isRunning());
 
 		std::unique_ptr<TransportAbstract> ptr = std::make_unique<T>(std::forward<Args>(args)...);
 
@@ -168,58 +147,28 @@ public:
 	 */
 	inline void setOnEvent(std::function<void (std::unique_ptr<TransportCommand>)> func) noexcept
 	{
-		assert(!m_running);
+		assert(!isRunning());
 
 		m_onEvent = std::move(func);
 	}
 
 	/**
-	 * Start the thread.
+	 * Stop the thread and clean everything.
 	 *
-	 * @pre isRunning() must return false
-	 */
-	inline void start()
-	{
-		assert(!m_running);
-
-		m_running = true;
-		m_thread = std::thread(std::bind(&TransportManager::run, this));
-	}
-
-	/**
-	 * Stop the thread and clean everything. This is called automatically
-	 * from the destructor.
-	 *
+	 * @pre isRunning() must return true
 	 * @note Thread-safe
 	 */
 	void stop();
-
-	/**
-	 * Tell if the transport manager is currently running.
-	 *
-	 * @note Thread-safe
-	 * @return true if running
-	 */
-	inline bool isRunning() const noexcept
-	{
-		return m_running;
-	}
 
 	/**
 	 * Send a message to all connected clients. Do not append \r\n\r\n,
 	 * the function does it automatically.
 	 *
 	 * @note Thread-safe
+	 * @pre isRunning() must return true
 	 * @param msg the message (without \r\n\r\n)
 	 */
-	inline void broadcast(const std::string &msg)
-	{
-		std::lock_guard<std::recursive_mutex> lock(m_mutex);
-
-		for (auto &tc : m_clients) {
-			tc.second->send(msg);
-		}
-	}
+	void broadcast(const std::string &msg);
 };
 
 } // !irccd

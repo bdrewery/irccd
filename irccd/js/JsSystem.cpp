@@ -22,9 +22,9 @@
 #include <thread>
 
 #include <IrccdConfig.h>
-#include <System.h>
 
 #include "Js.h"
+#include "System.h"
 
 namespace irccd {
 

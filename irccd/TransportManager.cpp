@@ -498,18 +498,12 @@ void TransportManager::onMessage(const std::shared_ptr<TransportClientAbstract> 
 
 void TransportManager::onWrite()
 {
-	static constexpr char command = Reload;
-	static constexpr int size = sizeof (char);
-
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
-
-	// Signal select() to reload its set.
-	m_signal.sendto(&command, size, m_signalAddress);
+	Service::reload();
 }
 
 void TransportManager::onDie(const std::shared_ptr<TransportClientAbstract> &client)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 	Logger::debug() << "transport: client disconnected" << std::endl;
 
@@ -553,7 +547,7 @@ void TransportManager::accept(const Socket &s)
 	client->setOnDie(bind(&TransportManager::onDie, this, client));
 
 	// Add for listening
-	std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 	m_clients.emplace(client->socket(), std::move(client));
 }
@@ -567,14 +561,14 @@ void TransportManager::process(const Socket &s, int direction)
 	m_clients.at(s)->process(direction);
 }
 
-void TransportManager::run() noexcept
+void TransportManager::run()
 {
 	SocketListener listener;
 
-	while (m_running) {
+	while (isRunning()) {
 		try {
 			listener.clear();
-			listener.set(m_signal, SocketListener::Read);
+			listener.set(socket(), SocketListener::Read);
 
 			for (auto &ts : m_transports) {
 				listener.set(ts.second->socket(), SocketListener::Read);
@@ -589,23 +583,16 @@ void TransportManager::run() noexcept
 
 			SocketStatus status = listener.select(1000);
 
-			if (status.socket == m_signal) {
-				static char command;
-				static int size = sizeof (char);
-				static SocketAddress address;
+			/*
+			 * TODO: Add better handling of reload so that we don't
+			 * clear the SocketListener at each iteration.
+			 */
+			if (isService(status.socket)) {
+				(void)action();
+				continue;
+			}
 
-				std::lock_guard<std::recursive_mutex> lock(m_mutex);
-
-				m_signal.recvfrom(&command, size, address);
-
-				switch (command) {
-				case Stop:
-					m_running = false;
-				case Reload:
-				default:
-					break;
-				}
-			} else if (isTransport(status.socket)) {
+			if (isTransport(status.socket)) {
 				accept(status.socket);
 			} else {
 				process(status.socket, status.direction);
@@ -619,11 +606,7 @@ void TransportManager::run() noexcept
 }
 
 TransportManager::TransportManager()
-#if defined(_WIN32)
-	: m_signal(AF_INET, 0)
-#else
-	: m_signal(AF_LOCAL, 0)
-#endif
+	: Service("/tmp/.irccd-ts")
 	, m_commandMap{
 		{ "cnotice",	&TransportManager::cnotice	},
 		{ "connect",	&TransportManager::connect	},
@@ -645,64 +628,30 @@ TransportManager::TransportManager()
 		{ "unload",	&TransportManager::unload	}
 	}
 {
-	m_signal.set(SOL_SOCKET, SO_REUSEADDR, 1);
-
-#if defined(_WIN32)
-	m_signal.bind(address::Internet("127.0.0.1", 0, AF_INET));
-
-	// Get the port
-	auto port = ntohs(reinterpret_cast<const sockaddr_in &>(m_signal.address().address()).sin_port);
-	m_signalAddress = address::Internet("127.0.0.1", port, AF_INET);
-#else
-	char path[] = "/tmp/.irccd.sock";
-
-	m_signalAddress = address::Unix(path, true);
-	m_signal.bind(m_signalAddress);
-#endif
 }
 
 TransportManager::~TransportManager()
 {
-	stop();
-
-	m_signal.close();
-
-#if !defined(_WIN32)
-	// Also remove the file at exit
-	remove("/tmp/.irccd.sock");
-#endif
+	assert(!isRunning());
 }
 
 void TransportManager::stop()
 {
-	if (m_running) {
-		static constexpr char command = Stop;
-		static constexpr int size = sizeof (char);
+	Service::stop();
 
-		/*
-		 * Try to tell the thread to stop by sending the appropriate
-		 * stop command. If it succeed, the select will stops
-		 * immediately and there will be no lag.
-		 *
-		 * If it fails, stop manually the thread, it will requires
-		 * to wait that the listener timeout.
-		 */
-		try {
-			std::lock_guard<std::recursive_mutex> lock(m_mutex);
+	m_transports.clear();
+	m_clients.clear();
+}
 
-			m_signal.sendto(&command, size, m_signalAddress);
-		} catch (const std::exception &) {
-			m_running = false;
+void TransportManager::broadcast(const std::string &msg)
+{
+	assert(isRunning());
 
-		}
-
-		try {
-			m_thread.join();
-		} catch (...) { }
-
-		m_transports.clear();
-		m_clients.clear();
+	for (auto &tc : m_clients) {
+		tc.second->send(msg);
 	}
+
+	Service::reload();
 }
 
 } // !irccd

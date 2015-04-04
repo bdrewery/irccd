@@ -17,7 +17,8 @@
  */
 
 #include <Server.h>
-#include <Plugin.h>
+
+#include <js/Plugin.h>
 
 #include "ServerEvent.h"
 
@@ -29,10 +30,10 @@ ServerEvent::ServerEvent(const std::string &, const std::string &)
 
 MessagePack ServerEvent::parseMessage(std::string message, Server &server, Plugin &plugin) const
 {
-	auto cc = server.settings().command;
-	auto name = plugin.info().name;
-	auto result = message;
-	auto iscommand = false;
+	std::string cc = server.settings().command;
+	std::string name = plugin.info().name;
+	std::string result = message;
+	bool iscommand = false;
 
 	// handle special commands "!<plugin> command"
 	if (cc.length() > 0) {
@@ -57,14 +58,15 @@ MessagePack ServerEvent::parseMessage(std::string message, Server &server, Plugi
 			 * If no space is found we just set the message to "" otherwise
 			 * the plugin name will be passed through onCommand
 			 */
-			if (pos == std::string::npos)
+			if (pos == std::string::npos) {
 				result = "";
-			else
+			} else {
 				result = message.substr(pos + 1);
+			}
 		}
 	}
 
-	return {result, ((iscommand) ? MessageType::Command : MessageType::Message)};
+	return MessagePack(result, ((iscommand) ? MessageType::Command : MessageType::Message));
 }
 
 } // !irccd

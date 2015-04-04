@@ -21,6 +21,8 @@ include(${irccd_SOURCE_DIR}/transportcommand/TransportCommand.cmake)
 set(
 	TEST_TRANSPORT_SOURCES
 	${TRANSPORT_COMMAND_SOURCES}
+	${irccd_SOURCE_DIR}/Service.cpp
+	${irccd_SOURCE_DIR}/Service.h
 	${irccd_SOURCE_DIR}/Transport.h
 	${irccd_SOURCE_DIR}/TransportManager.cpp
 	${irccd_SOURCE_DIR}/TransportManager.h

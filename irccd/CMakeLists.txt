@@ -22,7 +22,6 @@ include(servercommand/ServerCommand.cmake)
 include(serverevent/ServerEvent.cmake)
 include(serverstate/ServerState.cmake)
 include(transportcommand/TransportCommand.cmake)
-include(js/Js.cmake)
 
 set(
 	SOURCES
@@ -38,6 +37,8 @@ set(
 	ServerManager.cpp
 	ServerManager.h
 	ServerState.h
+	Service.cpp
+	Service.h
 	Transport.h
 	TransportCommand.h
 	TransportClient.cpp
@@ -47,22 +48,8 @@ set(
 )
 
 if (WITH_JS)
-	list(
-		APPEND
-		SOURCES
-		${JS_SOURCES}
-		Plugin.cpp
-		Plugin.h
-		System.h
-		System.cpp
-		Timer.cpp
-		Timer.h
-		TimerEvent.cpp
-		TimerEvent.h
-		Utf8.cpp
-		Utf8.h
-	)
-
+	include(js/Js.cmake)
+	list(APPEND SOURCES ${JS_SOURCES})
 	list(APPEND LIBRARIES duktape)
 endif ()
 

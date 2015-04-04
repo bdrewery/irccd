@@ -1,5 +1,5 @@
 /*
- * TestJsTimer.cpp -- test irccd timer JS API
+ * TestService.cpp -- test interruptible service
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,65 +16,73 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <chrono>
+
 #include <gtest/gtest.h>
 
 #include <ElapsedTimer.h>
-
-#include <js/Plugin.h>
-#include <js/Timer.h>
+#include <Logger.h>
+#include <Service.h>
+#include <SocketListener.h>
 
 using namespace irccd;
 using namespace std::chrono_literals;
 
-/* --------------------------------------------------------
- * Timer object itself
- * -------------------------------------------------------- */
+class TestService : public Service {
+protected:
+	void run() override
+	{
+		// Wait for a large number of seconds
+		SocketListener listener;
 
-TEST(Basic, single)
+		try {
+			listener.set(socket(), SocketListener::Read);
+			auto st = listener.select(5s);
+
+			if (isService(st.socket)) {
+				(void)action();
+			}
+		} catch (const std::exception &ex) {
+			FAIL() << ex.what();
+		}
+	}
+
+public:
+	TestService()
+		: Service("test-service.sock")
+	{
+	}
+};
+
+TEST(Basic, isRunning)
 {
-	Timer timer(TimerType::Single, 1000);
-	ElapsedTimer elapsed;
-	int count = 0;
+	TestService ts;
 
-	timer.onSignal([&] () {
-		count = elapsed.elapsed();
-	});
-	timer.onEnd([] () {});
-
-	elapsed.reset();
-	timer.start();
-
-	std::this_thread::sleep_for(3s);
-
-	ASSERT_TRUE(count >= 950 && count <= 1050);
+	ts.start();
+	ASSERT_TRUE(ts.isRunning());
+	ts.stop();
+	ASSERT_FALSE(ts.isRunning());
 }
 
-TEST(Basic, repeat)
+TEST(Basic, stop)
 {
-	Timer timer(TimerType::Repeat, 500);
-	int max = 0;
+	// Should not take any time
+	TestService ts;
 
-	timer.onSignal([&] () {
-		max ++;
-	});
-	timer.onEnd([] () {});
+	ts.start();
 
-	timer.start();
+	ElapsedTimer timer;
+	ts.stop();
 
-	// Should be at least 5
-	std::this_thread::sleep_for(3s);
-
-	ASSERT_TRUE(max >= 5);
+	/* Should not take any longer */
+	ASSERT_TRUE(timer.elapsed() <= 100);
 }
-
-/* --------------------------------------------------------
- * JS Timer API
- * -------------------------------------------------------- */
-
-// TODO
 
 int main(int argc, char **argv)
 {
+	// Disable logging
+	Logger::setStandard<LoggerSilent>();
+	Logger::setError<LoggerSilent>();
 	testing::InitGoogleTest(&argc, argv);
 
 	return RUN_ALL_TESTS();

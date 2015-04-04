@@ -18,7 +18,7 @@
 
 #include "Whois.h"
 
-#include <Plugin.h>
+#include <js/Plugin.h>
 
 namespace irccd {
 

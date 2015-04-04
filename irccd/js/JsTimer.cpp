@@ -17,8 +17,7 @@
  */
 
 #include "Js.h"
-
-#include <Plugin.h>
+#include "Plugin.h"
 
 namespace irccd {
 

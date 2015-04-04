@@ -74,6 +74,9 @@ if (WITH_TESTS)
 	add_subdirectory(server)
 	add_subdirectory(transport)
 	add_subdirectory(rules)
+
+	# Misc
+	add_subdirectory(service)
 	#add_subdirectory(converter)
 	#add_subdirectory(lua-util)
 	add_subdirectory(split)

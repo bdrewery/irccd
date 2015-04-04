@@ -238,7 +238,7 @@ public:
 	/**
 	 * no-op.
 	 */
-	static inline void init() noexcept {}
+	static inline void initialize() noexcept {}
 
 	/**
 	 * no-op.

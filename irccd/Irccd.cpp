@@ -30,7 +30,18 @@ Irccd::Irccd()
 	m_serverManager.setOnEvent([this] (std::unique_ptr<ServerEvent> event) {
 		serverAddEvent(std::move(event));
 	});
+	m_transportManager.setOnEvent([this] (std::unique_ptr<TransportCommand> command) {
+		transportAddCommand(std::move(command));
+	});
 }
+
+Irccd::~Irccd()
+{
+	//m_serverManager.stop();
+	m_transportManager.stop();
+}
+
+#if defined(WITH_JS)
 
 void Irccd::pluginLoad(std::string path)
 {
@@ -49,6 +60,8 @@ void Irccd::pluginLoad(std::string path)
 
 	m_plugins.push_back(std::move(plugin));
 }
+
+#endif
 
 void Irccd::run()
 {
@@ -72,18 +85,28 @@ void Irccd::run()
 			// Broadcast
 			m_transportManager.broadcast(m_serverEvents.front()->toJson());
 
+#if defined(WITH_JS)
 			for (auto &plugin : m_plugins) {
 				m_serverEvents.front()->call(*plugin);
 				m_serverEvents.pop();
 			}
+#endif
 		}
 
+
+#if defined(WITH_JS)
 		// Call timers
 		while (!m_timerEvents.empty()) {
 			m_timerEvents.front().call();
 			m_timerEvents.pop();
 		}
+#endif
 	}
+}
+
+void Irccd::stop()
+{
+	m_running = false;
 }
 
 Irccd irccd;

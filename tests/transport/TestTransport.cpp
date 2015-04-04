@@ -18,6 +18,8 @@
 
 #include <gtest/gtest.h>
 
+#include <Logger.h>
+
 #include "TransportManager.h"
 #include "TransportCommand.h"
 
@@ -302,6 +304,9 @@ TEST_F(TransportTest, unload)
 
 int main(int argc, char **argv)
 {
+	// Disable logging
+	Logger::setStandard<LoggerSilent>();
+	Logger::setError<LoggerSilent>();
 	testing::InitGoogleTest(&argc, argv);
 
 	manager = std::make_unique<TransportManager>();
@@ -311,5 +316,9 @@ int main(int argc, char **argv)
 	});
 	manager->start();
 
-	return RUN_ALL_TESTS();
+	int ret = RUN_ALL_TESTS();
+
+	manager->stop();
+
+	return ret;
 }

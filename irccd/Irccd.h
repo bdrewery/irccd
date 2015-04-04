@@ -27,14 +27,19 @@
 #include <queue>
 #include <vector>
 
+#include <IrccdConfig.h>
+
 #include <Logger.h>
 
+#if defined(WITH_JS)
+#  include "js/Plugin.h"
+#  include "js/TimerEvent.h"
+#endif
+
 #include "Identity.h"
-#include "Plugin.h"
 #include "Transport.h"
 #include "TransportCommand.h"
 #include "TransportManager.h"
-#include "TimerEvent.h"
 #include "ServerEvent.h"
 #include "ServerManager.h"
 
@@ -50,10 +55,12 @@ private:
 	/* Events */
 	std::queue<std::unique_ptr<TransportCommand>> m_transportCommands;
 	std::queue<std::unique_ptr<ServerEvent>> m_serverEvents;
-	std::queue<TimerEvent> m_timerEvents;
 
-	/* Loaded plugins */
+	/* Optional JavaScript plugins */
+#if defined(WITH_JS)
 	std::vector<std::shared_ptr<Plugin>> m_plugins;
+	std::queue<TimerEvent> m_timerEvents;
+#endif
 
 	/* Identities */
 	std::map<std::string, Identity> m_identities;
@@ -64,6 +71,7 @@ private:
 
 public:
 	Irccd();
+	~Irccd();
 
 	/* ------------------------------------------------
 	 * Identity management
@@ -91,7 +99,10 @@ public:
 		return m_identities.count(name) > 0 ? Identity() : m_identities.at(name);
 	}
 
+#if defined(WITH_JS)
 	void pluginLoad(std::string path);
+	void pluginUnload(const std::string &name);
+#endif
 
 	template <typename... Args>
 	inline void serverAdd(Args&&... args) noexcept
@@ -123,19 +134,18 @@ public:
 	 * @param args the arguments to pass to the command constructor.
 	 * @note Thread-safe
 	 */
-	template <typename T, typename... Args>
-	inline void transportAddCommand(Args&&... args)
+	inline void transportAddCommand(std::unique_ptr<TransportCommand> command)
 	{
 		{
-			puts("Adding command");
 			std::lock_guard<std::mutex> lock(m_mutex);
 
-			m_transportCommands.push(std::make_unique<T>(std::forward<Args>(args)...));
+			m_transportCommands.push(std::move(command));
 		}
 
 		m_condition.notify_one();
 	}
 
+#if defined(WITH_JS)
 	/**
 	 * Add a timer event.
 	 *
@@ -152,6 +162,7 @@ public:
 
 		m_condition.notify_one();
 	}
+#endif
 
 	inline void serverAddEvent(std::unique_ptr<ServerEvent> event)
 	{
@@ -168,6 +179,11 @@ public:
 	 * Start the main loop.
 	 */
 	void run();
+
+	/**
+	 * Request to stop, usually from a signal.
+	 */
+	void stop();
 };
 
 /**

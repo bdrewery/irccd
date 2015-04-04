@@ -17,7 +17,8 @@
  */
 
 #include <Server.h>
-#include <Plugin.h>
+
+#include <js/Plugin.h>
 
 #include "Kick.h"
 

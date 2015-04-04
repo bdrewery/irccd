@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <csignal>
 #include <iostream>
 #include <memory>
 
@@ -126,10 +127,19 @@ void openConfig(const std::string &path)
 	}
 }
 
+void stop(int)
+{
+	irccd.stop();
+}
+
 } // !irccd
 
 int main(void)
 {
+	signal(SIGINT, irccd::stop);
+	signal(SIGTERM, irccd::stop);
+	signal(SIGQUIT, irccd::stop);
+
 	irccd::Logger::setVerbose(true);
 	irccd::ServerInfo info;
 	irccd::ServerSettings settings;

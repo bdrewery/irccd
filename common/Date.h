@@ -65,7 +65,7 @@ public:
 	 * @param format the format
 	 * @return the date formated
 	 */
-	std::string format(const std::string &format);
+	std::string format(const std::string &format) const;
 };
 
 /**
