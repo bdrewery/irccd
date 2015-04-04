@@ -76,7 +76,7 @@ public:
 	 *
 	 * @param p the current plugin
 	 */
-	virtual void call(Plugin &p) = 0;
+	virtual void call(Plugin &p) const = 0;
 
 	/**
 	 * Get the event name such as onMessage, onCommand.
@@ -91,7 +91,7 @@ public:
 	 * @param p the current plugin
 	 * @return the event name
 	 */
-	virtual const char *name(Plugin &p) const = 0;
+	virtual std::string name(Plugin &p) const = 0;
 
 	/**
 	 * Return the event as JSon to be sent to transports.

@@ -32,7 +32,7 @@ Query::Query(std::shared_ptr<Server> server, std::string origin, std::string mes
 {
 }
 
-void Query::call(Plugin &p)
+void Query::call(Plugin &p) const
 {
 	auto pack = parseMessage(m_message, *m_server, p);
 
@@ -43,7 +43,7 @@ void Query::call(Plugin &p)
 	}
 }
 
-const char *Query::name(Plugin &p) const
+std::string Query::name(Plugin &p) const
 {
 	auto pack = parseMessage(m_message, *m_server, p);
 

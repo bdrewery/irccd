@@ -33,12 +33,12 @@ Invite::Invite(std::shared_ptr<Server> server, std::string origin, std::string c
 {
 }
 
-void Invite::call(Plugin &p)
+void Invite::call(Plugin &p) const
 {
-	p.onInvite(std::move(m_server), std::move(m_origin), std::move(m_channel));
+	p.onInvite(m_server, m_origin, m_channel);
 }
 
-const char *Invite::name(Plugin &) const
+std::string Invite::name(Plugin &) const
 {
 	return "onInvite";
 }

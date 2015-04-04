@@ -33,12 +33,12 @@ Notice::Notice(std::shared_ptr<Server> server, std::string origin, std::string n
 {
 }
 
-void Notice::call(Plugin &p)
+void Notice::call(Plugin &p) const
 {
-	p.onNotice(std::move(m_server), std::move(m_origin), std::move(m_notice));
+	p.onNotice(m_server, m_origin, m_notice);
 }
 
-const char *Notice::name(Plugin &) const
+std::string Notice::name(Plugin &) const
 {
 	return "onNotice";
 }

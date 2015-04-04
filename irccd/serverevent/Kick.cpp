@@ -35,12 +35,12 @@ Kick::Kick(std::shared_ptr<Server> server, std::string origin, std::string chann
 {
 }
 
-void Kick::call(Plugin &p)
+void Kick::call(Plugin &p) const
 {
-	p.onKick(std::move(m_server), std::move(m_origin), std::move(m_channel), std::move(m_target), std::move(m_reason));
+	p.onKick(m_server, m_origin, m_channel, m_target, m_reason);
 }
 
-const char *Kick::name(Plugin &) const
+std::string Kick::name(Plugin &) const
 {
 	return "onKick";
 }

@@ -34,18 +34,18 @@ Message::Message(std::shared_ptr<Server> server, std::string origin, std::string
 {
 }
 
-void Message::call(Plugin &p)
+void Message::call(Plugin &p) const
 {
 	auto pack = parseMessage(m_message, *m_server, p);
 
 	if (pack.second == MessageType::Message) {
-		p.onMessage(std::move(m_server), std::move(m_origin), std::move(m_channel), std::move(pack.first));
+		p.onMessage(m_server, m_origin, m_channel, pack.first);
 	} else {
-		p.onCommand(std::move(m_server), std::move(m_origin), std::move(m_channel), std::move(pack.first));
+		p.onCommand(m_server, m_origin, m_channel, pack.first);
 	}
 }
 
-const char *Message::name(Plugin &p) const
+std::string Message::name(Plugin &p) const
 {
 	auto pack = parseMessage(m_message, *m_server, p);
 

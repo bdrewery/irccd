@@ -61,12 +61,12 @@ public:
 	/**
 	 * @copydoc Event::call
 	 */
-	void call(Plugin &p) override;
+	void call(Plugin &p) const override;
 
 	/**
 	 * @copydoc Event::name
 	 */
-	const char *name(Plugin &p) const override;
+	std::string name(Plugin &p) const override;
 
 	/**
 	 * @copydoc ServerEvent::toJson

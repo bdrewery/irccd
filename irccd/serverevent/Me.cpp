@@ -34,12 +34,12 @@ Me::Me(std::shared_ptr<Server> server, std::string origin, std::string target, s
 {
 }
 
-void Me::call(Plugin &p)
+void Me::call(Plugin &p) const
 {
-	p.onMe(std::move(m_server), std::move(m_origin), std::move(m_target), std::move(m_message));
+	p.onMe(m_server, m_origin, m_target, m_message);
 }
 
-const char *Me::name(Plugin &) const
+std::string Me::name(Plugin &) const
 {
 	return "onMe";
 }

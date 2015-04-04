@@ -33,12 +33,12 @@ Join::Join(std::shared_ptr<Server> server, std::string origin, std::string chann
 {
 }
 
-void Join::call(Plugin &p)
+void Join::call(Plugin &p) const
 {
-	p.onJoin(std::move(m_server), std::move(m_origin), std::move(m_channel));
+	p.onJoin(m_server, m_origin, m_channel);
 }
 
-const char *Join::name(Plugin &) const
+std::string Join::name(Plugin &) const
 {
 	return "onJoin";
 }

@@ -32,12 +32,12 @@ Nick::Nick(std::shared_ptr<Server> server, std::string oldnickname, std::string 
 {
 }
 
-void Nick::call(Plugin &p)
+void Nick::call(Plugin &p) const
 {
 	p.onNick(m_server, m_oldnickname, m_newnickname);
 }
 
-const char *Nick::name(Plugin &) const
+std::string Nick::name(Plugin &) const
 {
 	return "onNick";
 }

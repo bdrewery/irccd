@@ -34,15 +34,16 @@ Topic::Topic(std::shared_ptr<Server> server, std::string origin, std::string cha
 {
 }
 
-void Topic::call(Plugin &p)
+void Topic::call(Plugin &p) const
 {
-	p.onTopic(std::move(m_server), std::move(m_origin), std::move(m_channel), std::move(m_topic));
+	p.onTopic(m_server, m_origin, m_channel, m_topic);
 }
 
-const char *Topic::name(Plugin &) const
+std::string Topic::name(Plugin &) const
 {
 	return "onTopic";
 }
+
 std::string Topic::toJson() const
 {
 	std::ostringstream oss;

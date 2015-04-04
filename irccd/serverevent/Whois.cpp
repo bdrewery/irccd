@@ -30,12 +30,12 @@ Whois::Whois(std::shared_ptr<Server> server, ServerWhois info)
 {
 }
 
-void Whois::call(Plugin &p)
+void Whois::call(Plugin &p) const
 {
 	p.onWhois(m_server, m_info);
 }
 
-const char *Whois::name(Plugin &) const
+std::string Whois::name(Plugin &) const
 {
 	return "onWhois";
 }

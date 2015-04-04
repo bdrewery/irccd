@@ -35,12 +35,12 @@ Mode::Mode(std::shared_ptr<Server> server, std::string origin, std::string chann
 {
 }
 
-void Mode::call(Plugin &p)
+void Mode::call(Plugin &p) const
 {
-	p.onMode(std::move(m_server), std::move(m_origin), std::move(m_channel), std::move(m_mode), std::move(m_argument));
+	p.onMode(m_server, m_origin, m_channel, m_mode, m_argument);
 }
 
-const char *Mode::name(Plugin &) const
+std::string Mode::name(Plugin &) const
 {
 	return "onMode";
 }

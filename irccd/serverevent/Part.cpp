@@ -34,12 +34,12 @@ Part::Part(std::shared_ptr<Server> server, std::string origin, std::string chann
 {
 }
 
-void Part::call(Plugin &p)
+void Part::call(Plugin &p) const
 {
-	p.onPart(std::move(m_server), std::move(m_origin), std::move(m_channel), std::move(m_reason));
+	p.onPart(m_server, m_origin, m_channel, m_reason);
 }
 
-const char *Part::name(Plugin &) const
+std::string Part::name(Plugin &) const
 {
 	return "onPart";
 }

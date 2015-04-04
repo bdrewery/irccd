@@ -30,12 +30,12 @@ Connect::Connect(std::shared_ptr<Server> server)
 {
 }
 
-void Connect::call(Plugin &p)
+void Connect::call(Plugin &p) const
 {
 	p.onConnect(m_server);
 }
 
-const char *Connect::name(Plugin &) const
+std::string Connect::name(Plugin &) const
 {
 	return "onConnect";
 }

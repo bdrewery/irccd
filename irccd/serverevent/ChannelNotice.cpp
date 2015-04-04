@@ -34,12 +34,12 @@ ChannelNotice::ChannelNotice(std::shared_ptr<Server> server, std::string origin,
 {
 }
 
-void ChannelNotice::call(Plugin &p)
+void ChannelNotice::call(Plugin &p) const
 {
 	p.onChannelNotice(m_server, m_origin, m_channel, m_notice);
 }
 
-const char *ChannelNotice::name(Plugin &) const
+std::string ChannelNotice::name(Plugin &) const
 {
 	return "onChannelNotice";
 }

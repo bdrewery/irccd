@@ -32,12 +32,12 @@ UserMode::UserMode(std::shared_ptr<Server> server, std::string origin, std::stri
 {
 }
 
-void UserMode::call(Plugin &p)
+void UserMode::call(Plugin &p) const
 {
-	p.onUserMode(std::move(m_server), std::move(m_origin), std::move(m_mode));
+	p.onUserMode(m_server, m_origin, m_mode);
 }
 
-const char *UserMode::name(Plugin &) const
+std::string UserMode::name(Plugin &) const
 {
 	return "onUserMode";
 }

@@ -32,12 +32,12 @@ Names::Names(std::shared_ptr<Server> server, std::string channel, std::vector<st
 {
 }
 
-void Names::call(Plugin &p)
+void Names::call(Plugin &p) const
 {
 	p.onNames(m_server, m_channel, m_names);
 }
 
-const char *Names::name(Plugin &) const
+std::string Names::name(Plugin &) const
 {
 	return "onNames";
 }
