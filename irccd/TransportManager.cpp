@@ -606,7 +606,7 @@ void TransportManager::run()
 }
 
 TransportManager::TransportManager()
-	: Service("/tmp/.irccd-ts")
+	: Service("transport", "/tmp/._irccd_ts.sock")
 	, m_commandMap{
 		{ "cnotice",	&TransportManager::cnotice	},
 		{ "connect",	&TransportManager::connect	},
@@ -630,11 +630,6 @@ TransportManager::TransportManager()
 {
 }
 
-TransportManager::~TransportManager()
-{
-	assert(!isRunning());
-}
-
 void TransportManager::stop()
 {
 	Service::stop();
@@ -647,8 +642,13 @@ void TransportManager::broadcast(const std::string &msg)
 {
 	assert(isRunning());
 
-	for (auto &tc : m_clients) {
-		tc.second->send(msg);
+	/* Protect clients while broadcasting */
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+
+		for (auto &tc : m_clients) {
+			tc.second->send(msg, false);
+		}
 	}
 
 	Service::reload();

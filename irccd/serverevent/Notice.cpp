@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
-
-#include <js/Plugin.h>
-
 #include "Notice.h"
 
 namespace irccd {
@@ -36,7 +32,11 @@ Notice::Notice(std::shared_ptr<Server> server, std::string origin, std::string n
 
 void Notice::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	p.onNotice(m_server, m_origin, m_notice);
+#else
+	(void)p;
+#endif
 }
 
 std::string Notice::name(Plugin &) const

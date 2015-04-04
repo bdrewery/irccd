@@ -35,12 +35,13 @@ constexpr const char CharStop = 's';
 
 } // !namespace
 
-Service::Service(std::string path)
+Service::Service(std::string name, std::string path)
 #if defined(_WIN32)
 	: m_signal(AF_INET, 0)
 #else
 	: m_signal(AF_LOCAL, 0)
 #endif
+	, m_servname(std::move(name))
 {
 	m_signal.set(SOL_SOCKET, SO_REUSEADDR, 1);
 
@@ -88,8 +89,6 @@ Socket &Service::socket() noexcept
 
 ServiceAction Service::action()
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
-
 	char command;
 	SocketAddress dummy;
 
@@ -97,10 +96,10 @@ ServiceAction Service::action()
 
 	switch (command) {
 	case CharReload:
-		Logger::debug() << "service: reloading" << std::endl;
+		Logger::debug() << "service " << m_servname << ": reloading" << std::endl;
 		return ServiceAction::Reload;
 	case CharStop:
-		Logger::debug() << "service: stopping" << std::endl;
+		Logger::debug() << "service " << m_servname << ": stopping" << std::endl;
 		return ServiceAction::Stop;
 	default:
 		break;

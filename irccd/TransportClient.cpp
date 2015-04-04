@@ -85,14 +85,16 @@ void TransportClientAbstract::process(int direction)
 	}
 }
 
-void TransportClientAbstract::send(std::string message)
+void TransportClientAbstract::send(std::string message, bool notify)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 
 	m_output += message;
 	m_output += "\r\n\r\n";
 
-	m_onWrite();
+	if (notify) {
+		m_onWrite();
+	}
 }
 
 bool TransportClientAbstract::hasOutput() const noexcept

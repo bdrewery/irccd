@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
-
-#include <js/Plugin.h>
-
 #include "Message.h"
 
 namespace irccd {
@@ -37,6 +33,7 @@ Message::Message(std::shared_ptr<Server> server, std::string origin, std::string
 
 void Message::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	auto pack = parseMessage(m_message, *m_server, p);
 
 	if (pack.second == MessageType::Message) {
@@ -44,6 +41,9 @@ void Message::call(Plugin &p) const
 	} else {
 		p.onCommand(m_server, m_origin, m_channel, pack.first);
 	}
+#else
+	(void)p;
+#endif
 }
 
 std::string Message::name(Plugin &p) const

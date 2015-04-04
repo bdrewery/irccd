@@ -27,21 +27,21 @@
 #include <unordered_map>
 
 #include "Server.h"
+#include "Service.h"
 
 namespace irccd {
 
 class ServerEvent;
 
-class ServerManager {
+class ServerManager : public Service {
 private:
 	std::function<void (std::unique_ptr<ServerEvent>)> m_onEvent;
 	std::unordered_map<std::string, std::shared_ptr<Server>> m_servers;
-	std::atomic<bool> m_running{false};
-	std::thread m_thread;
-	mutable std::mutex m_mutex;
 
-	void run() noexcept;
+protected:
+	void run() override;
 
+private:
 	// Converters from Server callbacks to our event loop
 	void onChannelNotice(std::shared_ptr<Server>, std::string, std::string, std::string);
 	void onConnect(std::shared_ptr<Server>);
@@ -62,17 +62,7 @@ public:
 	/**
 	 * Default constructor, does nothing.
 	 */
-	ServerManager() = default;
-
-	/**
-	 * Destructor, close the thread.
-	 */
-	~ServerManager();
-
-	/**
-	 * Start the thread.
-	 */
-	void start();
+	ServerManager();
 
 	/**
 	 * Set the event handler.
@@ -82,7 +72,7 @@ public:
 	 */
 	inline void setOnEvent(std::function<void (std::unique_ptr<ServerEvent>)> func) noexcept
 	{
-		assert(!m_running);
+		assert(!isRunning());
 
 		m_onEvent = std::move(func);
 	}
@@ -100,7 +90,6 @@ public:
 		using namespace std;
 		using namespace std::placeholders;
 
-		lock_guard<mutex> lock(m_mutex);
 		shared_ptr<Server> server = make_shared<Server>(forward<Args>(args)...);
 
 		server->setOnChannelNotice(bind(&ServerManager::onChannelNotice, this, server, _1, _2, _3));
@@ -118,7 +107,16 @@ public:
 		server->setOnTopic(bind(&ServerManager::onTopic, this, server, _1, _2, _3));
 		server->setOnUserMode(bind(&ServerManager::onUserMode, this, server, _1, _2));
 
-		m_servers.emplace(server->info().name, std::move(server));
+		{
+			lock_guard<mutex> lock(m_mutex);
+
+			m_servers.emplace(server->info().name, std::move(server));
+		}
+
+		// This function can be called even if the thread is not currently started
+		if (isRunning()) {
+			reload();
+		}
 	}
 };
 

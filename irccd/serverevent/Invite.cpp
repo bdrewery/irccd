@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
-
-#include <js/Plugin.h>
-
 #include "Invite.h"
 
 namespace irccd {
@@ -36,7 +32,11 @@ Invite::Invite(std::shared_ptr<Server> server, std::string origin, std::string c
 
 void Invite::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	p.onInvite(m_server, m_origin, m_channel);
+#else
+	(void)p;
+#endif
 }
 
 std::string Invite::name(Plugin &) const

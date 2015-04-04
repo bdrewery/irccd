@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
-
-#include <js/Plugin.h>
-
 #include "Names.h"
 
 namespace irccd {
@@ -35,7 +31,11 @@ Names::Names(std::shared_ptr<Server> server, std::string channel, std::vector<st
 
 void Names::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	p.onNames(m_server, m_channel, m_names);
+#else
+	(void)p;
+#endif
 }
 
 std::string Names::name(Plugin &) const

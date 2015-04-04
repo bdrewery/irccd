@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
-
-#include <js/Plugin.h>
-
 #include "ChannelNotice.h"
 
 namespace irccd {
@@ -37,7 +33,11 @@ ChannelNotice::ChannelNotice(std::shared_ptr<Server> server, std::string origin,
 
 void ChannelNotice::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	p.onChannelNotice(m_server, m_origin, m_channel, m_notice);
+#else
+	(void)p;
+#endif
 }
 
 std::string ChannelNotice::name(Plugin &) const

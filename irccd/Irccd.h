@@ -21,6 +21,7 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <deque>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -58,8 +59,8 @@ private:
 
 	/* Optional JavaScript plugins */
 #if defined(WITH_JS)
-	std::vector<std::shared_ptr<Plugin>> m_plugins;
-	std::queue<TimerEvent> m_timerEvents;
+	std::map<std::string, std::shared_ptr<Plugin>> m_plugins;
+	std::deque<TimerEvent> m_timerEvents;
 #endif
 
 	/* Identities */
@@ -100,8 +101,35 @@ public:
 	}
 
 #if defined(WITH_JS)
+	/**
+	 * Find a plugin.
+	 *
+	 * @param name the plugin id
+	 * @return the plugin
+	 * @throws std::out_of_range if not found
+	 */
+	std::shared_ptr<Plugin> pluginFind(const std::string &name) const;
+
+	/**
+	 * Load a plugin by a completely resolved path.
+	 *
+	 * @param path the plugin path
+	 */
 	void pluginLoad(std::string path);
+
+	/**
+	 * Unload a plugin and remove it.
+	 *
+	 * @param name the plugin id
+	 */
 	void pluginUnload(const std::string &name);
+
+	/**
+	 * Reload a plugin by calling onReload.
+	 *
+	 * @param name the plugin name
+	 */
+	void pluginReload(const std::string &name);
 #endif
 
 	template <typename... Args>
@@ -157,7 +185,7 @@ public:
 		{
 			std::lock_guard<std::mutex> lock(m_mutex);
 
-			m_timerEvents.push(std::move(event));
+			m_timerEvents.push_back(std::move(event));
 		}
 
 		m_condition.notify_one();
@@ -188,8 +216,11 @@ public:
 
 /**
  * Unique and global instance.
+ *
+ * Used as a pointer to be sure that it is destroyed in the main and not
+ * before anything else (Logger for instance).
  */
-extern Irccd irccd;
+extern Irccd *irccd;
 
 } // !irccd
 

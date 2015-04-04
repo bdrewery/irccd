@@ -95,8 +95,9 @@ public:
 	 *
 	 * @note Thread-safe
 	 * @param message the message
+	 * @param notify set to true to notify the TransportService
 	 */
-	void send(std::string message);
+	void send(std::string message, bool notify = true);
 
 	/**
 	 * Tell if the client has data pending for output.

@@ -16,9 +16,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <algorithm>
+#include <stdexcept>
+
 #include <Logger.h>
 
 #include "Irccd.h"
+
+using namespace std::string_literals;
 
 namespace irccd {
 
@@ -37,11 +42,22 @@ Irccd::Irccd()
 
 Irccd::~Irccd()
 {
-	//m_serverManager.stop();
+	Logger::debug() << "irccd: waiting for transport to finish..." << std::endl;
 	m_transportManager.stop();
+	Logger::debug() << "irccd: waiting for server to finish..." << std::endl;
+	m_serverManager.stop();
 }
 
 #if defined(WITH_JS)
+
+std::shared_ptr<Plugin> Irccd::pluginFind(const std::string &name) const
+{
+	if (m_plugins.count(name) == 0) {
+		throw std::out_of_range("plugin "s + name + " not found"s);
+	}
+
+	return m_plugins.at(name);
+}
 
 void Irccd::pluginLoad(std::string path)
 {
@@ -58,7 +74,35 @@ void Irccd::pluginLoad(std::string path)
 	});
 	plugin->onLoad();
 
-	m_plugins.push_back(std::move(plugin));
+	m_plugins.emplace(plugin->info().name, std::move(plugin));
+}
+
+void Irccd::pluginUnload(const std::string &name)
+{
+	std::shared_ptr<Plugin> plugin = pluginFind(name);
+
+	plugin->onUnload();
+
+	/*
+	 * Erase any element in the timer event queue that match this plugin
+	 * to avoid calling the event of a plugin that is not in irccd anymore.
+	 */
+	for (auto it = m_timerEvents.begin(); it != m_timerEvents.end(); ) {
+		if (it->plugin() == plugin) {
+			it = m_timerEvents.erase(it);
+		} else {
+			++ it;
+		}
+	}
+
+	m_plugins.erase(plugin->info().name);
+}
+
+void Irccd::pluginReload(const std::string &name)
+{
+	std::shared_ptr<Plugin> plugin = pluginFind(name);
+
+	plugin->onReload();
 }
 
 #endif
@@ -73,7 +117,15 @@ void Irccd::run()
 		std::unique_lock<std::mutex> lock(m_mutex);
 
 		m_condition.wait(lock, [this] () {
-			return !m_running || m_serverEvents.size() > 0 || m_timerEvents.size() > 0;
+			if (!m_running || m_serverEvents.size() > 0) {
+				return true;
+			}
+#if defined(WITH_JS)
+			if (m_timerEvents.size() > 0) {
+				return true;
+			}
+#endif
+			return false;
 		});
 
 		if (!m_running) {
@@ -87,18 +139,23 @@ void Irccd::run()
 
 #if defined(WITH_JS)
 			for (auto &plugin : m_plugins) {
-				m_serverEvents.front()->call(*plugin);
-				m_serverEvents.pop();
+				m_serverEvents.front()->call(*plugin.second);
 			}
 #endif
+			m_serverEvents.pop();
 		}
 
 
 #if defined(WITH_JS)
-		// Call timers
+		/*
+		 * Don't use a for-range based loop because the timer event may
+		 * modify this queue if the script request to unload a plugin.
+		 *
+		 * See pluginUnload function.
+		 */
 		while (!m_timerEvents.empty()) {
 			m_timerEvents.front().call();
-			m_timerEvents.pop();
+			m_timerEvents.pop_front();
 		}
 #endif
 	}
@@ -107,9 +164,10 @@ void Irccd::run()
 void Irccd::stop()
 {
 	m_running = false;
+	m_condition.notify_one();
 }
 
-Irccd irccd;
+Irccd *irccd{nullptr};
 
 } // !irccd
 

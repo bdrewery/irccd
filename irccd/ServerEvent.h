@@ -27,10 +27,17 @@
 #include <sstream>
 #include <utility>
 
+#include <IrccdConfig.h>
+
+#if defined(WITH_JS)
+#  include <js/Plugin.h>
+#endif
+
+#include "Server.h"
+
 namespace irccd {
 
 class Plugin;
-class Server;
 
 /**
  * @enum MessageType

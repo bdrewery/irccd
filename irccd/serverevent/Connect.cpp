@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
-
-#include <js/Plugin.h>
-
 #include "Connect.h"
 
 namespace irccd {
@@ -33,7 +29,11 @@ Connect::Connect(std::shared_ptr<Server> server)
 
 void Connect::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	p.onConnect(m_server);
+#else
+	(void)p;
+#endif
 }
 
 std::string Connect::name(Plugin &) const

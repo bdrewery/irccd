@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
-
-#include <js/Plugin.h>
-
 #include "Nick.h"
 
 namespace irccd {
@@ -35,7 +31,11 @@ Nick::Nick(std::shared_ptr<Server> server, std::string oldnickname, std::string 
 
 void Nick::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	p.onNick(m_server, m_oldnickname, m_newnickname);
+#else
+	(void)p;
+#endif
 }
 
 std::string Nick::name(Plugin &) const

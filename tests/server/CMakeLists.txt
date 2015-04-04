@@ -29,6 +29,8 @@ set(
 	${SERVER_STATE_SOURCES}
 	${irccd_SOURCE_DIR}/Server.cpp
 	${irccd_SOURCE_DIR}/Server.h
+	${irccd_SOURCE_DIR}/Service.cpp
+	${irccd_SOURCE_DIR}/Service.h
 	${irccd_SOURCE_DIR}/ServerEvent.cpp
 	${irccd_SOURCE_DIR}/ServerEvent.h
 	${irccd_SOURCE_DIR}/ServerManager.cpp

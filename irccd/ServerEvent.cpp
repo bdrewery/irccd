@@ -18,8 +18,6 @@
 
 #include <Server.h>
 
-#include <js/Plugin.h>
-
 #include "ServerEvent.h"
 
 namespace irccd {
@@ -30,6 +28,7 @@ ServerEvent::ServerEvent(const std::string &, const std::string &)
 
 MessagePack ServerEvent::parseMessage(std::string message, Server &server, Plugin &plugin) const
 {
+#if defined(WITH_JS)
 	std::string cc = server.settings().command;
 	std::string name = plugin.info().name;
 	std::string result = message;
@@ -67,6 +66,12 @@ MessagePack ServerEvent::parseMessage(std::string message, Server &server, Plugi
 	}
 
 	return MessagePack(result, ((iscommand) ? MessageType::Command : MessageType::Message));
+#else
+	(void)message;
+	(void)server;
+	(void)plugin;
+	return MessagePack("", MessageType::Message);
+#endif
 }
 
 } // !irccd

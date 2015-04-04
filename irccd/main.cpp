@@ -95,7 +95,7 @@ void loadIdentity(const IniSection &sc)
 			<< "nickname=" << nickname << ", username=" << username << ", "
 			<< "realname=" << realname << ", ctcp-version=" << ctcpversion << std::endl;
 
-	irccd.identityAdd(Identity(move(name), move(nickname), move(username), move(realname), move(ctcpversion)));
+	irccd->identityAdd(Identity(move(name), move(nickname), move(username), move(realname), move(ctcpversion)));
 }
 
 void loadIdentities(const Ini &config)
@@ -129,13 +129,16 @@ void openConfig(const std::string &path)
 
 void stop(int)
 {
-	irccd.stop();
+	irccd->stop();
 }
 
 } // !irccd
 
 int main(void)
 {
+	irccd::Irccd instance;
+	irccd::irccd = &instance;
+
 	signal(SIGINT, irccd::stop);
 	signal(SIGTERM, irccd::stop);
 	signal(SIGQUIT, irccd::stop);
@@ -154,25 +157,21 @@ int main(void)
 	};
 
 	try {
-		irccd::irccd.pluginLoad("test.js");
-	} catch (const std::exception &ex) {
-		irccd::Logger::warning() << "failed to load plugin: " << ex.what() << std::endl;
-	}
-
-	try {
-		irccd::irccd.serverAdd(info, irccd::Identity(), settings);
+		instance.serverAdd(info, irccd::Identity(), settings);
 	} catch (const std::exception &ex) {
 		irccd::Logger::warning() << "failed to add a server: " << ex.what() << std::endl;
 	}
 
 	try {
-		irccd::irccd.transportAdd<irccd::TransportUnix>("/tmp/irccd.sock");
-		irccd::irccd.transportAdd<irccd::TransportInet>(AF_INET6, 40000);
+		instance.transportAdd<irccd::TransportUnix>("/tmp/irccd.sock");
+		instance.transportAdd<irccd::TransportInet>(AF_INET6, 40000);
 	} catch (const std::exception &ex) {
 		irccd::Logger::warning() << "failed: " << ex.what() << std::endl;
 	}
 
-	irccd::irccd.run();
+	instance.run();
+
+	return 0;
 }
 
 

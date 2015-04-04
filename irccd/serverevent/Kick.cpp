@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
-
-#include <js/Plugin.h>
-
 #include "Kick.h"
 
 namespace irccd {
@@ -38,7 +34,11 @@ Kick::Kick(std::shared_ptr<Server> server, std::string origin, std::string chann
 
 void Kick::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	p.onKick(m_server, m_origin, m_channel, m_target, m_reason);
+#else
+	(void)p;
+#endif
 }
 
 std::string Kick::name(Plugin &) const

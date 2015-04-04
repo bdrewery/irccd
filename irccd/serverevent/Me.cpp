@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
-
-#include <js/Plugin.h>
-
 #include "Me.h"
 
 namespace irccd {
@@ -37,7 +33,11 @@ Me::Me(std::shared_ptr<Server> server, std::string origin, std::string target, s
 
 void Me::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	p.onMe(m_server, m_origin, m_target, m_message);
+#else
+	(void)p;
+#endif
 }
 
 std::string Me::name(Plugin &) const

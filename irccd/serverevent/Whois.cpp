@@ -18,8 +18,6 @@
 
 #include "Whois.h"
 
-#include <js/Plugin.h>
-
 namespace irccd {
 
 namespace event {
@@ -32,7 +30,11 @@ Whois::Whois(std::shared_ptr<Server> server, ServerWhois info)
 
 void Whois::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	p.onWhois(m_server, m_info);
+#else
+	(void)p;
+#endif
 }
 
 std::string Whois::name(Plugin &) const

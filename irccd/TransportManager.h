@@ -113,13 +113,6 @@ public:
 	TransportManager();
 
 	/**
-	 * Destructor.
-	 *
-	 * @pre stop() must have been called.
-	 */
-	~TransportManager();
-
-	/**
 	 * Create a new transport in-place.
 	 *
 	 * @pre isRunning() must return false

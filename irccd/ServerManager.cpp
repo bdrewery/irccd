@@ -42,15 +42,22 @@ namespace irccd {
 
 using namespace event;
 
-void ServerManager::run() noexcept
+void ServerManager::run()
 {
-	while (m_running) {
+	while (isRunning()) {
 		fd_set setinput;
 		fd_set setoutput;
 		int max = 0;
 
 		FD_ZERO(&setinput);
 		FD_ZERO(&setoutput);
+
+		// Add service socket
+		FD_SET(socket().handle(), &setinput);
+
+		if (socket().handle() > max) {
+			max = socket().handle();
+		}
 
 		// Protect the list of servers while preparing the set.
 		{
@@ -86,17 +93,23 @@ void ServerManager::run() noexcept
 
 		int error = select(max + 1, &setinput, &setoutput, nullptr, &tv);
 
-		// Protect the set while processing the sessions.
-		{
-			std::lock_guard<std::mutex> lock(m_mutex);
+		/* Skip on error */
+		if (error < 0) {
+			Logger::warning() << "irccd: " << Socket::syserror() << std::endl;
+			continue;
+		}
 
-			if (error < 0) {
-				Logger::warning() << "irccd: " << Socket::syserror() << std::endl;
-			} else {
-				for (auto &pair : m_servers) {
-					pair.second->process(setinput, setoutput);
-				}
-			}
+		/* Skip if it's the service socket */
+		if (FD_ISSET(socket().handle(), &setinput)) {
+			(void)action();
+			continue;
+		}
+
+		// Protect the set while processing the sessions.
+		std::lock_guard<std::mutex> lock(m_mutex);
+
+		for (auto &pair : m_servers) {
+			pair.second->process(setinput, setoutput);
 		}
 	}
 }
@@ -273,21 +286,9 @@ void ServerManager::onUserMode(std::shared_ptr<Server> server, std::string origi
 	));
 }
 
-ServerManager::~ServerManager()
+ServerManager::ServerManager()
+	: Service("server", "/tmp/._irccd_sv.sock")
 {
-	m_running = false;
-
-	try {
-		m_thread.join();
-	} catch (const std::exception &ex) {
-		Logger::debug() << "irccd: " << ex.what() << std::endl;
-	}
-}
-
-void ServerManager::start()
-{
-	m_running = true;
-	m_thread = std::thread(std::bind(&ServerManager::run, this));
 }
 
 } // !irccd

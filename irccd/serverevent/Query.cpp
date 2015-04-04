@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
-
-#include <js/Plugin.h>
-
 #include "Query.h"
 
 namespace irccd {
@@ -35,6 +31,7 @@ Query::Query(std::shared_ptr<Server> server, std::string origin, std::string mes
 
 void Query::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	auto pack = parseMessage(m_message, *m_server, p);
 
 	if (pack.second == MessageType::Message) {
@@ -42,6 +39,9 @@ void Query::call(Plugin &p) const
 	} else {
 		p.onQueryCommand(m_server, m_origin, pack.first);
 	}
+#else
+	(void)p;
+#endif
 }
 
 std::string Query::name(Plugin &p) const

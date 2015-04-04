@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
-
-#include <js/Plugin.h>
-
 #include "Topic.h"
 
 namespace irccd {
@@ -37,7 +33,11 @@ Topic::Topic(std::shared_ptr<Server> server, std::string origin, std::string cha
 
 void Topic::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	p.onTopic(m_server, m_origin, m_channel, m_topic);
+#else
+	(void)p;
+#endif
 }
 
 std::string Topic::name(Plugin &) const

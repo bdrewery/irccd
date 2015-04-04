@@ -104,6 +104,7 @@ private:
 	/* Thread and mutex */
 	std::atomic<bool> m_running{false};
 	std::thread m_thread;
+	std::string m_servname;
 
 	/*
 	 * Windows does not support Unix sockets and we require socket so we
@@ -111,7 +112,7 @@ private:
 	 *
 	 * Otherwise, we use a Unix socket at a path specified by the derivated class.
 	 */
-#if !defined(_WIN32)
+#if !defined(IRCCD_SYSTEM_WINDOWS)
 	std::string m_path;
 #endif
 
@@ -119,7 +120,7 @@ protected:
 	/**
 	 * The mutex to use.
 	 */
-	std::mutex m_mutex;
+	mutable std::mutex m_mutex;
 
 protected:
 	/**
@@ -158,9 +159,10 @@ public:
 	 *
 	 * This create the socket.
 	 *
+	 * @param name the service name (for debugging purposes)
 	 * @param path the path to the Unix file (not needed on Windows)
 	 */
-	Service(std::string path);
+	Service(std::string name, std::string path);
 
 	/**
 	 * Virtual destructor defaulted.

@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
-
-#include <js/Plugin.h>
-
 #include "Mode.h"
 
 namespace irccd {
@@ -38,7 +34,11 @@ Mode::Mode(std::shared_ptr<Server> server, std::string origin, std::string chann
 
 void Mode::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	p.onMode(m_server, m_origin, m_channel, m_mode, m_argument);
+#else
+	(void)p;
+#endif
 }
 
 std::string Mode::name(Plugin &) const

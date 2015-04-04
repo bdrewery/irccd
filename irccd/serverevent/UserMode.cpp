@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
-
-#include <js/Plugin.h>
-
 #include "UserMode.h"
 
 namespace irccd {
@@ -35,7 +31,11 @@ UserMode::UserMode(std::shared_ptr<Server> server, std::string origin, std::stri
 
 void UserMode::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	p.onUserMode(m_server, m_origin, m_mode);
+#else
+	(void)p;
+#endif
 }
 
 std::string UserMode::name(Plugin &) const

@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
-
-#include <js/Plugin.h>
-
 #include "Part.h"
 
 namespace irccd {
@@ -37,7 +33,11 @@ Part::Part(std::shared_ptr<Server> server, std::string origin, std::string chann
 
 void Part::call(Plugin &p) const
 {
+#if defined(WITH_JS)
 	p.onPart(m_server, m_origin, m_channel, m_reason);
+#else
+	(void)p;
+#endif
 }
 
 std::string Part::name(Plugin &) const
