@@ -46,7 +46,7 @@ namespace {
 duk_ret_t System_env(duk_context *ctx)
 {
 	const char *key = duk_require_string(ctx, 0);
-	const char *value = std::getenv(key);
+	const char *value = getenv(key);
 
 	if (value == nullptr) {
 		dukx_throw_syserror(ctx, errno);

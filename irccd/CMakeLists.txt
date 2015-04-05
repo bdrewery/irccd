@@ -69,3 +69,7 @@ irccd_define_executable(
 		common
 	INSTALL_RUNTIME bin/
 )
+
+if (UNIX)
+	set_target_properties(irccd PROPERTIES LINK_FLAGS "-pthread")
+endif ()

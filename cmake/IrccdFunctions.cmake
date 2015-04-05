@@ -239,5 +239,7 @@ function(apply_libraries target libs)
 		target_link_libraries(${target} ${${libs}})
 	endif ()
 
-	target_link_libraries(${target} port)
+	if (TARGET port)
+		target_link_libraries(${target} port)
+	endif ()
 endfunction()

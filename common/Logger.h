@@ -67,7 +67,6 @@ public:
 class LoggerSilent : public LoggerBase {
 private:
 	class Fake : public std::streambuf {
-		char m_dummy;
 	} m_buffer;
 
 public:
