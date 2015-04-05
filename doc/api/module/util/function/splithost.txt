@@ -1,0 +1,21 @@
+---
+function: splithost
+since: 1.1
+info: yes
+---
+
+Extract the host from a user, for instance with foo!~foo@localhost, localhost will be returned.
+
+# Synopsis
+
+````lua
+host = function util.splithost(user)
+````
+
+# Arguments
+
+- user, the user to split
+
+# Returns
+
+- host, the hostname

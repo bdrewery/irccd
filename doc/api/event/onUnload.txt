@@ -1,0 +1,17 @@
+---
+event: onUserMode
+---
+
+This event is triggered when the server changed your mode.
+
+# SYNOPSIS
+
+````lua
+function onUserMode(server, nickname, mode)
+````
+
+# ARGUMENTS
+
+- server, the current server.
+- nickname, the person who changed the mode.
+- mode, the new mode.

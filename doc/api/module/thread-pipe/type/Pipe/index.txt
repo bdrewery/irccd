@@ -1,0 +1,21 @@
+---
+object: Pipe
+since: 1.1
+info: yes
+---
+
+# Usage
+
+The pipe object.
+
+**Note**: all the functions are thread-safe.
+
+# Methods
+
+- [clear](method/clear.html)
+- [first](method/first.html)
+- [last](method/last.html)
+- [list](method/list.html)
+- [pop](method/pop.html)
+- [push](method/push.html)
+- [wait](method/wait.html)

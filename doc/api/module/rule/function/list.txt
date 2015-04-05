@@ -1,0 +1,27 @@
+---
+function: list
+---
+
+Iterate all rules.
+
+This function is thread-safe because it can be safely accessed between different threads. However, it returns an iterator function which each time it is called it access the next rule index, thus it is possible that an other thread may have removed a rule while you are iterating.
+
+In short: it is very advised to only remove or add rules in one plugin.
+
+# Synopsis
+
+````lua
+iterator = function rule.list()
+````
+
+# Returns
+
+- iterator, an iterator function which each time it is called, return the next rule and its index
+
+# Example
+
+````lua
+for r, i in rule.list() do
+    print(string.format("rule %d, enabled: %s", i, r.enabled))
+end
+````

@@ -1,0 +1,83 @@
+IRC Client Daemon CHANGES
+=========================
+
+CURRENT
+---------------------------------------
+  * The function thread.new can now take a file path as argument,
+  * New address system for irccd.socket,
+  * Add new irccd.util.convert,
+  * Add onQueryCommand new callback,
+  * Added more fields in Date:calendar,
+  * Add option auto-rejoin to server,
+  * Added coroutine library,
+  * Add uid and gid options,
+  * Add new server.list function,
+  * Add rules system,
+  * Add logger.debug,
+  * Add fs.separator,
+  * Create brand new documentation with Pandoc,
+  * Lua 5.3 is now imported and the only available option,
+  * Add new irccd.timer API,
+  * UDP listeners and clients have been removed,
+  * The history plugin has now better messages,
+  * Irccd can now connect to IPv6 servers.
+
+1.1.5 February 14, 2015
+---------------------------------------
+  * Fix Mac OS X build,
+  * Fix null constructed strings,
+  * Fix general.foreground option not working,
+  * Windows: Lua and OpenSSL are built as DLL and copied to installation.
+
+1.1.4 March 28, 2014
+---------------------------------------
+  * Fix Visual C++ redistributable installation.
+
+1.1.3 March 22, 2014
+---------------------------------------
+  * Fix default internet socket address,
+  * Remove listener disconnection errors,
+  * Updated Windows C++ 2013 redistributable.
+
+1.1.2 February 26, 2014
+---------------------------------------
+  * Fix the example in roulette documentation,
+  * Fix command parsing for onCommand event.
+
+1.1.1 February 15, 2014
+---------------------------------------
+  * Fix fs.mkdir that didn't return an error,
+  * Add missing optional mode parameter in fs.mkdir documentation,
+  * Also add irccd.VERSION_PATCH.
+
+1.1 January 30, 2014
+---------------------------------------
+  * Added support for UDP sockets,
+  * Added a plugin for authentication,
+  * Windows irccd's home is now the irccd.exe parent directory,
+  * Added new socket API for Lua,
+  * Added new thread API for Lua,
+  * Added support for server reconnection,
+  * Added support for text formatting with colors and attributes,
+  * Added support for onMe (CTCP Action) event,
+  * Added new way to load plugin by paths,
+  * Server:whois and server:names generate a new events instead of callback,
+  * Support of connecting and disconnecting at runtime,
+  * Plugin has more information, getHome() and getName() are deprecated,
+  * Split irccd.util into irccd.fs and irccd.system,
+  * Added support for LuaJIT.
+
+1.0.2 November 1, 2013
+---------------------------------------
+  * Errata, onMe event is not implemented.
+
+1.0.1 September 17, 2013
+---------------------------------------
+  * Fixed build without Lua,
+  * Improved documentation a lot,
+  * Improved NSIS installer,
+  * Fixed basename() issue.
+
+1.0 September 13, 2013
+---------------------------------------
+  * Initial release.

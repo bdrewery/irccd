@@ -1,0 +1,39 @@
+---
+object: Rule
+---
+
+A rule description. It is used both as information and when you want to add a rule.
+
+# Synopsis
+
+````lua
+local rule = {
+    action,
+    servers = { },
+    channels = { },
+    plugins = { }
+}
+````
+
+# Fields
+
+- **action**, *rule.Accept* or *rule.Drop*
+- **servers**, a sequence of servers
+- **channels**, a sequence of channels
+- **plugins**, a sequence of plugins
+- **events**, a sequence of events
+
+# Example
+
+The following example will match servers @server1@, @server2@ on channel @#staff@ (both servers). It disable the plugin @antiflood@ for these servers.
+
+````lua
+local rule = require "irccd.rule"
+
+rule.add{
+    servers = { "server1", "server2" },
+    channels = { "#staff" },
+    plugins = { "antiflood" },
+    action = rule.Drop
+}
+````

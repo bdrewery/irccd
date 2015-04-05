@@ -1,0 +1,24 @@
+---
+function: opendir
+info: yes
+category: fs
+since: 1.1
+---
+
+Open a directory. Optional boolean skip may be passed to avoid ".", ".." for being included.
+
+# Synopsis
+
+````lua
+directory, err = function fs.opendir(path, skip)
+````
+
+# Arguments
+
+* path, the path
+* skip, optional boolean to skip . and .., default: false
+
+# Returns
+
+* directory, a directory object or nil (see [Directory](Directory))
+* err, the error message

@@ -1,0 +1,13 @@
+---
+method: pop
+since: 1.1
+info: yes
+---
+
+Remove the first value.
+
+# Synopsis
+
+````lua
+function Pipe:pop()
+````

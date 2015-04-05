@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc-LOL">
+    $if(title)$<title>$title$</title>$endif$
+
+    <style type="text/css">code{white-space: pre;}</style>
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    $if(highlighting-css)$
+    <style type="text/css">
+    $highlighting-css$
+    </style>
+    $endif$
+
+    $for(css)$
+    <link rel="stylesheet" href="$css$" />
+    $endfor$
+    <link rel="stylesheet" href="@baseurl@/css/style.css" />
+  </head>
+
+  <body>
+
+  $if(guide)$
+  <div id="sidebar-guide" class="sidebar-common">
+  <h3 style="margin-left: 10px">Table of contents</h3>
+  <nav id="$idprefix$TOC">
+  $toc$
+  </nav>
+  </div>
+  $endif$
+
+  $if(lua)$
+  <div id="sidebar-lua" class="sidebar-common">
+    <div class="section">
+      <a id="index" href="@baseurl@api/index.html">Index</a>
+    </div>
+
+    <div class="section">
+      <p>Modules</p>
+      <ul>
+	<li><a href="@baseurl@api/module/irccd/index.html">irccd</a></li>
+	<li><a href="@baseurl@api/module/fs/index.html">irccd.fs</a></li>
+	<li><a href="@baseurl@api/module/logger/index.html">irccd.logger</a></li>
+	<li><a href="@baseurl@api/module/parser/index.html">irccd.parser</a></li>
+	<li><a href="@baseurl@api/module/plugin/index.html">irccd.plugin</a></li>
+	<li><a href="@baseurl@api/module/rule/index.html">irccd.rule</a></li>
+	<li><a href="@baseurl@api/module/server/index.html">irccd.server</a></li>
+	<li><a href="@baseurl@api/module/socket/index.html">irccd.socket</a></li>
+	<li><a href="@baseurl@api/module/socket-listener/index.html">irccd.socket.listener</a></li>
+	<li><a href="@baseurl@api/module/system/index.html">irccd.system</a></li>
+	<li><a href="@baseurl@api/module/thread/index.html">irccd.thread</a></li>
+	<li><a href="@baseurl@api/module/thread-pipe/index.html">irccd.thread.pipe</a></li>
+	<li><a href="@baseurl@api/module/utf8/index.html">irccd.utf8</a></li>
+	<li><a href="@baseurl@api/module/util/index.html">irccd.util</a></li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <p>Events</p>
+      <ul>
+	<li><a href="@baseurl@api/event/onCommand.html">onCommand</a></li>
+	<li><a href="@baseurl@api/event/onConnect.html">onConnect</a></li>
+	<li><a href="@baseurl@api/event/onChannelNotice.html">onChannelNotice</a></li>
+	<li><a href="@baseurl@api/event/onInvite.html">onInvite</a></li>
+	<li><a href="@baseurl@api/event/onJoin.html">onJoin</a></li>
+	<li><a href="@baseurl@api/event/onKick.html">onKick</a></li>
+	<li><a href="@baseurl@api/event/onLoad.html">onLoad</a></li>
+	<li><a href="@baseurl@api/event/onMessage.html">onMessage</a></li>
+	<li><a href="@baseurl@api/event/onMe.html">onMe</a></li>
+	<li><a href="@baseurl@api/event/onMode.html">onMode</a></li>
+	<li><a href="@baseurl@api/event/onNames.html">onNames</a></li>
+	<li><a href="@baseurl@api/event/onNick.html">onNick</a></li>
+	<li><a href="@baseurl@api/event/onNotice.html">onNotice</a></li>
+	<li><a href="@baseurl@api/event/onPart.html">onPart</a></li>
+	<li><a href="@baseurl@api/event/onQuery.html">onQuery</a></li>
+	<li><a href="@baseurl@api/event/onReload.html">onReload</a></li>
+	<li><a href="@baseurl@api/event/onTopic.html">onTopic</a></li>
+	<li><a href="@baseurl@api/event/onUnload.html">onUnload</a></li>
+	<li><a href="@baseurl@api/event/onUserMode.html">onUserMode</a></li>
+	<li><a href="@baseurl@api/event/onWhois.html">onWhois</a></li>
+      </ul>
+    </div>
+  </div>
+  $endif$
+
+  $if(lua)$
+  <div id="content-lua" class="content-common">
+  $if(event)$
+  <h1 id="content-title">Event: <span class="content-mononame">$event$</span></h1>
+  $endif$
+
+  $if(enum)$
+  <h1 id="content-title">Enumeration (table): <span class="content-mononame">$enum$</span></h1>
+  $endif$
+
+  $if(method)$
+  <h1 id="content-title">Method: <span class="content-mononame">$method$</span></h1>
+  $endif$
+
+  $if(metamethod)$
+  <h1 id="content-title">Metamethod: <span class="content-mononame">$metamethod$</span></h1>
+  $endif$
+
+  $if(function)$
+  <h1 id="content-title">Function: <span class="content-mononame">$function$</span></h1>
+  $endif$
+
+  $if(module)$
+  <h1 id="content-title">Module: <span class="content-mononame">$module$</span></h1>
+  $endif$
+
+  $if(object)$
+  <h1 id="content-title">Object: <span class="content-mononame">$object$</span></h1>
+  $endif$
+
+  $if(info)$
+  <div id="info">
+    $if(since)$
+    <p>Since version $since$</p>
+    $endif$
+  </div><!-- !info -->
+  $endif$
+
+$body$
+    </div><!-- !content -->
+  $endif$
+
+  $if(guide)$
+  <div id="content-guide" class="content-common">
+$body$
+  </div><!-- !content -->
+  $endif$
+
+  <div id="footer">
+    <p>irccd was written by David Demelier</p>
+    <p>Malikania (c) 2013, 2014</p>
+  </div><!-- !footer -->
+
+  </body>
+</html>

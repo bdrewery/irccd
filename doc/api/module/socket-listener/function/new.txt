@@ -1,0 +1,15 @@
+---
+function: new
+---
+
+Create a listener.
+
+# Synopsis
+
+````lua
+listener = function listener.new()
+````
+
+# Returns
+
+- listener, the listener object (see [SocketListener](@baseurl@/api/module/socket-listener/type/SocketListener/index.html))

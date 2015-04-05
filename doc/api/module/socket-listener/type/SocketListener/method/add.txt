@@ -1,0 +1,15 @@
+---
+method: add
+---
+
+Add a socket to the listener.
+
+# Synopsis
+
+````lua
+function Listener:add(sock)
+````
+
+# Arguments
+
+- sock, the socket

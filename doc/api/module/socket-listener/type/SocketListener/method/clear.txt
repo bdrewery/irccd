@@ -1,0 +1,11 @@
+---
+method: clear
+---
+
+Remove all sockets from the listener.
+
+# Synopsis
+
+````lua
+function Listener:clear()
+````

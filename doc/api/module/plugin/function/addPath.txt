@@ -1,0 +1,17 @@
+---
+function: addPath
+category: plugin
+since: 1.1
+---
+
+Add a path where irccd can find plugins.
+
+# Synopsis
+
+````lua
+function plugin.addPath(path)
+````
+
+# Arguments
+
+- path, the directory to add

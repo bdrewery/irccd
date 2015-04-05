@@ -1,0 +1,22 @@
+---
+function: length
+since: 1.2
+info: yes
+---
+
+Get the real length of a UTF-8 multibyte string.
+
+# Synopsis
+
+````lua
+function length(str)
+````
+
+# Arguments
+
+- str, the well encoded UTF-8 string
+
+# Returns
+
+1. The string's length or nil if not well encoded
+2. The error message

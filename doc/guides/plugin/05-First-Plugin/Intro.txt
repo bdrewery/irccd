@@ -1,0 +1,236 @@
+# Your first plugin
+
+Now, we will write a simple plugin that repeat every sentences said on a
+channel, it's quite easy but you should not use it on a real channel or you'll
+probably get kicked.
+
+## Requirements
+
+First of all, you need to be a little familiar with the Lua syntax.
+
+Please also note that we are running Lua 5.3 only and there is no way to use
+a different version.
+
+## Create your plugin
+
+We will create our new plugin under the home user plugin path. If you're running
+on Unix systems it is usually **${XDG_CONFIG_HOME}/.irccd/plugins**.
+
+So let start by creating a plugin named **repeater.lua**. On my system the file
+will live as **/home/markand/.config/irccd/plugins/repeater.lua**.
+
+## Anatomy of a plugin
+
+A irccd plugin consists of one plain Lua file for each plugin. Each plugin is
+loaded in its own Lua state which means that they can't use global variables
+defined in other plugins.
+
+The plugin defines global variables which will be evaluated when irccd load it.
+
+## General information
+
+While it's not mandatory, you can provide some information about your plugin.
+These information may be used by other plugins if necessary. To set them, just
+set the following global variables:
+
+- **AUTHOR**, the author. Usually in the following form: Names
+- **VERSION**, the version.
+- **LICENSE**, the license.
+- **COMMENT**, a short summary, without the final dot.
+
+**Example**
+
+````lua
+AUTHOR = "David Demelier <markand@malikania.fr>"
+VERSION = "1.0.8"
+LICENSE = "ISC"
+COMMENT = "This plugin destroy everything"
+````
+
+Please note that these information are just stored in the plugin metadata
+information. Irccd does not use them internally.
+
+## First event
+
+### Registering the callback
+
+Remember, plugins are made through the event driven mechanism, so we must define
+a function that will be called when a user said something on the channel.
+The function defined on channel message is called `onMessage`.
+
+It has the following signature:
+
+````lua
+function onMessage(server, channel, nickname, message)
+````
+
+The parameters are defined as following:
+
+- **server**, on which server the message happened
+- **channel**, on which channel
+- **nickname**, who emit the message (full nickname with host)
+- **message**, and the message content
+
+### Send the response
+
+Now that we have the message, the channel and the server, we can send the copy
+of the message. For this, you must take care of the server parameter. The server
+is one of defined in the server section from the configuration file.
+
+There are several methods available for the object, they are defined in the
+`irccd.server` documentation. But the one we are interested in is `Server:say`.
+This function takes two parameters, the target which can be a nickname or a
+channel, and the message.
+
+So the only thing to do is the following:
+
+````lua
+function onMessage(server, channel, nickname, message)
+    server:say(channel, message)
+end
+````
+
+That's it!
+
+You've just made a brand new plugin, of course it's not a very powerful one but
+at least you understood the way it works. With the powerful API provided you
+will be able to create a bunch of plugins that can fits your needs, such as
+a content provider, a moderator, a calculator and so on.
+
+# Do and do not
+
+There are things which should be avoided if possible.
+
+## Threaded plugins
+
+The new thread API that comes with irccd 1.1 is handy. It can helps creating
+plugins that need to live even if there are no event. However some
+considerations and rules should be applied:
+
+- Try to join threads if possible
+- Try to kill the thread when unloading a plugin
+
+### Problems
+
+The main problem with Lua is that it's it not thread safe at all. When you
+create a new thread, it create a new Lua state (context) with its own
+resources and variables. Nothing can be shared from the parent. That's why 
+the `irccd.pipe` API is made for. It permit communication between threads
+or even plugins.
+
+In the following example, we will see how to stop a thread when unloading a plugin.
+
+**Bad example**
+
+````lua
+local thread = require "irccd.thread"
+
+function onLoad()
+	thread.new(
+		function ()
+			while true do
+				-- do something here
+			end
+		end
+	)
+end
+````
+
+The problem with that example, is that the thread will never dies until irccd
+quits. Because there is no standard way to kill a thread, irccd only detach
+them if they have not been joined. A better practice, is to use a control
+variable and the `onUnload` callback.
+
+**Good example**
+
+````lua
+local thread   = require "irccd.thread"
+local pipe     = require "irccd.pipe"
+
+local myworker = nil
+local mypipe   = nil
+
+function onLoad()
+	mypipe = pipe.get "the_pipe_name"	-- use a unique name
+	myworker = thread.new(
+		function ()
+			local thread = require "irccd.thread"
+			local pipe   = require "irccd.pipe"
+
+			local mypipe = pipe.get "the_pipe_name"
+			local done = false
+
+			while not done do
+				if type(mypipe:first()) == "string" and mypipe:first() == "quit" then
+					--
+					-- Don't forget to clear the pipe, if we reload the plugin it
+					-- will enter this condition if we forget
+					--
+					mypipe:clear()
+					done = true
+				else
+					-- do something here...
+				end
+			end
+		end
+	end)
+end
+
+function onUnload()
+	mypipe:push("quit")
+	myworker:join()
+end
+````
+
+Of course, it's a bit less convenient and verbose but it's the correct way of
+handling threads.
+
+In that case, if we need to unload the plugin, irccd will wait until the threads
+finish their execution which is controlled by the `done` variable. As explain
+in the comments, do not forget to clear the pipe, they are persistent withing
+the full irccd context.
+
+## Error and load
+
+Since irccd 1.1, one should not write code outside Lua supported events
+functions. Internally, irccd store the plugin information the complete
+read. If a plugin has an syntax error or a bad API call, irccd looks
+for the plugin metadata information and since it is not currently stored,
+it generate the "unitialized state" error.
+
+### Handling error
+
+There are two ways of handling error.
+
+#### Your plugin can't continue running
+
+If you need a file, specific resource so your plugin can run and it's not the
+case, use Lua [error](http://www.lua.org/manual/5.2/manual.html#pdf-error) function.
+
+If you call the error function while you are in the `onLoad` callback, the
+plugin is not added to the registry. However, if the function is called
+in any other event, the plugin remains in the list.
+
+#### Your plugin has errors but can run
+
+If for instance, the plugin has errors but can still run for any reason. One
+should use the `irccd.logger` API. The function in this API will write a
+message in the irccd output.
+
+**Example**
+
+````lua
+local logger = require "irccd.logger"
+
+function onCommand(s, c, n, m)
+    if ... bad condition ... then
+        logger.warn("error condition")
+    end
+end
+````
+
+This will output to the irccd log something like:
+
+````
+plugin foo: error condition
+````

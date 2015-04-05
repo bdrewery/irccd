@@ -1,0 +1,17 @@
+---
+function: unload
+category: plugin
+since: 1.1
+---
+
+Unload a plugin.
+
+# Synopsis
+
+````lua
+function plugin.unload(name)
+````
+
+# Arguments
+
+- name, the plugin's name

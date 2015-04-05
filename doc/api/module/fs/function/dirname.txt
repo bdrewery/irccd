@@ -1,0 +1,22 @@
+---
+function: dirname
+info: yes
+category: fs
+since: 1.1
+---
+
+Get the parent path of a file. This function may be used to get the parent path from a file. Example: calling dirname on _/foo/bar/test.txt_ will returns _/foo/bar_.
+
+# Synopsis
+
+````lua
+name = function fs.dirname(path)
+````
+
+# Arguments
+
+* path, the path
+
+# Returns
+
+* name, the parent directory

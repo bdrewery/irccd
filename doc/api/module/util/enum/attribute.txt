@@ -1,0 +1,33 @@
+---
+enum: attribute
+info: yes
+since: 1.1
+---
+
+**Note**: not all attributes are supported
+
+# Synopsis
+
+````lua
+local attribute = {
+    Bold,
+    Color,
+    Italic,
+    StrikeThrough,
+    Reset,
+    Underline,
+    Underline2,
+    Reverse
+}
+````
+
+# Values
+
+- **Bold**, Bold.
+- **Color**, Color (start a color sequence).
+- **Italic**, Italic.
+- **StrikeThrough**, StrikeThrough.
+- **Reset**, Reset (remove all formatting).
+- **Underline**, Underline1.
+- **Underline2**, Underline2.
+- **Reverse**, Reverse (reverse foreground and background).

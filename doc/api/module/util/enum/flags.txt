@@ -1,0 +1,23 @@
+---
+enum: flags
+since: 1.2
+info: yes
+---
+
+Flags only used for the [irccd.util.convert](@baseurl@/api/module/util/function/convert.html) function.
+
+# Synopsis
+
+````lua
+local flags = {
+    ConvertDate,
+    ConvertHome,
+    ConvertEnv
+}
+````
+
+# Values
+
+- **ConvertDate**, convert date with strftime(3) patterns
+- **ConvertHome**, convert ~ to the user home directory
+- **ConvertEnv**, convert environment variables from ${} (braces are mandatory)

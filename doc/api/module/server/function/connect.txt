@@ -1,0 +1,61 @@
+---
+function: connect
+info: yes
+category: server
+since: 1.1
+---
+
+Connect to a server. The parameters are specified like this:
+
+- **name** (string): required, the server name
+- **host** (string): required, the hostname
+- **port** (int): required, the port number
+- **password** (string): an optional password for the IRC server
+- **channels** (table): list of string or name, password pairs of channels to join
+- **identity** (table): an identity to use with fields:
+	- **name** (string): the identity name
+	- **nickname** (string): the nickname to use
+	- **username** (string): the username
+	- **realname** (string): the full name
+
+# Synopsis
+
+````lua
+ret, err = function server.connect(params)
+````
+
+# Returns
+
+- ret, true on success or false
+- err, the error message
+
+# Example
+
+````lua
+local server	= require "irccd.server"
+
+--
+-- Connect to a server by hand when the plugin is loaded
+--
+function onLoad()
+	server.connect{
+		name		= "test",
+		host		= "the.hostname",
+		port		= 6667,
+
+		channels	= {
+			"#foo",				-- no password
+			{ "#staff" },			-- no password neither (alternative)
+			{ "#secret", "pass" }		-- channel #secret with "pass" as password
+		},
+
+		-- Use a different identity
+		identity	= {
+			name		= "mario",
+			nickname	= "mario",
+			username	= "mario",
+			realname	= "Super Mario"
+		}
+	}
+end
+````
