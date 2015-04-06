@@ -122,7 +122,7 @@ void Irccd::run()
 		std::unique_lock<std::mutex> lock(m_mutex);
 
 		m_condition.wait(lock, [this] () {
-			if (!m_running || m_serverEvents.size() > 0) {
+			if (!m_running || m_serverEvents.size() > 0 || m_transportCommands.size() > 0) {
 				return true;
 			}
 #if defined(WITH_JS)
@@ -137,7 +137,13 @@ void Irccd::run()
 			continue;
 		}
 
-		// Call server events
+		/* Call transport commands */
+		while (!m_transportCommands.empty()) {
+			m_transportCommands.front()->exec(*this);
+			m_transportCommands.pop();
+		}
+
+		/* Call server events */
 		while (!m_serverEvents.empty()) {
 			// Broadcast
 			m_transportManager.broadcast(m_serverEvents.front()->toJson());

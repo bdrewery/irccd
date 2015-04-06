@@ -27,6 +27,82 @@
 #include <string>
 #include <unordered_map>
 
+#include <SocketTcp.h>
+
+namespace irccd {
+
+class Irccdctl {
+private:
+	using Helper = void (Irccdctl::*)() const;
+	using Handler = void (Irccdctl::*)(int argc, char **argv);
+
+	/* Socket for connecting */
+	SocketTcp m_socket;
+
+	/* Commands and help */
+	std::unordered_map<std::string, Helper> m_helpers;
+	std::unordered_map<std::string, Handler> m_handlers;
+
+	/* Help messages */
+	void helpChannelNotice() const;
+	void helpConnect() const;
+	void helpDisconnect() const;
+	void helpInvite() const;
+	void helpJoin() const;
+	void helpKick() const;
+	void helpLoad() const;
+	void helpMe() const;
+	void helpMessage() const;
+	void helpMode() const;
+	void helpNick() const;
+	void helpNotice() const;
+	void helpPart() const;
+	void helpReconnect() const;
+	void helpReload() const;
+	void helpTopic() const;
+	void helpUnload() const;
+	void helpUserMode() const;
+
+	/* Commands */
+	void handleHelp(int, char **);
+	void handleChannelNotice(int, char **);
+	void handleConnect(int, char **);
+	void handleDisconnect(int, char **);
+	void handleInvite(int, char **);
+	void handleJoin(int, char **);
+	void handleKick(int, char **);
+	void handleLoad(int, char **);
+	void handleMe(int, char **);
+	void handleMessage(int, char **);
+	void handleMode(int, char **);
+	void handleNick(int, char **);
+	void handleNotice(int, char **);
+	void handlePart(int, char **);
+	void handleReconnect(int, char **);
+	void handleReload(int, char **);
+	void handleTopic(int, char **);
+	void handleUnload(int, char **);
+	void handleUserMode(int, char **);
+
+	/* Private functions */
+	void send(std::string message);
+	void usage();
+	std::string response();
+
+public:
+	Irccdctl(SocketTcp s);
+
+	int exec(int argc, char **argv);
+
+};
+
+} // !irccd
+
+#if 0
+
+#include <string>
+#include <unordered_map>
+
 #include <IrccdConfig.h>
 
 #include <Parser.h>
@@ -134,7 +210,7 @@ public:
 	int getResponse();
 
 	/**
-	 * Add an optional argument 
+	 * Add an optional argument
 	 *
 	 * @param c the character used
 	 * @param arg the value
@@ -168,5 +244,7 @@ public:
 };
 
 } // !irccd
+
+#endif
 
 #endif // !_IRCCDCTL_H_

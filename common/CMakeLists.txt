@@ -34,6 +34,8 @@ set(
 	Json.h
 	Logger.cpp
 	Logger.h
+	OptionParser.cpp
+	OptionParser.h
 	Singleton.h
 	Socket.cpp
 	Socket.h

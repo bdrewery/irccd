@@ -21,9 +21,18 @@
 #include <stdexcept>
 #include <string>
 
+#include <IrccdConfig.h>
+
 #include <Logger.h>
+#include <OptionParser.h>
+#include <SocketAddress.h>
+#include <SocketTcp.h>
 
 #include "Irccdctl.h"
+
+using namespace irccd;
+
+#if 0
 
 using namespace irccd;
 using namespace std;
@@ -98,8 +107,38 @@ void useParams(Irccdctl &ctl, const unordered_map<char, string> &params)
 	}
 }
 
+#endif
+
 int main(int argc, char **argv)
 {
+	setprogname("irccd");
+
+	OptionParser parser{
+		{ "v",	"verbose",	Option::NoArg	}
+	};
+	OptionPack pack = parser.parse(--argc, ++argv);
+
+	/* TODO : PARSE */
+	argc -= pack.parsed();
+	argv += pack.parsed();
+
+	SocketTcp socket(AF_INET, 0);
+
+	try {
+		socket.connect(address::Internet("localhost", 40000, AF_INET));
+	} catch (const std::exception &ex) {
+		Logger::warning() << getprogname() << ": " << ex.what() << std::endl;
+	}
+
+	Irccdctl ctl(socket);
+
+	int ret = ctl.exec(argc, argv);
+
+	socket.close();
+
+	return ret;
+
+#if 0
 	Irccdctl ctl;
 	unordered_map<char, string> params;
 	int ch;
@@ -143,6 +182,7 @@ int main(int argc, char **argv)
 		verifyParams(params);
 		useParams(ctl, params);
 	}
+#endif
 
-	return ctl.run(argc, argv);
+//	return ctl.run(argc, argv);
 }

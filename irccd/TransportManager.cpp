@@ -192,7 +192,7 @@ void TransportManager::topic(const std::shared_ptr<TransportClientAbstract> &cli
 		client,
 		want(object, "server").toString(),
 		want(object, "channel").toString(),
-		optional(object, "topic", "").toString()
+		want(object, "topic").toString()
 	));
 }
 

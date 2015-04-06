@@ -62,11 +62,6 @@
  * Platform checks
  * -------------------------------------------------------- */
 
-#cmakedefine	HAVE_GETOPT
-#if !defined(HAVE_GETOPT)
-#  include <getopt.h>
-#endif
-
 #cmakedefine	HAVE_SETPROGNAME
 #if !defined(HAVE_SETPROGNAME)
 #  include <setprogname.h>

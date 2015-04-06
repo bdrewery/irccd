@@ -329,7 +329,7 @@ private:
 	 *   "command": "topic",
 	 *   "server: "the server name",
 	 *   "channel": "the channel name",
-	 *   "topic": "the new topic"		(Optional)
+	 *   "topic": "the new topic"
 	 * }
 	 */
 	void topic(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);

@@ -34,6 +34,7 @@ Part::Part(std::shared_ptr<TransportClientAbstract> client, std::string server, 
 
 void Part::exec(Irccd &irccd)
 {
+	puts("CALLING!");
 	irccd.serverFind(m_server)->part(m_channel, m_reason);
 }
 

@@ -3,20 +3,15 @@ IRC Client Daemon CHANGES
 
 CURRENT
 ---------------------------------------
-  * The function thread.new can now take a file path as argument,
-  * New address system for irccd.socket,
+  * Switch from Lua to Ecmascript
   * Add new irccd.util.convert,
   * Add onQueryCommand new callback,
   * Added more fields in Date:calendar,
   * Add option auto-rejoin to server,
-  * Added coroutine library,
   * Add uid and gid options,
-  * Add new server.list function,
   * Add rules system,
   * Add logger.debug,
-  * Add fs.separator,
   * Create brand new documentation with Pandoc,
-  * Lua 5.3 is now imported and the only available option,
   * Add new irccd.timer API,
   * UDP listeners and clients have been removed,
   * The history plugin has now better messages,

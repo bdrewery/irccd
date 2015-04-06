@@ -22,254 +22,223 @@
 #include <unordered_map>
 #include <stdexcept>
 
+#include <IrccdConfig.h>
+
+#include <ElapsedTimer.h>
+#include <Filesystem.h>
+#include <Json.h>
 #include <Logger.h>
-#include <Parser.h>
 #include <SocketAddress.h>
 #include <SocketListener.h>
 #include <Util.h>
 
 #include "Irccdctl.h"
 
+using namespace std::string_literals;
+
 namespace irccd {
 
-namespace {
+/* --------------------------------------------------------
+ * Help messages
+ * -------------------------------------------------------- */
 
-/* {{{ help messages */
-
-using HelpHandler = std::function<void()>;
-
-void helpChannelNotice()
+void Irccdctl::helpChannelNotice() const
 {
-	Logger::warn("usage: %s cnotice server channel message\n", getprogname());
-	Logger::warn("Send a notice to a public channel. This is a notice that everyone");
-	Logger::warn("will be notified by.\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s cnotice freenode #staff \"Don't flood\"", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " cnotice server channel message\n\n"
+			  << "Send a notice to a public channel. This is a notice that everyone\n"
+			  << "will be notified by.\n\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " cnotice freenode #staff \"Don't flood\"" << std::endl;
 }
 
-void helpConnect()
+void Irccdctl::helpConnect() const
 {
-	Logger::warn("usage: %s [-k password] [-i identity] connect name address port\n", getprogname());
-	Logger::warn("Connect to a new server. Specify the server ressource name, address and the port");
-	Logger::warn("to use. Optional -k option specify a password. Optional -i option specify a");
-	Logger::warn("specific identity to use.\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s connect superserver irc.superserver.foo 6667", getprogname());
-	Logger::warn("\t%s connect -k secret -i fabrice serverz irc.svz.bar 6667", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " connect [-k password] [-i identity] name address port\n\n"
+			  << "Connect to a new server. Specify the server ressource name, address and the port\n"
+			  << "to use. Optional -k option specify a password. Optional -i option specify a\n"
+			  << "specific identity to use.\n\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " connect superserver irc.superserver.foo 6667\n"
+			  << "\t" << getprogname() << " connect -k secret -i fabrice serverz irc.svz.bar 6667" << std::endl;
 }
 
-void helpDisconnect()
+void Irccdctl::helpDisconnect() const
 {
-	Logger::warn("usage: %s disconnect server\n", getprogname());
-	Logger::warn("Disconnect from a connected server.\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s disconnect server", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " disconnect server\n\n"
+			  << "Disconnect from a connected server.\n\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " disconnect server" << std::endl;
 }
 
-void helpInvite()
+void Irccdctl::helpInvite() const
 {
-	Logger::warn("usage: %s invite server nickname channel\n", getprogname());
-	Logger::warn("Invite someone to a channel, needed for channel with mode +i\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s invite freenode xorg62 #staff", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " invite server nickname channel\n\n"
+			  << "Invite someone to a channel, needed for channel with mode +i\n\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " invite freenode xorg62 #staff" << std::endl;
 }
 
-void helpJoin()
+void Irccdctl::helpJoin() const
 {
-	Logger::warn("usage: %s join server channel [password]\n", getprogname());
-	Logger::warn("Join a channel on a specific server registered in irccd. The server");
-	Logger::warn("is referenced by the parameter server. Parameter channel is the channel");
-	Logger::warn("to join. An optional password may be set as password parameter.\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s join freenode #staff", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " join server channel [password]\n\n"
+			  << "Join a channel on a specific server registered in irccd. The server\n"
+			  << "is referenced by the parameter server. Parameter channel is the channel\n"
+			  << "to join. An optional password may be set as the third argument.\n\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " join freenode #staff" << std::endl;
 }
 
-void helpKick()
+void Irccdctl::helpKick() const
 {
-	Logger::warn("usage: %s kick server nick channel [reason]\n", getprogname());
-	Logger::warn("Kick someone from a channel. The parameter reason is optional and");
-	Logger::warn("may be ommited but when specified it must be unclosed between quotes.\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s kick freenode jean #staff \"Stop flooding\"", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " kick server nick channel [reason]\n"
+			  << "Kick someone from a channel. The parameter reason is optional and\n"
+			  << "may be ommited but when specified it must be unclosed between quotes.\n\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " kick freenode jean #staff \"Stop flooding\"" << std::endl;
 }
 
-void helpLoad()
+void Irccdctl::helpLoad() const
 {
-	Logger::warn("usage: %s load name\n", getprogname());
-	Logger::warn("Load a plugin into the irccd instance.\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s load logger", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " load name\n"
+			  << "Load a plugin into the irccd instance.\n\n"
+			  << "Example:\n"
+			  << "\t%s load logger" << std::endl;
 }
 
-void helpMe()
+void Irccdctl::helpMe() const
 {
-	Logger::warn("usage: %s me server target message\n", getprogname());
-	Logger::warn("Send a CTCP ACTION message. It is exactly the same syntax as message.\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s me freenode #staff \"going back soon\"", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " me server target message\n"
+			  << "Send a CTCP ACTION message. It is exactly the same syntax as message.\n\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " me freenode #staff \"going back soon\"" << std::endl;
 }
 
-void helpMessage()
+void Irccdctl::helpMessage() const
 {
-	Logger::warn("usage: %s message server target message\n", getprogname());
-	Logger::warn("Send a message to someone or a channel. The target may be a channel or a real person");
-	Logger::warn("If the message contains more than one word it must be enclosed between quotes.\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s message freenode #staff \"Hello from irccd\"", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " message server target message\n"
+			  << "Send a message to someone or a channel. The target may be a channel or a real person\n"
+			  << "If the message contains more than one word it must be enclosed between quotes.\n\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " message freenode #staff \"Hello from irccd\"" << std::endl;
 }
 
-void helpMode()
+void Irccdctl::helpMode() const
 {
-	Logger::warn("usage: %s mode server channel mode\n", getprogname());
-	Logger::warn("Change the mode of the specified channel. The mode contains full parameters");
-	Logger::warn("like \"+b\" or \"+k secret\".\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s mode freenode #staff +t", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " mode server channel mode\n"
+			  << "Change the mode of the specified channel. The mode contains full parameters\n"
+			  << "like \"+b\" or \"+k secret\".\n\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " mode freenode #staff +t" << std::endl;
 }
 
-void helpNick()
+void Irccdctl::helpNick() const
 {
-	Logger::warn("usage: %s nick server nickname\n", getprogname());
-	Logger::warn("Change your nickname. The parameter nickname is the new nickname\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s nick freenode david", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " nick server nickname\n"
+			  << "Change your nickname. The parameter nickname is the new nickname\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " nick freenode david" << std::endl;
 }
 
-void helpNotice()
+void Irccdctl::helpNotice() const
 {
-	Logger::warn("usage: %s notice server target message\n", getprogname());
-	Logger::warn("Send a private notice to a target user.\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s notice freenode jean \"Private notice\"", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " notice server target message\n"
+			  << "Send a private notice to a target user.\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " notice freenode jean \"Private notice\"" << std::endl;
 }
 
-void helpPart()
+void Irccdctl::helpPart() const
 {
-	Logger::warn("usage: %s part server channel\n", getprogname());
-	Logger::warn("Leave a channel. Parameter server is one registered in irccd config.");
-	Logger::warn("Parameter channel is the channel to leave.\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s part freenode #staff", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " part server channel\n"
+			  << "Leave a channel. Parameter server is one registered in irccd config.\n"
+			  << "Parameter channel is the channel to leave.\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " part freenode #staff" << std::endl;
 }
 
-void helpReload()
+void Irccdctl::helpReconnect() const
 {
-	Logger::warn("usage: %s reload name\n", getprogname());
-	Logger::warn("Reload a plugin, parameter name is the plugin to reload.");
-	Logger::warn("The plugin needs to be loaded.\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t %s reload logger", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " reconnect [name]\n"
+			  << "Force a server restart. If no name parameter is given all\n"
+			  << "servers are restarted.\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " reconnect"
+			  << "\t" << getprogname() << " reconnect wanadoo" << std::endl;
 }
 
-void helpRestart()
+void Irccdctl::helpReload() const
 {
-	Logger::warn("usage: %s restart [name]\n", getprogname());
-	Logger::warn("Force a server restart. If no name parameter is given all");
-	Logger::warn("servers are restarted.\n");
-
-
-	Logger::warn("Example:");
-	Logger::warn("\t %s restart", getprogname());
-	Logger::warn("\t %s restart wanadoo", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " reload name\n"
+			  << "Reload a plugin, parameter name is the plugin to reload.\n"
+			  << "The plugin needs to be loaded.\n\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " reload logger" << std::endl;
 }
 
-void helpTopic()
+void Irccdctl::helpTopic() const
 {
-	Logger::warn("usage: %s topic server channel topic\n", getprogname());
-	Logger::warn("Set the new topic of a channel. Topic must be enclosed between");
-	Logger::warn("quotes.\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s topic freenode #wmfs \"This is the best channel\"", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " topic server channel topic\n"
+			  << "Set the new topic of a channel. Topic must be enclosed between\n"
+			  << "quotes.\n\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " topic freenode #wmfs \"This is the best channel\"" << std::endl;
 }
 
-void helpUnload()
+void Irccdctl::helpUnload() const
 {
-	Logger::warn("usage: %s unload name\n", getprogname());
-	Logger::warn("Unload a loaded plugin from the irccd instance.\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s unload logger", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " unload name\n"
+			  << "Unload a loaded plugin from the irccd instance.\n\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " unload logger" << std::endl;
 }
 
-void helpUserMode()
+void Irccdctl::helpUserMode() const
 {
-	Logger::warn("usage: %s umode server mode\n", getprogname());
-	Logger::warn("Change your own user mode.\n");
-
-	Logger::warn("Example:");
-	Logger::warn("\t%s umode +i", getprogname());
+	Logger::warning() << "usage: " << getprogname() << " umode server mode\n"
+			  << "Change your own user mode.\n\n"
+			  << "Example:\n"
+			  << "\t" << getprogname() << " umode +i" << std::endl;
 }
 
-std::unordered_map<std::string, HelpHandler> helpHandlers {
-	{ "cnotice", 	helpChannelNotice	},
-	{ "disconnect",	helpDisconnect		},
-	{ "connect",	helpConnect		},
-	{ "invite",	helpInvite		},
-	{ "join",	helpJoin		},
-	{ "kick",	helpKick		},
-	{ "load",	helpLoad		},
-	{ "me",		helpMe			},
-	{ "message",	helpMessage		},
-	{ "mode",	helpMode		},
-	{ "notice",	helpNotice		},
-	{ "nick",	helpNick		},
-	{ "part",	helpPart		},
-	{ "reload",	helpReload		},
-	{ "restart",	helpRestart		},
-	{ "topic",	helpTopic		},
-	{ "umode",	helpUserMode		},
-	{ "unload",	helpUnload		}
-};
+/* --------------------------------------------------------
+ * Commands
+ * -------------------------------------------------------- */
 
-/* }}} */
-
-/* {{{ handlers */
-
-using Handler = std::function<void(Irccdctl *, int, char **)>;
-
-void handleHelp(Irccdctl *, int argc, char **argv)
+void Irccdctl::handleHelp(int argc, char **argv)
 {
-	if (argc < 1)
-		Logger::fatal(1, "help requires 1 argument");
-
-	try {
-		helpHandlers.at(argv[0])();
-	} catch (std::out_of_range ex) {
-		Logger::warn("There is no subject named %s", argv[0]);
+	if (argc < 1) {
+		Logger::warning() << "help requires 1 argument" << std::endl;
+	} else {
+		try {
+			// TODO
+			//m_helpers.at(argv[0])();
+		} catch (const std::exception &) {
+			Logger::warning() << "There are no subject named " << argv[0] << std::endl;
+		}
 	}
-
-	std::exit(1);
 }
 
-void handleChannelNotice(Irccdctl *ctl, int argc, char **argv)
+void Irccdctl::handleChannelNotice(int argc, char **argv)
 {
-	std::ostringstream oss;
+	if (argc < 3) {
+		Logger::warning() << "cnotice requires 3 arguments" << std::endl;
+	} else {
+		std::ostringstream oss;
 
-	if (argc < 3)
-		Logger::fatal(1, "cnotice requires 3 arguments");
+		oss << "{"
+		    <<   "\"command\":\"cnotice\","
+		    <<   "\"server\":\"" << argv[0] << "\","
+		    <<   "\"channel\":\"" << argv[1] << "\","
+		    <<   "\"message\":\"" << JsonValue::escape(argv[2]) << "\""
+		    << "}";
 
-	oss << "CNOTICE " << argv[0] << " " << argv[1];
-	oss << " " << argv[2] << "\n";
-	ctl->sendRaw(oss.str());
+		send(oss.str());
+	}
 }
 
-void handleConnect(Irccdctl *ctl, int argc, char **argv)
+void Irccdctl::handleConnect(int argc, char **argv)
 {
+#if 0
 	std::ostringstream oss;
 
 	if (argc < 3)
@@ -286,256 +255,366 @@ void handleConnect(Irccdctl *ctl, int argc, char **argv)
 	if (ctl->hasArg('s'))
 		oss << " ssl:on";
 	oss << "\n";
-	
-	ctl->sendRaw(oss.str());
-}
-
-void handleDisconnect(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 1)
-		Logger::fatal(1, "disonnect requires 1 argument");
-
-	oss << "DISCONNECT " << argv[0] << "\n";
-	ctl->sendRaw(oss.str());
-}
-
-void handleInvite(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 3)
-		Logger::fatal(1, "invite requires 3 arguments");
-
-	oss << "INVITE " << argv[0] << " " << argv[1];
-	oss << " " << argv[2] << "\n";
 
 	ctl->sendRaw(oss.str());
-}
-
-void handleJoin(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 2)
-		Logger::fatal(1, "join requires at least 2 arguments");
-
-	oss << "JOIN " << argv[0] << " " << argv[1];
-
-	// optional password
-	if (argc >= 3)
-		oss << " " << argv[2];
-	oss << "\n";
-	ctl->sendRaw(oss.str());
-}
-
-void handleKick(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 3)
-		Logger::fatal(1, "kick requires at least 3 arguments ");
-
-	oss << "KICK " << argv[0] << " " << argv[1] << " " << argv[2];
-
-	// optional reason
-	if (argc >= 4)
-		oss << " " << argv[3];
-	oss << "\n";
-	ctl->sendRaw(oss.str());
-}
-
-void handleLoad(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 1)
-		Logger::fatal(1, "load requires 1 argument");
-
-	oss << "LOAD " << argv[0] << "\n";
-	ctl->sendRaw(oss.str());
-}
-
-void handleMe(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 3)
-		Logger::fatal(1, "me requires 3 arguments");
-
-	oss << "ME " << argv[0] << " " << argv[1] << " " << argv[2] << "\n";
-	ctl->sendRaw(oss.str());
-}
-
-void handleMessage(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 3)
-		Logger::fatal(1, "message requires 3 arguments");
-
-	oss << "MSG " << argv[0] << " " << argv[1] << " " << argv[2] << "\n";
-	ctl->sendRaw(oss.str());
-}
-
-void handleMode(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 3)
-		Logger::fatal(1, "mode requires 3 arguments");
-
-	oss << "MODE " << argv[0] << " " << argv[1];
-	oss << " " << argv[2] << "\n";
-	ctl->sendRaw(oss.str());
-}
-
-void handleNick(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 2)
-		Logger::fatal(1, "nick requires 2 arguments");
-
-	oss << "NICK " << argv[0] << " " << argv[1] << "\n";
-	ctl->sendRaw(oss.str());
-}
-
-void handleNotice(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 3)
-		Logger::fatal(1, "notice requires 3 arguments");
-
-	oss << "NOTICE " << argv[0] << " " << argv[1];
-	oss << " " << argv[2] << "\n";
-	ctl->sendRaw(oss.str());
-}
-
-void handlePart(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 2)
-		Logger::fatal(1, "part requires 2 arguments");
-
-	oss << "PART " << argv[0] << " " << argv[1] << "\n";
-	ctl->sendRaw(oss.str());
-}
-
-void handleReload(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 1)
-		Logger::fatal(1, "reload requires 1 argument");
-
-	oss << "RELOAD " << argv[0] << "\n";
-	ctl->sendRaw(oss.str());
-}
-
-void handleRestart(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	oss << "RESTART ";
-	oss << ((argc < 1) ? "__ALL__" : argv[0]);
-	oss << "\n";
-
-	ctl->sendRaw(oss.str());
-}
-
-void handleTopic(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 3)
-		Logger::fatal(1, "topic requires 3 arguments");
-
-	oss << "TOPIC " << argv[0] << " " << argv[1] << " ";
-	oss << argv[2] << "\n";
-	ctl->sendRaw(oss.str());
-}
-
-void handleUnload(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 1)
-		Logger::fatal(1, "unload requires 1 argument");
-
-	oss << "UNLOAD " << argv[0] << "\n";
-	ctl->sendRaw(oss.str());
-}
-
-void handleUserMode(Irccdctl *ctl, int argc, char **argv)
-{
-	std::ostringstream oss;
-
-	if (argc < 2)
-		Logger::fatal(1, "umode requires 2 arguments");
-
-	oss << "UMODE " << argv[0] << " " << argv[1] << "\n";
-	ctl->sendRaw(oss.str());
-}
-
-std::unordered_map<std::string, Handler> handlers {
-	{ "cnotice",	handleChannelNotice	},
-	{ "connect",	handleConnect		},
-	{ "disconnect",	handleDisconnect	},
-	{ "help",	handleHelp		},
-	{ "invite",	handleInvite		},
-	{ "join",	handleJoin		},
-	{ "kick",	handleKick		},
-	{ "load",	handleLoad		},
-	{ "me",		handleMe		},
-	{ "message",	handleMessage		},
-	{ "mode",	handleMode		},
-	{ "nick",	handleNick		},
-	{ "notice",	handleNotice		},
-	{ "part",	handlePart		},
-	{ "reload",	handleReload		},
-	{ "restart",	handleRestart		},
-	{ "topic",	handleTopic		},
-	{ "umode",	handleUserMode		},
-	{ "unload",	handleUnload		}
-};
-
-}
-
-/* }}} */
-
-Irccdctl::Irccdctl()
-	: m_needResponse(true)
-	, m_readConfig(true)
-{
-	Socket::init();
-	Logger::setVerbose(false);
-
-#if !defined(_WIN32)
-	m_removeFiles = false;
 #endif
 }
 
-Irccdctl::~Irccdctl()
+void Irccdctl::handleDisconnect(int argc, char **argv)
 {
-	Socket::finish();
+	if (argc < 1) {
+		Logger::warning() << "disonnect requires 1 argument" << std::endl;
+	} else {
+		std::ostringstream oss;
 
-#if !defined(_WIN32)
-	if (m_socket.getDomain() == AF_LOCAL)
-		removeUnixFiles();
-#endif
+		oss << "{"
+		    <<   "\"command\":\"disconnect\","
+		    <<   "\"server\":\"" << argv[0] << "\""
+		    << "}";
+
+		send(oss.str());
+	}
 }
 
-#if !defined(_WIN32)
-
-void Irccdctl::loadUnix(const Section &section)
+void Irccdctl::handleInvite(int argc, char **argv)
 {
-	m_domain = AF_LOCAL;
-	m_unixPath = section.requireOption<std::string>("path");
+	if (argc < 3) {
+		Logger::warning() << "invite requires 3 arguments" << std::endl;
+	} else {
+		std::ostringstream oss;
+
+		oss << "{"
+		    <<   "\"command\":\"invite\","
+		    <<   "\"server\":\"" << argv[0] << "\","
+		    <<   "\"target\":\"" << argv[1] << "\","
+		    <<   "\"channel\":\"" << argv[2] << "\""
+		    << "}";
+
+		send(oss.str());
+	}
 }
+
+void Irccdctl::handleJoin(int argc, char **argv)
+{
+	if (argc < 2) {
+		Logger::warning() << "join requires at least 2 arguments" << std::endl;
+	} else {
+		std::ostringstream oss;
+		std::string password = (argc >= 3) ? argv[2] : "";
+
+		oss << "{"
+		    <<   "\"command\":\"join\","
+		    <<   "\"server\":\"" << argv[0] << "\","
+		    <<   "\"channel\":\"" << argv[1] << "\","
+		    <<   "\"password\":\"" << password << "\""
+		    << "}";
+
+		send(oss.str());
+	}
+}
+
+void Irccdctl::handleKick(int argc, char **argv)
+{
+	if (argc < 3) {
+		Logger::warning() << "kick requires at least 3 arguments " << std::endl;
+	} else {
+		std::ostringstream oss;
+		std::string reason = (argc >= 4) ? argv[3] : "";
+
+		oss << "{"
+		    <<   "\"command\":\"kick\","
+		    <<   "\"server\":\"" << argv[0] << "\","
+		    <<   "\"target\":\"" << argv[1] << "\","
+		    <<   "\"channel\":\"" << argv[2] << "\","
+		    <<   "\"reason\":\"" << reason << "\""
+		    << "}";
+
+		send(oss.str());
+	}
+}
+
+void Irccdctl::handleLoad(int argc, char **argv)
+{
+	if (argc < 1) {
+		Logger::warning() << "load requires 1 argument" << std::endl;
+	} else {
+		std::ostringstream oss;
+
+		oss << "{"
+		    <<   "\"command\":\"load\",";
+
+		if (Filesystem::isAbsolute(argv[0])) {
+			oss << "\"path\":\"" << argv[0] << "\"";
+		} else {
+			oss << "\"name\":\"" << argv[0] << "\"";
+		}
+
+		oss << "}";
+
+		send(oss.str());
+	}
+}
+
+void Irccdctl::handleMe(int argc, char **argv)
+{
+	if (argc < 3) {
+		Logger::warning() << "me requires 3 arguments" << std::endl;
+	} else {
+		//std::ostringstream oss;
+
+		// TRANSPORT MUST UNDERSTAND TARGET INSTEAD
+	}
+}
+
+void Irccdctl::handleMessage(int argc, char **argv)
+{
+	if (argc < 3) {
+		Logger::warning() << "message requires 3 arguments" << std::endl;
+	} else {
+		//std::ostringstream oss;
+
+		// TRANSPORT MUST RENAME SAY TO MESSAGE
+	}
+}
+
+void Irccdctl::handleMode(int argc, char **argv)
+{
+	if (argc < 3) {
+		Logger::warning() << "mode requires 3 arguments" << std::endl;
+	} else {
+		std::ostringstream oss;
+
+		oss << "{"
+		    <<   "\"command\":\"mode\","
+		    <<   "\"server\":\"" << argv[0] << "\","
+		    <<   "\"channel\":\"" << argv[1] << "\","
+		    <<   "\"mode\":\"" << argv[2] << "\""
+		    << "}";
+
+		send(oss.str());
+	}
+}
+
+void Irccdctl::handleNick(int argc, char **argv)
+{
+	if (argc < 2) {
+		Logger::warning() << "nick requires 2 arguments" << std::endl;
+	} else {
+		std::ostringstream oss;
+
+		oss << "{"
+		    <<   "\"command\":\"nick\","
+		    <<   "\"server\":\"" << argv[0] << "\","
+		    <<   "\"nickname\":\"" << argv[1] << "\""
+		    << "}";
+
+		send(oss.str());
+	}
+}
+
+void Irccdctl::handleNotice(int argc, char **argv)
+{
+	if (argc < 3) {
+		Logger::warning() << "notice requires 3 arguments" << std::endl;
+	} else {
+		std::ostringstream oss;
+
+		oss << "{"
+		    <<   "\"command\":\"notice\","
+		    <<   "\"server\":\"" << argv[0] << "\","
+		    <<   "\"target\":\"" << argv[1] << "\","
+		    <<   "\"message\":\"" << JsonValue::escape(argv[2]) << "\""
+		    << "}";
+
+		send(oss.str());
+	}
+}
+
+void Irccdctl::handlePart(int argc, char **argv)
+{
+	if (argc < 2) {
+		Logger::warning() << "part requires 2 arguments" << std::endl;
+	} else {
+		std::ostringstream oss;
+
+		oss << "{"
+		    <<   "\"command\":\"part\","
+		    <<   "\"server\":\"" << argv[0] << "\","
+		    <<   "\"channel\":\"" << argv[1] << "\","
+		    <<   "\"reason\":\"" << JsonValue::escape(argv[2]) << "\""
+		    << "}";
+
+		send(oss.str());
+	}
+}
+
+void Irccdctl::handleReconnect(int argc, char **argv)
+{
+	std::ostringstream oss;
+
+	oss << "{"
+	    <<   "\"command\":\"reconnect\"";
+
+	if (argc >= 1) {
+		oss << ",\"server\":\"" << argv[0] << "\"";
+	}
+
+	oss << "}";
+
+	send(oss.str());
+}
+
+void Irccdctl::handleReload(int argc, char **argv)
+{
+	if (argc < 1) {
+		Logger::warning() << "reload requires 1 argument" << std::endl;
+	} else {
+		std::ostringstream oss;
+
+		oss << "{"
+		    <<   "\"command\":\"reload\","
+		    <<   "\"plugin\":\"" << argv[0] << "\""
+		    << "}";
+
+		send(oss.str());
+	}
+}
+
+void Irccdctl::handleTopic(int argc, char **argv)
+{
+	if (argc < 3) {
+		Logger::warning() << "topic requires 3 arguments" << std::endl;
+	} else {
+		std::ostringstream oss;
+
+		oss << "{"
+		    <<   "\"command\":\"topic\","
+		    <<   "\"server\":\"" << argv[0] << "\","
+		    <<   "\"channel\":\"" << argv[1] << "\","
+		    <<   "\"topic\":\"" << argv[1] << "\""
+		    << "}";
+
+		send(oss.str());
+	}
+}
+
+void Irccdctl::handleUnload(int argc, char **argv)
+{
+	if (argc < 1) {
+		Logger::warning() << "unload requires 1 argument" << std::endl;
+	} else {
+		std::ostringstream oss;
+
+		oss << "{"
+		    <<   "\"command\":\"unload\","
+		    <<   "\"plugin\":\"" << argv[0] << "\""
+		    << "}";
+
+		send(oss.str());
+	}
+}
+
+void Irccdctl::handleUserMode(int argc, char **argv)
+{
+	if (argc < 2) {
+		Logger::warning() << "umode requires 2 arguments" << std::endl;
+	} else {
+		std::ostringstream oss;
+
+		oss << "{"
+		    <<   "\"command\":\"umode\","
+		    <<   "\"server\":\"" << argv[0] << "\","
+		    <<   "\"mode\":\"" << JsonValue::escape(argv[1]) << "\""
+		    << "}";
+
+		send(oss.str());
+	}
+}
+
+void Irccdctl::send(std::string message)
+{
+	try {
+		message += "\r\n\r\n";
+
+		m_socket.waitSend(message, 10000);
+	} catch (const std::exception &ex) {
+		throw std::runtime_error("irccdctl: "s + ex.what());
+	}
+}
+
+void Irccdctl::usage()
+{
+	Logger::warning() << "usage: " << getprogname() << " [-cv] <command> [<args>]\n"
+			  << "Commands supported:\n"
+			  << "\tcnotice\t\tSend a channel notice\n"
+			  << "\tconnect\t\tConnect to a server\n"
+			  << "\tdisconnect\tDisconnect from a server\n"
+			  << "\thelp\t\tGet this help\n"
+			  << "\tinvite\t\tInvite someone to a channel\n"
+			  << "\tjoin\t\tJoin a channel\n"
+			  << "\tkick\t\tKick someone from a channel\n"
+			  << "\tload\t\tLoad a JavaScript plugin\n"
+			  << "\tme\t\tSend a CTCP Action (same as /me)\n"
+			  << "\tmessage\t\tSend a message to someone or a channel\n"
+			  << "\tmode\t\tChange a channel mode\n"
+			  << "\tnotice\t\tSend a private notice\n"
+			  << "\tnick\t\tChange your nickname\n"
+			  << "\tpart\t\tLeave a channel\n"
+			  << "\treload\t\tReload a JavaScript plugin\n"
+			  << "\trestart\t\tRestart one or all servers\n"
+			  << "\ttopic\t\tChange a channel topic\n"
+			  << "\tumode\t\tChange a user mode\n"
+			  << "\tunload\t\tUnload a JavaScript plugin\n"
+			  << "\nFor more information on a command, type " << getprogname() << " help <command>" << std::endl;
+}
+
+Irccdctl::Irccdctl(SocketTcp s)
+	: m_socket(std::move(s))
+	, m_helpers{
+		{ "cnotice", 	&Irccdctl::helpChannelNotice	},
+		{ "disconnect",	&Irccdctl::helpDisconnect	},
+		{ "connect",	&Irccdctl::helpConnect		},
+		{ "invite",	&Irccdctl::helpInvite		},
+		{ "join",	&Irccdctl::helpJoin		},
+		{ "kick",	&Irccdctl::helpKick		},
+		{ "load",	&Irccdctl::helpLoad		},
+		{ "me",		&Irccdctl::helpMe		},
+		{ "message",	&Irccdctl::helpMessage		},
+		{ "mode",	&Irccdctl::helpMode		},
+		{ "notice",	&Irccdctl::helpNotice		},
+		{ "nick",	&Irccdctl::helpNick		},
+		{ "part",	&Irccdctl::helpPart		},
+		{ "reconnect",	&Irccdctl::helpReconnect	},
+		{ "reload",	&Irccdctl::helpReload		},
+		{ "topic",	&Irccdctl::helpTopic		},
+		{ "umode",	&Irccdctl::helpUserMode		},
+		{ "unload",	&Irccdctl::helpUnload		}
+	}
+	, m_handlers{
+		{ "cnotice",	&Irccdctl::handleChannelNotice	},
+		{ "connect",	&Irccdctl::handleConnect	},
+		{ "disconnect",	&Irccdctl::handleDisconnect	},
+		{ "help",	&Irccdctl::handleHelp		},
+		{ "invite",	&Irccdctl::handleInvite		},
+		{ "join",	&Irccdctl::handleJoin		},
+		{ "kick",	&Irccdctl::handleKick		},
+		{ "load",	&Irccdctl::handleLoad		},
+		{ "me",		&Irccdctl::handleMe		},
+		{ "message",	&Irccdctl::handleMessage	},
+		{ "mode",	&Irccdctl::handleMode		},
+		{ "nick",	&Irccdctl::handleNick		},
+		{ "notice",	&Irccdctl::handleNotice		},
+		{ "part",	&Irccdctl::handlePart		},
+		{ "reconnect",	&Irccdctl::handleReconnect	},
+		{ "reload",	&Irccdctl::handleReload		},
+		{ "topic",	&Irccdctl::handleTopic		},
+		{ "umode",	&Irccdctl::handleUserMode	},
+		{ "unload",	&Irccdctl::handleUnload		}
+	}
+{
+}
+
+#if 0
 
 void Irccdctl::connectUnix()
 {
@@ -579,8 +658,6 @@ void Irccdctl::removeUnixFiles()
 		::remove(m_tmpDir.c_str());
 	}
 }
-
-#endif
 
 void Irccdctl::loadInet(const Section &section)
 {
@@ -675,185 +752,72 @@ void Irccdctl::openConfig()
 	readConfig(config);
 }
 
-void Irccdctl::sendRaw(const std::string &message)
+#endif
+
+std::string Irccdctl::response()
 {
-	try {
-		if (m_socket.getType() == SOCK_STREAM)
-			m_socket.send(message.c_str(), message.length());
-		else
-			m_socket.sendto(message.c_str(), message.length(), m_addr);
-	} catch (SocketError ex) {
-		Logger::fatal(1, "irccdctl: failed to send message: %s", ex.what());
-	}
-}
+	ElapsedTimer timer;
+	bool done = false;
+	bool received = false;
+	std::string result;
+	std::string::size_type pos;
 
-int Irccdctl::getResponse()
-{
-	SocketListener listener;
-	std::ostringstream oss;
-	bool finished = false;
-	int ret = 0;
+	while (!done && timer.elapsed() < 10000) {
+		result += m_socket.waitRecv(512, 10000 - timer.elapsed());
 
-	listener.add(m_socket);
-	try {
-		while (!finished) {
-			char data[128];
-			unsigned nbread;
-			size_t pos;
+		while ((pos = result.find("\r\n\r\n")) == std::string::npos) {
+			std::string message = result.substr(0U, pos);
 
-			listener.select(30);
+			result.erase(0U, pos + 4);
 
-			if (m_socket.getType() == SOCK_DGRAM)
-				nbread = m_socket.recvfrom(data, sizeof (data) - 1);
-			else
-				nbread = m_socket.recv(data, sizeof (data) - 1);
+			JsonDocument document(message);
+			JsonObject object = document.toObject();
 
-			if (nbread == 0)
-				finished = true;
-			else {
-				std::string result;
-
-				data[nbread] = '\0';
-				oss << data;
-
-				pos = oss.str().find_first_of('\n');
-				if (pos == std::string::npos)
-					continue;
-
-				result = oss.str().substr(0, pos);
-				if (result != "OK") {
-					Logger::warn("irccdctl: error, server said: %s", result.c_str());
-					ret = 1;
-				}
-
-				finished = true;
+			/* Skip non result messages */
+			if (!object.contains("command")) {
+				continue;
 			}
+
+			if (object.contains("result")) {
+				result = object["result"].toString();
+			} else if (object.contains("error")) {
+				result = object["error"].toString();
+			}
+
+			received = true;
+			done = true;
 		}
-	} catch (SocketError ex) {
-		Logger::warn("irccdctl: error: %s", ex.what());
-		ret = 1;
-	} catch (SocketTimeout) {
-		Logger::warn("irccdctl: did not get a response from irccd");
-		ret = 1;
 	}
 
-	return ret;
+	if (!received) {
+		throw std::runtime_error("no response received");
+	}
+
+	return result;
 }
 
-void Irccdctl::addArg(char c, const std::string &arg)
+int Irccdctl::exec(int argc, char **argv)
 {
-	m_args[c] = arg;
-}
-
-bool Irccdctl::hasArg(char c)
-{
-	return m_args.count(c) > 0;
-}
-
-const std::string &Irccdctl::getArg(char c)
-{
-	return m_args[c];
-}
-
-void Irccdctl::usage()
-{
-	Logger::warn("usage: %s [-cv] <command> [<args>]\n", getprogname());
-
-	Logger::warn("Commands supported:");
-	Logger::warn("\tcnotice\t\tSend a channel notice");
-	Logger::warn("\tconnect\t\tConnect to a server");
-	Logger::warn("\tdisconnect\tDisconnect from a server");
-	Logger::warn("\thelp\t\tGet this help");
-	Logger::warn("\tinvite\t\tInvite someone to a channel");
-	Logger::warn("\tjoin\t\tJoin a channel");
-	Logger::warn("\tkick\t\tKick someone from a channel");
-	Logger::warn("\tload\t\tLoad a Lua plugin");
-	Logger::warn("\tme\t\tSend a CTCP Action (same as /me)");
-	Logger::warn("\tmessage\t\tSend a message to someone or a channel");
-	Logger::warn("\tmode\t\tChange a channel mode");
-	Logger::warn("\tnotice\t\tSend a private notice");
-	Logger::warn("\tnick\t\tChange your nickname");
-	Logger::warn("\tpart\t\tLeave a channel");
-	Logger::warn("\treload\t\tReload a Lua plugin");
-	Logger::warn("\trestart\t\tRestart one or all servers");
-	Logger::warn("\ttopic\t\tChange a channel topic");
-	Logger::warn("\tumode\t\tChange a user mode");
-	Logger::warn("\tunload\t\tUnload a Lua plugin");
-
-	Logger::fatal(1, "\nFor more information on a command, type %s help <command>", getprogname());
-}
-
-void Irccdctl::setConfigPath(const std::string &path)
-{
-	m_configPath = path;
-}
-
-void Irccdctl::useInternet(const std::string &host,
-			   int port,
-			   int domain,
-			   int type)
-{
-	m_readConfig = false;
-
-	m_domain = domain;
-	m_type = type;
-	m_host = host;
-	m_port = port;
-}
-
-#if !defined(_WIN32)
-
-void Irccdctl::useUnix(const std::string &path, int type)
-{
-	m_readConfig = false;
-
-	m_domain = AF_LOCAL;
-	m_type = type;
-	m_unixPath = path;
-}
-
-#endif
-
-void Irccdctl::setVerbosity(bool verbose)
-{
-	Logger::setVerbose(verbose);
-}
-
-int Irccdctl::run(int argc, char **argv)
-{
-	int ret = 0;
-
-	if (argc < 1)
+	if (argc <= 0) {
 		usage();
-		/* NOTREACHED */
+		return 1;
+	}
 
-	// exceptional, do not open for "help" subject
-	if (strcmp(argv[0], "help") != 0 && m_readConfig)
-		openConfig();
-
-	// Try to connect
-	if (m_domain == AF_INET || m_domain == AF_INET6)
-		connectInet();
-#if !defined(_WIN32)
-	else if (m_domain == AF_LOCAL)
-		connectUnix();
-#endif
+	if (m_handlers.count(argv[0]) == 0) {
+		Logger::warning() << getprogname() << ": " << argv[0] << ": invalid command" << std::endl;
+		return 1;
+	}
 
 	try {
 		std::string cmd = argv[0];
 
-		handlers.at(cmd)(this, --argc, ++argv);
-
-		if (m_needResponse)
-			ret = getResponse();
-	} catch (std::out_of_range ex) {
-		Logger::warn("irccdctl: unknown command %s", argv[0]);
+		(this->*m_handlers.at(cmd))(--argc, ++argv);
+	} catch (const std::exception &ex) {
+		Logger::warning() << getprogname() << ": " << ex.what() << std::endl;
 		return 1;
 	}
 
-	m_socket.close();
-	
-	return ret;
+	return 0;
 }
 
 } // !irccd
