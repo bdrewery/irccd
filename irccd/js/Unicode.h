@@ -1,5 +1,5 @@
 /*
- * Utf8.h -- UTF-8 to UCS-4 conversions
+ * Unicode.h -- UTF-8 to UTF-32 conversions and various operations
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,38 +16,38 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_UTF8_H_
-#define _IRCCD_UTF8_H_
+#ifndef _UNICODE_H_
+#define _UNICODE_H_
 
 /**
- * @file Utf8.h
- * @brief UTF-8 to UCS-4 conversions
+ * @file Unicode.h
+ * @brief UTF-8 to UTF-32 conversions
  */
 
-#include <cstdint>
 #include <stdexcept>
 #include <string>
 
-namespace irccd {
-
 /**
- * @class Utf8
- * @brief Conversion between UTF-8 and UCS-4
+ * @class Unicode
+ * @brief Conversion between UTF-8 and UTF-32
  */
-class Utf8 {
+class Unicode {
 private:
-	static void encode(uint32_t point, char res[5]);
-	static void decode(uint32_t &c, const char *res);
+	static void encode(char32_t point, char res[5]) noexcept;
+	static void decode(char32_t &c, const char *res) noexcept;
 
 public:
 	/**
 	 * Get the number of bytes for the first multi byte character from a
 	 * utf-8 string.
 	 *
+	 * This can be used to iterate a valid UTF-8 string to jump to the next
+	 * real character.
+	 *
 	 * @param c the first multi byte character
-	 * @return the number of bytes [1-4] or -1 on invalid
+	 * @return the number of bytes [1-4]
 	 */
-	static int8_t nbytesUtf8(uint8_t c);
+	static int nbytesUtf8(char c) noexcept;
 
 	/**
 	 * Get the number of bytes for the unicode point.
@@ -55,7 +55,7 @@ public:
 	 * @param point the unicode point
 	 * @return the number of bytes [1-4] or -1 on invalid
 	 */
-	static int8_t nbytesPoint(uint32_t point);
+	static int nbytesPoint(char32_t point) noexcept;
 
 	/**
 	 * Get real number of character in a string.
@@ -64,25 +64,52 @@ public:
 	 * @return the length
 	 * @throw std::invalid_argument on invalid sequence
 	 */
-	static size_t length(const std::string &str);
+	static int length(const std::string &str);
 
 	/**
-	 * Convert a UCS-4 string to UTF-8 string.
+	 * Iterate over all real characters in the UTF-8 string.
 	 *
-	 * @param array the UCS-4 string
+	 * The function must have the following signature:
+	 *	void f(char ch)
+	 *
+	 * @param str the UTF-8 string
+	 * @throw std::invalid_argument on invalid sequence
+	 */
+	template <typename Func>
+	static void forEach(const std::string &str, Func function)
+	{
+		for (size_t i = 0; i < str.size(); ) {
+			char32_t point = 0;
+			int size = nbytesUtf8(str[i]);
+
+			if (size < 0) {
+				throw std::invalid_argument("invalid sequence");
+			}
+
+			decode(point, str.data() + i);
+			function(point);
+
+			i += size;
+		}
+	}
+
+	/**
+	 * Convert a UTF-32 string to UTF-8 string.
+	 *
+	 * @param array the UTF-32 string
 	 * @return the UTF-8 string
 	 * @throw std::invalid_argument on invalid sequence
 	 */
-	static std::string toutf8(const std::u32string &array);
+	static std::string toUtf8(const std::u32string &array);
 
 	/**
-	 * Convert a UTF-8 string to UCS-4 string.
+	 * Convert a UTF-8 string to UTF-32 string.
 	 *
 	 * @param str the UTF-8 string
-	 * @return the UCS-4 string
+	 * @return the UTF-32 string
 	 * @throw std::invalid_argument on invalid sequence
 	 */
-	static std::u32string toucs(const std::string &str);
+	static std::u32string toUtf32(const std::string &str);
 
 	/**
 	 * Check if the unicode character is space.
@@ -90,7 +117,7 @@ public:
 	 * @param c the character
 	 * @return true if space
 	 */
-	static bool isspace(uint32_t c);
+	static bool isspace(char32_t c) noexcept;
 
 	/**
 	 * Check if the unicode character is digit.
@@ -98,15 +125,15 @@ public:
 	 * @param c the character
 	 * @return true if digit
 	 */
-	static bool isdigit(uint32_t c);
+	static bool isdigit(char32_t c) noexcept;
 
 	/**
-	 * Check if the unicode character is letter.
+	 * Check if the unicode character is alpha category.
 	 *
 	 * @param c the character
-	 * @return true if letter
+	 * @return true if alpha
 	 */
-	static bool isletter(uint32_t c);
+	static bool isalpha(char32_t c) noexcept;
 
 	/**
 	 * Check if the unicode character is upper case.
@@ -114,7 +141,7 @@ public:
 	 * @param c the character
 	 * @return true if upper case
 	 */
-	static bool isupper(uint32_t c);
+	static bool isupper(char32_t c) noexcept;
 
 	/**
 	 * Check if the unicode character is lower case.
@@ -122,7 +149,7 @@ public:
 	 * @param c the character
 	 * @return true if lower case
 	 */
-	static bool islower(uint32_t c);
+	static bool islower(char32_t c) noexcept;
 
 	/**
 	 * Check if the unicode character is title case.
@@ -130,7 +157,7 @@ public:
 	 * @param c the character
 	 * @return true if title case
 	 */
-	static bool istitle(uint32_t c);
+	static bool istitle(char32_t c) noexcept;
 
 	/**
 	 * Convert to upper case.
@@ -138,7 +165,7 @@ public:
 	 * @param c the character
 	 * @return the upper case character
 	 */
-	static uint32_t toupper(uint32_t c);
+	static char32_t toupper(char32_t c) noexcept;
 
 	/**
 	 * Convert to lower case.
@@ -146,7 +173,7 @@ public:
 	 * @param c the character
 	 * @return the lower case character
 	 */
-	static uint32_t tolower(uint32_t c);
+	static char32_t tolower(char32_t c) noexcept;
 
 	/**
 	 * Convert to title case.
@@ -154,33 +181,33 @@ public:
 	 * @param c the character
 	 * @return the title case character
 	 */
-	static uint32_t totitle(uint32_t c);
+	static char32_t totitle(char32_t c) noexcept;
 
 	/**
 	 * Convert the UTF-8 string to upper case.
 	 *
 	 * @param str the str
 	 * @return the upper case string
+	 * @warning very slow at the moment
 	 */
 	static inline std::string toupper(const std::string &str)
 	{
-		return toutf8(toupper(toucs(str)));
+		return toUtf8(toupper(toUtf32(str)));
 	}
 
 	/**
-	 * Convert the UCS-4 string to upper case.
+	 * Convert the UTF-32 string to upper case.
 	 *
 	 * @param str the str
 	 * @return the upper case string
 	 */
-	static inline std::u32string toupper(const std::u32string &str)
+	static inline std::u32string toupper(std::u32string str)
 	{
-		auto copy = str;
+		for (size_t i = 0; i < str.size(); ++i) {
+			str[i] = toupper(str[i]);
+		}
 
-		for (size_t i = 0; i < str.size(); ++i)
-			copy[i] = toupper(str[i]);
-
-		return copy;
+		return str;
 	}
 
 	/**
@@ -188,29 +215,27 @@ public:
 	 *
 	 * @param str the str
 	 * @return the lower case string
+	 * @warning very slow at the moment
 	 */
 	static inline std::string tolower(const std::string &str)
 	{
-		return toutf8(tolower(toucs(str)));
+		return toUtf8(tolower(toUtf32(str)));
 	}
 
 	/**
-	 * Convert the UCS-4 string to lower case.
+	 * Convert the UTF-32 string to lower case.
 	 *
 	 * @param str the str
 	 * @return the lower case string
 	 */
-	static inline std::u32string tolower(const std::u32string &str)
+	static inline std::u32string tolower(std::u32string str)
 	{
-		auto copy = str;
+		for (size_t i = 0; i < str.size(); ++i) {
+			str[i] = tolower(str[i]);
+		}
 
-		for (size_t i = 0; i < str.size(); ++i)
-			copy[i] = tolower(str[i]);
-
-		return copy;
+		return str;
 	}
 };
 
-} // !irccd
-
-#endif // !_IRCCD_UTF8_H_
+#endif // !_UTF8_H_

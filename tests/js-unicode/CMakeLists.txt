@@ -16,25 +16,21 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+include(${irccd_SOURCE_DIR}/servercommand/ServerCommand.cmake)
+include(${irccd_SOURCE_DIR}/js/Js.cmake)
+
 set(
-	JS_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/JsFilesystem.cpp
-	${CMAKE_CURRENT_LIST_DIR}/JsLogger.cpp
-	${CMAKE_CURRENT_LIST_DIR}/JsServer.cpp
-	${CMAKE_CURRENT_LIST_DIR}/JsSystem.cpp
-	${CMAKE_CURRENT_LIST_DIR}/JsTimer.cpp
-	${CMAKE_CURRENT_LIST_DIR}/JsUnicode.cpp
-	${CMAKE_CURRENT_LIST_DIR}/JsUtil.cpp
-	${CMAKE_CURRENT_LIST_DIR}/Js.cpp
-	${CMAKE_CURRENT_LIST_DIR}/Js.h
-	${CMAKE_CURRENT_LIST_DIR}/Plugin.cpp
-	${CMAKE_CURRENT_LIST_DIR}/Plugin.h
-	${CMAKE_CURRENT_LIST_DIR}/System.h
-	${CMAKE_CURRENT_LIST_DIR}/System.cpp
-	${CMAKE_CURRENT_LIST_DIR}/Timer.cpp
-	${CMAKE_CURRENT_LIST_DIR}/Timer.h
-	${CMAKE_CURRENT_LIST_DIR}/TimerEvent.cpp
-	${CMAKE_CURRENT_LIST_DIR}/TimerEvent.h
-	${CMAKE_CURRENT_LIST_DIR}/Unicode.cpp
-	${CMAKE_CURRENT_LIST_DIR}/Unicode.h
+	JS_UNICODE_SOURCES
+	${JS_SOURCES}
+	${SERVER_COMMAND_SOURCES}
+	TestJsUnicode.cpp
+)
+
+create_test(test-js-unicode "${JS_UNICODE_SOURCES}")
+
+target_link_libraries(test-js-unicode duktape)
+target_compile_definitions(
+	test-js-unicode
+	PRIVATE
+		BINARY=\"${CMAKE_BINARY_DIR}\"
 )

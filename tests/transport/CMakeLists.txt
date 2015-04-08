@@ -16,13 +16,29 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+include(${irccd_SOURCE_DIR}/js/Js.cmake)
 include(${irccd_SOURCE_DIR}/transportcommand/TransportCommand.cmake)
+include(${irccd_SOURCE_DIR}/servercommand/ServerCommand.cmake)
+include(${irccd_SOURCE_DIR}/serverevent/ServerEvent.cmake)
+include(${irccd_SOURCE_DIR}/serverstate/ServerState.cmake)
 
 set(
 	TEST_TRANSPORT_SOURCES
+	${JS_SOURCES}
+	${SERVER_COMMAND_SOURCES}
+	${SERVER_EVENT_SOURCES}
+	${SERVER_STATE_SOURCES}
 	${TRANSPORT_COMMAND_SOURCES}
+	${irccd_SOURCE_DIR}/Irccd.cpp
+	${irccd_SOURCE_DIR}/Irccd.h
 	${irccd_SOURCE_DIR}/Service.cpp
 	${irccd_SOURCE_DIR}/Service.h
+	${irccd_SOURCE_DIR}/Server.cpp
+	${irccd_SOURCE_DIR}/Server.h
+	${irccd_SOURCE_DIR}/ServerEvent.cpp
+	${irccd_SOURCE_DIR}/ServerEvent.h
+	${irccd_SOURCE_DIR}/ServerManager.cpp
+	${irccd_SOURCE_DIR}/ServerManager.h
 	${irccd_SOURCE_DIR}/Transport.h
 	${irccd_SOURCE_DIR}/TransportManager.cpp
 	${irccd_SOURCE_DIR}/TransportManager.h
@@ -33,3 +49,4 @@ set(
 )
 
 create_test(test-transport "${TEST_TRANSPORT_SOURCES}")
+target_link_libraries(test-transport duktape)

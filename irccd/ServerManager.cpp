@@ -57,7 +57,7 @@ void ServerManager::run()
 		// Add service socket
 		FD_SET(socket().handle(), &setinput);
 
-		if (socket().handle() > max) {
+		if (socket().handle() > static_cast<Socket::Handle>(max)) {
 			max = socket().handle();
 		}
 

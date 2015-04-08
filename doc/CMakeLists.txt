@@ -78,7 +78,7 @@ endif ()
 # User guides, Lua API
 # ---------------------------------------------------------
 
-if (WITH_DOCS_LUA OR WITH_DOCS_GUIDES_HTML OR WITH_DOCS_GUIDES_PDF)
+if (WITH_DOCS_JS OR WITH_DOCS_GUIDES_HTML OR WITH_DOCS_GUIDES_PDF)
 	add_subdirectory(linkify)
 	add_subdirectory(templates)
 endif ()
@@ -87,6 +87,6 @@ if (WITH_DOCS_GUIDES_HTML OR WITH_DOCS_GUIDES_PDF)
 	add_subdirectory(guides)
 endif ()
 
-if (WITH_DOCS_LUA)
+if (WITH_DOCS_JS)
 	add_subdirectory(api)
 endif ()

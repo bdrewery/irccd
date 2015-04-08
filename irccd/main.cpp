@@ -141,7 +141,6 @@ int main(void)
 
 	signal(SIGINT, irccd::stop);
 	signal(SIGTERM, irccd::stop);
-	signal(SIGQUIT, irccd::stop);
 
 	irccd::Logger::setVerbose(true);
 	irccd::ServerInfo info;
@@ -163,7 +162,6 @@ int main(void)
 	}
 
 	try {
-		instance.transportAdd<irccd::TransportUnix>("/tmp/irccd.sock");
 		instance.transportAdd<irccd::TransportInet>(AF_INET6, 40000);
 	} catch (const std::exception &ex) {
 		irccd::Logger::warning() << "failed: " << ex.what() << std::endl;

@@ -1,3 +1,57 @@
-# Welcome to the Lua API documentation
+# Welcome to the irccd Ecmascript API documentation
 
 Select a target on the left.
+
+## Irccd additions to Ecmascript
+
+As you may know, Ecmascript 5 does not come with any function to load modules
+from external files.
+
+Because irccd split the Ecmascript API as modules, the user must explicitly load
+them when needed.
+
+There are two ways for that purpose.
+
+### using function
+
+The `using` function allows loading an irccd module and to set all symbols from
+that module as global.
+
+This is similar to the `using namespace ns` statement in C++ where ns is the
+module name.
+
+**Example with irccd.filesystem**:
+
+The `irccd.fs` modules define two functions `File` and `Directory` and other
+symbols, when calling using like this:
+
+````javascript
+using("irccd.fs")
+````
+
+You'll be able to use `File` and `Directory` functions directly from global
+namespace like this:
+
+````javascript
+var f = new File();
+````
+
+**Note**: the `using` function does not support loading modules from external
+files.
+
+### require function
+
+In contrast with the `using` function, the `require` function loads a module
+which can be both a irccd module or a file.
+
+The `require` function returns an object containing all symbols exported
+from the module.
+
+**Example with irccd.filesystem**:
+
+You can use `require` like this:
+
+````javascript
+var fs = require("irccd.fs")
+var f = new fs.File();
+````

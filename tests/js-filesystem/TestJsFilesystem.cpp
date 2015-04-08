@@ -24,68 +24,16 @@
 #include <gtest/gtest.h>
 
 #include <IrccdConfig.h>
-
 #include <Filesystem.h>
-#include <js/Js.h>
+#include <LibtestUtil.h>
 
 using namespace irccd;
 
-class TestJsFilesystem : public testing::Test {
-protected:
-	duk_context *m_ctx;
-
+class TestJsFilesystem : public LibtestUtil {
 public:
 	TestJsFilesystem()
+		: LibtestUtil("fs", "irccd.fs")
 	{
-		m_ctx = duk_create_heap_default();
-
-		duk_push_c_function(m_ctx, dukopen_filesystem, 0);
-		duk_call(m_ctx, 0);
-		duk_put_global_string(m_ctx, "fs");
-
-		// set global BINARY dir
-		duk_push_string(m_ctx, BINARY);
-		duk_put_global_string(m_ctx, "BINARY");
-	}
-
-	~TestJsFilesystem()
-	{
-		duk_destroy_heap(m_ctx);
-	}
-
-	void checkSymbol(const std::string &name, const std::string &type)
-	{
-		std::ostringstream oss;
-		std::string cmd;
-
-		oss << "typeof (" << name << ") === \"" << type << "\"";
-		cmd = oss.str();
-
-		if (duk_peval_string(m_ctx, cmd.c_str())) {
-			std::string msg = duk_safe_to_string(m_ctx, -1);
-
-			duk_pop(m_ctx);
-
-			FAIL() << "Error in command: " << msg;
-		} else {
-			bool result = duk_to_boolean(m_ctx, -1);
-			duk_pop(m_ctx);
-
-			if (!result) {
-				FAIL() << "Missing symbol: " << name;
-			}
-		}
-	}
-
-	void execute(const std::string &cmd)
-	{
-		if (duk_peval_string(m_ctx, cmd.c_str())) {
-			std::string msg = duk_safe_to_string(m_ctx, -1);
-
-			duk_pop(m_ctx);
-
-			FAIL() << "Error in command: " << msg;
-		}
 	}
 };
 

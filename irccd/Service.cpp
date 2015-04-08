@@ -49,7 +49,8 @@ Service::Service(std::string name, std::string path)
 	m_signal.bind(address::Internet("127.0.0.1", 0, AF_INET));
 
 	// Get the port
-	auto port = ntohs(reinterpret_cast<const sockaddr_in &>(m_signal.address()).sin_port);
+	auto address = m_signal.address();
+	auto port = ntohs(reinterpret_cast<const sockaddr_in &>(address.address()).sin_port);
 	m_address = address::Internet("127.0.0.1", port, AF_INET);
 
 	// path not needed

@@ -17,7 +17,7 @@
  */
 
 #include "Js.h"
-#include "Utf8.h"
+#include "Unicode.h"
 
 namespace irccd {
 
@@ -47,7 +47,7 @@ std::u32string getArray(duk_context *ctx)
 	return str;
 }
 
-int pushArray(duk_context *ctx, std::u32string array)
+duk_ret_t pushArray(duk_context *ctx, std::u32string array)
 {
 	dukx_assert_begin(ctx);
 	duk_push_array(ctx);
@@ -61,7 +61,7 @@ int pushArray(duk_context *ctx, std::u32string array)
 	return 1;
 }
 
-int convert(duk_context *ctx, ConvertMode mode)
+duk_ret_t convert(duk_context *ctx, ConvertMode mode)
 {
 	/*
 	 * This function can convert both UTF-32 and UTF-8 strings.
@@ -71,21 +71,21 @@ int convert(duk_context *ctx, ConvertMode mode)
 	try {
 		if (duk_get_type(ctx, 0) == DUK_TYPE_OBJECT) {
 			if (mode == ConvertMode::ToUpper) {
-				pushArray(ctx, Utf8::toupper(getArray(ctx)));
+				pushArray(ctx, Unicode::toupper(getArray(ctx)));
 			} else {
-				pushArray(ctx, Utf8::tolower(getArray(ctx)));
+				pushArray(ctx, Unicode::tolower(getArray(ctx)));
 			}
 		} else if (duk_get_type(ctx, 0) == DUK_TYPE_STRING) {
 			if (mode == ConvertMode::ToUpper) {
-				duk_push_string(ctx, Utf8::toupper(duk_require_string(ctx, 0)).c_str());
+				duk_push_string(ctx, Unicode::toupper(duk_require_string(ctx, 0)).c_str());
 			} else {
-				duk_push_string(ctx, Utf8::tolower(duk_require_string(ctx, 0)).c_str());
+				duk_push_string(ctx, Unicode::tolower(duk_require_string(ctx, 0)).c_str());
 			}
 		} else if (duk_get_type(ctx, 0) == DUK_TYPE_NUMBER) {
 			if (mode == ConvertMode::ToUpper) {
-				duk_push_uint(ctx, Utf8::toupper(duk_require_uint(ctx, 0)));
+				duk_push_uint(ctx, Unicode::toupper(duk_require_uint(ctx, 0)));
 			} else {
-				duk_push_uint(ctx, Utf8::tolower(duk_require_uint(ctx, 0)));
+				duk_push_uint(ctx, Unicode::tolower(duk_require_uint(ctx, 0)));
 			}
 		} else {
 			dukx_throw(ctx, -1, "invalid argument to convert");
@@ -99,6 +99,46 @@ int convert(duk_context *ctx, ConvertMode mode)
 }
 
 /*
+ * Function: Unicode.forEach(string, callback)
+ * --------------------------------------------------------
+ *
+ * Iterate over individual **character** in the UTF-8 string.
+ *
+ * The callback receive a unique argument, the unicode code point.
+ *
+ * Arguments:
+ *   - string, the UTF-8 strnig
+ *   - callback, the callback to call
+ * Throws:
+ *   - Exception if the string is not a valid UTF-8 string
+ */
+duk_ret_t Unicode_forEach(duk_context *ctx)
+{
+	const char *string = duk_require_string(ctx, 0);
+
+	if (!duk_is_callable(ctx, 1)) {
+		dukx_throw(ctx, -1, "not a callable object");
+	}
+
+	dukx_assert_begin(ctx);
+
+	try {
+		Unicode::forEach(string, [&] (char32_t code) {
+			duk_dup(ctx, 1);
+			duk_push_int(ctx, code);
+			duk_call(ctx, 1);
+			duk_pop(ctx);
+		});
+	} catch (const std::exception &ex) {
+		dukx_throw(ctx, -1, ex.what());
+	}
+
+	dukx_assert_equals(ctx);
+
+	return 0;
+}
+
+/*
  * Function: Unicode.isDigit(code)
  * --------------------------------------------------------
  *
@@ -107,10 +147,10 @@ int convert(duk_context *ctx, ConvertMode mode)
  * Returns:
  *   - true if the code is in the digit category
  */
-int Unicode_isdigit(duk_context *ctx)
+duk_ret_t Unicode_isDigit(duk_context *ctx)
 {
 	dukx_assert_begin(ctx);
-	duk_push_boolean(ctx, Utf8::isdigit(duk_require_int(ctx, 0)));
+	duk_push_boolean(ctx, Unicode::isdigit(duk_require_int(ctx, 0)));
 	dukx_assert_end(ctx, 1);
 
 	return 1;
@@ -125,10 +165,10 @@ int Unicode_isdigit(duk_context *ctx)
  * Returns:
  *   - true if the code is in the letter category
  */
-int Unicode_isletter(duk_context *ctx)
+duk_ret_t Unicode_isLetter(duk_context *ctx)
 {
 	dukx_assert_begin(ctx);
-	duk_push_boolean(ctx, Utf8::isletter(duk_require_int(ctx, 0)));
+	duk_push_boolean(ctx, Unicode::isalpha(duk_require_int(ctx, 0)));
 	dukx_assert_end(ctx, 1);
 
 	return 1;
@@ -143,10 +183,10 @@ int Unicode_isletter(duk_context *ctx)
  * Returns:
  *   - true if the code is lower case
  */
-int Unicode_islower(duk_context *ctx)
+duk_ret_t Unicode_isLower(duk_context *ctx)
 {
 	dukx_assert_begin(ctx);
-	duk_push_boolean(ctx, Utf8::islower(duk_require_int(ctx, 0)));
+	duk_push_boolean(ctx, Unicode::islower(duk_require_int(ctx, 0)));
 	dukx_assert_end(ctx, 1);
 
 	return 1;
@@ -161,10 +201,10 @@ int Unicode_islower(duk_context *ctx)
  * Returns:
  *   - true if the code is in the space category
  */
-int Unicode_isspace(duk_context *ctx)
+duk_ret_t Unicode_isSpace(duk_context *ctx)
 {
 	dukx_assert_begin(ctx);
-	duk_push_boolean(ctx, Utf8::isspace(duk_require_int(ctx, 0)));
+	duk_push_boolean(ctx, Unicode::isspace(duk_require_int(ctx, 0)));
 	dukx_assert_end(ctx, 1);
 
 	return 1;
@@ -179,10 +219,10 @@ int Unicode_isspace(duk_context *ctx)
  * Returns:
  *   - true if the code is title case
  */
-int Unicode_istitle(duk_context *ctx)
+duk_ret_t Unicode_isTitle(duk_context *ctx)
 {
 	dukx_assert_begin(ctx);
-	duk_push_boolean(ctx, Utf8::istitle(duk_require_int(ctx, 0)));
+	duk_push_boolean(ctx, Unicode::istitle(duk_require_int(ctx, 0)));
 	dukx_assert_end(ctx, 1);
 
 	return 1;
@@ -197,10 +237,10 @@ int Unicode_istitle(duk_context *ctx)
  * Returns:
  *   - true if the code is upper case
  */
-int Unicode_isupper(duk_context *ctx)
+duk_ret_t Unicode_isUpper(duk_context *ctx)
 {
 	dukx_assert_begin(ctx);
-	duk_push_boolean(ctx, Utf8::isupper(duk_require_int(ctx, 0)));
+	duk_push_boolean(ctx, Unicode::isupper(duk_require_int(ctx, 0)));
 	dukx_assert_end(ctx, 1);
 	return 1;
 }
@@ -219,14 +259,14 @@ int Unicode_isupper(duk_context *ctx)
  * Throws:
  *   - Exception if the string is not a valid UTF-8 string
  */
-int Unicode_length(duk_context *ctx)
+duk_ret_t Unicode_length(duk_context *ctx)
 {
 	const char *str = duk_require_string(ctx, 0);
 
 	dukx_assert_begin(ctx);
 
 	try {
-		duk_push_int(ctx, static_cast<int>(Utf8::length(str)));
+		duk_push_int(ctx, static_cast<int>(Unicode::length(str)));
 	} catch (const std::exception &error) {
 		dukx_throw(ctx, -1, error.what());
 	}
@@ -250,22 +290,21 @@ int Unicode_length(duk_context *ctx)
  * Throws:
  *   - Exception if the string is not a valid UTF-8 string
  */
-int Unicode_toUtf32(duk_context *ctx)
+duk_ret_t Unicode_toUtf32(duk_context *ctx)
 {
 	const char *string = duk_require_string(ctx, 0);
-	std::u32string array;
 
 	dukx_assert_begin(ctx);
 
 	try {
-		array = Utf8::toucs(string);
+		pushArray(ctx, Unicode::toUtf32(string));
 	} catch (const std::exception &error) {
 		dukx_throw(ctx, -1, error.what());
 	}
 
 	dukx_assert_end(ctx, 1);
 
-	return pushArray(ctx, array);
+	return 1;
 }
 
 /*
@@ -282,7 +321,7 @@ int Unicode_toUtf32(duk_context *ctx)
  * Throws:
  *   - Any exception on error
  */
-int Unicode_tolower(duk_context *ctx)
+duk_ret_t Unicode_toLower(duk_context *ctx)
 {
 	return convert(ctx, ConvertMode::ToLower);
 }
@@ -300,12 +339,12 @@ int Unicode_tolower(duk_context *ctx)
  * Throws:
  *   - Any exception on error
  */
-int Unicode_toUtf8(duk_context *ctx)
+duk_ret_t Unicode_toUtf8(duk_context *ctx)
 {
 	dukx_assert_begin(ctx);
 
 	try {
-		duk_push_string(ctx, Utf8::toutf8(getArray(ctx)).c_str());
+		duk_push_string(ctx, Unicode::toUtf8(getArray(ctx)).c_str());
 	} catch (const std::exception &ex) {
 		dukx_throw(ctx, -1, ex.what());
 	}
@@ -329,23 +368,24 @@ int Unicode_toUtf8(duk_context *ctx)
  * Throws:
  *   - Any exception on error
  */
-int Unicode_toupper(duk_context *ctx)
+duk_ret_t Unicode_toUpper(duk_context *ctx)
 {
 	return convert(ctx, ConvertMode::ToUpper);
 }
 
-const duk_function_list_entry utf8Functions[] = {
-	{ "isDigit",		Unicode_isdigit,	1	},
-	{ "isLetter",		Unicode_isletter,	1	},
-	{ "isLower",		Unicode_islower,	1	},
-	{ "isSpace",		Unicode_isspace,	1	},
-	{ "isTitle",		Unicode_istitle,	1	},
-	{ "isUpper",		Unicode_isupper,	1	},
+const duk_function_list_entry unicodeFunctions[] = {
+	{ "forEach",		Unicode_forEach,	2	},
+	{ "isDigit",		Unicode_isDigit,	1	},
+	{ "isLetter",		Unicode_isLetter,	1	},
+	{ "isLower",		Unicode_isLower,	1	},
+	{ "isSpace",		Unicode_isSpace,	1	},
+	{ "isTitle",		Unicode_isTitle,	1	},
+	{ "isUpper",		Unicode_isUpper,	1	},
 	{ "length",		Unicode_length,		1	},
 	{ "toUtf32",		Unicode_toUtf32,	1	},
-	{ "toLower",		Unicode_tolower,	1	},
+	{ "toLower",		Unicode_toLower,	1	},
 	{ "toUtf8",		Unicode_toUtf8,		1	},
-	{ "toUpper",		Unicode_toupper,	1	},
+	{ "toUpper",		Unicode_toUpper,	1	},
 	{ nullptr,		nullptr,		0	}
 };
 
@@ -356,8 +396,8 @@ duk_ret_t dukopen_unicode(duk_context *ctx) noexcept
 	dukx_assert_begin(ctx);
 	duk_push_object(ctx);
 	duk_push_object(ctx);
-	duk_put_function_list(ctx, -1, utf8Functions);
-	duk_put_prop_string(ctx, -2, "Utf8");
+	duk_put_function_list(ctx, -1, unicodeFunctions);
+	duk_put_prop_string(ctx, -2, "Unicode");
 	dukx_assert_end(ctx, 1);
 
 	return 1;

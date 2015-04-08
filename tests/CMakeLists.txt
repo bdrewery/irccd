@@ -21,14 +21,21 @@ project(tests)
 
 # Function to create a test
 function(create_test name sources)
-	include_directories(
-		${CMAKE_BINARY_DIR}
-		${CMAKE_SOURCE_DIR}
-		${irccd_SOURCE_DIR}
-		${extern_SOURCE_DIR}
+	add_executable(
+		${name}
+		${sources}
+		${tests_SOURCE_DIR}/libtest/LibtestUtil.h
 	)
 
-	add_executable(${name} ${sources})
+	target_include_directories(
+		${name}
+		PRIVATE
+			${CMAKE_BINARY_DIR}
+			${CMAKE_SOURCE_DIR}
+			${irccd_SOURCE_DIR}
+			${extern_SOURCE_DIR}
+			${tests_SOURCE_DIR}/libtest
+	)
 
 	add_test(
 		NAME ${name}
@@ -69,6 +76,7 @@ if (WITH_TESTS)
 	add_subdirectory(js-filesystem)
 	add_subdirectory(js-system)
 	add_subdirectory(js-timer)
+	add_subdirectory(js-unicode)
 
 	# Server stuff
 	add_subdirectory(server)
@@ -78,7 +86,6 @@ if (WITH_TESTS)
 	# Misc
 	add_subdirectory(service)
 	#add_subdirectory(converter)
-	#add_subdirectory(lua-util)
 	add_subdirectory(split)
 	add_subdirectory(strip)
 endif ()

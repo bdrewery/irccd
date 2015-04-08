@@ -981,8 +981,8 @@ duk_ret_t Directory_mkdir(duk_context *ctx)
 
 constexpr const duk_function_list_entry directoryFunctions[] = {
 	{ "find",		Directory_find,		DUK_VARARGS		},
-	{ "remove",		Directory_remove,	DUK_VARARGS		},
 	{ "mkdir",		Directory_mkdir,	DUK_VARARGS		},
+	{ "remove",		Directory_remove,	DUK_VARARGS		},
 	{ nullptr,		nullptr,		0			}
 };
 

@@ -232,6 +232,10 @@ function(apply_flags target flags)
 	if (${flags})
 		target_compile_definitions(${target} PRIVATE ${${flags}})
 	endif ()
+
+	if (WIN32)
+		target_compile_options(${target} PRIVATE "-Wno-cpp")
+	endif ()
 endfunction()
 
 function(apply_libraries target libs)
