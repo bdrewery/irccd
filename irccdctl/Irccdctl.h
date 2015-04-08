@@ -28,16 +28,22 @@
 #include <unordered_map>
 
 #include <SocketTcp.h>
+#include <Util.h>
 
 namespace irccd {
+
+class IniSection;
 
 class Irccdctl {
 private:
 	using Helper = void (Irccdctl::*)() const;
 	using Handler = void (Irccdctl::*)(int argc, char **argv);
 
+	/* Command line options */
+	DefinedOptions m_options;
+
 	/* Socket for connecting */
-	SocketTcp m_socket;
+	std::unique_ptr<SocketTcp> m_socket;
 
 	/* Commands and help */
 	std::unordered_map<std::string, Helper> m_helpers;
@@ -86,13 +92,36 @@ private:
 
 	/* Private functions */
 	void send(std::string message);
+	void response();
+
 	void usage();
-	std::string response();
+
+	void loadGeneral(const IniSection &sc);
+	void loadSocket(const IniSection &sc);
+	void loadConfig();
 
 public:
-	Irccdctl(SocketTcp s);
+	Irccdctl();
 
-	int exec(int argc, char **argv);
+	/**
+	 * Define an option from command line.
+	 *
+	 * @param name the option name (short or long)
+	 * @param value the value
+	 */
+	void define(std::string name, std::string value);
+
+	/**
+	 * Execute the client command.
+	 *
+	 * The caller must remove the initial argv[0] which contains the
+	 * program name and reduce the argc from one.
+	 *
+	 * @param argc the number of arguments
+	 * @param argv the arguments
+	 * @return 0 or 1
+	 */
+	int exec(int argc, char **argv) noexcept;
 
 };
 

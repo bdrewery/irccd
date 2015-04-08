@@ -29,6 +29,8 @@
 #include <stdexcept>
 #include <string>
 
+namespace irccd {
+
 /**
  * @class IniError
  * @brief Error in a file
@@ -508,5 +510,7 @@ public:
 		return find<IniSection &>(key);
 	}
 };
+
+} // !irccd
 
 #endif // !_INI_H_

@@ -16,173 +16,38 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <iostream>
-#include <unordered_map>
-#include <stdexcept>
-#include <string>
-
 #include <IrccdConfig.h>
 
 #include <Logger.h>
 #include <OptionParser.h>
-#include <SocketAddress.h>
-#include <SocketTcp.h>
 
 #include "Irccdctl.h"
 
 using namespace irccd;
 
-#if 0
-
-using namespace irccd;
-using namespace std;
-
-void verifyParams(const unordered_map<char, string> &params)
-{
-	try {
-		string type;
-		string protocol;
-
-		if (params.find('t') == params.end())
-			throw runtime_error("irccdctl: no type given (-t internet or unix)");
-		if (params.find('T') == params.end())
-			throw runtime_error("irccdctl: no protocol given (-T tcp or udp)");
-
-		type = params.at('t');
-		protocol = params.at('T');
-
-		if (protocol != "tcp" && protocol != "udp")
-			throw runtime_error("irccdctl: invalid protocol `" + protocol + "'");
-
-		if (type == "internet") {
-			if (params.find('4') == params.end() && params.find('6') == params.end())
-				throw runtime_error("irccdctl: no family given (-4 or -6)");
-			if (params.find('h') == params.end())
-				throw runtime_error("irccdctl: no hostname given (-h)");
-			if (params.find('p') == params.end())
-				throw runtime_error("irccdctl: no port given (-p)");
-		} else if (type == "unix") {
-#if defined(_WIN32)
-			Logger::fatal(1, "irccdctl: unix sockets are not supported on Windows");
-#else
-			if (params.find('P') == params.end())
-				throw runtime_error("irccdctl: no path given (-P)");
-#endif
-		} else
-			Logger::fatal(1, "irccdctl: invalid type `%s'", type.c_str());
-	} catch (runtime_error error) {
-		Logger::fatal(1, error.what());
-	}
-}
-
-void useParams(Irccdctl &ctl, const unordered_map<char, string> &params)
-{
-	string domstr	= params.at('t');
-	string proto	= params.at('T');
-	int domain, type;
-
-	type = (proto == "tcp") ? SOCK_STREAM : SOCK_DGRAM;
-
-	if (domstr == "internet") {
-		if (params.find('4') != params.end())
-			domain = AF_INET;
-		else
-			domain = AF_INET6;
-
-		try {
-			ctl.useInternet(
-			    params.at('h'),
-			    stol(params.at('p')),
-			    domain,
-			    type
-			);
-		} catch (...) {
-			Logger::fatal(1, "socket: invalid port number `%s'",
-			    params.at('p').c_str());
-		}
-	} else {
-#if !defined(_WIN32)
-		ctl.useUnix(params.at('P'), type);
-#endif
-	}
-}
-
-#endif
-
 int main(int argc, char **argv)
 {
 	setprogname("irccd");
 
+	Irccdctl ctl;
 	OptionParser parser{
+		{ "c",	"config",			},
 		{ "v",	"verbose",	Option::NoArg	}
 	};
+
 	OptionPack pack = parser.parse(--argc, ++argv);
 
-	/* TODO : PARSE */
+	for (const OptionValue &option : pack) {
+		if (option == "c") {
+			ctl.define("c", option.value());
+		} else if (option == "v") {
+			Logger::setVerbose(true);
+			ctl.define("v", "");
+		}
+	}
+
 	argc -= pack.parsed();
 	argv += pack.parsed();
 
-	SocketTcp socket(AF_INET, 0);
-
-	try {
-		socket.connect(address::Internet("localhost", 40000, AF_INET));
-	} catch (const std::exception &ex) {
-		Logger::warning() << getprogname() << ": " << ex.what() << std::endl;
-	}
-
-	Irccdctl ctl(socket);
-
-	int ret = ctl.exec(argc, argv);
-
-	socket.close();
-
-	return ret;
-
-#if 0
-	Irccdctl ctl;
-	unordered_map<char, string> params;
-	int ch;
-
-	setprogname("irccdctl");
-
-	opterr = false;
-	while ((ch = getopt(argc, argv, "46c:h:i:k:P:p:sT:t:v")) != -1) {
-		switch (ch)
-		{
-		case '4':
-		case '6':
-			params[ch] = "1";			// IPv4 or IPv6?
-			break;
-		case 'c':
-			ctl.setConfigPath(optarg);
-			break;
-		case 's':					// ssl
-			ctl.addArg(ch, "dummy");
-			break;
-		case 'i':					// identity
-		case 'k':					// key (password)
-			ctl.addArg(ch, optarg);
-			break;
-		case 'h':					// host
-		case 'P':					// unix path
-		case 'p':					// port
-		case 'T':					// protocol
-		case 't':					// internet or unix
-			params[ch] = optarg;
-			break;
-		case 'v':
-			ctl.setVerbosity(true);
-			break;
-		}
-	}
-	argc -= optind;
-	argv += optind;
-
-	if (params.size() > 0) {
-		verifyParams(params);
-		useParams(ctl, params);
-	}
-#endif
-
-//	return ctl.run(argc, argv);
+	return ctl.exec(argc, argv);
 }

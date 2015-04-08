@@ -26,6 +26,7 @@
 
 #include <ElapsedTimer.h>
 #include <Filesystem.h>
+#include <Ini.h>
 #include <Json.h>
 #include <Logger.h>
 #include <SocketAddress.h>
@@ -536,7 +537,7 @@ void Irccdctl::send(std::string message)
 	try {
 		message += "\r\n\r\n";
 
-		m_socket.waitSend(message, 10000);
+		m_socket->waitSend(message, 10000);
 	} catch (const std::exception &ex) {
 		throw std::runtime_error("irccdctl: "s + ex.what());
 	}
@@ -568,9 +569,8 @@ void Irccdctl::usage()
 			  << "\nFor more information on a command, type " << getprogname() << " help <command>" << std::endl;
 }
 
-Irccdctl::Irccdctl(SocketTcp s)
-	: m_socket(std::move(s))
-	, m_helpers{
+Irccdctl::Irccdctl()
+	: m_helpers{
 		{ "cnotice", 	&Irccdctl::helpChannelNotice	},
 		{ "disconnect",	&Irccdctl::helpDisconnect	},
 		{ "connect",	&Irccdctl::helpConnect		},
@@ -754,16 +754,15 @@ void Irccdctl::openConfig()
 
 #endif
 
-std::string Irccdctl::response()
+void Irccdctl::response()
 {
 	ElapsedTimer timer;
 	bool done = false;
-	bool received = false;
 	std::string result;
 	std::string::size_type pos;
 
 	while (!done && timer.elapsed() < 10000) {
-		result += m_socket.waitRecv(512, 10000 - timer.elapsed());
+		result += m_socket->waitRecv(512, 10000 - timer.elapsed());
 
 		while ((pos = result.find("\r\n\r\n")) == std::string::npos) {
 			std::string message = result.substr(0U, pos);
@@ -779,28 +778,60 @@ std::string Irccdctl::response()
 			}
 
 			if (object.contains("result")) {
-				result = object["result"].toString();
+				Logger::info() << object["result"].toString() << std::endl;
 			} else if (object.contains("error")) {
-				result = object["error"].toString();
+				Logger::warning() << object["error"].toString() << std::endl;
 			}
 
-			received = true;
 			done = true;
 		}
 	}
-
-	if (!received) {
-		throw std::runtime_error("no response received");
-	}
-
-	return result;
 }
 
-int Irccdctl::exec(int argc, char **argv)
+void Irccdctl::loadGeneral(const IniSection &sc)
+{
+
+}
+
+void Irccdctl::loadSocket(const IniSection &sc)
+{
+
+}
+
+void Irccdctl::loadConfig()
+{
+	std::string path;
+
+	if (m_options.count("c") != 0) {
+
+	}
+
+	Ini config("irccdctl.conf");
+
+	for (const IniSection &sc : config) {
+		if (sc.key() == "general") {
+			loadGeneral(sc);
+		} else if (sc.key() == "socket") {
+			loadSocket(sc);
+		}
+	}
+}
+
+void Irccdctl::define(std::string name, std::string value)
+{
+	m_options[name] = value;
+}
+
+int Irccdctl::exec(int argc, char **argv) noexcept
 {
 	if (argc <= 0) {
 		usage();
 		return 1;
+	}
+
+	/* Help command does not require connection */
+	if (strcmp(argv[0], "help") != 0) {
+		loadConfig();
 	}
 
 	if (m_handlers.count(argv[0]) == 0) {
@@ -812,6 +843,8 @@ int Irccdctl::exec(int argc, char **argv)
 		std::string cmd = argv[0];
 
 		(this->*m_handlers.at(cmd))(--argc, ++argv);
+
+		response();
 	} catch (const std::exception &ex) {
 		Logger::warning() << getprogname() << ": " << ex.what() << std::endl;
 		return 1;

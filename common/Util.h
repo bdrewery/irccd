@@ -220,6 +220,84 @@ public:
 	static std::string strip(const std::string &str);
 };
 
+/**
+ * @class DefinedOption
+ * @brief Helper to determine if an option has been set at command line
+ */
+class DefinedOption {
+private:
+	std::string m_value;
+	bool m_defined{false};
+
+	/* Not needed */
+	DefinedOption(DefinedOption &&) = delete;
+	DefinedOption &operator=(DefinedOption &&) = delete;
+	DefinedOption(const DefinedOption &) = delete;
+	DefinedOption &operator=(const DefinedOption &) = delete;
+
+public:
+	/**
+	 * Default constructor, option not defined.
+	 */
+	DefinedOption() = default;
+
+	/**
+	 * Tell if the option is defined.
+	 */
+	inline operator bool() const noexcept
+	{
+		return m_defined;
+	}
+
+	/**
+	 * Tell if the option is defined.
+	 */
+	inline bool operator!() const noexcept
+	{
+		return !m_defined;
+	}
+
+	/**
+	 * Tell if the option is defined.
+	 *
+	 * @return true if defined
+	 */
+	inline bool isDefined() const noexcept
+	{
+		return m_defined;
+	}
+
+	/**
+	 * Get the defined value.
+	 *
+	 * @return the value
+	 * @throw std::invalid_argument if the option was not defined
+	 */
+	inline std::string value() const
+	{
+		if (!m_defined) {
+			throw std::invalid_argument("option not defined");
+		}
+
+		return m_value;
+	}
+
+	/**
+	 * Assign a value, the option will be defined.
+	 *
+	 * @param value the value
+	 * @return *this
+	 */
+	inline DefinedOption &operator=(std::string value) {
+		m_value = std::move(value);
+		m_defined = true;
+
+		return *this;
+	}
+};
+
+using DefinedOptions = std::unordered_map<std::string, DefinedOption>;
+
 } // !irccd
 
 #endif // !_IRCCD_UTIL_H_

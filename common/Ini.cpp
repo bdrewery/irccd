@@ -33,6 +33,8 @@
 
 #include "Ini.h"
 
+namespace irccd {
+
 namespace {
 
 /* --------------------------------------------------------
@@ -423,3 +425,5 @@ Ini::Ini(const std::string &path)
 {
 	IniBuilder(*this, path);
 }
+
+} // !irccd
