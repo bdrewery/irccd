@@ -53,6 +53,7 @@ TEST_F(TestJsFilesystem, symbols)
 	checkSymbol("fs.File.prototype.basename", "function");
 	checkSymbol("fs.File.prototype.dirname", "function");
 	checkSymbol("fs.File.prototype.read", "function");
+	checkSymbol("fs.File.prototype.readline", "function");
 	checkSymbol("fs.File.prototype.remove", "function");
 	checkSymbol("fs.File.prototype.seek", "function");
 #if defined(HAVE_STAT)
@@ -159,6 +160,34 @@ TEST_F(TestJsFilesystem, methodSeek1)
 
 	ASSERT_EQ(DUK_TYPE_STRING, duk_get_type(m_ctx, -1));
 	ASSERT_STREQ(".", duk_to_string(m_ctx, -1));
+}
+
+TEST_F(TestJsFilesystem, methodReadLine)
+{
+	execute(
+		"lines = [];"
+		"f = new fs.File(BINARY + \"/testassets/lines.txt\", \"r\");"
+		"for (var s; s = f.readline(); ) {"
+		"  lines.push(s);"
+		"}"
+	);
+
+	duk_get_global_string(m_ctx, "lines");
+
+	ASSERT_EQ(DUK_TYPE_OBJECT, duk_get_type(m_ctx, -1));
+
+	duk_get_prop_string(m_ctx, -1, "length");
+	int length = duk_to_number(m_ctx, -1);
+	duk_pop(m_ctx);
+
+	ASSERT_EQ(3, length);
+
+	std::string expected = "abc";
+	for (int i = 0; i < 3; ++i) {
+		duk_get_prop_index(m_ctx, -1, i);
+		ASSERT_EQ(expected[i], duk_to_string(m_ctx, -1)[0]);
+		duk_pop(m_ctx);
+	}
 }
 
 TEST_F(TestJsFilesystem, methodSeek2)

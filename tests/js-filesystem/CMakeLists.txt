@@ -41,6 +41,7 @@ target_compile_definitions(
 # CMAKE_BINARY_DIR
 #	| testassets
 #	|	|-- file.txt
+#	|	|-- lines.txt
 #	|	|-- level-1
 #	|	|	| -- file-1.txt
 #	|	|	| -- level-2
@@ -48,5 +49,6 @@ target_compile_definitions(
 #
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/testassets/level-1/level-2)
 file(WRITE ${CMAKE_BINARY_DIR}/testassets/file.txt "file.txt")
+file(WRITE ${CMAKE_BINARY_DIR}/testassets/lines.txt "a\nb\nc\n")
 file(WRITE ${CMAKE_BINARY_DIR}/testassets/level-1/file-1.txt "file-1.txt")
 file(WRITE ${CMAKE_BINARY_DIR}/testassets/level-1/level-2/file-2.txt "file-2.txt")

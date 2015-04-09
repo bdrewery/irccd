@@ -1,6 +1,7 @@
 #ifndef _IRCCD_TEST_JS_UTIL_H_
 #define _IRCCD_TEST_JS_UTIL_H_
 
+#include <iostream>
 #include <string>
 #include <sstream>
 
@@ -22,6 +23,13 @@ public:
 
 		oss << ret << " = require(\"" << modname << "\");";
 		str = oss.str();
+
+		duk_push_c_function(m_ctx, [] (duk_context *ctx) -> duk_ret_t {
+			std::cerr << "failure from script: " << duk_require_string(ctx, 0) << std::endl;
+
+			return 0;
+		}, 1);
+		duk_put_global_string(m_ctx, "fail");
 
 		duk_eval_string_noresult(m_ctx, str.c_str());
 		duk_push_string(m_ctx, BINARY);

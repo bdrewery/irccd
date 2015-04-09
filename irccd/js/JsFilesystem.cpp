@@ -99,6 +99,21 @@ public:
 		return pos;
 	}
 
+	bool readline(std::string &result)
+	{
+		std::getline(m_stream, result);
+
+		if (m_stream.eof()) {
+			return false;
+		}
+
+		if (!m_stream) {
+			throw std::runtime_error(std::strerror(errno));
+		}
+
+		return true;
+	}
+
 	std::string read(int amount)
 	{
 		if (!m_stream) {
@@ -467,6 +482,33 @@ duk_ret_t File_prototype_read(duk_context *ctx)
 }
 
 /*
+ * Method: File.readline()
+ * --------------------------------------------------------
+ *
+ * Read the next line available.
+ *
+ * Returns:
+ *   - The next line or undefined if eof
+ * Throws:
+ *   - Any exception on error
+ */
+duk_ret_t File_prototype_readline(duk_context *ctx)
+{
+	dukx_with_this<File>(ctx, [&] (File &file) {
+		try {
+			std::string str;
+
+			file.readline(str);
+			duk_push_string(ctx, str.c_str());
+		} catch (const std::exception &ex) {
+			dukx_throw(ctx, errno, std::strerror(errno));
+		}
+	});
+
+	return 1;
+}
+
+/*
  * Method: File.remove()
  * --------------------------------------------------------
  *
@@ -613,6 +655,7 @@ constexpr const duk_function_list_entry fileMethods[] = {
 	{ "basename",	File_prototype_basename,	0	},
 	{ "dirname",	File_prototype_dirname,		0	},
 	{ "read",	File_prototype_read,		1	},
+	{ "readline",	File_prototype_readline,	0	},
 	{ "remove",	File_prototype_remove,		0	},
 	{ "seek",	File_prototype_seek,		2	},
 #if defined(HAVE_STAT)
