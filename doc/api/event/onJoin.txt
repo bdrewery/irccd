@@ -6,7 +6,7 @@ User join events, this function is called when someone join a channel.
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onJoin(server, channel, nickname)
 ````
 

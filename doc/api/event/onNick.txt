@@ -6,7 +6,7 @@ This event is triggered when someone changed its nickname.
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onNick(server, oldnickname, newnickname)
 ````
 

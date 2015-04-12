@@ -6,7 +6,7 @@ This event is triggered when someone changed the channel's topic.
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onTopic(server, channel, who, topic)
 ````
 

@@ -11,7 +11,7 @@ This is an event most known as /me. What you usually see like this:
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onMe(server, channel, nickname, message)
 ````
 

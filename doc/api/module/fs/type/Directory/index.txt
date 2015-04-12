@@ -16,8 +16,9 @@ This object let you iterate a directory.
 
 # Properties
 
-- **count (int)**: number of entries in the directory
-- **path (string)**: path to the directory
+- **count (int)**: number of entries in the directory,
+- **path (string)**: path to the directory,
+- **entries (array)**: array of object containing fields **type** and **name**,
 
 # Methods
 
@@ -25,7 +26,7 @@ This object let you iterate a directory.
 - [find](method/find.html)
 - [remove](method/remove.html)
 
-# Static functions
+# Static methods
 
 - [find](function/find.html)
 - [mkdir](function/mkdir.html)

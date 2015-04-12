@@ -7,7 +7,7 @@ This event is triggered when a list of names has come.
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onNames(server, channel, list)
 ````
 

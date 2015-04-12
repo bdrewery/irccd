@@ -10,6 +10,6 @@ If you want to fully unload a plugin, use `irccdctl unload` then `irccdctl load`
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onReload()
 ````

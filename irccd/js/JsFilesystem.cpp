@@ -734,7 +734,7 @@ duk_ret_t File_File(duk_context *ctx)
  * Arguments:
  *   - path, the path to the file
  * Returns:
- *   - the basename
+ *   - the base name
  */
 duk_ret_t File_basename(duk_context *ctx)
 {
@@ -747,7 +747,7 @@ duk_ret_t File_basename(duk_context *ctx)
  * Function: fs.File.dirname(path)
  * --------------------------------------------------------
  *
- * Return the file basename as specified in dirname(3) C function.
+ * Return the file directory name as specified in `dirname(3)` C function.
  *
  * Arguments:
  *   - path, the path to the file
@@ -878,7 +878,6 @@ duk_ret_t Directory_prototype_find(duk_context *ctx)
  * directory object.
  *
  * Arguments:
- *   - path, the path to the directory
  *   - recursive, recursively or not (default: false)
  * Throws:
  *   Any exception on error

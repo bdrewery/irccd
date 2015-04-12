@@ -6,7 +6,7 @@ This event is triggered when someone has left a specific channel.
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onPart(server, channel, nickname, reason)
 ````
 

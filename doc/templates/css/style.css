@@ -38,6 +38,10 @@ a:hover {
 	text-decoration: underline;
 }
 
+strong {
+	font-size: 90%;
+}
+
 .sidebar-common {
 	margin: 0px 0px 10px 10px;
 	float: left;
@@ -106,21 +110,22 @@ table {
 }
 
 table, th, td {
-	padding: 7px;
 	border: 1px solid #D4B06A;
+	font-size: 100%;
 }
 
 th {
 	background-color: #FFE2AA;
+	padding: 3px 3px 3px 3px;
 }
 
 td {
-	padding: 4px;
+		padding: 3px 3px 3px 3px;
 }
 
 #footer {
 	font-size: 70%;
-	font-color: #4d4d4d;
+	color: #4d4d4d;
 	margin-left: 195px;
 }
 
@@ -142,35 +147,34 @@ td {
 
 .content-common h1, .content-common h2, .content-common h3, .content-common h4, .content-common h5, .content-common h6 {
 	margin: 10px 0px 10px 0px;
-	font-variant: small-caps;
 }
 
 .content-common h1 {
-	font-size: 135%;
+	font-size: 115%;
 	color: #061739;
 }
 
 .content-common h2 {
-	font-size: 125%;
+	font-size: 110%;
 	color: #061739;
 }
 
 .content-common h3 {
-	font-size: 120%;
+	font-size: 105%;
 	color: #152B55;
 }
 
 .content-common h4 {
-	font-size: 115%;
+	font-size: 100%;
 	color: #4E638E;
 }
 
 .content-common h5 {
-	font-size: 110%;
+	font-size: 100%;
 }
 
 .content-common h6 {
-	font-size: 105%;
+	font-size: 100%;
 }
 
 .content-common {

@@ -6,7 +6,7 @@ This callback is called when the irccd instance successfully connect to a server
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onConnect(server)
 ````
 

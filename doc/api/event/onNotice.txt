@@ -6,7 +6,7 @@ This event is triggered when someone sent a notice to you.
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onNotice(server, who, target, notice)
 ````
 

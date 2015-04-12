@@ -6,7 +6,7 @@ This event is triggered when someone changed the channel's mode.
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onMode(server, channel, nickname, mode, modeArg)
 ````
 

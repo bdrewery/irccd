@@ -6,7 +6,7 @@ This event is triggered when someone sent a private message to you.
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onQuery(server, who, message)
 ````
 

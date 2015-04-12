@@ -21,13 +21,17 @@ project(fs)
 set(
 	FS_SOURCES
 	${fs_SOURCE_DIR}/index.txt
-	${fs_SOURCE_DIR}/function/basename.txt
-	${fs_SOURCE_DIR}/function/dirname.txt
-	${fs_SOURCE_DIR}/function/exists.txt
-	${fs_SOURCE_DIR}/function/mkdir.txt
-	${fs_SOURCE_DIR}/function/opendir.txt
 	${fs_SOURCE_DIR}/type/Directory/index.txt
-	${fs_SOURCE_DIR}/type/Directory/method/count.txt
-	${fs_SOURCE_DIR}/type/Directory/method/read.txt
+	${fs_SOURCE_DIR}/type/Directory/function/find.txt
+	${fs_SOURCE_DIR}/type/Directory/function/mkdir.txt
+	${fs_SOURCE_DIR}/type/Directory/function/remove.txt
+	${fs_SOURCE_DIR}/type/Directory/method/find.txt
+	${fs_SOURCE_DIR}/type/Directory/method/remove.txt
+	${fs_SOURCE_DIR}/type/File/index.txt
+	${fs_SOURCE_DIR}/type/File/function/basename.txt
+	${fs_SOURCE_DIR}/type/File/function/dirname.txt
+	${fs_SOURCE_DIR}/type/File/function/exists.txt
+	${fs_SOURCE_DIR}/type/File/function/remove.txt
+	${fs_SOURCE_DIR}/type/File/function/stat.txt
 	PARENT_SCOPE
 )

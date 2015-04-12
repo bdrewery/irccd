@@ -44,17 +44,12 @@
       <ul>
 	<li><a href="@baseurl@api/module/irccd/index.html">irccd</a></li>
 	<li><a href="@baseurl@api/module/fs/index.html">irccd.fs</a></li>
-	<li><a href="@baseurl@api/module/logger/index.html">irccd.logger</a></li>
-	<li><a href="@baseurl@api/module/parser/index.html">irccd.parser</a></li>
 	<li><a href="@baseurl@api/module/plugin/index.html">irccd.plugin</a></li>
 	<li><a href="@baseurl@api/module/rule/index.html">irccd.rule</a></li>
 	<li><a href="@baseurl@api/module/server/index.html">irccd.server</a></li>
-	<li><a href="@baseurl@api/module/socket/index.html">irccd.socket</a></li>
-	<li><a href="@baseurl@api/module/socket-listener/index.html">irccd.socket.listener</a></li>
 	<li><a href="@baseurl@api/module/system/index.html">irccd.system</a></li>
-	<li><a href="@baseurl@api/module/thread/index.html">irccd.thread</a></li>
-	<li><a href="@baseurl@api/module/thread-pipe/index.html">irccd.thread.pipe</a></li>
-	<li><a href="@baseurl@api/module/utf8/index.html">irccd.utf8</a></li>
+	<li><a href="@baseurl@api/module/timer/index.html">irccd.timer</a></li>
+	<li><a href="@baseurl@api/module/unicode/index.html">irccd.unicode</a></li>
 	<li><a href="@baseurl@api/module/util/index.html">irccd.util</a></li>
       </ul>
     </div>
@@ -121,6 +116,9 @@
   <div id="info">
     $if(since)$
     <p>Since version $since$</p>
+    $endif$
+    $if(optional)$
+    <p><strong>Warning</strong>: this function is optional and may be not available on your system.</p>
     $endif$
   </div><!-- !info -->
   $endif$

@@ -6,7 +6,7 @@ This callback is called when someone sent a notice on a channel.
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onChannelNotice(server, who, channel, notice)
 ````
 

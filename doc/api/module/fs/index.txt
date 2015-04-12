@@ -1,7 +1,5 @@
 ---
 module: irccd.fs
-info: yes
-since: "2.0"
 ---
 
 # Usage

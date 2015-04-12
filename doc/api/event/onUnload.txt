@@ -6,7 +6,7 @@ This event is triggered when the server changed your mode.
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onUserMode(server, nickname, mode)
 ````
 

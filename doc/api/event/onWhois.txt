@@ -14,7 +14,7 @@ This event is triggered when irccd get information from a user. The info is a ta
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onWhois(server, info)
 ````
 

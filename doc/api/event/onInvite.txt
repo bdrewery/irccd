@@ -6,7 +6,7 @@ This callback is called when someone is inviting you to a channel.
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onInvite(server, channel, who)
 ````
 

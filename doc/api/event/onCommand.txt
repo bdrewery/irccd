@@ -10,7 +10,7 @@ Note that the command character is not fixed to '!', it's just the default and c
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onCommand(server, channel, who, message)
 ````
 

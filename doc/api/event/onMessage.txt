@@ -6,7 +6,7 @@ This event is triggered when someone said something on a specific channel.
 
 # SYNOPSIS
 
-````lua
+````javascript
 function onMessage(server, channel, nickname, message)
 ````
 
