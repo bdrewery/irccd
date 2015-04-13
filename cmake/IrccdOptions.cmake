@@ -20,12 +20,11 @@
 #
 # WITH_IPV6		Enable IPv6 support (default: on)
 # WITH_SSL		Enable OpenSSL (default: on)
-# WITH_LIBICONV		Enable libiconv reencoding (default: on)
 # WITH_JS		Enable JavaScript (default: on)
-# WITH_TESTS		Enable unit testing (default: on)
+# WITH_TESTS		Enable unit testing (default: off)
 # WITH_SYSTEMD		Install systemd service (default: off)
-# WITH_DOCS_DOXYGEN	Enable internal irccd documentation (default: on)
 # WITH_DOCS		Enable building of documentation (default: on)
+# WITH_DOCS_DOXYGEN	Enable internal irccd documentation (default: on)
 # WITH_DOCS_JS		Enable building of Lua documentation (default: on)
 # WITH_DOCS_GUIDES_PDF	Enable user guides in PDF
 # WITH_DOCS_GUIDES_HTML	Enable user guides in HTML
@@ -60,9 +59,8 @@ endif ()
 
 option(WITH_IPV6 "Enable IPv6" On)
 option(WITH_SSL "Enable SSL" On)
-option(WITH_LIBICONV "Enable libiconv for reencoding" On)
 option(WITH_JS "Enable embedded Duktape" On)
-option(WITH_TESTS "Enable unit testing" On)
+option(WITH_TESTS "Enable unit testing" Off)
 option(WITH_SYSTEMD "Install systemd service" Off)
 option(WITH_DOCS "Enable building of all documentation" On)
 option(WITH_DOCS_GUIDES_PDF "Enable building of PDF guides" On)

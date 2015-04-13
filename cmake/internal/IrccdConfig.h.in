@@ -46,8 +46,6 @@
 #define ETCDIR			"@ETCDIR@"
 #define MODDIR			"@MODDIR@"
 #define DOCDIR			"@DOCDIR@"
-#define VERSION			"@IRCCD_VERSION@"
-#define PREFIX			"@CMAKE_INSTALL_PREFIX@"
 
 #cmakedefine WITH_JS
 
