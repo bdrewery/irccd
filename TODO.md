@@ -1,5 +1,5 @@
-- Add JS Server functions
 - Test all JS API
 - Test server events -> transports
 - Improve reloading of Transport sets
-- Escape JSON strings
+- Add a better irccd_create_test function
+- Convert documentation
