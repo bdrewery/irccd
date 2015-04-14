@@ -27,6 +27,8 @@
 #define IRCCD_VERSION_MINOR	@IRCCD_VERSION_MINOR@
 #define IRCCD_VERSION_PATCH	@IRCCD_VERSION_PATCH@
 
+#cmakedefine IRCCD_RELOCATABLE
+
 /* --------------------------------------------------------
  * System identification
  * -------------------------------------------------------- */

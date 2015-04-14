@@ -19,18 +19,18 @@
 project(templates)
 
 add_custom_command(
-	OUTPUT ${WITH_DOCS_DIRECTORY}/css/style.css
+	OUTPUT ${CMAKE_BINARY_DIR}/docs/css/style.css
 	COMMAND
-		${CMAKE_COMMAND} -E make_directory ${WITH_DOCS_DIRECTORY}/css
+		${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/docs/css
 	COMMAND
-		${CMAKE_COMMAND} -E copy ${templates_SOURCE_DIR}/css/style.css ${WITH_DOCS_DIRECTORY}/css
+		${CMAKE_COMMAND} -E copy ${templates_SOURCE_DIR}/css/style.css ${CMAKE_BINARY_DIR}/docs/css
 	DEPENDS
 		${templates_SOURCE_DIR}/css/style.css
 )
 
 add_custom_target(
 	docs-templates
-	DEPENDS ${WITH_DOCS_DIRECTORY}/css/style.css
+	DEPENDS ${CMAKE_BINARY_DIR}/docs/css/style.css
 	SOURCES
 		${templates_SOURCE_DIR}/css/style.css
 		${templates_SOURCE_DIR}/template.html

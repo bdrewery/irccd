@@ -63,12 +63,6 @@ add_subdirectory(plugins)
 include(CTest)
 add_subdirectory(tests)
 
-message("Installation directories:")
-message("    MANDIR            ${CMAKE_INSTALL_PREFIX}/${MANDIR}")
-message("    DOCDIR            ${CMAKE_INSTALL_PREFIX}/${DOCDIR}")
-message("    MODDIR            ${CMAKE_INSTALL_PREFIX}/${MODDIR}")
-message("")
-
 message("Compiling with the following flags:")
 message("    General flags:    ${CMAKE_CXX_FLAGS}")
 message("    Debug flags:      ${CMAKE_CXX_FLAGS_DEBUG}")
@@ -83,8 +77,6 @@ message("    User docs (HTML): ${WITH_DOCS_GUIDES_HTML_MSG}")
 message("    User docs (PDF):  ${WITH_DOCS_GUIDES_PDF_MSG}")
 message("    JS docs:          ${WITH_DOCS_JS_MSG}")
 message("    Doxygen:          ${WITH_DOCS_DOXYGEN_MSG}")
-message("    irccd config:     ${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccd.conf")
-message("    irccdctl config:  ${CMAKE_INSTALL_PREFIX}/${ETCDIR}/irccdctl.conf")
 message("")
 
 message("Installing plugins:")
@@ -103,3 +95,29 @@ message("")
 # CPack
 include(cmake/IrccdCPackConfig.cmake)
 include(CPack)
+
+# Show warnings about non-relocatable irccd
+
+if (NOT IRCCD_RELOCATABLE)
+	message("Note: irccd is not relocatable, the following path are absolute:")
+	message("")
+
+	foreach (path ${IRCCD_ABSOLUTE_PATHS})
+		message("    ${path} is set to ${${path}}")
+	endforeach ()
+
+	if (WIN32)
+		message("")
+		message("No package_inno target will be provided.")
+	endif ()
+
+	message("")
+	message("You can still use irccd, but you won't be able to move the application to a")
+	message("different directory.")
+	message("")
+	message("This may be an issue with some packages manager which allows relocating")
+	message("application in different directories.")
+	message("")
+	message("Set to relative paths if this is a concern.")
+	message("")
+endif ()

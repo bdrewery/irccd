@@ -70,7 +70,7 @@ foreach (s ${SOURCES})
 	# outputdirectory: base directory for the output file
 	#
 	string(REGEX REPLACE "^(.*)\\.txt$" "\\1.html" outputname ${inputbase})
-	set(outputpath ${WITH_DOCS_DIRECTORY}/api/${outputname})
+	set(outputpath ${CMAKE_BINARY_DIR}/docs/api/${outputname})
 	get_filename_component(outputdirectory ${outputpath} DIRECTORY)
 
 	#
@@ -82,7 +82,7 @@ foreach (s ${SOURCES})
 
 	set(
 		linkify_args
-		${WITH_DOCS_DIRECTORY}
+		${CMAKE_BINARY_DIR}/docs
 		${outputdirectory}
 	)
 
@@ -105,7 +105,7 @@ foreach (s ${SOURCES})
 		COMMAND
 			${Pandoc_EXECUTABLE} ${pandoc_args}
 		COMMAND
-			$<TARGET_FILE:linkify> ${outputpath}.tmp ${outputpath} ${WITH_DOCS_DIRECTORY} ${outputdirectory}
+			$<TARGET_FILE:linkify> ${outputpath}.tmp ${outputpath} ${CMAKE_BINARY_DIR}/docs ${outputdirectory}
 		COMMAND
 			${CMAKE_COMMAND} -E remove ${outputpath}.tmp
 		DEPENDS

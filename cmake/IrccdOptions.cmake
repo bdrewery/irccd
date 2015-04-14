@@ -16,6 +16,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+#
 # Options that controls the build:
 #
 # WITH_IPV6		Enable IPv6 support (default: on)
@@ -29,7 +30,6 @@
 # WITH_DOCS_GUIDES_PDF	Enable user guides in PDF
 # WITH_DOCS_GUIDES_HTML	Enable user guides in HTML
 # WITH_DOCS_MAN		Install manpages (default: on, off for Windows)
-# WITH_DOCS_DIRECTORY	Selects the output directory for the documentation (default: ${CMAKE_BINARY_DIR}/docs)
 # WITH_PLUGIN_ANTIFLOOD	Enable antiflood plugin
 # WITH_PLUGIN_ASK	Enable ask plugin
 # WITH_PLUGIN_AUTH	Enable auth plugin
@@ -44,6 +44,20 @@
 # Note: the option() commands for WITH_PLUGIN_<name> variables are defined in plugins/CMakeLists.txt
 #
 
+#
+# Options that controls both installations and the irccd runtime:
+#
+# Note: it is allowed to use absolute path but it's *strongly* recommended to
+#       use relative paths if you want to keep irccd relocatable.
+#
+# WITH_BINDIR		Binary directory for irccd, irccdctl
+# WITH_PLUGINDIR	Path where plugins must be installed
+# WITH_DOCSDIR		Path where to install documentation
+# WITH_MANDIR		Path where to install manuals
+# WITH_CONFDIR		Path where to search configuration files
+#
+
+#
 # Options for unit tests only:
 #
 # WITH_TEST_IRCHOST	Which IRC server to use for tests (default: 127.0.0.1)
@@ -69,9 +83,6 @@ option(WITH_DOCS_DOXYGEN "Enable doxygen" On)
 option(WITH_DOCS_MAN "Install man pages" ${DEFAULT_MAN})
 option(WITH_DOCS_JS "Enable building of JavaScript documentation" On)
 
-set(WITH_DOCS_DIRECTORY ${CMAKE_BINARY_DIR}/docs
-	CACHE STRING "Directory where to output docs")
-
 set(WITH_TEST_IRCHOST "127.0.0.1"
 	CACHE STRING "IRC host for tests")
 set(WITH_TEST_IRCPORT 6667
@@ -81,29 +92,32 @@ set(WITH_TEST_IRCPORT 6667
 # Installation paths
 # ---------------------------------------------------------
 
+set(WITH_BINDIR "bin"
+	CACHE STRING "Binary directory")
+set(WITH_PLUGINDIR "share/irccd/plugins"
+	CACHE STRING "Module prefix where to install")
+set(WITH_DOCDIR "share/doc/irccd"
+	CACHE STRING "Documentation directory")
+set(WITH_MANDIR "share/man"
+	CACHE STRING "Man directory")
+set(WITH_CONFDIR "etc"
+	CACHE STRING "Configuration directory")
+
 #
-# Installation paths. On Windows, we just use the suffix relative
-# to the installation path.
+# Check if any of these path is absolute and mark irccd relocatable
+# only if all paths are relative
 #
-if (WIN32)
-	set(MODDIR "plugins"
-		CACHE STRING "Module prefix where to install")
-	set(DOCDIR "doc"
-		CACHE STRING "Documentation directory")
-	set(MANDIR "man"
-		CACHE STRING "Man directory")
-	set(ETCDIR "etc"
-		CACHE STRING "Configuration directory")
-else ()
-	set(MODDIR "share/irccd/plugins"
-		CACHE STRING "Module prefix where to install")
-	set(DOCDIR "share/doc/irccd"
-		CACHE STRING "Documentation directory")
-	set(MANDIR "share/man"
-		CACHE STRING "Man directory")
-	set(ETCDIR "etc"
-		CACHE STRING "Configuration directory")
-endif ()
+# Note: only WITH_BINDIR, WITH_MANDIR, WITH_CONFIGDIR must be relative to
+#       be relocatable.
+#
+set(IRCCD_RELOCATABLE TRUE)
+
+foreach (d WITH_BINDIR WITH_CONFDIR WITH_PLUGINDIR)
+	if (IS_ABSOLUTE ${${d}})
+		list(APPEND IRCCD_ABSOLUTE_PATHS ${d})
+		set(IRCCD_RELOCATABLE FALSE)
+	endif ()
+endforeach ()
 
 # ---------------------------------------------------------
 # Internal dependencies

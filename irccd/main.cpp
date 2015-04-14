@@ -21,6 +21,7 @@
 #include <memory>
 
 #include <Ini.h>
+#include <Util.h>
 
 #include "Logger.h"
 #include "Irccd.h"
@@ -134,8 +135,10 @@ void stop(int)
 
 } // !irccd
 
-int main(void)
+int main(int argc, char **argv)
 {
+	irccd::Util::setProgramPath(argv[0]);
+
 	irccd::Irccd instance;
 	irccd::irccd = &instance;
 

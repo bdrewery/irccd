@@ -64,7 +64,7 @@ if (WITH_DOCS_DOXYGEN)
 		docs-doxygen
 		COMMENT "Generating doxygen documentation"
 		COMMAND
-			${CMAKE_COMMAND} -E make_directory ${WITH_DOCS_DIRECTORY}/doxygen
+			${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/docs/doxygen
 		COMMAND
 			${DOXYGEN_EXECUTABLE} ${doc_BINARY_DIR}/doxygen/Doxyfile
 		WORKING_DIRECTORY

@@ -47,6 +47,8 @@ set(
 	SocketTcp.h
 	SocketUdp.cpp
 	SocketUdp.h
+	System.h
+	System.cpp
 	Util.cpp
 	Util.h
 )

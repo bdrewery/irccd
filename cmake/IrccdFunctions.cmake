@@ -147,8 +147,8 @@ endfunction()
 
 function(irccd_generate_guide target filename sources)
 	if (WITH_DOCS_GUIDES_HTML)
-		set(outputtmp ${WITH_DOCS_DIRECTORY}/guides/${filename}.html.tmp)
-		set(output ${WITH_DOCS_DIRECTORY}/guides/${filename}.html)
+		set(outputtmp ${CMAKE_BINARY_DIR}/docs/guides/${filename}.html.tmp)
+		set(output ${CMAKE_BINARY_DIR}/docs/guides/${filename}.html)
 
 		set(
 			args
@@ -164,16 +164,16 @@ function(irccd_generate_guide target filename sources)
 		)
 
 		add_custom_command(
-			OUTPUT ${WITH_DOCS_DIRECTORY}/guides/${filename}.html
+			OUTPUT ${CMAKE_BINARY_DIR}/docs/guides/${filename}.html
 			DEPENDS
 				${sources}
 				${templates_SOURCE_DIR}/template.html
 			COMMAND
-				${CMAKE_COMMAND} -E make_directory ${WITH_DOCS_DIRECTORY}/guides
+				${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/docs/guides
 			COMMAND
 				${Pandoc_EXECUTABLE} ${args}
 			COMMAND
-				$<TARGET_FILE:linkify> ${outputtmp} ${output} ${WITH_DOCS_DIRECTORY} ${WITH_DOCS_DIRECTORY}/guides
+				$<TARGET_FILE:linkify> ${outputtmp} ${output} ${CMAKE_BINARY_DIR}/docs ${CMAKE_BINARY_DIR}/docs/guides
 			COMMAND
 				${CMAKE_COMMAND} -E remove ${outputtmp}
 		)
@@ -189,7 +189,7 @@ function(irccd_generate_guide target filename sources)
 
 	if (WITH_DOCS_GUIDES_PDF)
 		pandoc(
-			OUTPUT ${WITH_DOCS_DIRECTORY}/guides/${filename}.pdf
+			OUTPUT ${CMAKE_BINARY_DIR}/docs/guides/${filename}.pdf
 			SOURCES ${sources}
 			FROM markdown
 			TO latex

@@ -35,7 +35,6 @@ set(
 set(
 	CMAKE_PACKAGES_SOURCES
 	${CMAKE_CURRENT_LIST_DIR}/packages/FindInnoSetup.cmake
-	${CMAKE_CURRENT_LIST_DIR}/packages/FindLibiconv.cmake
 	${CMAKE_CURRENT_LIST_DIR}/packages/FindPandoc.cmake
 )
 

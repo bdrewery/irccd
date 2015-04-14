@@ -22,32 +22,19 @@
 #include <fstream>
 #include <sstream>
 
-#if defined(_WIN32)
-#  include <sys/timeb.h>
-#  include <direct.h>
-#  include <windows.h>
-#  include <shlobj.h>
+#include <IrccdConfig.h>
 
-#  define _MKDIR(p, x)	::_mkdir(p)
-#else
-#  include <libgen.h>
-
-#  define _MKDIR(p, x)	::mkdir(p, x)
-
-#  include "Xdg.h"
+#if defined(IRCCD_SYSTEM_WINDOWS)
+#  include <Windows.h>
 #endif
 
-#include <sys/stat.h>
-
-#include "IrccdConfig.h"
 #include "Util.h"
 #include "Logger.h"
 
 namespace irccd {
 
-/* --------------------------------------------------------
- * Util class (private functions)
- * -------------------------------------------------------- */
+bool Util::m_programPathDefined{false};
+std::string Util::m_programPath;
 
 std::string Util::pathBase(const std::string &append)
 {
@@ -65,6 +52,8 @@ std::string Util::pathBase(const std::string &append)
 	 */
 	GetModuleFileNameA(NULL, exepath, sizeof (exepath));
 	base = Util::dirName(exepath);
+
+	// TODO: must extract WITH_BINDIR
 	pos = base.find("bin");
 	if (pos != std::string::npos)
 		base.erase(pos);
@@ -116,44 +105,6 @@ std::string Util::pathUser(const std::string &append)
 	return oss.str();
 }
 
-/* --------------------------------------------------------
- * Util class (public functions)
- * -------------------------------------------------------- */
-
-#if defined(_WIN32)
-	const char Util::DIR_SEP = '\\';
-#else
-	const char Util::DIR_SEP = '/';
-#endif
-
-std::string Util::baseName(const std::string &path)
-{
-#if defined(_WIN32) || defined(_MSC_VER)
-	std::string copy = path;
-	size_t pos;
-
-	pos = copy.find_last_of('\\');
-	if (pos == std::string::npos)
-		pos = copy.find_last_of('/');
-
-	if (pos == std::string::npos)
-		return copy;
-
-	return copy.substr(pos + 1);
-#else
-	char *copy = strdup(path.c_str());
-	std::string ret;
-
-	if (copy == NULL)
-		return "";
-
-	ret = std::string(::basename(copy));
-	free(copy);
-
-	return ret;
-#endif
-}
-
 std::string Util::findConfiguration(const std::string &filename)
 {
 	std::ostringstream oss;
@@ -185,119 +136,6 @@ std::string Util::findConfiguration(const std::string &filename)
 	oss << "could not find configuration file for " << filename;
 
 	throw std::runtime_error(oss.str());
-}
-
-std::string Util::findPluginHome(const std::string &name)
-{
-	std::ostringstream oss;
-	std::string fpath;
-
-	// 1. User first
-	oss << pathUser() << name;
-	fpath = oss.str();
-
-	if (hasAccess(fpath))
-		return fpath;
-
-	// 2. Base + ETCDIR + "irccd" + name
-	oss.str("");
-
-	if (!isAbsolute(ETCDIR))
-		oss << pathBase();
-
-	oss << ETCDIR << Util::DIR_SEP << "irccd" << Util::DIR_SEP;
-	oss << name;
-	fpath = oss.str();
-
-	/*
-	 * We returns the system path so that plugins can just check
-	 * the error code of opening files and such wich a real path
-	 * and not ""
-	 */
-
-	return fpath;
-}
-
-std::string Util::dirName(const std::string &file)
-{
-#if defined(_WIN32) || defined(_MSC_VER)
-	std::string copy = file;
-	std::size_t pos;
-
-	pos = copy.find_last_of('\\');
-	if (pos == std::string::npos)
-		pos = copy.find_last_of('/');
-
-	if (pos == std::string::npos)
-		return copy;
-
-	return copy.substr(0, pos);
-#else
-	char *copy = strdup(file.c_str());
-	std::string ret;
-
-	if (copy == NULL)
-		return "";
-
-	ret = std::string(::dirname(copy));
-	free(copy);
-
-	return ret;
-#endif
-}
-
-bool Util::exist(const std::string &path)
-{
-	struct stat st;
-
-	return (stat(path.c_str(), &st) != -1);
-}
-
-bool Util::isAbsolute(const std::string &path)
-{
-	return path.length() > 0 && path[0] == Util::DIR_SEP;
-}
-
-bool Util::hasAccess(const std::string &path)
-{
-	std::ifstream file;
-	bool ret;
-
-	file.open(path);
-	ret = file.is_open();
-	file.close();
-
-	return ret;
-}
-
-void Util::mkdir(const std::string &dir, int mode)
-{
-	std::ostringstream oss;
-
-	oss << "mkdir: ";
-
-	for (size_t i = 0; i < dir.length(); ++i) {
-		if (dir[i] != '/')
-			continue;
-
-		std::string part = dir.substr(0, i);
-		if (part.length() <= 0 || exist(part))
-			continue;
-
-		if (_MKDIR(part.c_str(), mode) == -1) {
-			oss << part << ": " << strerror(errno);
-			throw std::runtime_error(oss.str());
-		}
-	}
-
-	// Last part
-	if (_MKDIR(dir.c_str(), mode) == -1) {
-		oss << dir << ": " << strerror(errno);
-		throw std::runtime_error(oss.str());
-	}
-
-	// Windows's macro does not use mode.
-	(void)mode;
 }
 
 std::string Util::convert(const std::string &line, const Args &args, int flags)

@@ -36,20 +36,32 @@ set(
 )
 
 if (WIN32)
+	set(IRCCD_PROVIDE_INNO TRUE)
+
 	if (NOT InnoSetup_FOUND)
+		set(IRCCD_PROVIDE_INNO FALSE)
 		message("Note: InnoSetup not found, no package_inno target provided")
+	elseif (NOT IRCCD_RELOCATABLE)
+		set(IRCCD_PROVIDE_INNO FALSE)
+		# No need to write a warning, the main CMakeLists already did.
 	elseif (NOT WITH_DOCS_JS)
-		message("Note: Lua documentation disabled, no package_inno target provided")
+		set(IRCCD_PROVIDE_INNO FALSE)
+		message("Note: JavaScript documentation disabled, no package_inno target provided")
 	elseif (NOT WITH_DOCS_DOXYGEN)
+		set(IRCCD_PROVIDE_INNO FALSE)
 		message("Note: Doxygen documentation disabled, no package_inno target provided")
 	elseif (NOT WITH_DOCS_GUIDES_PDF)
+		set(IRCCD_PROVIDE_INNO FALSE)
 		message("Note: PDF guides documentation disabled, no package_inno target provided")
 	elseif (NOT WITH_DOCS_GUIDES_HTML)
+		set(IRCCD_PROVIDE_INNO FALSE)
 		message("Note: HTML guides documentation disabled, no package_inno target provided")
 	endif ()
+else ()
+	set(IRCCD_PROVIDE_INNO FALSE)
 endif ()
 
-if (InnoSetup_FOUND)
+if (IRCCD_PROVIDE_INNO)
 	macro(irccd_list_to_inno list var)
 		#
 		# We can't replace ';' directly because it is a reserved

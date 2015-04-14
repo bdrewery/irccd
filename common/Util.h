@@ -40,6 +40,10 @@ namespace irccd {
  * @brief Some utilities
  */
 class Util {
+private:
+	static bool m_programPathDefined;
+	static std::string m_programPath;
+
 public:
 	/**
 	 * @enum Flags
@@ -49,6 +53,12 @@ public:
 		ConvertEnv	= (1 << 0),	//!< Convert ${} environnement
 		ConvertHome	= (1 << 1),	//!< Convert ~ as home
 		ConvertDate	= (1 << 2),	//!< Convert % as strftime
+	};
+
+	enum Directory {
+		Binary,				//!< Obtained from WITH_BINDIR
+		Config,				//!< Obtained from WITH_CONFDIR
+		Plugins				//!< Obtained from WITH_PLUGINDIR
 	};
 
 	/**
@@ -82,6 +92,24 @@ public:
 	static const char DIR_SEP;
 
 	/**
+	 * This function must be called before running irccd.
+	 *
+	 * It use system dependant program path lookup if available and
+	 * fallbacks to the path given as argument if any failure was
+	 * encoutered.
+	 *
+	 * @param path the path to the executable (argv[0])
+	 */
+	static void setProgramPath(const std::string &path);
+
+	/**
+	 * Tell if setProgramPath has been called.
+	 *
+	 * @return true if called
+	 */
+	static bool isProgramPathDefined() noexcept;
+
+	/**
 	 * Get the installation prefix or installation directory. Also append
 	 * the path to it.
 	 *
@@ -99,26 +127,6 @@ public:
 	static std::string pathUser(const std::string &path = "");
 
 	/**
-	 * Get the basename of a file path, that is, remove
-	 * all parent path from it.
-	 *
-	 * @param path the full file path
-	 * @return the file name
-	 * @deprecated Use Filesystem::baseName instead
-	 */
-	static std::string baseName(const std::string &path);
-
-	/**
-	 * Wrapper around dirname(3) for portability. Returns the parent
-	 * directory of the file
-	 *
-	 * @param file the filename to check
-	 * @return the parent directory
-	 * @deprecated Use Filesystem::dirName instead
-	 */
-	static std::string dirName(const std::string &file);
-
-	/**
 	 * Find a configuration file, only for irccd.conf or
 	 * irccdctl.conf. Order is:
 	 *
@@ -134,57 +142,6 @@ public:
 	 * @throw ErrorException if none found
 	 */
 	static std::string findConfiguration(const std::string &filename);
-
-	/**
-	 * Find the plugin home directory. Order is:
-	 *
-	 * 1. User's config
-	 * 2. System
-	 *
-	 * Example:
-	 * 	~/.config/irccd/name || C:/Users/jean/irccd/name
-	 * 	/usr/local/etc/irccd/name || Path/To/Irccd/etc/irccd/name
-	 *
-	 * @param name the plugin name
-	 * @return the found path or system one
-	 */
-	static std::string findPluginHome(const std::string &name);
-
-	/**
-	 * Tell if a specified file or directory exists
-	 *
-	 * @param path the file / directory to check
-	 * @return true on success
-	 * @deprecated Use Filesystem::exists instead
-	 */
-	static bool exist(const std::string &path);
-
-	/**
-	 * Tells if the path is absolute.
-	 *
-	 * @param path the path
-	 * @return true if it is
-	 * @deprecated Use Filesystem::isAbsolute instead
-	 */
-	static bool isAbsolute(const std::string &path);
-
-	/**
-	 * Tells if the user has access to a file.
-	 *
-	 * @param path the path
-	 * @return true if has
-	 * @deprecated Don't use this function
-	 */
-	static bool hasAccess(const std::string &path);
-
-	/**
-	 * Create a directory.
-	 *
-	 * @param dir the directory path
-	 * @param mode the mode
-	 * @deprecated Use Filesystem::mkdir instead
-	 */
-	static void mkdir(const std::string &dir, int mode);
 
 	/**
 	 * Convert a string from a common patterns, date, environnement
@@ -218,6 +175,15 @@ public:
 	 * @return the removed white spaces
 	 */
 	static std::string strip(const std::string &str);
+
+	/**
+	 * Get the path to a special directory.
+	 *
+	 * @param directory the directory
+	 * @pre setProgramPath must have been called
+	 * @return the path
+	 */
+	static std::string path(Directory directory);
 };
 
 /**
