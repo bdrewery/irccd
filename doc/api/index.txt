@@ -1,13 +1,13 @@
-# Welcome to the irccd Ecmascript API documentation
+# Welcome to the irccd JavaScript API documentation
 
 Select a target on the left.
 
-## Irccd additions to Ecmascript
+## Irccd additions to JavaScript
 
-As you may know, Ecmascript 5 does not come with any function to load modules
+As you may know, JavaScript 5 does not come with any function to load modules
 from external files.
 
-Because irccd split the Ecmascript API as modules, the user must explicitly load
+Because irccd split the JavaScript API as modules, the user must explicitly load
 them when needed.
 
 There are two ways for that purpose.

@@ -17,62 +17,97 @@
  */
 
 #include <algorithm>
-#include <cerrno>
-#include <cstring>
-#include <fstream>
+#include <cassert>
 #include <sstream>
+#include <stdexcept>
 
 #include <IrccdConfig.h>
 
 #if defined(IRCCD_SYSTEM_WINDOWS)
 #  include <Windows.h>
+#  include <Shlobj.h>
 #endif
 
-#include "Util.h"
 #include "Logger.h"
+#include "Util.h"
+#include "Filesystem.h"
 
 namespace irccd {
 
 bool Util::m_programPathDefined{false};
 std::string Util::m_programPath;
 
-std::string Util::pathBase(const std::string &append)
+namespace {
+
+#if defined(IRCCD_SYSTEM_WINDOWS)
+
+std::string systemProgramPath()
 {
-	std::ostringstream oss;
+	std::string result;
+	char exepath[MAX_PATH];
 
-#if defined(_WIN32)
-	std::string base;
-	char exepath[512];
-	size_t pos;
+	if (!GetModuleFileNameA(NULL, exepath, sizeof (exepath))) {
+		throw std::runtime_error("GetModuleFileName error");
+	}
 
-	/*
-	 * Window is more complicated case as we don't know in advance
-	 * where irccd is installed, so we get the current process path
-	 * and removes its bin/ suffix.
-	 */
-	GetModuleFileNameA(NULL, exepath, sizeof (exepath));
-	base = Util::dirName(exepath);
+	result = Filesystem::dirName(exepath);
 
-	// TODO: must extract WITH_BINDIR
-	pos = base.find("bin");
-	if (pos != std::string::npos)
-		base.erase(pos);
+	std::string::size_type pos = result.rfind(WITH_BINDIR);
+	if (pos != std::string::npos) {
+		result.erase(pos);
+		result += Filesystem::Separator;
+	}
 
-	oss << base << "\\";
+	return result;
+}
+
 #else
-	oss << PREFIX << "/";
+
+/*
+ * TODO: add support for more systems here.
+ *
+ * - Linux
+ * - FreeBSD
+ * - NetBSD
+ * - OpenBSD
+ */
+
+std::string systemProgramPath()
+{
+	throw std::runtime_error("unsupported");
+}
+
 #endif
 
-	oss << append;
+} // !namespace
 
-	return oss.str();
+void Util::setProgramPath(const std::string &path)
+{
+	m_programPathDefined = true;
+
+	try {
+		m_programPath = systemProgramPath();
+	} catch (const std::exception &ex) {
+		Logger::debug() << getprogname() << ": failed to get executable path: " << ex.what() << std::endl;
+
+		/* Fallback using argv[0] */
+		m_programPath = Filesystem::dirName(path);
+
+		std::string::size_type pos = m_programPath.rfind(WITH_BINDIR);
+		if (pos != std::string::npos) {
+			m_programPath.erase(pos);
+		}
+
+		m_programPath += Filesystem::Separator;
+	}
+
 }
 
 std::string Util::pathUser(const std::string &append)
 {
 	std::ostringstream oss;
 
-#if defined(_WIN32)
+#if defined(IRCCD_SYSTEM_WINDOWS)
 	char path[MAX_PATH];
 
 	if (SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, 0, path) != S_OK)
@@ -82,7 +117,6 @@ std::string Util::pathUser(const std::string &append)
 		oss << "\\irccd\\";
 	}
 #else
-
 	try {
 		Xdg xdg;
 
@@ -97,7 +131,6 @@ std::string Util::pathUser(const std::string &append)
 		// append default path.
 		oss << "/.config/irccd/";
 	}
-
 #endif
 
 	oss << append;
@@ -105,8 +138,9 @@ std::string Util::pathUser(const std::string &append)
 	return oss.str();
 }
 
-std::string Util::findConfiguration(const std::string &filename)
+std::string Util::findConfiguration(const std::string &)
 {
+#if 0
 	std::ostringstream oss;
 	std::string fpath;
 
@@ -136,10 +170,13 @@ std::string Util::findConfiguration(const std::string &filename)
 	oss << "could not find configuration file for " << filename;
 
 	throw std::runtime_error(oss.str());
+#endif
+	return "";
 }
 
 std::string Util::convert(const std::string &line, const Args &args, int flags)
 {
+	// TODO: please clean up this function.
 	auto copy(line);
 	auto &kw(args.keywords);
 
@@ -239,15 +276,32 @@ std::vector<std::string> Util::split(const std::string &list,
 	return result;
 }
 
-std::string Util::strip(const std::string &str)
+std::string Util::strip(std::string str)
 {
-	auto copy = str;
 	auto test = [] (char c) { return !std::isspace(c); };
 
-	copy.erase(copy.begin(), std::find_if(copy.begin(), copy.end(), test));
-	copy.erase(std::find_if(copy.rbegin(), copy.rend(), test).base(), copy.end());
+	str.erase(str.begin(), std::find_if(str.begin(), str.end(), test));
+	str.erase(std::find_if(str.rbegin(), str.rend(), test).base(), str.end());
 
-	return copy;
+	return str;
+}
+
+std::string Util::path(Directory directory)
+{
+	assert(m_programPathDefined);
+
+	switch (directory) {
+	case Binary:
+		return m_programPath + Filesystem::Separator + WITH_BINDIR;
+	case Config:
+		return m_programPath + Filesystem::Separator + WITH_BINDIR;
+	case Plugins:
+		return m_programPath + Filesystem::Separator + WITH_BINDIR;
+	default:
+		break;
+	}
+
+	throw std::invalid_argument("unknown directory");
 }
 
 } // !irccd

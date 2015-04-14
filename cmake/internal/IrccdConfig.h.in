@@ -45,9 +45,9 @@
  * User definable options
  * -------------------------------------------------------- */
 
-#define ETCDIR			"@ETCDIR@"
-#define MODDIR			"@MODDIR@"
-#define DOCDIR			"@DOCDIR@"
+#define WITH_BINDIR		"@WITH_BINDIR@"
+#define WITH_CONFDIR		"@WITH_CONFDIR@"
+#define WITH_PLUGINDIR		"@WITH_PLUGINDIR@"
 
 #cmakedefine WITH_JS
 

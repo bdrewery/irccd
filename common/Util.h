@@ -24,11 +24,7 @@
  * @brief Utilities
  */
 
-#include <cstdint>
 #include <ctime>
-#include <exception>
-#include <functional>
-#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -55,6 +51,10 @@ public:
 		ConvertDate	= (1 << 2),	//!< Convert % as strftime
 	};
 
+	/**
+	 * @enum Directory
+	 * @brief Get a special directory from the irccd runtime
+	 */
 	enum Directory {
 		Binary,				//!< Obtained from WITH_BINDIR
 		Config,				//!< Obtained from WITH_CONFDIR
@@ -85,13 +85,6 @@ public:
 
 public:
 	/**
-	 * Directory separator, / on unix, \ on Windows.
-	 *
-	 * @deprecated Use Filesystem::Separator instead
-	 */
-	static const char DIR_SEP;
-
-	/**
 	 * This function must be called before running irccd.
 	 *
 	 * It use system dependant program path lookup if available and
@@ -101,13 +94,6 @@ public:
 	 * @param path the path to the executable (argv[0])
 	 */
 	static void setProgramPath(const std::string &path);
-
-	/**
-	 * Tell if setProgramPath has been called.
-	 *
-	 * @return true if called
-	 */
-	static bool isProgramPathDefined() noexcept;
 
 	/**
 	 * Get the installation prefix or installation directory. Also append
@@ -174,7 +160,7 @@ public:
 	 * @param str the string
 	 * @return the removed white spaces
 	 */
-	static std::string strip(const std::string &str);
+	static std::string strip(std::string str);
 
 	/**
 	 * Get the path to a special directory.

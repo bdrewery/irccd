@@ -137,7 +137,7 @@ void dukx_with_this(duk_context *ctx, Func func)
  * Convenient function to push a class that will be deleted by Duktape,
  * you can use dukx_with_this in the object methods.
  *
- * This function is best used when the object is constructed *from* ECMAScript
+ * This function is best used when the object is constructed *from* JavaScript
  * using function constructor.
  *
  * @class ctx the duktape context

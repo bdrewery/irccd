@@ -16,6 +16,31 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * This executable allows the documentation process to update links relative to
+ * the directory where the files are installed.
+ *
+ * For example:
+ *
+ * doc
+ *   | -- index.html
+ *   | -- level-1
+ *   |        | -- index.html
+ *
+ * If the level-1/index.html files wants to refer to the top level index.html,
+ * then a relative link of "../" is prepended.
+ *
+ * The file which have @baseurl@ strings are replaced to the appropriate root
+ * directory.
+ *
+ * For example:
+ *
+ * When invoking linkify with /usr/share/doc /usr/share/doc/irccd/foo, the link
+ * will be resolved to "../../".
+ *
+ * This make documentation more easier to write and to redistribute.
+ */
+
 #include <algorithm>
 #include <fstream>
 #include <functional>
@@ -30,7 +55,7 @@ namespace {
 
 void usage()
 {
-	cerr << "usage: templator base directory" << endl;
+	cerr << "usage: linkify input output base directory" << endl;
 	exit(1);
 }
 
@@ -44,47 +69,30 @@ string clean(string path)
 	replace(path.begin(), path.end(), '\\', '/');
 	path.erase(unique(path.begin(), path.end(), ispath), path.end());
 
-	while (path.size() > 1 && path[path.size() - 1] == '/')
+	while (path.size() > 1 && path[path.size() - 1] == '/') {
 		path.pop_back();
+	}
 
 	return path;
 }
 
-string baseName(const string &path)
+string relative(string from, string to)
 {
-	string result;
+	string result{"."};
 
-	auto first = path.rbegin();
-	auto last = path.rend();
+	from = clean(from);
+	to = clean(to);
 
-	while (first != last && *first != '/')
-		result.insert(result.begin(), *(first++));
+	while (from != to) {
+		string::size_type pos = from.rfind("/");
 
-	return result;
-}
-
-string relative(string base, string path)
-{
-	string result;
-	bool done{false};
-
-	base = clean(base);
-
-	do {
-		path = clean(path);
-
-		auto b1 = baseName(base);
-		auto b2 = baseName(path);
-
-		if (b1 == b2) {
-			done = true;
-		} else if (b2.size() == 0) {
-			throw invalid_argument("no common parent directory found");
-		} else {
-			path.erase(path.end() - b2.size(), path.end());
-			result += "../";
+		if (pos == string::npos) {
+			throw std::invalid_argument("no common parent directory found");
 		}
-	} while (!done);
+
+		from.erase(pos);
+		result += "/..";
+	}
 
 	return result;
 }
@@ -118,7 +126,7 @@ int main(int argc, char **argv)
 		usage();
 		// NOTREACHED
 
-	string replacement = relative(argv[2], argv[3]);
+	string replacement = relative(argv[3], argv[2]);
 	string content;
 	ifstream input(argv[0]);
 

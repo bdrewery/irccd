@@ -18,19 +18,23 @@
 
 project(templates)
 
+if (IRCCD_RELOCATABLE)
+	set(cssdir ${CMAKE_BINARY_DIR}/fakeroot/${WITH_DOCDIR}/css)
+else ()
+	set(cssdir ${CMAKE_BINARY_DIR}/docs/css)
+endif ()
+
 add_custom_command(
-	OUTPUT ${CMAKE_BINARY_DIR}/docs/css/style.css
+	OUTPUT ${cssdir}/style.css
 	COMMAND
-		${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/docs/css
-	COMMAND
-		${CMAKE_COMMAND} -E copy ${templates_SOURCE_DIR}/css/style.css ${CMAKE_BINARY_DIR}/docs/css
+		${CMAKE_COMMAND} -E copy ${templates_SOURCE_DIR}/css/style.css ${cssdir}/style.css
 	DEPENDS
 		${templates_SOURCE_DIR}/css/style.css
 )
 
 add_custom_target(
 	docs-templates
-	DEPENDS ${CMAKE_BINARY_DIR}/docs/css/style.css
+	DEPENDS ${cssdir}/style.css
 	SOURCES
 		${templates_SOURCE_DIR}/css/style.css
 		${templates_SOURCE_DIR}/template.html

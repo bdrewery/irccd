@@ -6,7 +6,7 @@ module: irccd.fs
 
 Bring filesystem functions.
 
-Because Ecmascript does not offer filesystem functions, this portable module
+Because JavaScript does not offer filesystem functions, this portable module
 provides some functions for reading and creating directories.
 
 # Types

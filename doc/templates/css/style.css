@@ -62,25 +62,25 @@ strong {
 	margin-left: -18px;
 }
 
-#sidebar-lua {
+#sidebar-js {
 	width: 150px;
 }
 
 
-#sidebar-lua .section {
+#sidebar-js .section {
 	margin-bottom: 5px;
 }
 
-#sidebar-lua .section p {
+#sidebar-js .section p {
 	font-weight: bold;
 }
 
-#sidebar-lua #index {
+#sidebar-js #index {
 	text-decoration: none;
 	font-weight: bold;
 }
 
-#sidebar-lua ul {
+#sidebar-js ul {
 	list-style-type: none;
 	margin-left: -40px;
 }
@@ -136,7 +136,7 @@ td {
 	padding: 10px;
 }
 
-#content-lua {
+#content-js {
 	margin: 10px 10px 10px 190px;
 
 }

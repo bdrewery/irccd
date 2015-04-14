@@ -56,18 +56,19 @@ endfunction()
 #	FLAGS (Optional) C/C++ flags (without -D)
 #	LIBRARIES (Optional) libraries to link
 #	INCLUDES (Optional) includes for the target
-#	INSTALL_RUNTIME (Optional) relative path where to install the executable
+#	INSTALL (Optional) install the executable or not (default: false)
 # )
 #
 # Create an executable that can be installed or not.
 # ---------------------------------------------------------
 
 function(irccd_define_executable)
-	set(oneValueArgs TARGET INSTALL_RUNTIME)
+	set(options INSTALL)
+	set(oneValueArgs TARGET INSTALL)
 	set(multiValueArgs SOURCES FLAGS LIBRARIES INCLUDES)
 	set(mandatory TARGET)
 
-	cmake_parse_arguments(EXE "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+	cmake_parse_arguments(EXE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
 	check_mandatory(EXE ${mandatory})
 	add_executable(${EXE_TARGET} ${EXE_SOURCES})
@@ -75,19 +76,22 @@ function(irccd_define_executable)
 	apply_flags(${EXE_TARGET} EXE_FLAGS)
 	apply_libraries(${EXE_TARGET} EXE_LIBRARIES)
 
-	set_target_properties(
-		${EXE_TARGET}
-		PROPERTIES
-			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/fakeroot/${EXE_INSTALL_RUNTIME}
-			RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/fakeroot/${EXE_INSTALL_RUNTIME}
-			RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/fakeroot/${EXE_INSTALL_RUNTIME}
-	)
+	# use fakeroot if relocatable
+	if (IRCCD_RELOCATABLE)
+		set_target_properties(
+			${EXE_TARGET}
+			PROPERTIES
+				RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/fakeroot/${WITH_BINDIR}
+				RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/fakeroot/${WITH_BINDIR}
+				RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/fakeroot/${WITH_BINDIR}
+		)
+	endif ()
 
 	# Install the target
-	if (EXE_INSTALL_RUNTIME)
+	if (EXE_INSTALL)
 		install(
 			TARGETS ${EXE_TARGET}
-			RUNTIME DESTINATION ${EXE_INSTALL_RUNTIME}
+			RUNTIME DESTINATION ${WITH_BINDIR}
 		)
 	endif ()
 endfunction()
@@ -105,7 +109,13 @@ endfunction()
 function(irccd_define_man file man)
 	if (WITH_MAN)
 		set(path "${doc_SOURCE_DIR}/man/${file}.in")
-		set(output "${doc_BINARY_DIR}/${file}")
+
+		# install to fakeroot if applicable
+		if (IRCCD_RELOCATABLE)
+			set(output ${CMAKE_BINARY_DIR}/fakeroot/${MANDIR}/${man}/${file})
+		else ()
+			set(output ${CMAKE_BINARY_DIR}/docs/man/${man}/${file})
+		endif ()
 
 		configure_file(${path} ${output})
 
@@ -147,40 +157,39 @@ endfunction()
 
 function(irccd_generate_guide target filename sources)
 	if (WITH_DOCS_GUIDES_HTML)
-		set(outputtmp ${CMAKE_BINARY_DIR}/docs/guides/${filename}.html.tmp)
-		set(output ${CMAKE_BINARY_DIR}/docs/guides/${filename}.html)
+		if (IRCCD_RELOCATABLE)
+			set(outputdir ${CMAKE_BINARY_DIR}/fakeroot/${WITH_DOCDIR})
+		else ()
+			set(outputdir ${CMAKE_BINARY_DIR}/docs)
+		endif ()
 
 		set(
 			args
-			-s
-			-S
-			-f markdown
-			-t html5
+			-s -S --toc -fmarkdown -thtml5 -Vguide:yes
 			--template ${templates_SOURCE_DIR}/template.html
-			-V guide:yes
-			--toc
-			-o ${outputtmp}
-			${sources}
 		)
 
+		#
+		# Note: the linkify is needed because the template use relative URLs for CSS.
+		#
 		add_custom_command(
-			OUTPUT ${CMAKE_BINARY_DIR}/docs/guides/${filename}.html
-			DEPENDS
-				${sources}
-				${templates_SOURCE_DIR}/template.html
+			OUTPUT ${outputdir}/${filename}.html
+			DEPENDS ${sources} linkify
 			COMMAND
-				${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/docs/guides
+				${CMAKE_COMMAND} -E make_directory ${outputdir}
 			COMMAND
-				${Pandoc_EXECUTABLE} ${args}
+				${Pandoc_EXECUTABLE} ${args} -o ${outputdir}/${filename}.tmp ${sources}
 			COMMAND
-				$<TARGET_FILE:linkify> ${outputtmp} ${output} ${CMAKE_BINARY_DIR}/docs ${CMAKE_BINARY_DIR}/docs/guides
+				$<TARGET_FILE:linkify> ${outputdir}/${filename}.tmp ${outputdir}/${filename}.html "empty" "empty"
 			COMMAND
-				${CMAKE_COMMAND} -E remove ${outputtmp}
+				${CMAKE_COMMAND} -E remove ${outputdir}/${filename}.tmp
 		)
 
 		add_custom_target(
 			docs-guide-${target}-html
-			DEPENDS ${output}
+			DEPENDS
+				docs-templates
+				${outputdir}/${filename}.html
 			SOURCES ${sources}
 		)
 
@@ -188,8 +197,14 @@ function(irccd_generate_guide target filename sources)
 	endif ()
 
 	if (WITH_DOCS_GUIDES_PDF)
+		if (IRCCD_RELOCATABLE)
+			set(output ${CMAKE_BINARY_DIR}/fakeroot/${WITH_DOCDIR}/${filename}.pdf)
+		else ()
+			set(output ${CMAKE_BINARY_DIR}/docs/${filename}.pdf)
+		endif ()
+
 		pandoc(
-			OUTPUT ${CMAKE_BINARY_DIR}/docs/guides/${filename}.pdf
+			OUTPUT ${output}
 			SOURCES ${sources}
 			FROM markdown
 			TO latex

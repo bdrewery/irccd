@@ -3,7 +3,7 @@ object: File
 title: File reading and writing
 ---
 
-File I/O provided for EcmaScript.
+File I/O provided for JavaScript.
 
 # Constants
 

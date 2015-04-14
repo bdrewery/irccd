@@ -151,7 +151,7 @@ public:
 	void stop();
 
 	/**
-	 * Get the ECMAScript reference.
+	 * Get the JavaScript reference.
 	 *
 	 * @return the reference
 	 * @note Thread-safe

@@ -30,14 +30,22 @@ file and exit if irccd failed to open it.
 
 The **irccd.conf** follow a very basic **.ini** syntax with the following rules:
 
-1. Each option is stored in a section and some of these sections may be redefined one or more times.
-2. Each option takes one line, it's not possible to write more than one option on the same line.
-3. The comment character is # and can live at the beginning or the end of a line.
+1. Each option is stored in a section
+2. Some sections may be redefined multiple times
+
+Irccd adds an extension to this format by adding an `@include` keyword which
+let you splitting your configuration file.
+
+Note, this `@include` statement must only be at the beginning of the file
+and must be surrounded by quotes.
 
 **Correct configuration**
 
 ````ini
 # This is a comment
+@include "rules.conf"
+@include "servers.conf"
+
 [general]
 verbose = false
 
@@ -48,10 +56,15 @@ host = "localhost"		# this is a comment too
 **Bad configuration**
 
 ````ini
-verbose = true				# no section!
+# Error: no section!
+verbose = true
 
 [server]
-host = "localhost" port = "8520"	# not allowed!
+host = "localhost"
+port = "8520"
+
+# @include statement cannot be here
+@include "rules.conf"
 ````
 
 ## The general section

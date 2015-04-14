@@ -26,6 +26,9 @@ add_custom_target(
 	COMMENT "Building irccd documentation"
 )
 
+# Needed for fakeroot
+add_subdirectory(examples)
+
 # ---------------------------------------------------------
 # Install manuals
 # ---------------------------------------------------------
@@ -75,7 +78,7 @@ if (WITH_DOCS_DOXYGEN)
 endif ()
 
 # ---------------------------------------------------------
-# User guides, Lua API
+# User guides, JavaScript API
 # ---------------------------------------------------------
 
 if (WITH_DOCS_JS OR WITH_DOCS_GUIDES_HTML OR WITH_DOCS_GUIDES_PDF)

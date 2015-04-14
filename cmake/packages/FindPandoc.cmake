@@ -104,7 +104,7 @@ if (Pandoc_FOUND)
 	function(pandoc)
 		set(options MAKE_DIRECTORY STANDALONE TOC)
 		set(oneValueArgs FILTER FROM TARGET TEMPLATE TO OUTPUT WORKING_DIRECTORY)
-		set(multiValueArgs ARGS FOOTER HEADER METADATA SOURCES VARIABLE)
+		set(multiValueArgs ARGS FOOTER HEADER METADATA SOURCES VARIABLE DEPENDS)
 
 		#
 		# The following variables will be set in that scope:
