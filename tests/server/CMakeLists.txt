@@ -33,8 +33,8 @@ set(
 	${irccd_SOURCE_DIR}/Service.h
 	${irccd_SOURCE_DIR}/ServerEvent.cpp
 	${irccd_SOURCE_DIR}/ServerEvent.h
-	${irccd_SOURCE_DIR}/ServerManager.cpp
-	${irccd_SOURCE_DIR}/ServerManager.h
+	${irccd_SOURCE_DIR}/ServerService.cpp
+	${irccd_SOURCE_DIR}/ServerService.h
 	${irccd_SOURCE_DIR}/ServerState.h
 	TestServer.cpp
 )

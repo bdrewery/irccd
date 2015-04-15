@@ -81,7 +81,7 @@ if (WITH_TESTS)
 	# Server stuff
 	add_subdirectory(server)
 	add_subdirectory(transport)
-	add_subdirectory(rules)
+	#add_subdirectory(rules)
 
 	# Misc
 	add_subdirectory(service)

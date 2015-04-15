@@ -1,5 +1,5 @@
 /*
- * TransportManager.h -- maintain transport I/O
+ * TransportService.h -- maintain transport I/O
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_TRANSPORT_MANAGER_H_
-#define _IRCCD_TRANSPORT_MANAGER_H_
+#ifndef _IRCCD_TRANSPORT_SERVICE_H_
+#define _IRCCD_TRANSPORT_SERVICE_H_
 
 /**
- * @class TransportManager
+ * @class TransportService
  * @brief Manage all transports and the clients
  */
 
@@ -47,7 +47,7 @@ namespace irccd {
 class TransportCommand;
 
 /**
- * @class TransportManager
+ * @class TransportService
  * @brief Manage transports and clients
  *
  * This class contains a transport for each one defined in the user
@@ -58,9 +58,9 @@ class TransportCommand;
  * manager. This allows large timeout but quick reload of the listener
  * set in case of changes.
  */
-class TransportManager : public Service {
+class TransportService : public Service {
 public:
-	using CommandHandler = void (TransportManager::*)(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	using CommandHandler = void (TransportService::*)(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 	using CommandMap = std::unordered_map<std::string, CommandHandler>;
 
 private:
@@ -386,7 +386,7 @@ public:
 	 *
 	 * @throw SocketError on errors
 	 */
-	TransportManager();
+	TransportService();
 
 	/**
 	 * Create a new transport in-place.
@@ -442,4 +442,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_TRANSPORT_MANAGER_H_
+#endif // !_IRCCD_TRANSPORT_SERVICE_H_

@@ -1,5 +1,5 @@
 /*
- * ServerManager.cpp -- manage servers
+ * ServerService.cpp -- processes servers automatically
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -19,7 +19,7 @@
 #include <Logger.h>
 #include <Socket.h>
 
-#include "ServerManager.h"
+#include "ServerService.h"
 
 #include "serverevent/ChannelNotice.h"
 #include "serverevent/Connect.h"
@@ -44,7 +44,7 @@ namespace irccd {
 
 using namespace event;
 
-void ServerManager::run()
+void ServerService::run()
 {
 	while (isRunning()) {
 		fd_set setinput;
@@ -116,7 +116,7 @@ void ServerManager::run()
 	}
 }
 
-void ServerManager::onChannelNotice(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string notice)
+void ServerService::onChannelNotice(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string notice)
 {
 	Logger::debug() << "server " << server->info().name << ": onChannelNotice: "
 			<< "origin=" << origin << ", channel=" << channel <<", notice=" << notice << std::endl;
@@ -129,14 +129,14 @@ void ServerManager::onChannelNotice(std::shared_ptr<Server> server, std::string 
 	));
 }
 
-void ServerManager::onConnect(std::shared_ptr<Server> server)
+void ServerService::onConnect(std::shared_ptr<Server> server)
 {
 	Logger::debug() << "server " << server->info().name << ": onConnect" << std::endl;
 
 	m_onEvent(std::make_unique<Connect>(std::move(server)));
 }
 
-void ServerManager::onInvite(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target)
+void ServerService::onInvite(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target)
 {
 	Logger::debug() << "server " << server->info().name << ": onInvite: "
 			<< "origin=" << origin << ", channel=" << channel << ", target=" << target << std::endl;
@@ -148,7 +148,7 @@ void ServerManager::onInvite(std::shared_ptr<Server> server, std::string origin,
 	));
 }
 
-void ServerManager::onJoin(std::shared_ptr<Server> server, std::string origin, std::string channel)
+void ServerService::onJoin(std::shared_ptr<Server> server, std::string origin, std::string channel)
 {
 	Logger::debug() << "server " << server->info().name << ": onJoin: "
 			<< "origin=" << origin << ", channel=" << channel << std::endl;
@@ -160,7 +160,7 @@ void ServerManager::onJoin(std::shared_ptr<Server> server, std::string origin, s
 	));
 }
 
-void ServerManager::onKick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason)
+void ServerService::onKick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason)
 {
 	Logger::debug() << "server " << server->info().name << ": onKick: "
 			<< "origin=" << origin << ", channel=" << channel << ", target=" << target << ", reason=" << reason << std::endl;
@@ -174,7 +174,7 @@ void ServerManager::onKick(std::shared_ptr<Server> server, std::string origin, s
 	));
 }
 
-void ServerManager::onMessage(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
+void ServerService::onMessage(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
 {
 	Logger::debug() << "server " << server->info().name << ": onMessage: "
 			<< "origin=" << origin << ", channel=" << channel << ", message=" << message << std::endl;
@@ -187,7 +187,7 @@ void ServerManager::onMessage(std::shared_ptr<Server> server, std::string origin
 	));
 }
 
-void ServerManager::onMe(std::shared_ptr<Server> server, std::string origin, std::string target, std::string message)
+void ServerService::onMe(std::shared_ptr<Server> server, std::string origin, std::string target, std::string message)
 {
 	Logger::debug() << "server " << server->info().name << ": onMe: "
 			<< "origin=" << origin << ", target=" << target << ", message=" << message << std::endl;
@@ -200,7 +200,7 @@ void ServerManager::onMe(std::shared_ptr<Server> server, std::string origin, std
 	));
 }
 
-void ServerManager::onMode(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string arg)
+void ServerService::onMode(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string arg)
 {
 	Logger::debug() << "server " << server->info().name << ": onMode: "
 			<< "origin=" << origin << ", channel=" << channel << ", mode=" << mode << ", argument=" << arg << std::endl;
@@ -214,7 +214,7 @@ void ServerManager::onMode(std::shared_ptr<Server> server, std::string origin, s
 	));
 }
 
-void ServerManager::onNick(std::shared_ptr<Server> server, std::string origin, std::string nickname)
+void ServerService::onNick(std::shared_ptr<Server> server, std::string origin, std::string nickname)
 {
 	Logger::debug() << "server " << server->info().name << ": onNick: "
 			<< "origin=" << origin << ", nickname=" << nickname << std::endl;
@@ -226,7 +226,7 @@ void ServerManager::onNick(std::shared_ptr<Server> server, std::string origin, s
 	));
 }
 
-void ServerManager::onNotice(std::shared_ptr<Server> server, std::string origin, std::string message)
+void ServerService::onNotice(std::shared_ptr<Server> server, std::string origin, std::string message)
 {
 	Logger::debug() << "server " << server->info().name << ": onNotice: "
 			<< "origin=" << origin << ", message=" << message << std::endl;
@@ -238,7 +238,7 @@ void ServerManager::onNotice(std::shared_ptr<Server> server, std::string origin,
 	));
 }
 
-void ServerManager::onPart(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string reason)
+void ServerService::onPart(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string reason)
 {
 	Logger::debug() << "server " << server->info().name << ": onPart: "
 			<< "origin=" << origin << ", channel=" << channel << ", reason=" << reason << std::endl;
@@ -251,7 +251,7 @@ void ServerManager::onPart(std::shared_ptr<Server> server, std::string origin, s
 	));
 }
 
-void ServerManager::onQuery(std::shared_ptr<Server> server, std::string origin, std::string message)
+void ServerService::onQuery(std::shared_ptr<Server> server, std::string origin, std::string message)
 {
 	Logger::debug() << "server " << server->info().name << ": onQuery: "
 			<< "origin=" << origin << ", message=" << message << std::endl;
@@ -263,7 +263,7 @@ void ServerManager::onQuery(std::shared_ptr<Server> server, std::string origin, 
 	));
 }
 
-void ServerManager::onTopic(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string topic)
+void ServerService::onTopic(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string topic)
 {
 	Logger::debug() << "server " << server->info().name << ": onTopic: "
 			<< "origin=" << origin << ", channel=" << channel << ", topic=" << topic << std::endl;
@@ -276,7 +276,7 @@ void ServerManager::onTopic(std::shared_ptr<Server> server, std::string origin, 
 	));
 }
 
-void ServerManager::onUserMode(std::shared_ptr<Server> server, std::string origin, std::string mode)
+void ServerService::onUserMode(std::shared_ptr<Server> server, std::string origin, std::string mode)
 {
 	Logger::debug() << "server " << server->info().name << ": onUserMode: "
 			<< "origin=" << origin << ", mode=" << mode << std::endl;
@@ -288,12 +288,12 @@ void ServerManager::onUserMode(std::shared_ptr<Server> server, std::string origi
 	));
 }
 
-ServerManager::ServerManager()
+ServerService::ServerService()
 	: Service("server", "/tmp/._irccd_sv.sock")
 {
 }
 
-std::shared_ptr<Server> ServerManager::find(const std::string &name) const
+std::shared_ptr<Server> ServerService::find(const std::string &name) const
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 

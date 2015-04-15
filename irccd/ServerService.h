@@ -1,5 +1,5 @@
 /*
- * ServerManager.h -- manage servers
+ * ServerService.h -- processes servers automatically
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_SERVER_MANAGER_H_
-#define _IRCCD_SERVER_MANAGER_H_
+#ifndef _IRCCD_SERVER_SERVICE_H_
+#define _IRCCD_SERVER_SERVICE_H_
 
 #include <cassert>
 #include <atomic>
@@ -33,7 +33,7 @@ namespace irccd {
 
 class ServerEvent;
 
-class ServerManager : public Service {
+class ServerService : public Service {
 private:
 	std::function<void (std::unique_ptr<ServerEvent>)> m_onEvent;
 	std::unordered_map<std::string, std::shared_ptr<Server>> m_servers;
@@ -62,7 +62,7 @@ public:
 	/**
 	 * Default constructor, does nothing.
 	 */
-	ServerManager();
+	ServerService();
 
 	/**
 	 * Set the event handler.
@@ -92,20 +92,20 @@ public:
 
 		shared_ptr<Server> server = make_shared<Server>(forward<Args>(args)...);
 
-		server->setOnChannelNotice(bind(&ServerManager::onChannelNotice, this, server, _1, _2, _3));
-		server->setOnConnect(bind(&ServerManager::onConnect, this, server));
-		server->setOnInvite(bind(&ServerManager::onInvite, this, server, _1, _2, _3));
-		server->setOnJoin(bind(&ServerManager::onJoin, this, server, _1, _2));
-		server->setOnKick(bind(&ServerManager::onKick, this, server, _1, _2, _3, _4));
-		server->setOnMessage(bind(&ServerManager::onMessage, this, server, _1, _2, _3));
-		server->setOnMe(bind(&ServerManager::onMe, this, server, _1, _2, _3));
-		server->setOnMode(bind(&ServerManager::onMode, this, server, _1, _2, _3, _4));
-		server->setOnNick(bind(&ServerManager::onNick, this, server, _1, _2));
-		server->setOnNotice(bind(&ServerManager::onNotice, this, server, _1, _2));
-		server->setOnPart(bind(&ServerManager::onPart, this, server, _1, _2, _3));
-		server->setOnQuery(bind(&ServerManager::onQuery, this, server, _1, _2));
-		server->setOnTopic(bind(&ServerManager::onTopic, this, server, _1, _2, _3));
-		server->setOnUserMode(bind(&ServerManager::onUserMode, this, server, _1, _2));
+		server->setOnChannelNotice(bind(&ServerService::onChannelNotice, this, server, _1, _2, _3));
+		server->setOnConnect(bind(&ServerService::onConnect, this, server));
+		server->setOnInvite(bind(&ServerService::onInvite, this, server, _1, _2, _3));
+		server->setOnJoin(bind(&ServerService::onJoin, this, server, _1, _2));
+		server->setOnKick(bind(&ServerService::onKick, this, server, _1, _2, _3, _4));
+		server->setOnMessage(bind(&ServerService::onMessage, this, server, _1, _2, _3));
+		server->setOnMe(bind(&ServerService::onMe, this, server, _1, _2, _3));
+		server->setOnMode(bind(&ServerService::onMode, this, server, _1, _2, _3, _4));
+		server->setOnNick(bind(&ServerService::onNick, this, server, _1, _2));
+		server->setOnNotice(bind(&ServerService::onNotice, this, server, _1, _2));
+		server->setOnPart(bind(&ServerService::onPart, this, server, _1, _2, _3));
+		server->setOnQuery(bind(&ServerService::onQuery, this, server, _1, _2));
+		server->setOnTopic(bind(&ServerService::onTopic, this, server, _1, _2, _3));
+		server->setOnUserMode(bind(&ServerService::onUserMode, this, server, _1, _2));
 
 		{
 			lock_guard<mutex> lock(m_mutex);
@@ -132,4 +132,4 @@ public:
 
 } // !irccd
 
-#endif // _IRCCD_SERVER_MANAGER_H_
+#endif // _IRCCD_SERVER_SERVICE_H_

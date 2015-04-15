@@ -37,11 +37,11 @@ set(
 	${irccd_SOURCE_DIR}/Server.h
 	${irccd_SOURCE_DIR}/ServerEvent.cpp
 	${irccd_SOURCE_DIR}/ServerEvent.h
-	${irccd_SOURCE_DIR}/ServerManager.cpp
-	${irccd_SOURCE_DIR}/ServerManager.h
+	${irccd_SOURCE_DIR}/ServerService.cpp
+	${irccd_SOURCE_DIR}/ServerService.h
 	${irccd_SOURCE_DIR}/Transport.h
-	${irccd_SOURCE_DIR}/TransportManager.cpp
-	${irccd_SOURCE_DIR}/TransportManager.h
+	${irccd_SOURCE_DIR}/TransportService.cpp
+	${irccd_SOURCE_DIR}/TransportService.h
 	${irccd_SOURCE_DIR}/TransportClient.cpp
 	${irccd_SOURCE_DIR}/TransportClient.h
 	${irccd_SOURCE_DIR}/TransportCommand.h

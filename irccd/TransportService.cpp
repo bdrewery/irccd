@@ -18,7 +18,7 @@
 
 #include "Json.h"
 #include "SocketListener.h"
-#include "TransportManager.h"
+#include "TransportService.h"
 
 #include "transportcommand/ChannelNotice.h"
 #include "transportcommand/Connect.h"
@@ -47,7 +47,7 @@ using namespace transport;
  * Transport events
  * -------------------------------------------------------- */
 
-void TransportManager::cnotice(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::cnotice(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<ChannelNotice>(
 		client,
@@ -57,7 +57,7 @@ void TransportManager::cnotice(const std::shared_ptr<TransportClientAbstract> &c
 	));
 }
 
-void TransportManager::connect(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::connect(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<Connect>(
 		client,
@@ -69,13 +69,13 @@ void TransportManager::connect(const std::shared_ptr<TransportClientAbstract> &c
 	));
 }
 
-void TransportManager::disconnect(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::disconnect(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<Disconnect>(client, want(object, "server").toString()));
 }
 
 
-void TransportManager::invite(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::invite(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<Invite>(
 		client,
@@ -85,7 +85,7 @@ void TransportManager::invite(const std::shared_ptr<TransportClientAbstract> &cl
 	));
 }
 
-void TransportManager::join(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::join(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<Join>(
 		client,
@@ -95,7 +95,7 @@ void TransportManager::join(const std::shared_ptr<TransportClientAbstract> &clie
 	));
 }
 
-void TransportManager::kick(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::kick(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<Kick>(
 		client,
@@ -106,7 +106,7 @@ void TransportManager::kick(const std::shared_ptr<TransportClientAbstract> &clie
 	));
 }
 
-void TransportManager::load(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::load(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	if (object.contains("name")) {
 		m_onEvent(std::make_unique<Load>(client, want(object, "name").toString(), true));
@@ -117,7 +117,7 @@ void TransportManager::load(const std::shared_ptr<TransportClientAbstract> &clie
 	}
 }
 
-void TransportManager::me(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::me(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<Me>(
 		client,
@@ -127,7 +127,7 @@ void TransportManager::me(const std::shared_ptr<TransportClientAbstract> &client
 	));
 }
 
-void TransportManager::mode(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::mode(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<Mode>(
 		client,
@@ -137,7 +137,7 @@ void TransportManager::mode(const std::shared_ptr<TransportClientAbstract> &clie
 	));
 }
 
-void TransportManager::nick(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::nick(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<Nick>(
 		client,
@@ -146,7 +146,7 @@ void TransportManager::nick(const std::shared_ptr<TransportClientAbstract> &clie
 	));
 }
 
-void TransportManager::notice(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::notice(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<Notice>(
 		client,
@@ -156,7 +156,7 @@ void TransportManager::notice(const std::shared_ptr<TransportClientAbstract> &cl
 	));
 }
 
-void TransportManager::part(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::part(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<Part>(
 		client,
@@ -166,17 +166,17 @@ void TransportManager::part(const std::shared_ptr<TransportClientAbstract> &clie
 	));
 }
 
-void TransportManager::reconnect(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::reconnect(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<Reconnect>(client, optional(object, "server", "").toString()));
 }
 
-void TransportManager::reload(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::reload(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<transport::Reload>(client, want(object, "plugin").toString()));
 }
 
-void TransportManager::say(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::say(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<Say>(
 		client,
@@ -186,7 +186,7 @@ void TransportManager::say(const std::shared_ptr<TransportClientAbstract> &clien
 	));
 }
 
-void TransportManager::topic(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::topic(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<Topic>(
 		client,
@@ -196,8 +196,7 @@ void TransportManager::topic(const std::shared_ptr<TransportClientAbstract> &cli
 	));
 }
 
-
-void TransportManager::umode(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::umode(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<UserMode>(
 		client,
@@ -206,7 +205,7 @@ void TransportManager::umode(const std::shared_ptr<TransportClientAbstract> &cli
 	));
 }
 
-void TransportManager::unload(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
+void TransportService::unload(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
 	m_onEvent(std::make_unique<Unload>(client, want(object, "plugin").toString()));
 }
@@ -215,7 +214,7 @@ void TransportManager::unload(const std::shared_ptr<TransportClientAbstract> &cl
  * TransportClient slots
  * -------------------------------------------------------- */
 
-void TransportManager::onMessage(const std::shared_ptr<TransportClientAbstract> &client, const std::string &message)
+void TransportService::onMessage(const std::shared_ptr<TransportClientAbstract> &client, const std::string &message)
 {
 	try {
 		JsonDocument document(message);
@@ -238,12 +237,12 @@ void TransportManager::onMessage(const std::shared_ptr<TransportClientAbstract> 
 	}
 }
 
-void TransportManager::onWrite()
+void TransportService::onWrite()
 {
 	Service::reload();
 }
 
-void TransportManager::onDie(const std::shared_ptr<TransportClientAbstract> &client)
+void TransportService::onDie(const std::shared_ptr<TransportClientAbstract> &client)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -256,7 +255,7 @@ void TransportManager::onDie(const std::shared_ptr<TransportClientAbstract> &cli
  * Private helpers
  * -------------------------------------------------------- */
 
-JsonValue TransportManager::want(const JsonObject &object, const std::string &key) const
+JsonValue TransportService::want(const JsonObject &object, const std::string &key) const
 {
 	if (!object.contains(key)) {
 		throw std::runtime_error("missing `" + key + "' property");
@@ -265,17 +264,17 @@ JsonValue TransportManager::want(const JsonObject &object, const std::string &ke
 	return object[key];
 }
 
-JsonValue TransportManager::optional(const JsonObject &object, const std::string &key, const JsonValue &def) const
+JsonValue TransportService::optional(const JsonObject &object, const std::string &key, const JsonValue &def) const
 {
 	return (object.contains(key)) ? object[key] : def;
 }
 
-bool TransportManager::isTransport(const Socket &s) const noexcept
+bool TransportService::isTransport(const Socket &s) const noexcept
 {
 	return m_transports.count(s) > 0;
 }
 
-void TransportManager::accept(const Socket &s)
+void TransportService::accept(const Socket &s)
 {
 	using namespace std;
 	using namespace std::placeholders;
@@ -284,9 +283,9 @@ void TransportManager::accept(const Socket &s)
 
 	Logger::debug() << "transport: new client" << std::endl;
 
-	client->setOnComplete(bind(&TransportManager::onMessage, this, client, _1));
-	client->setOnWrite(bind(&TransportManager::onWrite, this));
-	client->setOnDie(bind(&TransportManager::onDie, this, client));
+	client->setOnComplete(bind(&TransportService::onMessage, this, client, _1));
+	client->setOnWrite(bind(&TransportService::onWrite, this));
+	client->setOnDie(bind(&TransportService::onDie, this, client));
 
 	// Add for listening
 	std::lock_guard<std::mutex> lock(m_mutex);
@@ -294,7 +293,7 @@ void TransportManager::accept(const Socket &s)
 	m_clients.emplace(client->socket(), std::move(client));
 }
 
-void TransportManager::process(const Socket &s, int direction)
+void TransportService::process(const Socket &s, int direction)
 {
 	/*
 	 * Do not lock, the client function may already call onWrite
@@ -303,7 +302,7 @@ void TransportManager::process(const Socket &s, int direction)
 	m_clients.at(s)->process(direction);
 }
 
-void TransportManager::run()
+void TransportService::run()
 {
 	SocketListener listener;
 
@@ -347,32 +346,32 @@ void TransportManager::run()
 	}
 }
 
-TransportManager::TransportManager()
+TransportService::TransportService()
 	: Service("transport", "/tmp/._irccd_ts.sock")
 	, m_commandMap{
-		{ "cnotice",	&TransportManager::cnotice	},
-		{ "connect",	&TransportManager::connect	},
-		{ "disconnect",	&TransportManager::disconnect	},
-		{ "invite",	&TransportManager::invite	},
-		{ "join",	&TransportManager::join		},
-		{ "kick",	&TransportManager::kick		},
-		{ "load",	&TransportManager::load		},
-		{ "me",		&TransportManager::me		},
-		{ "mode",	&TransportManager::mode		},
-		{ "nick",	&TransportManager::nick		},
-		{ "notice",	&TransportManager::notice	},
-		{ "part",	&TransportManager::part		},
-		{ "reconnect",	&TransportManager::reconnect	},
-		{ "reload",	&TransportManager::reload	},
-		{ "say",	&TransportManager::say		},
-		{ "topic",	&TransportManager::topic	},
-		{ "umode",	&TransportManager::umode	},
-		{ "unload",	&TransportManager::unload	}
+		{ "cnotice",	&TransportService::cnotice	},
+		{ "connect",	&TransportService::connect	},
+		{ "disconnect",	&TransportService::disconnect	},
+		{ "invite",	&TransportService::invite	},
+		{ "join",	&TransportService::join		},
+		{ "kick",	&TransportService::kick		},
+		{ "load",	&TransportService::load		},
+		{ "me",		&TransportService::me		},
+		{ "mode",	&TransportService::mode		},
+		{ "nick",	&TransportService::nick		},
+		{ "notice",	&TransportService::notice	},
+		{ "part",	&TransportService::part		},
+		{ "reconnect",	&TransportService::reconnect	},
+		{ "reload",	&TransportService::reload	},
+		{ "say",	&TransportService::say		},
+		{ "topic",	&TransportService::topic	},
+		{ "umode",	&TransportService::umode	},
+		{ "unload",	&TransportService::unload	}
 	}
 {
 }
 
-void TransportManager::stop()
+void TransportService::stop()
 {
 	Service::stop();
 
@@ -380,7 +379,7 @@ void TransportManager::stop()
 	m_clients.clear();
 }
 
-void TransportManager::broadcast(const std::string &msg)
+void TransportService::broadcast(const std::string &msg)
 {
 	assert(isRunning());
 

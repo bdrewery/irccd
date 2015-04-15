@@ -25,6 +25,7 @@
  */
 
 #include <ctime>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -170,6 +171,42 @@ public:
 	 * @return the path
 	 */
 	static std::string path(Directory directory);
+
+	/**
+	 * Join values by a separator and return a string.
+	 *
+	 * @param first the first iterator
+	 * @param last the last iterator
+	 * @param delim the optional delimiter
+	 */
+	template <typename InputIt>
+	static std::string join(InputIt first, InputIt last, char delim = ':')
+	{
+		std::ostringstream oss;
+
+		if (first != last) {
+			oss << *first;
+
+			while (++first != last) {
+				oss << delim << *first;
+			}
+		}
+
+		return oss.str();
+	}
+
+	/**
+	 * Convenient overload.
+	 *
+	 * @param list the initializer list
+	 * @param delim the delimiter
+	 * @return the string
+	 */
+	template <typename T>
+	static inline std::string join(std::initializer_list<T> list, char delim = ':')
+	{
+		return join(list.begin(), list.end(), delim);
+	}
 };
 
 /**

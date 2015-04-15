@@ -21,12 +21,12 @@ project(irccdctl)
 
 irccd_define_executable(
 	TARGET irccdctl
+	INSTALL
 	SOURCES
 		main.cpp
 		Irccdctl.cpp
 		Irccdctl.h
 	LIBRARIES common
-	INSTALL_RUNTIME bin/
 )
 
 install(

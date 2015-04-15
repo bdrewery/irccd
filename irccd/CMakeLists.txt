@@ -34,8 +34,8 @@ set(
 	ServerCommand.h
 	ServerEvent.cpp
 	ServerEvent.h
-	ServerManager.cpp
-	ServerManager.h
+	ServerService.cpp
+	ServerService.h
 	ServerState.h
 	Service.cpp
 	Service.h
@@ -43,8 +43,8 @@ set(
 	TransportCommand.h
 	TransportClient.cpp
 	TransportClient.h
-	TransportManager.cpp
-	TransportManager.h
+	TransportService.cpp
+	TransportService.h
 )
 
 if (WITH_JS)
@@ -55,6 +55,7 @@ endif ()
 
 irccd_define_executable(
 	TARGET irccd
+	INSTALL
 	SOURCES
 		${SOURCES}
 		${SERVER_COMMAND_SOURCES}
@@ -67,7 +68,6 @@ irccd_define_executable(
 		${LIBRARIES}
 		ircclient
 		common
-	INSTALL_RUNTIME bin/
 )
 
 if (UNIX)

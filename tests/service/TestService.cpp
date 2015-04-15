@@ -49,7 +49,7 @@ protected:
 
 public:
 	TestService()
-		: Service("test-service.sock")
+		: Service("test-service", "/tmp/.irccd-test-service")
 	{
 	}
 };

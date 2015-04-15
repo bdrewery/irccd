@@ -32,10 +32,10 @@ Irccd::Irccd()
 	/*
 	 * This signal is called from the ServerManager.
 	 */
-	m_serverManager.setOnEvent([this] (std::unique_ptr<ServerEvent> event) {
+	m_serverService.setOnEvent([this] (std::unique_ptr<ServerEvent> event) {
 		serverAddEvent(std::move(event));
 	});
-	m_transportManager.setOnEvent([this] (std::unique_ptr<TransportCommand> command) {
+	m_transportService.setOnEvent([this] (std::unique_ptr<TransportCommand> command) {
 		transportAddCommand(std::move(command));
 	});
 }
@@ -43,14 +43,14 @@ Irccd::Irccd()
 Irccd::~Irccd()
 {
 	Logger::debug() << "irccd: waiting for transport to finish..." << std::endl;
-	m_transportManager.stop();
+	m_transportService.stop();
 	Logger::debug() << "irccd: waiting for server to finish..." << std::endl;
-	m_serverManager.stop();
+	m_serverService.stop();
 }
 
 std::shared_ptr<Server> Irccd::serverFind(const std::string &name) const
 {
-	return m_serverManager.find(name);
+	return m_serverService.find(name);
 }
 
 #if defined(WITH_JS)
@@ -114,8 +114,8 @@ void Irccd::pluginReload(const std::string &name)
 
 void Irccd::run()
 {
-	m_serverManager.start();
-	m_transportManager.start();
+	m_serverService.start();
+	m_transportService.start();
 
 	while (m_running) {
 		// Wait
@@ -146,7 +146,7 @@ void Irccd::run()
 		/* Call server events */
 		while (!m_serverEvents.empty()) {
 			// Broadcast
-			m_transportManager.broadcast(m_serverEvents.front()->toJson());
+			m_transportService.broadcast(m_serverEvents.front()->toJson());
 
 #if defined(WITH_JS)
 			for (auto &plugin : m_plugins) {

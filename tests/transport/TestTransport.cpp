@@ -20,7 +20,7 @@
 
 #include <Logger.h>
 
-#include "TransportManager.h"
+#include "TransportService.h"
 #include "TransportCommand.h"
 
 #define DELAY	250ms
@@ -30,7 +30,7 @@ using namespace std::literals::chrono_literals;
 using namespace irccd;
 using namespace address;
 
-std::unique_ptr<TransportManager> manager;
+std::unique_ptr<TransportService> manager;
 std::unique_ptr<TransportCommand> last;
 
 class TransportTest : public testing::Test {
@@ -262,17 +262,7 @@ TEST_F(TransportTest, say2)
 	ASSERT_EQ("say:localhost:francis:lol", last->ident());
 }
 
-TEST_F(TransportTest, topic1)
-{
-	m_client.send("{ \"command\": \"topic\", \"server\": \"localhost\", \"channel\": \"#staff\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("topic:localhost:#staff:", last->ident());
-}
-
-TEST_F(TransportTest, topic2)
+TEST_F(TransportTest, topic)
 {
 	m_client.send("{ \"command\": \"topic\", \"server\": \"localhost\", \"channel\": \"#staff\", \"topic\": \"new release\" }\r\n\r\n");
 
@@ -309,7 +299,7 @@ int main(int argc, char **argv)
 	Logger::setError<LoggerSilent>();
 	testing::InitGoogleTest(&argc, argv);
 
-	manager = std::make_unique<TransportManager>();
+	manager = std::make_unique<TransportService>();
 	manager->add<TransportInet>(TransportAbstract::IPv4, 25000);
 	manager->setOnEvent([&] (std::unique_ptr<TransportCommand> command) {
 		last = std::move(command);

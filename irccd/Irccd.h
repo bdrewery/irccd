@@ -40,9 +40,9 @@
 #include "Identity.h"
 #include "Transport.h"
 #include "TransportCommand.h"
-#include "TransportManager.h"
+#include "TransportService.h"
 #include "ServerEvent.h"
-#include "ServerManager.h"
+#include "ServerService.h"
 
 namespace irccd {
 
@@ -67,8 +67,8 @@ private:
 	std::map<std::string, Identity> m_identities;
 
 	/* Server and Transport threads */
-	ServerManager m_serverManager;
-	TransportManager m_transportManager;
+	ServerService m_serverService;
+	TransportService m_transportService;
 
 public:
 	Irccd();
@@ -103,6 +103,16 @@ public:
 	/* ------------------------------------------------
 	 * Server management
 	 * ------------------------------------------------ */
+
+	template <typename... Args>
+	inline void serverAdd(Args&&... args) noexcept
+	{
+		try {
+			m_serverService.add(std::forward<Args>(args)...);
+		} catch (const std::exception &ex) {
+			Logger::warning() << "server: " << ex.what() << std::endl;
+		}
+	}
 
 	std::shared_ptr<Server> serverFind(const std::string &name) const;
 
@@ -142,21 +152,11 @@ public:
 	void pluginReload(const std::string &name);
 #endif
 
-	template <typename... Args>
-	inline void serverAdd(Args&&... args) noexcept
-	{
-		try {
-			m_serverManager.add(std::forward<Args>(args)...);
-		} catch (const std::exception &ex) {
-			Logger::warning() << "server: " << ex.what() << std::endl;
-		}
-	}
-
 	template <typename T, typename... Args>
 	inline void transportAdd(Args&&... args)
 	{
 		try {
-			m_transportManager.add<T>(std::forward<Args>(args)...);
+			m_transportService.add<T>(std::forward<Args>(args)...);
 		} catch (const std::exception &ex) {
 			Logger::warning() << "transport: " << ex.what() << std::endl;
 		}
