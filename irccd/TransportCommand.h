@@ -19,6 +19,7 @@
 #ifndef _IRCCD_TRANSPORT_COMMAND_H_
 #define _IRCCD_TRANSPORT_COMMAND_H_
 
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -29,27 +30,55 @@ class TransportClientAbstract;
 
 class TransportCommand {
 protected:
+	std::string m_ident;
 	std::shared_ptr<TransportClientAbstract> m_client;
+	std::function<void (TransportCommand &, Irccd &)> m_command;
 
 public:
-	inline TransportCommand(std::shared_ptr<TransportClientAbstract> client)
-		: m_client(client)
+	void cnotice(const std::string &server, const std::string &channel, const std::string &message);
+	void connect(/* TODO */);
+	void disconnect(const std::string &name);
+	void invite(const std::string &server, const std::string &target, const std::string &channel);
+	void join(const std::string &server, const std::string &channel, const std::string &password);
+	void kick(const std::string &server, const std::string &target, const std::string &channel, const std::string &reason);
+	void load(const std::string &path, bool isrelative);
+	void me(const std::string &server, const std::string &channel, const std::string &message);
+	void mode(const std::string &server, const std::string &channel, const std::string &mode);
+	void nick(const std::string &server, const std::string &nickname);
+	void notice(const std::string &server, const std::string &target, const std::string &message);
+	void part(const std::string &server, const std::string &channel, const std::string &reason);
+	void reconnect(const std::string &server);
+	void reload(const std::string &plugin);
+	void topic(const std::string &server, const std::string &channel, const std::string &topic);
+	void unload(const std::string &plugin);
+	void umode(const std::string &server, const std::string &mode);
+
+	inline TransportCommand(std::string ident,
+				std::shared_ptr<TransportClientAbstract> client,
+				std::function<void (TransportCommand &, Irccd &)> command)
+		: m_ident(std::move(ident))
+		, m_client(std::move(client))
+		, m_command(std::move(command))
 	{
 	}
 
-	virtual ~TransportCommand() = default;
-
-	virtual void exec(Irccd &) = 0;
+	inline void exec(Irccd &irccd)
+	{
+		m_command(*this, irccd);
+	}
 
 	/**
 	 * Provide a ident string for unit tests.
 	 *
-	 * Derived classes should just concat their name plus all fields
+	 * Command should just concat their name plus all fields
 	 * separated by ':'.
 	 *
 	 * @return the ident
 	 */
-	virtual std::string ident() const = 0;
+	inline const std::string &ident() const noexcept
+	{
+		return m_ident;
+	}
 };
 
 } // !irccd

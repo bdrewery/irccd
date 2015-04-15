@@ -35,7 +35,7 @@ Irccd::Irccd()
 	m_serverService.setOnEvent([this] (std::unique_ptr<ServerEvent> event) {
 		serverAddEvent(std::move(event));
 	});
-	m_transportService.setOnEvent([this] (std::unique_ptr<TransportCommand> command) {
+	m_transportService.setOnEvent([this] (TransportCommand command) {
 		transportAddCommand(std::move(command));
 	});
 }
@@ -139,7 +139,7 @@ void Irccd::run()
 
 		/* Call transport commands */
 		while (!m_transportCommands.empty()) {
-			m_transportCommands.front()->exec(*this);
+			m_transportCommands.front().exec(*this);
 			m_transportCommands.pop();
 		}
 

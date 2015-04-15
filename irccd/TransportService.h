@@ -65,7 +65,7 @@ public:
 
 private:
 	CommandMap m_commandMap;
-	std::function<void (std::unique_ptr<TransportCommand>)> m_onEvent;
+	std::function<void (TransportCommand)> m_onEvent;
 	std::map<Socket, std::unique_ptr<TransportAbstract>> m_transports;
 	std::map<Socket, std::shared_ptr<TransportClientAbstract>> m_clients;
 
@@ -414,7 +414,7 @@ public:
 	 * @pre isRunning() must return false
 	 * @param func the handler function
 	 */
-	inline void setOnEvent(std::function<void (std::unique_ptr<TransportCommand>)> func) noexcept
+	inline void setOnEvent(std::function<void (TransportCommand)> func) noexcept
 	{
 		assert(!isRunning());
 

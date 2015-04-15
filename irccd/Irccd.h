@@ -54,7 +54,7 @@ private:
 	std::mutex m_mutex;
 
 	/* Events */
-	std::queue<std::unique_ptr<TransportCommand>> m_transportCommands;
+	std::queue<TransportCommand> m_transportCommands;
 	std::queue<std::unique_ptr<ServerEvent>> m_serverEvents;
 
 	/* Optional JavaScript plugins */
@@ -172,7 +172,7 @@ public:
 	 * @param args the arguments to pass to the command constructor.
 	 * @note Thread-safe
 	 */
-	inline void transportAddCommand(std::unique_ptr<TransportCommand> command)
+	inline void transportAddCommand(TransportCommand command)
 	{
 		{
 			std::lock_guard<std::mutex> lock(m_mutex);
