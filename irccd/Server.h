@@ -52,6 +52,9 @@
 #include "servercommand/UserMode.h"
 #include "servercommand/Whois.h"
 
+#include "serverstate/Connecting.h"
+#include "serverstate/Dead.h"
+
 namespace irccd {
 
 /**
@@ -546,6 +549,36 @@ public:
 		if (m_next) {
 			m_state = std::move(m_next);
 		}
+	}
+
+	/**
+	 * Request to disconnect. This function does not notify the
+	 * ServerService.
+	 *
+	 * @see Irccd::serverDisconnect
+	 * @note Thread-safe
+	 */
+	inline void disconnect() noexcept
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+
+		irc_disconnect(m_session.get());
+		next<state::Dead>();
+	}
+
+	/**
+	 * Asks for a reconnection. This function does not notify the
+	 * ServerService.
+	 *
+	 * @see Irccd::serverReconnect
+	 * @note Thread-safe
+	 */
+	inline void reconnect() noexcept
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+
+		irc_disconnect(m_session.get());
+		next<state::Connecting>();
 	}
 
 	/**

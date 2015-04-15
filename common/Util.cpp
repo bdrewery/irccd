@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstring>
 #include <sstream>
 #include <stdexcept>
 
@@ -26,6 +27,8 @@
 #if defined(IRCCD_SYSTEM_WINDOWS)
 #  include <Windows.h>
 #  include <Shlobj.h>
+#else
+#  include <Xdg.h>
 #endif
 
 #include "Logger.h"

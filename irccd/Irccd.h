@@ -104,6 +104,11 @@ public:
 	 * Server management
 	 * ------------------------------------------------ */
 
+	/**
+	 * Add a new server to the application.
+	 *
+	 * @param args the arguments to pass to the Server constructor
+	 */
 	template <typename... Args>
 	inline void serverAdd(Args&&... args) noexcept
 	{
@@ -114,13 +119,54 @@ public:
 		}
 	}
 
-	std::shared_ptr<Server> serverFind(const std::string &name) const;
+	/**
+	 * Disconnect a server and remove it.
+	 *
+	 * @param name the name
+	 * @throw std::exception if the server does not exist
+	 */
+	inline void serverDisconnect(const std::string &name)
+	{
+		serverFind(name)->disconnect();
+
+		m_serverService.reload();
+	}
+
+	/**
+	 * Force reconnection to a server.
+	 *
+	 * @param name the server name
+	 * @throw std::exception if the server does not exist
+	 */
+	inline void serverReconnect(const std::string &name)
+	{
+		serverFind(name)->reconnect();
+
+		m_serverService.reload();
+	}
+
+	/**
+	 * Find a server by name.
+	 *
+	 * @param name the server name
+	 * @return the server
+	 * @throw std::exception if the server does not exist
+	 */
+	inline std::shared_ptr<Server> serverFind(const std::string &name) const
+	{
+		return m_serverService.find(name);
+	}
 
 	/* ------------------------------------------------
 	 * Plugin management
 	 * ------------------------------------------------ */
 
 #if defined(WITH_JS)
+	inline bool pluginIsLoaded(const std::string &name) const noexcept
+	{
+		return m_plugins.count(name) > 0;
+	}
+
 	/**
 	 * Find a plugin.
 	 *
@@ -128,14 +174,24 @@ public:
 	 * @return the plugin
 	 * @throws std::out_of_range if not found
 	 */
-	std::shared_ptr<Plugin> pluginFind(const std::string &name) const;
+	inline std::shared_ptr<Plugin> pluginFind(const std::string &name) const
+	{
+		using namespace std::string_literals;
+
+		if (m_plugins.count(name) == 0) {
+			throw std::out_of_range("plugin "s + name + " not found"s);
+		}
+
+		return m_plugins.at(name);
+	}
 
 	/**
-	 * Load a plugin by a completely resolved path.
+	 * Load a plugin by a path or a name.
 	 *
 	 * @param path the plugin path
+	 * @throw std::exception on failures
 	 */
-	void pluginLoad(std::string path);
+	void pluginLoad(const std::string &path);
 
 	/**
 	 * Unload a plugin and remove it.
@@ -148,8 +204,13 @@ public:
 	 * Reload a plugin by calling onReload.
 	 *
 	 * @param name the plugin name
+	 * @throw std::exception on failures
 	 */
-	void pluginReload(const std::string &name);
+	inline void pluginReload(const std::string &name)
+	{
+		pluginFind(name)->onReload();
+	}
+
 #endif
 
 	template <typename T, typename... Args>

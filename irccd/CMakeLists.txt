@@ -39,6 +39,7 @@ set(
 	Service.cpp
 	Service.h
 	Transport.h
+	TransportCommand.cpp
 	TransportCommand.h
 	TransportClient.cpp
 	TransportClient.h

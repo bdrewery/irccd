@@ -17,8 +17,10 @@
  */
 
 #include <algorithm>
+#include <cassert>
 #include <stdexcept>
 
+#include <Filesystem.h>
 #include <Logger.h>
 
 #include "Irccd.h"
@@ -48,25 +50,17 @@ Irccd::~Irccd()
 	m_serverService.stop();
 }
 
-std::shared_ptr<Server> Irccd::serverFind(const std::string &name) const
-{
-	return m_serverService.find(name);
-}
-
 #if defined(WITH_JS)
 
-std::shared_ptr<Plugin> Irccd::pluginFind(const std::string &name) const
+void Irccd::pluginLoad(const std::string &path)
 {
-	if (m_plugins.count(name) == 0) {
-		throw std::out_of_range("plugin "s + name + " not found"s);
+	std::shared_ptr<Plugin> plugin;
+
+	if (Filesystem::isRelative(path)) {
+		// TODO: find plugin
+	} else {
+		plugin = std::make_shared<Plugin>("test", path);
 	}
-
-	return m_plugins.at(name);
-}
-
-void Irccd::pluginLoad(std::string path)
-{
-	std::shared_ptr<Plugin> plugin = std::make_shared<Plugin>("test", path);
 
 	/*
 	 * These signals will be called from the Timer thread.
@@ -101,13 +95,6 @@ void Irccd::pluginUnload(const std::string &name)
 	}
 
 	m_plugins.erase(plugin->info().name);
-}
-
-void Irccd::pluginReload(const std::string &name)
-{
-	std::shared_ptr<Plugin> plugin = pluginFind(name);
-
-	plugin->onReload();
 }
 
 #endif
