@@ -40,29 +40,25 @@ class Server;
  * The libircclient library uses a non-blocking model with fixed size buffers,
  * so we enqueue user commands such as message, query and such into the queue
  * and flush them when possible.
- *
- * At the beginning, a simple std::function was used but it makes the code not
- * really future-proof as we planned to add new features to the event/command
- * system.
  */
 class ServerCommand {
+private:
+	std::function<void (ServerCommand &)> m_command;
+
 public:
 	/**
-	 * Constructor defaulted.
+	 * Construct a server command.
+	 *
+	 * @pre command must be valid
 	 */
-	ServerCommand() = default;
-
-	/**
-	 * Virtual destructor defaulted.
-	 */
-	virtual ~ServerCommand() = default;
+	ServerCommand(std::function<bool (ServerCommand &)> command);
 
 	/**
 	 * Call the server command.
 	 *
 	 * @return true if was sent correctly
 	 */
-	virtual bool call() = 0;
+	bool call();
 };
 
 } // !irccd

@@ -16,14 +16,32 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Server.h>
+#include <cassert>
 
+#include "Server.h"
 #include "ServerEvent.h"
 
 namespace irccd {
 
-ServerEvent::ServerEvent(const std::string &, const std::string &)
+ServerEvent::ServerEvent(std::string name,
+			 std::string json,
+			 std::shared_ptr<Server> server,
+			 std::string origin,
+			 std::string channel,
+			 std::function<void (Plugin &p)> function)
+	: m_name(std::move(name))
+	, m_json(std::move(json))
+	, m_server(std::move(server))
+	, m_origin(std::move(origin))
+	, m_channel(std::move(channel))
+	, m_call(std::move(function))
 {
+	assert(m_call);
+}
+
+void ServerEvent::call(Plugin &p)
+{
+	m_call(p);
 }
 
 MessagePack ServerEvent::parseMessage(std::string message, Server &server, Plugin &plugin) const

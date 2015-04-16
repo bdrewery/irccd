@@ -18,8 +18,6 @@
 
 project(irccd)
 
-include(servercommand/ServerCommand.cmake)
-include(serverevent/ServerEvent.cmake)
 include(serverstate/ServerState.cmake)
 
 set(

@@ -16,33 +16,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <sstream>
+
+#include <Json.h>
 #include <Logger.h>
 #include <Socket.h>
 
-#include "ServerService.h"
+#if defined(WITH_JS)
+#  include "Plugin.h"
+#endif
 
-#include "serverevent/ChannelNotice.h"
-#include "serverevent/Connect.h"
-#include "serverevent/Invite.h"
-#include "serverevent/Join.h"
-#include "serverevent/Kick.h"
-#include "serverevent/Me.h"
-#include "serverevent/Message.h"
-#include "serverevent/Mode.h"
-#include "serverevent/Names.h"
-#include "serverevent/Nick.h"
-#include "serverevent/Notice.h"
-#include "serverevent/Part.h"
-#include "serverevent/Query.h"
-#include "serverevent/Topic.h"
-#include "serverevent/UserMode.h"
-#include "serverevent/Whois.h"
+#include "ServerEvent.h"
+#include "ServerService.h"
 
 using namespace std::string_literals;
 
 namespace irccd {
-
-using namespace event;
 
 void ServerService::run()
 {
@@ -121,19 +110,43 @@ void ServerService::onChannelNotice(std::shared_ptr<Server> server, std::string 
 	Logger::debug() << "server " << server->info().name << ": onChannelNotice: "
 			<< "origin=" << origin << ", channel=" << channel <<", notice=" << notice << std::endl;
 
-	m_onEvent(std::make_unique<ChannelNotice>(
-		std::move(server),
-		std::move(origin),
-		std::move(channel),
-		std::move(notice)
-	));
+	std::ostringstream json;
+
+	json << "{"
+	     << "\"event\":\"ChannelNotice\","
+	     << "\"server\":\"" << server->info().name << "\","
+	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
+	     << "\"channel\":\"" << JsonValue::escape(channel) << "\","
+	     << "\"notice\":\"" << JsonValue::escape(notice) << "\""
+	     << "}";
+
+	m_onEvent(ServerEvent("onChannelNotice", json.str(), server, origin, channel, [=] (Plugin &plugin) {
+#if defined(WITH_JS)
+		plugin.onChannelNotice(server, origin, channel, notice);
+#else
+		(void)plugin;
+#endif
+	});
 }
 
 void ServerService::onConnect(std::shared_ptr<Server> server)
 {
 	Logger::debug() << "server " << server->info().name << ": onConnect" << std::endl;
 
-	m_onEvent(std::make_unique<Connect>(std::move(server)));
+	std::ostringstream json;
+
+	json << "{"
+	     << "\"event\":\"onConnect\","
+	     << "\"server\":\"" << server->info().name << "\""
+	     << "}";
+
+	m_onEvent(ServerEvent("onConnect", json.str(), "", "", "", [=] (Plugin &plugin) {
+#if defined(WITH_JS)
+		plugin.onConnect(server);
+#else
+		(void)plugin;
+#endif
+	});
 }
 
 void ServerService::onInvite(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target)
@@ -141,11 +154,22 @@ void ServerService::onInvite(std::shared_ptr<Server> server, std::string origin,
 	Logger::debug() << "server " << server->info().name << ": onInvite: "
 			<< "origin=" << origin << ", channel=" << channel << ", target=" << target << std::endl;
 
-	m_onEvent(std::make_unique<Invite>(
-		std::move(server),
-		std::move(origin),
-		std::move(channel)
-	));
+	std::ostringstream json;
+
+	json << "{"
+	     << "\"event\":\"onInvite\","
+	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
+	     << "\"channel\":\"" << JsonValue::escape(channel) << "\""
+	     << "}";
+
+	m_onEvent(ServerEvent("onInvite", json.str(), server, origin, channel, [=] (Plugin &plugin) {
+#if defined(WITH_JS)
+		plugin.onInvite(server, origin, channel);
+#else
+		(void)plugin;
+#endif
+	});
 }
 
 void ServerService::onJoin(std::shared_ptr<Server> server, std::string origin, std::string channel)
@@ -153,11 +177,22 @@ void ServerService::onJoin(std::shared_ptr<Server> server, std::string origin, s
 	Logger::debug() << "server " << server->info().name << ": onJoin: "
 			<< "origin=" << origin << ", channel=" << channel << std::endl;
 
-	m_onEvent(std::make_unique<Join>(
-		std::move(server),
-		std::move(origin),
-		std::move(channel)
-	));
+	std::ostringstream json;
+
+	json << "{"
+	     << "\"event\":\"onJoin\","
+	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
+	     << "\"channel\":\"" << JsonValue::escape(channel) << "\""
+	     << "}";
+
+	m_onEvent(ServerEvent("onJoin", json.str(), server, origin, channel, [=] (Plugin &plugin) {
+#if defined(WITH_JS)
+		plugin.onJoin(server, origin, channel);
+#else
+		(void)plugin;
+#endif
+	});
 }
 
 void ServerService::onKick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason)
@@ -165,26 +200,42 @@ void ServerService::onKick(std::shared_ptr<Server> server, std::string origin, s
 	Logger::debug() << "server " << server->info().name << ": onKick: "
 			<< "origin=" << origin << ", channel=" << channel << ", target=" << target << ", reason=" << reason << std::endl;
 
-	m_onEvent(std::make_unique<Kick>(
-		std::move(server),
-		std::move(origin),
-		std::move(channel),
-		std::move(target),
-		std::move(reason)
-	));
+	std::ostringstream json;
+
+	json << "{"
+	     << "\"event\":\"onKick\","
+	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
+	     << "\"channel\":\"" << JsonValue::escape(channel) << "\","
+	     << "\"target\":\"" << JsonValue::escape(target) << "\","
+	     << "\"reason\":\"" << JsonValue::escape(reason) << "\""
+	     << "}";
+
+	m_onEvent(ServerEvent("onKick", json.str(), server, origin, channel, [=] (Plugin &plugin) {
+#if defined(WITH_JS)
+		plugin.onKick(server, origin, channel, target, reason);
+#else
+		(void)plugin;
+#endif
+	});
 }
 
-void ServerService::onMessage(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
+void ServerService::onMessage(std::shared_ptr<Server>, std::string, std::string, std::string)
 {
 	Logger::debug() << "server " << server->info().name << ": onMessage: "
 			<< "origin=" << origin << ", channel=" << channel << ", message=" << message << std::endl;
 
-	m_onEvent(std::make_unique<Message>(
-		std::move(server),
-		std::move(origin),
-		std::move(channel),
-		std::move(message)
-	));
+	std::ostringstream json;
+
+	json << "{"
+	     << "\"event\":\"Message\","
+	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
+	     << "\"channel\":\"" << JsonValue::escape(channel) << "\","
+	     << "\"message\":\"" << JsonValue::escape(message) << "\""
+	     << "}";
+
+	// TODO: handle onMessage/onCommand
 }
 
 void ServerService::onMe(std::shared_ptr<Server> server, std::string origin, std::string target, std::string message)
@@ -192,12 +243,23 @@ void ServerService::onMe(std::shared_ptr<Server> server, std::string origin, std
 	Logger::debug() << "server " << server->info().name << ": onMe: "
 			<< "origin=" << origin << ", target=" << target << ", message=" << message << std::endl;
 
-	m_onEvent(std::make_unique<Me>(
-		std::move(server),
-		std::move(origin),
-		std::move(target),
-		std::move(message)
-	));
+	std::ostringstream json;
+
+	json << "{"
+	     << "\"event\":\"Me\","
+	     << "\"server\":\"" << m_server->info().name << "\""
+	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
+	     << "\"target\":\"" << JsonValue::escape(target) << "\","
+	     << "\"message\":\"" << JsonValue::escape(message) << "\""
+	     << "}";
+
+	m_onEvent(ServerEvent("onMe", json.str(), server, origin, channel, [=] (Plugin &plugin) {
+#if defined(WITH_JS)
+		plugin.onMe(server, origin, target, message);
+#else
+		(void)plugin;
+#endif
+	});
 }
 
 void ServerService::onMode(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string arg)
@@ -205,13 +267,23 @@ void ServerService::onMode(std::shared_ptr<Server> server, std::string origin, s
 	Logger::debug() << "server " << server->info().name << ": onMode: "
 			<< "origin=" << origin << ", channel=" << channel << ", mode=" << mode << ", argument=" << arg << std::endl;
 
-	m_onEvent(std::make_unique<Mode>(
-		std::move(server),
-		std::move(origin),
-		std::move(channel),
-		std::move(mode),
-		std::move(arg)
-	));
+	std::ostringstream json;
+
+	json << "{"
+	     << "\"event\":\"Mode\","
+	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
+	     << "\"mode\":\"" << JsonValue::escape(mode) << "\","
+	     << "\"argument\":\"" << JsonValue::escape(argument) << "\""
+	     << "}";
+
+	m_onEvent(ServerEvent("onMode", json.str(), server, origin, channel, [=] (Plugin &plugin) {
+#if defined(WITH_JS)
+		plugin.onMode(server, origin, channel, mode, argument);
+#else
+		(void)plugin;
+#endif
+	});
 }
 
 void ServerService::onNick(std::shared_ptr<Server> server, std::string origin, std::string nickname)
@@ -219,11 +291,22 @@ void ServerService::onNick(std::shared_ptr<Server> server, std::string origin, s
 	Logger::debug() << "server " << server->info().name << ": onNick: "
 			<< "origin=" << origin << ", nickname=" << nickname << std::endl;
 
-	m_onEvent(std::make_unique<Nick>(
-		std::move(server),
-		std::move(origin),
-		std::move(nickname)
-	));
+	std::ostringstream json;
+
+	json << "{"
+	     << "\"event\":\"onNick\","
+	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"old\":\"" << oldnickname << "\","
+	     << "\"new\":\"" << newnickname << "\""
+	     << "}";
+
+	m_onEvent(ServerEvent("onNick", json.str(), server, origin, "", [=] (Plugin &plugin) {
+#if defined(WITH_JS)
+		plugin.onNick(server, oldnickname, newnickname);
+#else
+		(void)plugin;
+#endif
+	});
 }
 
 void ServerService::onNotice(std::shared_ptr<Server> server, std::string origin, std::string message)
@@ -231,11 +314,22 @@ void ServerService::onNotice(std::shared_ptr<Server> server, std::string origin,
 	Logger::debug() << "server " << server->info().name << ": onNotice: "
 			<< "origin=" << origin << ", message=" << message << std::endl;
 
-	m_onEvent(std::make_unique<Notice>(
-		std::move(server),
-		std::move(origin),
-		std::move(message)
-	));
+	std::ostringstream json;
+
+	json << "{"
+	     << "\"event\":\"onNotice\","
+	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
+	     << "\"notice\":\"" << JsonValue::escape(notice) << "\""
+	     << "}";
+
+	m_onEvent(ServerEvent("onNotice", json.str(), server, origin, /* channel */ "", [=] (Plugin &plugin) {
+#if defined(WITH_JS)
+		plugin.onNotice(server, origin, notice);
+#else
+		(void)plugin;
+#endif
+	});
 }
 
 void ServerService::onPart(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string reason)
@@ -243,24 +337,31 @@ void ServerService::onPart(std::shared_ptr<Server> server, std::string origin, s
 	Logger::debug() << "server " << server->info().name << ": onPart: "
 			<< "origin=" << origin << ", channel=" << channel << ", reason=" << reason << std::endl;
 
-	m_onEvent(std::make_unique<Part>(
-		std::move(server),
-		std::move(origin),
-		std::move(channel),
-		std::move(reason)
-	));
+	std::ostringstream json;
+
+	json << "{"
+	     << "\"event\":\"Part\","
+	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
+	     << "\"channel\":\"" << JsonValue::escape(channel) << "\","
+	     << "\"reason\":\"" << JsonValue::escape(reason) << "\""
+	     << "}";
+
+	m_onEvent(ServerEvent("onPart", json.str(), server, origin, channel, [=] (Plugin &plugin) {
+#if defined(WITH_JS)
+		plugin.onPart(server, origin, channel, reason);
+#else
+		(void)plugin;
+#endif
+	});
 }
 
-void ServerService::onQuery(std::shared_ptr<Server> server, std::string origin, std::string message)
+void ServerService::onQuery(std::shared_ptr<Server>, std::string, std::string)
 {
 	Logger::debug() << "server " << server->info().name << ": onQuery: "
 			<< "origin=" << origin << ", message=" << message << std::endl;
 
-	m_onEvent(std::make_unique<Query>(
-		std::move(server),
-		std::move(origin),
-		std::move(message)
-	));
+	// TODO: like onMessage
 }
 
 void ServerService::onTopic(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string topic)
@@ -268,12 +369,23 @@ void ServerService::onTopic(std::shared_ptr<Server> server, std::string origin, 
 	Logger::debug() << "server " << server->info().name << ": onTopic: "
 			<< "origin=" << origin << ", channel=" << channel << ", topic=" << topic << std::endl;
 
-	m_onEvent(std::make_unique<Topic>(
-		std::move(server),
-		std::move(origin),
-		std::move(channel),
-		std::move(topic)
-	));
+	std::ostringstream json;
+
+	json << "{"
+	     << "\"event\":\"Topic\""
+	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
+	     << "\"channel\":\"" << JsonValue::escape(channel) << "\","
+	     << "\"topic\":\"" << JsonValue::escape(topic) << "\""
+	     << "}";
+
+	m_onEvent(ServerEvent("onTopic", json.str(), server, origin, channel, [=] (Plugin &plugin) {
+#if defined(WITH_JS)
+		plugin.onTopic(server, origin, channel, topic);
+#else
+		(void)plugin;
+#endif
+	});
 }
 
 void ServerService::onUserMode(std::shared_ptr<Server> server, std::string origin, std::string mode)
@@ -281,11 +393,22 @@ void ServerService::onUserMode(std::shared_ptr<Server> server, std::string origi
 	Logger::debug() << "server " << server->info().name << ": onUserMode: "
 			<< "origin=" << origin << ", mode=" << mode << std::endl;
 
-	m_onEvent(std::make_unique<UserMode>(
-		std::move(server),
-		std::move(origin),
-		std::move(mode)
-	));
+	std::ostringstream json;
+
+	json << "{"
+	     << "\"event\":\"UserMode\","
+	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
+	     << "\"mode\":\"" << JsonValue::escape(mode) << "\""
+	     << "}";
+
+	m_onEvent(ServerEvent("onUserMode", server, origin, "", "", [=] (Plugin &plugin) {
+#if defined(WITH_JS)
+		plugin.onUserMode(server, origin, mode);
+#else
+		(void)plugin;
+#endif
+	});
 }
 
 ServerService::ServerService()

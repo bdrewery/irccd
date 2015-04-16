@@ -24,7 +24,9 @@
  * @brief Base event class
  */
 
+#include <functional>
 #include <sstream>
+#include <string>
 #include <utility>
 
 #include <IrccdConfig.h>
@@ -53,11 +55,24 @@ enum class MessageType {
  */
 using MessagePack = std::pair<std::string, MessageType>;
 
+class ServerEventInfo {
+public:
+
+};
+
 /**
  * @class Event
  * @brief Base event class for plugins
  */
 class ServerEvent {
+private:
+	std::string m_name;			//!< event name (onMessage, onTopic, ...)
+	std::string m_json;			//!< JSon data to broadcast
+	std::shared_ptr<Server> m_server;	//!< which server
+	std::string m_origin;			//!< originator
+	std::string m_channel;			//!< the channel (optional)
+	std::function<void (Plugin &)> m_call;	//!< function to call
+
 protected:
 	/**
 	 * Parse IRC message depending on the command char and the plugin name.
@@ -70,20 +85,23 @@ protected:
 	MessagePack parseMessage(std::string message, Server &server, Plugin &plugin) const;
 
 public:
+	
 	/**
 	 * Construct an event.
-	 *
-	 * @param serverName the server name
-	 * @param targetName the target name
 	 */
-	ServerEvent(const std::string &serverName = "", const std::string &targetName = "");
+	ServerEvent(std::string name,
+		    std::string json,
+		    std::shared_ptr<Server> server,
+		    std::string origin,
+		    std::string channel,
+		    std::function<void (Plugin &p)> function);
 
 	/**
 	 * Execute the plugin command.
 	 *
 	 * @param p the current plugin
 	 */
-	virtual void call(Plugin &p) const = 0;
+	void call(Plugin &p);
 
 	/**
 	 * Get the event name such as onMessage, onCommand.
@@ -98,24 +116,20 @@ public:
 	 * @param p the current plugin
 	 * @return the event name
 	 */
-	virtual std::string name(Plugin &p) const = 0;
+	inline const std::string &name(Plugin &p) const noexcept
+	{
+		return m_name;
+	}
 
 	/**
 	 * Return the event as JSon to be sent to transports.
 	 *
 	 * @return the event description in JSON
 	 */
-	virtual std::string toJson() const = 0;
-
-	/**
-	 * Provide a ident string for unit tests.
-	 *
-	 * Derived classes should just concat their name plus all fields
-	 * separated by ':'.
-	 *
-	 * @return the ident
-	 */
-	virtual std::string ident() const = 0;
+	inline const std::string &toJson() const noexcept
+	{
+		return m_json;
+	}
 };
 
 } // !irccd

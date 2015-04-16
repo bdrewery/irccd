@@ -36,22 +36,6 @@
 #include "ServerState.h"
 #include "ServerCommand.h"
 
-#include "servercommand/ChannelNotice.h"
-#include "servercommand/Invite.h"
-#include "servercommand/Join.h"
-#include "servercommand/Kick.h"
-#include "servercommand/Me.h"
-#include "servercommand/Message.h"
-#include "servercommand/Mode.h"
-#include "servercommand/Names.h"
-#include "servercommand/Nick.h"
-#include "servercommand/Notice.h"
-#include "servercommand/Part.h"
-#include "servercommand/Send.h"
-#include "servercommand/Topic.h"
-#include "servercommand/UserMode.h"
-#include "servercommand/Whois.h"
-
 #include "serverstate/Connecting.h"
 #include "serverstate/Dead.h"
 
@@ -857,7 +841,7 @@ public:
 	 */
 	inline void cnotice(std::string channel, std::string message)
 	{
-		addCommand<command::ChannelNotice>(*this, std::move(channel), std::move(message));
+		//addCommand<command::ChannelNotice>(*this, std::move(channel), std::move(message));
 	}
 
 	/**
@@ -869,7 +853,7 @@ public:
 	 */
 	inline void invite(std::string target, std::string channel)
 	{
-		addCommand<command::Invite>(*this, std::move(target), std::move(channel));
+		//addCommand<command::Invite>(*this, std::move(target), std::move(channel));
 	}
 
 	/**
@@ -881,7 +865,7 @@ public:
 	 */
 	inline void join(std::string channel, std::string password = "")
 	{
-		addCommand<command::Join>(*this, std::move(channel), std::move(password));
+		//addCommand<command::Join>(*this, std::move(channel), std::move(password));
 	}
 
 	/**
@@ -895,7 +879,7 @@ public:
 	 */
 	inline void kick(std::string target, std::string channel, std::string reason = "")
 	{
-		addCommand<command::Kick>(*this, std::move(target), std::move(channel), std::move(reason));
+		//addCommand<command::Kick>(*this, std::move(target), std::move(channel), std::move(reason));
 	}
 
 	/**
@@ -908,7 +892,7 @@ public:
 	 */
 	inline void me(std::string target, std::string message)
 	{
-		addCommand<command::Me>(*this, std::move(target), std::move(message));
+		//addCommand<command::Me>(*this, std::move(target), std::move(message));
 	}
 
 	/**
@@ -920,7 +904,7 @@ public:
 	 */
 	inline void mode(std::string channel, std::string mode)
 	{
-		addCommand<command::Mode>(*this, std::move(channel), std::move(mode));
+		//addCommand<command::Mode>(*this, std::move(channel), std::move(mode));
 	}
 
 	/**
@@ -931,7 +915,7 @@ public:
 	 */
 	inline void names(std::string channel)
 	{
-		addCommand<command::Names>(*this, std::move(channel));
+		//addCommand<command::Names>(*this, std::move(channel));
 	}
 
 	/**
@@ -942,7 +926,7 @@ public:
 	 */
 	inline void nick(std::string newnick)
 	{
-		addCommand<command::Nick>(*this, std::move(newnick));
+		//addCommand<command::Nick>(*this, std::move(newnick));
 	}
 
 	/**
@@ -954,7 +938,7 @@ public:
 	 */
 	inline void notice(std::string target, std::string message)
 	{
-		addCommand<command::Notice>(*this, std::move(target), std::move(message));
+		//addCommand<command::Notice>(*this, std::move(target), std::move(message));
 	}
 
 	/**
@@ -969,7 +953,7 @@ public:
 	 */
 	inline void part(std::string channel, std::string reason = "")
 	{
-		addCommand<command::Part>(*this, std::move(channel), std::move(reason));
+		//addCommand<command::Part>(*this, std::move(channel), std::move(reason));
 	}
 
 	/**
@@ -981,7 +965,7 @@ public:
 	 */
 	inline void message(std::string target, std::string message)
 	{
-		addCommand<command::Message>(*this, std::move(target), std::move(message));
+		//addCommand<command::Message>(*this, std::move(target), std::move(message));
 	}
 
 	/**
@@ -994,7 +978,7 @@ public:
 	 */
 	inline void send(std::string raw)
 	{
-		addCommand<command::Send>(*this, std::move(raw));
+		//addCommand<command::Send>(*this, std::move(raw));
 	}
 
 	/**
@@ -1006,7 +990,7 @@ public:
 	 */
 	inline void topic(std::string channel, std::string topic)
 	{
-		addCommand<command::Topic>(*this, std::move(channel), std::move(topic));
+		//addCommand<command::Topic>(*this, std::move(channel), std::move(topic));
 	}
 
 	/**
@@ -1017,7 +1001,7 @@ public:
 	 */
 	inline void umode(std::string mode)
 	{
-		addCommand<command::UserMode>(*this, std::move(mode));
+		//addCommand<command::UserMode>(*this, std::move(mode));
 	}
 
 	/**
@@ -1028,7 +1012,7 @@ public:
 	 */
 	inline void whois(std::string target)
 	{
-		addCommand<command::Whois>(*this, std::move(target));
+		//addCommand<command::Whois>(*this, std::move(target));
 	}
 };
 
