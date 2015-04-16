@@ -16,13 +16,24 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-include(${irccd_SOURCE_DIR}/servercommand/ServerCommand.cmake)
-include(${irccd_SOURCE_DIR}/js/Js.cmake)
-
 set(
 	JS_FILESYSTEM_SOURCES
-	${JS_SOURCES}
-	${SERVER_COMMAND_SOURCES}
+	${irccd_SOURCE_DIR}/Js.cpp
+	${irccd_SOURCE_DIR}/Js.h
+	${irccd_SOURCE_DIR}/JsFilesystem.cpp
+	${irccd_SOURCE_DIR}/JsLogger.cpp
+	${irccd_SOURCE_DIR}/JsPlugin.cpp
+	${irccd_SOURCE_DIR}/JsServer.cpp
+	${irccd_SOURCE_DIR}/JsSystem.cpp
+	${irccd_SOURCE_DIR}/JsTimer.cpp
+	${irccd_SOURCE_DIR}/JsUnicode.cpp
+	${irccd_SOURCE_DIR}/JsUtil.cpp
+	${irccd_SOURCE_DIR}/Plugin.cpp
+	${irccd_SOURCE_DIR}/Plugin.h
+	${irccd_SOURCE_DIR}/Timer.cpp
+	${irccd_SOURCE_DIR}/Timer.h
+	${irccd_SOURCE_DIR}/Unicode.cpp
+	${irccd_SOURCE_DIR}/Unicode.h
 	TestJsFilesystem.cpp
 )
 

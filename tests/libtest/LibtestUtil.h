@@ -7,7 +7,7 @@
 
 #include <gtest/gtest.h>
 
-#include <js/Js.h>
+#include <Js.h>
 
 namespace irccd {
 

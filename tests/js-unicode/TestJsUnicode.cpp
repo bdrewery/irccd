@@ -24,7 +24,7 @@
 
 #include <IrccdConfig.h>
 #include <LibtestUtil.h>
-#include <js/Unicode.h>
+#include <Unicode.h>
 
 using namespace irccd;
 

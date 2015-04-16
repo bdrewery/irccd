@@ -19,9 +19,8 @@
 #include <gtest/gtest.h>
 
 #include <ElapsedTimer.h>
-
-#include <js/Plugin.h>
-#include <js/Timer.h>
+#include <Plugin.h>
+#include <Timer.h>
 
 using namespace irccd;
 using namespace std::chrono_literals;
