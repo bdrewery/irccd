@@ -20,7 +20,6 @@ project(irccd)
 
 set(
 	SOURCES
-	Identity.h
 	Irccd.cpp
 	Irccd.h
 	main.cpp

@@ -37,10 +37,10 @@
 #  include "TimerEvent.h"
 #endif
 
-#include "Identity.h"
 #include "Transport.h"
 #include "TransportCommand.h"
 #include "TransportService.h"
+#include "Server.h"
 #include "ServerEvent.h"
 #include "ServerService.h"
 
@@ -64,7 +64,7 @@ private:
 #endif
 
 	/* Identities */
-	std::map<std::string, Identity> m_identities;
+	std::map<std::string, ServerIdentity> m_identities;
 
 	/* Server and Transport threads */
 	ServerService m_serverService;
@@ -84,7 +84,7 @@ public:
 	 * @param identity the identity
 	 * @note If the identity already exists, it is overriden
 	 */
-	inline void identityAdd(Identity identity) noexcept
+	inline void identityAdd(ServerIdentity identity) noexcept
 	{
 		m_identities.emplace(identity.name(), std::move(identity));
 	}
@@ -95,9 +95,9 @@ public:
 	 * @param name the identity name
 	 * @return the identity or default one
 	 */
-	inline Identity identityFind(const std::string &name) const noexcept
+	inline ServerIdentity identityFind(const std::string &name) const noexcept
 	{
-		return m_identities.count(name) > 0 ? Identity() : m_identities.at(name);
+		return m_identities.count(name) > 0 ? ServerIdentity() : m_identities.at(name);
 	}
 
 	/* ------------------------------------------------

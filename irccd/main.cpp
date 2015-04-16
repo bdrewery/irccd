@@ -132,7 +132,7 @@ void loadIdentity(const IniSection &sc)
 	using std::move;
 	using std::string;
 
-	Identity id;
+	ServerIdentity id;
 	string name;
 	string username = id.username();
 	string realname = id.username();
@@ -166,7 +166,7 @@ void loadIdentity(const IniSection &sc)
 			<< "nickname=" << nickname << ", username=" << username << ", "
 			<< "realname=" << realname << ", ctcp-version=" << ctcpversion << std::endl;
 
-	irccd->identityAdd(Identity(move(name), move(nickname), move(username), move(realname), move(ctcpversion)));
+	irccd->identityAdd(ServerIdentity(move(name), move(nickname), move(username), move(realname), move(ctcpversion)));
 }
 
 void loadIdentities(const Ini &config)
@@ -205,8 +205,9 @@ void stop(int)
 
 } // !irccd
 
-int main(int argc, char **argv)
+int main(int, char **argv)
 {
+	setprogname("irccd");
 	irccd::Util::setProgramPath(argv[0]);
 
 	irccd::Irccd instance;
@@ -229,7 +230,7 @@ int main(int argc, char **argv)
 	};
 
 	try {
-		instance.serverAdd(info, irccd::Identity(), settings);
+		instance.serverAdd(info, irccd::ServerIdentity(), settings);
 	} catch (const std::exception &ex) {
 		irccd::Logger::warning() << "failed to add a server: " << ex.what() << std::endl;
 	}

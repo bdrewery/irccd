@@ -126,7 +126,7 @@ void Server::handleUserMode(const char *orig, const char **params) noexcept
 	wrapHandler(m_onUserMode, strify(orig), strify(params[1]));
 }
 
-Server::Server(ServerInfo info, Identity identity, ServerSettings settings)
+Server::Server(ServerInfo info, ServerIdentity identity, ServerSettings settings)
 	: m_info(std::move(info))
 	, m_settings(std::move(settings))
 	, m_identity(std::move(identity))

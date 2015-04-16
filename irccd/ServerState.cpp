@@ -35,7 +35,7 @@ namespace irccd {
 bool ServerState::connect(Server &server)
 {
 	const ServerInfo &info = server.info();
-	const Identity &identity = server.identity();
+	const ServerIdentity &identity = server.identity();
 	const char *password = info.password.empty() ? nullptr : info.password.c_str();
 	std::string host = info.host;
 	int code;
