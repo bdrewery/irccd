@@ -28,7 +28,6 @@ set(
 	main.cpp
 	Server.cpp
 	Server.h
-	ServerCommand.h
 	ServerEvent.cpp
 	ServerEvent.h
 	ServerService.cpp
@@ -46,8 +45,29 @@ set(
 )
 
 if (WITH_JS)
-	include(js/Js.cmake)
-	list(APPEND SOURCES ${JS_SOURCES})
+	list(
+		APPEND
+		SOURCES
+		Js.cpp
+		Js.h
+		JsFilesystem.cpp
+		JsLogger.cpp
+		JsPlugin.cpp
+		JsServer.cpp
+		JsSystem.cpp
+		JsTimer.cpp
+		JsUnicode.cpp
+		JsUtil.cpp
+		Plugin.cpp
+		Plugin.h
+		Timer.cpp
+		Timer.h
+		TimerEvent.cpp
+		TimerEvent.h
+		Unicode.cpp
+		Unicode.h
+	)
+
 	list(APPEND LIBRARIES duktape)
 endif ()
 

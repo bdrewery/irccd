@@ -126,7 +126,7 @@ void ServerService::onChannelNotice(std::shared_ptr<Server> server, std::string 
 #else
 		(void)plugin;
 #endif
-	});
+	}));
 }
 
 void ServerService::onConnect(std::shared_ptr<Server> server)
@@ -140,13 +140,13 @@ void ServerService::onConnect(std::shared_ptr<Server> server)
 	     << "\"server\":\"" << server->info().name << "\""
 	     << "}";
 
-	m_onEvent(ServerEvent("onConnect", json.str(), "", "", "", [=] (Plugin &plugin) {
+	m_onEvent(ServerEvent("onConnect", json.str(), server, "", "", [=] (Plugin &plugin) {
 #if defined(WITH_JS)
 		plugin.onConnect(server);
 #else
 		(void)plugin;
 #endif
-	});
+	}));
 }
 
 void ServerService::onInvite(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target)
@@ -158,7 +158,7 @@ void ServerService::onInvite(std::shared_ptr<Server> server, std::string origin,
 
 	json << "{"
 	     << "\"event\":\"onInvite\","
-	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"server\":\"" << server->info().name << "\","
 	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
 	     << "\"channel\":\"" << JsonValue::escape(channel) << "\""
 	     << "}";
@@ -169,7 +169,7 @@ void ServerService::onInvite(std::shared_ptr<Server> server, std::string origin,
 #else
 		(void)plugin;
 #endif
-	});
+	}));
 }
 
 void ServerService::onJoin(std::shared_ptr<Server> server, std::string origin, std::string channel)
@@ -181,7 +181,7 @@ void ServerService::onJoin(std::shared_ptr<Server> server, std::string origin, s
 
 	json << "{"
 	     << "\"event\":\"onJoin\","
-	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"server\":\"" << server->info().name << "\","
 	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
 	     << "\"channel\":\"" << JsonValue::escape(channel) << "\""
 	     << "}";
@@ -192,7 +192,7 @@ void ServerService::onJoin(std::shared_ptr<Server> server, std::string origin, s
 #else
 		(void)plugin;
 #endif
-	});
+	}));
 }
 
 void ServerService::onKick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason)
@@ -204,7 +204,7 @@ void ServerService::onKick(std::shared_ptr<Server> server, std::string origin, s
 
 	json << "{"
 	     << "\"event\":\"onKick\","
-	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"server\":\"" << server->info().name << "\","
 	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
 	     << "\"channel\":\"" << JsonValue::escape(channel) << "\","
 	     << "\"target\":\"" << JsonValue::escape(target) << "\","
@@ -217,10 +217,10 @@ void ServerService::onKick(std::shared_ptr<Server> server, std::string origin, s
 #else
 		(void)plugin;
 #endif
-	});
+	}));
 }
 
-void ServerService::onMessage(std::shared_ptr<Server>, std::string, std::string, std::string)
+void ServerService::onMessage(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
 {
 	Logger::debug() << "server " << server->info().name << ": onMessage: "
 			<< "origin=" << origin << ", channel=" << channel << ", message=" << message << std::endl;
@@ -229,7 +229,7 @@ void ServerService::onMessage(std::shared_ptr<Server>, std::string, std::string,
 
 	json << "{"
 	     << "\"event\":\"Message\","
-	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"server\":\"" << server->info().name << "\","
 	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
 	     << "\"channel\":\"" << JsonValue::escape(channel) << "\","
 	     << "\"message\":\"" << JsonValue::escape(message) << "\""
@@ -247,19 +247,19 @@ void ServerService::onMe(std::shared_ptr<Server> server, std::string origin, std
 
 	json << "{"
 	     << "\"event\":\"Me\","
-	     << "\"server\":\"" << m_server->info().name << "\""
+	     << "\"server\":\"" << server->info().name << "\""
 	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
 	     << "\"target\":\"" << JsonValue::escape(target) << "\","
 	     << "\"message\":\"" << JsonValue::escape(message) << "\""
 	     << "}";
 
-	m_onEvent(ServerEvent("onMe", json.str(), server, origin, channel, [=] (Plugin &plugin) {
+	m_onEvent(ServerEvent("onMe", json.str(), server, origin, target, [=] (Plugin &plugin) {
 #if defined(WITH_JS)
 		plugin.onMe(server, origin, target, message);
 #else
 		(void)plugin;
 #endif
-	});
+	}));
 }
 
 void ServerService::onMode(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string arg)
@@ -271,19 +271,19 @@ void ServerService::onMode(std::shared_ptr<Server> server, std::string origin, s
 
 	json << "{"
 	     << "\"event\":\"Mode\","
-	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"server\":\"" << server->info().name << "\","
 	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
 	     << "\"mode\":\"" << JsonValue::escape(mode) << "\","
-	     << "\"argument\":\"" << JsonValue::escape(argument) << "\""
+	     << "\"argument\":\"" << JsonValue::escape(arg) << "\""
 	     << "}";
 
 	m_onEvent(ServerEvent("onMode", json.str(), server, origin, channel, [=] (Plugin &plugin) {
 #if defined(WITH_JS)
-		plugin.onMode(server, origin, channel, mode, argument);
+		plugin.onMode(server, origin, channel, mode, arg);
 #else
 		(void)plugin;
 #endif
-	});
+	}));
 }
 
 void ServerService::onNick(std::shared_ptr<Server> server, std::string origin, std::string nickname)
@@ -295,18 +295,18 @@ void ServerService::onNick(std::shared_ptr<Server> server, std::string origin, s
 
 	json << "{"
 	     << "\"event\":\"onNick\","
-	     << "\"server\":\"" << m_server->info().name << "\","
-	     << "\"old\":\"" << oldnickname << "\","
-	     << "\"new\":\"" << newnickname << "\""
+	     << "\"server\":\"" << server->info().name << "\","
+	     << "\"old\":\"" << origin << "\","
+	     << "\"new\":\"" << nickname << "\""
 	     << "}";
 
 	m_onEvent(ServerEvent("onNick", json.str(), server, origin, "", [=] (Plugin &plugin) {
 #if defined(WITH_JS)
-		plugin.onNick(server, oldnickname, newnickname);
+		plugin.onNick(server, origin, nickname);
 #else
 		(void)plugin;
 #endif
-	});
+	}));
 }
 
 void ServerService::onNotice(std::shared_ptr<Server> server, std::string origin, std::string message)
@@ -318,18 +318,18 @@ void ServerService::onNotice(std::shared_ptr<Server> server, std::string origin,
 
 	json << "{"
 	     << "\"event\":\"onNotice\","
-	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"server\":\"" << server->info().name << "\","
 	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
-	     << "\"notice\":\"" << JsonValue::escape(notice) << "\""
+	     << "\"notice\":\"" << JsonValue::escape(message) << "\""
 	     << "}";
 
 	m_onEvent(ServerEvent("onNotice", json.str(), server, origin, /* channel */ "", [=] (Plugin &plugin) {
 #if defined(WITH_JS)
-		plugin.onNotice(server, origin, notice);
+		plugin.onNotice(server, origin, message);
 #else
 		(void)plugin;
 #endif
-	});
+	}));
 }
 
 void ServerService::onPart(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string reason)
@@ -341,7 +341,7 @@ void ServerService::onPart(std::shared_ptr<Server> server, std::string origin, s
 
 	json << "{"
 	     << "\"event\":\"Part\","
-	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"server\":\"" << server->info().name << "\","
 	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
 	     << "\"channel\":\"" << JsonValue::escape(channel) << "\","
 	     << "\"reason\":\"" << JsonValue::escape(reason) << "\""
@@ -353,10 +353,10 @@ void ServerService::onPart(std::shared_ptr<Server> server, std::string origin, s
 #else
 		(void)plugin;
 #endif
-	});
+	}));
 }
 
-void ServerService::onQuery(std::shared_ptr<Server>, std::string, std::string)
+void ServerService::onQuery(std::shared_ptr<Server> server, std::string origin, std::string message)
 {
 	Logger::debug() << "server " << server->info().name << ": onQuery: "
 			<< "origin=" << origin << ", message=" << message << std::endl;
@@ -373,7 +373,7 @@ void ServerService::onTopic(std::shared_ptr<Server> server, std::string origin, 
 
 	json << "{"
 	     << "\"event\":\"Topic\""
-	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"server\":\"" << server->info().name << "\","
 	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
 	     << "\"channel\":\"" << JsonValue::escape(channel) << "\","
 	     << "\"topic\":\"" << JsonValue::escape(topic) << "\""
@@ -385,7 +385,7 @@ void ServerService::onTopic(std::shared_ptr<Server> server, std::string origin, 
 #else
 		(void)plugin;
 #endif
-	});
+	}));
 }
 
 void ServerService::onUserMode(std::shared_ptr<Server> server, std::string origin, std::string mode)
@@ -397,18 +397,18 @@ void ServerService::onUserMode(std::shared_ptr<Server> server, std::string origi
 
 	json << "{"
 	     << "\"event\":\"UserMode\","
-	     << "\"server\":\"" << m_server->info().name << "\","
+	     << "\"server\":\"" << server->info().name << "\","
 	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
 	     << "\"mode\":\"" << JsonValue::escape(mode) << "\""
 	     << "}";
 
-	m_onEvent(ServerEvent("onUserMode", server, origin, "", "", [=] (Plugin &plugin) {
+	m_onEvent(ServerEvent("onUserMode", json.str(), server, origin, "", [=] (Plugin &plugin) {
 #if defined(WITH_JS)
 		plugin.onUserMode(server, origin, mode);
 #else
 		(void)plugin;
 #endif
-	});
+	}));
 }
 
 ServerService::ServerService()

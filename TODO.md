@@ -4,5 +4,5 @@
 - Add a better irccd_create_test function
 - Convert documentation
 - Test if server/identity names are valid
-- Try to unify TransportCommand to one class using a std::function
-- Do the same for ServerEvent, ServerCommand
+- Unify Server::setOn* on a unique setOnEvent function
+- Get rid of irccd global variable

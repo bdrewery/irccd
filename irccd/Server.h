@@ -34,7 +34,6 @@
 
 #include "Identity.h"
 #include "ServerState.h"
-#include "ServerCommand.h"
 
 #include "serverstate/Connecting.h"
 #include "serverstate/Dead.h"
@@ -117,6 +116,14 @@ public:
 	int recocurrent{1};		//!< number of tries tested
 	bool autorejoin{false};		//!< auto rejoin after a kick?
 };
+
+/**
+ * Deferred command to send to the server.
+ *
+ * If the command returns true, it has been correctly buffered for outgoing
+ * and removed from the queue.
+ */
+using ServerCommand = std::function<bool ()>;
 
 /**
  * @class Server
@@ -411,7 +418,7 @@ private:
 	using Session = std::unique_ptr<irc_session_t, void (*)(irc_session_t *)>;
 	using State = std::unique_ptr<ServerState>;
 	using Mutex = std::mutex;
-	using Queue = std::queue<std::unique_ptr<ServerCommand>>;
+	using Queue = std::queue<ServerCommand>;
 
 private:
 	ServerInfo m_info;
@@ -482,12 +489,11 @@ private:
 	/*
 	 * Add a command safely
 	 */
-	template <typename Command, typename... Args>
-	void addCommand(Args&&... args)
+	void addCommand(ServerCommand command)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
-		m_queue.push(std::make_unique<Command>(std::forward<Args>(args)...));
+		m_queue.push(std::move(command));
 	}
 
 public:
@@ -839,9 +845,11 @@ public:
 	 * @param message message notice
 	 * @note Thread-safe
 	 */
-	inline void cnotice(std::string channel, std::string message)
+	inline void cnotice(std::string channel, std::string message) noexcept
 	{
-		//addCommand<command::ChannelNotice>(*this, std::move(channel), std::move(message));
+		addCommand([=] () {
+			return irc_cmd_notice(this->m_session.get(), channel.c_str(), message.c_str()) == 0;
+		});
 	}
 
 	/**
@@ -851,9 +859,11 @@ public:
 	 * @param channel the channel
 	 * @note Thread-safe
 	 */
-	inline void invite(std::string target, std::string channel)
+	inline void invite(std::string target, std::string channel) noexcept
 	{
-		//addCommand<command::Invite>(*this, std::move(target), std::move(channel));
+		addCommand([=] () {
+			return irc_cmd_invite(this->m_session.get(), target.c_str(), channel.c_str()) == 0;
+		});
 	}
 
 	/**
@@ -863,9 +873,13 @@ public:
 	 * @param password the optional password
 	 * @note Thread-safe
 	 */
-	inline void join(std::string channel, std::string password = "")
+	inline void join(std::string channel, std::string password = "") noexcept
 	{
-		//addCommand<command::Join>(*this, std::move(channel), std::move(password));
+		addCommand([=] () {
+			const char *ptr = password.empty() ? nullptr : password.c_str();
+	
+			return irc_cmd_join(this->m_session.get(), channel.c_str(), ptr) == 0;
+		});
 	}
 
 	/**
@@ -877,9 +891,11 @@ public:
 	 * @param reason the optional reason
 	 * @note Thread-safe
 	 */
-	inline void kick(std::string target, std::string channel, std::string reason = "")
+	inline void kick(std::string target, std::string channel, std::string reason = "") noexcept
 	{
-		//addCommand<command::Kick>(*this, std::move(target), std::move(channel), std::move(reason));
+		addCommand([=] () {
+			return irc_cmd_kick(this->m_session.get(), target.c_str(), channel.c_str(), reason.c_str()) == 0;
+		});
 	}
 
 	/**
@@ -892,7 +908,23 @@ public:
 	 */
 	inline void me(std::string target, std::string message)
 	{
-		//addCommand<command::Me>(*this, std::move(target), std::move(message));
+		addCommand([=] () {
+			return irc_cmd_me(m_session.get(), target.c_str(), message.c_str()) == 0;
+		});
+	}
+
+	/**
+	 * Send a message to the specified target or channel.
+	 *
+	 * @param target the target
+	 * @param message the message
+	 * @note Thread-safe
+	 */
+	inline void message(std::string target, std::string message)
+	{
+		addCommand([=] () {
+			return irc_cmd_msg(m_session.get(), target.c_str(), message.c_str()) == 0;
+		});
 	}
 
 	/**
@@ -904,7 +936,9 @@ public:
 	 */
 	inline void mode(std::string channel, std::string mode)
 	{
-		//addCommand<command::Mode>(*this, std::move(channel), std::move(mode));
+		addCommand([=] () {
+			return irc_cmd_channel_mode(m_session.get(), channel.c_str(), mode.c_str()) == 0;
+		});
 	}
 
 	/**
@@ -915,7 +949,9 @@ public:
 	 */
 	inline void names(std::string channel)
 	{
-		//addCommand<command::Names>(*this, std::move(channel));
+		addCommand([=] () {
+			return irc_cmd_names(m_session.get(), channel.c_str()) == 0;
+		});
 	}
 
 	/**
@@ -926,7 +962,9 @@ public:
 	 */
 	inline void nick(std::string newnick)
 	{
-		//addCommand<command::Nick>(*this, std::move(newnick));
+		addCommand([=] () {
+			return irc_cmd_nick(m_session.get(), newnick.c_str()) == 0;
+		});
 	}
 
 	/**
@@ -938,7 +976,9 @@ public:
 	 */
 	inline void notice(std::string target, std::string message)
 	{
-		//addCommand<command::Notice>(*this, std::move(target), std::move(message));
+		addCommand([=] () {
+			return irc_cmd_notice(m_session.get(), target.c_str(), message.c_str()) == 0;
+		});
 	}
 
 	/**
@@ -951,21 +991,11 @@ public:
 	 * @param reason the optional reason
 	 * @note Thread-safe
 	 */
-	inline void part(std::string channel, std::string reason = "")
+	inline void part(std::string channel, std::string /*reason = ""*/)
 	{
-		//addCommand<command::Part>(*this, std::move(channel), std::move(reason));
-	}
-
-	/**
-	 * Send a message to the specified target or channel.
-	 *
-	 * @param target the target
-	 * @param message the message
-	 * @note Thread-safe
-	 */
-	inline void message(std::string target, std::string message)
-	{
-		//addCommand<command::Message>(*this, std::move(target), std::move(message));
+		addCommand([=] () {
+			return irc_cmd_part(m_session.get(), channel.c_str()) == 0;
+		});
 	}
 
 	/**
@@ -978,7 +1008,9 @@ public:
 	 */
 	inline void send(std::string raw)
 	{
-		//addCommand<command::Send>(*this, std::move(raw));
+		addCommand([=] () {
+			return irc_send_raw(m_session.get(), raw.c_str()) == 0;
+		});
 	}
 
 	/**
@@ -990,7 +1022,9 @@ public:
 	 */
 	inline void topic(std::string channel, std::string topic)
 	{
-		//addCommand<command::Topic>(*this, std::move(channel), std::move(topic));
+		addCommand([=] () {
+			return irc_cmd_topic(m_session.get(), channel.c_str(), topic.c_str()) == 0;
+		});
 	}
 
 	/**
@@ -1001,7 +1035,9 @@ public:
 	 */
 	inline void umode(std::string mode)
 	{
-		//addCommand<command::UserMode>(*this, std::move(mode));
+		addCommand([=] () {
+			return irc_cmd_user_mode(m_session.get(), mode.c_str()) == 0;
+		});
 	}
 
 	/**
@@ -1012,7 +1048,9 @@ public:
 	 */
 	inline void whois(std::string target)
 	{
-		//addCommand<command::Whois>(*this, std::move(target));
+		addCommand([=] () {
+			return irc_cmd_whois(this->m_session.get(), target.c_str()) == 0;
+		});
 	}
 };
 

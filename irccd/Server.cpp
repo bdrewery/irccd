@@ -216,7 +216,7 @@ void Server::flush() noexcept
 	bool done = false;
 
 	while (!m_queue.empty() && !done) {
-		if (m_queue.front()->call()) {
+		if (m_queue.front()()) {
 			m_queue.pop();
 		} else {
 			done = true;

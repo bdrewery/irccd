@@ -69,6 +69,8 @@ private:
 	std::map<Socket, std::unique_ptr<TransportAbstract>> m_transports;
 	std::map<Socket, std::shared_ptr<TransportClientAbstract>> m_clients;
 
+	// TODO: rename all commands to handle<Name>().
+
 	/*
 	 * Send a channel notice
 	 * --------------------------------------------------------
@@ -82,7 +84,7 @@ private:
 	 *   "message": "the message"
 	 * }
 	 */
-	void cnotice(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleChannelNotice(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Connect to a server
@@ -104,7 +106,7 @@ private:
 	 * Responses:
 	 *   - Error if a server with that name already exists
 	 */
-	void connect(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleConnect(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Disconnect a server
@@ -120,7 +122,7 @@ private:
 	 * Responses:
 	 *   - Error if the server does not exist
 	 */
-	void disconnect(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleDisconnect(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Invite someone
@@ -135,7 +137,7 @@ private:
 	 *   "channel": "the channel"
 	 * }
 	 */
-	void invite(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleInvite(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Join a channel
@@ -150,7 +152,7 @@ private:
 	 *   "password": "the password"		(Optional)
 	 * }
 	 */
-	void join(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleJoin(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Kick someone from a channel
@@ -166,7 +168,7 @@ private:
 	 *   "reason": "the optional reason"	(Optional)
 	 * }
 	 */
-	void kick(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleKick(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Load a plugin.
@@ -191,7 +193,7 @@ private:
 	 * Responses:
 	 *   - Error if the plugin failed to load or was not found
 	 */
-	void load(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleLoad(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Send a CTCP Action
@@ -206,7 +208,22 @@ private:
 	 *   "message": "the message"		(Optional)
 	 * }
 	 */
-	void me(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleMe(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+
+	/*
+	 * Say something to a target
+	 * --------------------------------------------------------
+	 *
+	 * Send a message to a target which can be a nickname or a channel.
+	 *
+	 * {
+	 *   "command": "say",
+	 *   "server: "the server name",
+	 *   "target": "channel or nickname",
+	 *   "message": "The message"
+	 * }
+	 */
+	void handleMessage(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Change the channel mode
@@ -221,7 +238,7 @@ private:
 	 *   "mode": "mode and its arguments"
 	 * }
 	 */
-	void mode(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleMode(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Change the bot nickname
@@ -235,7 +252,7 @@ private:
 	 *   "nickname": "the new nickname"
 	 * }
 	 */
-	void nick(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleNick(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Send a notice
@@ -250,7 +267,7 @@ private:
 	 *   "message": "the message"
 	 * }
 	 */
-	void notice(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleNotice(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Part from a channel
@@ -266,7 +283,7 @@ private:
 	 *   "reason": "the reason"		(Optional)
 	 * }
 	 */
-	void part(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handlePart(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Force reconnection of a server
@@ -285,7 +302,7 @@ private:
 	 * Responses:
 	 *   - Error if the server does not exist
 	 */
-	void reconnect(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleReconnect(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Reload a plugin
@@ -302,22 +319,7 @@ private:
 	 * Responses:
 	 *   - Error if the plugin does not exists
 	 */
-	void reload(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
-
-	/*
-	 * Say something to a target
-	 * --------------------------------------------------------
-	 *
-	 * Send a message to a target which can be a nickname or a channel.
-	 *
-	 * {
-	 *   "command": "say",
-	 *   "server: "the server name",
-	 *   "target": "channel or nickname",
-	 *   "message": "The message"
-	 * }
-	 */
-	void say(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleReload(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Change a channel topic
@@ -332,7 +334,7 @@ private:
 	 *   "topic": "the new topic"
 	 * }
 	 */
-	void topic(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleTopic(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Set the irccd user mode
@@ -346,7 +348,7 @@ private:
 	 *   "mode": "the mode"
 	 * }
 	 */
-	void umode(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleUserMode(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
 	/*
 	 * Unload a plugin
@@ -363,16 +365,18 @@ private:
 	 * Responses:
 	 *   - Error if the plugin does not exists
 	 */
-	void unload(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
+	void handleUnload(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &);
 
-	// transport slot
+	/* transport slots */
 	void onMessage(const std::shared_ptr<TransportClientAbstract> &, const std::string &);
 	void onWrite();
 	void onDie(const std::shared_ptr<TransportClientAbstract> &);
 
-	// private helpers
+	/* private Json helpers */
 	JsonValue want(const JsonObject &, const std::string &name) const;
 	JsonValue optional(const JsonObject &, const std::string &name, const JsonValue &def) const;
+
+	/* private service helpers */
 	void accept(const Socket &s);
 	void process(const Socket &s, int direction);
 	bool isTransport(const Socket &s) const noexcept;

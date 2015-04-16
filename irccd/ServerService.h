@@ -35,7 +35,7 @@ class ServerEvent;
 
 class ServerService : public Service {
 private:
-	std::function<void (std::unique_ptr<ServerEvent>)> m_onEvent;
+	std::function<void (ServerEvent)> m_onEvent;
 	std::unordered_map<std::string, std::shared_ptr<Server>> m_servers;
 
 protected:
@@ -70,7 +70,7 @@ public:
 	 * @param func the function
 	 * @pre the thread must not be started
 	 */
-	inline void setOnEvent(std::function<void (std::unique_ptr<ServerEvent>)> func) noexcept
+	inline void setOnEvent(std::function<void (ServerEvent)> func) noexcept
 	{
 		assert(!isRunning());
 

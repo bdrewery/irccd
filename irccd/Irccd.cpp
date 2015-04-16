@@ -34,7 +34,7 @@ Irccd::Irccd()
 	/*
 	 * This signal is called from the ServerManager.
 	 */
-	m_serverService.setOnEvent([this] (std::unique_ptr<ServerEvent> event) {
+	m_serverService.setOnEvent([this] (ServerEvent event) {
 		serverAddEvent(std::move(event));
 	});
 	m_transportService.setOnEvent([this] (TransportCommand command) {
@@ -133,11 +133,11 @@ void Irccd::run()
 		/* Call server events */
 		while (!m_serverEvents.empty()) {
 			// Broadcast
-			m_transportService.broadcast(m_serverEvents.front()->toJson());
+			m_transportService.broadcast(m_serverEvents.front().toJson());
 
 #if defined(WITH_JS)
 			for (auto &plugin : m_plugins) {
-				m_serverEvents.front()->call(*plugin.second);
+				m_serverEvents.front().call(*plugin.second);
 			}
 #endif
 			m_serverEvents.pop();

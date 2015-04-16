@@ -29,8 +29,7 @@
 #include <string>
 #include <vector>
 
-#include "js/Js.h"
-
+#include "Js.h"
 #include "Timer.h"
 
 namespace irccd {

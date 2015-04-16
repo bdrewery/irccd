@@ -33,8 +33,8 @@
 #include <Logger.h>
 
 #if defined(WITH_JS)
-#  include "js/Plugin.h"
-#  include "js/TimerEvent.h"
+#  include "Plugin.h"
+#  include "TimerEvent.h"
 #endif
 
 #include "Identity.h"
@@ -55,7 +55,7 @@ private:
 
 	/* Events */
 	std::queue<TransportCommand> m_transportCommands;
-	std::queue<std::unique_ptr<ServerEvent>> m_serverEvents;
+	std::queue<ServerEvent> m_serverEvents;
 
 	/* Optional JavaScript plugins */
 #if defined(WITH_JS)
@@ -263,7 +263,7 @@ public:
 	}
 #endif
 
-	inline void serverAddEvent(std::unique_ptr<ServerEvent> event)
+	inline void serverAddEvent(ServerEvent event)
 	{
 		{
 			std::lock_guard<std::mutex> lock(m_mutex);

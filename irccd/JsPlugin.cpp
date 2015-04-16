@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#if 0
+
 #include <common/Logger.h>
 #include <common/Util.h>
 
@@ -164,3 +166,5 @@ int luaopen_plugin(lua_State *L)
 }
 
 } // !irccd
+
+#endif

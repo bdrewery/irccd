@@ -32,7 +32,7 @@
 #include <IrccdConfig.h>
 
 #if defined(WITH_JS)
-#  include <js/Plugin.h>
+#  include <Plugin.h>
 #endif
 
 #include "Server.h"
@@ -54,11 +54,6 @@ enum class MessageType {
  * Pair of message and its category
  */
 using MessagePack = std::pair<std::string, MessageType>;
-
-class ServerEventInfo {
-public:
-
-};
 
 /**
  * @class Event
@@ -116,8 +111,13 @@ public:
 	 * @param p the current plugin
 	 * @return the event name
 	 */
-	inline const std::string &name(Plugin &p) const noexcept
+	inline const std::string &name(Plugin &) const noexcept
 	{
+		/*
+		 * TODO:
+		 *
+		 * Special case for onMessage and onQuery
+		 */
 		return m_name;
 	}
 
