@@ -18,8 +18,6 @@
 
 project(irccd)
 
-include(serverstate/ServerState.cmake)
-
 set(
 	SOURCES
 	Identity.h
@@ -32,6 +30,7 @@ set(
 	ServerEvent.h
 	ServerService.cpp
 	ServerService.h
+	ServerState.cpp
 	ServerState.h
 	Service.cpp
 	Service.h
@@ -76,10 +75,6 @@ irccd_define_executable(
 	INSTALL
 	SOURCES
 		${SOURCES}
-		${SERVER_COMMAND_SOURCES}
-		${SERVER_EVENT_SOURCES}
-		${SERVER_STATE_SOURCES}
-		${TRANSPORT_COMMAND_SOURCES}
 	INCLUDES
 		${irccd_SOURCE_DIR}
 	LIBRARIES

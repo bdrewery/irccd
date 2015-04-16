@@ -1,5 +1,5 @@
 /*
- * Connecting.cpp -- server is connecting
+ * ServerState.cpp -- server current state
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,6 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cassert>
+
+#include <IrccdConfig.h>
+
 #if !defined(_WIN32)
 #  include <sys/types.h>
 #  include <netinet/in.h>
@@ -23,26 +27,12 @@
 #  include <resolv.h>
 #endif
 
-#include <Logger.h>
-
-#include "Connecting.h"
-#include "Disconnected.h"
+#include "ServerState.h"
 #include "Server.h"
 
 namespace irccd {
 
-namespace state {
-
-Connecting::Connecting()
-{
-	Logger::debug() << "server: switching to state \"Connecting\"" << std::endl;
-}
-
-Connecting::~Connecting()
-{
-}
-
-bool Connecting::connect(Server &server)
+bool ServerState::connect(Server &server)
 {
 	const ServerInfo &info = server.info();
 	const Identity &identity = server.identity();
@@ -70,7 +60,25 @@ bool Connecting::connect(Server &server)
 	return code == 0;
 }
 
-void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, int &maxfd)
+void ServerState::prepareConnected(Server &server, fd_set &setinput, fd_set &setoutput, int &maxfd)
+{
+	if (!irc_is_connected(server.session())) {
+		const ServerSettings &settings = server.settings();
+
+		Logger::warning() << "server " << server.info().name << ": disconnected" << std::endl;
+
+		if (settings.recotimeout > 0) {
+			Logger::warning() << "server " << server.info().name << ": retrying in "
+					  << settings.recotimeout << " seconds" << std::endl;
+		}
+
+		server.next(ServerState::Disconnected);
+	} else {
+		irc_add_select_descriptors(server.session(), &setinput, &setoutput, &maxfd);
+	}
+}
+
+void ServerState::prepareConnecting(Server &server, fd_set &setinput, fd_set &setoutput, int &maxfd)
 {
 	/*
 	 * The connect function will either fail if the hostname wasn't resolved
@@ -93,7 +101,7 @@ void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, in
 
 		if (m_timer.elapsed() > static_cast<unsigned>(settings.recotimeout * 1000)) {
 			Logger::warning() << "server " << info.name << ": timeout while connecting" << std::endl;
-			server.next<state::Disconnected>();
+			server.next(ServerState::Disconnected);
 		} else if (!irc_is_connected(server.session())) {
 			Logger::warning() << "server " << info.name << ": error while connecting: "
 					  << irc_strerror(irc_errno(server.session())) << std::endl;
@@ -102,7 +110,7 @@ void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, in
 				Logger::warning() << "server " << info.name << ": retrying in " << settings.recotimeout << " seconds" << std::endl;
 			}
 
-			server.next<state::Disconnected>();
+			server.next(ServerState::Disconnected);
 		} else {
 			irc_add_select_descriptors(server.session(), &setinput, &setoutput, &maxfd);
 		}
@@ -121,18 +129,65 @@ void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, in
 		if (!connect(server)) {
 			Logger::warning() << "server " << info.name << ": disconnected while connecting: "
 					  << irc_strerror(irc_errno(server.session())) << std::endl;
-			server.next<state::Disconnected>();
+			server.next(ServerState::Disconnected);
 		} else {
 			m_started = true;
 		}
 	}
 }
 
-int Connecting::state() const noexcept
+void ServerState::prepareDead(Server &, fd_set &, fd_set &, int &)
 {
-	return ServerState::Connecting;
+	// nothing to do, the ServerManager will remove the server.
 }
 
-} // !state
+void ServerState::prepareDisconnected(Server &server, fd_set &, fd_set &, int &)
+{
+	const ServerInfo &info = server.info();
+	ServerSettings &settings = server.settings();
+
+	// if ServerSettings::recotries it set to -1, reconnection is completely disabled.
+	if (settings.recotries < 0) {
+		Logger::warning() << "server " << info.name << ": reconnection disabled, skipping" << std::endl;
+		server.next(ServerState::Dead);
+	} else if ((settings.recocurrent + 1) > settings.recotries) {
+		Logger::warning() << "server " << info.name << ": giving up" << std::endl;
+		server.next(ServerState::Dead);
+	} else {
+		if (m_timer.elapsed() > static_cast<unsigned>(settings.recotimeout * 1000)) {
+			irc_disconnect(server.session());
+
+			settings.recocurrent ++;
+			server.next(ServerState::Connecting);
+		}
+	}
+}
+
+ServerState::ServerState(Type type)
+	: m_type(type)
+{
+	assert(static_cast<int>(m_type) >= static_cast<int>(ServerState::Undefined));
+	assert(static_cast<int>(m_type) <= static_cast<int>(ServerState::Dead));
+}
+
+void ServerState::prepare(Server &server, fd_set &setinput, fd_set &setoutput, int &maxfd)
+{
+	switch (m_type) {
+	case Connecting:
+		prepareConnecting(server, setinput, setoutput, maxfd);
+		break;
+	case Connected:
+		prepareConnected(server, setinput, setoutput, maxfd);
+		break;
+	case Disconnected:
+		prepareDisconnected(server, setinput, setoutput, maxfd);
+		break;
+	case Dead:
+		prepareDead(server, setinput, setoutput, maxfd);
+		break;
+	default:
+		break;
+	}
+}
 
 } // !irccd

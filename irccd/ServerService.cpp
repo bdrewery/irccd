@@ -62,7 +62,7 @@ void ServerService::run()
 
 			// 2. Remove dead servers
 			for (auto it = m_servers.begin(); it != m_servers.end(); ) {
-				if (it->second->state() == ServerState::Dead) {
+				if (it->second->type() == ServerState::Dead) {
 					Logger::debug() << "server " << it->second->info().name << ": destroyed" << std::endl;
 					it = m_servers.erase(it);
 				} else {

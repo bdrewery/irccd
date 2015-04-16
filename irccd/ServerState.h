@@ -19,7 +19,10 @@
 #ifndef _IRCCD_SERVER_STATE_H_
 #define _IRCCD_SERVER_STATE_H_
 
-#if defined(_WIN32)
+#include <ElapsedTimer.h>
+#include <IrccdConfig.h>
+
+#if defined(IRCCD_SYSTEM_WINDOWS)
 #  include <Winsock2.h>
 #else
 #  include <sys/types.h>
@@ -51,6 +54,9 @@ class Server;
  * +---------------+              |
  * | Connected     |------------->|
  * +---------------+
+ *
+ * The states are very basic and small so we implement them in a functional
+ * basis using a type and a switch statement.
  *
  * The Connecting state
  * --------------------
@@ -86,17 +92,39 @@ class Server;
  */
 class ServerState {
 public:
-	enum {
+	enum Type {
+		Undefined,
 		Connecting,
 		Connected,
 		Disconnected,
 		Dead
 	};
 
-	ServerState() = default;
-	virtual ~ServerState() = default;
-	virtual void prepare(Server &, fd_set &setinput, fd_set &setoutput, int &maxfd) = 0;
-	virtual int state() const noexcept = 0;
+private:
+	Type m_type;
+
+	/* For ServerState::Connecting */
+	bool m_started{false};
+	ElapsedTimer m_timer;
+
+	/* Private helpers */
+	bool connect(Server &server);
+
+	/* Different preparation */
+	void prepareConnected(Server &, fd_set &setinput, fd_set &setoutput, int &maxfd);
+	void prepareConnecting(Server &, fd_set &setinput, fd_set &setoutput, int &maxfd);
+	void prepareDead(Server &, fd_set &setinput, fd_set &setoutput, int &maxfd);
+	void prepareDisconnected(Server &, fd_set &setinput, fd_set &setoutput, int &maxfd);
+
+public:
+	ServerState(Type type);
+
+	void prepare(Server &server, fd_set &setinput, fd_set &setoutput, int &maxfd);
+
+	inline Type type() const noexcept
+	{
+		return m_type;
+	}
 };
 
 } // !irccd

@@ -31,12 +31,10 @@
 #include <libircclient.h>
 
 #include <IrccdConfig.h>
+#include <Logger.h>
 
 #include "Identity.h"
 #include "ServerState.h"
-
-#include "serverstate/Connecting.h"
-#include "serverstate/Dead.h"
 
 namespace irccd {
 
@@ -416,7 +414,6 @@ public:
 
 private:
 	using Session = std::unique_ptr<irc_session_t, void (*)(irc_session_t *)>;
-	using State = std::unique_ptr<ServerState>;
 	using Mutex = std::mutex;
 	using Queue = std::queue<ServerCommand>;
 
@@ -425,8 +422,8 @@ private:
 	ServerSettings m_settings;
 	Identity m_identity;
 	Session m_session;
-	State m_state;
-	State m_next;
+	ServerState m_state;
+	ServerState m_next;
 	Queue m_queue;
 	mutable Mutex m_mutex;
 
@@ -518,12 +515,12 @@ public:
 	 * If the server is installed into the ServerManager, it is called
 	 * automatically.
 	 *
+	 * @param type the new state type
 	 * @warning Not thread-safe
 	 */
-	template <typename State, typename... Args>
-	inline void next(Args&&... args)
+	inline void next(ServerState::Type type)
 	{
-		m_next = std::make_unique<State>(std::forward<Args>(args)...);
+		m_next = std::move(ServerState(type));
 	}
 
 	/**
@@ -536,8 +533,28 @@ public:
 	 */
 	inline void update() noexcept
 	{
-		if (m_next) {
+		if (m_next.type() != ServerState::Undefined) {
+			Logger::debug() << "server: switching to state: ";
+
+			switch (m_next.type()) {
+			case ServerState::Connecting:
+				Logger::debug() << "\"Connecting\"" << std::endl;
+				break;
+			case ServerState::Connected:
+				Logger::debug() << "\"Connected\"" << std::endl;
+				break;
+			case ServerState::Disconnected:
+				Logger::debug() << "\"Disconnected\"" << std::endl;
+				break;
+			case ServerState::Dead:
+				Logger::debug() << "\"Dead\"" << std::endl;
+				break;
+			default:
+				break;
+			}
+
 			m_state = std::move(m_next);
+			m_next = ServerState::Undefined;
 		}
 	}
 
@@ -550,10 +567,12 @@ public:
 	 */
 	inline void disconnect() noexcept
 	{
+		using namespace std::placeholders;
+
 		std::lock_guard<std::mutex> lock(m_mutex);
 
 		irc_disconnect(m_session.get());
-		next<state::Dead>();
+		next(ServerState::Type::Dead);
 	}
 
 	/**
@@ -568,7 +587,7 @@ public:
 		std::lock_guard<std::mutex> lock(m_mutex);
 
 		irc_disconnect(m_session.get());
-		next<state::Connecting>();
+		next(ServerState::Type::Connecting);
 	}
 
 	/**
@@ -592,7 +611,7 @@ public:
 	 */
 	inline void prepare(fd_set &setinput, fd_set &setoutput, int &maxfd) noexcept
 	{
-		m_state->prepare(*this, setinput, setoutput, maxfd);
+		m_state.prepare(*this, setinput, setoutput, maxfd);
 	}
 
 	/**
@@ -680,11 +699,11 @@ public:
 	 *
 	 * @note Thread-safe but the state may change just after the call
 	 */
-	inline int state() const noexcept
+	inline ServerState::Type type() const noexcept
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
-		return m_state->state();
+		return m_state.type();
 	}
 
 	/**
@@ -877,7 +896,7 @@ public:
 	{
 		addCommand([=] () {
 			const char *ptr = password.empty() ? nullptr : password.c_str();
-	
+
 			return irc_cmd_join(this->m_session.get(), channel.c_str(), ptr) == 0;
 		});
 	}

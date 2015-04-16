@@ -23,8 +23,6 @@
 #include <Logger.h>
 
 #include "Server.h"
-#include "serverstate/Connected.h"
-#include "serverstate/Connecting.h"
 
 namespace irccd {
 
@@ -32,9 +30,9 @@ void Server::handleConnect(const char *, const char **) noexcept
 {
 	// Reset the number of tried reconnection.
 	m_settings.recocurrent = 0;
-	m_next = std::make_unique<state::Connected>();
 
 	// Don't forget to notify.
+	next(ServerState::Connected);
 	wrapHandler(m_onConnect);
 
 	// Auto join listed channels
@@ -133,7 +131,8 @@ Server::Server(ServerInfo info, Identity identity, ServerSettings settings)
 	, m_settings(std::move(settings))
 	, m_identity(std::move(identity))
 	, m_session(nullptr, nullptr)
-	, m_state(std::make_unique<state::Connecting>())
+	, m_state(ServerState::Connecting)
+	, m_next(ServerState::Undefined)
 {
 	irc_callbacks_t callbacks;
 

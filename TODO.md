@@ -4,5 +4,4 @@
 - Add a better irccd_create_test function
 - Convert documentation
 - Test if server/identity names are valid
-- Unify Server::setOn* on a unique setOnEvent function
 - Get rid of irccd global variable
