@@ -19,10 +19,14 @@
 #ifndef _IRCCD_TIMER_H_
 #define _IRCCD_TIMER_H_
 
+/**
+ * @file Timer.h
+ * @brief Provides interval based timers for JavaScript
+ */
+
 #include <atomic>
 #include <cassert>
 #include <condition_variable>
-#include <cstdint>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -58,7 +62,6 @@ class Timer final {
 private:
 	TimerType m_type;
 	int m_delay;
-	int m_reference;
 
 	std::function<void ()> m_onSignal;
 	std::function<void ()> m_onEnd;
@@ -79,7 +82,6 @@ public:
 	 *
 	 * @param type the timer type
 	 * @param delay the delay in milliseconds
-	 * @param reference the JS function reference
 	 * @post isRunning() returns false
 	 */
 	Timer(TimerType type, int delay);
@@ -88,17 +90,6 @@ public:
 	 * Destructor, closes the thread.
 	 */
 	~Timer();
-
-	/**
-	 * Set the reference.
-	 *
-	 * @param reference the JS function reference
-	 * @note Not thread-safe
-	 */
-	inline void setReference(int reference)
-	{
-		m_reference = reference;
-	}
 
 	/**
 	 * Set the onSignal event, called when the timer expires.
@@ -149,17 +140,6 @@ public:
 	 * @note Thread-safe
 	 */
 	void stop();
-
-	/**
-	 * Get the JavaScript reference.
-	 *
-	 * @return the reference
-	 * @note Thread-safe
-	 */
-	inline int reference() const noexcept
-	{
-		return m_reference;
-	}
 
 	/**
 	 * Tells if the timer has still a running thread.

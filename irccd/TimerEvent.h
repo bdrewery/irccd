@@ -19,6 +19,11 @@
 #ifndef _IRCCD_TIMER_EVENT_H_
 #define _IRCCD_TIMER_EVENT_H_
 
+/**
+ * @file TimerEvent.h
+ * @brief Timer event in the event queue
+ */
+
 #include <cstdint>
 #include <memory>
 
@@ -27,11 +32,19 @@
 
 namespace irccd {
 
+/**
+ * @enum TimerEventType
+ * @brief Type of event for this timer
+ */
 enum class TimerEventType {
 	Signal,
 	End
 };
 
+/**
+ * @class TimerEvent
+ * @brief Provide an event in the irccd main event loop
+ */
 class TimerEvent {
 private:
 	std::shared_ptr<Plugin> m_plugin;
@@ -39,25 +52,41 @@ private:
 	TimerEventType m_type;
 
 public:
+	/**
+	 * Construct a timer event.
+	 *
+	 * @param plugin which plugin
+	 * @param timer which timer
+	 * @param type which type of event
+	 */
 	TimerEvent(std::shared_ptr<Plugin> plugin,
 		   std::shared_ptr<Timer> timer,
 		   TimerEventType type = TimerEventType::Signal) noexcept;
 
+
+	/**
+	 * Get the associated plugin.
+	 *
+	 * @return the plugin
+	 */
 	inline const std::shared_ptr<Plugin> &plugin() const noexcept
 	{
 		return m_plugin;
 	}
 
-	inline const std::shared_ptr<Timer> &timer() const noexcept
-	{
-		return m_timer;
-	}
-
+	/**
+	 * Get the timer type.
+	 *
+	 * @return the type
+	 */
 	inline TimerEventType type() const noexcept
 	{
 		return m_type;
 	}
 
+	/**
+	 * Execute the timer event.
+	 */
 	void call() noexcept;
 };
 

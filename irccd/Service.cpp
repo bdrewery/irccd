@@ -138,6 +138,8 @@ void Service::stop()
 	 * If it fails, stop manually the thread, it will requires
 	 * to wait that the listener timeout.
 	 */
+	m_running = false;
+
 	try {
 		std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -148,7 +150,6 @@ void Service::stop()
 
 	/* Join the thread */
 	try {
-		m_running = false;
 		m_thread.join();
 	} catch (const std::exception &ex) {
 		Logger::debug() << "irccd: thread error: " << ex.what();

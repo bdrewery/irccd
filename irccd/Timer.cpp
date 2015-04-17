@@ -51,7 +51,6 @@ void Timer::run()
 Timer::Timer(TimerType type, int delay)
 	: m_type(type)
 	, m_delay(delay)
-	, m_reference(-1)
 {
 	assert(!m_running);
 }

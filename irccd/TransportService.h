@@ -69,8 +69,6 @@ private:
 	std::map<Socket, std::unique_ptr<TransportAbstract>> m_transports;
 	std::map<Socket, std::shared_ptr<TransportClientAbstract>> m_clients;
 
-	// TODO: rename all commands to handle<Name>().
-
 	/*
 	 * Send a channel notice
 	 * --------------------------------------------------------

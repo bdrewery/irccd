@@ -63,6 +63,11 @@ void TransportCommand::me(const std::string &server, const std::string &channel,
 	irccd->serverFind(server)->me(channel, message);
 }
 
+void TransportCommand::message(const std::string &server, const std::string &channel, const std::string &message)
+{
+	irccd->serverFind(server)->message(channel, message);
+}
+
 void TransportCommand::mode(const std::string &server, const std::string &channel, const std::string &mode)
 {
 	irccd->serverFind(server)->mode(channel, mode);

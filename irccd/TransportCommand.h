@@ -19,6 +19,11 @@
 #ifndef _IRCCD_TRANSPORT_COMMAND_H_
 #define _IRCCD_TRANSPORT_COMMAND_H_
 
+/**
+ * @file TransportCommand.h
+ * @brief Command from transport clients
+ */
+
 #include <functional>
 #include <memory>
 #include <string>
@@ -28,11 +33,21 @@ namespace irccd {
 class Irccd;
 class TransportClientAbstract;
 
+/**
+ * @class TransportCommand
+ * @brief Regroup all commands
+ *
+ * This class regroup all commands that are understood under the irccd transport
+ * protocol.
+ *
+ * It contains a std::function to avoid creating lots of classes since it is
+ * used to execute only one action.
+ */
 class TransportCommand {
 protected:
 	std::string m_ident;
 	std::shared_ptr<TransportClientAbstract> m_client;
-	std::function<void (TransportCommand &, Irccd &)> m_command;
+	std::function<void (Irccd &)> m_command;
 
 public:
 	void cnotice(const std::string &server, const std::string &channel, const std::string &message);
@@ -43,6 +58,7 @@ public:
 	void kick(const std::string &server, const std::string &target, const std::string &channel, const std::string &reason);
 	void load(const std::string &path, bool isrelative);
 	void me(const std::string &server, const std::string &channel, const std::string &message);
+	void message(const std::string &server, const std::string &channel, const std::string &message);
 	void mode(const std::string &server, const std::string &channel, const std::string &mode);
 	void nick(const std::string &server, const std::string &nickname);
 	void notice(const std::string &server, const std::string &target, const std::string &message);
@@ -53,18 +69,25 @@ public:
 	void unload(const std::string &plugin);
 	void umode(const std::string &server, const std::string &mode);
 
-	inline TransportCommand(std::string ident,
-				std::shared_ptr<TransportClientAbstract> client,
-				std::function<void (TransportCommand &, Irccd &)> command)
+	/**
+	 * Construct a command with the appropriate function to call.
+	 *
+	 * @param ident the transport command ident
+	 * @param client the client
+	 * @param func the member function to call (TransportCommand::cnotice, etc)
+	 * @param args the arguments to pass to the function
+	 */
+	template <typename Func, typename... Args>
+	inline TransportCommand(std::string ident, std::shared_ptr<TransportClientAbstract> client, Func func, Args&&... args)
 		: m_ident(std::move(ident))
 		, m_client(std::move(client))
-		, m_command(std::move(command))
+		, m_command(std::bind(func, this, std::forward<Args>(args)...))
 	{
 	}
 
 	inline void exec(Irccd &irccd)
 	{
-		m_command(*this, irccd);
+		m_command(irccd);
 	}
 
 	/**
