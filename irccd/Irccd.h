@@ -210,8 +210,11 @@ public:
 	{
 		pluginFind(name)->onReload();
 	}
-
 #endif
+
+	/* ------------------------------------------------
+	 * Transport management
+	 * ------------------------------------------------ */
 
 	template <typename T, typename... Args>
 	inline void transportAdd(Args&&... args)

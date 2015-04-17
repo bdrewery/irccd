@@ -5,3 +5,4 @@
 - Convert documentation
 - Test if server/identity names are valid
 - Get rid of irccd global variable
+- Rename slots "on*" to "handle"

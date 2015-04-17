@@ -91,10 +91,10 @@ void Plugin::timerAdd(std::shared_ptr<Timer> timer) noexcept
 	 * These signals are called from the Timer thread.
 	 */
 	timer->onSignal([this, timer] () {
-		m_onTimerSignal(std::move(timer));
+		m_onTimerSignal(timer);
 	});
 	timer->onEnd([this, timer] () {
-		m_onTimerEnd(std::move(timer));
+		m_onTimerEnd(timer);
 	});
 
 	m_timers.insert(std::move(timer));

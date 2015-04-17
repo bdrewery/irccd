@@ -24,9 +24,9 @@
  * @brief Irccd plugins
  */
 
-#include <unordered_map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "Js.h"
@@ -37,11 +37,20 @@ namespace irccd {
 class Server;
 class ServerWhois;
 
+/**
+ * @class PluginInfo
+ * @brief Plugin information
+ */
 class PluginInfo {
 public:
 	std::string name;
 	std::string path;
 };
+
+/**
+ * Configuration map extract from config file.
+ */
+using PluginConfig = std::unordered_map<std::string, std::string>;
 
 /**
  * @class Plugin
@@ -61,6 +70,7 @@ private:
 	std::function<void (std::shared_ptr<Timer>)> m_onTimerSignal;
 	std::function<void (std::shared_ptr<Timer>)> m_onTimerEnd;
 
+	/* Private helpers */
 	std::string global(const std::string &name) const;
 	void call(const char *name, int nargs = 0);
 
@@ -123,6 +133,11 @@ public:
 		m_timers.erase(timer);
 	}
 
+	/**
+	 * Access the Duktape context.
+	 *
+	 * @return the context
+	 */
 	inline DukContext &context() noexcept
 	{
 		return m_context;
