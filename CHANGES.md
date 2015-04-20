@@ -1,58 +1,58 @@
 IRC Client Daemon CHANGES
 =========================
 
-CURRENT (2.x.y)
----------------------------------------
+irccd current
+----------------------
 
-- Switch from Lua to JavaScript
+- Switch from Lua to JavaScript,
 - Add new irccd.util.convert,
 - Add onQueryCommand new callback,
-- Added more fields in Date:calendar,
+- Added more fields in Date.prototype.calendar,
 - Add option auto-rejoin to server,
 - Add uid and gid options,
 - Add rules system,
 - Add logger.debug,
 - Create brand new documentation with Pandoc,
 - Add new irccd.timer API,
-- UDP listeners and clients have been removed,
+- UDP listeners have been removed,
 - The history plugin has now better messages,
 - Irccd can now connect to IPv6 servers.
 
-1.1.5 February 14, 2015
----------------------------------------
+irccd 1.1.5 2015-02-14
+----------------------
 
 - Fix Mac OS X build,
 - Fix null constructed strings,
 - Fix general.foreground option not working,
 - Windows: Lua and OpenSSL are built as DLL and copied to installation.
 
-1.1.4 March 28, 2014
----------------------------------------
+irccd 1.1.4 2014-03-28
+----------------------
 
 - Fix Visual C++ redistributable installation.
 
-1.1.3 March 22, 2014
----------------------------------------
+irccd 1.1.3 2014-03-22
+----------------------
 
 - Fix default internet socket address,
 - Remove listener disconnection errors,
 - Updated Windows C++ 2013 redistributable.
 
-1.1.2 February 26, 2014
----------------------------------------
+irccd 1.1.2 2014-02-26
+----------------------
 
 - Fix the example in roulette documentation,
 - Fix command parsing for onCommand event.
 
-1.1.1 February 15, 2014
----------------------------------------
+irccd 1.1.1 2014-02-15
+----------------------
 
 - Fix fs.mkdir that didn't return an error,
 - Add missing optional mode parameter in fs.mkdir documentation,
 - Also add irccd.VERSION_PATCH.
 
-1.1 January 30, 2014
----------------------------------------
+irccd 1.1.0 2014-01-30
+----------------------
 
 - Added support for UDP sockets,
 - Added a plugin for authentication,
@@ -69,20 +69,20 @@ CURRENT (2.x.y)
 - Split irccd.util into irccd.fs and irccd.system,
 - Added support for LuaJIT.
 
-1.0.2 November 1, 2013
----------------------------------------
+irccd 1.0.2 2013-11-01
+----------------------
 
 - Errata, onMe event is not implemented.
 
-1.0.1 September 17, 2013
----------------------------------------
+irccd 1.0.1 2013-09-17
+----------------------
 
 - Fixed build without Lua,
 - Improved documentation a lot,
 - Improved NSIS installer,
 - Fixed basename() issue.
 
-1.0 September 13, 2013
----------------------------------------
+irccd 1.0.0 2013-09-13
+----------------------
 
 - Initial release.
