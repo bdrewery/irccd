@@ -22,6 +22,7 @@
 
 #include <Filesystem.h>
 #include <Logger.h>
+#include <Util.h>
 
 #include "Irccd.h"
 
@@ -52,14 +53,54 @@ Irccd::~Irccd()
 
 #if defined(WITH_JS)
 
-void Irccd::pluginLoad(const std::string &path)
+void Irccd::pluginLoad(std::string path)
 {
 	std::shared_ptr<Plugin> plugin;
+	std::string name;
 
 	if (Filesystem::isRelative(path)) {
-		// TODO: find plugin
+		name = path;
+
+		/*
+		 * Iterate over all plugin directories and try to load, we emit
+		 * a warning for all failures but do not break unless we have
+		 * found a plugin working.
+		 */
+		for (const std::string &dir : Util::pathsPlugins()) {
+			std::string fullpath = dir + Filesystem::Separator + path + ".js";
+
+			try {
+				Logger::info() << "plugin " << name << ": trying " << fullpath << std::endl;
+
+				plugin = std::make_shared<Plugin>(path, fullpath, m_pluginConf[name]);
+				break;
+			} catch (const std::exception &ex) {
+				Logger::info() << "plugin " << name << ": " << fullpath << ": " << ex.what() << std::endl;
+			}
+		}
 	} else {
-		plugin = std::make_shared<Plugin>("test", path);
+		/* Extract name from the path */
+		std::string::size_type first = path.rfind(Filesystem::Separator);
+		std::string::size_type last = path.rfind(".js");
+
+		if (first == std::string::npos || last == std::string::npos) {
+			throw std::invalid_argument("unable to extract plugin name");
+		}
+
+		name = path.substr(first, last);
+
+		Logger::info() << "plugin " << name << ": trying " << path << std::endl;
+
+		try {
+			plugin = std::make_shared<Plugin>(std::move(name), std::move(path), m_pluginConf[name]);
+		} catch (const std::exception &ex) {
+			Logger::info() << "plugin " << name << ": error: " << ex.what() << std::endl;
+		}
+	}
+
+	if (!plugin) {
+		Logger::warning() << "plugin " << name << ": unable to find suitable plugin" << std::endl;
+		return;
 	}
 
 	/*
@@ -132,12 +173,21 @@ void Irccd::run()
 
 		/* Call server events */
 		while (!m_serverEvents.empty()) {
-			// Broadcast
+			/* Broadcast */
 			m_transportService.broadcast(m_serverEvents.front().toJson());
 
 #if defined(WITH_JS)
-			for (auto &plugin : m_plugins) {
-				m_serverEvents.front().call(*plugin.second);
+			/*
+			 * Make a copy of the list of plugins because like
+			 * timers, a callback may remove a plugin from the list
+			 * while we are iterating.
+			 */
+			std::map<std::string, std::shared_ptr<Plugin>> plugins = m_plugins;
+			for (auto &pair : plugins) {
+				/* Only call if our plugin is still alive */
+				if (m_plugins.count(pair.first) > 0) {
+					m_serverEvents.front().call(*pair.second);
+				}
 			}
 #endif
 			m_serverEvents.pop();

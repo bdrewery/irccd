@@ -60,6 +60,7 @@ private:
 	/* Optional JavaScript plugins */
 #if defined(WITH_JS)
 	std::map<std::string, std::shared_ptr<Plugin>> m_plugins;
+	std::map<std::string, PluginConfig> m_pluginConf;
 	std::deque<TimerEvent> m_timerEvents;
 #endif
 
@@ -186,12 +187,23 @@ public:
 	}
 
 	/**
+	 * Add plugin configuration for the specified plugin.
+	 *
+	 * @param name
+	 * @param config
+	 */
+	inline void pluginAddConfig(std::string name, PluginConfig config)
+	{
+		m_pluginConf.emplace(std::move(name), std::move(config));
+	}
+
+	/**
 	 * Load a plugin by a path or a name.
 	 *
 	 * @param path the plugin path
 	 * @throw std::exception on failures
 	 */
-	void pluginLoad(const std::string &path);
+	void pluginLoad(std::string path);
 
 	/**
 	 * Unload a plugin and remove it.

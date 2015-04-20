@@ -175,41 +175,39 @@ void TransportService::handleReconnect(const std::shared_ptr<TransportClientAbst
 	m_onEvent(TransportCommand(move(ident), move(client), &TransportCommand::reconnect, server));
 }
 
-void TransportService::handleReload(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportService::handleReload(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
-#if 0
-	m_onEvent(std::make_unique<transport::Reload>(client, want(object, "plugin").toString()));
-#endif
+	string plugin = want(object, "plugin").toString();
+	string ident = Util::join({"reload"s, plugin});
+
+	m_onEvent(TransportCommand(move(ident), move(client), &TransportCommand::reload, plugin));
 }
 
-void TransportService::handleTopic(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportService::handleTopic(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
-#if 0
-	m_onEvent(std::make_unique<Topic>(
-		client,
-		want(object, "server").toString(),
-		want(object, "channel").toString(),
-		want(object, "topic").toString()
-	));
-#endif
+	string server = want(object, "server").toString();
+	string channel = want(object, "channel").toString();
+	string topic = want(object, "topic").toString();
+	string ident = Util::join({"topic"s, server, channel, topic});
+
+	m_onEvent(TransportCommand(move(ident), move(client), &TransportCommand::topic, server, channel, topic));
 }
 
-void TransportService::handleUserMode(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportService::handleUserMode(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
-#if 0
-	m_onEvent(std::make_unique<UserMode>(
-		client,
-		want(object, "server").toString(),
-		want(object, "mode").toString()
-	));
-#endif
+	string server = want(object, "server").toString();
+	string mode = want(object, "mode").toString();
+	string ident = Util::join({"umode"s, server, mode});
+
+	m_onEvent(TransportCommand(move(ident), move(client), &TransportCommand::umode, server, mode));
 }
 
-void TransportService::handleUnload(const std::shared_ptr<TransportClientAbstract> &, const JsonObject &)
+void TransportService::handleUnload(const std::shared_ptr<TransportClientAbstract> &client, const JsonObject &object)
 {
-#if 0
-	m_onEvent(std::make_unique<Unload>(client, want(object, "plugin").toString()));
-#endif
+	string plugin = want(object, "plugin").toString();
+	string ident = Util::join({"unload"s, plugin});
+
+	m_onEvent(TransportCommand(move(ident), move(client), &TransportCommand::unload, plugin));
 }
 
 /* --------------------------------------------------------

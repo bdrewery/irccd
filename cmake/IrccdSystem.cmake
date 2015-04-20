@@ -184,6 +184,11 @@ check_function_exists(access HAVE_ACCESS)
 check_include_file(sys/stat.h HAVE_SYS_STAT_H)
 check_function_exists(stat HAVE_STAT)
 
+# If the sys/stat.h is not found, we disable stat(2)
+if (NOT HAVE_SYS_STAT_H)
+	set(HAVE_STAT FALSE)
+endif ()
+
 # Check for struct stat fields.
 check_struct_has_member("struct stat" st_atime sys/stat.h HAVE_STAT_ST_ATIME)
 check_struct_has_member("struct stat" st_blksize sys/stat.h HAVE_STAT_ST_BLKSIZE)

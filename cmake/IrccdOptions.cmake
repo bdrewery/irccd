@@ -94,6 +94,8 @@ set(WITH_TEST_IRCPORT 6667
 
 set(WITH_BINDIR "bin"
 	CACHE STRING "Binary directory")
+set(WITH_DATADIR "share/irccd"
+	CACHE STRING "Data directory")
 set(WITH_PLUGINDIR "share/irccd/plugins"
 	CACHE STRING "Module prefix where to install")
 set(WITH_DOCDIR "share/doc/irccd"
@@ -107,12 +109,9 @@ set(WITH_CONFDIR "etc"
 # Check if any of these path is absolute and mark irccd relocatable
 # only if all paths are relative
 #
-# Note: only WITH_BINDIR, WITH_MANDIR, WITH_CONFIGDIR must be relative to
-#       be relocatable.
-#
 set(IRCCD_RELOCATABLE TRUE)
 
-foreach (d WITH_BINDIR WITH_CONFDIR WITH_PLUGINDIR)
+foreach (d WITH_BINDIR WITH_DATADIR WITH_CONFDIR WITH_PLUGINDIR)
 	if (IS_ABSOLUTE ${${d}})
 		list(APPEND IRCCD_ABSOLUTE_PATHS ${d})
 		set(IRCCD_RELOCATABLE FALSE)

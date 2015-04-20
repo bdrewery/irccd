@@ -64,6 +64,7 @@ private:
 	/* Plugin data */
 	DukContext m_context;
 	PluginInfo m_info;
+	PluginConfig m_config;
 	Timers m_timers;
 
 	/* Timer notifiers */
@@ -80,9 +81,10 @@ public:
 	 *
 	 * @param name the plugin name
 	 * @param path the fully resolved path to the plugin
+	 * @param config the plugin configuration
 	 * @throws std::runtime_error on errors
 	 */
-	Plugin(std::string name, std::string path);
+	Plugin(std::string name, std::string path, PluginConfig config);
 
 	/**
 	 * Get the plugin information.

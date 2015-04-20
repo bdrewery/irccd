@@ -80,7 +80,7 @@ public:
 #define dukx_assert_end(ctx, count)					\
 	assert(_topstack == (duk_get_top(ctx) - count))
 #else
-#define dukx_assert-end(ctx, count)
+#define dukx_assert_end(ctx, count)
 #endif
 
 /**

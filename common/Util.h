@@ -32,6 +32,14 @@
 
 namespace irccd {
 
+enum class DirectoryType {
+	Binary,
+	Config,
+	Plugins,
+	Data,
+	Cache
+};
+
 /**
  * @class Util
  * @brief Some utilities
@@ -50,16 +58,6 @@ public:
 		ConvertEnv	= (1 << 0),	//!< Convert ${} environnement
 		ConvertHome	= (1 << 1),	//!< Convert ~ as home
 		ConvertDate	= (1 << 2),	//!< Convert % as strftime
-	};
-
-	/**
-	 * @enum Directory
-	 * @brief Get a special directory from the irccd runtime
-	 */
-	enum Directory {
-		Binary,				//!< Obtained from WITH_BINDIR
-		Config,				//!< Obtained from WITH_CONFDIR
-		Plugins				//!< Obtained from WITH_PLUGINDIR
 	};
 
 	/**
@@ -96,22 +94,11 @@ public:
 	 */
 	static void setProgramPath(const std::string &path);
 
-	/**
-	 * Get the installation prefix or installation directory. Also append
-	 * the path to it.
-	 *
-	 * @param path what to append
-	 * @return the final path
-	 */
-	static std::string pathBase(const std::string &path = "");
-
-	/**
-	 * Get the local path to the user append the path at the end.
-	 *
-	 * @param path what to append
-	 * @return the final path
-	 */
-	static std::string pathUser(const std::string &path = "");
+	static std::vector<std::string> pathsBinaries();
+	static std::vector<std::string> pathsConfig();
+	static std::vector<std::string> pathsData();
+	static std::vector<std::string> pathsCache();
+	static std::vector<std::string> pathsPlugins();
 
 	/**
 	 * Find a configuration file, only for irccd.conf or
@@ -164,15 +151,6 @@ public:
 	static std::string strip(std::string str);
 
 	/**
-	 * Get the path to a special directory.
-	 *
-	 * @param directory the directory
-	 * @pre setProgramPath must have been called
-	 * @return the path
-	 */
-	static std::string path(Directory directory);
-
-	/**
 	 * Join values by a separator and return a string.
 	 *
 	 * @param first the first iterator
@@ -208,6 +186,8 @@ public:
 		return join(list.begin(), list.end(), delim);
 	}
 };
+
+// TODO: keep ?
 
 /**
  * @class DefinedOption

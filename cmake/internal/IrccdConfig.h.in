@@ -46,6 +46,7 @@
  * -------------------------------------------------------- */
 
 #define WITH_BINDIR		"@WITH_BINDIR@"
+#define WITH_DATADIR		"@WITH_DATADIR@"
 #define WITH_CONFDIR		"@WITH_CONFDIR@"
 #define WITH_PLUGINDIR		"@WITH_PLUGINDIR@"
 

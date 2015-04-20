@@ -19,14 +19,18 @@
 #include <csignal>
 #include <iostream>
 #include <memory>
+#include <regex>
 
 #include <IrccdConfig.h>
 
+#include <Filesystem.h>
 #include <Ini.h>
+#include <Logger.h>
 #include <Util.h>
 
-#include "Logger.h"
 #include "Irccd.h"
+
+using namespace std::string_literals;
 
 namespace irccd {
 
@@ -81,13 +85,43 @@ namespace irccd {
 
 void loadPlugin(const IniSection &sc)
 {
-	(void)sc;
+	for (const IniOption &option : sc) {
+		if (option.value().empty()) {
+			irccd->pluginLoad(option.key());
+		} else {
+			irccd->pluginLoad(option.value());
+		}
+	}
+}
+
+void loadPluginConfig(const IniSection &sc, std::string name)
+{
+	PluginConfig config;
+
+	for (const IniOption &option : sc) {
+		config.emplace(option.key(), option.value());
+	}
+
+	irccd->pluginAddConfig(std::move(name), std::move(config));
 }
 
 void loadPlugins(const Ini &config)
 {
+	std::regex regex("^plugin\\.([A-Za-z0-9-_]+)$");
+	std::smatch match;
+
+	/*
+	 * Load plugin configurations before we load plugins since we use them
+	 * when we load the plugin itself.
+	 */
 	for (const IniSection &section : config) {
-		if (section.key() == "plugin") {
+		if (std::regex_match(section.key(), match, regex)) {
+			loadPluginConfig(section, match[1]);
+		}
+	}
+
+	for (const IniSection &section : config) {
+		if (section.key() == "plugins") {
 			try {
 				loadPlugin(section);
 			} catch (const std::exception &ex) {
@@ -100,6 +134,8 @@ void loadPlugins(const Ini &config)
 void loadServer(const IniSection &sc)
 {
 	ServerInfo info;
+	ServerIdentity identity;
+	ServerSettings settings;
 
 	if (!sc.contains("name")) {
 		throw std::invalid_argument("missing name");
@@ -107,11 +143,39 @@ void loadServer(const IniSection &sc)
 	if (!sc.contains("host")) {
 		throw std::invalid_argument("missing host");
 	}
+	if (sc.contains("channels")) {
+		for (const std::string &s : Util::split(sc["channels"].value(), " \t")) {
+			ServerChannel channel;
+
+			std::string::size_type pos = s.find(":");
+			if (pos != std::string::npos) {
+				channel.name = s.substr(0, pos);
+				channel.password = s.substr(pos + 1);
+			} else {
+				channel.name = s;
+			}
+
+			settings.channels.push_back(std::move(channel));
+		}
+	}
+	if (sc.contains("identity")) {
+		identity = irccd->identityFind(sc["identity"].value());
+	}
 
 	info.name = sc["name"].value();
 	if (info.name.empty()) {
 		throw std::invalid_argument("name can not be empty");
 	}
+	info.host = sc["host"].value();
+	if (sc.contains("port")) {
+		try {
+			info.port = std::stoi(sc["port"].value());
+		} catch (const std::exception &ex) {
+			throw std::invalid_argument("`"s + sc["port"].value() + "'"s + ": invalid port number"s);
+		}
+	}
+
+	irccd->serverAdd(std::move(info), std::move(identity), std::move(settings));
 }
 
 void loadServers(const Ini &config)
@@ -182,7 +246,7 @@ void loadIdentities(const Ini &config)
 	}
 }
 
-void openConfig(const std::string &path)
+bool openConfig(const std::string &path)
 {
 	try {
 		/*
@@ -192,10 +256,13 @@ void openConfig(const std::string &path)
 
 		loadIdentities(config);
 		loadServers(config);
+		loadPlugins(config);
 	} catch (const std::exception &ex) {
-		Logger::warning() << "irccd: " << ex.what() << std::endl;
-		Logger::warning() << "irccd: exiting." << std::endl;
+		Logger::info() << getprogname() << ": " << path << ": " << ex.what() << std::endl;
+		return false;
 	}
+
+	return true;
 }
 
 void stop(int)
@@ -213,32 +280,17 @@ int main(int, char **argv)
 	irccd::Irccd instance;
 	irccd::irccd = &instance;
 
+	irccd::Logger::setVerbose(true);
+
 	signal(SIGINT, irccd::stop);
 	signal(SIGTERM, irccd::stop);
 
-	irccd::Logger::setVerbose(true);
-	irccd::ServerInfo info;
-	irccd::ServerSettings settings;
+	for (const std::string &path : irccd::Util::pathsConfig()) {
+		irccd::Logger::info() << getprogname() << ": trying " << path << irccd::Filesystem::Separator << "irccd.conf" << std::endl;
 
-	irccd::openConfig("test.conf");
-
-	info.name = "localhost";
-	info.host = "localhost";
-	info.port = 6667;
-	settings.channels = {
-		{ "#staff", "" }
-	};
-
-	try {
-		instance.serverAdd(info, irccd::ServerIdentity(), settings);
-	} catch (const std::exception &ex) {
-		irccd::Logger::warning() << "failed to add a server: " << ex.what() << std::endl;
-	}
-
-	try {
-		instance.transportAdd<irccd::TransportInet>(AF_INET6, 40000);
-	} catch (const std::exception &ex) {
-		irccd::Logger::warning() << "failed: " << ex.what() << std::endl;
+		if (irccd::openConfig(path + irccd::Filesystem::Separator + "irccd.conf")) {
+			break;
+		}
 	}
 
 	instance.run();
@@ -246,126 +298,11 @@ int main(int, char **argv)
 	return 0;
 }
 
-
-
-
-
-
-
-
-
-
 #if 0
-#include <cstdlib>
-#include <cstring>
 
-#include <signal.h>
-
-#include <Logger.h>
-
-#include "Irccd.h"
-#include "Test.h"
-#include "PluginManager.h"
-
-using namespace irccd;
-using namespace std;
-
-namespace {
-
-void quit(int)
-{
-	Irccd::instance().shutdown();
-	Irccd::instance().stop();
-}
-
-void usage()
 {
 	Logger::warn("usage: %s [-fv] [-c config] [-p pluginpath] [-P plugin]", getprogname());
 	Logger::fatal(1, "       %s test plugin.lua [command] [parameters...]", getprogname());
-}
-
-} // !namespace
-
-int main(int argc, char **argv)
-{
-	Irccd &irccd = Irccd::instance();
-	int ch;
-
-	setprogname("irccd");
-	atexit([] () {
-		quit(0);
-	});
-
-	irccd.initialize();
-
-	while ((ch = getopt(argc, argv, "fc:p:P:v")) != -1) {
-		switch (ch) {
-		case 'c':
-			irccd.setConfigPath(string(optarg));
-			irccd.override(Options::Config);
-			break;
-		case 'f':
-			irccd.setForeground(true);
-			irccd.override(Options::Foreground);
-			break;
-		case 'p':
-#if defined(WITH_LUA)
-			PluginManager::instance().addPath(string(optarg));
-#endif
-			break;
-		case 'P':
-			irccd.deferPlugin(string(optarg));
-			break;
-		case 'v':
-			Logger::setVerbose(true);
-			irccd.override(Options::Verbose);
-			break;
-		case '?':
-		default:
-			usage();
-			// NOTREACHED
-		}
-	}
-	argc -= optind;
-	argv += optind;
-
-	if (argc > 0) {
-		if (strcmp(argv[0], "test") == 0) {
-#if defined(WITH_LUA)
-			test(argc, argv);
-			// NOTREACHED
-#else
-			Logger::fatal(1, "irccd: Lua support is disabled");
-#endif
-		}
-
-		if (strcmp(argv[0], "version") == 0) {
-			Logger::setVerbose(true);
-			Logger::log("irccd version %s", VERSION);
-			Logger::log("Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>");
-			Logger::log("");
-			Logger::log("Irccd is a customizable IRC bot daemon compatible with Lua plugins");
-			Logger::log("to fit your needs.");
-			Logger::log("");
-
-#if defined(WITH_LUA)
-			auto enabled = "enabled";
-#else
-			auto enabled = "disabled";
-#endif
-			Logger::log("* Lua support is %s", enabled);
-			std::exit(0);
-		}
-	}
-
-	signal(SIGINT, quit);
-	signal(SIGTERM, quit);
-
-#if defined(SIGQUIT)
-	signal(SIGQUIT, quit);
-#endif
-
-	return irccd.run();
 }
 
 #endif

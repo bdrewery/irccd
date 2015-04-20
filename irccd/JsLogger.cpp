@@ -24,16 +24,20 @@ namespace irccd {
 
 namespace {
 
-int print(duk_context *ctx, std::ostream &out)
+duk_ret_t print(duk_context *ctx, std::ostream &out)
 {
 	/*
 	 * Get the message before we start printing stuff to avoid
 	 * empty lines.
 	 */
 	const char *message = duk_require_string(ctx, 0);
-	const char *pname = "todo";
 
-	out << "plugin " << pname << ": " << message << std::endl;
+	dukx_assert_begin(ctx);
+	duk_get_global_string(ctx, "\xff""\xff""name");
+	out << "plugin " << duk_to_string(ctx, -1);
+	duk_pop(ctx);
+	out << ": " << message << std::endl;
+	dukx_assert_equals(ctx);
 
 	return 0;
 }

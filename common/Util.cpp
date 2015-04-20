@@ -90,9 +90,7 @@ void Util::setProgramPath(const std::string &path)
 
 	try {
 		m_programPath = systemProgramPath();
-	} catch (const std::exception &ex) {
-		Logger::debug() << getprogname() << ": failed to get executable path: " << ex.what() << std::endl;
-
+	} catch (const std::exception &) {
 		/* Fallback using argv[0] */
 		m_programPath = Filesystem::dirName(path);
 
@@ -101,10 +99,14 @@ void Util::setProgramPath(const std::string &path)
 			m_programPath.erase(pos);
 		}
 
-		m_programPath += Filesystem::Separator;
+		/* Now the path may end with / or \ */
+		if (m_programPath.length() > 0 && m_programPath[m_programPath.length() - 1] == Filesystem::Separator) {
+			m_programPath.pop_back();
+		}
 	}
-
 }
+
+#if 0
 
 std::string Util::pathUser(const std::string &append)
 {
@@ -139,6 +141,95 @@ std::string Util::pathUser(const std::string &append)
 	oss << append;
 
 	return oss.str();
+}
+
+#endif
+
+std::vector<std::string> Util::pathsBinaries()
+{
+	return {m_programPath + Filesystem::Separator + WITH_BINDIR};
+}
+
+std::vector<std::string> Util::pathsConfig()
+{
+	std::vector<std::string> paths;
+
+#if defined(IRCCD_SYSTEM_WINDOWS)
+	// TODO
+#else
+	try {
+		Xdg xdg;
+
+		paths.push_back(xdg.configHome());
+	} catch (const std::exception &ex) {
+		Logger::warning() << getprogname() << ": failed to user directory: " << ex.what();
+	}
+
+#endif
+	paths.push_back(m_programPath + Filesystem::Separator + WITH_CONFDIR);
+
+	return paths;
+}
+
+std::vector<std::string> Util::pathsData()
+{
+	std::vector<std::string> paths;
+
+#if defined(IRCCD_SYSTEM_WINDOWS)
+	// TODO
+#else
+	try {
+		Xdg xdg;
+
+		paths.push_back(xdg.dataHome());
+	} catch (const std::exception &ex) {
+		Logger::warning() << getprogname() << ": failed to user directory: " << ex.what();
+	}
+
+#endif
+	paths.push_back(m_programPath + Filesystem::Separator + WITH_DATADIR);
+
+	return paths;
+}
+
+std::vector<std::string> Util::pathsCache()
+{
+	std::vector<std::string> paths;
+
+#if defined(IRCCD_SYSTEM_WINDOWS)
+	// TODO
+#else
+	try {
+		Xdg xdg;
+
+		paths.push_back(xdg.cacheHome());
+	} catch (const std::exception &ex) {
+		Logger::warning() << getprogname() << ": failed to user directory: " << ex.what();
+	}
+#endif
+
+	return paths;
+}
+
+std::vector<std::string> Util::pathsPlugins()
+{
+	std::vector<std::string> paths;
+
+#if defined(IRCCD_SYSTEM_WINDOWS)
+	// TODO
+#else
+	try {
+		Xdg xdg;
+
+		paths.push_back(xdg.dataHome() + "/plugins");
+	} catch (const std::exception &ex) {
+		Logger::warning() << getprogname() << ": failed to user directory: " << ex.what();
+	}
+
+#endif
+	paths.push_back(m_programPath + Filesystem::Separator + WITH_DATADIR + Filesystem::Separator + "plugins");
+
+	return paths;
 }
 
 std::string Util::findConfiguration(const std::string &)
@@ -287,24 +378,6 @@ std::string Util::strip(std::string str)
 	str.erase(std::find_if(str.rbegin(), str.rend(), test).base(), str.end());
 
 	return str;
-}
-
-std::string Util::path(Directory directory)
-{
-	assert(m_programPathDefined);
-
-	switch (directory) {
-	case Binary:
-		return m_programPath + Filesystem::Separator + WITH_BINDIR;
-	case Config:
-		return m_programPath + Filesystem::Separator + WITH_BINDIR;
-	case Plugins:
-		return m_programPath + Filesystem::Separator + WITH_BINDIR;
-	default:
-		break;
-	}
-
-	throw std::invalid_argument("unknown directory");
 }
 
 } // !irccd

@@ -144,7 +144,7 @@ public:
 	std::string name;			//!< server's name
 	std::string host;			//!< hostname
 	std::string password;			//!< optional server password
-	uint16_t port{0};			//!< server's port
+	uint16_t port{6667};			//!< server's port
 	bool ipv6{false};			//!< use IPv6?
 	bool ssl{false};			//!< use SSL?
 	bool sslverify{false};			//!< verify SSL?

@@ -20,6 +20,14 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <IrccdConfig.h>
+
+#if defined(HAVE_STAT)
+#  include <sys/stat.h>
+#  include <cerrno>
+#  include <cstring>
+#endif
+
 /*
  * Keep this ordered like this, on Windows we get some errors saying that windows.h
  * must be included before winsock2.h
@@ -61,19 +69,36 @@ void Plugin::call(const char *name, int nargs)
 	}
 }
 
-Plugin::Plugin(std::string name, std::string path)
+Plugin::Plugin(std::string name, std::string path, PluginConfig config)
+	: m_config(std::move(config))
 {
 	m_info.name = std::move(name);
 	m_info.path = std::move(path);
+
+	/*
+	 * Duktape currently emit useless warnings when a file do
+	 * not exists so we do a homemade access.
+	 */
+#if defined(HAVE_STAT)
+	struct stat st;
+
+	if (stat(m_info.path.c_str(), &st) < 0) {
+		throw std::runtime_error(std::strerror(errno));
+	}
+#endif
 
 	if (duk_peval_file(m_context, m_info.path.c_str()) != 0) {
 		throw std::runtime_error(duk_safe_to_string(m_context, -1));
 	}
 
-	// Safe a reference to this
+	/* Save a reference to this */
 	duk_push_global_object(m_context);
 	duk_push_pointer(m_context, this);
 	duk_put_prop_string(m_context, -2, "\xff""\xff""plugin");
+	duk_push_string(m_context, m_info.path.c_str());
+	duk_put_prop_string(m_context, -2, "\xff""\xff""path");
+	duk_push_string(m_context, m_info.name.c_str());
+	duk_put_prop_string(m_context, -2, "\xff""\xff""name");
 	duk_pop(m_context);
 }
 
@@ -99,45 +124,6 @@ void Plugin::timerAdd(std::shared_ptr<Timer> timer) noexcept
 
 	m_timers.insert(std::move(timer));
 }
-
-#if 0
-void Plugin::open()
-{
-	auto lock = m_process->lock();
-	auto L = static_cast<lua_State *>(*m_process);
-
-	// Load default library as it was done by require.
-	for (const auto &l : Process::luaLibs)
-		Luae::require(L, l.first, l.second, true);
-
-	// Put external modules in package.preload so user
-	// will need require (modname)
-	for (const auto &l : Process::irccdLibs)
-		Luae::preload(L, l.first, l.second);
-
-	try {
-		Luae::dofile(L, m_info.path);
-	} catch (const std::exception &error) {
-		throw ErrorException(m_info.name, error.what());
-	}
-
-	// Find the home directory for the plugin
-	m_info.home = Util::findPluginHome(m_info.name);
-
-	// Extract global information
-	m_info.author	= getGlobal("AUTHOR");
-	m_info.comment	= getGlobal("COMMENT");
-	m_info.version	= getGlobal("VERSION");
-	m_info.license	= getGlobal("LICENSE");
-
-	// Initialize the plugin name and its data
-	Process::initialize(m_process, m_info);
-
-	// Do a initial load
-	call("onLoad");
-}
-
-#endif
 
 void Plugin::onCommand(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
 {
@@ -176,6 +162,7 @@ void Plugin::onJoin(std::shared_ptr<Server> server, std::string origin, std::str
 	dukx_push_shared(m_context, server);
 	duk_push_string(m_context, origin.c_str());
 	duk_push_string(m_context, channel.c_str());
+	call("onJoin", 3);
 }
 
 void Plugin::onKick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason)
@@ -190,7 +177,13 @@ void Plugin::onKick(std::shared_ptr<Server> server, std::string origin, std::str
 
 void Plugin::onLoad()
 {
-	call("onLoad");
+	duk_push_object(m_context);
+	for (const auto &pair : m_config) {
+		duk_push_string(m_context, pair.second.c_str());
+		duk_put_prop_string(m_context, -2, pair.first.c_str());
+	}
+
+	call("onLoad", 1);
 }
 
 void Plugin::onMessage(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
@@ -221,8 +214,19 @@ void Plugin::onMode(std::shared_ptr<Server> server, std::string origin, std::str
 	call("onMode", 5);
 }
 
-void Plugin::onNames(std::shared_ptr<Server>, std::string, std::vector<std::string>)
+void Plugin::onNames(std::shared_ptr<Server> server, std::string channel, std::vector<std::string> names)
 {
+	dukx_push_shared(m_context, server);
+	duk_push_string(m_context, channel.c_str());
+	duk_push_array(m_context);
+
+	int i = 0;
+	for (const std::string &s : names) {
+		duk_push_string(m_context, s.c_str());
+		duk_put_prop_index(m_context, -2, i++);
+	}
+
+	call("onNames", 3);
 }
 
 void Plugin::onNick(std::shared_ptr<Server> server, std::string oldnick, std::string newnick)
@@ -293,8 +297,29 @@ void Plugin::onUserMode(std::shared_ptr<Server> server, std::string origin, std:
 	call("onUserMode", 3);
 }
 
-void Plugin::onWhois(std::shared_ptr<Server>, ServerWhois)
+void Plugin::onWhois(std::shared_ptr<Server> server, ServerWhois whois)
 {
+	dukx_push_shared(m_context, server);
+	duk_push_object(m_context);
+	duk_push_boolean(m_context, whois.found);
+	duk_put_prop_string(m_context, -2, "found");
+	duk_push_string(m_context, whois.nick.c_str());
+	duk_put_prop_string(m_context, -2, "nickname");
+	duk_push_string(m_context, whois.user.c_str());
+	duk_put_prop_string(m_context, -2, "username");
+	duk_push_string(m_context, whois.realname.c_str());
+	duk_put_prop_string(m_context, -2, "realname");
+	duk_push_string(m_context, whois.host.c_str());
+	duk_put_prop_string(m_context, -2, "host");
+	duk_push_array(m_context);
+
+	int i = 0;
+	for (const std::string &channel : whois.channels) {
+		duk_push_string(m_context, channel.c_str());
+		duk_put_prop_index(m_context, -2, i++);
+	}
+	duk_put_prop_string(m_context, -2, "channels");
+	call("onWhois", 2);
 }
 
 } // !irccd
