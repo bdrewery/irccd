@@ -6,8 +6,8 @@ Get the list of names. This function will generate the [[irccd-event-onNames|onN
 
 # Synopsis
 
-````lua
-function Server:names(channel)
+````javascript
+Server.prototype.names(channel)
 ````
 
 # Arguments

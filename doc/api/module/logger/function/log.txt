@@ -1,5 +1,5 @@
 ---
-function: log
+function: info
 category: logger
 ---
 
@@ -7,10 +7,10 @@ Log something. The message is logged only if irccd is running in verbose.
 
 # Synopsis
 
-````lua
-function logger.log(message)
+````javascript
+Logger.info(message)
 ````
 
 # Arguments
 
-* message, the message
+- message, the message

@@ -1,0 +1,19 @@
+---
+function: debug
+category: logger
+---
+
+Adds a debug message, this is only appended to the journal if irccd was
+compiled in Debug mode.
+
+This function targets irccd developers, the end user should not use it.
+
+# Synopsis
+
+````javascript
+Logger.debug(message)
+````
+
+# Arguments
+
+- message, the message

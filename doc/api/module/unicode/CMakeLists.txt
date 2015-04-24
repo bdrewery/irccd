@@ -16,24 +16,22 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(socket)
+project(unicode)
 
 set(
-	SOCKET_SOURCES
-	${socket_SOURCE_DIR}/index.txt
-	${socket_SOURCE_DIR}/enum/family.txt
-	${socket_SOURCE_DIR}/enum/protocol.txt
-	${socket_SOURCE_DIR}/enum/type.txt
-	${socket_SOURCE_DIR}/function/new.txt
-	${socket_SOURCE_DIR}/type/Socket/index.txt
-	${socket_SOURCE_DIR}/type/Socket/method/accept.txt
-	${socket_SOURCE_DIR}/type/Socket/method/bind.txt
-	${socket_SOURCE_DIR}/type/Socket/method/blockMode.txt
-	${socket_SOURCE_DIR}/type/Socket/method/close.txt
-	${socket_SOURCE_DIR}/type/Socket/method/connect.txt
-	${socket_SOURCE_DIR}/type/Socket/method/receive.txt
-	${socket_SOURCE_DIR}/type/Socket/method/receiveFrom.txt
-	${socket_SOURCE_DIR}/type/Socket/method/send.txt
-	${socket_SOURCE_DIR}/type/Socket/method/set.txt
+	UNICODE_SOURCES
+	${unicode_SOURCE_DIR}/index.txt
+	${unicode_SOURCE_DIR}/function/isdigit.txt
+	${unicode_SOURCE_DIR}/function/isletter.txt
+	${unicode_SOURCE_DIR}/function/islower.txt
+	${unicode_SOURCE_DIR}/function/isspace.txt
+	${unicode_SOURCE_DIR}/function/istitle.txt
+	${unicode_SOURCE_DIR}/function/isupper.txt
+	${unicode_SOURCE_DIR}/function/length.txt
+	${unicode_SOURCE_DIR}/function/list.txt
+	${unicode_SOURCE_DIR}/function/toarray.txt
+	${unicode_SOURCE_DIR}/function/tolower.txt
+	${unicode_SOURCE_DIR}/function/tostring.txt
+	${unicode_SOURCE_DIR}/function/toupper.txt
 	PARENT_SCOPE
 )

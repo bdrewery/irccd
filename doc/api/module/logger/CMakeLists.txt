@@ -21,6 +21,7 @@ project(logger)
 set(
 	LOGGER_SOURCES
 	${logger_SOURCE_DIR}/index.txt
+	${logger_SOURCE_DIR}/function/debug.txt
 	${logger_SOURCE_DIR}/function/log.txt
 	${logger_SOURCE_DIR}/function/warn.txt
 	PARENT_SCOPE

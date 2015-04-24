@@ -6,8 +6,8 @@ Change the channel mode. Mode can contains additional parameters if supported, s
 
 # Synopsis
 
-````lua
-function Server:mode(channel, mode)
+````javascript
+Server.prototype.mode(channel, mode)
 ````
 
 # Arguments

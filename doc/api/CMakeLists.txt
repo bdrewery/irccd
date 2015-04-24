@@ -25,13 +25,8 @@ add_subdirectory(module/logger)
 add_subdirectory(module/server)
 add_subdirectory(module/system)
 add_subdirectory(module/plugin)
-add_subdirectory(module/parser)
 add_subdirectory(module/rule)
-add_subdirectory(module/socket)
-add_subdirectory(module/socket-listener)
-add_subdirectory(module/thread)
-add_subdirectory(module/thread-pipe)
-add_subdirectory(module/utf8)
+add_subdirectory(module/unicode)
 add_subdirectory(module/util)
 
 set(
@@ -44,13 +39,8 @@ set(
 	${SERVER_SOURCES}
 	${SYSTEM_SOURCES}
 	${PLUGIN_SOURCES}
-	${PARSER_SOURCES}
 	${RULE_SOURCES}
-	${SOCKET_SOURCES}
-	${SOCKET_LISTENER_SOURCES}
-	${THREAD_SOURCES}
-	${THREAD_PIPE_SOURCES}
-	${UTF8_SOURCES}
+	${UNICODE_SOURCES}
 	${UTIL_SOURCES}
 )
 
@@ -103,6 +93,7 @@ foreach (s ${SOURCES})
 		COMMAND
 			${CMAKE_COMMAND} -E remove ${outputdir}/${outputname}.tmp
 		DEPENDS
+			${templates_SOURCE_DIR}/template.html
 			linkify
 			docs-templates
 			${s}

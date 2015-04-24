@@ -6,8 +6,8 @@ Send a private notice to a user.
 
 # Synopsis
 
-````lua
-function Server:notice(nickname, message)
+````javascript
+Server.prototype.notice(nickname, message)
 ````
 
 # Arguments

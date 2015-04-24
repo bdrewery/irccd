@@ -6,8 +6,8 @@ Change your nickname.
 
 # Synopsis
 
-````lua
-function Server:nick(nickname)
+````javascript
+Server.prototype.nick(nickname)
 ````
 
 # Arguments

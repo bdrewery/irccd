@@ -1,0 +1,18 @@
+---
+method: toString
+---
+
+Convert object as a string.
+
+Because each server has a unique identifier, this method allows adding a server
+a property key.
+
+# Synopsis
+
+````lua
+Server.prototype.toString()
+````
+
+# Returns
+
+- str, the server identifier

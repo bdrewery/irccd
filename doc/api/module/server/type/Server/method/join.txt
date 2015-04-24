@@ -6,8 +6,8 @@ Join a channel. Note: the channel must starts with a hash '#'.
 
 # Synopsis
 
-````lua
-function Server:join(channel, password)
+````javascript
+Server.prototype.join(channel, password)
 ````
 
 # Arguments

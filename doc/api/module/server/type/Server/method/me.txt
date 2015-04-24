@@ -6,8 +6,8 @@ Invoke a CTCP Action. Send a message as known as /me. The target may be a nick o
 
 # Synopsis
 
-````lua
-function Server:me(target, message)
+````javascript
+Server.prototype.me(target, message)
 ````
 
 # Arguments

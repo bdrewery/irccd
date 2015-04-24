@@ -2,12 +2,13 @@
 method: whois
 ---
 
-Get whois information from a user. The function will generate the [[irccd-event-onWhois|onWhois]] event.
+Get whois information from a user. The function will generate th
+[onWhois](@baseurl@/api/event/onWhois.html) event.
 
 # Synopsis
 
-````lua
-function Server:whois(target)
+````javascript
+Server.prototype.whois(target)
 ````
 
 # Arguments

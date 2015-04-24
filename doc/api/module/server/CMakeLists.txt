@@ -21,25 +21,24 @@ project(server)
 set(
 	SERVER_SOURCES
 	${server_SOURCE_DIR}/index.txt
-	${server_SOURCE_DIR}/function/find.txt
-	${server_SOURCE_DIR}/function/connect.txt
+	${server_SOURCE_DIR}/type/Server/function/find.txt
+	${server_SOURCE_DIR}/type/Server/function/connect.txt
 	${server_SOURCE_DIR}/type/Server/index.txt
 	${server_SOURCE_DIR}/type/Server/method/cnotice.txt
 	${server_SOURCE_DIR}/type/Server/method/info.txt
 	${server_SOURCE_DIR}/type/Server/method/join.txt
 	${server_SOURCE_DIR}/type/Server/method/kick.txt
 	${server_SOURCE_DIR}/type/Server/method/me.txt
+	${server_SOURCE_DIR}/type/Server/method/message.txt
 	${server_SOURCE_DIR}/type/Server/method/mode.txt
 	${server_SOURCE_DIR}/type/Server/method/names.txt
 	${server_SOURCE_DIR}/type/Server/method/nick.txt
 	${server_SOURCE_DIR}/type/Server/method/notice.txt
 	${server_SOURCE_DIR}/type/Server/method/part.txt
 	${server_SOURCE_DIR}/type/Server/method/query.txt
-	${server_SOURCE_DIR}/type/Server/method/say.txt
 	${server_SOURCE_DIR}/type/Server/method/topic.txt
 	${server_SOURCE_DIR}/type/Server/method/umode.txt
 	${server_SOURCE_DIR}/type/Server/method/whois.txt
-	${server_SOURCE_DIR}/type/Server/metamethod/__eq.txt
-	${server_SOURCE_DIR}/type/Server/metamethod/__tostring.txt
+	${server_SOURCE_DIR}/type/Server/method/toString.txt
 	PARENT_SCOPE
 )

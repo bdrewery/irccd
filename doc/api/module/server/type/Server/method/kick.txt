@@ -6,8 +6,8 @@ Kick someone from a channel.
 
 # Synopsis
 
-````lua
-function Server:kick(nickname, channel, reason)
+````javascript
+Server.prototype.kick(nickname, channel, reason)
 ````
 
 # Arguments

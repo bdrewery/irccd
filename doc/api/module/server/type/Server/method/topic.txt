@@ -6,8 +6,8 @@ Change the topic on the specified channel.
 
 # Synopsis
 
-````lua
-function Server:topic(channel, topic)
+````javascript
+Server.prototype.topic(channel, topic)
 ````
 
 # Arguments

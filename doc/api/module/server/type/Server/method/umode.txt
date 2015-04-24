@@ -6,8 +6,8 @@ Change your own user mode.
 
 # Synopsis
 
-````lua
-function Server:umode(mode)
+````javascript
+Server.prototype.umode(mode)
 ````
 
 # Arguments

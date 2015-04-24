@@ -6,8 +6,8 @@ Send a public notice on a channel.
 
 # Synopsis
 
-````lua
-function Server:cnotice(channel, message)
+````javascript
+Server.prototype.cnotice(channel, message)
 ````
 
 # Arguments

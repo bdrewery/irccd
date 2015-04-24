@@ -7,8 +7,8 @@ Log a warning. The message will always be logged.
 
 # Synopsis
 
-````lua
-function logger.warn(message)
+````javascript
+Logger.warn(message)
 ````
 
 # Arguments

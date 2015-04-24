@@ -1,13 +1,13 @@
 ---
-method: say
+method: message
 ---
 
 Send a message to a channel.
 
 # Synopsis
 
-````lua
-function Server:say(channel, message)
+````javascript
+Server.prototype.message(channel, message)
 ````
 
 # Arguments

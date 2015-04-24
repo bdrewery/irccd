@@ -6,8 +6,8 @@ Send a private message to the specified target.
 
 # Synopsis
 
-````lua
-function Server:query(nickname, message)
+````javascript
+Server.prototype.query(nickname, message)
 ````
 
 # Arguments

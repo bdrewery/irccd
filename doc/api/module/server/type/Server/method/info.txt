@@ -1,7 +1,5 @@
 ---
 method: info
-since: 1.2
-info: yes
 ---
 
 Extract server information. The returned table has the following fields:
@@ -22,8 +20,8 @@ Extract server information. The returned table has the following fields:
 
 # Synopsis
 
-````lua
-info = function Server:info()
+````javascript
+Server.prototype.info()
 ````
 
 # Returns

@@ -11,8 +11,8 @@ So if it does not work, do not pass a reason.
 
 # Synopsis
 
-````lua
-function Server:part(channel, reason)
+````javascript
+Server.prototype.part(channel, reason)
 ````
 
 # Arguments
