@@ -1,6 +1,5 @@
 ---
 event: onNames
-since: 1.1
 ---
 
 This event is triggered when a list of names has come.

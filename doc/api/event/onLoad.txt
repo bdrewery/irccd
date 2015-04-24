@@ -1,7 +1,5 @@
 ---
 event: onLoad
-info: yes
-since: 1.1
 ---
 
 This function is called when irccd instance load a plugin. If this function raises an error, the script is not loaded.
