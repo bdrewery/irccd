@@ -1,15 +1,13 @@
 ---
-function: isspace
-since: 1.2
-info: yes
+function: isSpace
 ---
 
 Check if the unicode character is a space.
 
 # Synopsis
 
-````lua
-function isspace(code)
+````javascript
+Unicode.isSpace(code)
 ````
 
 # Arguments
@@ -18,4 +16,4 @@ function isspace(code)
 
 # Returns
 
-True if space.
+- true if space.

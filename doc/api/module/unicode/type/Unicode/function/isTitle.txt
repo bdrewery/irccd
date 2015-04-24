@@ -1,15 +1,13 @@
 ---
-function: istitle
-since: 1.2
-info: yes
+function: isTitle
 ---
 
 Check if the unicode character is title case.
 
 # Synopsis
 
-````lua
-function istitle(code)
+````javascript
+Unicode.isTitle(code)
 ````
 
 # Arguments
@@ -18,4 +16,4 @@ function istitle(code)
 
 # Returns
 
-True if title case.
+- true if title case.

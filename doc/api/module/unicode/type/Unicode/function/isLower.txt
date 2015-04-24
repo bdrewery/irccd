@@ -1,15 +1,13 @@
 ---
-function: islower
-since: 1.2
-info: yes
+function: isLower
 ---
 
 Check if the unicode character is lower case.
 
 # Synopsis
 
-````lua
-function islower(code)
+````javascript
+Unicode.isLower(code)
 ````
 
 # Arguments
@@ -18,4 +16,4 @@ function islower(code)
 
 # Returns
 
-True if lower case.
+- true if lower case.
