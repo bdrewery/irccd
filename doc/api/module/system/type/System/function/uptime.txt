@@ -1,18 +1,16 @@
 ---
 function: uptime
-info: yes
 category: system
-since: 1.1
 ---
 
 Get the system uptime. This function returns the number of seconds elapsed since the system boot up.
 
 # Synopsis
 
-````lua
-seconds = function system.uptime()
+````javascript
+System.uptime()
 ````
 
 # Returns
 
-- seconds, the number of seconds
+- the number of seconds

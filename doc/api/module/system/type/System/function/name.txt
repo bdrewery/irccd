@@ -1,18 +1,16 @@
 ---
 function: name
-info: yes
 category: system
-since: 1.1
 ---
 
 Get the operating system name. Usually Windows, FreeBSD, Linux and such.
 
 # Synopsis
 
-````lua
-name = function system.name()
+````javascript
+System.name()
 ````
 
 # Returns
 
-name, the operating system name
+- the operating system name

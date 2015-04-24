@@ -1,0 +1,16 @@
+---
+object: System
+---
+
+The main system class.
+
+# Static methods
+
+- [env](function/env.html)
+- [home](function/home.html)
+- [name](function/name.html)
+- [ticks](function/ticks.html)
+- [sleep](function/sleep.html)
+- [uptime](function/uptime.html)
+- [usleep](function/usleep.html)
+- [version](function/version.html)

@@ -90,6 +90,19 @@ duk_ret_t System_name(duk_context *ctx)
 }
 
 /*
+ * Function: System.sleep(delay)
+ * --------------------------------------------------------
+ *
+ * Sleep the main loop for the specific delay in seconds.
+ */
+duk_ret_t System_sleep(duk_context *ctx)
+{
+	std::this_thread::sleep_for(std::chrono::seconds(duk_require_int(ctx, 0)));
+
+	return 0;
+}
+
+/*
  * Function: System.ticks()
  * --------------------------------------------------------
  *
@@ -103,19 +116,6 @@ duk_ret_t System_ticks(duk_context *ctx)
 	duk_push_int(ctx, System::ticks());
 
 	return 1;
-}
-
-/*
- * Function: System.sleep(delay)
- * --------------------------------------------------------
- *
- * Sleep the main loop for the specific delay in seconds.
- */
-duk_ret_t System_sleep(duk_context *ctx)
-{
-	std::this_thread::sleep_for(std::chrono::seconds(duk_require_int(ctx, 0)));
-
-	return 0;
 }
 
 /*
@@ -151,8 +151,8 @@ const duk_function_list_entry functions[] = {
 	{ "env",	System_env,	1	},
 	{ "home",	System_home,	0	},
 	{ "name",	System_name,	0	},
-	{ "ticks",	System_ticks,	0	},
 	{ "sleep",	System_sleep,	1	},
+	{ "ticks",	System_ticks,	0	},
 	{ "usleep",	System_usleep,	1	},
 	{ "version",	System_version,	0	},
 	{ nullptr,	nullptr,	0	}
