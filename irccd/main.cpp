@@ -137,9 +137,15 @@ void loadServer(const IniSection &sc)
 	ServerIdentity identity;
 	ServerSettings settings;
 
+	/* Verify name */
 	if (!sc.contains("name")) {
 		throw std::invalid_argument("missing name");
+	} else if (!Util::isIdentifierValid(sc["name"].value())) {
+		throw std::invalid_argument("name is not valid");
+	} else if (irccd->serverHas(sc["name"].value())) {
+		throw std::invalid_argument("server already exists");
 	}
+
 	if (!sc.contains("host")) {
 		throw std::invalid_argument("missing host");
 	}

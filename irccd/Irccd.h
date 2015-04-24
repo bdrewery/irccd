@@ -158,6 +158,17 @@ public:
 		return m_serverService.find(name);
 	}
 
+	/**
+	 * Check if a server exists.
+	 *
+	 * @param name the name
+	 * @return true if exists
+	 */
+	inline bool serverHas(const std::string &name) const noexcept
+	{
+		return m_serverService.has(name);
+	}
+
 	/* ------------------------------------------------
 	 * Plugin management
 	 * ------------------------------------------------ */

@@ -81,6 +81,7 @@ public:
 	 * Add a server. Pass exactly the same arguments as you would pass
 	 * to the Server constructor.
 	 *
+	 * @pre the server must not exists
 	 * @param args the arguments to pass to Server constructor
 	 * @throw std::exception on failures
 	 */
@@ -91,6 +92,8 @@ public:
 		using namespace std::placeholders;
 
 		shared_ptr<Server> server = make_shared<Server>(forward<Args>(args)...);
+
+		assert(!has(server->info().name));
 
 		server->setOnChannelNotice(bind(&ServerService::onChannelNotice, this, server, _1, _2, _3));
 		server->setOnConnect(bind(&ServerService::onConnect, this, server));
@@ -128,6 +131,20 @@ public:
 	 * @note Thread-safe
 	 */
 	std::shared_ptr<Server> find(const std::string &name) const;
+
+	/**
+	 * Check if a server is already enabled.
+	 *
+	 * @param name the server name
+	 * @return true if the server exists
+	 * @note Thread-safe
+	 */
+	inline bool has(const std::string &name) const noexcept
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+
+		return m_servers.count(name) > 0;
+	}
 };
 
 } // !irccd

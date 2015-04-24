@@ -237,7 +237,7 @@ void Irccdctl::handleChannelNotice(int argc, char **argv)
 	}
 }
 
-void Irccdctl::handleConnect(int argc, char **argv)
+void Irccdctl::handleConnect(int, char **)
 {
 #if 0
 	std::ostringstream oss;
@@ -356,7 +356,7 @@ void Irccdctl::handleLoad(int argc, char **argv)
 	}
 }
 
-void Irccdctl::handleMe(int argc, char **argv)
+void Irccdctl::handleMe(int argc, char **)
 {
 	if (argc < 3) {
 		Logger::warning() << "me requires 3 arguments" << std::endl;
@@ -367,7 +367,7 @@ void Irccdctl::handleMe(int argc, char **argv)
 	}
 }
 
-void Irccdctl::handleMessage(int argc, char **argv)
+void Irccdctl::handleMessage(int argc, char **)
 {
 	if (argc < 3) {
 		Logger::warning() << "message requires 3 arguments" << std::endl;
@@ -788,12 +788,12 @@ void Irccdctl::response()
 	}
 }
 
-void Irccdctl::loadGeneral(const IniSection &sc)
+void Irccdctl::loadGeneral(const IniSection &)
 {
 
 }
 
-void Irccdctl::loadSocket(const IniSection &sc)
+void Irccdctl::loadSocket(const IniSection &)
 {
 
 }
@@ -801,10 +801,6 @@ void Irccdctl::loadSocket(const IniSection &sc)
 void Irccdctl::loadConfig()
 {
 	std::string path;
-
-	if (m_options.count("c") != 0) {
-
-	}
 
 	Ini config("irccdctl.conf");
 
@@ -815,11 +811,6 @@ void Irccdctl::loadConfig()
 			loadSocket(sc);
 		}
 	}
-}
-
-void Irccdctl::define(std::string name, std::string value)
-{
-	m_options[name] = value;
 }
 
 int Irccdctl::exec(int argc, char **argv) noexcept

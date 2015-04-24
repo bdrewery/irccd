@@ -19,6 +19,14 @@
 #ifndef _IRCCD_CONFIG_H_
 #define _IRCCD_CONFIG_H_
 
+/*
+ * Fix annoying "Please include winsock2.h before windows.h"
+ */
+#if defined(_WIN32)
+#  include <winsock2.h>
+#  include <windows.h>
+#endif
+
 /* --------------------------------------------------------
  * Auto generated from CMake
  * -------------------------------------------------------- */

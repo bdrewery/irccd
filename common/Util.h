@@ -25,20 +25,13 @@
  */
 
 #include <ctime>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 namespace irccd {
-
-enum class DirectoryType {
-	Binary,
-	Config,
-	Plugins,
-	Data,
-	Cache
-};
 
 /**
  * @class Util
@@ -185,87 +178,22 @@ public:
 	{
 		return join(list.begin(), list.end(), delim);
 	}
-};
-
-// TODO: keep ?
-
-/**
- * @class DefinedOption
- * @brief Helper to determine if an option has been set at command line
- */
-class DefinedOption {
-private:
-	std::string m_value;
-	bool m_defined{false};
-
-	/* Not needed */
-	DefinedOption(DefinedOption &&) = delete;
-	DefinedOption &operator=(DefinedOption &&) = delete;
-	DefinedOption(const DefinedOption &) = delete;
-	DefinedOption &operator=(const DefinedOption &) = delete;
-
-public:
-	/**
-	 * Default constructor, option not defined.
-	 */
-	DefinedOption() = default;
 
 	/**
-	 * Tell if the option is defined.
-	 */
-	inline operator bool() const noexcept
-	{
-		return m_defined;
-	}
-
-	/**
-	 * Tell if the option is defined.
-	 */
-	inline bool operator!() const noexcept
-	{
-		return !m_defined;
-	}
-
-	/**
-	 * Tell if the option is defined.
+	 * Server and identities must have strict names. This function can
+	 * be used to ensure that they are valid.
 	 *
-	 * @return true if defined
+	 * @param name the identifier name
+	 * @return true if is valid
 	 */
-	inline bool isDefined() const noexcept
+	static inline bool isIdentifierValid(const std::string &name)
 	{
-		return m_defined;
-	}
-
-	/**
-	 * Get the defined value.
-	 *
-	 * @return the value
-	 * @throw std::invalid_argument if the option was not defined
-	 */
-	inline std::string value() const
-	{
-		if (!m_defined) {
-			throw std::invalid_argument("option not defined");
-		}
-
-		return m_value;
-	}
-
-	/**
-	 * Assign a value, the option will be defined.
-	 *
-	 * @param value the value
-	 * @return *this
-	 */
-	inline DefinedOption &operator=(std::string value) {
-		m_value = std::move(value);
-		m_defined = true;
-
-		return *this;
+		std::regex regex("[A-Za-z0-9-_]+");
+		std::smatch match;
+	
+		return std::regex_match(name, match, regex);
 	}
 };
-
-using DefinedOptions = std::unordered_map<std::string, DefinedOption>;
 
 } // !irccd
 
