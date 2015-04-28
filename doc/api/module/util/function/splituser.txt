@@ -1,0 +1,21 @@
+---
+function: splituser
+since: 1.1
+info: yes
+---
+
+Extract the nickname, for instance with foo!~foo@localhost, foo will be returned.
+
+# Synopsis
+
+````lua
+nick = function util.splituser(user)
+````
+
+# Arguments
+
+- user, the user to split
+
+# Returns
+
+- nick, the nickname

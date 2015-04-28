@@ -1,0 +1,21 @@
+---
+method: mkdir
+---
+
+Create a directory specified by path. It will created needed subdirectories
+just like you have invoked `mkdir -p`.
+
+# Synopsis
+
+````javascript
+fs.Directory.mkdir(path, mode = 0700)
+````
+
+# Arguments
+
+- path, the path to the directory
+- mode, the mode, not available on all platforms
+
+# Throws
+
+- Any exception on error

@@ -1,0 +1,63 @@
+---
+function: connect
+category: server
+---
+
+Connect to a server. The parameters are specified like this:
+
+- **name** (string): required, the server name
+- **host** (string): required, the hostname
+- **port** (int): required, the port number
+- **password** (string): an optional password for the IRC server
+- **channels** (array): list of channels to join (see below)
+- **ssl** (bool): use SSL (default: false)
+- **ssl-verify** (bool) verify SSL (default: true)
+- **identity** (table): an identity to use with fields:
+	- **name** (string): the identity name
+	- **nickname** (string): the nickname to use
+	- **username** (string): the username
+	- **realname** (string): the full name
+
+**Note**: the **channels** field is an array of strings of channels to join. If
+a password is required, use an array instead `[ "#channel", "password" ]`.
+
+# Synopsis
+
+````javascript
+Server.connect(params)
+````
+
+# Arguments
+
+- params, the server parameters
+
+# Example
+
+````javascript
+using("irccd.server")
+
+/*
+ * Connect to a server by hand when the plugin is loaded.
+ */
+function onLoad()
+{
+	Server.connect({
+		name: "test",
+		host: "irc.thehostname.org",
+		port: 6667,
+
+		channels: {
+			"#foo",				-- no password
+			[ "#secret", "pass" ]		-- channel #secret with "pass" as password
+		},
+
+		-- Use a different identity
+		identity: {
+			name: "mario",
+			nickname: "mario",
+			username: "mario",
+			realname: "It's me Mario!"
+		}
+	});
+}
+````

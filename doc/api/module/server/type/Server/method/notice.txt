@@ -1,0 +1,16 @@
+---
+method: notice
+---
+
+Send a private notice to a user.
+
+# Synopsis
+
+````javascript
+Server.prototype.notice(nickname, message)
+````
+
+# Arguments
+
+- nickname, the target nickname
+- message, the notice message

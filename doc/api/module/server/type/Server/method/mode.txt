@@ -1,0 +1,16 @@
+---
+method: mode
+---
+
+Change the channel mode. Mode can contains additional parameters if supported, such as: "+k secret".
+
+# Synopsis
+
+````javascript
+Server.prototype.mode(channel, mode)
+````
+
+# Arguments
+
+- channel, the channel target
+- mode, the mode

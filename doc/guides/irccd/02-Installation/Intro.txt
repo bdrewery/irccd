@@ -1,0 +1,101 @@
+# Installation
+
+Irccd is provided as prebuilt binaries for Windows, the installer is quite easy
+to use.
+
+If you have and old computer, you should take the 32bits version, otherwise, choose 64bit version.
+
+Grab the irccd package that fits your system at http://projects.malikania.fr/irccd/download.php
+
+## Building from sources
+
+On Unix systems, there are probably prebuilt binaries provided by your
+distribution. If not you will need to build from sources, don't worry it's not
+very hard.
+
+### Requirements
+
+To build from sources, you need the following installed on your system:
+
+- [CMake](http://www.cmake.org),
+- [OpenSSL](https://www.openssl.org) (Optional),
+- C++14 support (std::make_unique, std::literals),
+
+### Running the build
+
+When you're ready, extract the **irccd-x.y.z-sources.tar.gz** where `x.y.z` is
+replaced by the current version. Go to that directory, then type the
+following commands:
+
+````
+markand@localhost [irccd-1.1] $ mkdir _build_
+markand@localhost [irccd-1.1] $ cd _build_
+markand@localhost [irccd-1.1/_build_] $ cmake ..
+markand@localhost [irccd-1.1/_build_] $ make
+markand@localhost [irccd-1.1/_build_] $ sudo make install
+````
+
+This is the quick way of compiling and installing. It's also possible to set some options to customize the build.
+
+## Customizing the build
+
+### Disabling Lua
+
+You can disable Lua support.
+
+````
+markand@localhost [irccd-1.2/_build_] $ cmake .. -DWITH_LUA=Off
+````
+
+When disabling Lua, the IRC bot can still be used as a message relayer, so you
+can still use irccdctl to manage irccd.
+
+### Disabling Lua documentation
+
+If you don't want to install Lua API documentation, use the following command.
+
+````
+markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_DOCS_LUA=Off
+````
+
+### Disabling SSL
+
+You can disable OpenSSL support, it is automatically unset if OpenSSL is not
+found.
+
+**Note**: this is not recommended.
+
+````
+markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_SSL=Off
+````
+
+### Disabling man pages
+
+On Windows, man pages are not really useful, you can also disable them.
+
+````
+markand@localhost [irccd-1.1/_build_] $ cmake .. -DWITH_MAN=Off
+````
+
+### Installation path
+
+Sometimes, you may need to install irccd over other place, for that, you can
+specify the prefix where to install files.
+
+On unix systems, it's usually **/usr/local** and **C:/Program Files/Irccd** on Windows.
+
+To change this, use the following:
+
+````
+markand@localhost [irccd-1.1/_build_] $ cmake .. -DCMAKE_INSTALL_PREFIX=/opt/some/directory
+````
+
+### Manual pages path
+
+By default, irccd use **${CMAKE_INSTALL_PREFIX}/share/man** for manual pages. Some systems use different one.
+
+For example, on FreeBSD the typical use would be:
+
+````
+markand@localhost [irccd-1.1/_build_] $ cmake .. -DMANDIR=/usr/local/man
+````

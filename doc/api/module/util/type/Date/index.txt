@@ -1,0 +1,17 @@
+---
+object: Date
+---
+
+The date object.
+
+# Methods
+
+- [Date:calendar](method/calendar.html)
+- [Date:format](method/format.html)
+- [Date:timestamp](method/timestamp.html)
+
+# Metamethods
+
+- [Date:__tostring](metamethod/__tostring.html)
+- [Date:__eq](metamethod/__eq.html)
+- [Date:__le](metamethod/__le.html)

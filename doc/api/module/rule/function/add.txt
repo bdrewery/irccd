@@ -1,0 +1,20 @@
+---
+function: add
+---
+
+Add a rule.
+
+# Synopsis
+
+````lua
+ret, err = function rule.add(rule)
+````
+
+# Arguments
+
+- rule, the rule (see [[irccd-Rule|Rule]])
+
+# Returns
+
+- ret, true on success or nil on failure
+- err, the error message

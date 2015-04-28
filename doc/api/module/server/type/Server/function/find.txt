@@ -1,0 +1,25 @@
+---
+function: find
+category: server
+---
+
+Find a server by name.
+
+# Synopsis
+
+````javascript
+Server.find(name)
+````
+
+# Arguments
+
+- name, the server name
+
+# Returns
+
+- server, the server or undefined if not found
+
+# Remarks
+
+Avoid using this function in the [onLoad](@baseurl@/api/event/onLoad.html) event
+because plugins are loaded before servers.

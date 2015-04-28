@@ -1,0 +1,31 @@
+---
+object: Server
+---
+
+The server object.
+
+**Note**: all the functions are thread-safe.
+
+# Static methods
+
+- [find](function/find.html)
+- [connect](function/connect.html)
+
+# Methods
+
+- [cnotice](method/cnotice.html)
+- [info](method/info.html)
+- [join](method/join.html)
+- [kick](method/kick.html)
+- [me](method/me.html)
+- [message](method/message.html)
+- [mode](method/mode.html)
+- [names](method/names.html)
+- [nick](method/nick.html)
+- [notice](method/notice.html)
+- [part](method/part.html)
+- [query](method/query.html)
+- [topic](method/topic.html)
+- [umode](method/umode.html)
+- [whois](method/whois.html)
+- [toString](method/toString.html)

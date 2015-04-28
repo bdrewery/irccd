@@ -1,0 +1,16 @@
+---
+method: message
+---
+
+Send a message to a channel.
+
+# Synopsis
+
+````javascript
+Server.prototype.message(channel, message)
+````
+
+# Arguments
+
+- channel, the channel
+- message, the message to send

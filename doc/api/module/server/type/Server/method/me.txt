@@ -1,0 +1,16 @@
+---
+method: me
+---
+
+Invoke a CTCP Action. Send a message as known as /me. The target may be a nick or a channel.
+
+# Synopsis
+
+````javascript
+Server.prototype.me(target, message)
+````
+
+# Arguments
+
+- target, a nick or a channel
+- message, the message to send

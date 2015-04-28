@@ -1,0 +1,24 @@
+---
+object: File
+title: File reading and writing
+---
+
+File I/O provided for JavaScript.
+
+# Constants
+
+- **SeekCur**: seek from current position
+- **SeekEnd**: seek from the end
+- **SeekSet**: seek to the beginning
+
+# Methods
+
+- [(constructor)](method/Constructor.html)
+
+# Static methods
+
+- [basename](function/basename.html)
+- [dirname](function/dirname.html)
+- [exists](function/exists.html)
+- [remove](function/remove.html)
+- [stat](function/stat.html)

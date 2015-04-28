@@ -1,0 +1,21 @@
+---
+method: Directory.find
+---
+
+Find an entry by a pattern or a regular expression.
+
+# Synopsis
+
+````javascript
+Directory.find(path, pattern, recursive)
+````
+
+# Arguments
+
+- path, the base path
+- pattern, the regular expression or file name
+- recursive, set to true to search recursively (default: false)
+
+# Returns
+
+- the path to the file or undefined on errors or not found

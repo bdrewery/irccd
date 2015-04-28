@@ -1,0 +1,22 @@
+---
+function: toarray
+since: 1.2
+info: yes
+---
+
+Convert a UTF-8 string to array.
+
+# Synopsis
+
+````lua
+function toarray(str)
+````
+
+# Arguments
+
+- str, the UTF-8 string
+
+# Returns
+
+1. The sequence table or nil on failure
+2. The error message

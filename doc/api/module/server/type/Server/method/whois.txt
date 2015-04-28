@@ -1,0 +1,16 @@
+---
+method: whois
+---
+
+Get whois information from a user. The function will generate th
+[onWhois](@baseurl@/api/event/onWhois.html) event.
+
+# Synopsis
+
+````javascript
+Server.prototype.whois(target)
+````
+
+# Arguments
+
+- target, the target

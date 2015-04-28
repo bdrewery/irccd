@@ -1,0 +1,16 @@
+---
+method: cnotice
+---
+
+Send a public notice on a channel.
+
+# Synopsis
+
+````javascript
+Server.prototype.cnotice(channel, message)
+````
+
+# Arguments
+
+- channel, the target channel
+- message, the message

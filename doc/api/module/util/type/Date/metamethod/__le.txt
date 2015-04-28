@@ -1,0 +1,19 @@
+---
+metamethod: __le
+---
+
+Test inferiority.
+
+# Synopsis
+
+````lua
+status = function Date:__le(other)
+````
+
+# Arguments
+
+- other, the other
+
+# Returns
+
+- status, true if self <= other

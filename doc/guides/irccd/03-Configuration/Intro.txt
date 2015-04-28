@@ -1,0 +1,305 @@
+# Configuration
+
+Now that you've successfully installed irccd, let's add a configuration file
+so we can run it.
+
+## Paths
+
+The irccd configuration file is named **irccd.conf** and its location varies
+on operating systems.
+
+On Unix, the files are loaded in the following order:
+
+1. **${XDG_CONFIG_HOME}/irccd/irccd.conf**
+2. **/usr/local/etc/irccd.conf**
+
+On Windows, the files are loaded in the following order:
+
+1. **C:\\Users\\YourUser\\irccd\\irccd.conf**
+2. **Path\\To\\Irccd\\Directory\\etc\\irccd.conf**
+
+**Specify at the command line**
+
+**Note**: on every operating systems, it's possible to pass a specific
+configuration file at the command line, this will only try to open that
+file and exit if irccd failed to open it.
+
+**Example**: `irccd -c myconfig.conf`
+
+## Syntax
+
+The **irccd.conf** follow a very basic **.ini** syntax with the following rules:
+
+1. Each option is stored in a section
+2. Some sections may be redefined multiple times
+
+Irccd adds an extension to this format by adding an `@include` keyword which
+let you splitting your configuration file.
+
+Note, this `@include` statement must only be at the beginning of the file
+and must be surrounded by quotes.
+
+**Correct configuration**
+
+````ini
+# This is a comment
+@include "rules.conf"
+@include "servers.conf"
+
+[general]
+verbose = false
+
+[server]
+host = "localhost"		# this is a comment too
+````
+
+**Bad configuration**
+
+````ini
+# Error: no section!
+verbose = true
+
+[server]
+host = "localhost"
+port = "8520"
+
+# @include statement cannot be here
+@include "rules.conf"
+````
+
+## The general section
+
+This section contains global options that are used in the whole irccd application.
+
+The options available:
+
+- **plugin-path**: (string) A path to local plugins, default: empty.
+- **verbose**: (bool) Enable verbosity, default: false.
+
+Options available only on Unix:
+
+- **foreground**: (bool) Keep irccd to foreground, default: false.
+- **syslog**: (bool) If enabled, use syslog instead of standard output, default: false.
+
+**Example**
+
+````ini
+[general]
+verbose = true
+````
+
+## The plugins section
+
+This section is used to load plugins.
+
+Just add any key you like to load a plugin. If the value is not specified, the
+plugin is searched through the standard directories, otherwise, provide the full
+path (including the .lua extension).
+
+**Example**
+
+````ini
+[plugins]
+history =
+myplugin = /tmp/myplugin.lua
+````
+
+## The identity section
+
+This section is completely optional, if you don't provide one, irccd will use a default identity with *irccd* as nickname and username. This section is redefinable, you can create one or more.
+
+The options available:
+
+- **name**: (string) Required. the identity unique id.
+- **nickname**: (string) The nickname, default: irccd.
+- **realname**: (string) The realname, default: IRC Client daemon.
+- **username**: (string) The username name, default: irccd.
+- **ctcp-version**: (string) What version to respond to CTCP VERSION, default: IRC Client Daemon.
+- **ctcp-autoreply**: (bool) Enable auto CTCP VERSION reply, default: true.
+
+**Example**
+
+````ini
+[identity]
+name = "default"
+nickname = "jean"
+
+[identity]
+name = "development"
+nickname = "unstable"
+username = "un"
+````
+
+## The server section
+
+This section is used to connect to one or more server. Thus, this section is
+also redefinable. You need at least one server in your configuration file.
+
+The options available:
+
+- **name**: (string) Required. A unique id.
+- **host**: (string) Required. The server address.
+- **port**: (int) Required, The server port.
+- **identity**: (string) An identity to use.
+- **password**: (string) An optional password.
+- **join-invite**: (bool) Join channels upon invitation, default: false.
+- **channels**: (string list) List of channel to auto join, default: empty.
+- **command-char**: (string) The prefix for invoking special commands, default: !.
+- **ssl**: (bool) Enable or disable SSL, default: false.
+- **ssl-verify**: (bool) Verify the SSL certificates, default: true.
+- **reconnect**: (bool) Enable reconnection after failure, default: true.
+- **reconnect-tries**: (int) Number of tries before giving up. A value of 0 means indefinitely, default: 0.
+- **reconnect-timeout**: (int) Number of seconds to wait before retrying, default: 30.
+
+**Example**
+
+````ini
+[server]
+name = "local"
+host = "localhost"
+port = 6667
+````
+
+## The listener section
+
+This section defines listeners, you may use sockets to do a basic IPC system in
+irccd.
+
+This let you controlling irccd with sockets. For instance, with listeners, you
+may ask `irccd` to send a message, a notice or even kicking someone from a
+channel.
+
+This is done with the irccdctl utility.
+
+There are two type of listeners availables:
+
+1. Internet sockets, IPv4 and IPv6
+2. Unix sockets, based on files (not available on Windows)
+
+### Available options for both types
+
+- **type**: (string) Required. type of listener "internet" or "unix"
+- **protocol**: (string) Protocol to use, "tcp" or "udp", default: "tcp".
+
+### Using internet sockets
+
+The available options:
+
+- **address**: (string) Address to bind or "*" for any, default: *.
+- **family**: (string list) Internet family: ipv6, ipv4. Both are accepted, default: ipv4
+- **port**: (int) Required: port number.
+
+**Example**
+
+````ini
+[listener]
+type = "internet"
+address = "*"
+family = "ipv4 ipv6"
+port = 9999
+````
+
+This will let you controlling irccd on port 9999 with both IPv4 and IPv6 families.
+
+### Using unix sockets
+
+The available options:
+
+- **path**: (string) Required. The file path to the socket.
+
+**Example**
+
+````ini
+[listener]
+type = "unix"
+path = "/tmp/irccd.sock"
+````
+
+This will let you controlling irccd on path **/tmp/irccd.sock**, the file is
+automatically deleted when irccd starts, but not when it stops.
+
+**Warning**: Consider using internet sockets with care, especially if you
+are running your bot on a server with multiple users. If your bot has operator
+rights and you bind on any address, almost every users can do a kick or a ban.
+
+If this is a concern switch to a Unix sockets.
+
+## The rule section
+
+The rule section is one of the most powerful within irccd configuration. It let
+you enable or disable plugins and IRC events for specific criterias. For
+instance, you may want to disable a plugin only for a specific channel on a
+specific server. And because rules are evaluated in the order they are defined,
+you can override rules.
+
+The available options:
+
+- **servers**, a list of servers that will match the rule
+- **channels**, a list of channel
+- **plugins**, which plugins
+- **events**, which events (e.g onCommand, onMessage, ...)
+- **action**, set to **accept** or **drop** (default: accept)
+
+### Basic rules example
+
+This first rule disable the plugin reboot on **all** servers and channels.
+
+````ini
+[rule]
+plugins = "reboot"
+action = drop
+````
+
+This rule enable the reboot plugin again on the server **malikania**, channel **#staff**.
+
+````ini
+[rule]
+servers = "malikania"
+channels = "#staff"
+plugins = "reboot"
+action = accept
+````
+
+## Full example of configuration file
+
+````ini
+# This line is a comment
+[general]
+verbose = true
+
+# Add a listener that bind only to IPv6
+[listener]
+address = "*"
+family = "ipv6"
+port = "12000"
+
+# A listener that bind to both IPv4 and IPv6
+[listener]
+address = "*"
+family = "ipv4 ipv6"
+port = "15000"
+
+# Identity reused by many servers
+[identity]
+name = "myIdentity"
+nickname = "superbot"
+realname = "SuperBot v1.0"
+username = "sp"
+
+# A server
+[server]
+host = "irc.foo.org"
+port = "6667"
+identity = "myIdentity"
+
+# An other server
+[server]
+host = "chat.wanadoo.fr"
+port = "6667"
+identity = "myIdentity"
+
+# Load some plugins
+[plugins]
+ask =					# This search for plugin ask
+myplugin = /path/to/myplugin.lua	# This use absolute path
+````

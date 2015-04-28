@@ -1,0 +1,19 @@
+---
+method: File.remove
+---
+
+Remove the file at the specified path.
+
+# Synopsis
+
+````javascript
+File.remove(path)
+````
+
+# Arguments
+
+- path, the path to the file
+
+# Throws
+
+- Any exception on error

@@ -1,0 +1,20 @@
+---
+method: File
+---
+
+Open a file specified by path with the specified mode.
+
+# Synopsis
+
+````javascript
+File(path, mode)
+````
+
+# Arguments
+
+- path, the path to the file
+- mode, the mode, can be "r" "w" or "a"
+
+# Throws
+
+- Any exception on error

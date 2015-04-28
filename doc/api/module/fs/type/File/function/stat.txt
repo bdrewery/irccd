@@ -1,0 +1,25 @@
+---
+method: File.stat
+optional: yes
+info: yes
+---
+
+Get file information at the specified path.
+
+# Synopsis
+
+````javascript
+File.stat(path)
+````
+
+# Arguments
+
+- path, the path to the file
+
+# Returns
+
+- the stats information
+
+# Throws
+
+- Any exception on error

@@ -1,0 +1,21 @@
+---
+method: part
+---
+
+Leave a channel.
+
+Please note that providing a reason wasn't possible in the initial standard IRC
+protocol.
+
+So if it does not work, do not pass a reason.
+
+# Synopsis
+
+````javascript
+Server.prototype.part(channel, reason)
+````
+
+# Arguments
+
+- channel, the channel to leave
+- reason, an optional reason

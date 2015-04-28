@@ -1,0 +1,21 @@
+---
+function: tolower
+since: 1.2
+info: yes
+---
+
+Convert the unicode character to lower case.
+
+# Synopsis
+
+````lua
+function tolower(code)
+````
+
+# Arguments
+
+- code, the code point
+
+# Returns
+
+The lower case character.

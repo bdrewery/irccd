@@ -1,0 +1,15 @@
+---
+title: Irccdctl utility user guide
+author: David Demelier <markand@malikania.fr>
+date: February 18, 2015
+---
+
+# Introduction
+
+The `irccdctl` utility let you controlling a running `irccd` instance. It uses
+sockets to perform any operation.
+
+First, you need to define at least one listener before using `irccdctl`.
+
+Second, you need to write a configuration file named **irccdctl.conf**. It takes
+places at exactly the same irccd paths.

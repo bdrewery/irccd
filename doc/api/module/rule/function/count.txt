@@ -1,0 +1,15 @@
+---
+function: count
+---
+
+Get the number of rules in the manager.
+
+# Synopsis
+
+````lua
+count = function rule.count()
+````
+
+# Returns
+
+- count, the number of all rules

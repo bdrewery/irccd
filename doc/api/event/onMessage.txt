@@ -1,0 +1,19 @@
+---
+event: onMessage
+---
+
+This event is triggered when someone said something on a specific channel.
+
+# SYNOPSIS
+
+````javascript
+function onMessage(server, channel, nickname, message)
+````
+
+# ARGUMENTS
+
+- server, the current server.
+- channel, the channel.
+- nickname, the person that said something.
+- message, the message sent.
+

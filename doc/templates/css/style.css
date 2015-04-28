@@ -1,0 +1,211 @@
+/*
+ * http://paletton.com/#uid=70s0u0kllllaFw0g0qFqFg0w0aF
+ */
+
+/*
+ * .color-primary-0 { color: #AA6A39 }
+ * .color-primary-1 { color: #FFCFAA }
+ * .color-primary-2 { color: #D4986A }
+ * .color-primary-3 { color: #804315 }
+ * .color-primary-4 { color: #552500 }
+ *
+ * .color-secondary-1-0 { color: #AA8339 }
+ * .color-secondary-1-1 { color: #FFE2AA }
+ * .color-secondary-1-2 { color: #D4B06A }
+ * .color-secondary-1-3 { color: #805B15 }
+ * .color-secondary-1-4 { color: #553800 }
+ *
+ * .color-secondary-2-0 { color: #2D4471 }
+ * .color-secondary-2-1 { color: #7788AA }
+ * .color-secondary-2-2 { color: #4E638E }
+ * .color-secondary-2-3 { color: #152B55 }
+ * .color-secondary-2-4 { color: #061739 }
+ *
+ * .color-complement-0 { color: #236863 }
+ * .color-complement-1 { color: #689D99 }
+ * .color-complement-2 { color: #41837E }
+ * .color-complement-3 { color: #0D4E4A }
+ * .color-complement-4 { color: #003430 }
+ */
+
+a {
+	color: #0D4E4A;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #003430;
+	text-decoration: underline;
+}
+
+strong {
+	font-size: 90%;
+}
+
+.sidebar-common {
+	margin: 0px 0px 10px 10px;
+	float: left;
+	font-size: 90%;
+	background-color: #f5f5f5;
+	border: 1px solid #ededed;
+	border-radius: 3px;
+	padding: 10px 10px 0px 10px;
+}
+
+#sidebar-guide {
+	width: 200px;
+	font-size: 70%;
+	padding: 0;
+}
+
+#sidebar-guide ul {
+	margin-left: -18px;
+}
+
+#sidebar-js {
+	width: 150px;
+}
+
+
+#sidebar-js .section {
+	margin-bottom: 5px;
+}
+
+#sidebar-js .section p {
+	font-weight: bold;
+}
+
+#sidebar-js #index {
+	text-decoration: none;
+	font-weight: bold;
+}
+
+#sidebar-js ul {
+	list-style-type: none;
+	margin-left: -40px;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	font-family: sans-serif;
+}
+
+pre {
+	border: 1px solid #FFE2AA;
+	border-radius: 4px;
+	border-left: 4px solid #AA8339;
+	padding: 10px;
+	margin-left: 5px;
+	background-color: white;
+}
+
+pre code {
+	font-family: "Ubuntu Mono", Consolas, "DejaVu Sans Mono";
+}
+
+table {
+	border-collapse: collapse;
+	margin: 10px;
+}
+
+table, th, td {
+	border: 1px solid #D4B06A;
+	font-size: 100%;
+}
+
+th {
+	background-color: #FFE2AA;
+	padding: 3px 3px 3px 3px;
+}
+
+td {
+		padding: 3px 3px 3px 3px;
+}
+
+#footer {
+	font-size: 70%;
+	color: #4d4d4d;
+	margin-left: 195px;
+}
+
+.content-common {
+	background-color: #f5f5f5;
+	border: 1px solid #ededed;
+	border-radius: 3px;
+	padding: 10px;
+}
+
+#content-js {
+	margin: 10px 10px 10px 190px;
+
+}
+
+#content-guide {
+	margin: 10px 10px 10px 220px;
+}
+
+.content-common h1, .content-common h2, .content-common h3, .content-common h4, .content-common h5, .content-common h6 {
+	margin: 10px 0px 10px 0px;
+}
+
+.content-common h1 {
+	font-size: 115%;
+	color: #061739;
+}
+
+.content-common h2 {
+	font-size: 110%;
+	color: #061739;
+}
+
+.content-common h3 {
+	font-size: 105%;
+	color: #152B55;
+}
+
+.content-common h4 {
+	font-size: 100%;
+	color: #4E638E;
+}
+
+.content-common h5 {
+	font-size: 100%;
+}
+
+.content-common h6 {
+	font-size: 100%;
+}
+
+.content-common {
+	margin-left: 195px;
+}
+
+.content-common #content-title {
+	margin: 0px 0px 10px 0px;
+	border-bottom: 1px solid #061739;
+	padding-bottom: 5px;
+}
+
+.content-common .content-mononame {
+	font-variant: none;
+	font-family: "Ubuntu Mono", Consolas, "DejaVu Sans Mono";
+}
+
+.content-common #info {
+	background-color: white;
+	padding: 5px;
+	border: 1px solid #7788AA;
+	border-left: 4px solid #4E638E;
+	border-radius: 4px;
+	margin-bottom: 10px;
+}
+
+.content-common #info p {
+	margin: 0;
+}
+
+#content ul, #content ol {
+	list-style-type: circle;
+	margin-left: 25px;
+}

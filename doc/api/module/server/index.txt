@@ -1,0 +1,11 @@
+---
+module: irccd.server
+---
+
+# Usage
+
+Functions for server management.
+
+# Types
+
+- [Server](type/Server/index.html)

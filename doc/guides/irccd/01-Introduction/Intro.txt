@@ -1,0 +1,28 @@
+---
+title: Irccd user guide
+author: David Demelier <markand@malikania.fr>
+date: February 18, 2015
+---
+
+# Introduction
+
+Irccd is a IRC bot written in [C++14](http://en.wikipedia.org/wiki/C%2B%2B14)
+
+It is developed in mind of being as portable as possible.
+
+Irccd also tries to be small and efficient. It is not uncommon to see more than
+twenty plugins loaded without eating all your memory.
+
+Irccd also tries to have the best JavaScript API for writing the funniest
+plugins ever.
+
+## Features
+
+- Can use JavaScript to create plugins,
+- Support multiple servers,
+- Support multiple identities,
+- Can be controled by sockets and irccdctl,
+- Run on Linux, Windows and *BSD,
+- Well documented,
+- Clean and powerful JavaScript API,
+- Very fast and light.

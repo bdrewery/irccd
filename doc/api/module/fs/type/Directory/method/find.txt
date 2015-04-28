@@ -1,0 +1,23 @@
+---
+method: Directory.prototype.find
+---
+
+Synonym of [Directory.find(path, pattern, recursive)][1] but the path is taken
+from the directory object.
+
+# Synopsis
+
+````javascript
+Directory.prototype.find(pattern, recursive)
+````
+
+# Arguments
+
+- pattern, the regular expression or file name
+- recursive, set to true to search recursively (default: false)
+
+# Returns
+
+- the path to the file or undefined on errors or not found
+
+[1]: @baseurl@api/module/fs/Directory/function/find.html

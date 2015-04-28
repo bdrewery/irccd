@@ -1,0 +1,15 @@
+---
+method: nick
+---
+
+Change your nickname.
+
+# Synopsis
+
+````javascript
+Server.prototype.nick(nickname)
+````
+
+# Arguments
+
+- nickname, the new nickname

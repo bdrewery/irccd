@@ -1,0 +1,21 @@
+---
+function: isletter
+since: 1.2
+info: yes
+---
+
+Check if the unicode character is a letter.
+
+# Synopsis
+
+````lua
+function isletter(code)
+````
+
+# Arguments
+
+- code, the code point
+
+# Returns
+
+True if letter.

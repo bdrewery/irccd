@@ -1,0 +1,17 @@
+---
+event: onNames
+---
+
+This event is triggered when a list of names has come.
+
+# SYNOPSIS
+
+````javascript
+function onNames(server, channel, list)
+````
+
+# ARGUMENTS
+
+- server, he current server.
+- channel, which channel.
+- list, a sequence with all users.

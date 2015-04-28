@@ -1,0 +1,23 @@
+---
+method: File.exists
+---
+
+Check if the file exists.
+
+# Synopsis
+
+````javascript
+File.exists(path)
+````
+
+# Arguments
+
+- path, the path to the file
+
+# Returns
+
+- true if exists
+
+# Throws
+
+- Any exception if we don't have access

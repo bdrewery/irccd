@@ -1,0 +1,16 @@
+---
+method: topic
+---
+
+Change the topic on the specified channel.
+
+# Synopsis
+
+````javascript
+Server.prototype.topic(channel, topic)
+````
+
+# Arguments
+
+- channel, the channel
+- topic, the new topic

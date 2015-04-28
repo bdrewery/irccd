@@ -1,0 +1,19 @@
+---
+metamethod: __eq
+---
+
+Test equality.
+
+# Synopsis
+
+````lua
+status = function Date:__eq(other)
+````
+
+# Arguments
+
+- other, the other
+
+# Returns
+
+* status, true if they equals

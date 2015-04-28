@@ -1,0 +1,15 @@
+---
+module: irccd.fs
+---
+
+# Usage
+
+Bring filesystem functions.
+
+Because JavaScript does not offer filesystem functions, this portable module
+provides some functions for reading and creating directories.
+
+# Types
+
+- [Directory](type/Directory/index.html)
+- [File](type/File/index.html)

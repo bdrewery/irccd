@@ -1,0 +1,16 @@
+---
+function: warn
+category: logger
+---
+
+Log a warning. The message will always be logged.
+
+# Synopsis
+
+````javascript
+Logger.warn(message)
+````
+
+# Arguments
+
+* message, the message

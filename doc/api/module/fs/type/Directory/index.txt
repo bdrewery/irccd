@@ -1,0 +1,33 @@
+---
+object: Directory
+title: Directory object
+---
+
+This object let you iterate a directory.
+
+# Constants
+
+- **Dot**: request to show "." directories
+- **DotDot**: request to show ".." directories
+- **TypeUnknown**: unknown type file
+- **TypeDir**: the entry is a directory
+- **TypeLink**: the entry is a link
+- **TypeFile**: the entry is a regular file
+
+# Properties
+
+- **count (int)**: number of entries in the directory,
+- **path (string)**: path to the directory,
+- **entries (array)**: array of object containing fields **type** and **name**,
+
+# Methods
+
+- [(constructor)](method/Constructor.html)
+- [find](method/find.html)
+- [remove](method/remove.html)
+
+# Static methods
+
+- [find](function/find.html)
+- [mkdir](function/mkdir.html)
+- [remove](function/remove.html)

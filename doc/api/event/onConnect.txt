@@ -1,0 +1,16 @@
+---
+event: onConnect
+---
+
+This callback is called when the irccd instance successfully connect to a server.
+
+# SYNOPSIS
+
+````javascript
+function onConnect(server)
+````
+
+# ARGUMENTS
+
+- server, the current server.
+

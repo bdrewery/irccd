@@ -1,0 +1,17 @@
+---
+event: onQuery
+---
+
+This event is triggered when someone sent a private message to you.
+
+# SYNOPSIS
+
+````javascript
+function onQuery(server, who, message)
+````
+
+# ARGUMENTS
+
+- server, the current server.
+- who, the person that said something.
+- message, the message sent.

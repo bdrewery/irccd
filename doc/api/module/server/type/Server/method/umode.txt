@@ -1,0 +1,15 @@
+---
+method: umode
+---
+
+Change your own user mode.
+
+# Synopsis
+
+````javascript
+Server.prototype.umode(mode)
+````
+
+# Arguments
+
+- mode, the new mode

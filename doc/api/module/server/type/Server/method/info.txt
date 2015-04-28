@@ -1,0 +1,29 @@
+---
+method: info
+---
+
+Extract server information. The returned table has the following fields:
+
+- **name** (string): the server ident
+- **hostname** (string): the hostname
+- **port** (int): the port
+- **ssl** (bool): true if using SSL
+- **sslVerify** (bool): true if using SSL verification
+- **commandChar** (string): the command character needed
+- **channels** (sequence): a sequence of channels joined
+- **identity** (table): the identity table with the following fields:
+	- **name** (string): the identity name
+	- **nickname** (string): the nickname currently in use
+	- **username** (string): the username
+	- **realname** (string): the full name
+	- **ctcpversion** (string): the CTCP Version reply
+
+# Synopsis
+
+````javascript
+Server.prototype.info()
+````
+
+# Returns
+
+- info, the information

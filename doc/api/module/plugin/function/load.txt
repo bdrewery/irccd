@@ -1,0 +1,18 @@
+---
+function: load
+category: plugin
+info: yes
+since: 1.1
+---
+
+Load a plugin. If the path is relative, the plugin is searched through the standard directories, otherwise the absolute path is used.
+
+# Synopsis
+
+````lua
+function plugin.load(path)
+````
+
+# Arguments
+
+- path, the plugin's name or absolute path

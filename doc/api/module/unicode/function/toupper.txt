@@ -1,0 +1,21 @@
+---
+function: toupper
+since: 1.2
+info: yes
+---
+
+Convert the unicode character to upper case.
+
+# Synopsis
+
+````lua
+function toupper(code)
+````
+
+# Arguments
+
+- code, the code point
+
+# Returns
+
+The upper case character.

@@ -1,0 +1,16 @@
+# Paths
+
+Irccd will find plugins in many paths depending on the configuration or the operating system.
+
+## Unix paths
+
+1. Specified by -p on command line
+2. <code>${XDG_CONFIG_HOME}/irccd/plugins</code>
+3. <code>${HOME}/.config/irccd/plugins</code>
+4. <code>/usr/local/share/irccd/plugins</code>
+
+## Windows paths
+
+1. Specified by -p on command line
+2. <code>C:\\Users\\YourUser\\irccd\\plugins</code>
+3. <code>Path\\To\\Irccd\\Directory\\share\\plugins</code>

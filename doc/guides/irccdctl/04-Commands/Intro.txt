@@ -1,0 +1,330 @@
+# Irccdctl commands
+
+The following commands are available.
+
+## Channel notice
+
+Send a notice to a public channel. This is a notice that everyone will be notified by.
+
+**Usage**
+
+````
+$ irccdctl cnotice server channel message
+````
+
+**Usage**
+
+````
+$ irccdctl cnotice freenode #staff "Don't flood"
+````
+
+## Connect
+
+Connect to a new IRC server.
+
+**Usage**
+
+````
+$ irccdctl [-s] [-i identity] [-k password] connect name host port
+````
+
+Available options:
+
+- **-s**, use SSL,
+- **-i identity**, specify an identity, if the identity is not found, use the default,
+- **-k password**, specify the server password
+
+**Note**: the options must be passed before the arguments.
+
+**Example**
+
+````
+$ irccdctl connect wanadoo chat.wanadoo.fr 6667
+$ irccdctl -s connect wanadoo chat.wanadoo.fr 6697
+$ irccdctl -k "secret" connect wanadoo chat.wanadoo.fr 6667
+````
+
+## Disconnect
+
+Disconnect from a connected server.
+
+**Usage**
+
+````
+$ irccdctl disconnect name
+````
+
+**Example**
+
+````
+$ irccdctl disconnect wanadoo
+````
+
+## Help
+
+Get the help.
+
+**Usage**
+
+````
+$ irccdctl help subject
+````
+
+**Example**
+
+````
+$ irccdctl help message
+````
+
+## Invite
+
+Invite someone to a channel, needed for channel with mode +i
+
+**Usage**
+
+````
+$ irccdctl invite server nickname channel
+````
+
+**Example**
+
+````
+$ irccdctl invite freenode xorg62 #staff
+````
+
+## Join
+
+Join a channel on a specific server registered in irccd. The server is
+referenced by the parameter server. Parameter channel is the channel to join.
+
+An optional password may be set as password parameter.
+
+**Usage**
+
+````
+$ irccdctl join server channel [password]
+````
+
+**Example**
+
+````
+$ irccdctl join freenode #staff
+````
+
+## Kick
+
+Kick someone from a channel. The parameter reason is optional and may be ommited
+but when specified it must be unclosed between quotes.
+
+**Usage**
+
+````
+$ irccdctl kick server nick channel [reason]
+````
+
+**Example**
+
+````
+$ irccdctl kick freenode jean #staff "Stop flooding"
+````
+
+## Load
+
+Load a plugin into the irccd instance.
+
+**Usage**
+
+````
+$ irccdctl load plugin
+````
+
+**Example**
+
+````
+$ irccdctl load ask
+````
+
+## Me
+
+Send a CTCP ACTION message. It is exactly the same syntax as  message.
+
+**Usage**
+
+````
+$ irccdctl me server target message
+````
+
+**Example**
+
+````
+$ irccdctl me freenode #staff "going back soon"
+````
+
+## Message
+
+Send a message to someone or a channel. The target may be a channel or a real
+person. If the message contains more than one word it must be enclosed between
+quotes.
+
+**Usage**
+
+````
+$ irccdctl message server target message
+````
+
+**Example**
+
+````
+$ irccdctl message freenode #staff "Hello from irccd"
+````
+
+## Channel mode
+
+Change the mode of the specified channel. The mode contains full parameters like
+"+b" or "+k secret".
+
+**Usage**
+
+````
+$ irccdctl mode server channel mode
+````
+
+**Example**
+
+````
+$ irccdctl mode freenode #staff +t
+````
+
+## Notice
+
+Send a private notice to a target user.
+
+**Usage**
+
+````
+$ irccdctl notice server target message
+````
+
+**Example**
+
+````
+$ irccdctl notice freenode jean "Private notice"
+````
+
+## Nickname
+
+Change your nickname. The parameter nickname is the new nickname
+
+**Usage**
+
+````
+$ irccdctl nick server nickname
+````
+
+**Example**
+
+````
+$ irccdctl nick freenode david
+````
+
+## Part
+
+Leave a channel. Parameter server is one registered in irccd config. Parameter
+channel is the channel to leave.
+
+**Usage**
+
+````
+$ irccdctl part server channel
+````
+
+**Example**
+
+````
+$ irccdctl part freenode #staff
+````
+
+## Reload
+
+Reload a plugin, parameter name is the plugin to reload. The plugin needs to be
+loaded.
+
+**Usage**
+
+````
+$ irccdctl reload name
+````
+
+**Example**
+
+````
+$ irccdctl reload logger
+````
+
+## Restart
+
+Sometimes it is needed to force a reload by hand. This even more true when a
+server died, irccd has no way to detect that. This command force a reconnection
+even if it is not enabled in the config.
+
+**Note**: If the parameter name is not given, all servers are restarted.
+
+**Usage**
+
+````
+$ irccdctl restart [name]
+````
+
+**Example**
+
+````
+$ irccdctl restart
+````
+
+## Topic
+
+Set the new topic of a channel. Topic must be enclosed between quotes.
+
+**Usage**
+
+````
+$ irccdctl topic server channel topic
+````
+
+**Example**
+
+````
+$ irccdctl topic freenode #wmfs "This is the best channel"
+````
+
+## User mode
+
+Change your own user mode.
+
+**Usage**
+
+````
+$ irccdctl umode server mode
+````
+
+**Example**
+
+````
+$ irccdctl umode +i
+````
+
+## Unload
+
+Unload a loaded plugin from the irccd instance.
+
+**Usage**
+
+````
+$ irccdctl unload name
+````
+
+**Example**
+
+````
+$ irccdctl unload logger
+````

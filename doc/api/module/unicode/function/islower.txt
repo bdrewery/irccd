@@ -1,0 +1,21 @@
+---
+function: islower
+since: 1.2
+info: yes
+---
+
+Check if the unicode character is lower case.
+
+# Synopsis
+
+````lua
+function islower(code)
+````
+
+# Arguments
+
+- code, the code point
+
+# Returns
+
+True if lower case.
