@@ -79,7 +79,7 @@ if (WITH_TESTS)
 	add_subdirectory(js-unicode)
 
 	# Server stuff
-	#add_subdirectory(server)
+	add_subdirectory(server)
 	#add_subdirectory(transport)
 	#add_subdirectory(rules)
 

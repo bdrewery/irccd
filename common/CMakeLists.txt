@@ -36,6 +36,7 @@ set(
 	Logger.h
 	OptionParser.cpp
 	OptionParser.h
+	Signals.h
 	Socket.cpp
 	Socket.h
 	SocketAddress.cpp

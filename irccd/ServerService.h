@@ -95,20 +95,20 @@ public:
 
 		assert(!has(server->info().name));
 
-		server->setOnChannelNotice(bind(&ServerService::onChannelNotice, this, server, _1, _2, _3));
-		server->setOnConnect(bind(&ServerService::onConnect, this, server));
-		server->setOnInvite(bind(&ServerService::onInvite, this, server, _1, _2, _3));
-		server->setOnJoin(bind(&ServerService::onJoin, this, server, _1, _2));
-		server->setOnKick(bind(&ServerService::onKick, this, server, _1, _2, _3, _4));
-		server->setOnMessage(bind(&ServerService::onMessage, this, server, _1, _2, _3));
-		server->setOnMe(bind(&ServerService::onMe, this, server, _1, _2, _3));
-		server->setOnMode(bind(&ServerService::onMode, this, server, _1, _2, _3, _4));
-		server->setOnNick(bind(&ServerService::onNick, this, server, _1, _2));
-		server->setOnNotice(bind(&ServerService::onNotice, this, server, _1, _2));
-		server->setOnPart(bind(&ServerService::onPart, this, server, _1, _2, _3));
-		server->setOnQuery(bind(&ServerService::onQuery, this, server, _1, _2));
-		server->setOnTopic(bind(&ServerService::onTopic, this, server, _1, _2, _3));
-		server->setOnUserMode(bind(&ServerService::onUserMode, this, server, _1, _2));
+		server->onChannelNotice.connect(bind(&ServerService::onChannelNotice, this, server, _1, _2, _3));
+		server->onConnect.connect(bind(&ServerService::onConnect, this, server));
+		server->onInvite.connect(bind(&ServerService::onInvite, this, server, _1, _2, _3));
+		server->onJoin.connect(bind(&ServerService::onJoin, this, server, _1, _2));
+		server->onKick.connect(bind(&ServerService::onKick, this, server, _1, _2, _3, _4));
+		server->onMessage.connect(bind(&ServerService::onMessage, this, server, _1, _2, _3));
+		server->onMe.connect(bind(&ServerService::onMe, this, server, _1, _2, _3));
+		server->onMode.connect(bind(&ServerService::onMode, this, server, _1, _2, _3, _4));
+		server->onNick.connect(bind(&ServerService::onNick, this, server, _1, _2));
+		server->onNotice.connect(bind(&ServerService::onNotice, this, server, _1, _2));
+		server->onPart.connect(bind(&ServerService::onPart, this, server, _1, _2, _3));
+		server->onQuery.connect(bind(&ServerService::onQuery, this, server, _1, _2));
+		server->onTopic.connect(bind(&ServerService::onTopic, this, server, _1, _2, _3));
+		server->onUserMode.connect(bind(&ServerService::onUserMode, this, server, _1, _2));
 
 		{
 			lock_guard<mutex> lock(m_mutex);

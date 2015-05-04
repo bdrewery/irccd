@@ -32,6 +32,7 @@
 
 #include <IrccdConfig.h>
 #include <Logger.h>
+#include <Signals.h>
 
 #include "ServerState.h"
 
@@ -287,13 +288,18 @@ public:
 	static constexpr const char *JsName{"Server"};
 #endif
 
+	/* ------------------------------------------------
+	 * Signals
+	 * ------------------------------------------------ */
+
 	/**
 	 * ServerEvent: onConnect
 	 * ------------------------------------------------
 	 *
 	 * Triggered when the server is successfully connected.
 	 */
-	using OnConnect = std::function<void ()>;
+	Signal<> onConnect;
+	
 
 	/**
 	 * ServerEvent: onChannelNotice
@@ -306,7 +312,7 @@ public:
 	 * - the channel name
 	 * - the notice message
 	 */
-	using OnChannelNotice = std::function<void (std::string, std::string, std::string)>;
+	Signal<std::string, std::string, std::string> onChannelNotice;
 
 	/**
 	 * ServerEvent: onInvite
@@ -319,7 +325,7 @@ public:
 	 * - the channel
 	 * - your nickname
 	 */
-	using OnInvite = std::function<void (std::string, std::string, std::string)>;
+	Signal<std::string, std::string, std::string> onInvite;
 
 	/**
 	 * ServerEvent: onJoin
@@ -331,7 +337,7 @@ public:
 	 * - the origin (may be you)
 	 * - the channel
 	 */
-	using OnJoin = std::function<void (std::string, std::string)>;
+	Signal<std::string, std::string> onJoin;
 
 	/**
 	 * ServerEvent: onKick
@@ -345,7 +351,7 @@ public:
 	 * - the target who has been kicked
 	 * - the optional reason
 	 */
-	using OnKick = std::function<void (std::string, std::string, std::string, std::string)>;
+	Signal<std::string, std::string, std::string, std::string> onKick;
 
 	/**
 	 * ServerEvent: onMessage
@@ -358,7 +364,7 @@ public:
 	 * - the channel
 	 * - the message
 	 */
-	using OnMessage = std::function<void (std::string, std::string, std::string)>;
+	Signal<std::string, std::string, std::string> onMessage;
 
 	/**
 	 * ServerEvent: onMe
@@ -374,7 +380,7 @@ public:
 	 * - the target
 	 * - the message
 	 */
-	using OnMe = std::function<void (std::string, std::string, std::string)>;
+	Signal<std::string, std::string, std::string> onMe;
 
 	/**
 	 * ServerEvent: onMode
@@ -388,7 +394,7 @@ public:
 	 * - the mode
 	 * - the optional mode argument
 	 */
-	using OnMode = std::function<void (std::string, std::string, std::string, std::string)>;
+	Signal<std::string, std::string, std::string, std::string> onMode;
 
 	/**
 	 * ServerEvent: onNick
@@ -400,7 +406,7 @@ public:
 	 * - the old nickname (may be you)
 	 * - the new nickname
 	 */
-	using OnNick = std::function<void (std::string, std::string)>;
+	Signal<std::string, std::string> onNick;
 
 	/**
 	 * ServerEvent: onNotice
@@ -412,7 +418,7 @@ public:
 	 * - the origin
 	 * - the notice message
 	 */
-	using OnNotice = std::function<void (std::string, std::string)>;
+	Signal<std::string, std::string> onNotice;
 
 	/**
 	 * ServerEvent: onPart
@@ -425,7 +431,7 @@ public:
 	 * - the channel that the nickname has left
 	 * - the optional reason
 	 */
-	using OnPart = std::function<void (std::string, std::string, std::string)>;
+	Signal<std::string, std::string, std::string> onPart;
 
 	/**
 	 * ServerEvent: onQuery
@@ -437,7 +443,7 @@ public:
 	 * - the origin
 	 * - the message
 	 */
-	using OnQuery = std::function<void (std::string, std::string)>;
+	Signal<std::string, std::string> onQuery;
 
 	/**
 	 * ServerEvent: onTopic
@@ -450,7 +456,7 @@ public:
 	 * - the channel
 	 * - the new topic
 	 */
-	using OnTopic = std::function<void (std::string, std::string, std::string)>;
+	Signal<std::string, std::string, std::string> onTopic;
 
 	/**
 	 * ServerEvent: onUserMode
@@ -462,7 +468,7 @@ public:
 	 * - the origin
 	 * - the mode (e.g +i)
 	 */
-	using OnUserMode = std::function<void (std::string, std::string)>;
+	Signal<std::string, std::string> onUserMode;
 
 private:
 	using Session = std::unique_ptr<irc_session_t, void (*)(irc_session_t *)>;
@@ -478,39 +484,6 @@ private:
 	ServerState m_next;
 	Queue m_queue;
 	mutable Mutex m_mutex;
-
-	// All events
-	OnConnect m_onConnect;
-	OnChannelNotice m_onChannelNotice;
-	OnInvite m_onInvite;
-	OnJoin m_onJoin;
-	OnKick m_onKick;
-	OnMessage m_onMessage;
-	OnMe m_onMe;
-	OnMode m_onMode;
-	OnNick m_onNick;
-	OnNotice m_onNotice;
-	OnPart m_onPart;
-	OnQuery m_onQuery;
-	OnTopic m_onTopic;
-	OnUserMode m_onUserMode;
-
-private:
-	/*
-	 * Wrappers for libircclient callbacks to our std::functions, the
-	 * irc_callbacks_t structure is filled with lambdas that call
-	 * these appropriate functions.
-	 *
-	 * The signatures do not match the irc_event_callback_t function
-	 * because we have discarded useless parameter.
-	 */
-	template <typename Function, typename... Args>
-	inline void wrapHandler(Function &function, Args&&... args) noexcept
-	{
-		if (function) {
-			function(std::forward<Args>(args)...);
-		}
-	}
 
 	void handleChannel(const char *, const char **) noexcept;
 	void handleChannelNotice(const char *, const char **) noexcept;
@@ -767,146 +740,6 @@ public:
 	inline irc_session_t *session() noexcept
 	{
 		return m_session.get();
-	}
-
-	/**
-	 * Set the onConnect handler.
-	 *
-	 * @param func the function
-	 */
-	inline void setOnConnect(OnConnect func) noexcept
-	{
-		m_onConnect = std::move(func);
-	}
-
-	/**
-	 * Set the onChannelNotice handler.
-	 *
-	 * @param func the function
-	 */
-	inline void setOnChannelNotice(OnChannelNotice func) noexcept
-	{
-		m_onChannelNotice = std::move(func);
-	}
-
-	/**
-	 * Set the onInvite handler.
-	 *
-	 * @param func the function
-	 */
-	inline void setOnInvite(OnInvite func) noexcept
-	{
-		m_onInvite = std::move(func);
-	}
-
-	/**
-	 * Set the onJoin handler.
-	 *
-	 * @param func the function
-	 */
-	inline void setOnJoin(OnJoin func) noexcept
-	{
-		m_onJoin = std::move(func);
-	}
-
-	/**
-	 * Set the onKick handler.
-	 *
-	 * @param func the function
-	 */
-	inline void setOnKick(OnKick func) noexcept
-	{
-		m_onKick = std::move(func);
-	}
-
-	/**
-	 * Set the onMessage handler.
-	 *
-	 * @param func the function
-	 */
-	inline void setOnMessage(OnMessage func) noexcept
-	{
-		m_onMessage = std::move(func);
-	}
-
-	/**
-	 * Set the onMe handler.
-	 *
-	 * @param func the function
-	 */
-	inline void setOnMe(OnMe func) noexcept
-	{
-		m_onMe = std::move(func);
-	}
-
-	/**
-	 * Set the onMode handler.
-	 *
-	 * @param func the function
-	 */
-	inline void setOnMode(OnMode func) noexcept
-	{
-		m_onMode = std::move(func);
-	}
-
-	/**
-	 * Set the onNick handler.
-	 *
-	 * @param func the function
-	 */
-	inline void setOnNick(OnNick func) noexcept
-	{
-		m_onNick = std::move(func);
-	}
-
-	/**
-	 * Set the onNotice handler.
-	 *
-	 * @param func the function
-	 */
-	inline void setOnNotice(OnNotice func) noexcept
-	{
-		m_onNotice = std::move(func);
-	}
-
-	/**
-	 * Set the onPart handler.
-	 *
-	 * @param func the function
-	 */
-	inline void setOnPart(OnPart func) noexcept
-	{
-		m_onPart = std::move(func);
-	}
-
-	/**
-	 * Set the onQuery handler.
-	 *
-	 * @param func the function
-	 */
-	inline void setOnQuery(OnQuery func) noexcept
-	{
-		m_onQuery = std::move(func);
-	}
-
-	/**
-	 * Set the onTopic handler.
-	 *
-	 * @param func the function
-	 */
-	inline void setOnTopic(OnTopic func) noexcept
-	{
-		m_onTopic = std::move(func);
-	}
-
-	/**
-	 * Set the onUserMode handler.
-	 *
-	 * @param func the function
-	 */
-	inline void setOnUserMode(OnUserMode func) noexcept
-	{
-		m_onUserMode = std::move(func);
 	}
 
 	/**
