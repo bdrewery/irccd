@@ -26,6 +26,8 @@
 #include <thread>
 #include <unordered_map>
 
+#include <Signals.h>
+
 #include "Server.h"
 #include "Service.h"
 
@@ -34,48 +36,51 @@ namespace irccd {
 class ServerEvent;
 
 class ServerService : public Service {
+public:
+	/*
+	 * Signal: event has been generated
+	 * ------------------------------------------------
+	 *
+	 * This signal is emitted when an event has been received.
+	 *
+	 * <strong>Do not add a function while the thread is running</strong>
+	 *
+	 * Arguments:
+	 * - the generic event
+	 */
+	Signal<ServerEvent> onEvent;
+
 private:
-	std::function<void (ServerEvent)> m_onEvent;
 	std::unordered_map<std::string, std::shared_ptr<Server>> m_servers;
 
 protected:
 	void run() override;
 
 private:
-	// Converters from Server callbacks to our event loop
-	void onChannelNotice(std::shared_ptr<Server>, std::string, std::string, std::string);
-	void onConnect(std::shared_ptr<Server>);
-	void onInvite(std::shared_ptr<Server>, std::string, std::string, std::string);
-	void onJoin(std::shared_ptr<Server>, std::string, std::string);
-	void onKick(std::shared_ptr<Server>, std::string, std::string, std::string, std::string);
-	void onMessage(std::shared_ptr<Server>, std::string, std::string, std::string);
-	void onMe(std::shared_ptr<Server>, std::string, std::string, std::string);
-	void onMode(std::shared_ptr<Server>, std::string, std::string, std::string, std::string);
-	void onNick(std::shared_ptr<Server>, std::string, std::string);
-	void onNotice(std::shared_ptr<Server>, std::string, std::string);
-	void onPart(std::shared_ptr<Server>, std::string, std::string, std::string);
-	void onQuery(std::shared_ptr<Server>, std::string, std::string);
-	void onTopic(std::shared_ptr<Server>, std::string, std::string, std::string);
-	void onUserMode(std::shared_ptr<Server>, std::string, std::string);
+	/* ------------------------------------------------
+	 * Slots (convert Server's signals to ServerEvent)
+	 * ------------------------------------------------ */
+
+	void handleOnChannelNotice(std::shared_ptr<Server>, std::string, std::string, std::string);
+	void handleOnConnect(std::shared_ptr<Server>);
+	void handleOnInvite(std::shared_ptr<Server>, std::string, std::string, std::string);
+	void handleOnJoin(std::shared_ptr<Server>, std::string, std::string);
+	void handleOnKick(std::shared_ptr<Server>, std::string, std::string, std::string, std::string);
+	void handleOnMessage(std::shared_ptr<Server>, std::string, std::string, std::string);
+	void handleOnMe(std::shared_ptr<Server>, std::string, std::string, std::string);
+	void handleOnMode(std::shared_ptr<Server>, std::string, std::string, std::string, std::string);
+	void handleOnNick(std::shared_ptr<Server>, std::string, std::string);
+	void handleOnNotice(std::shared_ptr<Server>, std::string, std::string);
+	void handleOnPart(std::shared_ptr<Server>, std::string, std::string, std::string);
+	void handleOnQuery(std::shared_ptr<Server>, std::string, std::string);
+	void handleOnTopic(std::shared_ptr<Server>, std::string, std::string, std::string);
+	void handleOnUserMode(std::shared_ptr<Server>, std::string, std::string);
 
 public:
 	/**
 	 * Default constructor, does nothing.
 	 */
 	ServerService();
-
-	/**
-	 * Set the event handler.
-	 *
-	 * @param func the function
-	 * @pre the thread must not be started
-	 */
-	inline void setOnEvent(std::function<void (ServerEvent)> func) noexcept
-	{
-		assert(!isRunning());
-
-		m_onEvent = std::move(func);
-	}
 
 	/**
 	 * Add a server. Pass exactly the same arguments as you would pass
@@ -95,20 +100,20 @@ public:
 
 		assert(!has(server->info().name));
 
-		server->onChannelNotice.connect(bind(&ServerService::onChannelNotice, this, server, _1, _2, _3));
-		server->onConnect.connect(bind(&ServerService::onConnect, this, server));
-		server->onInvite.connect(bind(&ServerService::onInvite, this, server, _1, _2, _3));
-		server->onJoin.connect(bind(&ServerService::onJoin, this, server, _1, _2));
-		server->onKick.connect(bind(&ServerService::onKick, this, server, _1, _2, _3, _4));
-		server->onMessage.connect(bind(&ServerService::onMessage, this, server, _1, _2, _3));
-		server->onMe.connect(bind(&ServerService::onMe, this, server, _1, _2, _3));
-		server->onMode.connect(bind(&ServerService::onMode, this, server, _1, _2, _3, _4));
-		server->onNick.connect(bind(&ServerService::onNick, this, server, _1, _2));
-		server->onNotice.connect(bind(&ServerService::onNotice, this, server, _1, _2));
-		server->onPart.connect(bind(&ServerService::onPart, this, server, _1, _2, _3));
-		server->onQuery.connect(bind(&ServerService::onQuery, this, server, _1, _2));
-		server->onTopic.connect(bind(&ServerService::onTopic, this, server, _1, _2, _3));
-		server->onUserMode.connect(bind(&ServerService::onUserMode, this, server, _1, _2));
+		server->onChannelNotice.connect(bind(&ServerService::handleOnChannelNotice, this, server, _1, _2, _3));
+		server->onConnect.connect(bind(&ServerService::handleOnConnect, this, server));
+		server->onInvite.connect(bind(&ServerService::handleOnInvite, this, server, _1, _2, _3));
+		server->onJoin.connect(bind(&ServerService::handleOnJoin, this, server, _1, _2));
+		server->onKick.connect(bind(&ServerService::handleOnKick, this, server, _1, _2, _3, _4));
+		server->onMessage.connect(bind(&ServerService::handleOnMessage, this, server, _1, _2, _3));
+		server->onMe.connect(bind(&ServerService::handleOnMe, this, server, _1, _2, _3));
+		server->onMode.connect(bind(&ServerService::handleOnMode, this, server, _1, _2, _3, _4));
+		server->onNick.connect(bind(&ServerService::handleOnNick, this, server, _1, _2));
+		server->onNotice.connect(bind(&ServerService::handleOnNotice, this, server, _1, _2));
+		server->onPart.connect(bind(&ServerService::handleOnPart, this, server, _1, _2, _3));
+		server->onQuery.connect(bind(&ServerService::handleOnQuery, this, server, _1, _2));
+		server->onTopic.connect(bind(&ServerService::handleOnTopic, this, server, _1, _2, _3));
+		server->onUserMode.connect(bind(&ServerService::handleOnUserMode, this, server, _1, _2));
 
 		{
 			lock_guard<mutex> lock(m_mutex);

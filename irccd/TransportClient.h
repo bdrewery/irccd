@@ -29,6 +29,9 @@
 #include <mutex>
 #include <string>
 
+#include <Json.h>
+#include <Signals.h>
+
 #include "SocketTcp.h"
 
 namespace irccd {
@@ -38,14 +41,72 @@ namespace irccd {
  * @brief Client connected to irccd
  */
 class TransportClientAbstract {
+public:
+	/*
+	 * Signal: onChannelNotice
+	 * --------------------------------------------------------
+	 *
+	 * Send a channel notice to the specified channel.
+	 *
+	 * {
+	 *   "command": "cnotice",
+	 *   "server: "the server name",
+	 *   "channel": "name",
+	 *   "message": "the message"
+	 * }
+	 */
+	Signal<std::string, std::string, std::string> onChannelNotice;
+	Signal<> onConnect;
+	Signal<std::string> onDisconnect;
+	Signal<std::string, std::string, std::string> onInvite;
+	Signal<std::string, std::string, std::string> onJoin;
+	Signal<std::string, std::string, std::string, std::string> onKick;
+	Signal<std::string> onLoad;
+	Signal<std::string, std::string, std::string> onMe;
+	Signal<std::string, std::string, std::string> onMessage;
+	Signal<std::string, std::string, std::string> onMode;
+	Signal<std::string, std::string> onNick;
+	Signal<std::string, std::string, std::string> onNotice;
+	Signal<std::string, std::string, std::string> onPart;
+	Signal<std::string> onReconnect;
+	Signal<std::string> onReload;
+	Signal<std::string> onTopic;
+	Signal<std::string> onUnload;
+	Signal<std::string, std::string> onUserMode;
+	Signal<> onDie;
+	Signal<> onWrite;
+
 private:
 	std::string m_input;
 	std::string m_output;
 	mutable std::mutex m_mutex;
-	std::function<void (const std::string &)> m_onComplete;
-	std::function<void ()> m_onDie;
-	std::function<void ()> m_onWrite;
 
+	/* JSON helpers */
+	JsonValue want(const JsonObject &, const std::string &name) const;
+	JsonValue optional(const JsonObject &, const std::string &name, const JsonValue &def) const;
+
+	/* Parse JSON commands */
+	void parseChannelNotice(const JsonObject &) const;
+	void parseConnect(const JsonObject &) const;
+	void parseDisconnect(const JsonObject &) const;
+	void parseInvite(const JsonObject &) const;
+	void parseJoin(const JsonObject &) const;
+	void parseKick(const JsonObject &) const;
+	void parseLoad(const JsonObject &) const;
+	void parseMe(const JsonObject &) const;
+	void parseMessage(const JsonObject &) const;
+	void parseMode(const JsonObject &) const;
+	void parseNick(const JsonObject &) const;
+	void parseNotice(const JsonObject &) const;
+	void parsePart(const JsonObject &) const;
+	void parseReconnect(const JsonObject &) const;
+	void parseReload(const JsonObject &) const;
+	void parseTopic(const JsonObject &) const;
+	void parseUnload(const JsonObject &) const;
+	void parseUserMode(const JsonObject &) const;
+	void parse(const std::string &) const;
+
+	/* Do I/O */
 	void receive();
 	void send();
 
@@ -54,31 +115,6 @@ public:
 	 * Virtual destructor defaulted.
 	 */
 	virtual ~TransportClientAbstract() = default;
-
-	/**
-	 * Set the onComplete callback. The callback will be called for each
-	 * message received that is complete.
-	 *
-	 * @param func the function to move
-	 */
-	void setOnComplete(std::function<void (const std::string &)> func);
-
-	/**
-	 * Set the onWrite callback. The callback will be called when some
-	 * output has been queued.
-	 *
-	 * @param func the funciton to move
-	 */
-	void setOnWrite(std::function<void ()> func);
-
-	/**
-	 * Set the onDie callback. The callback will be called when the
-	 * client is marked disconnected.
-	 *
-	 * @param func the function to move
-	 * @note It is still safe to use the object as it is a shared_ptr
-	 */
-	void setOnDie(std::function<void ()> func);
 
 	/**
 	 * Flush pending data to send and try to receive if possible.

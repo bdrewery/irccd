@@ -293,7 +293,7 @@ public:
 	 * ------------------------------------------------ */
 
 	/**
-	 * ServerEvent: onConnect
+	 * Signal: onConnect
 	 * ------------------------------------------------
 	 *
 	 * Triggered when the server is successfully connected.
@@ -302,7 +302,7 @@ public:
 	
 
 	/**
-	 * ServerEvent: onChannelNotice
+	 * Signal: onChannelNotice
 	 * ------------------------------------------------
 	 *
 	 * Triggered when a notice has been sent on a channel.
@@ -315,7 +315,7 @@ public:
 	Signal<std::string, std::string, std::string> onChannelNotice;
 
 	/**
-	 * ServerEvent: onInvite
+	 * Signal: onInvite
 	 * ------------------------------------------------
 	 *
 	 * Triggered when an invite has been sent to you (the bot).
@@ -328,7 +328,7 @@ public:
 	Signal<std::string, std::string, std::string> onInvite;
 
 	/**
-	 * ServerEvent: onJoin
+	 * Signal: onJoin
 	 * ------------------------------------------------
 	 *
 	 * Triggered when a user has joined the channel, it also includes you.
@@ -340,7 +340,7 @@ public:
 	Signal<std::string, std::string> onJoin;
 
 	/**
-	 * ServerEvent: onKick
+	 * Signal: onKick
 	 * ------------------------------------------------
 	 *
 	 * Triggered when someone has been kicked from a channel.
@@ -367,7 +367,7 @@ public:
 	Signal<std::string, std::string, std::string> onMessage;
 
 	/**
-	 * ServerEvent: onMe
+	 * Signal: onMe
 	 * ------------------------------------------------
 	 *
 	 * Triggered on a CTCP Action.
@@ -383,7 +383,7 @@ public:
 	Signal<std::string, std::string, std::string> onMe;
 
 	/**
-	 * ServerEvent: onMode
+	 * Signal: onMode
 	 * ------------------------------------------------
 	 *
 	 * Triggered when someone changed the channel mode.
@@ -397,7 +397,7 @@ public:
 	Signal<std::string, std::string, std::string, std::string> onMode;
 
 	/**
-	 * ServerEvent: onNick
+	 * Signal: onNick
 	 * ------------------------------------------------
 	 *
 	 * Triggered when someone changed its nickname, it also includes you.
@@ -409,7 +409,7 @@ public:
 	Signal<std::string, std::string> onNick;
 
 	/**
-	 * ServerEvent: onNotice
+	 * Signal: onNotice
 	 * ------------------------------------------------
 	 *
 	 * Triggered when someone has sent a notice to you.
@@ -421,7 +421,7 @@ public:
 	Signal<std::string, std::string> onNotice;
 
 	/**
-	 * ServerEvent: onPart
+	 * Signal: onPart
 	 * ------------------------------------------------
 	 *
 	 * Triggered when someone has left the channel.
@@ -434,7 +434,7 @@ public:
 	Signal<std::string, std::string, std::string> onPart;
 
 	/**
-	 * ServerEvent: onQuery
+	 * Signal: onQuery
 	 * ------------------------------------------------
 	 *
 	 * Triggered when someone has sent you a private message.
@@ -446,7 +446,7 @@ public:
 	Signal<std::string, std::string> onQuery;
 
 	/**
-	 * ServerEvent: onTopic
+	 * Signal: onTopic
 	 * ------------------------------------------------
 	 *
 	 * Triggered when someone changed the channel topic.
@@ -459,7 +459,7 @@ public:
 	Signal<std::string, std::string, std::string> onTopic;
 
 	/**
-	 * ServerEvent: onUserMode
+	 * Signal: onUserMode
 	 * ------------------------------------------------
 	 *
 	 * Triggered when the server changed your user mode.

@@ -16,35 +16,45 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-include(${irccd_SOURCE_DIR}/js/Js.cmake)
-include(${irccd_SOURCE_DIR}/transportcommand/TransportCommand.cmake)
-include(${irccd_SOURCE_DIR}/servercommand/ServerCommand.cmake)
-include(${irccd_SOURCE_DIR}/serverevent/ServerEvent.cmake)
-include(${irccd_SOURCE_DIR}/serverstate/ServerState.cmake)
-
 set(
 	TEST_TRANSPORT_SOURCES
-	${JS_SOURCES}
-	${SERVER_COMMAND_SOURCES}
-	${SERVER_EVENT_SOURCES}
-	${SERVER_STATE_SOURCES}
-	${TRANSPORT_COMMAND_SOURCES}
 	${irccd_SOURCE_DIR}/Irccd.cpp
 	${irccd_SOURCE_DIR}/Irccd.h
+	${irccd_SOURCE_DIR}/Js.cpp
+	${irccd_SOURCE_DIR}/Js.h
+	${irccd_SOURCE_DIR}/JsFilesystem.cpp
+	${irccd_SOURCE_DIR}/JsLogger.cpp
+	${irccd_SOURCE_DIR}/JsPlugin.cpp
+	${irccd_SOURCE_DIR}/JsServer.cpp
+	${irccd_SOURCE_DIR}/JsSystem.cpp
+	${irccd_SOURCE_DIR}/JsTimer.cpp
+	${irccd_SOURCE_DIR}/JsUnicode.cpp
+	${irccd_SOURCE_DIR}/JsUtil.cpp
+	${irccd_SOURCE_DIR}/Plugin.cpp
+	${irccd_SOURCE_DIR}/Plugin.h
 	${irccd_SOURCE_DIR}/Service.cpp
 	${irccd_SOURCE_DIR}/Service.h
 	${irccd_SOURCE_DIR}/Server.cpp
 	${irccd_SOURCE_DIR}/Server.h
+	${irccd_SOURCE_DIR}/ServerState.cpp
+	${irccd_SOURCE_DIR}/ServerState.h
 	${irccd_SOURCE_DIR}/ServerEvent.cpp
 	${irccd_SOURCE_DIR}/ServerEvent.h
 	${irccd_SOURCE_DIR}/ServerService.cpp
 	${irccd_SOURCE_DIR}/ServerService.h
+	${irccd_SOURCE_DIR}/Timer.cpp
+	${irccd_SOURCE_DIR}/Timer.h
+	${irccd_SOURCE_DIR}/TimerEvent.cpp
+	${irccd_SOURCE_DIR}/TimerEvent.h
 	${irccd_SOURCE_DIR}/Transport.h
-	${irccd_SOURCE_DIR}/TransportService.cpp
-	${irccd_SOURCE_DIR}/TransportService.h
 	${irccd_SOURCE_DIR}/TransportClient.cpp
 	${irccd_SOURCE_DIR}/TransportClient.h
+	${irccd_SOURCE_DIR}/TransportCommand.cpp
 	${irccd_SOURCE_DIR}/TransportCommand.h
+	${irccd_SOURCE_DIR}/TransportService.cpp
+	${irccd_SOURCE_DIR}/TransportService.h
+	${irccd_SOURCE_DIR}/Unicode.cpp
+	${irccd_SOURCE_DIR}/Unicode.h
 	TestTransport.cpp
 )
 

@@ -214,29 +214,6 @@ void TransportService::handleUnload(const std::shared_ptr<TransportClientAbstrac
  * TransportService slots from TransportClient signals
  * -------------------------------------------------------- */
 
-void TransportService::onMessage(const std::shared_ptr<TransportClientAbstract> &client, const std::string &message)
-{
-	try {
-		JsonDocument document(message);
-
-		if (!document.isObject()) {
-			client->error("Invalid JSon command");
-		} else {
-			JsonObject object = document.toObject();
-
-			if (!object.contains("command")) {
-				client->error("Invalid message");
-			} else if (m_commandMap.count(object["command"].toString()) == 0) {
-				client->error("Invalid command");
-			} else {
-				(this->*m_commandMap.at(object["command"].toString()))(client, object);
-			}
-		}
-	} catch (const std::exception &error) {
-		client->error(error.what());
-	}
-}
-
 void TransportService::onWrite()
 {
 	Service::reload();
@@ -283,9 +260,10 @@ void TransportService::accept(const Socket &s)
 
 	Logger::debug() << "transport: new client" << std::endl;
 
-	client->setOnComplete(bind(&TransportService::onMessage, this, client, _1));
-	client->setOnWrite(bind(&TransportService::onWrite, this));
-	client->setOnDie(bind(&TransportService::onDie, this, client));
+	// TODO: add all slots here
+
+	client->onWrite.connect(bind(&TransportService::onWrite, this));
+	client->onDie.connect(bind(&TransportService::onDie, this, client));
 
 	// Add for listening
 	std::lock_guard<std::mutex> lock(m_mutex);
@@ -307,6 +285,7 @@ void TransportService::run()
 	SocketListener listener;
 
 	while (isRunning()) {
+		// TODO: do not rebuild the listener at each iteration.
 		try {
 			listener.clear();
 			listener.set(socket(), SocketListener::Read);
@@ -348,26 +327,6 @@ void TransportService::run()
 
 TransportService::TransportService()
 	: Service("transport", "/tmp/._irccd_ts.sock")
-	, m_commandMap{
-		{ "cnotice",	&TransportService::handleChannelNotice	},
-		{ "connect",	&TransportService::handleConnect	},
-		{ "disconnect",	&TransportService::handleDisconnect	},
-		{ "invite",	&TransportService::handleInvite		},
-		{ "join",	&TransportService::handleJoin		},
-		{ "kick",	&TransportService::handleKick		},
-		{ "load",	&TransportService::handleLoad		},
-		{ "me",		&TransportService::handleMe		},
-		{ "message",	&TransportService::handleMessage	},
-		{ "mode",	&TransportService::handleMode		},
-		{ "nick",	&TransportService::handleNick		},
-		{ "notice",	&TransportService::handleNotice		},
-		{ "part",	&TransportService::handlePart		},
-		{ "reconnect",	&TransportService::handleReconnect	},
-		{ "reload",	&TransportService::handleReload		},
-		{ "topic",	&TransportService::handleTopic		},
-		{ "umode",	&TransportService::handleUserMode	},
-		{ "unload",	&TransportService::handleUnload		}
-	}
 {
 }
 

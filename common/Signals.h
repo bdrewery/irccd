@@ -146,7 +146,7 @@ public:
 	 *
 	 * @param args the arguments to pass to the signal
 	 */
-	void operator()(Args... args)
+	void operator()(Args... args) const
 	{
 		for (auto &pair : m_functions) {
 			pair.second(args...);

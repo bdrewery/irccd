@@ -301,8 +301,8 @@ int main(int argc, char **argv)
 
 	manager = std::make_unique<TransportService>();
 	manager->add<TransportInet>(TransportAbstract::IPv4, 25000);
-	manager->setOnEvent([&] (std::unique_ptr<TransportCommand> command) {
-		last = std::move(command);
+	manager->setOnEvent([&] (TransportCommand command) {
+		last = std::make_unique<TransportCommand>(std::move(command));
 	});
 	manager->start();
 

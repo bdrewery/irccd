@@ -35,7 +35,7 @@ Irccd::Irccd()
 	/*
 	 * This signal is called from the ServerManager.
 	 */
-	m_serverService.setOnEvent([this] (ServerEvent event) {
+	m_serverService.onEvent.connect([this] (ServerEvent event) {
 		serverAddEvent(std::move(event));
 	});
 	m_transportService.setOnEvent([this] (TransportCommand command) {
