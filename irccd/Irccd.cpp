@@ -106,11 +106,11 @@ void Irccd::pluginLoad(std::string path)
 	/*
 	 * These signals will be called from the Timer thread.
 	 */
-	plugin->setOnTimerSignal([this, plugin] (std::shared_ptr<Timer> timer) {
-		timerAddEvent(TimerEvent(std::move(plugin), std::move(timer)));
+	plugin->onTimerSignal.connect([this, plugin] (std::shared_ptr<Timer> timer) {
+		timerAddEvent({std::move(plugin), std::move(timer)});
 	});
-	plugin->setOnTimerEnd([this, plugin] (std::shared_ptr<Timer> timer) {
-		timerAddEvent(TimerEvent(std::move(plugin), std::move(timer), TimerEventType::End));
+	plugin->onTimerEnd.connect([this, plugin] (std::shared_ptr<Timer> timer) {
+		timerAddEvent({std::move(plugin), std::move(timer), TimerEventType::End});
 	});
 	plugin->onLoad();
 

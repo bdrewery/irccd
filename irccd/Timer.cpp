@@ -36,7 +36,7 @@ void Timer::run()
 
 		if (m_running) {
 			// Signal process
-			m_onSignal();
+			onSignal();
 
 			if (m_type == TimerType::Single) {
 				m_running = false;
@@ -45,7 +45,7 @@ void Timer::run()
 	}
 
 	// Finished
-	m_onEnd();
+	onEnd();
 }
 
 Timer::Timer(TimerType type, int delay)
@@ -74,8 +74,6 @@ Timer::~Timer()
 void Timer::start()
 {
 	assert(!m_running);
-	assert(m_onSignal);
-	assert(m_onEnd);
 
 	m_running = true;
 	m_thread = std::thread(std::bind(&Timer::run, this));

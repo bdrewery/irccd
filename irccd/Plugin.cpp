@@ -109,17 +109,14 @@ const PluginInfo &Plugin::info() const
 
 void Plugin::timerAdd(std::shared_ptr<Timer> timer) noexcept
 {
-	assert(m_onTimerSignal != nullptr);
-	assert(m_onTimerEnd != nullptr);
-
 	/*
 	 * These signals are called from the Timer thread.
 	 */
-	timer->onSignal([this, timer] () {
-		m_onTimerSignal(timer);
+	timer->onSignal.connect([this, timer] () {
+		onTimerSignal(std::move(timer));
 	});
-	timer->onEnd([this, timer] () {
-		m_onTimerEnd(timer);
+	timer->onEnd.connect([this, timer] () {
+		onTimerEnd(std::move(timer));
 	});
 
 	m_timers.insert(std::move(timer));

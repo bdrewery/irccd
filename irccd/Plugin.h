@@ -29,6 +29,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <Signals.h>
+
 #include "Js.h"
 #include "Timer.h"
 
@@ -60,16 +62,35 @@ using PluginConfig = std::unordered_map<std::string, std::string>;
  * at runtime.
  */
 class Plugin {
+public:
+	/**
+	 * Signal: onTimerSignal
+	 * ------------------------------------------------
+	 *
+	 * When a timer expires.
+	 *
+	 * Arguments:
+	 * - the timer object
+	 */
+	Signal<std::shared_ptr<Timer>> onTimerSignal;
+
+	/**
+	 * Signal: onTimerEnd
+	 * ------------------------------------------------
+	 *
+	 * When a timer is finished.
+	 *
+	 * Arguments:
+	 * - the timer object
+	 */
+	Signal<std::shared_ptr<Timer>> onTimerEnd;
+
 private:
 	/* Plugin data */
 	DukContext m_context;
 	PluginInfo m_info;
 	PluginConfig m_config;
 	Timers m_timers;
-
-	/* Timer notifiers */
-	std::function<void (std::shared_ptr<Timer>)> m_onTimerSignal;
-	std::function<void (std::shared_ptr<Timer>)> m_onTimerEnd;
 
 	/* Private helpers */
 	std::string global(const std::string &name) const;
@@ -92,36 +113,8 @@ public:
 	const PluginInfo &info() const;
 
 	/**
-	 * Set the timer signal associated to a plugin.
-	 *
-	 * @param func the function
-	 * @pre the list of timers must be empty
-	 */
-	inline void setOnTimerSignal(std::function<void (std::shared_ptr<Timer>)> func) noexcept
-	{
-		assert(m_timers.empty());
-
-		m_onTimerSignal = std::move(func);
-	}
-
-	/**
-	 * Set the timer end signal associated to a plugin.
-	 *
-	 * @param func the function
-	 * @pre the list of timers must be empty
-	 */
-	inline void setOnTimerEnd(std::function<void (std::shared_ptr<Timer>)> func) noexcept
-	{
-		assert(m_timers.empty());
-
-		m_onTimerEnd = std::move(func);
-	}
-
-	/**
 	 * Add a timer to the plugin.
 	 *
-	 * @pre setOnTimerSignal must have been called
-	 * @pre setOnTimerEnd must have been called
 	 * @param timer the timer to add
 	 */
 	void timerAdd(std::shared_ptr<Timer> timer) noexcept;

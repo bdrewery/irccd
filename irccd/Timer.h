@@ -33,6 +33,8 @@
 #include <thread>
 #include <unordered_set>
 
+#include <Signals.h>
+
 namespace irccd {
 
 /**
@@ -59,12 +61,26 @@ enum class TimerType {
  * must be stopped.
  */
 class Timer final {
+public:
+	/**
+	 * Signal: onSignal
+	 * ------------------------------------------------
+	 *
+	 * Called when the timeout expires.
+	 */
+	Signal<> onSignal;
+
+	/**
+	 * Signal: onEnd
+	 * ------------------------------------------------
+	 *
+	 * Called when the timeout ends.
+	 */
+	Signal<> onEnd;
+
 private:
 	TimerType m_type;
 	int m_delay;
-
-	std::function<void ()> m_onSignal;
-	std::function<void ()> m_onEnd;
 
 	/* Thread management */
 	std::atomic<bool> m_running{false};
@@ -90,34 +106,6 @@ public:
 	 * Destructor, closes the thread.
 	 */
 	~Timer();
-
-	/**
-	 * Set the onSignal event, called when the timer expires.
-	 *
-	 * @param func the function
-	 * @pre isRunning() must return false
-	 * @note Not thread-safe
-	 */
-	inline void onSignal(std::function<void ()> func) noexcept
-	{
-		assert(!m_running);
-
-		m_onSignal = std::move(func);
-	}
-
-	/**
-	 * Set the onSignal event, called when the timer ends.
-	 *
-	 * @param func the function
-	 * @pre isRunning() must return false
-	 * @note Not thread-safe
-	 */
-	inline void onEnd(std::function<void ()> func) noexcept
-	{
-		assert(!m_running);
-
-		m_onEnd = std::move(func);
-	}
 
 	/**
 	 * Start the thread.
