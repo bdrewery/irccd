@@ -202,41 +202,36 @@ void loadIdentity(const IniSection &sc)
 	using std::move;
 	using std::string;
 
-	ServerIdentity id;
-	string name;
-	string username = id.username();
-	string realname = id.username();
-	string nickname = id.nickname();
-	string ctcpversion = id.ctcpversion();
+	ServerIdentity identity;
 
 	if (!sc.contains("name")) {
 		throw std::invalid_argument("missing name");
 	}
 
-	name = sc["name"].value();
-	if (name.empty()) {
+	identity.name = sc["name"].value();
+	if (identity.name.empty()) {
 		throw std::invalid_argument("name can not be empty");
 	}
 
 	/* Optional stuff */
 	if (sc.contains("username")) {
-		username = sc["username"].value();
+		identity.username = sc["username"].value();
 	}
 	if (sc.contains("realname")) {
-		realname = sc["realname"].value();
+		identity.realname = sc["realname"].value();
 	}
 	if (sc.contains("nickname")) {
-		nickname = sc["nickname"].value();
+		identity.nickname = sc["nickname"].value();
 	}
 	if (sc.contains("ctcp-version")) {
-		ctcpversion = sc["ctcp-version"].value();
+		identity.ctcpversion = sc["ctcp-version"].value();
 	}
 
-	Logger::debug() << "identity " << name << ": "
-			<< "nickname=" << nickname << ", username=" << username << ", "
-			<< "realname=" << realname << ", ctcp-version=" << ctcpversion << std::endl;
+	Logger::debug() << "identity " << identity.name << ": "
+			<< "nickname=" << identity.nickname << ", username=" << identity.username << ", "
+			<< "realname=" << identity.realname << ", ctcp-version=" << identity.ctcpversion << std::endl;
 
-	irccd->identityAdd(ServerIdentity(move(name), move(nickname), move(username), move(realname), move(ctcpversion)));
+	irccd->identityAdd(move(identity));
 }
 
 void loadIdentities(const Ini &config)

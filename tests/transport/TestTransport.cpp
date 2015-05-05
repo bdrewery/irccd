@@ -20,6 +20,9 @@
 
 #include <Logger.h>
 
+#include <SocketListener.h>
+#include <SocketTcp.h>
+
 #include "TransportService.h"
 #include "TransportCommand.h"
 
@@ -32,10 +35,12 @@ using namespace address;
 
 std::unique_ptr<TransportService> manager;
 std::unique_ptr<TransportCommand> last;
+std::string error;
 
 class TransportTest : public testing::Test {
 protected:
 	SocketTcp m_client;
+	SocketListener m_listener;
 
 public:
 	TransportTest()
@@ -49,247 +54,314 @@ public:
 		m_client.close();
 
 		last = nullptr;
+		error = "";
+	}
+
+	void test(const std::string &str, const std::string &expected)
+	{
+		m_client.send(str + "\r\n\r\n");
+
+		try {
+			m_listener.set(m_client, SocketListener::Read);
+			m_listener.select(DELAY);
+
+			error = m_client.recv(512);
+		} catch (...) {}
+
+		std::this_thread::sleep_for(DELAY);
+
+		ASSERT_TRUE(last != nullptr);
+		ASSERT_EQ("", error);
+
+		// Do not understand why ASSERT does not stop
+		if (last) {
+			ASSERT_EQ(expected, last->ident());
+		}
 	}
 };
 
 TEST_F(TransportTest, channelNotice)
 {
-	m_client.send("{ \"command\": \"cnotice\", \"server\": \"localhost\", \"channel\": \"#staff\", \"message\": \"hello world\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("cnotice:localhost:#staff:hello world", last->ident());
+	test(
+		"{"
+		  "\"command\":\"cnotice\","
+		  "\"server\":\"localhost\","
+		  "\"channel\":\"#staff\","
+		  "\"message\":\"hello world\""
+		"}",
+		"cnotice:localhost:#staff:hello world"
+	);
 }
 
 TEST_F(TransportTest, connect)
 {
-	m_client.send("{ \"command\": \"connect\", \"name\": \"google\", \"host\": \"google.fr\", \"port\": 6667, \"ssl\": false, \"ssl-verify\": true }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("connect:google:google.fr6667:false:true", last->ident());
+	test(
+		"{"
+		  "\"command\":\"connect\","
+		  "\"name\":\"google\","
+		  "\"host\": \"google.fr\","
+		  "\"port\":6667,"
+		  "\"ssl\":false,"
+		  "\"ssl-verify\":true"
+		"}",
+		"connect:google:google.fr:6667"
+	);
 }
 
 TEST_F(TransportTest, disconnect)
 {
-	m_client.send("{ \"command\": \"disconnect\", \"server\": \"localhost\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("disconnect:localhost", last->ident());
+	test(
+		"{"
+		  "\"command\":\"disconnect\","
+		  "\"server\":\"localhost\""
+		"}",
+		"disconnect:localhost"
+	);
 }
 
 TEST_F(TransportTest, invite)
 {
-	m_client.send("{ \"command\": \"invite\", \"server\": \"localhost\", \"target\": \"francis\", \"channel\": \"staff\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("invite:localhost:francis:staff", last->ident());
+	test(
+		"{"
+		  "\"command\":\"invite\","
+		  "\"server\":\"localhost\","
+		  "\"target\":\"francis\","
+		  "\"channel\":\"#staff\""
+		"}",
+		"invite:localhost:francis:#staff"
+	);
 }
 
 TEST_F(TransportTest, join1)
 {
-	m_client.send("{ \"command\": \"join\", \"server\": \"localhost\", \"channel\": \"#staff\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("join:localhost:#staff:", last->ident());
+	test(
+		"{"
+		  "\"command\":\"join\","
+		  "\"server\":\"localhost\","
+		  "\"channel\":\"#staff\""
+		"}",
+		"join:localhost:#staff:"
+	);
 }
 
 TEST_F(TransportTest, join2)
 {
-	m_client.send("{ \"command\": \"join\", \"server\": \"localhost\", \"channel\": \"#secure\", \"password\": \"abcdef\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("join:localhost:#secure:abcdef", last->ident());
+	test(
+		"{"
+		  "\"command\":\"join\","
+		  "\"server\":\"localhost\","
+		  "\"channel\":\"#secure\","
+		  "\"password\": \"abcdef\""
+		"}",
+		"join:localhost:#secure:abcdef"
+	);
 }
 
 TEST_F(TransportTest, kick1)
 {
-	m_client.send("{ \"command\": \"kick\", \"server\": \"localhost\", \"target\": \"jean\", \"channel\": \"#staff\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("kick:localhost:jean:#staff:", last->ident());
+	test(
+		"{"
+		  "\"command\":\"kick\","
+		  "\"server\":\"localhost\","
+		  "\"target\":\"jean\","
+		  "\"channel\":\"#staff\""
+		"}",
+		"kick:localhost:jean:#staff:"
+	);
 }
 
 TEST_F(TransportTest, kick2)
 {
-	m_client.send("{ \"command\": \"kick\", \"server\": \"localhost\", \"target\": \"jean\", \"channel\": \"#staff\", \"reason\": \"bad OS\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("kick:localhost:jean:#staff:bad OS", last->ident());
+	test(
+		"{"
+		  "\"command\":\"kick\","
+		  "\"server\":\"localhost\","
+		  "\"target\":\"jean\","
+		  "\"channel\":\"#staff\","
+		  "\"reason\":\"bad OS\""
+		"}",
+		"kick:localhost:jean:#staff:bad OS"
+	);
 }
 
-TEST_F(TransportTest, load1)
+TEST_F(TransportTest, load)
 {
-	m_client.send("{ \"command\": \"load\", \"path\": \"/opt/breakmyplugin.js\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("load:/opt/breakmyplugin.js:false", last->ident());
-}
-
-TEST_F(TransportTest, load2)
-{
-	m_client.send("{ \"command\": \"load\", \"name\": \"breakmyplugin.js\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("load:breakmyplugin.js:true", last->ident());
+	test(
+		"{"
+		  "\"command\":\"load\","
+		  "\"plugin\":\"breakmyplugin\""
+		"}",
+		"load:breakmyplugin"
+	);
 }
 
 TEST_F(TransportTest, me1)
 {
-	m_client.send("{ \"command\": \"me\", \"server\": \"localhost\", \"channel\": \"#staff\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("me:localhost:#staff:", last->ident());
+	test(
+		"{"
+		  "\"command\":\"me\","
+		  "\"server\":\"localhost\","
+		  "\"channel\":\"#staff\""
+		"}",
+		"me:localhost:#staff:"
+	);
 }
 
 TEST_F(TransportTest, me2)
 {
-	m_client.send("{ \"command\": \"me\", \"server\": \"localhost\", \"channel\": \"#food\", \"message\": \"is hungry\" }\r\n\r\n");
+	test(
+		"{"
+		  "\"command\":\"me\","
+		  "\"server\":\"localhost\","
+		  "\"channel\":\"#food\","
+		  "\"message\":\"is hungry\""
+		"}",
+		"me:localhost:#food:is hungry"
+	);
+}
 
-	std::this_thread::sleep_for(DELAY);
+TEST_F(TransportTest, message1)
+{
+	test(
+		"{"
+		  "\"command\":\"message\","
+		  "\"server\":\"localhost\","
+		  "\"target\":\"francis\""
+		"}",
+		"message:localhost:francis:"
+	);
+}
 
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("me:localhost:#food:is hungry", last->ident());
+TEST_F(TransportTest, message2)
+{
+	test(
+		"{"
+		  "\"command\":\"message\","
+		  "\"server\":\"localhost\","
+		  "\"target\":\"francis\","
+		  "\"message\":\"lol\""
+		"}",
+		"message:localhost:francis:lol"
+	);
 }
 
 TEST_F(TransportTest, mode)
 {
-	m_client.send("{ \"command\": \"mode\", \"server\": \"localhost\", \"channel\": \"#staff\", \"mode\": \"+b francis\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("mode:localhost:#staff:+b francis", last->ident());
+	test(
+		"{"
+		  "\"command\":\"mode\","
+		  "\"server\":\"localhost\","
+		  "\"channel\":\"#staff\","
+		  "\"mode\":\"+b francis\""
+		"}",
+		"mode:localhost:#staff:+b francis"
+	);
 }
 
 TEST_F(TransportTest, notice)
 {
-	m_client.send("{ \"command\": \"notice\", \"server\": \"localhost\", \"target\": \"francis\", \"message\": \"stop flooding\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("notice:localhost:francis:stop flooding", last->ident());
+	test(
+		"{"
+		  "\"command\":\"notice\","
+		  "\"server\":\"localhost\","
+		  "\"target\":\"francis\","
+		  "\"message\":\"stop flooding\""
+		"}",
+		"notice:localhost:francis:stop flooding"
+	);
 }
 
 TEST_F(TransportTest, part1)
 {
-	m_client.send("{ \"command\": \"part\", \"server\": \"localhost\", \"channel\": \"#visualstudio\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("part:localhost:#visualstudio:", last->ident());
+	test(
+		"{"
+		  "\"command\":\"part\","
+		  "\"server\":\"localhost\","
+		  "\"channel\":\"#visualstudio\""
+		"}",
+		"part:localhost:#visualstudio:"
+	);
 }
 
 TEST_F(TransportTest, part2)
 {
-	m_client.send("{ \"command\": \"part\", \"server\": \"localhost\", \"channel\": \"#visualstudio\", \"reason\": \"too few features\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("part:localhost:#visualstudio:too few features", last->ident());
+	test(
+		"{"
+		  "\"command\":\"part\","
+		  "\"server\":\"localhost\","
+		  "\"channel\":\"#visualstudio\","
+		  "\"reason\":\"too few features\""
+		"}",
+		"part:localhost:#visualstudio:too few features"
+	);
 }
 
 TEST_F(TransportTest, reconnect1)
 {
-	m_client.send("{ \"command\": \"reconnect\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("reconnect:", last->ident());
+	test(
+		"{"
+		  "\"command\":\"reconnect\""
+		"}",
+		"reconnect:"
+	);
 }
 
 TEST_F(TransportTest, reconnect2)
 {
-	m_client.send("{ \"command\": \"reconnect\", \"server\": \"localhost\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("reconnect:localhost", last->ident());
+	test(
+		"{"
+		  "\"command\":\"reconnect\","
+		  "\"server\":\"localhost\""
+		"}",
+		"reconnect:localhost"
+	);
 }
 
 TEST_F(TransportTest, reload)
 {
-	m_client.send("{ \"command\": \"reload\", \"plugin\": \"crazy\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("reload:crazy", last->ident());
-}
-
-TEST_F(TransportTest, say1)
-{
-	m_client.send("{ \"command\": \"say\", \"server\": \"localhost\", \"target\": \"francis\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("say:localhost:francis:", last->ident());
-}
-
-TEST_F(TransportTest, say2)
-{
-	m_client.send("{ \"command\": \"say\", \"server\": \"localhost\", \"target\": \"francis\", \"message\": \"lol\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("say:localhost:francis:lol", last->ident());
+	test(
+		"{"
+		  "\"command\":\"reload\","
+		  "\"plugin\":\"crazy\""
+		"}",
+		"reload:crazy"
+	);
 }
 
 TEST_F(TransportTest, topic)
 {
-	m_client.send("{ \"command\": \"topic\", \"server\": \"localhost\", \"channel\": \"#staff\", \"topic\": \"new release\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("topic:localhost:#staff:new release", last->ident());
+	test(
+		"{"
+		  "\"command\":\"topic\","
+		  "\"server\":\"localhost\","
+		  "\"channel\":\"#staff\","
+		  "\"topic\":\"new release\""
+		"}",
+		"topic:localhost:#staff:new release"
+	);
 }
 
 TEST_F(TransportTest, umode)
 {
-	m_client.send("{ \"command\": \"umode\", \"server\": \"localhost\", \"mode\": \"+i\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("umode:localhost:+i", last->ident());
+	test(
+		"{"
+		  "\"command\":\"umode\","
+		  "\"server\":\"localhost\","
+		  "\"mode\":\"+i\""
+		"}",
+		"umode:localhost:+i"
+	);
 }
 
 TEST_F(TransportTest, unload)
 {
-	m_client.send("{ \"command\": \"unload\", \"plugin\": \"crazy\" }\r\n\r\n");
-
-	std::this_thread::sleep_for(DELAY);
-
-	ASSERT_TRUE(last != nullptr);
-	ASSERT_EQ("unload:crazy", last->ident());
+	test(
+		"{"
+		  "\"command\":\"unload\","
+		  "\"plugin\":\"crazy\""
+		"}",
+		"unload:crazy"
+	);
 }
 
 int main(int argc, char **argv)
@@ -301,7 +373,7 @@ int main(int argc, char **argv)
 
 	manager = std::make_unique<TransportService>();
 	manager->add<TransportInet>(TransportAbstract::IPv4, 25000);
-	manager->setOnEvent([&] (TransportCommand command) {
+	manager->onCommand.connect([&] (TransportCommand command) {
 		last = std::make_unique<TransportCommand>(std::move(command));
 	});
 	manager->start();

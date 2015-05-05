@@ -33,6 +33,7 @@
 #include <Signals.h>
 
 #include "SocketTcp.h"
+#include "Server.h"
 
 namespace irccd {
 
@@ -48,32 +49,231 @@ public:
 	 *
 	 * Send a channel notice to the specified channel.
 	 *
-	 * {
-	 *   "command": "cnotice",
-	 *   "server: "the server name",
-	 *   "channel": "name",
-	 *   "message": "the message"
-	 * }
+	 * Arguments:
+	 * - the server name
+	 * - the channel
+	 * - the notice message
 	 */
 	Signal<std::string, std::string, std::string> onChannelNotice;
-	Signal<> onConnect;
+
+	/**
+	 * Signal: onConnect
+	 * ------------------------------------------------
+	 *
+	 * Request to connect to a server.
+	 *
+	 * Arguments:
+	 * - the server information
+	 * - the server identity
+	 * - the server settings
+	 */
+	Signal<ServerInfo, ServerIdentity, ServerSettings> onConnect;
+
+	/**
+	 * TODO
+	 */
 	Signal<std::string> onDisconnect;
+
+	/**
+	 * Signal: onInvite
+	 * ------------------------------------------------
+	 *
+	 * Invite someone to a channel.
+	 *
+	 * Arguments:
+	 * - the server name
+	 * - the target name
+	 * - the channel
+	 */
 	Signal<std::string, std::string, std::string> onInvite;
+
+	/**
+	 * Signal: onJoin
+	 * ------------------------------------------------
+	 *
+	 * Join a channel.
+	 *
+	 * Arguments:
+	 * - the server name
+	 * - the channel
+	 * - the password (optional)
+	 */
 	Signal<std::string, std::string, std::string> onJoin;
+
+	/**
+	 * Signal: onKick
+	 * ------------------------------------------------
+	 *
+	 * Kick someone from a channel.
+	 *
+	 * Arguments:
+	 * - the server name
+	 * - the target name
+	 * - the channel
+	 * - the reason (optional)
+	 */
 	Signal<std::string, std::string, std::string, std::string> onKick;
+
+	/**
+	 * Signal: onLoad
+	 * ------------------------------------------------
+	 *
+	 * Request to load a plugin. Always relative.
+	 *
+	 * Arguments:
+	 * - the plugin name
+	 */
 	Signal<std::string> onLoad;
+
+	/**
+	 * Signal: onMe
+	 * ------------------------------------------------
+	 *
+	 * Send a CTCP Action.
+	 *
+	 * Arguments:
+	 * - the server name
+	 * - the target name
+	 * - the message
+	 */
 	Signal<std::string, std::string, std::string> onMe;
+
+	/**
+	 * Signal: onMessage
+	 * ------------------------------------------------
+	 *
+	 * Send a standard message.
+	 *
+	 * Arguments:
+	 * - the server name
+	 * - the target name
+	 * - the message
+	 */
 	Signal<std::string, std::string, std::string> onMessage;
+
+	/**
+	 * Signal: onMode
+	 * ------------------------------------------------
+	 *
+	 * Change the channel mode.
+	 *
+	 * Arguments:
+	 * - the server name
+	 * - the channel name
+	 * - the mode argument
+	 */
 	Signal<std::string, std::string, std::string> onMode;
+
+	/**
+	 * Signal: onNick
+	 * ------------------------------------------------
+	 *
+	 * Change the nickname.
+	 *
+	 * Arguments:
+	 * - the server name
+	 * - the new nickname
+	 */
 	Signal<std::string, std::string> onNick;
+
+	/**
+	 * Signal: onNotice
+	 * ------------------------------------------------
+	 *
+	 * Send a notice.
+	 *
+	 * Arguments:
+	 * - the server name
+	 * - the target name
+	 * - the message
+	 */
 	Signal<std::string, std::string, std::string> onNotice;
+
+	/**
+	 * Signal: onPart
+	 * ------------------------------------------------
+	 *
+	 * Leave a channel.
+	 *
+	 * Arguments:
+	 * - the server name
+	 * - the channel name
+	 * - the reason (optional)
+	 */
 	Signal<std::string, std::string, std::string> onPart;
+
+	/**
+	 * Signal: onReconnect
+	 * ------------------------------------------------
+	 *
+	 * Reconnect one or all servers.
+	 *
+	 * Arguments:
+	 * - the server name (optional)
+	 */
 	Signal<std::string> onReconnect;
+
+	/**
+	 * Signal: onReload
+	 * ------------------------------------------------
+	 *
+	 * Reload a plugin.
+	 *
+	 * Arguments:
+	 * - the plugin name
+	 */
 	Signal<std::string> onReload;
-	Signal<std::string> onTopic;
+
+	/**
+	 * Signal: onTopic
+	 * ------------------------------------------------
+	 *
+	 * Change a channel topic.
+	 *
+	 * Arguments:
+	 * - the server name
+	 * - the channel name
+	 * - the new topic (optional)
+	 */
+	Signal<std::string, std::string, std::string> onTopic;
+
+	/**
+	 * Signal: onUnload
+	 * ------------------------------------------------
+	 *
+	 * Unload a plugin.
+	 *
+	 * Arguments:
+	 * - the plugin name
+	 */
 	Signal<std::string> onUnload;
+
+	/**
+	 * Signal: onUserMode
+	 * ------------------------------------------------
+	 *
+	 * Change a user mode.
+	 *
+	 * Arguments:
+	 * - the server name
+	 * - the new mode
+	 */
 	Signal<std::string, std::string> onUserMode;
+
+	/**
+	 * Signal: onDie
+	 * ------------------------------------------------
+	 *
+	 * The client has disconnected.
+	 */
 	Signal<> onDie;
+
+	/**
+	 * Signal: onWrite
+	 * ------------------------------------------------
+	 *
+	 * New data has been queued for send.
+	 */
 	Signal<> onWrite;
 
 private:
@@ -82,8 +282,8 @@ private:
 	mutable std::mutex m_mutex;
 
 	/* JSON helpers */
-	JsonValue want(const JsonObject &, const std::string &name) const;
-	JsonValue optional(const JsonObject &, const std::string &name, const JsonValue &def) const;
+	JsonValue value(const JsonObject &, const std::string &name) const;
+	JsonValue valueOr(const JsonObject &, const std::string &name, const JsonValue &def) const;
 
 	/* Parse JSON commands */
 	void parseChannelNotice(const JsonObject &) const;

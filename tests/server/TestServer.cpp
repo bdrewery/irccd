@@ -67,8 +67,17 @@ public:
 
 		ServerInfo info;
 		ServerSettings settings;
-		ServerIdentity identityClient("pvd", "pvd", "pvd");
-		ServerIdentity identityIrccd("irct", "irct", "irct");
+		ServerIdentity identityClient;
+
+		identityClient.nickname = "pvd";
+		identityClient.username = "pvd";
+		identityClient.realname = "pvd";
+
+		ServerIdentity identityIrccd;
+
+		identityIrccd.nickname = "irct";
+		identityIrccd.username = "irct";
+		identityIrccd.realname = "irct";
 
 		info.name = "test";
 		info.host = WITH_TEST_IRCHOST;

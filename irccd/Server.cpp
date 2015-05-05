@@ -81,7 +81,7 @@ void Server::handleKick(const char *orig, const char **params) noexcept
 
 	irc_target_get_nick(orig, target, sizeof (target));
 
-	if (m_identity.nickname() == target) {
+	if (m_identity.nickname == target && m_settings.autorejoin) {
 		join(strify(params[1]));
 	}
 
@@ -95,6 +95,17 @@ void Server::handleMode(const char *orig, const char **params) noexcept
 
 void Server::handleNick(const char *orig, const char **params) noexcept
 {
+	/*
+	 * Update our nickname.
+	 */
+	char target[32]{0};
+
+	irc_target_get_nick(orig, target, sizeof (target));
+
+	if (m_identity.nickname == target) {
+		m_identity.nickname = strify(params[0]);
+	}
+
 	onNick(strify(orig), strify(params[0]));
 }
 

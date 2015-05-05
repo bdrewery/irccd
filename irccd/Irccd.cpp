@@ -38,7 +38,7 @@ Irccd::Irccd()
 	m_serverService.onEvent.connect([this] (ServerEvent event) {
 		serverAddEvent(std::move(event));
 	});
-	m_transportService.setOnEvent([this] (TransportCommand command) {
+	m_transportService.onCommand.connect([this] (TransportCommand command) {
 		transportAddCommand(std::move(command));
 	});
 }

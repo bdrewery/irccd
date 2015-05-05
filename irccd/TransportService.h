@@ -69,10 +69,26 @@ private:
 	 * Slots (convert TransportClient's signals to TransportCommand)
 	 * ------------------------------------------------ */
 
-	/* transport slots */
-	void onMessage(const std::shared_ptr<TransportClientAbstract> &, const std::string &);
-	void onWrite();
-	void onDie(const std::shared_ptr<TransportClientAbstract> &);
+	void handleChannelNotice(std::shared_ptr<TransportClientAbstract>, std::string, std::string, std::string) const;
+	void handleConnect(std::shared_ptr<TransportClientAbstract>, ServerInfo, ServerIdentity, ServerSettings) const;
+	void handleDisconnect(std::shared_ptr<TransportClientAbstract>, std::string) const;
+	void handleInvite(std::shared_ptr<TransportClientAbstract>, std::string, std::string, std::string) const;
+	void handleJoin(std::shared_ptr<TransportClientAbstract>, std::string, std::string, std::string) const;
+	void handleKick(std::shared_ptr<TransportClientAbstract>, std::string, std::string, std::string, std::string) const;
+	void handleLoad(std::shared_ptr<TransportClientAbstract>, std::string) const;
+	void handleMe(std::shared_ptr<TransportClientAbstract>, std::string, std::string, std::string) const;
+	void handleMessage(std::shared_ptr<TransportClientAbstract>, std::string, std::string, std::string) const;
+	void handleMode(std::shared_ptr<TransportClientAbstract>, std::string, std::string, std::string) const;
+	void handleNick(std::shared_ptr<TransportClientAbstract>, std::string, std::string) const;
+	void handleNotice(std::shared_ptr<TransportClientAbstract>, std::string, std::string, std::string) const;
+	void handlePart(std::shared_ptr<TransportClientAbstract>, std::string, std::string, std::string) const;
+	void handleReconnect(std::shared_ptr<TransportClientAbstract>, std::string) const;
+	void handleReload(std::shared_ptr<TransportClientAbstract>, std::string) const;
+	void handleTopic(std::shared_ptr<TransportClientAbstract>, std::string, std::string, std::string) const;
+	void handleUnload(std::shared_ptr<TransportClientAbstract>, std::string) const;
+	void handleUserMode(std::shared_ptr<TransportClientAbstract>, std::string, std::string) const;
+	void handleOnWrite();
+	void handleOnDie(const std::shared_ptr<TransportClientAbstract> &);
 
 	/* private service helpers */
 	void accept(const Socket &s);

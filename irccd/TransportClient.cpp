@@ -25,6 +25,20 @@
 
 namespace irccd {
 
+JsonValue TransportClientAbstract::value(const JsonObject &object, const std::string &key) const
+{
+	if (!object.contains(key)) {
+		throw std::runtime_error("missing `" + key + "' property");
+	}
+
+	return object[key];
+}
+
+JsonValue TransportClientAbstract::valueOr(const JsonObject &object, const std::string &key, const JsonValue &def) const
+{
+	return (object.contains(key)) ? object[key] : def;
+}
+
 void TransportClientAbstract::receive()
 {
 	std::string incoming = socket().recv(512);
@@ -77,15 +91,53 @@ void TransportClientAbstract::parseChannelNotice(const JsonObject &object) const
  *   "host": "server host",
  *   "port": 6667,
  *   "ssl": true,
- *   "ssl-verify": true
+ *   "ssl-verify": true,
+ *   "identity": {
+ *     "nickname": "irccd",
+ *     "username": "the user name",
+ *     "realname": "the real name",
+ *     "ctcp-version": "the ctcp version to show"
+ *   },
+ *   "settings": {
+ *     "command-char": "the command character",
+ *     "reconnect-tries": number of reconnection
+ *     "reconnect-timeout": number of seconds to wait
+ *   }
  * }
  *
  * Responses:
  *   - Error if a server with that name already exists
  */
-void TransportClientAbstract::parseConnect(const JsonObject &) const
+void TransportClientAbstract::parseConnect(const JsonObject &object) const
 {
-	// TODO
+	ServerInfo info;
+	ServerIdentity identity;
+	ServerSettings settings;
+
+	/* Mandatory information */
+	info.name = value(object, "name").toString();
+	info.host = value(object, "host").toString();
+	info.port = value(object, "port").toInteger();
+	info.ssl = value(object, "ssl").isTrue();
+	info.sslverify = value(object, "ssl-verify").isTrue();
+
+	/* Optional indentity */
+	JsonObject identityObject = object["identity"].toObject();
+	if (identityObject.isObject()) {
+		identity.nickname = valueOr(identityObject, "nickname", identity.nickname).toString();
+		identity.username = valueOr(identityObject, "username", identity.username).toString();
+		identity.realname = valueOr(identityObject, "realname", identity.realname).toString();
+	}
+
+	/* Optional settings */
+	JsonObject settingsObject = object["settings"].toObject();
+	if (settingsObject.isObject()) {
+		settings.command = valueOr(settingsObject, "command-char", settings.command).toString();
+		settings.recotries = valueOr(settingsObject, "reconnect-tries", settings.recotries).toInteger();
+		settings.recotimeout = valueOr(settingsObject, "reconnect-timeout", settings.recotimeout).toInteger();
+	}
+
+	onConnect(std::move(info), std::move(identity), std::move(settings));
 }
 
 /*
@@ -104,7 +156,7 @@ void TransportClientAbstract::parseConnect(const JsonObject &) const
  */
 void TransportClientAbstract::parseDisconnect(const JsonObject &object) const
 {
-	onDisconnect(valueOr(object, "server", "").toString());
+	onDisconnect(value(object, "server").toString());
 }
 
 /*
@@ -144,7 +196,7 @@ void TransportClientAbstract::parseInvite(const JsonObject &object) const
  */
 void TransportClientAbstract::parseJoin(const JsonObject &object) const
 {
-	onInvite(
+	onJoin(
 		value(object, "server").toString(),
 		value(object, "channel").toString(),
 		valueOr(object, "password", "").toString()
@@ -167,7 +219,7 @@ void TransportClientAbstract::parseJoin(const JsonObject &object) const
  */
 void TransportClientAbstract::parseKick(const JsonObject &object) const
 {
-	onInvite(
+	onKick(
 		value(object, "server").toString(),
 		value(object, "target").toString(),
 		value(object, "channel").toString(),
@@ -252,8 +304,13 @@ void TransportClientAbstract::parseMessage(const JsonObject &object) const
  *   "mode": "mode and its arguments"
  * }
  */
-void TransportClientAbstract::parseMode(const JsonObject &) const
+void TransportClientAbstract::parseMode(const JsonObject &object) const
 {
+	onMode(
+		value(object, "server").toString(),
+		value(object, "channel").toString(),
+		value(object, "mode").toString()
+	);
 }
 
 /*
@@ -268,8 +325,12 @@ void TransportClientAbstract::parseMode(const JsonObject &) const
  *   "nickname": "the new nickname"
  * }
  */
-void TransportClientAbstract::parseNick(const JsonObject &) const
+void TransportClientAbstract::parseNick(const JsonObject &object) const
 {
+	onNick(
+		value(object, "server").toString(),
+		value(object, "nickname").toString()
+	);
 }
 
 /*
@@ -285,8 +346,13 @@ void TransportClientAbstract::parseNick(const JsonObject &) const
  *   "message": "the message"
  * }
  */
-void TransportClientAbstract::parseNotice(const JsonObject &) const
+void TransportClientAbstract::parseNotice(const JsonObject &object) const
 {
+	onNotice(
+		value(object, "server").toString(),
+		value(object, "target").toString(),
+		value(object, "message").toString()
+	);
 }
 
 /*
@@ -303,8 +369,13 @@ void TransportClientAbstract::parseNotice(const JsonObject &) const
  *   "reason": "the reason"		(Optional)
  * }
  */
-void TransportClientAbstract::parsePart(const JsonObject &) const
+void TransportClientAbstract::parsePart(const JsonObject &object) const
 {
+	onPart(
+		value(object, "server").toString(),
+		value(object, "channel").toString(),
+		valueOr(object, "reason", "").toString()
+	);
 }
 
 /*
@@ -324,8 +395,9 @@ void TransportClientAbstract::parsePart(const JsonObject &) const
  * Responses:
  *   - Error if the server does not exist
  */
-void TransportClientAbstract::parseReconnect(const JsonObject &) const
+void TransportClientAbstract::parseReconnect(const JsonObject &object) const
 {
+	onReconnect(valueOr(object, "server", "").toString());
 }
 
 /*
@@ -343,8 +415,9 @@ void TransportClientAbstract::parseReconnect(const JsonObject &) const
  * Responses:
  *   - Error if the plugin does not exists
  */
-void TransportClientAbstract::parseReload(const JsonObject &) const
+void TransportClientAbstract::parseReload(const JsonObject &object) const
 {
+	onReload(value(object, "plugin").toString());
 }
 
 /*
@@ -360,8 +433,13 @@ void TransportClientAbstract::parseReload(const JsonObject &) const
  *   "topic": "the new topic"
  * }
  */
-void TransportClientAbstract::parseTopic(const JsonObject &) const
+void TransportClientAbstract::parseTopic(const JsonObject &object) const
 {
+	onTopic(
+		value(object, "server").toString(),
+		value(object, "channel").toString(),
+		valueOr(object, "topic", "").toString()
+	);
 }
 
 /*
@@ -379,8 +457,9 @@ void TransportClientAbstract::parseTopic(const JsonObject &) const
  * Responses:
  *   - Error if the plugin does not exists
  */
-void TransportClientAbstract::parseUnload(const JsonObject &) const
+void TransportClientAbstract::parseUnload(const JsonObject &object) const
 {
+	onUnload(value(object, "plugin").toString());
 }
 
 /*
@@ -395,8 +474,12 @@ void TransportClientAbstract::parseUnload(const JsonObject &) const
  *   "mode": "the mode"
  * }
  */
-void TransportClientAbstract::parseUserMode(const JsonObject &) const
+void TransportClientAbstract::parseUserMode(const JsonObject &object) const
 {
+	onUserMode(
+		value(object, "server").toString(),
+		value(object, "mode").toString()
+	);
 }
 
 void TransportClientAbstract::parse(const std::string &message) const
@@ -404,24 +487,25 @@ void TransportClientAbstract::parse(const std::string &message) const
 	using namespace std;
 	using namespace std::placeholders;
 
-	static std::unordered_map<std::string, std::function<void (const JsonObject &)>> parsers = {
-		{ "cnotice",	bind(&TransportClientAbstract::parseChannelNotice, this, _1)	},
-		{ "connect",	bind(&TransportClientAbstract::parseConnect, this, _1)		},
-		{ "disconnect",	bind(&TransportClientAbstract::parseDisconnect, this, _1)	},
-		{ "invite",	bind(&TransportClientAbstract::parseInvite, this, _1)		},
-		{ "kick",	bind(&TransportClientAbstract::parseKick, this, _1)		},
-		{ "load",	bind(&TransportClientAbstract::parseLoad, this, _1)		},
-		{ "me",		bind(&TransportClientAbstract::parseMe, this, _1)		},
-		{ "message",	bind(&TransportClientAbstract::parseMessage, this, _1)		},
-		{ "mode",	bind(&TransportClientAbstract::parseMode, this, _1)		},
-		{ "nick",	bind(&TransportClientAbstract::parseNick, this, _1)		},
-		{ "notice",	bind(&TransportClientAbstract::parseNotice, this, _1)		},
-		{ "part",	bind(&TransportClientAbstract::parsePart, this, _1)		},
-		{ "reconnect",	bind(&TransportClientAbstract::parseReconnect, this, _1)	},
-		{ "reload",	bind(&TransportClientAbstract::parseReload, this, _1)		},
-		{ "topic",	bind(&TransportClientAbstract::parseTopic, this, _1)		},
-		{ "unload",	bind(&TransportClientAbstract::parseUnload, this, _1)		},
-		{ "umode",	bind(&TransportClientAbstract::parseUserMode, this, _1)		}
+	static std::unordered_map<std::string, std::function<void (const JsonObject &)>> parsers{
+		{ "cnotice",	bind(&parseChannelNotice, this, _1)	},
+		{ "connect",	bind(&parseConnect, this, _1)		},
+		{ "disconnect",	bind(&parseDisconnect, this, _1)	},
+		{ "invite",	bind(&parseInvite, this, _1)		},
+		{ "join",	bind(&parseJoin, this, _1)		},
+		{ "kick",	bind(&parseKick, this, _1)		},
+		{ "load",	bind(&parseLoad, this, _1)		},
+		{ "me",		bind(&parseMe, this, _1)		},
+		{ "message",	bind(&parseMessage, this, _1)		},
+		{ "mode",	bind(&parseMode, this, _1)		},
+		{ "nick",	bind(&parseNick, this, _1)		},
+		{ "notice",	bind(&parseNotice, this, _1)		},
+		{ "part",	bind(&parsePart, this, _1)		},
+		{ "reconnect",	bind(&parseReconnect, this, _1)		},
+		{ "reload",	bind(&parseReload, this, _1)		},
+		{ "topic",	bind(&parseTopic, this, _1)		},
+		{ "unload",	bind(&parseUnload, this, _1)		},
+		{ "umode",	bind(&parseUserMode, this, _1)		}
 	};
 
 	JsonDocument document(message);

@@ -87,7 +87,7 @@ public:
 	 */
 	inline void identityAdd(ServerIdentity identity) noexcept
 	{
-		m_identities.emplace(identity.name(), std::move(identity));
+		m_identities.emplace(identity.name, std::move(identity));
 	}
 
 	/**

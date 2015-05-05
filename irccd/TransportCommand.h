@@ -50,41 +50,25 @@ protected:
 	std::function<void (Irccd &)> m_command;
 
 public:
-	void cnotice(const std::string &server, const std::string &channel, const std::string &message);
-	void connect(/* TODO */);
-	void disconnect(const std::string &name);
-	void invite(const std::string &server, const std::string &target, const std::string &channel);
-	void join(const std::string &server, const std::string &channel, const std::string &password);
-	void kick(const std::string &server, const std::string &target, const std::string &channel, const std::string &reason);
-	void load(const std::string &path, bool isrelative);
-	void me(const std::string &server, const std::string &channel, const std::string &message);
-	void message(const std::string &server, const std::string &channel, const std::string &message);
-	void mode(const std::string &server, const std::string &channel, const std::string &mode);
-	void nick(const std::string &server, const std::string &nickname);
-	void notice(const std::string &server, const std::string &target, const std::string &message);
-	void part(const std::string &server, const std::string &channel, const std::string &reason);
-	void reconnect(const std::string &server);
-	void reload(const std::string &plugin);
-	void topic(const std::string &server, const std::string &channel, const std::string &topic);
-	void unload(const std::string &plugin);
-	void umode(const std::string &server, const std::string &mode);
-
 	/**
 	 * Construct a command with the appropriate function to call.
 	 *
-	 * @param ident the transport command ident
 	 * @param client the client
-	 * @param func the member function to call (TransportCommand::cnotice, etc)
-	 * @param args the arguments to pass to the function
+	 * @param ident the transport command ident
+	 * @param command the command to call
 	 */
-	template <typename Func, typename... Args>
-	inline TransportCommand(std::string ident, std::shared_ptr<TransportClientAbstract> client, Func func, Args&&... args)
+	inline TransportCommand(std::shared_ptr<TransportClientAbstract> client, std::string ident, std::function<void (Irccd &)> command)
 		: m_ident(std::move(ident))
 		, m_client(std::move(client))
-		, m_command(std::bind(func, this, std::forward<Args>(args)...))
+		, m_command(std::move(command))
 	{
 	}
 
+	/**
+	 * Execute the command.
+	 *
+	 * @param irccd the irccd instance
+	 */
 	inline void exec(Irccd &irccd)
 	{
 		m_command(irccd);
