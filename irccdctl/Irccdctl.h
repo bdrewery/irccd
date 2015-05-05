@@ -39,9 +39,6 @@ private:
 	using Helper = void (Irccdctl::*)() const;
 	using Handler = void (Irccdctl::*)(int argc, char **argv);
 
-	/* Command line options */
-	DefinedOptions m_options;
-
 	/* Socket for connecting */
 	std::unique_ptr<SocketTcp> m_socket;
 

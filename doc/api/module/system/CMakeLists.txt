@@ -21,14 +21,15 @@ project(system)
 set(
 	SYSTEM_SOURCES
 	${system_SOURCE_DIR}/index.txt
-	${system_SOURCE_DIR}/function/env.txt
-	${system_SOURCE_DIR}/function/home.txt
-	${system_SOURCE_DIR}/function/name.txt
-	${system_SOURCE_DIR}/function/sleep.txt
-	${system_SOURCE_DIR}/function/ticks.txt
-	${system_SOURCE_DIR}/function/uptime.txt
-	${system_SOURCE_DIR}/function/usleep.txt
-	${system_SOURCE_DIR}/function/version.txt
+	${system_SOURCE_DIR}/type/System/index.txt
+	${system_SOURCE_DIR}/type/System/function/env.txt
+	${system_SOURCE_DIR}/type/System/function/home.txt
+	${system_SOURCE_DIR}/type/System/function/name.txt
+	${system_SOURCE_DIR}/type/System/function/sleep.txt
+	${system_SOURCE_DIR}/type/System/function/ticks.txt
+	${system_SOURCE_DIR}/type/System/function/uptime.txt
+	${system_SOURCE_DIR}/type/System/function/usleep.txt
+	${system_SOURCE_DIR}/type/System/function/version.txt
 	PARENT_SCOPE
 )
 

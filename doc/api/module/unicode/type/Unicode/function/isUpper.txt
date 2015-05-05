@@ -1,15 +1,13 @@
 ---
-function: isupper
-since: 1.2
-info: yes
+function: isUpper
 ---
 
 Check if the unicode character is upper case.
 
 # Synopsis
 
-````lua
-function isupper(code)
+````javascript
+Unicode.isUpper(code)
 ````
 
 # Arguments
@@ -18,4 +16,4 @@ function isupper(code)
 
 # Returns
 
-True if upper case.
+- true if upper case.

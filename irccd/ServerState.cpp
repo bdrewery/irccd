@@ -47,14 +47,14 @@ bool ServerState::connect(Server &server)
 
 	if (info.ipv6) {
 		code = irc_connect6(server.session(), host.c_str(), info.port, password,
-				    identity.nickname().c_str(),
-				    identity.username().c_str(),
-				    identity.realname().c_str());
+				    identity.nickname.c_str(),
+				    identity.username.c_str(),
+				    identity.realname.c_str());
 	} else {
 		code = irc_connect(server.session(), host.c_str(), info.port, password,
-				   identity.nickname().c_str(),
-				   identity.username().c_str(),
-				   identity.realname().c_str());
+				   identity.nickname.c_str(),
+				   identity.username.c_str(),
+				   identity.realname.c_str());
 	}
 
 	return code == 0;

@@ -37,6 +37,7 @@ int main(int argc, char **argv)
 
 	OptionPack pack = parser.parse(--argc, ++argv);
 
+#if 0
 	for (const OptionValue &option : pack) {
 		if (option == "c") {
 			ctl.define("c", option.value());
@@ -45,6 +46,7 @@ int main(int argc, char **argv)
 			ctl.define("v", "");
 		}
 	}
+#endif
 
 	argc -= pack.parsed();
 	argv += pack.parsed();

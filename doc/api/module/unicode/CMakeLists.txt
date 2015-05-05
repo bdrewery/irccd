@@ -21,17 +21,12 @@ project(unicode)
 set(
 	UNICODE_SOURCES
 	${unicode_SOURCE_DIR}/index.txt
-	${unicode_SOURCE_DIR}/function/isdigit.txt
-	${unicode_SOURCE_DIR}/function/isletter.txt
-	${unicode_SOURCE_DIR}/function/islower.txt
-	${unicode_SOURCE_DIR}/function/isspace.txt
-	${unicode_SOURCE_DIR}/function/istitle.txt
-	${unicode_SOURCE_DIR}/function/isupper.txt
-	${unicode_SOURCE_DIR}/function/length.txt
-	${unicode_SOURCE_DIR}/function/list.txt
-	${unicode_SOURCE_DIR}/function/toarray.txt
-	${unicode_SOURCE_DIR}/function/tolower.txt
-	${unicode_SOURCE_DIR}/function/tostring.txt
-	${unicode_SOURCE_DIR}/function/toupper.txt
+	${unicode_SOURCE_DIR}/type/Unicode/index.txt
+	${unicode_SOURCE_DIR}/type/Unicode/function/isDigit.txt
+	${unicode_SOURCE_DIR}/type/Unicode/function/isLetter.txt
+	${unicode_SOURCE_DIR}/type/Unicode/function/isLower.txt
+	${unicode_SOURCE_DIR}/type/Unicode/function/isSpace.txt
+	${unicode_SOURCE_DIR}/type/Unicode/function/isTitle.txt
+	${unicode_SOURCE_DIR}/type/Unicode/function/isUpper.txt
 	PARENT_SCOPE
 )

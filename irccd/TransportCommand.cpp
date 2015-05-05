@@ -21,6 +21,8 @@
 
 namespace irccd {
 
+#if 0
+
 void TransportCommand::cnotice(const std::string &server, const std::string &channel, const std::string &message)
 {
 	m_irccd.serverFind(server)->cnotice(channel, message);
@@ -112,5 +114,7 @@ void TransportCommand::umode(const std::string &server, const std::string &mode)
 {
 	m_irccd.serverFind(server)->umode(mode);
 }
+
+#endif
 
 } // !irccd

@@ -31,15 +31,14 @@ using namespace std::string_literals;
 namespace irccd {
 
 Irccd::Irccd()
-	: m_transportService(*this)
 {
 	/*
 	 * This signal is called from the ServerManager.
 	 */
-	m_serverService.setOnEvent([this] (ServerEvent event) {
+	m_serverService.onEvent.connect([this] (ServerEvent event) {
 		serverAddEvent(std::move(event));
 	});
-	m_transportService.setOnEvent([this] (TransportCommand command) {
+	m_transportService.onCommand.connect([this] (TransportCommand command) {
 		transportAddCommand(std::move(command));
 	});
 }

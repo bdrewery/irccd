@@ -1,15 +1,13 @@
 ---
-function: isdigit
-since: 1.2
-info: yes
+function: isDigit
 ---
 
 Check if the unicode character is a digit.
 
 # Synopsis
 
-````lua
-function isdigit(code)
+````javascript
+Unicode.isDigit(code)
 ````
 
 # Arguments
@@ -18,4 +16,4 @@ function isdigit(code)
 
 # Returns
 
-True if digit.
+- true if digit.

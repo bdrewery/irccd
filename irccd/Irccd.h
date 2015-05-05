@@ -90,7 +90,7 @@ public:
 	 */
 	inline void identityAdd(ServerIdentity identity) noexcept
 	{
-		m_identities.emplace(identity.name(), std::move(identity));
+		m_identities.emplace(identity.name, std::move(identity));
 	}
 
 	/**
@@ -159,6 +159,17 @@ public:
 	inline std::shared_ptr<Server> serverFind(const std::string &name) const
 	{
 		return m_serverService.find(name);
+	}
+
+	/**
+	 * Check if a server exists.
+	 *
+	 * @param name the name
+	 * @return true if exists
+	 */
+	inline bool serverHas(const std::string &name) const noexcept
+	{
+		return m_serverService.has(name);
 	}
 
 	/* ------------------------------------------------
@@ -302,14 +313,6 @@ public:
 	 */
 	static void stop();
 };
-
-/**
- * Unique and global instance.
- *
- * Used as a pointer to be sure that it is destroyed in the main and not
- * before anything else (Logger for instance).
- */
-//extern Irccd *irccd;
 
 } // !irccd
 

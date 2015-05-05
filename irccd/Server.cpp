@@ -33,7 +33,7 @@ void Server::handleConnect(const char *, const char **) noexcept
 
 	// Don't forget to notify.
 	next(ServerState::Connected);
-	wrapHandler(m_onConnect);
+	onConnect();
 
 	// Auto join listed channels
 	for (const ServerChannel &channel : m_settings.channels) {
@@ -44,17 +44,17 @@ void Server::handleConnect(const char *, const char **) noexcept
 
 void Server::handleChannel(const char *orig, const char **params) noexcept
 {
-	wrapHandler(m_onMessage, strify(orig), strify(params[0]), strify(params[1]));
+	onMessage(strify(orig), strify(params[0]), strify(params[1]));
 }
 
 void Server::handleChannelNotice(const char *orig, const char **params) noexcept
 {
-	wrapHandler(m_onChannelNotice, strify(orig), strify(params[0]), strify(params[1]));
+	onChannelNotice(strify(orig), strify(params[0]), strify(params[1]));
 }
 
 void Server::handleCtcpAction(const char *orig, const char **params) noexcept
 {
-	wrapHandler(m_onMe, strify(orig), strify(params[0]), strify(params[1]));
+	onMe(strify(orig), strify(params[0]), strify(params[1]));
 }
 
 void Server::handleInvite(const char *orig, const char **params) noexcept
@@ -64,12 +64,12 @@ void Server::handleInvite(const char *orig, const char **params) noexcept
 	 * uncommon to need it so it is passed as the last argument to be
 	 * optional in the plugin.
 	 */
-	wrapHandler(m_onInvite, strify(orig), strify(params[1]), strify(params[0]));
+	onInvite(strify(orig), strify(params[1]), strify(params[0]));
 }
 
 void Server::handleJoin(const char *orig, const char **params) noexcept
 {
-	wrapHandler(m_onJoin, strify(orig), strify(params[0]));
+	onJoin(strify(orig), strify(params[0]));
 }
 
 void Server::handleKick(const char *orig, const char **params) noexcept
@@ -81,21 +81,32 @@ void Server::handleKick(const char *orig, const char **params) noexcept
 
 	irc_target_get_nick(orig, target, sizeof (target));
 
-	if (m_identity.nickname() == target) {
+	if (m_identity.nickname == target && m_settings.autorejoin) {
 		join(strify(params[1]));
 	}
 
-	wrapHandler(m_onKick, strify(orig), strify(params[0]), strify(params[1]), strify(params[2]));
+	onKick(strify(orig), strify(params[0]), strify(params[1]), strify(params[2]));
 }
 
 void Server::handleMode(const char *orig, const char **params) noexcept
 {
-	wrapHandler(m_onMode, strify(orig), strify(params[0]), strify(params[1]), strify(params[2]));
+	onMode(strify(orig), strify(params[0]), strify(params[1]), strify(params[2]));
 }
 
 void Server::handleNick(const char *orig, const char **params) noexcept
 {
-	wrapHandler(m_onNick, strify(orig), strify(params[0]));
+	/*
+	 * Update our nickname.
+	 */
+	char target[32]{0};
+
+	irc_target_get_nick(orig, target, sizeof (target));
+
+	if (m_identity.nickname == target) {
+		m_identity.nickname = strify(params[0]);
+	}
+
+	onNick(strify(orig), strify(params[0]));
 }
 
 void Server::handleNotice(const char *orig, const char **params) noexcept
@@ -103,27 +114,27 @@ void Server::handleNotice(const char *orig, const char **params) noexcept
 	/*
 	 * As for handleInvite, the notice provides the target nickname, we discard it.
 	 */
-	wrapHandler(m_onNotice, strify(orig), strify(params[1]));
+	onNotice(strify(orig), strify(params[1]));
 }
 
 void Server::handlePart(const char *orig, const char **params) noexcept
 {
-	wrapHandler(m_onPart, strify(orig), strify(params[0]), strify(params[1]));
+	onPart(strify(orig), strify(params[0]), strify(params[1]));
 }
 
 void Server::handleQuery(const char *orig, const char **params) noexcept
 {
-	wrapHandler(m_onQuery, strify(orig), strify(params[1]));
+	onQuery(strify(orig), strify(params[1]));
 }
 
 void Server::handleTopic(const char *orig, const char **params) noexcept
 {
-	wrapHandler(m_onTopic, strify(orig), strify(params[0]), strify(params[1]));
+	onTopic(strify(orig), strify(params[0]), strify(params[1]));
 }
 
 void Server::handleUserMode(const char *orig, const char **params) noexcept
 {
-	wrapHandler(m_onUserMode, strify(orig), strify(params[1]));
+	onUserMode(strify(orig), strify(params[1]));
 }
 
 Server::Server(ServerInfo info, ServerIdentity identity, ServerSettings settings)

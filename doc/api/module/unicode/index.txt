@@ -1,24 +1,11 @@
 ---
-module: irccd.utf8
-since: 1.2
-info: yes
+module: irccd.unicode
 ---
 
 # Usage
 
 Support for UTF-8 and general Unicode in irccd. Helps converting UCS-4 string to UTF-8 and vice-versa.
 
-# Functions
+# Types
 
-- [isdigit](function/isdigit.html)
-- [isletter](function/isletter.html)
-- [islower](function/islower.html)
-- [istitle](function/istitle.html)
-- [isspace](function/isspace.html)
-- [isupper](function/isupper.html)
-- [length](function/length.html)
-- [list](function/list.html)
-- [toarray](function/toarray.html)
-- [tolower](function/tolower.html)
-- [tostring](function/tostring.html)
-- [toupper](function/toupper.html)
+- [Unicode](type/Unicode/index.html)

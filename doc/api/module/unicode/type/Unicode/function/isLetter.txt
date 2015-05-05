@@ -1,15 +1,13 @@
 ---
-function: isletter
-since: 1.2
-info: yes
+function: isLetter
 ---
 
 Check if the unicode character is a letter.
 
 # Synopsis
 
-````lua
-function isletter(code)
+````javascript
+Unicode.isLetter(code)
 ````
 
 # Arguments
@@ -18,4 +16,4 @@ function isletter(code)
 
 # Returns
 
-True if letter.
+- true if letter.
