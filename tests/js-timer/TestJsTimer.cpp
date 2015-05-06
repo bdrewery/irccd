@@ -35,10 +35,9 @@ TEST(Basic, single)
 	ElapsedTimer elapsed;
 	int count = 0;
 
-	timer.onSignal([&] () {
+	timer.onSignal.connect([&] () {
 		count = elapsed.elapsed();
 	});
-	timer.onEnd([] () {});
 
 	elapsed.reset();
 	timer.start();
@@ -53,10 +52,9 @@ TEST(Basic, repeat)
 	Timer timer(TimerType::Repeat, 500);
 	int max = 0;
 
-	timer.onSignal([&] () {
+	timer.onSignal.connect([&] () {
 		max ++;
 	});
-	timer.onEnd([] () {});
 
 	timer.start();
 

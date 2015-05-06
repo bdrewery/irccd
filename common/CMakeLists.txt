@@ -24,6 +24,8 @@ set(
 	Date.h
 	Directory.cpp
 	Directory.h
+	Dynlib.cpp
+	Dynlib.h
 	ElapsedTimer.cpp
 	ElapsedTimer.h
 	Filesystem.cpp

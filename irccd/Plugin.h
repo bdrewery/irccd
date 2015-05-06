@@ -87,7 +87,7 @@ public:
 
 private:
 	/* Plugin data */
-	DukContext m_context;
+	JsDuktape m_context;
 	PluginInfo m_info;
 	PluginConfig m_config;
 	Timers m_timers;
@@ -133,7 +133,7 @@ public:
 	 *
 	 * @return the context
 	 */
-	inline DukContext &context() noexcept
+	inline JsDuktape &context() noexcept
 	{
 		return m_context;
 	}

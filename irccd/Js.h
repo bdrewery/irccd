@@ -22,16 +22,71 @@
 #include <cassert>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include <duktape.h>
 
+#include <Dynlib.h>
+
 namespace irccd {
+
+class JsModule {
+public:
+	JsModule() = default;
+	virtual ~JsModule() = default;
+
+	virtual void load(duk_context *ctx) = 0;
+};
+
+class JsModuleNative : public JsModule {
+private:
+	using Load = duk_ret_t (*)(duk_context *);
+
+	Dynlib m_library;
+	Load m_load;
+
+public:
+	JsModuleNative(std::string path, std::string name);
+
+	void load(duk_context *ctx) override;
+};
+
+class JsModuleIrccd : public JsModule {
+private:
+	duk_c_function m_function;
+
+public:
+	JsModuleIrccd(duk_c_function func);
+
+	void load(duk_context *ctx) override;
+};
+
+class JsModuleStandard : public JsModule {
+private:
+	std::string m_path;
+	std::string m_name;
+
+public:
+	JsModuleStandard(std::string path, std::string name);
+
+	void load(duk_context *ctx) override;
+};
+
+using JsModules = std::unordered_map<std::string, std::unique_ptr<JsModule>>;
 
 /**
  * @class DukContext
  * @brief C++ Wrapper for Duktape context
  */
-class DukContext : public std::unique_ptr<duk_context, void (*)(duk_context *)> {
+class JsDuktape : public std::unique_ptr<duk_context, void (*)(duk_context *)> {
+private:
+	JsModules m_modules;
+
+	static std::unique_ptr<JsModule> jsLoad(duk_context *ctx, const std::string &name);
+
+	static duk_ret_t jsUsing(duk_context *ctx);
+	static duk_ret_t jsRequire(duk_context *ctx);
+
 public:
 	/**
 	 * Create a Duktape context prepared for irccd, it will contains the
@@ -39,7 +94,7 @@ public:
 	 *
 	 * @return the ready to use Duktape context
 	 */
-	DukContext();
+	JsDuktape();
 
 	/**
 	 * Convert the context to the native Duktape/C type.

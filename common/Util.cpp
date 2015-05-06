@@ -225,8 +225,8 @@ std::vector<std::string> Util::pathsPlugins()
 	} catch (const std::exception &ex) {
 		Logger::warning() << getprogname() << ": failed to user directory: " << ex.what();
 	}
-
 #endif
+
 	paths.push_back(m_programPath + Filesystem::Separator + WITH_DATADIR + Filesystem::Separator + "plugins");
 
 	return paths;

@@ -19,27 +19,127 @@
 #include <cstring>
 #include <unordered_map>
 
+#include <IrccdConfig.h>
+
+#include <Filesystem.h>
+#include <Util.h>
+
 #include "Js.h"
 
 namespace irccd {
 
-namespace {
+/* --------------------------------------------------------
+ * JsModuleNative implementation
+ * -------------------------------------------------------- */
 
-const std::unordered_map<std::string, duk_c_function> modules {
-	{ "irccd.fs",		dukopen_filesystem	},
-	{ "irccd.logger",	dukopen_logger		},
-	{ "irccd.timer",	dukopen_timer		},
-	{ "irccd.server",	dukopen_server		},
-	{ "irccd.system",	dukopen_system		},
-	{ "irccd.unicode",	dukopen_unicode		},
-	{ "irccd.util",		dukopen_util		}
-};
+JsModuleNative::JsModuleNative(std::string path, std::string name)
+	: m_library(std::move(path), Dynlib::Immediately)
+	, m_load(m_library.sym<Load>(std::move(name)))
+{
+}
+
+void JsModuleNative::load(duk_context *ctx)
+{
+	m_load(ctx);
+}
+
+/* --------------------------------------------------------
+ * JsModuleIrccd implementation
+ * -------------------------------------------------------- */
+
+JsModuleIrccd::JsModuleIrccd(duk_c_function func)
+	: m_function(func)
+{
+}
+
+void JsModuleIrccd::load(duk_context *ctx)
+{
+	duk_push_c_function(ctx, m_function, 1);
+	duk_call(ctx, 0);
+}
+
+/* --------------------------------------------------------
+ * JsModuleStandard implementation
+ * -------------------------------------------------------- */
+
+JsModuleStandard::JsModuleStandard(std::string path, std::string name)
+	: m_path(std::move(path))
+	, m_name(std::move(name))
+{
+}
+
+void JsModuleStandard::load(duk_context *ctx)
+{
+	// TODO: implement exports table
+}
+
+/* --------------------------------------------------------
+ * JsDuktape
+ * -------------------------------------------------------- */
+
+std::unique_ptr<JsModule> JsDuktape::jsLoad(duk_context *ctx, const std::string &name)
+{
+	static const std::unordered_map<std::string, duk_c_function> modules{
+		{ "irccd.fs",		dukopen_filesystem	},
+		{ "irccd.logger",	dukopen_logger		},
+		{ "irccd.timer",	dukopen_timer		},
+		{ "irccd.server",	dukopen_server		},
+		{ "irccd.system",	dukopen_system		},
+		{ "irccd.unicode",	dukopen_unicode		},
+		{ "irccd.util",		dukopen_util		}
+	};
+
+	/*
+	 * First, check if the module is a predefined irccd module.
+	 */
+	auto it = modules.find(name);
+	if (it != modules.end()) {
+		return std::make_unique<JsModuleIrccd>(it->second);
+	}
+
+	/*
+	 * Second, check for each path if a file with the name translated to a 
+	 * real path ends with .js or .suffix where the suffix
+	 * depends on the system.
+	 *
+	 * First check for .js because the dynamic loading is not supported
+	 * everywhere.
+	 */
+
+	/* Convert . to filesystem / or \ */
+	std::string modname = name;
+	std::replace(modname.begin(), modname.end(), '.', Filesystem::Separator);
+
+	for (const std::string &path : Util::pathsPlugins()) {
+		std::string fullpath = path + Filesystem::Separator + modname;
+
+		/* JavaScript plugin */
+		std::string jspath = fullpath + Filesystem::Separator + ".js";
+		if (Filesystem::exists(fullpath)) {
+			return std::make_unique<JsModuleStandard>(jspath, name);
+		}
+
+#if defined(WITH_JS_EXTENSION)
+		/* Dynamic loading */
+		std::string nativepath = fullpath + Filesystem::Separator + WITH_JS_EXTENSION;
+		if (Filesystem::exists(nativepath)) {
+			return std::make_unique<JsModuleNative>(nativepath, name);
+		}
+#endif
+	}
+
+	dukx_throw(ctx, -1, "could not find module");
+
+	/* dukx_throw does not return, but make the compiler happy */
+	return nullptr;
+}
 
 /*
  * irccd's implementation of using()
  */
-duk_ret_t irccdUsing(duk_context *ctx)
+duk_ret_t JsDuktape::jsUsing(duk_context *ctx)
 {
+#if 0
 	const char *module = duk_require_string(ctx, 0);
 
 	if (modules.count(module) == 0) {
@@ -54,6 +154,7 @@ duk_ret_t irccdUsing(duk_context *ctx)
 	while (duk_next(ctx, -1, 1)) {
 		duk_put_prop(ctx, -5);
 	}
+#endif
 
 	return 0;
 }
@@ -61,8 +162,9 @@ duk_ret_t irccdUsing(duk_context *ctx)
 /*
  * irccd's implementation of require()
  */
-duk_ret_t irccdRequire(duk_context *ctx)
+duk_ret_t JsDuktape::jsRequire(duk_context *ctx)
 {
+#if 0
 	const char *module = duk_require_string(ctx, 0);
 
 	if (modules.count(module) == 0) {
@@ -71,21 +173,20 @@ duk_ret_t irccdRequire(duk_context *ctx)
 
 	duk_push_c_function(ctx, modules.at(module), 0);
 	duk_call(ctx, 0);
+#endif
 
 	return 1;
 }
 
-} // !namespace
-
-DukContext::DukContext()
+JsDuktape::JsDuktape()
 	: std::unique_ptr<duk_context, void (*)(duk_context *)>(duk_create_heap_default(), duk_destroy_heap)
 {
 	dukx_assert_begin(get());
 
 	/* Set our "using" and "require" keyword */
-	duk_push_c_function(get(), irccdUsing, 1);
+	duk_push_c_function(get(), jsUsing, 1);
 	duk_put_global_string(get(), "using");
-	duk_push_c_function(get(), irccdRequire, 1);
+	duk_push_c_function(get(), jsRequire, 1);
 	duk_put_global_string(get(), "require");
 
 	/* Disable alert, print */

@@ -13,7 +13,7 @@ namespace irccd {
 
 class LibtestUtil : public testing::Test {
 protected:
-	irccd::DukContext m_ctx;
+	JsDuktape m_ctx;
 
 public:
 	LibtestUtil(const std::string &ret, const std::string &modname)

@@ -95,6 +95,18 @@ elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
 endif ()
 
 # ---------------------------------------------------------
+# JavaScript dynamic loading
+# ---------------------------------------------------------
+
+if (WIN32)
+	set(WITH_JS_EXTENSION ".dll")
+elseif (APPLE)
+	set(WITH_JS_EXTENSION ".dylib")
+elseif (UNIX)
+	set(WITH_JS_EXTENSION ".so")
+endif()
+
+# ---------------------------------------------------------
 # Portability requirements
 # ---------------------------------------------------------
 
