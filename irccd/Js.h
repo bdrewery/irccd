@@ -30,9 +30,40 @@
 
 namespace irccd {
 
-class JsModule {
+class Plugin;
+
+class JsError : public std::exception {
 public:
-	JsModule() = default;
+	std::string source;
+	std::string error;
+	std::string stack;
+
+	const char *what() const noexcept override
+	{
+		return error.c_str();
+	}
+};
+
+/* --------------------------------------------------------
+ * Module loading
+ * -------------------------------------------------------- */
+
+class JsModule {
+private:
+	std::string m_name;
+
+public:
+	inline JsModule(std::string name) noexcept
+		: m_name(std::move(name))
+	{
+
+	}
+
+	inline const std::string &name() const noexcept
+	{
+		return m_name;
+	}
+
 	virtual ~JsModule() = default;
 
 	virtual void load(duk_context *ctx) = 0;
@@ -46,7 +77,7 @@ private:
 	Load m_load;
 
 public:
-	JsModuleNative(std::string path, std::string name);
+	JsModuleNative(std::string name, std::string path);
 
 	void load(duk_context *ctx) override;
 };
@@ -56,7 +87,7 @@ private:
 	duk_c_function m_function;
 
 public:
-	JsModuleIrccd(duk_c_function func);
+	JsModuleIrccd(std::string name, duk_c_function func);
 
 	void load(duk_context *ctx) override;
 };
@@ -64,10 +95,9 @@ public:
 class JsModuleStandard : public JsModule {
 private:
 	std::string m_path;
-	std::string m_name;
 
 public:
-	JsModuleStandard(std::string path, std::string name);
+	JsModuleStandard(std::string name, std::string path);
 
 	void load(duk_context *ctx) override;
 };
@@ -80,21 +110,30 @@ using JsModules = std::unordered_map<std::string, std::unique_ptr<JsModule>>;
  */
 class JsDuktape : public std::unique_ptr<duk_context, void (*)(duk_context *)> {
 private:
+	Plugin &m_plugin;
 	JsModules m_modules;
 
-	static std::unique_ptr<JsModule> jsLoad(duk_context *ctx, const std::string &name);
-
+	static std::string jsReplace(std::string name) noexcept;
+	static JsDuktape &jsSelf(duk_context *ctx) noexcept;
+	static std::unique_ptr<JsModule> jsLoad(duk_context *ctx);
 	static duk_ret_t jsUsing(duk_context *ctx);
 	static duk_ret_t jsRequire(duk_context *ctx);
+
+	/* Move and copy forbidden */
+	JsDuktape(const JsDuktape &) = delete;
+	JsDuktape &operator=(const JsDuktape &) = delete;
+	JsDuktape(const JsDuktape &&) = delete;
+	JsDuktape &operator=(const JsDuktape &&) = delete;
 
 public:
 	/**
 	 * Create a Duktape context prepared for irccd, it will contains the
 	 * using() and require() functions specialized for irccd.
 	 *
+	 * @param plugin, the reference to the plugin that owns this context
 	 * @return the ready to use Duktape context
 	 */
-	JsDuktape();
+	JsDuktape(Plugin &plugin);
 
 	/**
 	 * Convert the context to the native Duktape/C type.

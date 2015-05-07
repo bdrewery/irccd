@@ -25,11 +25,7 @@ namespace irccd {
 
 class Filesystem {
 public:
-#if defined(_WIN32)
-	static constexpr const char Separator{'\\'};
-#else
-	static constexpr const char Separator{'/'};
-#endif
+	static const char Separator;
 
 public:
 	static std::string baseName(std::string path);

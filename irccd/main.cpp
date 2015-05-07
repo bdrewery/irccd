@@ -277,6 +277,8 @@ int main(int, char **argv)
 {
 	using namespace irccd;
 
+	Logger::setVerbose(true);
+
 	setprogname("irccd");
 	Util::setProgramPath(argv[0]);
 

@@ -37,6 +37,12 @@
 
 namespace irccd {
 
+#if defined(_WIN32)
+const char Filesystem::Separator{'\\'};
+#else
+const char Filesystem::Separator{'/'};
+#endif
+
 std::string Filesystem::baseName(std::string path)
 {
 #if defined(_WIN32)
