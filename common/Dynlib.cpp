@@ -26,9 +26,9 @@
 
 #include "Dynlib.h"
 
-#if defined(_WIN32)
-
 namespace irccd {
+
+#if defined(_WIN32)
 
 namespace {
 

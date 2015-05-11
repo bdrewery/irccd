@@ -49,11 +49,11 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	# LLVM/clang implemented C++14 starting from version 3.4 but the
 	# switch -std=c++14 was not available.
 	#
-	if (${VERSION} VERSION_LESS "3.4")
+	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.4")
 		message(FATAL_ERROR "You need at least Clang 3.4")
 	endif ()
 
-	if (${VERSION} VERSION_LESS "3.5")
+	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.5")
 		message("-Wall -Wextra -std=c++1y  ${CMAKE_CXX_FLAGS}")
 	else ()
 		message("-Wall -Wextra -std=c++14  ${CMAKE_CXX_FLAGS}")
