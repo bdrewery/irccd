@@ -1,8 +1,0 @@
-- Test all JS API
-- Test server events -> transports
-- Improve reloading of Transport sets
-- Add a better irccd_create_test function
-- Convert documentation
-- Test if server/identity names are valid
-- Get rid of irccd global variable
-- Rename slots "on*" to "handle"
