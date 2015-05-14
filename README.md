@@ -11,6 +11,8 @@ on these events.
 Irccd is also controllable via internet and unix sockets, this let you use
 irccd as a message relayer and such.
 
+**This is the development version.**
+
 Features
 ========
 
