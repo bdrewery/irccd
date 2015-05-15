@@ -28,12 +28,10 @@
 #  include <cstring>
 #endif
 
-/*
- * Keep this ordered like this, on Windows we get some errors saying that windows.h
- * must be included before winsock2.h
- */
-#include "Server.h"
+#include <Filesystem.h>
+
 #include "Plugin.h"
+#include "Server.h"
 
 namespace irccd {
 
@@ -70,8 +68,7 @@ void Plugin::call(const char *name, int nargs)
 }
 
 Plugin::Plugin(std::string name, std::string path, PluginConfig config)
-	: m_context(*this)
-	, m_config(std::move(config))
+	: m_config(std::move(config))
 {
 	m_info.name = std::move(name);
 	m_info.path = std::move(path);
@@ -88,8 +85,18 @@ Plugin::Plugin(std::string name, std::string path, PluginConfig config)
 	}
 #endif
 
-	if (duk_peval_file(m_context, m_info.path.c_str()) != 0) {
-		throw std::runtime_error(duk_safe_to_string(m_context, -1));
+	/*
+	 * Store the base path to the plugin, it is required for
+	 * Duktape.modSearch to find external modules and other
+	 * sources.
+	 *
+	 * If path is absolute, the parent is the directory name, otherwise
+	 * we use the current working directory (needed for some tests).
+	 */
+	if (Filesystem::isAbsolute(m_info.path)) {
+		m_info.parent = Filesystem::dirName(m_info.path);
+	} else {
+		m_info.parent = Filesystem::cwd();
 	}
 
 	/* Save a reference to this */
@@ -100,7 +107,13 @@ Plugin::Plugin(std::string name, std::string path, PluginConfig config)
 	duk_put_prop_string(m_context, -2, "\xff""\xff""path");
 	duk_push_string(m_context, m_info.name.c_str());
 	duk_put_prop_string(m_context, -2, "\xff""\xff""name");
+	duk_push_string(m_context, m_info.parent.c_str());
+	duk_put_prop_string(m_context, -2, "\xff""\xff""parent");
 	duk_pop(m_context);
+
+	if (duk_peval_file(m_context, m_info.path.c_str()) != 0) {
+		throw std::runtime_error(duk_safe_to_string(m_context, -1));
+	}
 }
 
 const PluginInfo &Plugin::info() const

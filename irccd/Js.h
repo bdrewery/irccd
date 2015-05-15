@@ -22,11 +22,15 @@
 #include <cassert>
 #include <memory>
 #include <string>
-#include <unordered_map>
+#include <vector>
+
+#include <IrccdConfig.h>
 
 #include <duktape.h>
 
-#include <Dynlib.h>
+#if defined(WITH_JS_EXTENSION)
+#  include <Dynlib.h>
+#endif
 
 namespace irccd {
 
@@ -34,9 +38,11 @@ class Plugin;
 
 class JsError : public std::exception {
 public:
+	std::string name;
 	std::string source;
 	std::string error;
 	std::string stack;
+	int lineNumber{0};
 
 	const char *what() const noexcept override
 	{
@@ -44,80 +50,42 @@ public:
 	}
 };
 
-/* --------------------------------------------------------
- * Module loading
- * -------------------------------------------------------- */
-
-class JsModule {
-private:
-	std::string m_name;
-
-public:
-	inline JsModule(std::string name) noexcept
-		: m_name(std::move(name))
-	{
-
-	}
-
-	inline const std::string &name() const noexcept
-	{
-		return m_name;
-	}
-
-	virtual ~JsModule() = default;
-
-	virtual void load(duk_context *ctx) = 0;
-};
-
-class JsModuleNative : public JsModule {
-private:
-	using Load = duk_ret_t (*)(duk_context *);
-
-	Dynlib m_library;
-	Load m_load;
-
-public:
-	JsModuleNative(std::string name, std::string path);
-
-	void load(duk_context *ctx) override;
-};
-
-class JsModuleIrccd : public JsModule {
-private:
-	duk_c_function m_function;
-
-public:
-	JsModuleIrccd(std::string name, duk_c_function func);
-
-	void load(duk_context *ctx) override;
-};
-
-class JsModuleStandard : public JsModule {
-private:
-	std::string m_path;
-
-public:
-	JsModuleStandard(std::string name, std::string path);
-
-	void load(duk_context *ctx) override;
-};
-
-using JsModules = std::unordered_map<std::string, std::unique_ptr<JsModule>>;
+#if defined(WITH_JS_EXTENSION)
+/**
+ * Vector of Dynlib as pointers. It's not possible to use the exported
+ * symbols when the library is closed so be sure that the object is never
+ * deleted while the module is loaded.
+ */
+using JsModules = std::vector<std::unique_ptr<Dynlib>>;
+#endif
 
 /**
- * @class DukContext
+ * @class JsDuktape
  * @brief C++ Wrapper for Duktape context
+ *
+ * Avoid using this class directly because it needs to use global hidden
+ * variables that are defined from Plugin object.
  */
 class JsDuktape : public std::unique_ptr<duk_context, void (*)(duk_context *)> {
 private:
-	Plugin &m_plugin;
+#if defined(WITH_JS_EXTENSION)
 	JsModules m_modules;
+#endif
 
-	static std::string jsReplace(std::string name) noexcept;
-	static JsDuktape &jsSelf(duk_context *ctx) noexcept;
-	static std::unique_ptr<JsModule> jsLoad(duk_context *ctx);
-	static duk_ret_t jsUsing(duk_context *ctx);
-	static duk_ret_t jsRequire(duk_context *ctx);
+	/* Some helpers */
+	static JsDuktape &self(duk_context *ctx) noexcept;
+	static std::string parent(JsDuktape &ctx) noexcept;
+
+	/* Loaders */
+	static void loadFunction(JsDuktape &ctx, duk_c_function fn);
+	static void loadPlain(JsDuktape &ctx, const std::string &path);
+#if defined(WITH_JS_EXTENSION)
+	static void loadNative(JsDuktape &ctx, std::string ident, const std::string &path);
+#endif
+
+	/* Duktape modifications */
+	static duk_ret_t use(duk_context *);
+	static duk_ret_t modSearch(duk_context *ctx);
 
 	/* Move and copy forbidden */
 	JsDuktape(const JsDuktape &) = delete;
@@ -133,7 +101,7 @@ public:
 	 * @param plugin, the reference to the plugin that owns this context
 	 * @return the ready to use Duktape context
 	 */
-	JsDuktape(Plugin &plugin);
+	JsDuktape();
 
 	/**
 	 * Convert the context to the native Duktape/C type.
@@ -324,6 +292,15 @@ void dukx_push_shared(duk_context *ctx, std::shared_ptr<Type> ptr)
 
 	dukx_assert_end(ctx, 1);
 }
+
+/**
+ * Get the error fields from the Error object at the top of the
+ * stack.
+ *
+ * @param ctx the context
+ * @return the error object
+ */
+JsError dukx_get_error(duk_context *ctx);
 
 /* Modules */
 duk_ret_t dukopen_filesystem(duk_context *ctx) noexcept;

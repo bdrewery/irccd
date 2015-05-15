@@ -83,8 +83,6 @@
 #endif
 
 #cmakedefine HAVE_ACCESS
-
-#cmakedefine HAVE_SYS_STAT_H
 #cmakedefine HAVE_STAT
 #cmakedefine HAVE_STAT_ST_ATIME
 #cmakedefine HAVE_STAT_ST_BLKSIZE

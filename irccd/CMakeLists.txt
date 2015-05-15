@@ -69,10 +69,6 @@ if (WITH_JS)
 	list(APPEND LIBRARIES duktape)
 endif ()
 
-if (IRCCD_SYSTEM_LINUX)
-	list(APPEND LIBRARIES dl)
-endif ()
-
 irccd_define_executable(
 	TARGET irccd
 	INSTALL

@@ -57,6 +57,10 @@ set(
 
 if (UNIX)
 	list(APPEND SOURCES Xdg.cpp Xdg.h)
+
+	if (IRCCD_SYSTEM_LINUX)
+		list(APPEND LIBRARIES dl)
+	endif ()
 elseif (WIN32)
 	list(APPEND LIBRARIES ws2_32)
 	list(APPEND LIBRARIES gdi32)

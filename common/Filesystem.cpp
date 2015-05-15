@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -24,11 +25,12 @@
 
 #include <IrccdConfig.h>
 
-#if defined(_WIN32)
+#if defined(IRCCD_SYSTEM_WINDOWS)
 #  include <direct.h>
 #  include <shlwapi.h>
 #else
 #  include <sys/stat.h>
+#  include <climits>
 #  include <unistd.h>
 #  include <libgen.h>
 #endif
@@ -37,7 +39,7 @@
 
 namespace irccd {
 
-#if defined(_WIN32)
+#if defined(IRCCD_SYSTEM_WINDOWS)
 const char Filesystem::Separator{'\\'};
 #else
 const char Filesystem::Separator{'/'};
@@ -45,7 +47,7 @@ const char Filesystem::Separator{'/'};
 
 std::string Filesystem::baseName(std::string path)
 {
-#if defined(_WIN32)
+#if defined(IRCCD_SYSTEM_WINDOWS)
 	size_t pos;
 
 	pos = path.find_last_of('\\');
@@ -64,7 +66,7 @@ std::string Filesystem::baseName(std::string path)
 
 std::string Filesystem::dirName(std::string path)
 {
-#if defined(_WIN32)
+#if defined(IRCCD_SYSTEM_WINDOWS)
 	std::size_t pos;
 
 	pos = path.find_last_of('\\');
@@ -84,7 +86,7 @@ std::string Filesystem::dirName(std::string path)
 
 bool Filesystem::isAbsolute(const std::string &path) noexcept
 {
-#if defined(_WIN32)
+#if defined(IRCCD_SYSTEM_WINDOWS)
 	return !isRelative(path);
 #else
 	return path.size() > 0 && path[0] == '/';
@@ -93,7 +95,7 @@ bool Filesystem::isAbsolute(const std::string &path) noexcept
 
 bool Filesystem::isRelative(const std::string &path) noexcept
 {
-#if defined(_WIN32)
+#if defined(IRCCD_SYSTEM_WINDOWS)
 	return PathIsRelativeA(path.c_str());
 #else
 	return !isAbsolute(path);
@@ -138,7 +140,7 @@ void Filesystem::mkdir(const std::string &dir, int mode)
 		if (part.length() <= 0 || exists(part))
 			continue;
 
-#if defined(_WIN32)
+#if defined(IRCCD_SYSTEM_WINDOWS)
 		if (::_mkdir(part.c_str()) < 0) {
 #else
 		if (::mkdir(part.c_str(), mode) < 0) {
@@ -149,7 +151,7 @@ void Filesystem::mkdir(const std::string &dir, int mode)
 	}
 
 	// Last part
-#if defined(_WIN32)
+#if defined(IRCCD_SYSTEM_WINDOWS)
 	if (::_mkdir(dir.c_str()) < 0) {
 #else
 	if (::mkdir(dir.c_str(), mode) < 0) {
@@ -158,9 +160,31 @@ void Filesystem::mkdir(const std::string &dir, int mode)
 		throw std::runtime_error(oss.str());
 	}
 
-#if defined(_WIN32)
+#if defined(IRCCD_SYSTEM_WINDOWS)
 	// Windows's mkdir does not use mode.
 	(void)mode;
+#endif
+}
+
+std::string Filesystem::cwd()
+{
+#if defined(IRCCD_SYSTEM_WINDOWS)
+	char path[MAX_PATH];
+
+	if (GetCurrentDirectoryA(path, sizeof (path)) < 0) {
+		// TODO: format message
+		throw std::runtime_error("failed to get current working directory");
+	}
+
+	return path;
+#else
+	char path[PATH_MAX];
+
+	if (getcwd(path, sizeof (path)) == nullptr) {
+		throw std::runtime_error(std::strerror(errno));
+	}
+
+	return path;
 #endif
 }
 

@@ -34,6 +34,7 @@ public:
 	static bool isRelative(const std::string &path) noexcept;
 	static bool exists(const std::string &path);
 	static void mkdir(const std::string &dir, int mode = 0700);
+	static std::string cwd();
 };
 
 } // !irccd

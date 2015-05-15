@@ -26,7 +26,7 @@
 
 #include <IrccdConfig.h>
 
-#if defined(HAVE_SYS_STAT_H) && defined(HAVE_STAT)
+#if defined(HAVE_STAT)
 #  include <sys/stat.h>
 #endif
 

@@ -45,8 +45,9 @@ class ServerWhois;
  */
 class PluginInfo {
 public:
-	std::string name;
-	std::string path;
+	std::string name;		//!< plugin name (from file on disk)
+	std::string path;		//!< full path to the plugin file
+	std::string parent;		//!< parent directory
 };
 
 /**

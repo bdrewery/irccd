@@ -40,6 +40,7 @@ function(create_test name sources)
 	add_test(
 		NAME ${name}
 		COMMAND ${name}
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 	)
 
 	target_link_libraries(
@@ -77,6 +78,9 @@ if (WITH_TESTS)
 	add_subdirectory(js-system)
 	add_subdirectory(js-timer)
 	add_subdirectory(js-unicode)
+
+	# JS modules
+	add_subdirectory(js-module-standard)
 
 	# Server stuff
 	add_subdirectory(server)

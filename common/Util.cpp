@@ -215,6 +215,9 @@ std::vector<std::string> Util::pathsPlugins()
 {
 	std::vector<std::string> paths;
 
+	/* Always current directory first */
+	paths.push_back(Filesystem::cwd());
+
 #if defined(IRCCD_SYSTEM_WINDOWS)
 	// TODO
 #else
