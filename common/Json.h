@@ -608,11 +608,6 @@ public:
 		{
 		}
 
-		inline operator JsonValue() const noexcept
-		{
-			return *this;
-		}
-
 		inline JsonValue &operator*() noexcept
 		{
 			return *this;
@@ -1160,11 +1155,6 @@ public:
 			, m_object(object)
 			, m_key(std::move(key))
 		{
-		}
-
-		inline operator JsonValue() const noexcept
-		{
-			return *this;
 		}
 
 		inline JsonValue &operator*() noexcept

@@ -104,6 +104,7 @@ void JsDuktape::loadNative(JsDuktape &ctx, std::string ident, const std::string 
 
 duk_ret_t JsDuktape::modSearch(duk_context *ctx)
 {
+#if 0
 	static const std::unordered_map<std::string, duk_c_function> modules{
 		{ "irccd.fs",		dukopen_filesystem	},
 		{ "irccd.logger",	dukopen_logger		},
@@ -114,8 +115,6 @@ duk_ret_t JsDuktape::modSearch(duk_context *ctx)
 		{ "irccd.util",		dukopen_util		}
 	};
 
-	auto id = duk_require_string(ctx, 0);
-	auto it = modules.find(id);
 	bool extract = true;
 
 	if (it != modules.end()) {
@@ -148,6 +147,71 @@ duk_ret_t JsDuktape::modSearch(duk_context *ctx)
 		while (duk_next(ctx, -1, 1)) {
 			duk_put_prop(ctx, 2);
 		}
+	}
+#endif
+
+	return 1;
+}
+
+void JsDuktape::requireLocal(JsDuktape &ctx, const std::string &name)
+{
+	duk_get_global_string(ctx, "\xff""\xff""Duktape-require");
+	duk_push_string(ctx, name.c_str());
+	duk_call(ctx, 1);
+}
+
+void JsDuktape::requirePlugin(JsDuktape &ctx, const std::string &name)
+{
+	// TODO: implement when plugin API export is ready.
+	(void)ctx;
+	(void)name;
+}
+
+/*
+ * Global require: require("foo")
+ *
+ * This is also the one that is called when loading irccd modules, in the form
+ * require("irccd.foo"), otherwise, the path is specified like in C,
+ * require("foo/bar").
+ */
+void JsDuktape::requireGlobal(JsDuktape &ctx, const std::string &name)
+{
+	static const std::unordered_map<std::string, duk_c_function> modules{
+		{ "irccd.fs",		dukopen_filesystem	},
+		{ "irccd.logger",	dukopen_logger		},
+		{ "irccd.timer",	dukopen_timer		},
+		{ "irccd.server",	dukopen_server		},
+		{ "irccd.system",	dukopen_system		},
+		{ "irccd.unicode",	dukopen_unicode		},
+		{ "irccd.util",		dukopen_util		}
+	};
+
+	auto id = duk_require_string(ctx, 0);
+	auto it = modules.find(id);
+	if (it != modules.end()) {
+		loadFunction(self(ctx), it->second);
+	} else {
+		// TODO: search for global .js and .<ext>
+	}
+}
+
+/*
+ * Require is modified to understand different formats:
+ *
+ * require("foo") -> search for native/plain foo in irccd directories
+ * require("./foo") -> search for foo.js locally to the current module
+ * require(":foo") -> import foo plugin API
+ */
+duk_ret_t JsDuktape::require(duk_context *ctx)
+{
+	const char *path = duk_require_string(ctx, 0);
+
+	if (path[0] == '.' && path[1] == '/') {
+		requireLocal(self(ctx), path + 2);
+	} else if (path[0] == ':') {
+		requirePlugin(self(ctx), path + 1);
+	} else {
+		requireGlobal(self(ctx), path);
 	}
 
 	return 1;
@@ -193,6 +257,12 @@ JsDuktape::JsDuktape()
 	/* Set our "using" keyword */
 	duk_push_c_function(get(), &JsDuktape::use, 1);
 	duk_put_global_string(get(), "using");
+
+	/* Replace the "require" function, but save it to reuse it */
+	duk_get_global_string(get(), "require");
+	duk_put_global_string(get(), "\xff""\xff""Duktape-require");
+	duk_push_c_function(get(), &JsDuktape::require, 1);
+	duk_put_global_string(get(), "require");
 
 	/* Set Duktape.modSearch */
 	duk_get_global_string(get(), "Duktape");

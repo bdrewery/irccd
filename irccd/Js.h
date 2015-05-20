@@ -83,7 +83,13 @@ private:
 	static void loadNative(JsDuktape &ctx, std::string ident, const std::string &path);
 #endif
 
+	/* Require searchers */
+	static void requireLocal(JsDuktape &ctx, const std::string &name);
+	static void requirePlugin(JsDuktape &ctx, const std::string &name);
+	static void requireGlobal(JsDuktape &ctx, const std::string &name);
+
 	/* Duktape modifications */
+	static duk_ret_t require(duk_context *);
 	static duk_ret_t use(duk_context *);
 	static duk_ret_t modSearch(duk_context *ctx);
 
