@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include <common/Util.h>
+#include <Util.h>
 
 namespace irccd {
 

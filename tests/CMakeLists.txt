@@ -19,59 +19,6 @@
 # Project
 project(tests)
 
-# Function to create a test
-function(create_test name sources)
-	add_executable(
-		${name}
-		${sources}
-		${tests_SOURCE_DIR}/libtest/LibtestUtil.h
-	)
-
-	target_include_directories(
-		${name}
-		PRIVATE
-			${CMAKE_BINARY_DIR}
-			${CMAKE_SOURCE_DIR}
-			${irccd_SOURCE_DIR}
-			${extern_SOURCE_DIR}
-			${tests_SOURCE_DIR}/libtest
-	)
-
-	add_test(
-		NAME ${name}
-		COMMAND ${name}
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-	)
-
-	target_link_libraries(
-		${name}
-		common
-		ircclient
-		gtest
-	)
-
-	if (UNIX)
-		set_target_properties(${name} PROPERTIES LINK_FLAGS "-pthread")
-	endif ()
-endfunction()
-
-# Create and copy a directory
-function(create_dir target dirname)
-	add_custom_command(
-		TARGET ${target}
-		POST_BUILD
-		COMMAND
-			${CMAKE_COMMAND} -E make_directory
-			${CMAKE_CURRENT_BINARY_DIR}/${dirname}
-		COMMAND
-			${CMAKE_COMMAND} -E copy_directory
-			${CMAKE_CURRENT_SOURCE_DIR}/${dirname}
-			${CMAKE_CURRENT_BINARY_DIR}/${dirname}
-	)
-endfunction()
-
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/testassets)
-
 if (WITH_TESTS)
 	# JS API
 	add_subdirectory(js-filesystem)
@@ -80,7 +27,7 @@ if (WITH_TESTS)
 	add_subdirectory(js-unicode)
 
 	# JS modules
-	add_subdirectory(js-module-standard)
+	# add_subdirectory(js-module-standard)
 
 	# Server stuff
 	add_subdirectory(server)

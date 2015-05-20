@@ -16,11 +16,11 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-set(
-	TEST_SERVICE_SOURCES
-	${irccd_SOURCE_DIR}/Service.cpp
-	${irccd_SOURCE_DIR}/Service.h
-	TestService.cpp
+irccd_define_test(
+	NAME service
+	SOURCES
+		${irccd_SOURCE_DIR}/Service.cpp
+		${irccd_SOURCE_DIR}/Service.h
+		TestService.cpp
+	LIBRARIES common
 )
-
-create_test(test-service "${TEST_SERVICE_SOURCES}")

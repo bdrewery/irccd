@@ -16,41 +16,34 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-set(
-	JS_FILESYSTEM_SOURCES
-	${irccd_SOURCE_DIR}/Js.cpp
-	${irccd_SOURCE_DIR}/Js.h
-	${irccd_SOURCE_DIR}/JsFilesystem.cpp
-	${irccd_SOURCE_DIR}/JsLogger.cpp
-	${irccd_SOURCE_DIR}/JsPlugin.cpp
-	${irccd_SOURCE_DIR}/JsServer.cpp
-	${irccd_SOURCE_DIR}/JsSystem.cpp
-	${irccd_SOURCE_DIR}/JsTimer.cpp
-	${irccd_SOURCE_DIR}/JsUnicode.cpp
-	${irccd_SOURCE_DIR}/JsUtil.cpp
-	${irccd_SOURCE_DIR}/Plugin.cpp
-	${irccd_SOURCE_DIR}/Plugin.h
-	${irccd_SOURCE_DIR}/Timer.cpp
-	${irccd_SOURCE_DIR}/Timer.h
-	${irccd_SOURCE_DIR}/Unicode.cpp
-	${irccd_SOURCE_DIR}/Unicode.h
-	TestJsFilesystem.cpp
-)
-
-create_test(test-js-filesystem "${JS_FILESYSTEM_SOURCES}")
-
-target_link_libraries(test-js-filesystem duktape)
-target_compile_definitions(
-	test-js-filesystem
-	PRIVATE
-		BINARY=\"${CMAKE_BINARY_DIR}\"
+irccd_define_test(
+	NAME js-filesystem
+	SOURCES
+		${irccd_SOURCE_DIR}/Js.cpp
+		${irccd_SOURCE_DIR}/Js.h
+		${irccd_SOURCE_DIR}/JsFilesystem.cpp
+		${irccd_SOURCE_DIR}/JsLogger.cpp
+		${irccd_SOURCE_DIR}/JsPlugin.cpp
+		${irccd_SOURCE_DIR}/JsServer.cpp
+		${irccd_SOURCE_DIR}/JsSystem.cpp
+		${irccd_SOURCE_DIR}/JsTimer.cpp
+		${irccd_SOURCE_DIR}/JsUnicode.cpp
+		${irccd_SOURCE_DIR}/JsUtil.cpp
+		${irccd_SOURCE_DIR}/Plugin.cpp
+		${irccd_SOURCE_DIR}/Plugin.h
+		${irccd_SOURCE_DIR}/Timer.cpp
+		${irccd_SOURCE_DIR}/Timer.h
+		${irccd_SOURCE_DIR}/Unicode.cpp
+		${irccd_SOURCE_DIR}/Unicode.h
+		TestJsFilesystem.cpp
+	LIBRARIES common duktape ircclient
 )
 
 #
 # Create following tree:
 #
 # CMAKE_BINARY_DIR
-#	| testassets
+#	| tests
 #	|	|-- file.txt
 #	|	|-- lines.txt
 #	|	|-- level-1
@@ -58,8 +51,8 @@ target_compile_definitions(
 #	|	|	| -- level-2
 #	|	|	|	| -- file-2.txt
 #
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/testassets/level-1/level-2)
-file(WRITE ${CMAKE_BINARY_DIR}/testassets/file.txt "file.txt")
-file(WRITE ${CMAKE_BINARY_DIR}/testassets/lines.txt "a\nb\nc\n")
-file(WRITE ${CMAKE_BINARY_DIR}/testassets/level-1/file-1.txt "file-1.txt")
-file(WRITE ${CMAKE_BINARY_DIR}/testassets/level-1/level-2/file-2.txt "file-2.txt")
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/tests/level-1/level-2)
+file(WRITE ${CMAKE_BINARY_DIR}/tests/file.txt "file.txt")
+file(WRITE ${CMAKE_BINARY_DIR}/tests/lines.txt "a\nb\nc\n")
+file(WRITE ${CMAKE_BINARY_DIR}/tests/level-1/file-1.txt "file-1.txt")
+file(WRITE ${CMAKE_BINARY_DIR}/tests/level-1/level-2/file-2.txt "file-2.txt")

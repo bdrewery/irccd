@@ -16,26 +16,26 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-set(
-	JS_SYSTEM_SOURCES
-	${irccd_SOURCE_DIR}/Js.cpp
-	${irccd_SOURCE_DIR}/Js.h
-	${irccd_SOURCE_DIR}/JsFilesystem.cpp
-	${irccd_SOURCE_DIR}/JsLogger.cpp
-	${irccd_SOURCE_DIR}/JsPlugin.cpp
-	${irccd_SOURCE_DIR}/JsServer.cpp
-	${irccd_SOURCE_DIR}/JsSystem.cpp
-	${irccd_SOURCE_DIR}/JsTimer.cpp
-	${irccd_SOURCE_DIR}/JsUnicode.cpp
-	${irccd_SOURCE_DIR}/JsUtil.cpp
-	${irccd_SOURCE_DIR}/Plugin.cpp
-	${irccd_SOURCE_DIR}/Plugin.h
-	${irccd_SOURCE_DIR}/Timer.cpp
-	${irccd_SOURCE_DIR}/Timer.h
-	${irccd_SOURCE_DIR}/Unicode.cpp
-	${irccd_SOURCE_DIR}/Unicode.h
-	TestJsSystem.cpp
+irccd_define_test(
+	NAME js-system
+	SOURCES
+		${irccd_SOURCE_DIR}/Js.cpp
+		${irccd_SOURCE_DIR}/Js.h
+		${irccd_SOURCE_DIR}/JsFilesystem.cpp
+		${irccd_SOURCE_DIR}/JsLogger.cpp
+		${irccd_SOURCE_DIR}/JsPlugin.cpp
+		${irccd_SOURCE_DIR}/JsServer.cpp
+		${irccd_SOURCE_DIR}/JsSystem.cpp
+		${irccd_SOURCE_DIR}/JsTimer.cpp
+		${irccd_SOURCE_DIR}/JsUnicode.cpp
+		${irccd_SOURCE_DIR}/JsUtil.cpp
+		${irccd_SOURCE_DIR}/Plugin.cpp
+		${irccd_SOURCE_DIR}/Plugin.h
+		${irccd_SOURCE_DIR}/Timer.cpp
+		${irccd_SOURCE_DIR}/Timer.h
+		${irccd_SOURCE_DIR}/Unicode.cpp
+		${irccd_SOURCE_DIR}/Unicode.h
+		TestJsSystem.cpp
+	LIBRARIES common duktape ircclient
 )
 
-create_test(test-js-system "${JS_SYSTEM_SOURCES}")
-target_link_libraries(test-js-system duktape)

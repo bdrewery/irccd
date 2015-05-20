@@ -16,4 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-create_test(test-split TestSplit.cpp)
+irccd_define_test(
+	NAME split
+	SOURCES TestSplit.cpp
+	LIBRARIES common
+)

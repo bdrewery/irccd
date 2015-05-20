@@ -104,7 +104,7 @@ TEST_F(TestJsFilesystem, dirname)
 
 TEST_F(TestJsFilesystem, exists)
 {
-	execute("fs.File.exists(BINARY + \"/testassets/file.txt\")");
+	execute("fs.File.exists(\"file.txt\")");
 
 	ASSERT_EQ(DUK_TYPE_BOOLEAN, duk_get_type(m_ctx, -1));
 	ASSERT_TRUE(duk_to_boolean(m_ctx, -1));
@@ -112,7 +112,7 @@ TEST_F(TestJsFilesystem, exists)
 
 TEST_F(TestJsFilesystem, notExists)
 {
-	execute("fs.File.exists(BINARY + \"file_does_not_exist\")");
+	execute("fs.File.exists(\"file_does_not_exist\")");
 
 	ASSERT_EQ(DUK_TYPE_BOOLEAN, duk_get_type(m_ctx, -1));
 	ASSERT_FALSE(duk_to_boolean(m_ctx, -1));
@@ -134,7 +134,7 @@ TEST_F(TestJsFilesystem, remove)
 
 TEST_F(TestJsFilesystem, methodBasename)
 {
-	execute("(new fs.File(BINARY + \"/testassets/level-1/file-1.txt\", \"r\")).basename()");
+	execute("(new fs.File(\"level-1/file-1.txt\", \"r\")).basename()");
 
 	ASSERT_EQ(DUK_TYPE_STRING, duk_get_type(m_ctx, -1));
 	ASSERT_STREQ("file-1.txt", duk_get_string(m_ctx, -1));
@@ -142,9 +142,9 @@ TEST_F(TestJsFilesystem, methodBasename)
 
 TEST_F(TestJsFilesystem, methodDirname)
 {
-	std::string directory = std::string(BINARY) + "/testassets/level-1";
+	std::string directory = "level-1";
 
-	execute("(new fs.File(BINARY + \"/testassets/level-1/file-1.txt\", \"r\")).dirname()");
+	execute("(new fs.File(\"level-1/file-1.txt\", \"r\")).dirname()");
 
 	ASSERT_EQ(DUK_TYPE_STRING, duk_get_type(m_ctx, -1));
 	ASSERT_EQ(directory, duk_get_string(m_ctx, -1));
@@ -153,7 +153,7 @@ TEST_F(TestJsFilesystem, methodDirname)
 TEST_F(TestJsFilesystem, methodSeek1)
 {
 	execute(
-		"var f = new fs.File(BINARY + \"/testassets/file.txt\", \"r\");"
+		"var f = new fs.File(\"file.txt\", \"r\");"
 		"f.seek(fs.File.SeekSet, 4);"
 		"f.read(1);"
 	);
@@ -166,7 +166,7 @@ TEST_F(TestJsFilesystem, methodReadLine)
 {
 	execute(
 		"lines = [];"
-		"f = new fs.File(BINARY + \"/testassets/lines.txt\", \"r\");"
+		"f = new fs.File(\"lines.txt\", \"r\");"
 		"for (var s; s = f.readline(); ) {"
 		"  lines.push(s);"
 		"}"
@@ -193,7 +193,7 @@ TEST_F(TestJsFilesystem, methodReadLine)
 TEST_F(TestJsFilesystem, methodSeek2)
 {
 	execute(
-		"var f = new fs.File(BINARY + \"/testassets/file.txt\", \"r\");"
+		"var f = new fs.File(\"file.txt\", \"r\");"
 		"f.seek(fs.File.SeekSet, 2);"
 		"f.seek(fs.File.SeekCur, 2);"
 		"f.read(1);"
@@ -206,7 +206,7 @@ TEST_F(TestJsFilesystem, methodSeek2)
 TEST_F(TestJsFilesystem, methodSeek3)
 {
 	execute(
-		"var f = new fs.File(BINARY + \"/testassets/file.txt\", \"r\");"
+		"var f = new fs.File(\"file.txt\", \"r\");"
 		"f.seek(fs.File.SeekEnd, -2);"
 		"f.read(1);"
 	);
@@ -217,7 +217,7 @@ TEST_F(TestJsFilesystem, methodSeek3)
 
 TEST_F(TestJsFilesystem, directoryCount)
 {
-	execute("(new fs.Directory(BINARY + \"/testassets/level-1\")).count");
+	execute("(new fs.Directory(\"level-1\")).count");
 
 	ASSERT_EQ(DUK_TYPE_NUMBER, duk_get_type(m_ctx, -1));
 	ASSERT_EQ(2, duk_get_int(m_ctx, -1));
@@ -225,7 +225,7 @@ TEST_F(TestJsFilesystem, directoryCount)
 
 TEST_F(TestJsFilesystem, directoryCount2)
 {
-	execute("(new fs.Directory(BINARY + \"/testassets/level-1\", fs.Directory.Dot)).count");
+	execute("(new fs.Directory(\"level-1\", fs.Directory.Dot)).count");
 
 	ASSERT_EQ(DUK_TYPE_NUMBER, duk_get_type(m_ctx, -1));
 	ASSERT_EQ(3, duk_get_int(m_ctx, -1));
@@ -233,7 +233,7 @@ TEST_F(TestJsFilesystem, directoryCount2)
 
 TEST_F(TestJsFilesystem, directoryCount3)
 {
-	execute("(new fs.Directory(BINARY + \"/testassets/level-1\", fs.Directory.Dot | fs.Directory.DotDot)).count");
+	execute("(new fs.Directory(\"level-1\", fs.Directory.Dot | fs.Directory.DotDot)).count");
 
 	ASSERT_EQ(DUK_TYPE_NUMBER, duk_get_type(m_ctx, -1));
 	ASSERT_EQ(4, duk_get_int(m_ctx, -1));
@@ -242,7 +242,7 @@ TEST_F(TestJsFilesystem, directoryCount3)
 TEST_F(TestJsFilesystem, directoryFind1)
 {
 	// Not recursive
-	execute("fs.Directory.find(BINARY + \"/testassets\", \"file.txt\", false)");
+	execute("fs.Directory.find(\"./\", \"file.txt\", false)");
 
 	ASSERT_EQ(DUK_TYPE_STRING, duk_get_type(m_ctx, -1));
 	ASSERT_STREQ("file.txt", duk_to_string(m_ctx, -1));
@@ -250,7 +250,7 @@ TEST_F(TestJsFilesystem, directoryFind1)
 
 TEST_F(TestJsFilesystem, directoryFind2)
 {
-	execute("fs.Directory.find(BINARY + \"/testassets\", \"file-1.txt\", true)");
+	execute("fs.Directory.find(\"./\", \"file-1.txt\", true)");
 
 	ASSERT_EQ(DUK_TYPE_STRING, duk_get_type(m_ctx, -1));
 #if defined(IRCCD_SYSTEM_WINDOWS)
@@ -263,7 +263,7 @@ TEST_F(TestJsFilesystem, directoryFind2)
 TEST_F(TestJsFilesystem, directoryFind3)
 {
 	// Like directoryFind2 but using a regex
-	execute("fs.Directory.find(BINARY + \"/testassets/level-1/level-2\", /^file-[0-9]\\.txt$/, true)");
+	execute("fs.Directory.find(\"level-1/level-2\", /^file-[0-9]\\.txt$/, true)");
 
 	ASSERT_EQ(DUK_TYPE_STRING, duk_get_type(m_ctx, -1));
 	ASSERT_STREQ("file-2.txt", duk_to_string(m_ctx, -1));
@@ -272,13 +272,13 @@ TEST_F(TestJsFilesystem, directoryFind3)
 TEST_F(TestJsFilesystem, directoryMkdir)
 {
 #if !defined(IRCCD_SYSTEM_WINDOWS)
-	execute("fs.Directory.mkdir(BINARY + \"/testassets/tmpdir\")");
+	execute("fs.Directory.mkdir(\"tmpdir\")");
 
-	ASSERT_TRUE(Filesystem::exists(std::string(BINARY) + "/testassets/tmpdir"));
+	ASSERT_TRUE(Filesystem::exists("tmpdir"));
 
 	// Problem on Windows with this
-	if (::remove(BINARY "/testassets/tmpdir") < 0) {
-		FAIL() << "Failed to remove testassets/tmpdir directory: " << std::strerror(errno);
+	if (::remove("tmpdir") < 0) {
+		FAIL() << "Failed to remove tmpdir directory: " << std::strerror(errno);
 	}
 #endif
 }
@@ -289,11 +289,11 @@ TEST_F(TestJsFilesystem, directoryRemove1)
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 	// not recursive
 	execute(
-		"fs.Directory.mkdir(BINARY + \"/testassets/tmpdir\");"
-		"fs.Directory.remove(BINARY + \"/testassets/tmpdir\", false);"
+		"fs.Directory.mkdir(\"tmpdir\");"
+		"fs.Directory.remove(\"tmpdir\", false);"
 	);
 
-	ASSERT_FALSE(Filesystem::exists(BINARY "/testassets/tmpdir"));
+	ASSERT_FALSE(Filesystem::exists("tmpdir"));
 #endif
 }
 
@@ -302,18 +302,18 @@ TEST_F(TestJsFilesystem, directoryRemove2)
 	// Problem on Windows
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 	execute(
-		"fs.Directory.mkdir(BINARY + \"/testassets/tmpdir1/tmpdir2\");"
-		"fs.Directory.remove(BINARY + \"/testassets/tmpdir1\", true);"
+		"fs.Directory.mkdir(\"tmpdir1/tmpdir2\");"
+		"fs.Directory.remove(\"tmpdir1\", true);"
 	);
 
-	ASSERT_FALSE(Filesystem::exists(BINARY "/testassets/tmpdir1"));
+	ASSERT_FALSE(Filesystem::exists("tmpdir1"));
 #endif
 }
 
 TEST_F(TestJsFilesystem, directoryMethodFind1)
 {
 	// Not recursive
-	execute("(new fs.Directory(BINARY + \"/testassets\")).find(\"file.txt\", false)");
+	execute("(new fs.Directory(\"./\")).find(\"file.txt\", false)");
 
 	ASSERT_EQ(DUK_TYPE_STRING, duk_get_type(m_ctx, -1));
 	ASSERT_STREQ("file.txt", duk_to_string(m_ctx, -1));
@@ -321,7 +321,7 @@ TEST_F(TestJsFilesystem, directoryMethodFind1)
 
 TEST_F(TestJsFilesystem, directoryMethodFind2)
 {
-	execute("(new fs.Directory(BINARY + \"/testassets\")).find(\"file-1.txt\", true)");
+	execute("(new fs.Directory(\"./\")).find(\"file-1.txt\", true)");
 
 	ASSERT_EQ(DUK_TYPE_STRING, duk_get_type(m_ctx, -1));
 #if defined(IRCCD_SYSTEM_WINDOWS)
@@ -334,7 +334,7 @@ TEST_F(TestJsFilesystem, directoryMethodFind2)
 TEST_F(TestJsFilesystem, directoryMethodFind3)
 {
 	// Like directoryFind2 but using a regex
-	execute("(new fs.Directory(BINARY + \"/testassets/level-1/level-2\")).find(/^file-[0-9]\\.txt$/, true)");
+	execute("(new fs.Directory(\"level-1/level-2\")).find(/^file-[0-9]\\.txt$/, true)");
 
 	ASSERT_EQ(DUK_TYPE_STRING, duk_get_type(m_ctx, -1));
 	ASSERT_STREQ("file-2.txt", duk_to_string(m_ctx, -1));

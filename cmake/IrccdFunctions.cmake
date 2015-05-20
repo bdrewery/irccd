@@ -42,7 +42,7 @@ function(irccd_define_library)
 
 	cmake_parse_arguments(LIB "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-	check_mandatory(LIB ${mandatory})
+	irccd_verify_args(LIB ${mandatory})
 	add_library(${LIB_TARGET} STATIC ${LIB_SOURCES})
 	apply_includes(${LIB_TARGET} LIB_LOCAL_INCLUDES LIB_PUBLIC_INCLUDES)
 	apply_flags(${LIB_TARGET} LIB_FLAGS)
@@ -70,7 +70,7 @@ function(irccd_define_executable)
 
 	cmake_parse_arguments(EXE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-	check_mandatory(EXE ${mandatory})
+	irccd_verify_args(EXE ${mandatory})
 	add_executable(${EXE_TARGET} ${EXE_SOURCES})
 	apply_includes(${EXE_TARGET} EXE_INCLUDES DUMMY_VALUE_UNUSED)
 	apply_flags(${EXE_TARGET} EXE_FLAGS)
@@ -142,6 +142,60 @@ function(irccd_verify_args prefix list)
 			message(FATAL_ERROR "Please define ${v}")
 		endif ()
 	endforeach ()
+endfunction()
+
+function(irccd_define_test)
+	set(oneValueArgs NAME)	
+	set(multiValueArgs SOURCES LIBRARIES RESOURCES)
+	set(mandatory NAME SOURCES)
+
+	cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+	irccd_verify_args(TEST ${mandatory})
+
+	foreach (r ${TEST_RESOURCES})
+		get_filename_component(output NAME ${r})
+		add_custom_command(
+			OUTPUT ${CMAKE_BINARY_DIR}/tests/${output}
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/tests/${output}
+		)	
+		list(APPEND RESOURCES ${CMAKE_BINARY_DIR}/tests/${output})
+	endforeach ()
+
+	# Always link to googletest
+	list(APPEND TEST_LIBRARIES gtest)
+
+	# Executable
+	add_executable(test-${TEST_NAME} ${TEST_SOURCES} ${RESOURCES})
+	apply_libraries(test-${TEST_NAME} TEST_LIBRARIES)
+	source_group(Auto-generated FILES ${RESOURCES})
+	target_include_directories(
+		test-${TEST_NAME}
+		PRIVATE
+			${irccd_SOURCE_DIR}
+			${tests_SOURCE_DIR}/libtest
+	)
+
+	# Tests are all in the same directory
+	set_target_properties(
+		test-${TEST_NAME}
+		PROPERTIES
+			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests
+			RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/tests
+			RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/tests
+			RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/tests
+			RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/tests
+	)
+
+	if (UNIX)
+		set_target_properties(test-${TEST_NAME} PROPERTIES LINK_FLAGS "-pthread")
+	endif ()
+
+	# And test
+	add_test(
+		NAME test-${TEST_NAME}
+		COMMAND test-${TEST_NAME}
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests
+	)
 endfunction()
 
 # ---------------------------------------------------------
@@ -220,15 +274,6 @@ endfunction()
 # ---------------------------------------------------------
 # Private functions
 # ---------------------------------------------------------
-
-function(check_mandatory prefix list)
-	# Check mandatory arguments
-	foreach(a ${list})
-		if (NOT ${prefix}_${a})
-			message(FATAL_ERROR "Please specify ${a} parameter")
-		endif ()
-	endforeach()
-endfunction()
 
 function(apply_includes target local public)
 	# We always add CMake's binary dir for config.h

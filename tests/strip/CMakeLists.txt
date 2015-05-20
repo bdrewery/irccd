@@ -16,4 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-create_test(test-strip TestStrip.cpp)
+irccd_define_test(
+	NAME strip
+	SOURCES TestStrip.cpp
+	LIBRARIES common
+)

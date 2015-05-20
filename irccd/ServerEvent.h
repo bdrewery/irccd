@@ -32,7 +32,7 @@
 #include <IrccdConfig.h>
 
 #if defined(WITH_JS)
-#  include <Plugin.h>
+#  include "Plugin.h"
 #endif
 
 #include "Server.h"

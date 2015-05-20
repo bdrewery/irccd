@@ -23,7 +23,8 @@
 
 #include <Date.h>
 #include <Util.h>
-#include <Irccd.h>
+
+#include "Irccd.h"
 
 namespace irccd {
 
