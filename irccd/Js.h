@@ -50,6 +50,29 @@ public:
 	}
 };
 
+class JsException {
+private:
+	std::string m_name;
+	std::string m_message;
+
+public:
+	inline JsException(std::string name, std::string message) noexcept
+		: m_name(std::move(name))
+		, m_message(std::move(message))
+	{
+	}
+
+	inline const std::string &name() const noexcept
+	{
+		return m_name;
+	}
+
+	inline const std::string &message() const noexcept
+	{
+		return m_message;
+	}
+};
+
 #if defined(WITH_JS_EXTENSION)
 /**
  * Vector of Dynlib as pointers. It's not possible to use the exported
@@ -104,10 +127,10 @@ public:
 	 * Create a Duktape context prepared for irccd, it will contains the
 	 * using() and require() functions specialized for irccd.
 	 *
-	 * @param plugin, the reference to the plugin that owns this context
+	 * @param path the parent directory of that context (used for require)
 	 * @return the ready to use Duktape context
 	 */
-	JsDuktape();
+	JsDuktape(const std::string &path);
 
 	/**
 	 * Convert the context to the native Duktape/C type.
@@ -297,6 +320,35 @@ void dukx_push_shared(duk_context *ctx, std::shared_ptr<Type> ptr)
 	duk_put_prop_string(ctx, -2, "\xff\xff" "data");
 
 	dukx_assert_end(ctx, 1);
+}
+
+/**
+ * Throw an exception.
+ *
+ * The error must have the following requirements:
+ *
+ * - const std::string &name() const noexcept
+ * - const std::string &message() const noexcept
+ * - void create(duk_context *ctx) const
+ *
+ * Deriving from JsException is a good idea as it already provides
+ * name() and message().
+ *
+ * @param error the object function to throw
+ * @return 0
+ */
+template <typename Error>
+duk_ret_t dukx_throw(duk_context *ctx, const Error &error)
+{
+	error.create(ctx);
+
+	duk_push_string(ctx, error.name().c_str());
+	duk_put_prop_string(ctx, -2, "name");
+	duk_push_string(ctx, error.message().c_str());
+	duk_put_prop_string(ctx, -2, "message");
+	duk_throw(ctx);	
+
+	return 0;
 }
 
 /**

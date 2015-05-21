@@ -51,7 +51,7 @@ JsDuktape &JsDuktape::self(duk_context *ctx) noexcept
 std::string JsDuktape::parent(JsDuktape &ctx) noexcept
 {
 	dukx_assert_begin(ctx);
-	duk_get_global_string(ctx, "\xff""\xff""parent");
+	duk_get_global_string(ctx, "\xff""\xff""irccd-parent");
 	std::string path = duk_to_string(ctx, -1);
 	duk_pop(ctx);
 	dukx_assert_equals(ctx);
@@ -70,12 +70,25 @@ void JsDuktape::loadFunction(JsDuktape &ctx, duk_c_function fn)
 void JsDuktape::loadPlain(JsDuktape &ctx, const std::string &path)
 {
 	std::ifstream file(path, std::ifstream::in);
+
+	if (!file) {
+		duk_push_error_object(ctx, DUK_ERR_TYPE_ERROR, "Module not found: %s", path.c_str());
+		duk_throw(ctx);
+	}
+
 	std::string content(std::istreambuf_iterator<char>(file.rdbuf()), std::istreambuf_iterator<char>());
 
 	dukx_assert_begin(ctx);
 	duk_push_string(ctx, content.c_str());
 	dukx_assert_end(ctx, 1);
 }
+
+#if 0
+void JsDuktape::loadPlugin(JsDuktape &ctx, const std::string &path)
+{
+	// TODO
+}
+#endif
 
 #if defined(WITH_JS_EXTENSION)
 
@@ -102,57 +115,26 @@ void JsDuktape::loadNative(JsDuktape &ctx, std::string ident, const std::string 
 
 #endif
 
+/*
+ * Duktape.modSearch
+ *
+ * This function is only used when searching local files (.e.g require("./api")),
+ * so it only supports .js files.
+ */
 duk_ret_t JsDuktape::modSearch(duk_context *ctx)
 {
-#if 0
-	static const std::unordered_map<std::string, duk_c_function> modules{
-		{ "irccd.fs",		dukopen_filesystem	},
-		{ "irccd.logger",	dukopen_logger		},
-		{ "irccd.timer",	dukopen_timer		},
-		{ "irccd.server",	dukopen_server		},
-		{ "irccd.system",	dukopen_system		},
-		{ "irccd.unicode",	dukopen_unicode		},
-		{ "irccd.util",		dukopen_util		}
-	};
+	const auto id = duk_require_string(ctx, 0);
+	const auto path = parent(self(ctx));
 
-	bool extract = true;
-
-	if (it != modules.end()) {
-		loadFunction(self(ctx), it->second);
-	} else {
-		/* First, check from the parent plugin directory */
-		std::string path = parent(self(ctx)) + Filesystem::Separator + std::string(id);
-		std::string jspath = path + ".js";
-		std::string nativepath = path + WITH_JS_EXTENSION;
-
-		if (Filesystem::exists(jspath)) {
-			loadPlain(self(ctx), jspath);
-			extract = false;
-		}
-/*
- * TODO: can't be used unless we split irccd into libraries
- */
-#if 0
-#if defined(WITH_JS_EXTENSION)
-		else if (Filesystem::exists(nativepath)) {
-			loadNative(self(ctx), id, nativepath);
-		}
-#endif
-#endif
-	}
-
-	if (extract) {
-		/* Now the returned table contains things to export */
-		duk_enum(ctx, -1, DUK_ENUM_INCLUDE_NONENUMERABLE);
-		while (duk_next(ctx, -1, 1)) {
-			duk_put_prop(ctx, 2);
-		}
-	}
-#endif
+	puts("About to load");
+	loadPlain(self(ctx), path + Filesystem::Separator + std::string(id) + ".js");
 
 	return 1;
 }
 
+/*
+ * Call the real Duktape require which use Duktape.modSearch function.
+ */
 void JsDuktape::requireLocal(JsDuktape &ctx, const std::string &name)
 {
 	duk_get_global_string(ctx, "\xff""\xff""Duktape-require");
@@ -186,8 +168,7 @@ void JsDuktape::requireGlobal(JsDuktape &ctx, const std::string &name)
 		{ "irccd.util",		dukopen_util		}
 	};
 
-	auto id = duk_require_string(ctx, 0);
-	auto it = modules.find(id);
+	auto it = modules.find(name);
 	if (it != modules.end()) {
 		loadFunction(self(ctx), it->second);
 	} else {
@@ -243,10 +224,14 @@ duk_ret_t JsDuktape::use(duk_context *)
 	return 0;
 }
 
-JsDuktape::JsDuktape()
+JsDuktape::JsDuktape(const std::string &path)
 	: std::unique_ptr<duk_context, void (*)(duk_context *)>(duk_create_heap_default(), duk_destroy_heap)
 {
 	dukx_assert_begin(get());
+
+	/* Set the parent path */
+	duk_push_string(get(), path.c_str());
+	duk_put_global_string(get(), "\xff""\xff""irccd-parent");
 
 	/* Save a reference to this */
 	duk_push_global_object(get());

@@ -68,7 +68,8 @@ void Plugin::call(const char *name, int nargs)
 }
 
 Plugin::Plugin(std::string name, std::string path, PluginConfig config)
-	: m_config(std::move(config))
+	: m_context(Filesystem::dirName(path))
+	, m_config(std::move(config))
 {
 	m_info.name = std::move(name);
 	m_info.path = std::move(path);

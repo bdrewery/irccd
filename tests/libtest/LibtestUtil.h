@@ -16,7 +16,8 @@ protected:
 	JsDuktape m_ctx;
 
 public:
-	LibtestUtil(const std::string &ret, const std::string &modname)
+	LibtestUtil(const std::string &ret, const std::string &modname, const std::string &path = "./")
+		: m_ctx(path)
 	{
 		std::ostringstream oss;
 		std::string str;

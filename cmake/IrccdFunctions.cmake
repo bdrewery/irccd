@@ -153,10 +153,11 @@ function(irccd_define_test)
 	irccd_verify_args(TEST ${mandatory})
 
 	foreach (r ${TEST_RESOURCES})
-		get_filename_component(output NAME ${r})
+		file(RELATIVE_PATH output ${CMAKE_CURRENT_SOURCE_DIR} ${r})
 		add_custom_command(
 			OUTPUT ${CMAKE_BINARY_DIR}/tests/${output}
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/tests/${output}
+			COMMAND ${CMAKE_COMMAND} -E copy ${r} ${CMAKE_BINARY_DIR}/tests/${output}
+			DEPENDS ${r}
 		)	
 		list(APPEND RESOURCES ${CMAKE_BINARY_DIR}/tests/${output})
 	endforeach ()
