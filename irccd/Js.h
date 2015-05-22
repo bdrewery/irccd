@@ -21,6 +21,7 @@
 
 #include <cassert>
 #include <memory>
+#include <stack>
 #include <string>
 #include <vector>
 
@@ -36,37 +37,70 @@ namespace irccd {
 
 class Plugin;
 
+/**
+ * @class JsError
+ * @brief Error description
+ *
+ * This class fills the fields got in an Error object, you can get it from dukx_error.
+ */
 class JsError : public std::exception {
 public:
-	std::string name;
-	std::string source;
-	std::string error;
-	std::string stack;
-	int lineNumber{0};
+	std::string name;		//!< name of error
+	std::string message;		//!< error message
+	std::string stack;		//!< stack if available
+	std::string fileName;		//!< filename if applicable
+	int lineNumber{0};		//!< line number if applicable
 
+	/**
+	 * Get the error message. This effectively returns message field.
+	 *
+	 * @return the message
+	 */
 	const char *what() const noexcept override
 	{
-		return error.c_str();
+		return message.c_str();
 	}
 };
 
+/**
+ * @class JsException
+ * @brief Base class to use for dukx_throw
+ *
+ * This helper class can be used to automatically set Error fields in JavaScript exceptions.
+ */
 class JsException {
 private:
 	std::string m_name;
 	std::string m_message;
 
 public:
+	/**
+	 * Create the helper.
+	 *
+	 * @param name the name (e.g TypeError)
+	 * @param message the message
+	 */
 	inline JsException(std::string name, std::string message) noexcept
 		: m_name(std::move(name))
 		, m_message(std::move(message))
 	{
 	}
 
+	/**
+	 * Get the error name.
+	 *
+	 * @return the name
+	 */
 	inline const std::string &name() const noexcept
 	{
 		return m_name;
 	}
 
+	/**
+	 * Get the error message.
+	 *
+	 * @return the message
+	 */
 	inline const std::string &message() const noexcept
 	{
 		return m_message;
@@ -94,6 +128,10 @@ private:
 #if defined(WITH_JS_EXTENSION)
 	JsModules m_modules;
 #endif
+	/*
+	 * Paths stored in a stack when loading module globally recursively.
+	 */
+	static std::stack<std::string> m_paths;
 
 	/* Some helpers */
 	static JsDuktape &self(duk_context *ctx) noexcept;
@@ -101,7 +139,7 @@ private:
 
 	/* Loaders */
 	static void loadFunction(JsDuktape &ctx, duk_c_function fn);
-	static void loadPlain(JsDuktape &ctx, const std::string &path);
+	static void loadLocal(JsDuktape &ctx, const std::string &path);
 #if defined(WITH_JS_EXTENSION)
 	static void loadNative(JsDuktape &ctx, std::string ident, const std::string &path);
 #endif
@@ -358,7 +396,7 @@ duk_ret_t dukx_throw(duk_context *ctx, const Error &error)
  * @param ctx the context
  * @return the error object
  */
-JsError dukx_get_error(duk_context *ctx);
+JsError dukx_error(duk_context *ctx, duk_idx_t index = -1);
 
 /* Modules */
 duk_ret_t dukopen_filesystem(duk_context *ctx) noexcept;

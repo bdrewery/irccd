@@ -67,7 +67,7 @@ void JsDuktape::loadFunction(JsDuktape &ctx, duk_c_function fn)
 	dukx_assert_end(ctx, 1);
 }
 
-void JsDuktape::loadPlain(JsDuktape &ctx, const std::string &path)
+void JsDuktape::loadLocal(JsDuktape &ctx, const std::string &path)
 {
 	std::ifstream file(path, std::ifstream::in);
 
@@ -126,14 +126,16 @@ duk_ret_t JsDuktape::modSearch(duk_context *ctx)
 	const auto id = duk_require_string(ctx, 0);
 	const auto path = parent(self(ctx));
 
-	puts("About to load");
-	loadPlain(self(ctx), path + Filesystem::Separator + std::string(id) + ".js");
+	loadLocal(self(ctx), path + Filesystem::Separator + std::string(id) + ".js");
 
 	return 1;
 }
 
 /*
- * Call the real Duktape require which use Duktape.modSearch function.
+ * Local require: require("./file")
+ *
+ * This function use the real Duktape's require implementation with the
+ * associated Duktape.modSearch function to recursively 
  */
 void JsDuktape::requireLocal(JsDuktape &ctx, const std::string &name)
 {
@@ -142,12 +144,20 @@ void JsDuktape::requireLocal(JsDuktape &ctx, const std::string &name)
 	duk_call(ctx, 1);
 }
 
+/*
+ * Plugin require: require(":plugin-name")
+ *
+ * This is the function to load API from a plugin. The plugin must be loaded
+ * otherwise an exception is thrown.
+ */
 void JsDuktape::requirePlugin(JsDuktape &ctx, const std::string &name)
 {
 	// TODO: implement when plugin API export is ready.
 	(void)ctx;
 	(void)name;
 }
+
+std::stack<std::string> JsDuktape::m_paths;
 
 /*
  * Global require: require("foo")
@@ -301,20 +311,22 @@ void dukx_throw(duk_context *ctx, int code, const std::string &msg)
 	duk_throw(ctx);
 }
 
-JsError dukx_get_error(duk_context *ctx)
+JsError dukx_error(duk_context *ctx, duk_idx_t index)
 {
 	JsError error;
 
+	index = duk_normalize_index(ctx, index);
+
 	dukx_assert_begin(ctx);
-	duk_get_prop_string(ctx, -1, "name");
+	duk_get_prop_string(ctx, index, "name");
 	error.name = duk_to_string(ctx, -1);
-	duk_get_prop_string(ctx, -2, "message");
-	error.error = duk_to_string(ctx, -1);
-	duk_get_prop_string(ctx, -3, "fileName");
-	error.source = duk_to_string(ctx, -1);
-	duk_get_prop_string(ctx, -4, "lineNumber");
+	duk_get_prop_string(ctx, index, "message");
+	error.message = duk_to_string(ctx, -1);
+	duk_get_prop_string(ctx, index, "fileName");
+	error.fileName = duk_to_string(ctx, -1);
+	duk_get_prop_string(ctx, index, "lineNumber");
 	error.lineNumber = duk_to_int(ctx, -1);
-	duk_get_prop_string(ctx, -5, "stack");
+	duk_get_prop_string(ctx, index, "stack");
 	error.stack = duk_to_string(ctx, -1);
 	duk_pop_n(ctx, 5);
 	dukx_assert_equals(ctx);
