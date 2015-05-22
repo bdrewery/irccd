@@ -346,7 +346,7 @@ duk_ret_t directoryFind(duk_context *ctx, const char *base, int beginindex)
 		} else if (duk_is_object(ctx, beginindex)) {
 			path = directoryFindRegex(base, duk_to_string(ctx, beginindex), recursive);
 		} else {
-			dukx_throw(ctx, -1, "pattern must be a string or a regex expression");
+			duk_error(ctx, DUK_ERR_TYPE_ERROR, "pattern must be a string or a regex expression");
 		}
 
 		if (path.empty()) {
@@ -355,7 +355,7 @@ duk_ret_t directoryFind(duk_context *ctx, const char *base, int beginindex)
 
 		duk_push_string(ctx, path.c_str());
 	} catch (const std::exception &ex) {
-		dukx_throw(ctx, -1, ex.what());
+		duk_error(ctx, DUK_ERR_ERROR, ex.what());
 	}
 
 	return 1;
@@ -461,7 +461,7 @@ duk_ret_t File_prototype_read(duk_context *ctx)
 	dukx_assert_begin(ctx);
 	dukx_with_this<File>(ctx, [&] (File &file) {
 		if (file.type() == File::Output) {
-			dukx_throw(ctx, -1, "file is opened for writing");
+			duk_error(ctx, DUK_ERR_TYPE_ERROR, "file is opened for writing");
 		}
 
 		int amount = -1;
@@ -473,7 +473,7 @@ duk_ret_t File_prototype_read(duk_context *ctx)
 		try {
 			duk_push_string(ctx, file.read(amount).c_str());
 		} catch (const std::exception &ex) {
-			dukx_throw(ctx, -1, ex.what());
+			dukx_throw(ctx, JsSystemError{errno, ex.what()});
 		}
 	});
 	dukx_assert_end(ctx, 1);
@@ -501,7 +501,7 @@ duk_ret_t File_prototype_readline(duk_context *ctx)
 			file.readline(str);
 			duk_push_string(ctx, str.c_str());
 		} catch (const std::exception &ex) {
-			dukx_throw(ctx, errno, std::strerror(errno));
+			dukx_throw(ctx, JsSystemError{});
 		}
 	});
 
@@ -522,7 +522,7 @@ duk_ret_t File_prototype_remove(duk_context *ctx)
 	dukx_assert_begin(ctx);
 	dukx_with_this<File>(ctx, [&] (File &file) {
 		if (remove(file.path().c_str()) < 0) {
-			dukx_throw_syserror(ctx, errno);
+			dukx_throw(ctx, JsSystemError{});
 		}
 	});
 	dukx_assert_equals(ctx);
@@ -553,7 +553,7 @@ duk_ret_t File_prototype_seek(duk_context *ctx)
 			file.seek(static_cast<std::fstream::off_type>(amount),
 				  static_cast<std::fstream::seekdir>(type));
 		} catch (const std::exception &ex) {
-			dukx_throw(ctx, -1, ex.what());
+			dukx_throw(ctx, JsSystemError{errno, ex.what()});
 		}
 	});
 	dukx_assert_equals(ctx);
@@ -581,7 +581,7 @@ duk_ret_t File_prototype_stat(duk_context *ctx)
 		struct stat st;
 
 		if (stat(file.path().c_str(), &st) < 0) {
-			dukx_throw_syserror(ctx, errno);
+			dukx_throw(ctx, JsSystemError{});
 		}
 
 		(void)filePushStat(ctx, st);
@@ -610,8 +610,8 @@ duk_ret_t File_prototype_tell(duk_context *ctx)
 	dukx_with_this<File>(ctx, [&] (File &file) {
 		try {
 			duk_push_int(ctx, file.tell());
-		} catch (const std::exception &ex) {
-			dukx_throw(ctx, -1, ex.what());
+		} catch (const std::exception &) {
+			dukx_throw(ctx, JsSystemError{});
 		}
 	});
 	dukx_assert_end(ctx, 1);
@@ -637,13 +637,13 @@ duk_ret_t File_prototype_write(duk_context *ctx)
 	dukx_assert_begin(ctx);
 	dukx_with_this<File>(ctx, [&] (File &file) {
 		if (file.type() == File::Input) {
-			dukx_throw(ctx, -1, "file is opened for reading");
+			duk_error(ctx, DUK_ERR_TYPE_ERROR, "file is opened for reading");
 		}
 
 		try {
 			file.write(data);
 		} catch (const std::exception &ex) {
-			dukx_throw(ctx, -1, ex.what());
+			dukx_throw(ctx, JsSystemError{errno, ex.what()});
 		}
 	});
 	dukx_assert_equals(ctx);
@@ -704,7 +704,7 @@ duk_ret_t File_File(duk_context *ctx)
 	}
 
 	if (((mode & std::fstream::out) || (mode & std::fstream::app)) && (mode & std::fstream::in)) {
-		dukx_throw(ctx, -1, "can not open for both reading and writing");
+		duk_error(ctx, DUK_ERR_TYPE_ERROR, "can not open for both reading and writing");
 	}
 
 	duk_push_this(ctx);
@@ -717,7 +717,7 @@ duk_ret_t File_File(duk_context *ctx)
 		}
 	} catch (...) {
 		duk_pop(ctx);
-		dukx_throw_syserror(ctx, errno);
+		dukx_throw(ctx, JsSystemError{});
 	}
 
 	duk_pop(ctx);
@@ -795,7 +795,7 @@ duk_ret_t File_exists(duk_context *ctx)
 duk_ret_t File_remove(duk_context *ctx)
 {
 	if (remove(duk_require_string(ctx, 0)) < 0) {
-		dukx_throw_syserror(ctx, errno);
+		dukx_throw(ctx, JsSystemError{});
 	}
 
 	return 0;
@@ -822,7 +822,7 @@ duk_ret_t File_stat(duk_context *ctx)
 	struct stat st;
 
 	if (stat(path, &st) < 0) {
-		dukx_throw_syserror(ctx, errno);
+		dukx_throw(ctx, JsSystemError{});
 	}
 
 	return filePushStat(ctx, st);
@@ -949,7 +949,7 @@ duk_ret_t Directory_Directory(duk_context *ctx)
 
 		duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
 	} catch (const std::exception &ex) {
-		dukx_throw(ctx, -1, ex.what());
+		dukx_throw(ctx, JsSystemError{errno, ex.what()});
 	}
 
 	return 0;
@@ -1015,7 +1015,7 @@ duk_ret_t Directory_mkdir(duk_context *ctx)
 	try {
 		Filesystem::mkdir(path, mode);
 	} catch (const std::exception &ex) {
-		dukx_throw(ctx, -1, ex.what());
+		dukx_throw(ctx, JsSystemError{errno, ex.what()});
 	}
 
 	return 0;

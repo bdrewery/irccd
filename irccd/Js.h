@@ -19,7 +19,23 @@
 #ifndef _IRCCD_JS_H_
 #define _IRCCD_JS_H_
 
+/**
+ * @file Js.h
+ * @brief Bring JavaScript support to irccd
+ *
+ * This file provide a wrapper around Duktape API. The class JsDuktape **must** be used where you plan to use
+ * a Duktape context. It is specialized for irccd application by adding additions that are required within the irccd
+ * JavaScript API.
+ *
+ * It's also possible to use the class Plugin instead which already embed the JsDuktape class.
+ *
+ * Because you will require to call a lot of Duktape API, all of these functions defined in this file follow the same
+ * conventions as Duktape, they are all free functions using underscore case. They are prefixed with dukx_ though.
+ */
+
 #include <cassert>
+#include <cerrno>
+#include <cstring>
 #include <memory>
 #include <stack>
 #include <string>
@@ -34,8 +50,6 @@
 #endif
 
 namespace irccd {
-
-class Plugin;
 
 /**
  * @class JsError
@@ -104,6 +118,53 @@ public:
 	inline const std::string &message() const noexcept
 	{
 		return m_message;
+	}
+};
+
+/**
+ * @class JsSystemError
+ * @brief SystemError error that is usually thrown from I/O or system operations
+ *
+ * The SystemError inherits from Error and adds an additional errno field which contains one of the standard C++11
+ * errno constants.
+ */
+class JsSystemError : public JsException {
+private:
+	int m_errno;
+
+public:
+	/**
+	 * This constructor automatically use errno and std::strerror.
+	 */
+	inline JsSystemError()
+		: JsSystemError(errno, std::strerror(errno))
+	{
+
+	}
+
+	/**
+	 * Construct the SystemError with the appropriate errno code and message.
+	 *
+	 * @param errn the errno number
+	 * @param message the message
+	 */
+	inline JsSystemError(int errn, std::string message)
+		: JsException("SystemError", std::move(message))
+		, m_errno(errn)
+	{
+	}
+
+	/**
+	 * Create the exception.
+	 *
+	 * @param ctx the Duktape context.
+	 */
+	inline void create(duk_context *ctx) const
+	{
+		duk_get_global_string(ctx, "SystemError");
+		duk_new(ctx, 0);
+		duk_push_int(ctx, m_errno);
+		duk_put_prop_string(ctx, -2, "errno");
 	}
 };
 
@@ -213,28 +274,6 @@ public:
 #endif
 
 /**
- * Throw a javascript error object that contains the following fields:
- *
- * {
- *   code	// the system error code
- *   message	// the system error message
- * }
- *
- * @param ctx the duktape context
- * @param code the code (usually errno)
- */
-void dukx_throw_syserror(duk_context *ctx, int code);
-
-/**
- * Throw an error with a specified code and error message.
- *
- * @param ctx the context
- * @param code the code
- * @param msg the message
- */
-void dukx_throw(duk_context *ctx, int code, const std::string &msg);
-
-/**
  * Call a function with the object cast to the given type. This works
  * only if the object contains the "\xff\xff" "data" field pointer.
  *
@@ -312,7 +351,6 @@ void dukx_set_class(duk_context *ctx, Type *ptr)
 /**
  * Similar to dukx_set_class but this function push an object instead which is
  * allocated frmo the C++ side.
- *
  */
 template <typename Type>
 void dukx_push_shared(duk_context *ctx, std::shared_ptr<Type> ptr)
@@ -384,7 +422,7 @@ duk_ret_t dukx_throw(duk_context *ctx, const Error &error)
 	duk_put_prop_string(ctx, -2, "name");
 	duk_push_string(ctx, error.message().c_str());
 	duk_put_prop_string(ctx, -2, "message");
-	duk_throw(ctx);	
+	duk_throw(ctx);
 
 	return 0;
 }

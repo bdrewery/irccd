@@ -108,7 +108,7 @@ void JsDuktape::loadNative(JsDuktape &ctx, std::string ident, const std::string 
 
 		ctx.m_modules.push_back(std::move(dso));
 	} catch (const std::exception &ex) {
-		dukx_throw(ctx, -1, "failed to load: "s + ex.what());
+		duk_error(ctx, DUK_ERR_ERROR, "failed to load native module: %s",  ex.what());
 	}
 	dukx_assert_end(ctx, 1);
 }
@@ -278,6 +278,14 @@ JsDuktape::JsDuktape(const std::string &path)
 	duk_push_object(get());
 	duk_put_prop_string(get(), -2, "\xff" "irccd-timers");
 	duk_pop(get());
+
+	/* SystemError (dummy) */
+	duk_push_c_function(get(), [] (duk_context *) -> duk_ret_t { return 0; }, 0);
+	duk_get_global_string(get(), "Error");
+	duk_get_prop_string(get(), -1, "prototype");
+	duk_put_prop_string(get(), -3, "prototype");
+	duk_pop(get());
+	duk_put_global_string(get(), "SystemError");
 
 	/* This is needed for storing prototypes */
 	duk_push_global_object(get());

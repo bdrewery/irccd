@@ -16,12 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cerrno>
 #include <chrono>
-#include <cstring>
 #include <thread>
-
-#include <IrccdConfig.h>
 
 #include "Js.h"
 #include "System.h"
@@ -49,7 +45,7 @@ duk_ret_t System_env(duk_context *ctx)
 	const char *value = getenv(key);
 
 	if (value == nullptr) {
-		dukx_throw_syserror(ctx, errno);
+		dukx_throw(ctx, JsSystemError{});
 	}
 
 	duk_push_string(ctx, value);

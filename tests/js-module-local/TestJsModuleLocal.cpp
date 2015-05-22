@@ -1,0 +1,58 @@
+/*
+ * TestJsModuleLocal.cpp -- test loading local files
+ *
+ * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#include <gtest/gtest.h>
+
+#include <Js.h>
+
+using namespace irccd;
+
+TEST(Load, simple)
+{
+	JsDuktape js("./");
+
+	if (duk_peval_file(js, "main.js") != 0) {
+		FAIL() << dukx_error(js).message;
+	}
+
+	duk_get_global_string(js, "value");
+
+	ASSERT_EQ(DUK_TYPE_NUMBER, duk_get_type(js, -1));
+	ASSERT_EQ(123, duk_get_int(js, -1));
+}
+
+TEST(Load, hierarchical)
+{
+	JsDuktape js("./");
+
+	if (duk_peval_file(js, "main-2.js") != 0) {
+		FAIL() << dukx_error(js).message;
+	}
+
+	duk_get_global_string(js, "value");
+
+	ASSERT_EQ(DUK_TYPE_STRING, duk_get_type(js, -1));
+	ASSERT_STREQ("text", duk_to_string(js, -1));
+}
+
+int main(int argc, char **argv)
+{
+	testing::InitGoogleTest(&argc, argv);
+
+	return RUN_ALL_TESTS();
+}
