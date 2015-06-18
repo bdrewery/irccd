@@ -299,26 +299,6 @@ JsDuktape::JsDuktape(const std::string &path)
 	dukx_assert_equals(get());
 }
 
-void dukx_throw_syserror(duk_context *ctx, int code)
-{
-	duk_push_object(ctx);
-	duk_push_int(ctx, code);
-	duk_put_prop_string(ctx, -2, "code");
-	duk_push_string(ctx, std::strerror(code));
-	duk_put_prop_string(ctx, -2, "message");
-	duk_throw(ctx);
-}
-
-void dukx_throw(duk_context *ctx, int code, const std::string &msg)
-{
-	duk_push_object(ctx);
-	duk_push_int(ctx, code);
-	duk_put_prop_string(ctx, -2, "code");
-	duk_push_string(ctx, msg.c_str());
-	duk_put_prop_string(ctx, -2, "message");
-	duk_throw(ctx);
-}
-
 JsError dukx_error(duk_context *ctx, duk_idx_t index)
 {
 	JsError error;
