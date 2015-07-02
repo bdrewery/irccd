@@ -119,23 +119,6 @@ Service::Service(int timeout, std::string name, std::string path)
 #endif
 	, m_servname{std::move(name)}
 {
-#if 0
-#if defined(IRCCD_SYSTEM_WINDOWS)
-	m_signal.bind(address::Internet("127.0.0.1", 0, AF_INET));
-
-	// Get the port
-	auto address = m_signal.address();
-	auto port = ntohs(reinterpret_cast<const sockaddr_in &>(address.address()).sin_port);
-	m_address = address::Internet("127.0.0.1", port, AF_INET);
-
-	// path not needed
-	(void)path;
-#else
-	m_path = std::move(path);
-	m_address = address::Unix(m_path, true);
-	m_signal.bind(m_address);
-#endif
-#endif
 	/* Do not forget to add signal socket */
 	m_listener.set(m_interface->socket(), SocketListener::Read);
 }

@@ -174,6 +174,17 @@ public:
 #else
 
 // TODO: add support back for Windows.
+#if 0
+	m_signal.bind(address::Internet("127.0.0.1", 0, AF_INET));
+
+	// Get the port
+	auto address = m_signal.address();
+	auto port = ntohs(reinterpret_cast<const sockaddr_in &>(address.address()).sin_port);
+	m_address = address::Internet("127.0.0.1", port, AF_INET);
+
+	// path not needed
+	(void)path;
+#endif
 
 /**
  * @class ServiceSocketIp
@@ -298,6 +309,9 @@ private:
 	void flush();
 	void notify();
 
+	/*
+	 * Determine the socket owner.
+	 */
 	inline Owner owner(SocketAbstract &sc) const noexcept
 	{
 		if (sc == m_interface->socket()) {
@@ -362,8 +376,12 @@ public:
 	/**
 	 * Get the current service state.
 	 *
+	 * The service will not update its state by itself so it's perfectly safe to call this
+	 * function to get the state from the service owner but it's not if multiple threads
+	 * have access to the service.
+	 *
 	 * @return the state
-	 * @warning Not thread-safe, should be called from the only one place that have access to the service
+	 * @warning Thread-safe with some considerations
 	 */
 	inline ServiceState state() const noexcept
 	{
@@ -391,6 +409,7 @@ public:
 	 * Start the thread.
 	 *
 	 * @pre state() must return Stopped
+	 * @warning Not thread-safe
 	 */
 	void start();
 
@@ -398,6 +417,7 @@ public:
 	 * Pause the thread.
 	 *
 	 * @pre state() must return Running
+	 * @note Thread-safe
 	 */
 	void pause();
 
@@ -405,6 +425,7 @@ public:
 	 * Resume the thread.
 	 *
 	 * @pre state() must return Paused
+	 * @note Thread-safe
 	 */
 	void resume();
 
@@ -412,16 +433,16 @@ public:
 	 * Stop the thread.
 	 *
 	 * @pre state() must return Running or Paused
+	 * @warning Not thread-safe
 	 */
 	void stop();
 
 	/**
 	 * Set a socket for listening on input, write or both.
 	 *
-	 * This function should be called in onAcceptor callbacks only.
-	 *
 	 * @param sc the socket
 	 * @param flags the flags (SocketListener::Read or SocketListener::Write)
+	 * @note Thread-safe
 	 */
 	inline void set(SocketAbstract &sc, int flags)
 	{
@@ -436,6 +457,7 @@ public:
 	 *
 	 * @param sc the socket
 	 * @param flags the flags (SocketListener::Read or SocketListener::Write)
+	 * @note Thread-safe
 	 */
 	inline void unset(SocketAbstract &sc, int flags)
 	{
@@ -448,6 +470,7 @@ public:
 	 * Completely remove a client.
 	 *
 	 * @param sc the socket to remove
+	 * @note Thread-safe
 	 */
 	inline void remove(SocketAbstract &sc)
 	{

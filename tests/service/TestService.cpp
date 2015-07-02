@@ -87,7 +87,21 @@ TEST(Basic, resume)
 	ASSERT_EQ(ServiceState::Stopped, ts.state());
 }
 
-TEST(Basic, connect)
+TEST(Basic, stopThenStart)
+{
+	TestService ts;
+
+	ts.start();
+	ASSERT_EQ(ServiceState::Running, ts.state());
+	ts.stop();
+	ASSERT_EQ(ServiceState::Stopped, ts.state());
+	ts.start();
+	ASSERT_EQ(ServiceState::Running, ts.state());
+	ts.stop();
+	ASSERT_EQ(ServiceState::Stopped, ts.state());
+}
+
+TEST(Basic, connectThenStop)
 {
 	TestService ts;
 
@@ -111,9 +125,86 @@ TEST(Basic, connect)
 
 		std::this_thread::sleep_for(150ms);
 
-		puts("Stopping...");
 		ts.stop();
-		puts("Stopped");
+
+		ASSERT_TRUE(connected);
+	} catch (const std::exception &ex) {
+		FAIL() << ex.what();
+	}
+}
+
+TEST(Basic, connectPauseThenStop)
+{
+	TestService ts;
+
+	try {
+		SocketTcp<Unix> s{AF_UNIX, 0};
+		bool connected{false};
+
+		s.bind(Unix{"connect.sock", true});
+		s.listen(128);
+
+		ts.onAcceptor.connect([&] (SocketAbstract &) {
+			connected = true;
+			s.accept();
+		});
+
+		ts.addAcceptor(s);
+		ts.start();
+
+		SocketTcp<Unix> client{AF_UNIX, 0};
+		client.connect(Unix{"connect.sock"});
+
+		std::this_thread::sleep_for(150ms);
+
+		ts.pause();
+		ts.stop();
+
+		ASSERT_TRUE(connected);
+	} catch (const std::exception &ex) {
+		FAIL() << ex.what();
+	}
+}
+
+TEST(Basic, recv)
+{
+	TestService ts;
+
+	try {
+		SocketTcp<Unix> s{AF_UNIX, 0};
+		bool connected{false};
+		bool received{false};
+
+		s.bind(Unix{"connect.sock", true});
+		s.listen(128);
+
+		std::unique_ptr<SocketTcp<Unix>> acceptedClient;
+		ts.onAcceptor.connect([&] (SocketAbstract &) {
+			connected = true;
+			acceptedClient = std::make_unique<SocketTcp<Unix>>(s.accept());
+		});
+		ts.onIncoming.connect([&] (SocketAbstract &sc) {
+			ASSERT_EQ(acceptedClient->handle(), sc.handle());
+
+			try {
+				ASSERT_EQ("Hello", acceptedClient->recv(512));
+				received = true;
+			} catch (const std::exception &ex) {
+				FAIL() << ex.what();
+			}
+		});
+
+		ts.addAcceptor(s);
+		ts.start();
+
+		SocketTcp<Unix> client{AF_UNIX, 0};
+		client.connect(Unix{"connect.sock"});
+		client.send("Hello");
+
+		std::this_thread::sleep_for(150ms);
+
+		ts.pause();
+		ts.stop();
 
 		ASSERT_TRUE(connected);
 	} catch (const std::exception &ex) {
