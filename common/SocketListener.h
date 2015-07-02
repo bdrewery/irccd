@@ -19,6 +19,71 @@
 #ifndef _SOCKET_LISTENER_NG_H_
 #define _SOCKET_LISTENER_NG_H_
 
+/**
+ * @file SocketListener.h
+ * @brief Portable synchronous multiplexer
+ *
+ * Feature detection, multiple implementations may be avaible, for example,
+ * Linux has poll, select and epoll.
+ *
+ * We assume that select(2) is always available.
+ *
+ * Of course, you can set the variables yourself if you test it with your
+ * build system.
+ *
+ * - **SOCKET_HAVE_POLL**: Defined on all BSD, Linux. Also defined on Windows
+ * if _WIN32_WINNT is set to 0x0600 or greater.
+ *
+ * - **SOCKET_HAVE_KQUEUE**: Defined on all BSD and Apple.
+ * - **SOCKET_HAVE_EPOLL**: Defined on Linux only.
+ */
+#if defined(_WIN32)
+#  if _WIN32_WINNT >= 0x0600
+#    define SOCKET_HAVE_POLL
+#  endif
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
+#  define SOCKET_HAVE_KQUEUE
+#  define SOCKET_HAVE_POLL
+#elif defined(__linux__)
+#  define SOCKET_HAVE_EPOLL
+#  define SOCKET_HAVE_POLL
+#endif
+
+/**
+ * This sets the default backend to use depending on the system. The following
+ * table summaries.
+ *
+ * The preference priority is ordered from left to right.
+ *
+ * | System        | Backend                 |
+ * |---------------|-------------------------|
+ * | Linux         | epoll(7)                |
+ * | *BSD          | kqueue(2)               |
+ * | Windows       | poll(2), select(2)      |
+ * | Mac OS X      | kqueue(2)               |
+ */
+
+#if defined(_WIN32)
+#  if defined(SOCKET_HAVE_POLL)
+#    define SOCKET_DEFAULT_BACKEND backend::Poll
+#  else
+#    define SOCKET_DEFAULT_BACKEND backend::Select
+#  endif
+#elif defined(__linux__)
+#  include <sys/epoll.h>
+#  include <cstring>
+
+#  define SOCKET_DEFAULT_BACKEND backend::Epoll
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__) || defined(__APPLE__)
+#  include <sys/types.h>
+#  include <sys/event.h>
+#  include <sys/time.h>
+
+#  define SOCKET_DEFAULT_BACKEND backend::Kqueue
+#else
+#  define SOCKET_DEFAULT_BACKEND backend::Select
+#endif
+
 #include <chrono>
 #include <functional>
 #include <initializer_list>
@@ -29,101 +94,178 @@
 
 #include "Socket.h"
 
-#if defined(_WIN32)
-#  if _WIN32_WINNT >= 0x0600
-#    define SOCKET_HAVE_POLL
-#  endif
-#else
-#  define SOCKET_HAVE_POLL
+#if defined(SOCKET_HAVE_POLL) && !defined(_WIN32)
+#  include <poll.h>
 #endif
 
-/**
- * @enum SocketMethod
- * @brief The SocketMethod enum
- *
- * Select the method of polling. It is only a preferred method, for example if you
- * request for poll but it is not available, select will be used.
- */
-enum class SocketMethod {
-	Select,				//!< select(2) method, fallback
-	Poll				//!< poll(2), everywhere possible
-};
+namespace irccd {
 
 /**
  * @struct SocketStatus
- * @brief The SocketStatus struct
+ * @brief The SocketStatus class
  *
  * Result of a select call, returns the first ready socket found with its
- * direction.
+ * flags.
  */
 class SocketStatus {
 public:
-	Socket	&socket;		//!< which socket is ready
-	int	 direction;		//!< the direction
+	SocketAbstract &socket;		//!< which socket is ready
+	int flags;			//!< the flags
 };
 
 /**
- * @class SocketListenerInterface
- * @brief Implement the polling method
+ * Table used in the socket listener to store which sockets have been
+ * set in which directions.
  */
-class SocketListenerInterface {
+using SocketTable = std::map<SocketAbstract::Handle, std::pair<SocketAbstract *, int>>;
+
+/**
+ * @brief Namespace for predefined backends
+ */
+namespace backend {
+
+/**
+ * @class Select
+ * @brief Implements select(2)
+ *
+ * This class is the fallback of any other method, it is not preferred at all for many reasons.
+ */
+class Select {
 public:
 	/**
-	 * Default destructor.
+	 * Backend identifier
 	 */
-	virtual ~SocketListenerInterface() = default;
+	inline const char *name() const noexcept
+	{
+		return "select";
+	}
 
 	/**
-	 * Add a socket with a specified direction.
-	 *
-	 * @param s the socket
-	 * @param direction the direction
+	 * No-op, uses the SocketTable directly.
 	 */
-	virtual void set(Socket &sc, int direction) = 0;
+	inline void set(const SocketTable &, SocketAbstract &, int, bool) noexcept {}
 
 	/**
-	 * Remove a socket with a specified direction.
-	 *
-	 * @param s the socket
-	 * @param direction the direction
+	 * No-op, uses the SocketTable directly.
 	 */
-	virtual void unset(Socket &sc, int direction) = 0;
+	inline void unset(const SocketTable &, SocketAbstract &, int, bool) noexcept {}
 
 	/**
-	 * Remove completely a socket.
-	 *
-	 * @param sc the socket to remove
+	 * Return the sockets
 	 */
-	virtual void remove(Socket &sc) = 0;
-
-	/**
-	 * Remove all sockets.
-	 */
-	virtual void clear() = 0;
-
-	/**
-	 * Select one socket.
-	 *
-	 * @param ms the number of milliseconds to wait, -1 means forever
-	 * @return the socket status
-	 * @throw error::Failure on failure
-	 * @throw error::Timeout on timeout
-	 */
-	virtual SocketStatus select(int ms) = 0;
-
-	/**
-	 * Select many sockets.
-	 *
-	 * @param ms the number of milliseconds to wait, -1 means forever
-	 * @return a vector of ready sockets
-	 * @throw error::Failure on failure
-	 * @throw error::Timeout on timeout
-	 */
-	virtual std::vector<SocketStatus> selectMultiple(int ms) = 0;
+	std::vector<SocketStatus> wait(const SocketTable &table, int ms);
 };
 
+#if defined(SOCKET_HAVE_POLL)
+
 /**
- * @class SocketListener
+ * @class Poll
+ * @brief Implements poll(2)
+ *
+ * Poll is widely supported and is better than select(2). It is still not the
+ * best option as selecting the sockets is O(n).
+ */
+class Poll {
+private:
+	std::vector<pollfd> m_fds;
+
+	short topoll(int flags) const noexcept;
+	int toflags(short &event) const noexcept;
+
+public:
+	void set(const SocketTable &, SocketAbstract &sc, int flags, bool add);
+	void unset(const SocketTable &, SocketAbstract &sc, int flags, bool remove);
+	std::vector<SocketStatus> wait(const SocketTable &, int ms);
+
+	/**
+	 * Backend identifier
+	 */
+	inline const char *name() const noexcept
+	{
+		return "poll";
+	}
+};
+
+#endif
+
+#if defined(SOCKET_HAVE_EPOLL)
+
+class Epoll {
+private:
+	int m_handle;
+	std::vector<struct epoll_event> m_events;
+
+	Epoll(const Epoll &) = delete;
+	Epoll &operator=(const Epoll &) = delete;
+	Epoll(const Epoll &&) = delete;
+	Epoll &operator=(const Epoll &&) = delete;
+
+	uint32_t toepoll(int flags) const noexcept;
+	int toflags(uint32_t events) const noexcept;
+	void update(SocketAbstract &sc, int op, int flags);
+
+public:
+	Epoll();
+	~Epoll();
+	void set(const SocketTable &, SocketAbstract &sc, int flags, bool add);
+	void unset(const SocketTable &, SocketAbstract &sc, int flags, bool remove);
+	std::vector<SocketStatus> wait(const SocketTable &table, int ms);
+
+	/**
+	 * Backend identifier
+	 */
+	inline const char *name() const noexcept
+	{
+		return "epoll";
+	}
+};
+
+#endif
+
+#if defined(SOCKET_HAVE_KQUEUE)
+
+/**
+ * @class Kqueue
+ * @brief Implements kqueue(2)
+ *
+ * This implementation is available on all BSD and Mac OS X. It is better than
+ * poll(2) because it's O(1), however it's a bit more memory consuming.
+ */
+class Kqueue {
+private:
+	std::vector<struct kevent> m_result;
+	int m_handle;
+
+	Kqueue(const Kqueue &) = delete;
+	Kqueue &operator=(const Kqueue &) = delete;
+	Kqueue(Kqueue &&) = delete;
+	Kqueue &operator=(Kqueue &&) = delete;
+
+	void update(const Socket &sc, int filter, int flags);
+
+public:
+	Kqueue();
+	~Kqueue();
+
+	void set(const SocketTable &, SocketAbstract &sc, int flags, bool add);
+	void unset(const SocketTable &, SocketAbstract &sc, int flags, bool remove);
+	std::vector<SocketStatus> wait(const SocketTable &, int ms);
+
+	/**
+	 * Backend identifier
+	 */
+	inline const char *name() const noexcept
+	{
+		return "kqueue";
+	}
+};
+
+#endif
+
+} // !backend
+
+/**
+ * @class SocketListenerAbstract
  * @brief Synchronous multiplexing
  *
  * Convenient wrapper around the select() system call.
@@ -131,68 +273,98 @@ public:
  * This class is implemented using a bridge pattern to allow different uses
  * of listener implementation.
  *
- * Currently, poll and select() are available.
+ * You should not reinstanciate a new SocketListener at each iteartion of your
+ * main loop as it can be extremely costly. Instead use the same listener that
+ * you can safely modify on the fly.
  *
- * This wrappers takes abstract sockets as non-const reference but it does not
- * own them so you must take care that sockets are still alive until the
- * SocketListener is destroyed.
+ * Currently, poll, epoll, select and kqueue are available.
+ *
+ * To implement the backend, the following functions must be available:
+ *
+ * # Set
+ *
+ * @code
+ * void set(const SocketTable &, const SocketAbstract &sc, int flags, bool add);
+ * @endcode
+ *
+ * This function, takes the socket to be added and the flags. The flags are
+ * always guaranteed to be correct and the function will never be called twice
+ * even if the user tries to set the same flag again.
+ *
+ * An optional add argument is added for backends which needs to do different
+ * operation depending if the socket was already set before or if it is the
+ * first time (e.g EPOLL_CTL_ADD vs EPOLL_CTL_MOD for epoll(7).
+ *
+ * # Unset
+ *
+ * @code
+ * void unset(const SocketTable &, const SocketAbstract &sc, int flags, bool remove);
+ * @endcode
+ *
+ * Like set, this function is only called if the flags are actually set and will
+ * not be called multiple times.
+ *
+ * Also like set, an optional remove argument is set if the socket is being
+ * completely removed (e.g no more flags are set for this socket).
+ *
+ * # Wait
+ *
+ * @code
+ * std::vector<SocketStatus> wait(const SocketTable &, int ms);
+ * @encode
+ *
+ * Wait for the sockets to be ready with the specified milliseconds. Must return a list of SocketStatus,
+ * may throw any exceptions.
+ *
+ * # Name
+ *
+ * @code
+ * inline const char *name() const noexcept
+ * @endcode
+ *
+ * Returns the backend name. Usually the class in lower case.
  */
-class SocketListener final {
+template <typename Backend = SOCKET_DEFAULT_BACKEND>
+class SocketListenerAbstract final {
 public:
-#if defined(SOCKET_HAVE_POLL)
-	static constexpr const SocketMethod PreferredMethod = SocketMethod::Poll;
-#else
-	static constexpr const SocketMethod PreferredMethod = SocketMethod::Select;
-#endif
-
+	/**
+	 * Mark the socket for read operation.
+	 */
 	static const int Read;
+
+	/**
+	 * Mark the socket for write operation.
+	 */
 	static const int Write;
 
-	using Map = std::map<std::reference_wrapper<Socket>, int>;
-	using Iface = std::unique_ptr<SocketListenerInterface>;
-
 private:
-	Map m_map;
-	Iface m_interface;
+	Backend m_backend;
+	SocketTable m_table;
 
 public:
 	/**
-	 * Move constructor.
-	 *
-	 * @param other the other object
+	 * Construct an empty listener.
 	 */
-	SocketListener(SocketListener &&other) = default;
+	SocketListenerAbstract() = default;
 
 	/**
-	 * Move operator.
+	 * Get the backend.
 	 *
-	 * @param other the other object
-	 * @return this
+	 * @return the backend
 	 */
-	SocketListener &operator=(SocketListener &&other) = default;
-
-	/**
-	 * Create a socket listener.
-	 *
-	 * @param method the preferred method
-	 */
-	SocketListener(SocketMethod method = PreferredMethod);
-
-	/**
-	 * Create a listener from a list of sockets.
-	 *
-	 * @param list the list
-	 */
-	SocketListener(std::initializer_list<std::pair<std::reference_wrapper<Socket>, int>> list);
-
-	/**
-	 * Return an iterator to the beginning.
-	 *
-	 * @return the iterator
-	 */
-	inline auto begin() noexcept
+	inline const Backend &backend() const noexcept
 	{
-		return m_map.begin();
+		return m_backend;
+	}
+
+	/**
+	 * Get the non-modifiable table.
+	 *
+	 * @return the table
+	 */
+	inline const SocketTable &table() const noexcept
+	{
+		return m_table;
 	}
 
 	/**
@@ -200,9 +372,9 @@ public:
 	 *
 	 * @return the iterator
 	 */
-	inline auto begin() const noexcept
+	inline SocketTable::const_iterator begin() const noexcept
 	{
-		return m_map.begin();
+		return m_table.begin();
 	}
 
 	/**
@@ -210,19 +382,9 @@ public:
 	 *
 	 * @return the iterator
 	 */
-	inline auto cbegin() const noexcept
+	inline SocketTable::const_iterator cbegin() const noexcept
 	{
-		return m_map.cbegin();
-	}
-
-	/**
-	 * Return an iterator to the end.
-	 *
-	 * @return the iterator
-	 */
-	inline auto end() noexcept
-	{
-		return m_map.end();
+		return m_table.cbegin();
 	}
 
 	/**
@@ -230,9 +392,9 @@ public:
 	 *
 	 * @return the iterator
 	 */
-	inline auto end() const noexcept
+	inline SocketTable::const_iterator end() const noexcept
 	{
-		return m_map.end();
+		return m_table.end();
 	}
 
 	/**
@@ -240,58 +402,66 @@ public:
 	 *
 	 * @return the iterator
 	 */
-	inline auto cend() const noexcept
+	inline SocketTable::const_iterator cend() const noexcept
 	{
-		return m_map.cend();
+		return m_table.cend();
 	}
 
 	/**
-	 * Add a socket to the listener.
+	 * Add or update a socket to the listener.
+	 *
+	 * If the socket is already placed with the appropriate flags, the
+	 * function is a no-op.
+	 *
+	 * If incorrect flags are passed, the function does nothing.
 	 *
 	 * @param sc the socket
-	 * @param direction (may be OR'ed)
+	 * @param flags (may be OR'ed)
+	 * @throw SocketError if the backend failed to set
 	 */
-	void set(Socket &sc, int direction);
+	void set(SocketAbstract &sc, int flags);
 
 	/**
-	 * Unset a socket from the listener, only the direction is removed
-	 * unless the two directions are requested.
+	 * Unset a socket from the listener, only the flags is removed
+	 * unless the two flagss are requested.
 	 *
 	 * For example, if you added a socket for both reading and writing,
-	 * unsetting the write direction will keep the socket for reading.
+	 * unsetting the write flags will keep the socket for reading.
 	 *
 	 * @param sc the socket
-	 * @param direction the direction (may be OR'ed)
+	 * @param flags the flags (may be OR'ed)
 	 * @see remove
 	 */
-	void unset(Socket &sc, int direction) noexcept;
+	void unset(SocketAbstract &sc, int flags);
 
 	/**
 	 * Remove completely the socket from the listener.
 	 *
+	 * It is a shorthand for unset(sc, SocketListener::Read | SocketListener::Write);
+	 *
 	 * @param sc the socket
 	 */
-	inline void remove(Socket &sc) noexcept
+	inline void remove(SocketAbstract &sc)
 	{
-		m_map.erase(sc);
-		m_interface->remove(sc);
+		unset(sc, Read | Write);
 	}
 
 	/**
 	 * Remove all sockets.
 	 */
-	inline void clear() noexcept
+	inline void clear()
 	{
-		m_map.clear();
-		m_interface->clear();
+		while (!m_table.empty()) {
+			remove(m_table.begin()->second.first);
+		}
 	}
 
 	/**
 	 * Get the number of sockets in the listener.
 	 */
-	unsigned size() const noexcept
+	inline SocketTable::size_type size() const noexcept
 	{
-		return m_map.size();
+		return m_table.size();
 	}
 
 	/**
@@ -301,11 +471,11 @@ public:
 	 * @return the socket ready
 	 */
 	template <typename Rep, typename Ratio>
-	inline SocketStatus select(const std::chrono::duration<Rep, Ratio> &duration)
+	inline SocketStatus wait(const std::chrono::duration<Rep, Ratio> &duration)
 	{
 		auto cvt = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
 
-		return m_interface->select(cvt.count());
+		return m_backend.wait(m_table, cvt.count())[0];
 	}
 
 	/**
@@ -314,9 +484,9 @@ public:
 	 * @param timeout the optional timeout in milliseconds
 	 * @return the socket ready
 	 */
-	inline SocketStatus select(int timeout = -1)
+	inline SocketStatus wait(int timeout = -1)
 	{
-		return m_interface->select(timeout);
+		return wait(std::chrono::milliseconds(timeout));
 	}
 
 	/**
@@ -326,11 +496,11 @@ public:
 	 * @return the socket ready
 	 */
 	template <typename Rep, typename Ratio>
-	inline std::vector<SocketStatus> selectMultiple(const std::chrono::duration<Rep, Ratio> &duration)
+	inline std::vector<SocketStatus> waitMultiple(const std::chrono::duration<Rep, Ratio> &duration)
 	{
 		auto cvt = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
 
-		return m_interface->selectMultiple(cvt.count());
+		return m_backend.wait(m_table, cvt.count());
 	}
 
 	/**
@@ -338,10 +508,89 @@ public:
 	 *
 	 * @return the socket ready
 	 */
-	inline std::vector<SocketStatus> selectMultiple(int timeout = -1)
+	inline std::vector<SocketStatus> waitMultiple(int timeout = -1)
 	{
-		return m_interface->selectMultiple(timeout);
+		return waitMultiple(std::chrono::milliseconds(timeout));
 	}
 };
+
+template <typename Backend>
+void SocketListenerAbstract<Backend>::set(SocketAbstract &sc, int flags)
+{
+	/* Invalid or useless flags */
+	if (flags == 0 || flags > 0x3)
+		return;
+
+	auto it = m_table.find(sc.handle());
+
+	/*
+	 * Do not update the table if the backend failed to add
+	 * or update.
+	 */
+	if (it == m_table.end()) {
+		m_backend.set(m_table, sc, flags, true);
+		m_table.emplace(sc.handle(), std::make_pair(std::addressof(sc), flags));
+	} else {
+		if ((flags & Read) && (it->second.second & Read)) {
+			flags &= ~(Read);
+		}
+		if ((flags & Write) && (it->second.second & Write)) {
+			flags &= ~(Write);
+		}
+
+		/* Still need a call? */
+		if (flags != 0) {
+			m_backend.set(m_table, sc, flags, false);
+			it->second.second |= flags;
+		}
+	}
+}
+
+template <typename Backend>
+void SocketListenerAbstract<Backend>::unset(SocketAbstract &sc, int flags)
+{
+	auto it = m_table.find(sc.handle());
+
+	/* Invalid or useless flags */
+	if (flags == 0 || flags > 0x3 || it == m_table.end())
+		return;
+
+	/*
+	 * Like set, do not update if the socket is already at the appropriate
+	 * state.
+	 */
+	if ((flags & Read) && !(it->second.second & Read)) {
+		flags &= ~(Read);
+	}
+	if ((flags & Write) && !(it->second.second & Write)) {
+		flags &= ~(Write);
+	}
+
+	if (flags != 0) {
+		/* Determine if it's a complete removal */
+		bool removal = ((it->second.second) & ~(flags)) == 0;
+
+		m_backend.unset(m_table, sc, flags, removal);
+
+		if (removal) {
+			m_table.erase(it);
+		} else {
+			it->second.second &= ~(flags);
+		}
+	}
+}
+
+/**
+ * Helper to use the default.
+ */
+using SocketListener = SocketListenerAbstract<>;
+
+template <typename Backend>
+const int SocketListenerAbstract<Backend>::Read{1 << 0};
+
+template <typename Backend>
+const int SocketListenerAbstract<Backend>::Write{1 << 1};
+
+} // !irccd
 
 #endif // !_SOCKET_LISTENER_NG_H_

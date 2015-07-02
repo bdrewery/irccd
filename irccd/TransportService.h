@@ -62,8 +62,14 @@ public:
 	Signal<TransportCommand> onCommand;
 
 private:
-	std::map<Socket, std::unique_ptr<TransportAbstract>> m_transports;
-	std::map<Socket, std::shared_ptr<TransportClientAbstract>> m_clients;
+	enum class Owner {
+		Service,
+		Acceptor,
+		Client
+	};
+
+	std::map<SocketAbstract::Handle, std::unique_ptr<TransportAcceptorAbstract>> m_transports;
+	std::map<SocketAbstract::Handle, std::shared_ptr<TransportClientAbstract>> m_clients;
 
 	/* ------------------------------------------------
 	 * Slots (convert TransportClient's signals to TransportCommand)
@@ -91,9 +97,13 @@ private:
 	void handleOnDie(const std::shared_ptr<TransportClientAbstract> &);
 
 	/* private service helpers */
+#if 0
 	void accept(const Socket &s);
 	void process(const Socket &s, int direction);
 	bool isTransport(const Socket &s) const noexcept;
+#endif
+
+	Owner owner(const SocketAbstract &sc) const noexcept;
 
 protected:
 	void run() override;
@@ -118,12 +128,11 @@ public:
 	{
 		assert(!isRunning());
 
-		std::unique_ptr<TransportAbstract> ptr = std::make_unique<T>(std::forward<Args>(args)...);
+		std::unique_ptr<TransportAcceptorAbstract> ptr = std::make_unique<T>(std::forward<Args>(args)...);
 
-		ptr->bind();
 		Logger::info() << "transport: listening on " << ptr->info() << std::endl;
 
-		m_transports.emplace(ptr->socket(), std::move(ptr));
+		m_transports.emplace(ptr->socket().handle(), std::move(ptr));
 	}
 
 	/**

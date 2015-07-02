@@ -27,7 +27,7 @@ if (WITH_TESTS)
 	add_subdirectory(js-unicode)
 
 	# JS modules
-	add_subdirectory(js-module-local)
+	# add_subdirectory(js-module-local)
 
 	# Server stuff
 	add_subdirectory(server)

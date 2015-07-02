@@ -26,47 +26,30 @@
 #include <SocketListener.h>
 
 using namespace irccd;
+using namespace irccd::address;
+
 using namespace std::chrono_literals;
 
 class TestService : public Service {
-protected:
-	void run() override
-	{
-		// Wait for a large number of seconds
-		SocketListener listener;
-
-		try {
-			listener.set(socket(), SocketListener::Read);
-			auto st = listener.select(5s);
-
-			if (isService(st.socket)) {
-				(void)action();
-			}
-		} catch (const std::exception &ex) {
-			FAIL() << ex.what();
-		}
-	}
-
 public:
 	TestService()
-		: Service("test-service", "/tmp/.irccd-test-service")
+		: Service(5000, "test-service", "/tmp/.irccd-test-service")
 	{
 	}
 };
 
-TEST(Basic, isRunning)
+TEST(Basic, start)
 {
 	TestService ts;
 
 	ts.start();
-	ASSERT_TRUE(ts.isRunning());
+	ASSERT_EQ(ServiceState::Running, ts.state());
 	ts.stop();
-	ASSERT_FALSE(ts.isRunning());
+	ASSERT_EQ(ServiceState::Stopped, ts.state());
 }
 
 TEST(Basic, stop)
 {
-	// Should not take any time
 	TestService ts;
 
 	ts.start();
@@ -76,6 +59,66 @@ TEST(Basic, stop)
 
 	/* Should not take any longer */
 	ASSERT_TRUE(timer.elapsed() <= 100);
+}
+
+TEST(Basic, pause)
+{
+	TestService ts;
+
+	ts.start();
+	ASSERT_EQ(ServiceState::Running, ts.state());
+	ts.pause();
+	ASSERT_EQ(ServiceState::Paused, ts.state());
+	ts.stop();
+	ASSERT_EQ(ServiceState::Stopped, ts.state());
+}
+
+TEST(Basic, resume)
+{
+	TestService ts;
+
+	ts.start();
+	ASSERT_EQ(ServiceState::Running, ts.state());
+	ts.pause();
+	ASSERT_EQ(ServiceState::Paused, ts.state());
+	ts.resume();
+	ASSERT_EQ(ServiceState::Running, ts.state());
+	ts.stop();
+	ASSERT_EQ(ServiceState::Stopped, ts.state());
+}
+
+TEST(Basic, connect)
+{
+	TestService ts;
+
+	try {
+		SocketTcp<Unix> s{AF_UNIX, 0};
+		bool connected{false};
+
+		s.bind(Unix{"connect.sock", true});
+		s.listen(128);
+
+		ts.onAcceptor.connect([&] (SocketAbstract &) {
+			connected = true;
+			s.accept();
+		});
+
+		ts.addAcceptor(s);
+		ts.start();
+
+		SocketTcp<Unix> client{AF_UNIX, 0};
+		client.connect(Unix{"connect.sock"});
+
+		std::this_thread::sleep_for(150ms);
+
+		puts("Stopping...");
+		ts.stop();
+		puts("Stopped");
+
+		ASSERT_TRUE(connected);
+	} catch (const std::exception &ex) {
+		FAIL() << ex.what();
+	}
 }
 
 int main(int argc, char **argv)

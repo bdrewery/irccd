@@ -41,6 +41,7 @@ JsonValue TransportClientAbstract::valueOr(const JsonObject &object, const std::
 
 void TransportClientAbstract::receive()
 {
+#if 0
 	std::string incoming = socket().recv(512);
 
 	if (incoming.size() == 0) {
@@ -48,11 +49,15 @@ void TransportClientAbstract::receive()
 	}
 
 	m_input += incoming;
+#endif
 }
 
 void TransportClientAbstract::send()
 {
-	m_output.erase(0, socket().send(m_output));
+	// TODO
+#if 0
+	m_output.erase(0, send(m_output, false));
+#endif
 }
 
 /*

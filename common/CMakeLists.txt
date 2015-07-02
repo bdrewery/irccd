@@ -45,10 +45,6 @@ set(
 	SocketAddress.h
 	SocketListener.cpp
 	SocketListener.h
-	SocketTcp.cpp
-	SocketTcp.h
-	SocketUdp.cpp
-	SocketUdp.h
 	System.h
 	System.cpp
 	Util.cpp

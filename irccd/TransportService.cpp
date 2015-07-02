@@ -215,7 +215,10 @@ void TransportService::handleUserMode(shared_ptr<TransportClientAbstract> client
 
 void TransportService::handleOnWrite()
 {
-	reload();
+	// TODO
+#if 0
+	//reload();
+#endif
 }
 
 void TransportService::handleOnDie(const shared_ptr<TransportClientAbstract> &client)
@@ -224,12 +227,17 @@ void TransportService::handleOnDie(const shared_ptr<TransportClientAbstract> &cl
 
 	Logger::debug() << "transport: client disconnected" << endl;
 
+	// TODO
+#if 0
 	m_clients.erase(client->socket());
+#endif
 }
 
 /* --------------------------------------------------------
  * Private helpers
  * -------------------------------------------------------- */
+
+#if 0
 
 bool TransportService::isTransport(const Socket &s) const noexcept
 {
@@ -282,11 +290,27 @@ void TransportService::process(const Socket &s, int direction)
 	m_clients.at(s)->process(direction);
 }
 
+#endif
+
+TransportService::Owner TransportService::owner(const SocketAbstract &sc) const noexcept
+{
+#if 0
+	if (sc.handle() == socket().handle())
+		return Owner::Service;
+	if (m_cl)
+#endif
+}
+
 void TransportService::run()
 {
 	SocketListener listener;
 
+	/* Add master */
+	listener.set(socket(), SocketListener::Read);
+
 	while (isRunning()) {
+
+#if 0
 		// TODO: do not rebuild the listener at each iteration.
 		try {
 			listener.clear();
@@ -324,11 +348,12 @@ void TransportService::run()
 				Logger::debug() << "transport: error: " << ex.what() << endl;
 			}
 		}
+#endif
 	}
 }
 
 TransportService::TransportService()
-	: Service("transport", "/tmp/._irccd_ts.sock")
+	: Service{"transport", "/tmp/._irccd_ts.sock"}
 {
 }
 
@@ -353,7 +378,7 @@ void TransportService::broadcast(const string &msg)
 		}
 	}
 
-	Service::reload();
+	notify();
 }
 
 } // !irccd

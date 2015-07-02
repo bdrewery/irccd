@@ -35,123 +35,308 @@
  */
 
 #include <atomic>
+#include <cassert>
+#include <condition_variable>
 #include <functional>
 #include <mutex>
+#include <set>
+#include <stdexcept>
 #include <thread>
 
 #include <IrccdConfig.h>
 
+#include <Signals.h>
+#include <Socket.h>
 #include <SocketAddress.h>
-#include <SocketUdp.h>
-
-/**
- * @enum ServiceAction
- * @brief Which action do execute
- */
-enum class ServiceAction {
-	Reload,			//!< Reload the listener
-	Stop			//!< Stop the thread
-};
+#include <SocketListener.h>
 
 namespace irccd {
 
 /**
+ * @class ServiceSocketAbstract
+ * @brief Base interface for service interruption implementation
+ *
+ * This class is used to store the underlying socket and to notify it when
+ * appliable.
+ *
+ * For better performance, the socket must be placed non-blocking and silently
+ * discard errors.
+ */
+class ServiceSocketAbstract {
+public:
+	/**
+	 * Virtual destructor defaulted.
+	 */
+	virtual ~ServiceSocketAbstract() = default;
+
+	/**
+	 * Get the underlying socket as base type.
+	 *
+	 * @return the socket
+	 */
+	virtual SocketAbstract &socket() noexcept = 0;
+
+	/**
+	 * Send a small notification packet to notify the listener.
+	 */
+	virtual void notify() = 0;
+
+	/**
+	 * Flush the pending byte.
+	 */
+	virtual void flush() = 0;
+};
+
+/**
+ * @class ServiceSocket
+ * @brief Template wrapper that automatically define functions
+ * @see ServiceSocketUnix
+ * @see ServiceSocketIp
+ */
+template <typename Address>
+class ServiceSocket : public ServiceSocketAbstract {
+protected:
+	SocketUdp<Address> m_socket;
+	Address m_address;
+
+	/**
+	 * Constructor,
+	 *
+	 * 1. Create the socket
+	 * 2. Bind it
+	 * 3. Make it non blocking
+	 *
+	 * @param domain the domain (AF_INET, ...)
+	 * @param address the address
+	 */
+	inline ServiceSocket(int domain, Address address)
+		: m_socket{domain, 0}
+		, m_address{std::move(address)}
+	{
+		m_socket.set(SOL_SOCKET, SO_REUSEADDR, 1);
+		m_socket.setBlockMode(false);
+		m_socket.bind(address);
+	}
+
+	/**
+	 * @copydoc ServiceSocketAbstract::socket
+	 */
+	SocketAbstract &socket() noexcept override
+	{
+		return m_socket;
+	}
+
+	/**
+	 * @copydoc ServiceSocketAbstract::notify
+	 */
+	void notify() override
+	{
+		static char dummyByte{1};
+
+		m_socket.sendto(&dummyByte, sizeof (char), m_address);
+	}
+
+	/**
+	 * @copydoc ServiceSocketAbstract::flush
+	 */
+	void flush() override
+	{
+		static char dummyByte;
+		static Address dummyAddress;
+
+		m_socket.recvfrom(&dummyByte, sizeof (char), dummyAddress);
+	}
+};
+
+#if !defined(IRCCD_SYSTEM_WINDOWS)
+
+/**
+ * @class ServiceSocketUnix
+ * @brief Interruption implemented as unix socket
+ */
+class ServiceSocketUnix : public ServiceSocket<address::Unix> {
+private:
+	std::string m_path;
+
+public:
+	inline ServiceSocketUnix(std::string path)
+		: ServiceSocket{AF_LOCAL, address::Unix{path, true}}
+		, m_path{std::move(path)}
+	{
+	}
+
+	~ServiceSocketUnix() noexcept
+	{
+		::remove(m_path.c_str());
+	}
+};
+
+#else
+
+// TODO: add support back for Windows.
+
+/**
+ * @class ServiceSocketIp
+ * @brief Interruption implemented as IP sockets
+ */
+class ServiceSocketIp : public ServiceSocket<address::Ip> {
+public:
+};
+
+#endif
+
+/**
+ * @enum ServiceState
+ * @brief Service thread state
+ */
+enum class ServiceState {
+	Paused,			//!< The thread is actually paused
+	Running,		//!< The thread is active and running
+	Stopped			//!< The thread is completely stopped
+};
+
+/**
  * @class Service
- * @brief Provide a UDP socket for select interrupt
+ * @brief Provide an asynchronous I/O event loop
  *
- * The TransportService and ServerService use a select(2) based loop
- * to monitor sockets.
+ * This class register sockets into a SocketListener and wait for events on it for further
+ * operations. It runs in a thread that is interruptible with a small UDP socket that is bound
+ * to a file on Unix systems and in a random port on Windows.
  *
- * Because these classes use threads and have a blocking select(2) call we
- * provide a UDP socket to interrupt the selection immediately.
+ * Just like the SocketListener, this class does not take ownership of the sockets, therefore they
+ * must be kept somewhere.
  *
- * This can be used both to notify we have modified a socket I/O or because
- * we are shutting down irccd.
- *
- * A typical service run function should look like this:
- *
- * @code
- * void MyService::run()
- * {
- *   SocketListener listener;
- *
- *   while (isRunning()) {
- *     listener.set(socket(), SocketListener::Read);
- *
- *     // Fill with the service sockets here
- *
- *     SocketStatus st = listener.select();
- *
- *     if (isService(st.socket)) {
- *       if (action() == ServiceAction::Reload) {
- *         // Reload the sets
- *       } else {
- *         // isRunning() will return false, so just break the loop
- *         continue;
- *       }
- *     } else {
- *       // Do you service stuff here
- *   }
- * }
- * @endcode
+ * Most of the functions are thread-safe but whose who are not are meant to be called only by
+ * the owner of the Service (e.g addAcceptor).
  */
 class Service {
+public:
+	/*
+	 * onAcceptor
+	 * ------------------------------------------------
+	 *
+	 * This signal is emitted when an acceptor socket is ready for accepting
+	 * a new connection.
+	 *
+	 * Arguments:
+	 * - The socket ready for accept **not the new client socket**
+	 */
+	Signal<SocketAbstract &> onAcceptor;
+
+	/**
+	 * onIncoming
+	 * ------------------------------------------------
+	 *
+	 * This signal is emitted when a client has incoming data available.
+	 *
+	 * Arguments:
+	 * - The socket ready for read operation
+	 */
+	Signal<SocketAbstract &> onIncoming;
+
+	/**
+	 * onOutgoing
+	 * ------------------------------------------------
+	 *
+	 * This signal is emitted when a client has outgoing data available.
+	 *
+	 * Arguments:
+	 * - The socket ready for write.
+	 */
+	Signal<SocketAbstract &> onOutgoing;
+
+	/**
+	 * onError
+	 * ------------------------------------------------
+	 *
+	 * This signal is emitted when an error occurs.
+	 *
+	 * Arguments:
+	 * - The socket error
+	 */
+	Signal<const SocketError &> onError;
+
+	/**
+	 * onTimeout
+	 * ------------------------------------------------
+	 *
+	 * This signal is emitted when the listener did timeout.
+	 */
+	Signal<> onTimeout;
+
 private:
-	/* Select interrupt */
-	SocketUdp m_signal;
-	SocketAddress m_address;
+	enum class Owner {
+		Service,
+		Acceptor,
+		Client
+	};
+
+	/* State, its lock and its condition variable */
+	ServiceState m_state{ServiceState::Stopped};
+	std::mutex m_mutexState;
+	std::condition_variable m_condition;
+
+	/* Socket listener and its mutex */
+	SocketListener m_listener;
+	int m_timeout;
+	std::mutex m_mutexListener;
+
+	/* Select interrupt interface and its mutex */
+	std::unique_ptr<ServiceSocketAbstract> m_interface;
+	std::mutex m_mutexInterface;
 
 	/* Thread and mutex */
 	std::atomic<bool> m_running{false};
 	std::thread m_thread;
 	std::string m_servname;
 
+	/* Lookup table for acceptors and clients */
+	std::set<SocketAbstract::Handle> m_acceptors;
+	std::set<SocketAbstract::Handle> m_clients;
+
+	void run();
+	void flush();
+	void notify();
+
+	inline Owner owner(SocketAbstract &sc) const noexcept
+	{
+		if (sc == m_interface->socket()) {
+			return Owner::Service;
+		}
+		if (m_acceptors.count(sc.handle()) != 0) {
+			return Owner::Acceptor;
+		}
+		if (m_clients.count(sc.handle()) != 0) {
+			return Owner::Client;
+		}
+
+		throw std::runtime_error{"Unknown socket selected"};
+	}
+
 	/*
-	 * Windows does not support Unix sockets and we require socket so we
-	 * use a AF_INET address with a random port stored here.
+	 * Update the SocketListener safely by pausing the thread and locking
+	 * the listener.
 	 *
-	 * Otherwise, we use a Unix socket at a path specified by the derivated class.
-	 */
-#if !defined(IRCCD_SYSTEM_WINDOWS)
-	std::string m_path;
-#endif
-
-protected:
-	/**
-	 * The mutex to use.
-	 */
-	mutable std::mutex m_mutex;
-
-protected:
-	/**
-	 * The function to run when start() is called.
-	 */
-	virtual void run() = 0;
-
-	/**
-	 * Tell if the user selection has selected the service.
+	 * The function is free to use m_listener safely.
 	 *
-	 * @param s the selected socket
-	 * @return true if the socket is the service
-	 * @note Thread-safe
+	 * See set and unset.
 	 */
-	bool isService(Socket &s) const noexcept;
+	template <typename Operation>
+	void updateListener(Operation &&func)
+	{
+		if (m_state != ServiceState::Paused) {
+			pause();
+		}
 
-	/**
-	 * Get the socket to be put in the SocketListener.
-	 *
-	 * @return the sockets
-	 * @note Thread-safe
-	 */
-	Socket &socket() noexcept;
+		{
+			std::lock_guard<std::mutex> lock(m_mutexListener);
 
-	/**
-	 * Tell which action must be taken.
-	 *
-	 * @return the action
-	 * @note Thread-safe
-	 */
-	ServiceAction action();
+			// This will call SocketListener::set or SocketListener::unset
+			func();
+		}
+
+		resume();
+	}
 
 public:
 	/**
@@ -159,10 +344,11 @@ public:
 	 *
 	 * This create the socket.
 	 *
+	 * @param timeout the time to wait in milliseconds
 	 * @param name the service name (for debugging purposes)
 	 * @param path the path to the Unix file (not needed on Windows)
 	 */
-	Service(std::string name, std::string path);
+	Service(int timeout, std::string name, std::string path);
 
 	/**
 	 * Virtual destructor defaulted.
@@ -174,43 +360,102 @@ public:
 	virtual ~Service();
 
 	/**
-	 * Check if the thread is running.
+	 * Get the current service state.
 	 *
-	 * @return true if running
-	 * @note Thread-safe
+	 * @return the state
+	 * @warning Not thread-safe, should be called from the only one place that have access to the service
 	 */
-	bool isRunning() const noexcept;
+	inline ServiceState state() const noexcept
+	{
+		return m_state;
+	}
 
 	/**
-	 * Ask immediat reload.
+	 * Add a socket for accepting clients.
 	 *
-	 * This function should be called from a different thread than the
-	 * service.
+	 * This function should be called before starting the thread.
 	 *
-	 * @pre isRunning() must return true
-	 * @note Thread-safe
+	 * @param sc the socket
+	 * @pre state() must not be running
+	 * @warning Not thread-safe
 	 */
-	void reload();
+	inline void addAcceptor(SocketAbstract &sc)
+	{
+		assert(m_state != ServiceState::Running);
+
+		m_acceptors.insert(sc.handle());
+		m_listener.set(sc, SocketListener::Read);
+	}
 
 	/**
 	 * Start the thread.
 	 *
-	 * @pre isRunning() must returm false
+	 * @pre state() must return Stopped
 	 */
-	virtual void start();
+	void start();
 
 	/**
-	 * Request to stop.
+	 * Pause the thread.
 	 *
-	 * This function should be called from a different thread than the
-	 * service.
-	 *
-	 * This function does not close the socket so it can be reused.
-	 *
-	 * @note Thread-safe
-	 * @pre isRunning() must return true
+	 * @pre state() must return Running
 	 */
-	virtual void stop();
+	void pause();
+
+	/**
+	 * Resume the thread.
+	 *
+	 * @pre state() must return Paused
+	 */
+	void resume();
+
+	/**
+	 * Stop the thread.
+	 *
+	 * @pre state() must return Running or Paused
+	 */
+	void stop();
+
+	/**
+	 * Set a socket for listening on input, write or both.
+	 *
+	 * This function should be called in onAcceptor callbacks only.
+	 *
+	 * @param sc the socket
+	 * @param flags the flags (SocketListener::Read or SocketListener::Write)
+	 */
+	inline void set(SocketAbstract &sc, int flags)
+	{
+		updateListener([&] () {
+			m_clients.insert(sc.handle());
+			m_listener.set(sc, flags);
+		});
+	}
+
+	/**
+	 * Unregister a listening operation.
+	 *
+	 * @param sc the socket
+	 * @param flags the flags (SocketListener::Read or SocketListener::Write)
+	 */
+	inline void unset(SocketAbstract &sc, int flags)
+	{
+		updateListener([&] () {
+			m_listener.unset(sc, flags);
+		});
+	}
+
+	/**
+	 * Completely remove a client.
+	 *
+	 * @param sc the socket to remove
+	 */
+	inline void remove(SocketAbstract &sc)
+	{
+		updateListener([&] () {
+			m_listener.remove(sc);
+			m_clients.erase(sc.handle());
+		});
+	}
 };
 
 } // !irccd

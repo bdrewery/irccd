@@ -1,5 +1,5 @@
 /*
- * Transport.h -- I/O for irccd clients
+ * TransportAcceptor.h -- I/O for irccd clients (acceptors)
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,70 +16,69 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_TRANSPORT_H_
-#define _IRCCD_TRANSPORT_H_
+#ifndef _IRCCD_TRANSPORT_ACCEPTOR_H_
+#define _IRCCD_TRANSPORT_ACCEPTOR_H_
 
 /**
  * @file Transport.h
  * @brief Transports for irccd
  */
 
+#include <cstdio>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <type_traits>
 
+#include <IrccdConfig.h>
+
 #include "SocketAddress.h"
 #include "Socket.h"
-#include "SocketTcp.h"
 #include "TransportClient.h"
 
 namespace irccd {
 
 /**
- * @class TransportAbstract
+ * @class TransportAcceptorAbstract
  * @brief Bring networking between irccd and irccdctl
  *
  * This class contains a master sockets for listening to TCP connections, it is
- * then processed by TransportManager who select() them.
+ * then processed by TransportService who select() them.
  *
  * The transport class supports the following domains:
  *
- * |-----------------------|---------------|
- * | Domain                | Class         |
- * |-----------------------|---------------|
- * | IPv4, IPv6            | TransportInet |
- * | IPv4, IPv6 over SSL   | TransportSsl  |
- * | Unix (not on Windows) | TransportUnix |
- * |-----------------------|---------------|
+ * | Domain                | Class                 |
+ * |-----------------------|-----------------------|
+ * | IPv4, IPv6            | TransportAcceptorIp   |
+ * | Unix (not on Windows) | TransportAcceptorUnix |
  *
  * Note: IPv4 and IPv6 can be combined, using Transport::IPv4 | Transport::IPv6
  * makes the transport available on both domains.
+ *
+ * Because this class owns a socket that will be borrowed to a SocketListener, it is not copyable
+ * and not movable so that underlying socket will never be invalidated.
  */
-class TransportAbstract {
+class TransportAcceptorAbstract {
 public:
-	enum Domain {
-		IPv4	= (1 << 0),
-		IPv6	= (1 << 1),
-		Unix	= 4
-	};
+	TransportAcceptorAbstract(const TransportAcceptorAbstract &) = delete;
+	TransportAcceptorAbstract(TransportAcceptorAbstract &&) = delete;
+
+	/**
+	 * Default constructor.
+	 */
+	TransportAcceptorAbstract() = default;
 
 	/**
 	 * Destructor defaulted.
 	 */
-	virtual ~TransportAbstract() = default;
+	virtual ~TransportAcceptorAbstract() = default;
 
 	/**
 	 * Retrieve the underlying socket.
 	 *
 	 * @return the socket
 	 */
-	virtual SocketAbstractTcp &socket() noexcept = 0;
-
-	/**
-	 * Bind to the address.
-	 */
-	virtual void bind() = 0;
+	virtual SocketAbstract &socket() noexcept = 0;
 
 	/**
 	 * Accept a new client depending on the domain.
@@ -93,11 +92,14 @@ public:
 	 *
 	 * @return the info
 	 */
-	virtual std::string info() const noexcept = 0;
+	virtual std::string info() const = 0;
+
+	TransportAcceptorAbstract &operator=(const TransportAcceptorAbstract &) = delete;
+	TransportAcceptorAbstract &operator=(TransportAcceptorAbstract &&) = delete;
 };
 
 /**
- * @class Transport
+ * @class TransportAcceptor
  * @brief Wrapper for Transport
  *
  * This class contains the underlying socket (SocketTcp or SocketSsl) and
@@ -106,12 +108,11 @@ public:
  * It also provides the accept() function.
  */
 template <typename Sock>
-class Transport : public TransportAbstract {
-private:
-	static_assert(std::is_same<Sock, SocketTcp>::value, "Sock must be SocketTcp or SocketSsl");
-
+class TransportAcceptor : public TransportAcceptorAbstract {
 protected:
-	Sock m_socket;
+	using Address = typename Sock::AddressType;
+
+	SocketTcp<Address> m_socket;
 
 public:
 	/**
@@ -119,17 +120,12 @@ public:
 	 *
 	 * @param domain the domain (AF_INET, AF_INET6, ...)
 	 */
-	Transport(int domain)
-		: m_socket(domain, 0)
+	TransportAcceptor(int domain, const Address &address)
+		: m_socket{domain, 0}
 	{
-	}
-
-	/**
-	 * Destroy the transport and close the socket.
-	 */
-	~Transport()
-	{
-		m_socket.close();
+		m_socket.set(SOL_SOCKET, SO_REUSEADDR, 1);
+		m_socket.bind(address);
+		m_socket.listen();
 	}
 
 	/**
@@ -137,7 +133,7 @@ public:
 	 *
 	 * @return the socket
 	 */
-	SocketAbstractTcp &socket() noexcept override
+	SocketAbstract &socket() noexcept override
 	{
 		return m_socket;
 	}
@@ -147,105 +143,69 @@ public:
 	 */
 	std::unique_ptr<TransportClientAbstract> accept() override
 	{
-		return std::make_unique<TransportClient<Sock>>(m_socket.accept());
+		// TODO
+		//return std::make_unique<TransportClient<Sock>>(m_socket.accept());
+		return nullptr;
 	}
 };
 
-/**
- * @class TransportAbstractInet
- * @brief Abstract class that provide common operations for internet domain
- *
- * This class is parent of TransportInet and TransportSsl.
- *
- * @see TransportInet
- * @see TransportSsl
- */
-template <typename Sock>
-class TransportAbstractInet : public Transport<Sock> {
-protected:
-	int m_domain;
-	int m_port;
-	std::string m_host;
-
+class TransportAcceptorIpv6 : public TransportAcceptor<SocketTcp<address::Ipv6>> {
 public:
-	/**
-	 * Construct an internet domain transport.
-	 *
-	 * @param domain the domain
-	 * @param port the port
-	 * @param host the address "*" for any
-	 */
-	TransportAbstractInet(int domain, int port, std::string host = "*")
-		: Transport<Sock>((domain & TransportAbstract::IPv6) ? AF_INET6 : AF_INET)
-		, m_domain((domain & TransportAbstract::IPv6) ? AF_INET6 : AF_INET)
-		, m_port(port)
-		, m_host(std::move(host))
+	TransportAcceptorIpv6(std::string host, unsigned port, bool ipv6only = true)
+		: TransportAcceptor{AF_INET6, address::Ipv6{std::move(host), port}}
 	{
-		if (m_domain == AF_INET6) {
-			Transport<Sock>::m_socket.set(IPPROTO_IPV6, IPV6_V6ONLY, static_cast<int>(domain == TransportAbstract::IPv6));
-		}
-	}
+		int v6opt = ipv6only;
 
-	/**
-	 * Bind the socket.
-	 */
-	void bind() override
-	{
-		Transport<Sock>::m_socket.set(SOL_SOCKET, SO_REUSEADDR, 1);
-		Transport<Sock>::m_socket.bind(address::Internet(m_host, m_port, m_domain));
-		Transport<Sock>::m_socket.listen();
+		m_socket.set(IPPROTO_IPV6, IPV6_V6ONLY, v6opt);
 	}
-};
-
-/**
- * @class TransportInet
- * @brief Implementation of clear IPv4 and IPv6 transports
- */
-class TransportInet : public TransportAbstractInet<SocketTcp> {
-public:
-	/**
-	 * Inherited constructors.
-	 */
-	using TransportAbstractInet::TransportAbstractInet;
 
 	/**
 	 * @copydoc TransportAbstract::info
 	 */
-	std::string info() const noexcept override
+	std::string info() const override
 	{
-		std::ostringstream oss;
-
-		oss << ((m_host == "*") ? "\"all\"" : m_host)
-		    << ", port " << m_port << ", "
-		    << ((m_domain == AF_INET6) ? "IPv6" : "IPv4");
-
-		return oss.str();
+		return "TODO";
 	}
 };
 
-#if !defined(_WIN32)
+class TransportAcceptorIpv4 : public TransportAcceptor<SocketTcp<address::Ipv4>> {
+public:
+	TransportAcceptorIpv4(std::string host, unsigned port)
+		: TransportAcceptor{AF_INET, address::Ipv4{std::move(host), port}}
+	{
+	}
 
-class TransportUnix : public Transport<SocketTcp> {
+	/**
+	 * @copydoc TransportAbstract::info
+	 */
+	std::string info() const override
+	{
+		return "TODO";
+	}
+};
+
+#if !defined(IRCCD_SYSTEM_WINDOWS)
+
+class TransportAcceptorUnix : public TransportAcceptor<SocketTcp<address::Unix>> {
 private:
 	std::string m_path;
 
 public:
-	inline TransportUnix(std::string path)
-		: Transport<SocketTcp>(AF_UNIX)
-		, m_path(std::move(path))
+	inline TransportAcceptorUnix(std::string path)
+		: TransportAcceptor{AF_UNIX, address::Unix{path, true}}
+		, m_path{std::move(path)}
 	{
 	}
 
-	void bind()
+	~TransportAcceptorUnix()
 	{
-		m_socket.bind(address::Unix(m_path, true));
-		m_socket.listen();
+		::remove(m_path.c_str());
 	}
 
 	/**
 	 * @copydoc TransportAbstract::info
 	 */
-	std::string info() const noexcept override
+	std::string info() const override
 	{
 		return m_path;
 	}
