@@ -173,25 +173,21 @@ public:
 
 #else
 
-// TODO: add support back for Windows.
-#if 0
-	m_signal.bind(address::Internet("127.0.0.1", 0, AF_INET));
-
-	// Get the port
-	auto address = m_signal.address();
-	auto port = ntohs(reinterpret_cast<const sockaddr_in &>(address.address()).sin_port);
-	m_address = address::Internet("127.0.0.1", port, AF_INET);
-
-	// path not needed
-	(void)path;
-#endif
-
 /**
  * @class ServiceSocketIp
  * @brief Interruption implemented as IP sockets
  */
-class ServiceSocketIp : public ServiceSocket<address::Ip> {
+class ServiceSocketIp : public ServiceSocket<address::Ipv4> {
 public:
+	inline ServiceSocketIp()
+		: ServiceSocket{AF_INET, address::Ipv4{"127.0.0.1", 0}}
+	{
+		// Get the address back from the generated port
+		auto address = m_socket.address();
+		auto port = ntohs(reinterpret_cast<const sockaddr_in &>(address.address()).sin_port);
+
+		m_address = address::Ipv4{"127.0.0.1", port};
+	}
 };
 
 #endif

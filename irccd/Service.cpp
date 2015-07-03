@@ -111,16 +111,21 @@ void Service::notify()
  * TODO: bring back to life for Windows.
  */
 Service::Service(int timeout, std::string name, std::string path)
-#if defined(IRCCD_SYSTEM_WINDOWS)
-	: m_interface(/* TODO */)
-#else
 	: m_timeout{timeout}
+#if defined(IRCCD_SYSTEM_WINDOWS)
+	, m_interface{std::make_unique<ServiceSocketIp>()}
+#else
 	, m_interface{std::make_unique<ServiceSocketUnix>(std::move(path))}
 #endif
 	, m_servname{std::move(name)}
 {
 	/* Do not forget to add signal socket */
 	m_listener.set(m_interface->socket(), SocketListener::Read);
+
+#if defined(IRCCD_SYSTEM_WINDOWS)
+	/* The path is not needed */
+	(void)path;
+#endif
 }
 
 Service::~Service()

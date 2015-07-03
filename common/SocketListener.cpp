@@ -366,7 +366,7 @@ std::vector<SocketStatus> Kqueue::wait(const SocketTable &table, int ms)
 	}
 
 	for (int i = 0; i < nevents; ++i) {
-		Socket *sc = table.at(m_result[i].ident).first;
+		SocketAbstract *sc = table.at(m_result[i].ident).first;
 		int flags = m_result[i].filter == EVFILT_READ ? SocketListener::Read : SocketListener::Write;
 
 		sockets.push_back(SocketStatus{*sc, flags});
@@ -377,6 +377,6 @@ std::vector<SocketStatus> Kqueue::wait(const SocketTable &table, int ms)
 
 #endif // !SOCKET_HAVE_KQUEUE
 
-} // !backend
-
 } // !irccd
+
+} // !backend

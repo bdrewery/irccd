@@ -101,6 +101,8 @@ TEST(Basic, stopThenStart)
 	ASSERT_EQ(ServiceState::Stopped, ts.state());
 }
 
+#if !defined(IRCCD_SYSTEM_WINDOWS)
+
 TEST(Basic, connectThenStop)
 {
 	TestService ts;
@@ -212,8 +214,128 @@ TEST(Basic, recv)
 	}
 }
 
+#else // IRCCD_SYSTEM_WINDOWS
+
+TEST(Basic, connectThenStop)
+{
+	TestService ts;
+
+	try {
+		SocketTcp<Ipv4> s{AF_INET, 0};
+		bool connected{false};
+
+		s.set(SOL_SOCKET, SO_REUSEADDR, 1);
+		s.bind(Ipv4{"*", 43000});
+		s.listen(128);
+
+		ts.onAcceptor.connect([&] (SocketAbstract &) {
+			connected = true;
+			s.accept();
+		});
+
+		ts.addAcceptor(s);
+		ts.start();
+
+		SocketTcp<Ipv4> client{AF_INET, 0};
+		client.connect(Ipv4{"127.0.0.1", 43000});
+
+		std::this_thread::sleep_for(150ms);
+
+		ts.stop();
+
+		ASSERT_TRUE(connected);
+	} catch (const std::exception &ex) {
+		FAIL() << ex.what();
+	}
+}
+
+TEST(Basic, connectPauseThenStop)
+{
+	TestService ts;
+
+	try {
+		SocketTcp<Ipv4> s{AF_INET, 0};
+		bool connected{false};
+
+		s.set(SOL_SOCKET, SO_REUSEADDR, 1);
+		s.bind(Ipv4{"*", 43000});
+		s.listen(128);
+
+		ts.onAcceptor.connect([&] (SocketAbstract &) {
+			connected = true;
+			s.accept();
+		});
+
+		ts.addAcceptor(s);
+		ts.start();
+
+		SocketTcp<Ipv4> client{AF_INET, 0};
+		client.connect(Ipv4{"127.0.0.1", 43000});
+
+		std::this_thread::sleep_for(150ms);
+
+		ts.pause();
+		ts.stop();
+
+		ASSERT_TRUE(connected);
+	} catch (const std::exception &ex) {
+		FAIL() << ex.what();
+	}
+}
+
+TEST(Basic, recv)
+{
+	TestService ts;
+
+	try {
+		SocketTcp<Ipv4> s{AF_INET, 0};
+		bool connected{false};
+		bool received{false};
+
+		s.set(SOL_SOCKET, SO_REUSEADDR, 1);
+		s.bind(Ipv4{"*", 43000});
+		s.listen(128);
+
+		std::unique_ptr<SocketTcp<Ipv4>> acceptedClient;
+		ts.onAcceptor.connect([&] (SocketAbstract &) {
+			connected = true;
+			acceptedClient = std::make_unique<SocketTcp<Ipv4>>(s.accept());
+		});
+		ts.onIncoming.connect([&] (SocketAbstract &sc) {
+			ASSERT_EQ(acceptedClient->handle(), sc.handle());
+
+			try {
+				ASSERT_EQ("Hello", acceptedClient->recv(512));
+				received = true;
+			} catch (const std::exception &ex) {
+				FAIL() << ex.what();
+			}
+		});
+
+		ts.addAcceptor(s);
+		ts.start();
+
+		SocketTcp<Ipv4> client{AF_INET, 0};
+		client.connect(Ipv4{"127.0.0.1", 43000});
+		client.send("Hello");
+
+		std::this_thread::sleep_for(150ms);
+
+		ts.pause();
+		ts.stop();
+
+		ASSERT_TRUE(connected);
+	} catch (const std::exception &ex) {
+		FAIL() << ex.what();
+	}
+}
+
+#endif
+
 int main(int argc, char **argv)
 {
+	SocketAbstract::initialize();
+
 	// Disable logging
 	Logger::setStandard<LoggerSilent>();
 	Logger::setError<LoggerSilent>();

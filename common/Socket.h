@@ -29,8 +29,6 @@
  * automatically calls WSAStartup() when creating sockets. Otherwise, you will need to call
  * SocketAbstract::init, SocketAbstract::finish yourself.
  *
- * - **SOCKET_NO_SSL_INIT**: (bool) Set to false if you don't want OpenSSL to be
- * initialized when the first SocketSsl object is created.
  */
 
 #include <cstdlib>
@@ -148,19 +146,6 @@ public:
 	{
 		return m_error.c_str();
 	}
-};
-
-/**
- * @enum SocketState
- * @brief Category of error
- */
-enum class SocketState {
-	Opened,				//!< Socket is opened
-	Closed,				//!< Socket has been closed
-	Bound,				//!< Socket is bound to address
-	Connected,			//!< Socket is connected to an end point
-	Disconnected,			//!< Socket is disconnected
-	Timeout				//!< Timeout has occured in a waiting operation
 };
 
 /* --------------------------------------------------------
@@ -303,7 +288,6 @@ public:
 
 protected:
 	Handle m_handle{Invalid};			//!< The native handle
-	SocketState m_state{SocketState::Opened};	//!< The socket state
 
 public:
 	/**
@@ -327,7 +311,6 @@ public:
 	 */	
 	inline SocketAbstract() noexcept
 		: m_handle{Invalid}
-		, m_state{SocketState::Closed}
 	{
 	}
 
@@ -336,9 +319,8 @@ public:
 	 *
 	 * @param handle the native descriptor
 	 */
-	inline SocketAbstract(Handle handle) noexcept
+	explicit inline SocketAbstract(Handle handle) noexcept
 		: m_handle{handle}
-		, m_state{SocketState::Opened}
 	{
 	}
 
@@ -425,16 +407,6 @@ public:
 	}
 
 	/**
-	 * Get the socket state.
-	 *
-	 * @return
-	 */
-	inline SocketState state() const noexcept
-	{
-		return m_state;
-	}
-
-	/**
 	 * Set the blocking mode, if set to false, the socket will be marked
 	 * **non-blocking**.
 	 *
@@ -480,11 +452,6 @@ template <typename Address>
 class Socket : public SocketAbstract {
 public:
 	/**
-	 * Get the address back.
-	 */
-	using AddressType = Address;
-
-	/**
 	 * Inherited constructors.
 	 */
 	using SocketAbstract::SocketAbstract;
@@ -508,8 +475,6 @@ public:
 		if (::bind(m_handle, reinterpret_cast<const sockaddr *>(&sa), addrlen) == Error) {
 			throw SocketError{SocketError::System, "bind"};
 		}
-
-		m_state = SocketState::Bound;
 	}
 
 	/**
@@ -543,6 +508,24 @@ public:
  */
 template <typename Address>
 class SocketAbstractTcp : public Socket<Address> {
+protected:
+	/**
+	 * Do standard accept.
+	 *
+	 * @param info the address
+	 * @return the connected handle
+	 * @throw SocketError on error
+	 */
+	SocketAbstract::Handle standardAccept(Address &info);
+
+	/**
+	 * Do standard connect.
+	 *
+	 * @param info the address
+	 * @throw SocketError on error
+	 */
+	void standardConnect(const Address &info);
+
 public:
 	/**
 	 * Inherited constructors.
@@ -628,166 +611,8 @@ public:
 	}
 };
 
-/**
- * @class SocketTcp
- * @brief Standard implementation of TCP sockets
- *
- * This class is the basic implementation of TCP sockets.
- */
 template <typename Address>
-class SocketTcp : public SocketAbstractTcp<Address> {
-public:
-	/**
-	 * Inherited constructors.
-	 */
-	using SocketAbstractTcp<Address>::SocketAbstractTcp;
-
-	/**
-	 * Default constructor.
-	 */
-	SocketTcp() = default;
-
-	/**
-	 * Connect to an end point.
-	 *
-	 * @param address the address
-	 * @throw SocketError on error
-	 */
-	void connect(const Address &address);
-
-	/**
-	 * Overloaded function.
-	 */
-	inline SocketTcp accept()
-	{
-		Address dummy;
-
-		return accept(dummy);
-	}
-
-	/**
-	 * Accept a clear TCP socket.
-	 *
-	 * @param info the client information
-	 * @return the socket
-	 * @throw SocketError on error
-	 */
-	SocketTcp accept(Address &info);
-
-	/**
-	 * @copydoc SocketAbstractTcp<Address>::recv
-	 */
-	using SocketAbstractTcp<Address>::recv;
-
-	/**
-	 * @copydoc SocketAbstractTcp<Address>::send
-	 */
-	using SocketAbstractTcp<Address>::send;
-
-	/**
-	 * @copydoc SocketAbstractTcp<Address>::recv
-	 */
-	unsigned recv(void *data, unsigned length) override;
-
-	/**
-	 * @copydoc SocketAbstractTcp<Address>::send
-	 */
-	unsigned send(const void *data, unsigned length) override;
-};
-
-template <typename Address>
-void SocketTcp<Address>::connect(const Address &address)
-{
-	if (SocketAbstract::m_state == SocketState::Connected) {
-		return;
-	}
-
-	auto &sa = address.address();
-	auto addrlen = address.length();
-
-	if (::connect(SocketAbstract::m_handle, reinterpret_cast<const sockaddr *>(&sa), addrlen) == SocketAbstract::Error) {
-		/*
-		 * Determine if the error comes from a non-blocking connect that cannot be
-		 * accomplished yet.
-		 */
-#if defined(_WIN32)
-		int error = WSAGetLastError();
-
-		if (error == WSAEWOULDBLOCK) {
-			throw SocketError{SocketError::WouldBlockWrite, "connect", error};
-		}
-
-		throw SocketError{SocketError::System, "connect", error};
-#else
-		if (errno == EINPROGRESS) {
-			throw SocketError{SocketError::WouldBlockWrite, "connect"};
-		}
-
-		throw SocketError{SocketError::System, "connect"};
-#endif
-	}
-
-	SocketAbstract::m_state = SocketState::Connected;
-}
-
-template <typename Address>
-unsigned SocketTcp<Address>::recv(void *data, unsigned dataLen)
-{
-	int nbread;
-
-	nbread = ::recv(SocketAbstract::m_handle, (SocketAbstract::Arg)data, dataLen, 0);
-	if (nbread == SocketAbstract::Error) {
-#if defined(_WIN32)
-		int error = WSAGetLastError();
-
-		if (error == WSAEWOULDBLOCK) {
-			throw SocketError{SocketError::WouldBlockRead, "recv", error};
-		}
-
-		throw SocketError{SocketError::System, "recv", error};
-#else
-		if (errno == EAGAIN || errno == EWOULDBLOCK) {
-			throw SocketError{SocketError::WouldBlockRead, "recv"};
-		}
-
-		throw SocketError{SocketError::System, "recv"};
-#endif
-	} else if (nbread == 0) {
-		SocketAbstract::m_state = SocketState::Closed;
-	}
-
-	return static_cast<unsigned>(nbread);
-}
-
-template <typename Address>
-unsigned SocketTcp<Address>::send(const void *data, unsigned length)
-{
-	int nbsent;
-
-	nbsent = ::send(SocketAbstract::m_handle, (SocketAbstract::ConstArg)data, length, 0);
-	if (nbsent == SocketAbstract::Error) {
-#if defined(_WIN32)
-		int error = WSAGetLastError();
-
-		if (error == WSAEWOULDBLOCK) {
-			throw SocketError{SocketError::WouldBlockWrite, "send", error};
-		}
-
-		throw SocketError{SocketError::System, "send", error};
-#else
-		if (errno == EAGAIN || errno == EWOULDBLOCK) {
-			throw SocketError{SocketError::WouldBlockWrite, "send"};
-		}
-
-		throw SocketError{SocketError::System, "send"};
-#endif
-	}
-
-	return static_cast<unsigned>(nbsent);
-}
-
-template <typename Address>
-SocketTcp<Address> SocketTcp<Address>::accept(Address &info)
+SocketAbstract::Handle SocketAbstractTcp<Address>::standardAccept(Address &info)
 {
 	SocketAbstract::Handle handle;
 
@@ -818,7 +643,164 @@ SocketTcp<Address> SocketTcp<Address>::accept(Address &info)
 
 	info = Address{address, addrlen};
 
-	return SocketTcp{handle};
+	//return SocketTcp{handle};
+	return handle;
+}
+
+template <typename Address>
+void SocketAbstractTcp<Address>::standardConnect(const Address &address)
+{
+	auto &sa = address.address();
+	auto addrlen = address.length();
+
+	if (::connect(SocketAbstract::m_handle, reinterpret_cast<const sockaddr *>(&sa), addrlen) == SocketAbstract::Error) {
+		/*
+		 * Determine if the error comes from a non-blocking connect that cannot be
+		 * accomplished yet.
+		 */
+#if defined(_WIN32)
+		int error = WSAGetLastError();
+
+		if (error == WSAEWOULDBLOCK) {
+			throw SocketError{SocketError::WouldBlockWrite, "connect", error};
+		}
+
+		throw SocketError{SocketError::System, "connect", error};
+#else
+		if (errno == EINPROGRESS) {
+			throw SocketError{SocketError::WouldBlockWrite, "connect"};
+		}
+
+		throw SocketError{SocketError::System, "connect"};
+#endif
+	}
+}
+
+/**
+ * @class SocketTcp
+ * @brief Standard implementation of TCP sockets
+ *
+ * This class is the basic implementation of TCP sockets.
+ */
+template <typename Address>
+class SocketTcp : public SocketAbstractTcp<Address> {
+public:
+	/**
+	 * Inherited constructors.
+	 */
+	using SocketAbstractTcp<Address>::SocketAbstractTcp;
+
+	/**
+	 * Default constructor.
+	 */
+	SocketTcp() = default;
+
+	/**
+	 * Connect to an end point.
+	 *
+	 * @param address the address
+	 * @throw SocketError on error
+	 */
+	inline void connect(const Address &address)
+	{
+		SocketAbstractTcp<Address>::standardConnect(address);
+	}
+
+	/**
+	 * Overloaded function.
+	 */
+	inline SocketTcp accept()
+	{
+		Address dummy;
+
+		return accept(dummy);
+	}
+
+	/**
+	 * Accept a clear TCP socket.
+	 *
+	 * @param info the client information
+	 * @return the socket
+	 * @throw SocketError on error
+	 */
+	inline SocketTcp accept(Address &info)
+	{
+		return SocketTcp{SocketAbstractTcp<Address>::standardAccept(info)};
+	}
+
+	/**
+	 * @copydoc SocketAbstractTcp<Address>::recv
+	 */
+	using SocketAbstractTcp<Address>::recv;
+
+	/**
+	 * @copydoc SocketAbstractTcp<Address>::send
+	 */
+	using SocketAbstractTcp<Address>::send;
+
+	/**
+	 * @copydoc SocketAbstractTcp<Address>::recv
+	 */
+	unsigned recv(void *data, unsigned length) override;
+
+	/**
+	 * @copydoc SocketAbstractTcp<Address>::send
+	 */
+	unsigned send(const void *data, unsigned length) override;
+};
+
+template <typename Address>
+unsigned SocketTcp<Address>::recv(void *data, unsigned dataLen)
+{
+	int nbread;
+
+	nbread = ::recv(SocketAbstract::m_handle, (SocketAbstract::Arg)data, dataLen, 0);
+	if (nbread == SocketAbstract::Error) {
+#if defined(_WIN32)
+		int error = WSAGetLastError();
+
+		if (error == WSAEWOULDBLOCK) {
+			throw SocketError{SocketError::WouldBlockRead, "recv", error};
+		}
+
+		throw SocketError{SocketError::System, "recv", error};
+#else
+		if (errno == EAGAIN || errno == EWOULDBLOCK) {
+			throw SocketError{SocketError::WouldBlockRead, "recv"};
+		}
+
+		throw SocketError{SocketError::System, "recv"};
+#endif
+	}
+
+	return static_cast<unsigned>(nbread);
+}
+
+template <typename Address>
+unsigned SocketTcp<Address>::send(const void *data, unsigned length)
+{
+	int nbsent;
+
+	nbsent = ::send(SocketAbstract::m_handle, (SocketAbstract::ConstArg)data, length, 0);
+	if (nbsent == SocketAbstract::Error) {
+#if defined(_WIN32)
+		int error = WSAGetLastError();
+
+		if (error == WSAEWOULDBLOCK) {
+			throw SocketError{SocketError::WouldBlockWrite, "send", error};
+		}
+
+		throw SocketError{SocketError::System, "send", error};
+#else
+		if (errno == EAGAIN || errno == EWOULDBLOCK) {
+			throw SocketError{SocketError::WouldBlockWrite, "send"};
+		}
+
+		throw SocketError{SocketError::System, "send"};
+#endif
+	}
+
+	return static_cast<unsigned>(nbsent);
 }
 
 /* --------------------------------------------------------

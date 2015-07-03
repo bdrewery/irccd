@@ -241,7 +241,7 @@ private:
 	Kqueue(Kqueue &&) = delete;
 	Kqueue &operator=(Kqueue &&) = delete;
 
-	void update(const Socket &sc, int filter, int flags);
+	void update(SocketAbstract &sc, int filter, int flags);
 
 public:
 	Kqueue();

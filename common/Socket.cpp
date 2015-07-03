@@ -28,7 +28,7 @@ namespace irccd {
  * -------------------------------------------------------- */
 
 #if defined(_WIN32)
-const Socket::Handle SocketAbstract::Invalid{INVALID_SOCKET};
+const SocketAbstract::Handle SocketAbstract::Invalid{INVALID_SOCKET};
 const int SocketAbstract::Error{SOCKET_ERROR};
 #else
 const int SocketAbstract::Invalid{-1};
@@ -123,18 +123,14 @@ SocketAbstract::SocketAbstract(int domain, int type, int protocol)
 	if (m_handle == Invalid) {
 		throw SocketError{SocketError::System, "socket"};
 	}
-
-	m_state = SocketState::Opened;
 }
 
 SocketAbstract::SocketAbstract(SocketAbstract &&other) noexcept
 {
 	m_handle = other.m_handle;
-	m_state = other.m_state;
 
 	// Invalidate other
 	other.m_handle = -1;
-	other.m_state = SocketState::Closed;
 }
 
 SocketAbstract::~SocketAbstract()
@@ -144,14 +140,13 @@ SocketAbstract::~SocketAbstract()
 
 void SocketAbstract::close()
 {
-	if (m_state != SocketState::Closed) {
+	if (m_handle != Invalid) {
 #if defined(_WIN32)
 		::closesocket(m_handle);
 #else
 		::close(m_handle);
 #endif
 		m_handle = Invalid;
-		m_state = SocketState::Closed;
 	}
 }
 
@@ -185,11 +180,9 @@ void SocketAbstract::setBlockMode(bool block)
 SocketAbstract &SocketAbstract::operator=(SocketAbstract &&other) noexcept
 {
 	m_handle = other.m_handle;
-	m_state = other.m_state;
 
 	// Invalidate other
 	other.m_handle = Invalid;
-	other.m_state = SocketState::Closed;
 
 	return *this;
 }

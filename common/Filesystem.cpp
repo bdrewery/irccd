@@ -171,8 +171,7 @@ std::string Filesystem::cwd()
 #if defined(IRCCD_SYSTEM_WINDOWS)
 	char path[MAX_PATH];
 
-	if (GetCurrentDirectoryA(path, sizeof (path)) < 0) {
-		// TODO: format message
+	if (!GetCurrentDirectoryA(sizeof (path), path)) {
 		throw std::runtime_error("failed to get current working directory");
 	}
 

@@ -159,6 +159,6 @@ SocketAddressInfo Unix::info() const
 
 #endif // _WIN32
 
-} // !address
-
 } // !irccd
+
+} // !address
