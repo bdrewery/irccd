@@ -32,7 +32,6 @@
 #include <Json.h>
 #include <Signals.h>
 
-#include "SocketTcp.h"
 #include "Server.h"
 
 namespace irccd {
@@ -356,7 +355,7 @@ public:
 	 *
 	 * @return the abstract socket
 	 */
-	virtual SocketAbstractTcp &socket() noexcept = 0;
+	virtual std::string recv() = 0;
 };
 
 /**
@@ -379,13 +378,20 @@ public:
 	{
 	}
 
+	std::string recv() override
+	{
+		return "ok";
+	}
+
+#if 0
 	/**
 	 * @copydoc TransportClientAbstract::socket
 	 */
-	SocketAbstractTcp &socket() noexcept override
+	SocketAbstract &socket() noexcept override
 	{
 		return m_socket;
 	}
+#endif
 };
 
 } // !irccd

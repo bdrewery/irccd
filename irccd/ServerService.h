@@ -123,7 +123,7 @@ public:
 
 		// This function can be called even if the thread is not currently started
 		if (isRunning()) {
-			reload();
+			notify();
 		}
 	}
 

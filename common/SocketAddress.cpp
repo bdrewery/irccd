@@ -19,38 +19,61 @@
 #include <algorithm>
 #include <cstring>
 
-#if !defined(_WIN32)
-#  include <sys/un.h>
-#endif
-
 #include "Socket.h"
 #include "SocketAddress.h"
+
+namespace irccd {
+
+bool operator==(const SocketAddressAbstract &address1, const SocketAddressAbstract &address2) noexcept
+{
+	const char *addr1 = reinterpret_cast<const char *>(&address1.address());
+	const char *addr2 = reinterpret_cast<const char *>(&address2.address());
+
+	return std::equal(
+		addr1, addr1 + address1.length(),
+		addr2, addr2 + address2.length()
+	);
+}
+
+bool operator<(const SocketAddressAbstract &address1, const SocketAddressAbstract &address2) noexcept
+{
+	const char *addr1 = reinterpret_cast<const char *>(&address1.address());
+	const char *addr2 = reinterpret_cast<const char *>(&address2.address());
+
+	return std::lexicographical_compare(
+		addr1, addr1 + address1.length(),
+		addr2, addr2 + address2.length()
+	);
+}
 
 namespace address {
 
 /* --------------------------------------------------------
- * Internet implementation
+ * Ip implementation
  * -------------------------------------------------------- */
 
-Internet::Internet(const std::string &host, unsigned port, int domain)
+Ip::Ip()
+{
+	// Default uses IPv4
+	std::memset(&m_sin, 0, sizeof (sockaddr_in));
+}
+
+Ip::Ip(const std::string &host, unsigned port, int domain)
+	: m_domain{domain}
 {
 	if (host == "*") {
-		if (domain == AF_INET6) {
-			sockaddr_in6 *ptr = (sockaddr_in6 *)&m_addr;
+		if (m_domain == AF_INET6) {
+			std::memset(&m_sin6, 0, sizeof (sockaddr_in6));
 
-			ptr->sin6_addr = in6addr_any;
-			ptr->sin6_family = AF_INET6;
-			ptr->sin6_port = htons(port);
-
-			m_addrlen = sizeof (sockaddr_in6);
+			m_sin6.sin6_addr = in6addr_any;
+			m_sin6.sin6_family = AF_INET6;
+			m_sin6.sin6_port = htons(port);
 		} else {
-			sockaddr_in *ptr = (sockaddr_in *)&m_addr;
+			std::memset(&m_sin, 0, sizeof (sockaddr_in));
 
-			ptr->sin_addr.s_addr = INADDR_ANY;
-			ptr->sin_family = AF_INET;
-			ptr->sin_port = htons(port);
-
-			m_addrlen = sizeof (sockaddr_in);
+			m_sin.sin_addr.s_addr = INADDR_ANY;
+			m_sin.sin_family = AF_INET;
+			m_sin.sin_port = htons(port);
 		}
 	} else {
 		addrinfo hints, *res;
@@ -60,13 +83,39 @@ Internet::Internet(const std::string &host, unsigned port, int domain)
 
 		auto error = getaddrinfo(host.c_str(), std::to_string(port).c_str(), &hints, &res);
 		if (error != 0) {
-			throw SocketError(SocketError::System, "getaddrinfo", gai_strerror(error));
+			throw SocketError{SocketError::System, "getaddrinfo", gai_strerror(error)};
 		}
 
-		std::memcpy(&m_addr, res->ai_addr, res->ai_addrlen);
-		m_addrlen = res->ai_addrlen;
+		if (m_domain == AF_INET6) {
+			std::memcpy(&m_sin6, res->ai_addr, sizeof (sockaddr_in6));
+		} else {
+			std::memcpy(&m_sin, res->ai_addr, sizeof (sockaddr_in));
+		}
+
 		freeaddrinfo(res);
 	}
+}
+
+Ip::Ip(const sockaddr_storage &ss, socklen_t length)
+	: m_domain{ss.ss_family}
+{
+	if (ss.ss_family == AF_INET6) {
+		std::memcpy(&m_sin6, &ss, length);
+	} else {
+		std::memcpy(&m_sin, &ss, length);
+	}
+}
+
+SocketAddressInfo Ip::info() const
+{
+	std::string type = (m_domain == AF_INET6) ? "ipv6" : "ipv4";
+	std::string port = std::to_string(m_domain == AF_INET6 ? ntohs(m_sin6.sin6_port) : ntohs(m_sin.sin_port));
+
+	// TODO: add IP here
+	return SocketAddressInfo{
+		{ "type",	type	},
+		{ "port",	port	}
+	};
 }
 
 /* --------------------------------------------------------
@@ -75,66 +124,41 @@ Internet::Internet(const std::string &host, unsigned port, int domain)
 
 #if !defined(_WIN32)
 
-Unix::Unix(const std::string &path, bool rm)
+Unix::Unix(std::string path, bool rm)
+	: m_path{std::move(path)}
 {
-	sockaddr_un *sun = (sockaddr_un *)&m_addr;
-
 	// Silently remove the file even if it fails
 	if (rm) {
-		::remove(path.c_str());
+		::remove(m_path.c_str());
 	}
 
 	// Copy the path
-	memset(sun->sun_path, 0, sizeof (sun->sun_path));
-	strncpy(sun->sun_path, path.c_str(), sizeof (sun->sun_path) - 1);
+	std::memset(m_sun.sun_path, 0, sizeof (m_sun.sun_path));
+	std::strncpy(m_sun.sun_path, m_path.c_str(), sizeof (m_sun.sun_path) - 1);
 
 	// Set the parameters
-	sun->sun_family = AF_UNIX;
-	m_addrlen = SUN_LEN(sun);
+	m_sun.sun_family = AF_UNIX;
+}
+
+Unix::Unix(const sockaddr_storage &ss, socklen_t length)
+{
+	std::memcpy(&m_sun, &ss, length);
+
+	if (ss.ss_family == AF_UNIX) {
+		m_path = reinterpret_cast<const sockaddr_un &>(m_sun).sun_path;
+	}
+}
+
+SocketAddressInfo Unix::info() const
+{
+	return SocketAddressInfo{
+		{ "type",	"unix"	},
+		{ "path",	m_path	}
+	};
 }
 
 #endif // _WIN32
 
+} // !irccd
+
 } // !address
-
-/* --------------------------------------------------------
- * SocketAddress implementation
- * -------------------------------------------------------- */
-
-SocketAddress::SocketAddress()
-	: m_addrlen(0)
-{
-	memset(&m_addr, 0, sizeof (m_addr));
-}
-
-SocketAddress::SocketAddress(const sockaddr_storage &addr, socklen_t length)
-	: m_addr(addr)
-	, m_addrlen(length)
-{
-}
-
-const sockaddr_storage &SocketAddress::address() const
-{
-	return m_addr;
-}
-
-socklen_t SocketAddress::length() const
-{
-	return m_addrlen;
-}
-
-bool operator<(const SocketAddress &s1, const SocketAddress &s2)
-{
-	const auto &array1 = reinterpret_cast<const unsigned char *>(&s1.address());
-	const auto &array2 = reinterpret_cast<const unsigned char *>(&s2.address());
-
-	return std::lexicographical_compare(array1, array1 + s1.length(), array2, array2 + s2.length());
-}
-
-bool operator==(const SocketAddress &s1, const SocketAddress &s2)
-{
-	const auto &array1 = reinterpret_cast<const unsigned char *>(&s1.address());
-	const auto &array2 = reinterpret_cast<const unsigned char *>(&s2.address());
-
-	return std::equal(array1, array1 + s1.length(), array2, array2 + s2.length());
-}

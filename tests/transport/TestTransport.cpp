@@ -21,7 +21,6 @@
 #include <Logger.h>
 
 #include <SocketListener.h>
-#include <SocketTcp.h>
 
 #include "TransportService.h"
 #include "TransportCommand.h"
@@ -39,14 +38,14 @@ std::string error;
 
 class TransportTest : public testing::Test {
 protected:
-	SocketTcp m_client;
+	SocketTcp<Ipv4> m_client;
 	SocketListener m_listener;
 
 public:
 	TransportTest()
 		: m_client(AF_INET, 0)
 	{
-		m_client.connect(Internet("127.0.0.1", 25000, AF_INET));
+		m_client.connect(Ipv4{"127.0.0.1", 25000});
 	}
 
 	~TransportTest()
@@ -63,7 +62,7 @@ public:
 
 		try {
 			m_listener.set(m_client, SocketListener::Read);
-			m_listener.select(DELAY);
+			m_listener.wait(DELAY);
 
 			error = m_client.recv(512);
 		} catch (...) {}
@@ -372,7 +371,7 @@ int main(int argc, char **argv)
 	testing::InitGoogleTest(&argc, argv);
 
 	manager = std::make_unique<TransportService>();
-	manager->add<TransportInet>(TransportAbstract::IPv4, 25000);
+	manager->add<TransportAcceptorIpv4>("*", 25000);
 	manager->onCommand.connect([&] (TransportCommand command) {
 		last = std::make_unique<TransportCommand>(std::move(command));
 	});

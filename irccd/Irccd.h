@@ -133,7 +133,7 @@ public:
 	{
 		serverFind(name)->disconnect();
 
-		m_serverService.reload();
+		m_serverService.notify();
 	}
 
 	/**
@@ -146,7 +146,7 @@ public:
 	{
 		serverFind(name)->reconnect();
 
-		m_serverService.reload();
+		m_serverService.notify();
 	}
 
 	/**

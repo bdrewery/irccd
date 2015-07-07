@@ -46,7 +46,7 @@ void ServerService::run()
 		// Add service socket
 		FD_SET(socket().handle(), &setinput);
 
-		if (socket().handle() > static_cast<Socket::Handle>(max)) {
+		if (socket().handle() > static_cast<SocketAbstract::Handle>(max)) {
 			max = socket().handle();
 		}
 
@@ -86,13 +86,12 @@ void ServerService::run()
 
 		/* Skip on error */
 		if (error < 0) {
-			Logger::warning() << "irccd: " << Socket::syserror() << std::endl;
+			Logger::warning() << "irccd: " << SocketAbstract::syserror() << std::endl;
 			continue;
 		}
 
 		/* Skip if it's the service socket */
 		if (FD_ISSET(socket().handle(), &setinput)) {
-			(void)action();
 			continue;
 		}
 

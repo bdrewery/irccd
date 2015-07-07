@@ -1,5 +1,5 @@
 /*
- * System.h -- platform dependent functions for system inspection
+ * Signals.h -- synchronous observer mechanism
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
