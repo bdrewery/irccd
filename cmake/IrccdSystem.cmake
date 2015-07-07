@@ -37,10 +37,10 @@ endif ()
 #
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 	#
-	# For GCC, we require at least GCC 4.9
+	# For GCC, we require at least GCC 5.1
 	#
-	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
-		message(FATAL_ERROR "You need at least GCC 4.9")
+	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.1")
+		message(FATAL_ERROR "You need at least GCC 5.1")
 	endif ()
 
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 ${CMAKE_CXX_FLAGS}")
@@ -59,11 +59,7 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 ${CMAKE_CXX_FLAGS}")
 	endif ()
 else ()
-	if (WIN32)
-		message(FATAL_ERROR "Only MinGW is supported for Windows")
-	else ()
-		message(WARNING "Unsupported ${CMAKE_CXX_COMPILER_ID}, may not build correctly.")
-	endif ()
+	message(WARNING "Unsupported ${CMAKE_CXX_COMPILER_ID}, may not build correctly.")
 endif ()
 
 if (WIN32)
