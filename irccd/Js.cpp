@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cerrno>
 #include <cstring>
 #include <fstream>
 #include <iterator>
@@ -32,6 +33,99 @@
 using namespace std::string_literals;
 
 namespace irccd {
+
+/* --------------------------------------------------------
+ * SystemError exception
+ * -------------------------------------------------------- */
+
+namespace {
+
+const struct {
+	const char *name;
+	int code;
+} errnoMap[] {
+	{ "E2BIG",		E2BIG		},
+	{ "EACCES",		EACCES		},
+	{ "EADDRINUSE",		EADDRINUSE	},
+	{ "EADDRNOTAVAIL",	EADDRNOTAVAIL	},
+	{ "EAFNOSUPPORT",	EAFNOSUPPORT	},
+	{ "EAGAIN",		EAGAIN		},
+	{ "EALREADY",		EALREADY	},
+	{ "EBADF",		EBADF		},
+	{ "EBADMSG",		EBADMSG		},
+	{ "EBUSY",		EBUSY		},
+	{ "ECANCELED",		ECANCELED	},
+	{ "ECHILD",		ECHILD		},
+	{ "ECONNABORTED",	ECONNABORTED	},
+	{ "ECONNREFUSED",	ECONNREFUSED	},
+	{ "ECONNRESET",		ECONNRESET	},
+	{ "EDEADLK",		EDEADLK		},
+	{ "EDESTADDRREQ",	EDESTADDRREQ	},
+	{ "EDOM",		EDOM		},
+	{ "EEXIST",		EEXIST		},
+	{ "EFAULT",		EFAULT		},
+	{ "EFBIG",		EFBIG		},
+	{ "EHOSTUNREACH",	EHOSTUNREACH	},
+	{ "EIDRM",		EIDRM		},
+	{ "EILSEQ",		EILSEQ		},
+	{ "EINPROGRESS",	EINPROGRESS	},
+	{ "EINTR",		EINTR		},
+	{ "EINVAL",		EINVAL		},
+	{ "EIO",		EIO		},
+	{ "EISCONN",		EISCONN		},
+	{ "EISDIR",		EISDIR		},
+	{ "ELOOP",		ELOOP		},
+	{ "EMFILE",		EMFILE		},
+	{ "EMLINK",		EMLINK		},
+	{ "EMSGSIZE",		EMSGSIZE	},
+	{ "ENAMETOOLONG",	ENAMETOOLONG	},
+	{ "ENETDOWN",		ENETDOWN	},
+	{ "ENETRESET",		ENETRESET	},
+	{ "ENETUNREACH",	ENETUNREACH	},
+	{ "ENFILE",		ENFILE		},
+	{ "ENOBUFS",		ENOBUFS		},
+	{ "ENODATA",		ENODATA		},
+	{ "ENODEV",		ENODEV		},
+	{ "ENOENT",		ENOENT		},
+	{ "ENOEXEC",		ENOEXEC		},
+	{ "ENOLCK",		ENOLCK		},
+	{ "ENOLINK",		ENOLINK		},
+	{ "ENOMEM",		ENOMEM		},
+	{ "ENOMSG",		ENOMSG		},
+	{ "ENOPROTOOPT",	ENOPROTOOPT	},
+	{ "ENOSPC",		ENOSPC		},
+	{ "ENOSR",		ENOSR		},
+	{ "ENOSTR",		ENOSTR		},
+	{ "ENOSYS",		ENOSYS		},
+	{ "ENOTCONN",		ENOTCONN	},
+	{ "ENOTDIR",		ENOTDIR		},
+	{ "ENOTEMPTY",		ENOTEMPTY	},
+	{ "ENOTRECOVERABLE",	ENOTRECOVERABLE	},
+	{ "ENOTSOCK",		ENOTSOCK	},
+	{ "ENOTSUP",		ENOTSUP		},
+	{ "ENOTTY",		ENOTTY		},
+	{ "ENXIO",		ENXIO		},
+	{ "EOPNOTSUPP",		EOPNOTSUPP	},
+	{ "EOVERFLOW",		EOVERFLOW	},
+	{ "EOWNERDEAD",		EOWNERDEAD	},
+	{ "EPERM",		EPERM		},
+	{ "EPIPE",		EPIPE		},
+	{ "EPROTO",		EPROTO		},
+	{ "EPROTONOSUPPORT",	EPROTONOSUPPORT	},
+	{ "EPROTOTYPE",		EPROTOTYPE	},
+	{ "ERANGE",		ERANGE		},
+	{ "EROFS",		EROFS		},
+	{ "ESPIPE",		ESPIPE		},
+	{ "ESRCH",		ESRCH		},
+	{ "ETIME",		ETIME		},
+	{ "ETIMEDOUT",		ETIMEDOUT	},
+	{ "ETXTBSY",		ETXTBSY		},
+	{ "EWOULDBLOCK",	EWOULDBLOCK	},
+	{ "EXDEV",		EXDEV		},
+	{ nullptr,		0		}
+};
+
+} // !namespace
 
 /* --------------------------------------------------------
  * JsDuktape
@@ -135,7 +229,7 @@ duk_ret_t JsDuktape::modSearch(duk_context *ctx)
  * Local require: require("./file")
  *
  * This function use the real Duktape's require implementation with the
- * associated Duktape.modSearch function to recursively 
+ * associated Duktape.modSearch function to recursively
  */
 void JsDuktape::requireLocal(JsDuktape &ctx, const std::string &name)
 {
@@ -281,6 +375,13 @@ JsDuktape::JsDuktape(const std::string &path)
 
 	/* SystemError (dummy) */
 	duk_push_c_function(get(), [] (duk_context *) -> duk_ret_t { return 0; }, 0);
+
+	/* Store errno codes */
+	for (const auto &code : errnoMap) {
+		duk_push_int(get(), code.code);
+		duk_put_prop_string(get(), -2, code.name);
+	}
+
 	duk_get_global_string(get(), "Error");
 	duk_get_prop_string(get(), -1, "prototype");
 	duk_put_prop_string(get(), -3, "prototype");

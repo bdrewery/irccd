@@ -136,10 +136,9 @@ public:
 	/**
 	 * This constructor automatically use errno and std::strerror.
 	 */
-	inline JsSystemError()
+	inline JsSystemError() noexcept
 		: JsSystemError(errno, std::strerror(errno))
 	{
-
 	}
 
 	/**
@@ -148,7 +147,7 @@ public:
 	 * @param errn the errno number
 	 * @param message the message
 	 */
-	inline JsSystemError(int errn, std::string message)
+	inline JsSystemError(int errn, std::string message) noexcept
 		: JsException("SystemError", std::move(message))
 		, m_errno(errn)
 	{
