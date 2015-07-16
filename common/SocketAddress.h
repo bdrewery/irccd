@@ -104,6 +104,13 @@ using SocketAddressInfo = std::unordered_map<std::string, std::string>;
 class SocketAddressAbstract {
 public:
 	/**
+	 * Get the domain.
+	 *
+	 * @return the domain
+	 */
+	virtual int domain() const noexcept = 0;
+
+	/**
 	 * Get the address as base type.
 	 *
 	 * @return the base address reference
@@ -185,7 +192,29 @@ public:
 	Ip(const sockaddr_storage &ss, socklen_t length);
 
 	/**
-	 * @copydoc SocketAddress::address
+	 * Get the port.
+	 *
+	 * @return the port
+	 */
+	unsigned port() const noexcept;
+
+	/**
+	 * Get the ip address.
+	 *
+	 * @return the address in text form
+	 */
+	std::string ip() const;
+
+	/**
+	 * @copydoc SocketAddressAbstract::domain
+	 */
+	inline int domain() const noexcept
+	{
+		return m_domain;
+	}
+
+	/**
+	 * @copydoc SocketAddressAbstract::address
 	 */
 	const sockaddr &address() const noexcept override
 	{
@@ -197,7 +226,7 @@ public:
 	}
 
 	/**
-	 * @copydoc SocketAddress::length
+	 * @copydoc SocketAddressAbstract::length
 	 */
 	socklen_t length() const noexcept override
 	{
@@ -205,7 +234,7 @@ public:
 	}
 
 	/**
-	 * @copydoc SocketAddress::info
+	 * @copydoc SocketAddressAbstract::info
 	 */
 	SocketAddressInfo info() const;
 };
@@ -314,6 +343,11 @@ public:
 	 * @param length the length
 	 */
 	Unix(const sockaddr_storage &ss, socklen_t length);
+
+	inline int domain() const noexcept
+	{
+		return AF_LOCAL;
+	}
 
 	/**
 	 * @copydoc SocketAddress::address

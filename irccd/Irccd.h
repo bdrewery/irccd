@@ -21,16 +21,16 @@
 
 #include <atomic>
 #include <condition_variable>
-#include <deque>
-#include <map>
+#include <functional>
 #include <memory>
 #include <mutex>
-#include <queue>
 #include <vector>
 
 #include <IrccdConfig.h>
 
 #include <Logger.h>
+#include <Socket.h>
+#include <SocketAddress.h>
 
 #if defined(WITH_JS)
 #  include "Plugin.h"
@@ -38,13 +38,18 @@
 #endif
 
 #include "Transport.h"
-#include "TransportCommand.h"
-#include "TransportService.h"
 #include "Server.h"
 #include "ServerEvent.h"
-#include "ServerService.h"
 
 namespace irccd {
+
+using Event = std::function<void ()>;
+using Events = std::vector<Event>;
+
+using Servers = std::unordered_map<std::string, std::shared_ptr<Server>>;
+
+template <typename T>
+using LookupTable = std::unordered_map<SocketAbstract::Handle, std::shared_ptr<T>>;
 
 class Irccd {
 private:
@@ -53,30 +58,75 @@ private:
 	static std::condition_variable m_condition;
 	std::mutex m_mutex;
 
-private:
-	/* Event loop */
+	/* IPC */
+	SocketTcp<address::Ipv4> m_socketServer;
+	SocketTcp<address::Ipv4> m_socketClient;
 
-	/* Events */
-	std::queue<TransportCommand> m_transportCommands;
-	std::queue<ServerEvent> m_serverEvents;
+	/* Event loop */
+	Events m_events;
+
+	/* Servers */
+	Servers m_servers;
 
 	/* Optional JavaScript plugins */
 #if defined(WITH_JS)
-	std::map<std::string, std::shared_ptr<Plugin>> m_plugins;
-	std::map<std::string, PluginConfig> m_pluginConf;
-	std::deque<TimerEvent> m_timerEvents;
+	std::unordered_map<std::string, std::shared_ptr<Plugin>> m_plugins;
+	std::unordered_map<std::string, PluginConfig> m_pluginConf;
 #endif
 
 	/* Identities */
-	std::map<std::string, ServerIdentity> m_identities;
+	std::unordered_map<std::string, ServerIdentity> m_identities;
 
-	/* Server and Transport threads */
-	ServerService m_serverService;
-	TransportService m_transportService;
+	/* Lookup tables */
+	LookupTable<TransportClientAbstract> m_lookupTransportClients;
+	LookupTable<TransportServerAbstract> m_lookupTransportServers;
+
+	/* Server slots */
+	void handleServerOnChannelNotice(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string notice);
+	void handleServerOnConnect(std::shared_ptr<Server> server);
+	void handleServerOnInvite(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target);
+	void handleServerOnJoin(std::shared_ptr<Server> server, std::string origin, std::string channel);
+	void handleServerOnKick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason);
+	void handleServerOnMessage(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message);
+	void handleServerOnMe(std::shared_ptr<Server> server, std::string origin, std::string target, std::string message);
+	void handleServerOnMode(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string arg);
+	void handleServerOnNick(std::shared_ptr<Server> server, std::string origin, std::string nickname);
+	void handleServerOnNotice(std::shared_ptr<Server> server, std::string origin, std::string message);
+	void handleServerOnPart(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string reason);
+	void handleServerOnQuery(std::shared_ptr<Server> server, std::string origin, std::string message);
+	void handleServerOnTopic(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string topic);
+	void handleServerOnUserMode(std::shared_ptr<Server> server, std::string origin, std::string mode);
+
+	/* Transport slots */
+	void handleTransportChannelNotice(std::shared_ptr<TransportClientAbstract> tc, std::string server, std::string channel, std::string message);
+	void handleTransportConnect();
+	void handleTransportDisconnect(std::shared_ptr<TransportClientAbstract> tc, std::string server);
+	void handleTransportInvite(std::shared_ptr<TransportClientAbstract> tc, std::string server, std::string target, std::string channel);
+	void handleTransportJoin(std::shared_ptr<TransportClientAbstract> tc, std::string server, std::string channel, std::string password);
+	void handleTransportKick(std::shared_ptr<TransportClientAbstract> tc, std::string server, std::string target, std::string channel, std::string reason);
+	void handleTransportMe(std::shared_ptr<TransportClientAbstract> tc, std::string server, std::string channel, std::string message);
+	void handleTransportMessage(std::shared_ptr<TransportClientAbstract> tc, std::string server, std::string channel, std::string message);
+	void handleTransportMode(std::shared_ptr<TransportClientAbstract> tc, std::string server, std::string channel, std::string mode);
+	void handleTransportNick(std::shared_ptr<TransportClientAbstract> tc, std::string server, std::string nickname);
+	void handleTransportNotice(std::shared_ptr<TransportClientAbstract> tc, std::string server, std::string target, std::string message);
+	void handleTransportPart(std::shared_ptr<TransportClientAbstract> tc, std::string server, std::string channel, std::string reason);
+	void handleTransportReconnect(std::shared_ptr<TransportClientAbstract> tc, std::string server);
+	void handleTransportReload(std::shared_ptr<TransportClientAbstract> tc, std::string plugin);
+	void handleTransportTopic(std::shared_ptr<TransportClientAbstract> tc, std::string server, std::string channel, std::string topic);
+	void handleTransportUnload(std::shared_ptr<TransportClientAbstract> tc, std::string plugin);
+	void handleTransportUserMode(std::shared_ptr<TransportClientAbstract> tc, std::string server, std::string mode);
 
 public:
 	Irccd();
 	~Irccd();
+
+	/* ------------------------------------------------
+	 * Common routines
+	 * ------------------------------------------------ */
+
+	void addTransportEvent(std::shared_ptr<TransportClientAbstract> tc, Event ev) noexcept;
+	void addPluginEvent(std::string, std::string, std::string, std::string, std::string, std::function<void (Plugin &)>) noexcept;
+	void addEvent(Event ev) noexcept;
 
 	/* ------------------------------------------------
 	 * Identity management
@@ -88,7 +138,7 @@ public:
 	 * @param identity the identity
 	 * @note If the identity already exists, it is overriden
 	 */
-	inline void identityAdd(ServerIdentity identity) noexcept
+	inline void addIdentity(ServerIdentity identity) noexcept
 	{
 		m_identities.emplace(identity.name, std::move(identity));
 	}
@@ -99,9 +149,11 @@ public:
 	 * @param name the identity name
 	 * @return the identity or default one
 	 */
-	inline ServerIdentity identityFind(const std::string &name) const noexcept
+	inline ServerIdentity findIdentity(const std::string &name) const noexcept
 	{
-		return m_identities.count(name) > 0 ? ServerIdentity() : m_identities.at(name);
+		auto it = m_identities.find(name);
+
+		return it == m_identities.end() ? ServerIdentity{} : it->second;
 	}
 
 	/* ------------------------------------------------
@@ -113,16 +165,9 @@ public:
 	 *
 	 * @param args the arguments to pass to the Server constructor
 	 */
-	template <typename... Args>
-	inline void serverAdd(Args&&... args) noexcept
-	{
-		try {
-			m_serverService.add(std::forward<Args>(args)...);
-		} catch (const std::exception &ex) {
-			Logger::warning() << "server: " << ex.what() << std::endl;
-		}
-	}
+	void addServer(std::shared_ptr<Server> sv) noexcept;
 
+#if 0
 	/**
 	 * Disconnect a server and remove it.
 	 *
@@ -132,8 +177,6 @@ public:
 	inline void serverDisconnect(const std::string &name)
 	{
 		serverFind(name)->disconnect();
-
-		m_serverService.notify();
 	}
 
 	/**
@@ -145,9 +188,8 @@ public:
 	inline void serverReconnect(const std::string &name)
 	{
 		serverFind(name)->reconnect();
-
-		m_serverService.notify();
 	}
+#endif
 
 	/**
 	 * Find a server by name.
@@ -156,9 +198,9 @@ public:
 	 * @return the server
 	 * @throw std::exception if the server does not exist
 	 */
-	inline std::shared_ptr<Server> serverFind(const std::string &name) const
+	inline std::shared_ptr<Server> findServer(const std::string &name) const
 	{
-		return m_serverService.find(name);
+		return m_servers.at(name);
 	}
 
 	/**
@@ -167,9 +209,9 @@ public:
 	 * @param name the name
 	 * @return true if exists
 	 */
-	inline bool serverHas(const std::string &name) const noexcept
+	inline bool containsServer(const std::string &name) const noexcept
 	{
-		return m_serverService.has(name);
+		return m_servers.count(name) != 0;
 	}
 
 	/* ------------------------------------------------
@@ -177,10 +219,12 @@ public:
 	 * ------------------------------------------------ */
 
 #if defined(WITH_JS)
+#if 0
 	inline bool pluginIsLoaded(const std::string &name) const noexcept
 	{
 		return m_plugins.count(name) > 0;
 	}
+#endif
 
 	/**
 	 * Find a plugin.
@@ -189,15 +233,17 @@ public:
 	 * @return the plugin
 	 * @throws std::out_of_range if not found
 	 */
-	inline std::shared_ptr<Plugin> pluginFind(const std::string &name) const
+	inline std::shared_ptr<Plugin> findPlugin(const std::string &name) const
 	{
 		using namespace std::string_literals;
 
-		if (m_plugins.count(name) == 0) {
+		auto it = m_plugins.find(name);
+
+		if (it == m_plugins.end()) {
 			throw std::out_of_range("plugin "s + name + " not found"s);
 		}
 
-		return m_plugins.at(name);
+		return it->second;
 	}
 
 	/**
@@ -206,7 +252,7 @@ public:
 	 * @param name
 	 * @param config
 	 */
-	inline void pluginAddConfig(std::string name, PluginConfig config)
+	inline void addPluginConfig(std::string name, PluginConfig config)
 	{
 		m_pluginConf.emplace(std::move(name), std::move(config));
 	}
@@ -217,14 +263,16 @@ public:
 	 * @param path the plugin path
 	 * @throw std::exception on failures
 	 */
-	void pluginLoad(std::string path);
+	void loadPlugin(std::string path);
+
+#if 0
 
 	/**
 	 * Unload a plugin and remove it.
 	 *
 	 * @param name the plugin id
 	 */
-	void pluginUnload(const std::string &name);
+	void unloadPlugin(const std::string &name);
 
 	/**
 	 * Reload a plugin by calling onReload.
@@ -232,7 +280,7 @@ public:
 	 * @param name the plugin name
 	 * @throw std::exception on failures
 	 */
-	inline void pluginReload(const std::string &name)
+	inline void reloadPlugin(const std::string &name)
 	{
 		pluginFind(name)->onReload();
 	}
@@ -242,15 +290,9 @@ public:
 	 * Transport management
 	 * ------------------------------------------------ */
 
-	template <typename T, typename... Args>
-	inline void transportAdd(Args&&... args)
-	{
-		try {
-			m_transportService.add<T>(std::forward<Args>(args)...);
-		} catch (const std::exception &ex) {
-			Logger::warning() << "transport: " << ex.what() << std::endl;
-		}
-	}
+	void addTransport(std::shared_ptr<TransportServerAbstract> ts);
+
+#if 0
 
 	/* ------------------------------------------------
 	 * For threads only
@@ -302,6 +344,9 @@ public:
 
 		m_condition.notify_one();
 	}
+#endif
+
+	void exec();
 
 	/**
 	 * Start the main loop.
@@ -527,6 +572,7 @@ public:
 
 } // !irccd
 
+#endif
 #endif
 
 #endif // !_IRCCD_H_

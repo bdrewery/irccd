@@ -87,9 +87,9 @@ void loadPlugin(Irccd &irccd, const IniSection &sc)
 {
 	for (const IniOption &option : sc) {
 		if (option.value().empty()) {
-			irccd.pluginLoad(option.key());
+			irccd.loadPlugin(option.key());
 		} else {
-			irccd.pluginLoad(option.value());
+			irccd.loadPlugin(option.value());
 		}
 	}
 }
@@ -102,7 +102,7 @@ void loadPluginConfig(Irccd &irccd, const IniSection &sc, std::string name)
 		config.emplace(option.key(), option.value());
 	}
 
-	irccd.pluginAddConfig(std::move(name), std::move(config));
+	irccd.addPluginConfig(std::move(name), std::move(config));
 }
 
 void loadPlugins(Irccd &irccd, const Ini &config)
@@ -142,7 +142,7 @@ void loadServer(Irccd &irccd, const IniSection &sc)
 		throw std::invalid_argument("missing name");
 	} else if (!Util::isIdentifierValid(sc["name"].value())) {
 		throw std::invalid_argument("name is not valid");
-	} else if (irccd.serverHas(sc["name"].value())) {
+	} else if (irccd.containsServer(sc["name"].value())) {
 		throw std::invalid_argument("server already exists");
 	}
 
@@ -165,7 +165,7 @@ void loadServer(Irccd &irccd, const IniSection &sc)
 		}
 	}
 	if (sc.contains("identity")) {
-		identity = irccd.identityFind(sc["identity"].value());
+		identity = irccd.findIdentity(sc["identity"].value());
 	}
 
 	info.name = sc["name"].value();
@@ -181,7 +181,7 @@ void loadServer(Irccd &irccd, const IniSection &sc)
 		}
 	}
 
-	irccd.serverAdd(std::move(info), std::move(identity), std::move(settings));
+	irccd.addServer(std::make_shared<Server>(std::move(info), std::move(identity), std::move(settings)));
 }
 
 void loadServers(Irccd &irccd, const Ini &config)
@@ -231,7 +231,7 @@ void loadIdentity(Irccd &irccd, const IniSection &sc)
 			<< "nickname=" << identity.nickname << ", username=" << identity.username << ", "
 			<< "realname=" << identity.realname << ", ctcp-version=" << identity.ctcpversion << std::endl;
 
-	irccd.identityAdd(std::move(identity));
+	irccd.addIdentity(std::move(identity));
 }
 
 void loadIdentities(Irccd &irccd, const Ini &config)
@@ -275,6 +275,7 @@ void stop(int)
 
 int main(int, char **argv)
 {
+	try {
 	using namespace irccd;
 
 	Logger::setVerbose(true);
@@ -282,7 +283,7 @@ int main(int, char **argv)
 	setprogname("irccd");
 	Util::setProgramPath(argv[0]);
 
-	Irccd irccd;
+		Irccd irccd;
 
 	signal(SIGINT, irccd::stop);
 	signal(SIGTERM, irccd::stop);
@@ -296,6 +297,9 @@ int main(int, char **argv)
 	}
 
 	irccd.run();
+	} catch (const irccd::SocketError &ex) {
+		std::cerr << ex.function() << ": " << ex.what() << std::endl;
+	}
 
 	return 0;
 }

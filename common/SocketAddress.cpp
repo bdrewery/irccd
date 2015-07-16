@@ -106,15 +106,35 @@ Ip::Ip(const sockaddr_storage &ss, socklen_t length)
 	}
 }
 
+unsigned Ip::port() const noexcept
+{
+	return m_domain == AF_INET6 ? ntohs(m_sin6.sin6_port) : ntohs(m_sin.sin_port);
+}
+
+std::string Ip::ip() const
+{
+	// TODO: return "*" for any.
+	std::string ret;
+
+	if (m_domain == AF_INET6) {
+		ret.resize(INET6_ADDRSTRLEN);
+	} else {
+		ret.resize(INET_ADDRSTRLEN);
+	}
+
+	if (inet_ntop(m_domain, &address(), &ret[0], ret.size())) {
+		throw SocketError{SocketError::System, "inet_ntop"};
+	}
+
+	return ret;
+}
+
 SocketAddressInfo Ip::info() const
 {
-	std::string type = (m_domain == AF_INET6) ? "ipv6" : "ipv4";
-	std::string port = std::to_string(m_domain == AF_INET6 ? ntohs(m_sin6.sin6_port) : ntohs(m_sin.sin_port));
-
-	// TODO: add IP here
 	return SocketAddressInfo{
-		{ "type",	type	},
-		{ "port",	port	}
+		{ "type",	(m_domain == AF_INET6) ? "ipv6" : "ipv4"	},
+		{ "port",	std::to_string(port())				},
+		{ "ip",		ip()						}
 	};
 }
 

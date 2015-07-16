@@ -1,5 +1,5 @@
 /*
- * TransportAcceptor.h -- I/O for irccd clients (acceptors)
+ * TransportServer.h -- I/O for irccd clients (acceptors)
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -39,7 +39,7 @@
 namespace irccd {
 
 /**
- * @class TransportAcceptorAbstract
+ * @class TransportServerAbstract
  * @brief Bring networking between irccd and irccdctl
  *
  * This class contains a master sockets for listening to TCP connections, it is
@@ -49,8 +49,8 @@ namespace irccd {
  *
  * | Domain                | Class                 |
  * |-----------------------|-----------------------|
- * | IPv4, IPv6            | TransportAcceptorIp   |
- * | Unix (not on Windows) | TransportAcceptorUnix |
+ * | IPv4, IPv6            | TransportServerIp   |
+ * | Unix (not on Windows) | TransportServerUnix |
  *
  * Note: IPv4 and IPv6 can be combined, using Transport::IPv4 | Transport::IPv6
  * makes the transport available on both domains.
@@ -58,20 +58,20 @@ namespace irccd {
  * Because this class owns a socket that will be borrowed to a SocketListener, it is not copyable
  * and not movable so that underlying socket will never be invalidated.
  */
-class TransportAcceptorAbstract {
+class TransportServerAbstract {
 public:
-	TransportAcceptorAbstract(const TransportAcceptorAbstract &) = delete;
-	TransportAcceptorAbstract(TransportAcceptorAbstract &&) = delete;
+	TransportServerAbstract(const TransportServerAbstract &) = delete;
+	TransportServerAbstract(TransportServerAbstract &&) = delete;
 
 	/**
 	 * Default constructor.
 	 */
-	TransportAcceptorAbstract() = default;
+	TransportServerAbstract() = default;
 
 	/**
 	 * Destructor defaulted.
 	 */
-	virtual ~TransportAcceptorAbstract() = default;
+	virtual ~TransportServerAbstract() = default;
 
 	/**
 	 * Retrieve the underlying socket.
@@ -94,12 +94,12 @@ public:
 	 */
 	virtual std::string info() const = 0;
 
-	TransportAcceptorAbstract &operator=(const TransportAcceptorAbstract &) = delete;
-	TransportAcceptorAbstract &operator=(TransportAcceptorAbstract &&) = delete;
+	TransportServerAbstract &operator=(const TransportServerAbstract &) = delete;
+	TransportServerAbstract &operator=(TransportServerAbstract &&) = delete;
 };
 
 /**
- * @class TransportAcceptor
+ * @class TransportServer
  * @brief Wrapper for Transport
  *
  * This class contains the underlying socket (SocketTcp or SocketSsl) and
@@ -107,11 +107,9 @@ public:
  *
  * It also provides the accept() function.
  */
-template <typename Sock>
-class TransportAcceptor : public TransportAcceptorAbstract {
+template <typename Address>
+class TransportServer : public TransportServerAbstract {
 protected:
-	using Address = typename Sock::AddressType;
-
 	SocketTcp<Address> m_socket;
 
 public:
@@ -120,7 +118,7 @@ public:
 	 *
 	 * @param domain the domain (AF_INET, AF_INET6, ...)
 	 */
-	TransportAcceptor(int domain, const Address &address)
+	TransportServer(int domain, const Address &address)
 		: m_socket{domain, 0}
 	{
 		m_socket.set(SOL_SOCKET, SO_REUSEADDR, 1);
@@ -149,10 +147,10 @@ public:
 	}
 };
 
-class TransportAcceptorIpv6 : public TransportAcceptor<SocketTcp<address::Ipv6>> {
+class TransportServerIpv6 : public TransportServer<address::Ipv6> {
 public:
-	TransportAcceptorIpv6(std::string host, unsigned port, bool ipv6only = true)
-		: TransportAcceptor{AF_INET6, address::Ipv6{std::move(host), port}}
+	TransportServerIpv6(std::string host, unsigned port, bool ipv6only = true)
+		: TransportServer{AF_INET6, address::Ipv6{std::move(host), port}}
 	{
 		int v6opt = ipv6only;
 
@@ -168,10 +166,10 @@ public:
 	}
 };
 
-class TransportAcceptorIpv4 : public TransportAcceptor<SocketTcp<address::Ipv4>> {
+class TransportServerIpv4 : public TransportServer<address::Ipv4> {
 public:
-	TransportAcceptorIpv4(std::string host, unsigned port)
-		: TransportAcceptor{AF_INET, address::Ipv4{std::move(host), port}}
+	TransportServerIpv4(std::string host, unsigned port)
+		: TransportServer{AF_INET, address::Ipv4{std::move(host), port}}
 	{
 	}
 
@@ -186,18 +184,18 @@ public:
 
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 
-class TransportAcceptorUnix : public TransportAcceptor<SocketTcp<address::Unix>> {
+class TransportServerUnix : public TransportServer<address::Unix> {
 private:
 	std::string m_path;
 
 public:
-	inline TransportAcceptorUnix(std::string path)
-		: TransportAcceptor{AF_UNIX, address::Unix{path, true}}
+	inline TransportServerUnix(std::string path)
+		: TransportServer{AF_UNIX, address::Unix{path, true}}
 		, m_path{std::move(path)}
 	{
 	}
 
-	~TransportAcceptorUnix()
+	~TransportServerUnix()
 	{
 		::remove(m_path.c_str());
 	}

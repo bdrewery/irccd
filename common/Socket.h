@@ -478,17 +478,17 @@ public:
 	}
 
 	/**
-	 * Get the local name. This is a wrapper of getsockname().
+	 * Get the local name.
 	 *
 	 * @return the address
 	 * @throw SocketError on failures
 	 */
-	inline Address address() const
+	inline Address getsockname() const
 	{
-		socklen_t length;
+		socklen_t length = sizeof (sockaddr_storage);
 		sockaddr_storage ss;
 
-		if (getsockname(m_handle, (sockaddr *)&ss, &length) == Error) {
+		if (::getsockname(m_handle, (sockaddr *)&ss, &length) == Error) {
 			throw SocketError{SocketError::System, "getsockname"};
 		}
 

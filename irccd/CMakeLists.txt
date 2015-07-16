@@ -25,21 +25,13 @@ set(
 	main.cpp
 	Server.cpp
 	Server.h
-	ServerEvent.cpp
-	ServerEvent.h
-	ServerService.cpp
-	ServerService.h
 	ServerState.cpp
 	ServerState.h
-	Service.cpp
-	Service.h
 	Transport.h
 	TransportCommand.cpp
 	TransportCommand.h
 	TransportClient.cpp
 	TransportClient.h
-	TransportService.cpp
-	TransportService.h
 )
 
 if (WITH_JS)
@@ -60,8 +52,6 @@ if (WITH_JS)
 		Plugin.h
 		Timer.cpp
 		Timer.h
-		TimerEvent.cpp
-		TimerEvent.h
 		Unicode.cpp
 		Unicode.h
 	)
