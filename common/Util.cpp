@@ -37,14 +37,25 @@
 
 namespace irccd {
 
-bool Util::m_programPathDefined{false};
-std::string Util::m_programPath;
+bool		Util::m_programPathDefined{false};
+std::string	Util::m_programPath;
 
-namespace {
-
+/*
+ * programPath
+ * ---------------------------------------------------------
+ *
+ * This function is used to determine the executable path. It is available and used when the project has been built
+ * in the relocatable manner.
+ *
+ * That will be used to determine the application data, cache and such directories by getting back to the parent
+ * directory from where the executable is found.
+ *
+ * On system that does not support that, we just get the executable path from the argv[0] when starting, the main
+ * must **absolutely** calls setProgramPath before.
+ */
 #if defined(IRCCD_SYSTEM_WINDOWS)
 
-std::string systemProgramPath()
+std::string Util::programPath()
 {
 	std::string result;
 	char exepath[MAX_PATH];
@@ -82,31 +93,23 @@ std::string systemProgramPath()
 
 #endif
 
-} // !namespace
-
-void Util::setProgramPath(const std::string &path)
-{
-	m_programPathDefined = true;
-
-	try {
-		m_programPath = systemProgramPath();
-	} catch (const std::exception &) {
-		/* Fallback using argv[0] */
-		m_programPath = Filesystem::dirName(path);
-
-		std::string::size_type pos = m_programPath.rfind(WITH_BINDIR);
-		if (pos != std::string::npos) {
-			m_programPath.erase(pos);
-		}
-
-		/* Now the path may end with / or \ */
-		if (m_programPath.length() > 0 && m_programPath[m_programPath.length() - 1] == Filesystem::Separator) {
-			m_programPath.pop_back();
-		}
-	}
-}
-
-std::string Util::pathUser(const std::string &append)
+/*
+ * pathConfigUser
+ * ---------------------------------------------------------
+ *
+ * Get the path directory to the user configuration. Example:
+ *
+ * Unix:
+ *
+ * XDG_CONFIG_HOME/irccd
+ * HOME/.config/irccd
+ *
+ * Windows:
+ *
+ * CSIDL_PROFILE
+ *
+ */
+std::string Util::pathConfigUser()
 {
 	std::ostringstream oss;
 
@@ -131,14 +134,63 @@ std::string Util::pathUser(const std::string &append)
 		if (home != nullptr)
 			oss << home;
 
-		// append default path.
 		oss << "/.config/irccd/";
 	}
 #endif
 
-	oss << append;
+	return oss.str();
+}
+
+std::string Util::pathDataUser()
+{
+	std::ostringstream oss;
+
+#if defined(IRCCD_SYSTEM_WINDOWS)
+	// TODO
+#else
+	try {
+		Xdg xdg;
+
+		oss << xdg.dataHome();
+		oss << "/irccd/";
+	} catch (const std::exception &) {
+		const char *home = getenv("HOME");
+
+		if (home != nullptr)
+			oss << home;
+
+		oss << "/.local/share/irccd/";
+	}
+#endif
 
 	return oss.str();
+}
+
+std::string Util::pathCacheUser()
+{
+	return "";
+}
+
+void Util::setProgramPath(const std::string &path)
+{
+	m_programPathDefined = true;
+
+	try {
+		m_programPath = systemProgramPath();
+	} catch (const std::exception &) {
+		/* Fallback using argv[0] */
+		m_programPath = Filesystem::dirName(path);
+
+		std::string::size_type pos = m_programPath.rfind(WITH_BINDIR);
+		if (pos != std::string::npos) {
+			m_programPath.erase(pos);
+		}
+
+		/* Now the path may end with / or \ */
+		if (m_programPath.length() > 0 && m_programPath[m_programPath.length() - 1] == Filesystem::Separator) {
+			m_programPath.pop_back();
+		}
+	}
 }
 
 std::vector<std::string> Util::pathsBinaries()
@@ -150,7 +202,7 @@ std::vector<std::string> Util::pathsConfig()
 {
 	std::vector<std::string> paths;
 
-	paths.push_back(pathUser(""));
+	paths.push_back(pathConfigUser());
 	paths.push_back(m_programPath + Filesystem::Separator + WITH_CONFDIR);
 
 	return paths;
@@ -160,18 +212,7 @@ std::vector<std::string> Util::pathsData()
 {
 	std::vector<std::string> paths;
 
-#if defined(IRCCD_SYSTEM_WINDOWS)
-	// TODO
-#else
-	try {
-		Xdg xdg;
-
-		paths.push_back(xdg.dataHome());
-	} catch (const std::exception &ex) {
-		Logger::warning() << getprogname() << ": failed to user directory: " << ex.what();
-	}
-
-#endif
+	paths.push_back(pathDataUser());
 	paths.push_back(m_programPath + Filesystem::Separator + WITH_DATADIR);
 
 	return paths;
@@ -181,17 +222,7 @@ std::vector<std::string> Util::pathsCache()
 {
 	std::vector<std::string> paths;
 
-#if defined(IRCCD_SYSTEM_WINDOWS)
-	// TODO
-#else
-	try {
-		Xdg xdg;
-
-		paths.push_back(xdg.cacheHome());
-	} catch (const std::exception &ex) {
-		Logger::warning() << getprogname() << ": failed to user directory: " << ex.what();
-	}
-#endif
+	paths.push_back(pathCacheUser());
 
 	return paths;
 }
@@ -202,58 +233,10 @@ std::vector<std::string> Util::pathsPlugins()
 
 	/* Always current directory first */
 	paths.push_back(Filesystem::cwd());
-
-#if defined(IRCCD_SYSTEM_WINDOWS)
-	// TODO
-#else
-	try {
-		Xdg xdg;
-
-		paths.push_back(xdg.dataHome() + "/plugins");
-	} catch (const std::exception &ex) {
-		Logger::warning() << getprogname() << ": failed to user directory: " << ex.what();
-	}
-#endif
-
+	paths.push_back(pathDataUser() + "plugins");
 	paths.push_back(m_programPath + Filesystem::Separator + WITH_DATADIR + Filesystem::Separator + "plugins");
 
 	return paths;
-}
-
-std::string Util::findConfiguration(const std::string &)
-{
-#if 0
-	std::ostringstream oss;
-	std::string fpath;
-
-	// 1. User first
-	oss << pathUser() << filename;
-	fpath = oss.str();
-
-	Logger::info() << getprogname() << ": checking for " << fpath << std::endl;
-	if (hasAccess(fpath))
-		return fpath;
-
-	// 2. Base + ETCDIR + filename
-	oss.str("");
-
-	if (!isAbsolute(ETCDIR))
-		oss << pathBase();
-
-	oss << ETCDIR << Util::DIR_SEP << filename;
-	fpath = oss.str();
-
-	Logger::info() << getprogname() << ": checking for " << fpath << std::endl;
-	if (hasAccess(fpath))
-		return fpath;
-
-	// Failure
-	oss.str("");
-	oss << "could not find configuration file for " << filename;
-
-	throw std::runtime_error(oss.str());
-#endif
-	return "";
 }
 
 std::string Util::convert(const std::string &line, const Args &args, int flags)

@@ -44,9 +44,11 @@ void TransportClientAbstract::sync(fd_set &setinput, fd_set &setoutput)
 	auto h = handle();
 
 	if (FD_ISSET(h, &setinput)) {
+		Logger::debug() << "transport: receiving" << std::endl;
 		receive();
 	}
 	if (FD_ISSET(h, &setoutput)) {
+		Logger::debug() << "transport: sending" << std::endl;
 		send();
 	}
 }
@@ -522,7 +524,6 @@ void TransportClientAbstract::parse(const std::string &message) const
 	it->second(object);
 }
 
-
 void TransportClientAbstract::error(std::string message)
 {
 	m_output += "{";
@@ -535,11 +536,6 @@ void TransportClientAbstract::send(std::string message)
 {
 	m_output += JsonValue::escape(message);
 	m_output += "\r\n\r\n";
-}
-
-bool TransportClientAbstract::hasOutput() const noexcept
-{
-	return m_output.size() > 0;
 }
 
 } // !irccd

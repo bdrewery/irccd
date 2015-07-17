@@ -118,6 +118,7 @@ private:
 
 	/* Private helpers */
 	void process(fd_set &setinput, fd_set &setoutput);
+	void dispatch();
 
 public:
 	Irccd();
@@ -128,7 +129,7 @@ public:
 	 * ------------------------------------------------ */
 
 	void addTransportEvent(std::shared_ptr<TransportClientAbstract> tc, Event ev) noexcept;
-	void addPluginEvent(std::string, std::string, std::string, std::string, std::string, std::function<void (Plugin &)>) noexcept;
+	void addServerEvent(std::string, std::string, std::string, std::string, std::string, std::function<void (Plugin &)>) noexcept;
 	void addEvent(Event ev) noexcept;
 
 	/* ------------------------------------------------

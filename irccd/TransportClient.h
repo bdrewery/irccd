@@ -306,6 +306,12 @@ public:
 	 */
 	virtual ~TransportClientAbstract() = default;
 
+	/**
+	 * Send or receive data, called after a select.
+	 *
+	 * @param setinput the input fd_set
+	 * @param setoutput the output fd_set
+	 */
 	void sync(fd_set &setinput, fd_set &setoutput);
 
 	/**
@@ -321,7 +327,6 @@ public:
 	 * This function appends "\r\n\r\n" after the message so you don't have
 	 * to do it manually.
 	 *
-	 * @note Thread-safe
 	 * @param message the message
 	 */
 	void send(std::string message);
@@ -329,10 +334,12 @@ public:
 	/**
 	 * Tell if the client has data pending for output.
 	 *
-	 * @note Thread-safe
 	 * @return true if has pending data to write
 	 */
-	bool hasOutput() const noexcept;
+	inline bool hasOutput() const noexcept
+	{
+		return !m_output.empty();
+	}
 };
 
 /**

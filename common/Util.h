@@ -75,7 +75,13 @@ public:
 		}
 	};
 
-	static std::string pathUser(const std::string &append);
+	static std::string programPath();
+
+	/* User paths */
+	static std::string pathConfigUser();
+	static std::string pathDataUser();
+	static std::string pathCacheUser();
+	static std::string pathPluginUser();
 
 public:
 	/**
