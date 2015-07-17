@@ -34,12 +34,11 @@
 
 #if defined(WITH_JS)
 #  include "Plugin.h"
-#  include "TimerEvent.h"
 #endif
 
 #include "Transport.h"
 #include "Server.h"
-#include "ServerEvent.h"
+//#include "ServerEvent.h"
 
 namespace irccd {
 

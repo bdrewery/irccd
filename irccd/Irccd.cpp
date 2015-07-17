@@ -521,6 +521,8 @@ void Irccd::handleTransportUserMode(shared_ptr<TransportClientAbstract> tc, stri
 
 void Irccd::addTransport(std::shared_ptr<TransportServerAbstract> ts)
 {
+	Logger::info() << "transport: listening on " << ts->info() << endl;
+
 	m_lookupTransportServers.emplace(ts->socket().handle(), move(ts));
 }
 
@@ -643,7 +645,7 @@ void Irccd::process(fd_set &setinput, fd_set &setoutput)
 	/* 3. Check for transport servers */
 	for (auto &pair : m_lookupTransportServers) {
 		if (FD_ISSET(pair.second->socket().handle(), &setinput)) {
-			Logger::debug() << "transport: new client" << std::endl;
+			Logger::debug() << "transport: new client connected" << endl;
 
 			auto client = pair.second->accept();
 
@@ -666,13 +668,13 @@ void Irccd::dispatch()
 	vector<Event> copy;
 
 	{
-		lock_guard<mutex> lock(m_mutex);
+		lock_guard<mutex> lock{m_mutex};
 
 		copy = move(m_events);
-	}
 
-	/* Clear for safety */
-	m_events.clear();
+		/* Clear for safety */
+		m_events.clear();
+	}
 
 	if (copy.size() > 0) {
 		Logger::debug() << "irccd: dispatching " << copy.size() << " event(s)" << endl;

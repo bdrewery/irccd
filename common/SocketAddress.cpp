@@ -113,16 +113,22 @@ unsigned Ip::port() const noexcept
 
 std::string Ip::ip() const
 {
-	// TODO: return "*" for any.
-	std::string ret;
+	bool resolve{false};
+	std::string ret{"*"};
 
 	if (m_domain == AF_INET6) {
-		ret.resize(INET6_ADDRSTRLEN);
+		if (std::memcmp(&m_sin6.sin6_addr, &in6addr_any, sizeof (in6addr_any)) != 0) {
+			ret.resize(INET6_ADDRSTRLEN);
+			resolve = true;
+		}
 	} else {
-		ret.resize(INET_ADDRSTRLEN);
+		if (m_sin.sin_addr.s_addr != INADDR_ANY) {
+			ret.resize(INET_ADDRSTRLEN);
+			resolve = true;
+		}
 	}
 
-	if (inet_ntop(m_domain, &address(), &ret[0], ret.size())) {
+	if (resolve && inet_ntop(m_domain, &address(), &ret[0], ret.size()) == nullptr) {
 		throw SocketError{SocketError::System, "inet_ntop"};
 	}
 

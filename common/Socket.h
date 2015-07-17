@@ -308,7 +308,7 @@ public:
 
 	/**
 	 * This create an invalid socket.
-	 */	
+	 */
 	inline SocketAbstract() noexcept
 		: m_handle{Invalid}
 	{

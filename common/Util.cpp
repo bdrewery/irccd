@@ -28,6 +28,11 @@
 #  include <Windows.h>
 #  include <Shlobj.h>
 #else
+#  if defined(IRCCD_SYSTEM_LINUX)
+#    include <sys/types.h>
+#    include <limits.h>
+#    include <unistd.h>
+#  endif
 #  include <Xdg.h>
 #endif
 
@@ -75,12 +80,29 @@ std::string Util::programPath()
 	return result;
 }
 
+#elif defined(IRCCD_SYSTEM_LINUX)
+
+std::string Util::programPath()
+{
+	char path[PATH_MAX];
+	char dest[PATH_MAX];
+	pid_t pid = getpid();
+
+	std::sprintf(path, "/proc/%d/exe", pid);
+
+	ssize_t size = readlink(path, dest, PATH_MAX);
+	if (size < 0) {
+		throw std::invalid_argument("readlink");
+	}
+
+	return std::string(dest, size);
+}
+
 #else
 
 /*
  * TODO: add support for more systems here.
  *
- * - Linux
  * - FreeBSD
  * - NetBSD
  * - OpenBSD
@@ -175,10 +197,13 @@ void Util::setProgramPath(const std::string &path)
 {
 	m_programPathDefined = true;
 
+	/*
+	 * 1. Attempt to get the executable path from the operating system call.
+	 */
 	try {
-		m_programPath = systemProgramPath();
+		m_programPath = programPath();
 	} catch (const std::exception &) {
-		/* Fallback using argv[0] */
+		/* 2. Fallback using argv[0] */
 		m_programPath = Filesystem::dirName(path);
 
 		std::string::size_type pos = m_programPath.rfind(WITH_BINDIR);

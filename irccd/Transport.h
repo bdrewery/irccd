@@ -59,10 +59,14 @@ namespace irccd {
  * and not movable so that underlying socket will never be invalidated.
  */
 class TransportServerAbstract {
-public:
+private:
 	TransportServerAbstract(const TransportServerAbstract &) = delete;
 	TransportServerAbstract(TransportServerAbstract &&) = delete;
 
+	TransportServerAbstract &operator=(const TransportServerAbstract &) = delete;
+	TransportServerAbstract &operator=(TransportServerAbstract &&) = delete;
+
+public:
 	/**
 	 * Default constructor.
 	 */
@@ -93,19 +97,13 @@ public:
 	 * @return the info
 	 */
 	virtual std::string info() const = 0;
-
-	TransportServerAbstract &operator=(const TransportServerAbstract &) = delete;
-	TransportServerAbstract &operator=(TransportServerAbstract &&) = delete;
 };
 
 /**
  * @class TransportServer
  * @brief Wrapper for Transport
  *
- * This class contains the underlying socket (SocketTcp or SocketSsl) and
- * provide a destructor that automatically close it.
- *
- * It also provides the accept() function.
+ * Base template class for TransportServer's, automatically binds and accept sockets.
  */
 template <typename Address>
 class TransportServer : public TransportServerAbstract {
@@ -145,6 +143,10 @@ public:
 	}
 };
 
+/**
+ * @class TransportServerIpv6
+ * @brief Implementation of transports using IPv6
+ */
 class TransportServerIpv6 : public TransportServer<address::Ipv6> {
 public:
 	TransportServerIpv6(std::string host, unsigned port, bool ipv6only = true)
@@ -160,7 +162,12 @@ public:
 	 */
 	std::string info() const override
 	{
-		return "TODO";
+		std::ostringstream oss;
+
+		oss << "ipv6, address: " << m_socket.getsockname().ip() << ", "
+		    << "port: " << m_socket.getsockname().port();
+
+		return oss.str();
 	}
 };
 
@@ -176,7 +183,12 @@ public:
 	 */
 	std::string info() const override
 	{
-		return "TODO";
+		std::ostringstream oss;
+
+		oss << "ipv4, address: " << m_socket.getsockname().ip() << ", "
+		    << "port: " << m_socket.getsockname().port();
+
+		return oss.str();
 	}
 };
 
@@ -203,7 +215,7 @@ public:
 	 */
 	std::string info() const override
 	{
-		return m_path;
+		return "unix, path: " + m_path;
 	}
 };
 

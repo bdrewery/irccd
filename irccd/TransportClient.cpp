@@ -44,11 +44,11 @@ void TransportClientAbstract::sync(fd_set &setinput, fd_set &setoutput)
 	auto h = socket().handle();
 
 	if (FD_ISSET(h, &setinput)) {
-		Logger::debug() << "transport: receiving" << std::endl;
+		Logger::debug() << "transport: receiving to input buffer" << std::endl;
 		receive();
 	}
 	if (FD_ISSET(h, &setoutput)) {
-		Logger::debug() << "transport: sending" << std::endl;
+		Logger::debug() << "transport: sending outgoing buffer" << std::endl;
 		send();
 	}
 }

@@ -22,6 +22,7 @@
 #include <functional>
 #include <stack>
 #include <unordered_map>
+#include <vector>
 
 /**
  * @file Signals.h
@@ -49,7 +50,7 @@ public:
 	 * @param id the id
 	 */
 	inline SignalConnection(unsigned id) noexcept
-		: m_id(id)
+		: m_id{id}
 	{
 	}
 
@@ -58,7 +59,7 @@ public:
 	 *
 	 * @return the id
 	 */
-	unsigned id() const noexcept
+	inline unsigned id() const noexcept
 	{
 		return m_id;
 	}
@@ -109,7 +110,7 @@ public:
 
 		m_functions.emplace(id, std::move(function));
 
-		return SignalConnection(id);
+		return SignalConnection{id};
 	}
 
 	/**
@@ -148,8 +149,26 @@ public:
 	 */
 	void operator()(Args... args) const
 	{
+		/*
+		 * Make a copy of the ids before iterating because the callbacks may eventually remove or modify
+		 * the list.
+		 */
+		std::vector<unsigned> ids;
+
 		for (auto &pair : m_functions) {
-			pair.second(args...);
+			ids.push_back(pair.first);
+		}
+
+		/*
+		 * Now iterate while checking if the next id is still available, however if any new signals were
+		 * added while iterating, they will not be called immediately.
+		 */
+		for (unsigned i : ids) {
+			auto it = m_functions.find(i);
+
+			if (it != m_functions.end()) {
+				it->second(args...);
+			}
 		}
 	}
 };
@@ -157,4 +176,3 @@ public:
 } // !irccd
 
 #endif // !_IRCCD_SIGNALS_H_
-

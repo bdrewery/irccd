@@ -259,7 +259,7 @@ void loadListenerInet(Irccd &irccd, const IniSection &sc)
 	/* Optional stuff */
 	std::string address{"*"};
 
-	if (!sc.contains("address")) {
+	if (sc.contains("address")) {
 		address = sc["address"].value();
 	}
 
@@ -290,7 +290,7 @@ void loadListeners(Irccd &irccd, const Ini &config)
 				else
 					throw std::invalid_argument("invalid type given");
 			} catch (const std::exception &ex) {
-				Logger::warning() << "transport: " << ex.what() << std::endl;
+				Logger::warning() << "transport: error: " << ex.what() << std::endl;
 			}
 		}
 	}
