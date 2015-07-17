@@ -215,10 +215,9 @@ Server::~Server()
 	irc_disconnect(m_session.get());
 }
 
-void Server::flush() noexcept
+void Server::sync(fd_set &setinput, fd_set &setoutput) noexcept
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
-
+	/* 1. Send maximum of command possible if available for write */
 	/*
 	 * Break on the first failure to avoid changing the order of the
 	 * commands if any of them fails.
@@ -232,6 +231,9 @@ void Server::flush() noexcept
 			done = true;
 		}
 	}
+
+	/* 2. Read data */
+	irc_process_select_descriptors(m_session.get(), &setinput, &setoutput);
 }
 
 #if 0

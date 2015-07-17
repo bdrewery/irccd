@@ -39,25 +39,16 @@ JsonValue TransportClientAbstract::valueOr(const JsonObject &object, const std::
 	return (object.contains(key)) ? object[key] : def;
 }
 
-void TransportClientAbstract::receive()
+void TransportClientAbstract::sync(fd_set &setinput, fd_set &setoutput)
 {
-#if 0
-	std::string incoming = socket().recv(512);
+	auto h = handle();
 
-	if (incoming.size() == 0) {
-		throw std::invalid_argument("client disconnected");
+	if (FD_ISSET(h, &setinput)) {
+		receive();
 	}
-
-	m_input += incoming;
-#endif
-}
-
-void TransportClientAbstract::send()
-{
-	// TODO
-#if 0
-	m_output.erase(0, send(m_output, false));
-#endif
+	if (FD_ISSET(h, &setoutput)) {
+		send();
+	}
 }
 
 /*
@@ -531,68 +522,23 @@ void TransportClientAbstract::parse(const std::string &message) const
 	it->second(object);
 }
 
-void TransportClientAbstract::process(int direction)
+
+void TransportClientAbstract::error(std::string message)
 {
-	try {
-		if (direction & SocketListener::Read) {
-			receive();
-		}
-		if (direction & SocketListener::Write) {
-			send();
-		}
-	} catch (const std::exception &ex) {
-		onDie();
-	}
-
-	std::string::size_type pos;
-	while ((pos = m_input.find("\r\n\r\n")) != std::string::npos) {
-		/*
-		 * Make a copy and erase it in case that onComplete function
-		 * throws.
-		 */
-		std::string message = m_input.substr(0, pos);
-
-		m_input.erase(m_input.begin(), m_input.begin() + pos + 4);
-
-		try {
-			parse(message);
-		} catch (const std::exception &ex) {
-			// TODO: report error to client
-			Logger::warning() << "transport: " << ex.what() << std::endl;
-		}
-	}
-}
-
-void TransportClientAbstract::error(std::string message, bool notify)
-{
-	std::lock_guard<std::mutex> lock(m_mutex);
-
 	m_output += "{";
 	m_output += "\"error\":";
 	m_output += "\"" + JsonValue::escape(message) + "\"";
 	m_output += "}\r\n\r\n";
-
-	if (notify) {
-		onWrite();
-	}
 }
 
-void TransportClientAbstract::send(std::string message, bool notify)
+void TransportClientAbstract::send(std::string message)
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
-
 	m_output += JsonValue::escape(message);
 	m_output += "\r\n\r\n";
-
-	if (notify) {
-		onWrite();
-	}
 }
 
 bool TransportClientAbstract::hasOutput() const noexcept
 {
-	std::lock_guard<std::mutex> lock(m_mutex);
-
 	return m_output.size() > 0;
 }
 

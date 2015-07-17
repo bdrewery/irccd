@@ -116,6 +116,9 @@ private:
 	void handleTransportUnload(std::shared_ptr<TransportClientAbstract> tc, std::string plugin);
 	void handleTransportUserMode(std::shared_ptr<TransportClientAbstract> tc, std::string server, std::string mode);
 
+	/* Private helpers */
+	void process(fd_set &setinput, fd_set &setoutput);
+
 public:
 	Irccd();
 	~Irccd();

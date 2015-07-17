@@ -75,6 +75,8 @@ public:
 		}
 	};
 
+	static std::string pathUser(const std::string &append);
+
 public:
 	/**
 	 * This function must be called before running irccd.
@@ -190,7 +192,7 @@ public:
 	{
 		std::regex regex("[A-Za-z0-9-_]+");
 		std::smatch match;
-	
+
 		return std::regex_match(name, match, regex);
 	}
 };

@@ -26,7 +26,6 @@
 
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <string>
 
 #include <Json.h>
@@ -267,18 +266,9 @@ public:
 	 */
 	Signal<> onDie;
 
-	/**
-	 * Signal: onWrite
-	 * ------------------------------------------------
-	 *
-	 * New data has been queued for send.
-	 */
-	Signal<> onWrite;
-
-private:
+protected:
 	std::string m_input;
 	std::string m_output;
-	mutable std::mutex m_mutex;
 
 	/* JSON helpers */
 	JsonValue value(const JsonObject &, const std::string &name) const;
@@ -306,8 +296,9 @@ private:
 	void parse(const std::string &) const;
 
 	/* Do I/O */
-	void receive();
-	void send();
+	virtual SocketAbstract::Handle handle() = 0;
+	virtual void receive() = 0;
+	virtual void send() = 0;
 
 public:
 	/**
@@ -315,20 +306,14 @@ public:
 	 */
 	virtual ~TransportClientAbstract() = default;
 
-	/**
-	 * Flush pending data to send and try to receive if possible.
-	 *
-	 * @note This function is called from the TransportManager thread and should not be used somewhere else
-	 */
-	void process(int direction);
+	void sync(fd_set &setinput, fd_set &setoutput);
 
 	/**
 	 * Send an error message to the client.
 	 *
 	 * @param message the error message
-	 * @param notify set to true to notify the TransportService
 	 */
-	void error(std::string message, bool notify = true);
+	void error(std::string message);
 
 	/**
 	 * Send some data, it will be pushed to the outgoing buffer.
@@ -338,9 +323,8 @@ public:
 	 *
 	 * @note Thread-safe
 	 * @param message the message
-	 * @param notify set to true to notify the TransportService
 	 */
-	void send(std::string message, bool notify = true);
+	void send(std::string message);
 
 	/**
 	 * Tell if the client has data pending for output.
@@ -349,23 +333,20 @@ public:
 	 * @return true if has pending data to write
 	 */
 	bool hasOutput() const noexcept;
-
-	/**
-	 * Get the underlying socket as abstract.
-	 *
-	 * @return the abstract socket
-	 */
-	virtual std::string recv() = 0;
 };
 
 /**
  * @class TransportClient
  * @brief Template class for Tcp and Ssl sockets
  */
-template <typename Sock>
+template <typename Address>
 class TransportClient : public TransportClientAbstract {
 private:
-	Sock m_socket;
+	SocketTcp<Address> m_socket;
+
+protected:
+	void send() override;
+	void receive() override;
 
 public:
 	/**
@@ -373,26 +354,51 @@ public:
 	 *
 	 * @param sock the socket
 	 */
-	inline TransportClient(Sock socket)
-		: m_socket(std::move(socket))
+	inline TransportClient(SocketTcp<Address> socket)
+		: m_socket{std::move(socket)}
 	{
 	}
-
-	std::string recv() override
-	{
-		return "ok";
-	}
-
-#if 0
-	/**
-	 * @copydoc TransportClientAbstract::socket
-	 */
-	SocketAbstract &socket() noexcept override
-	{
-		return m_socket;
-	}
-#endif
 };
+
+template <typename Address>
+void TransportClient<Address>::receive()
+{
+	try {
+		auto message = m_socket.recv(512);
+
+		if (message.empty()) {
+			throw std::runtime_error("client disconnected");
+		}
+
+		m_input += message;
+	} catch (const std::exception &ex) {
+		onDie();
+	}
+
+	std::string::size_type pos;
+	while ((pos = m_input.find("\r\n\r\n")) != std::string::npos) {
+		/*
+		 * Make a copy and erase it in case that onComplete function
+		 * throws.
+		 */
+		auto message = m_input.substr(0, pos);
+
+		m_input.erase(m_input.begin(), m_input.begin() + pos + 4);
+
+		try {
+			parse(message);
+		} catch (const std::exception &ex) {
+			// TODO: report error to client
+			Logger::warning() << "transport: " << ex.what() << std::endl;
+		}
+	}
+}
+
+template <typename Address>
+void TransportClient<Address>::send()
+{
+	m_output.erase(0, send(m_output, false));
+}
 
 } // !irccd
 

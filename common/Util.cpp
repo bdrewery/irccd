@@ -106,8 +106,6 @@ void Util::setProgramPath(const std::string &path)
 	}
 }
 
-#if 0
-
 std::string Util::pathUser(const std::string &append)
 {
 	std::ostringstream oss;
@@ -143,8 +141,6 @@ std::string Util::pathUser(const std::string &append)
 	return oss.str();
 }
 
-#endif
-
 std::vector<std::string> Util::pathsBinaries()
 {
 	return {m_programPath + Filesystem::Separator + WITH_BINDIR};
@@ -154,18 +150,7 @@ std::vector<std::string> Util::pathsConfig()
 {
 	std::vector<std::string> paths;
 
-#if defined(IRCCD_SYSTEM_WINDOWS)
-	// TODO
-#else
-	try {
-		Xdg xdg;
-
-		paths.push_back(xdg.configHome());
-	} catch (const std::exception &ex) {
-		Logger::warning() << getprogname() << ": failed to user directory: " << ex.what();
-	}
-
-#endif
+	paths.push_back(pathUser(""));
 	paths.push_back(m_programPath + Filesystem::Separator + WITH_CONFDIR);
 
 	return paths;

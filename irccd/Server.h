@@ -22,7 +22,6 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <queue>
 #include <string>
 #include <utility>
@@ -259,7 +258,7 @@ public:
 	 * Triggered when the server is successfully connected.
 	 */
 	Signal<> onConnect;
-	
+
 
 	/**
 	 * Signal: onChannelNotice
@@ -432,7 +431,6 @@ public:
 
 private:
 	using Session = std::unique_ptr<irc_session_t, void (*)(irc_session_t *)>;
-	using Mutex = std::mutex;
 	using Queue = std::queue<ServerCommand>;
 
 private:
@@ -443,7 +441,6 @@ private:
 	ServerState m_state;
 	ServerState m_next;
 	Queue m_queue;
-	mutable Mutex m_mutex;
 
 	void handleChannel(const char *, const char **) noexcept;
 	void handleChannelNotice(const char *, const char **) noexcept;
@@ -470,11 +467,11 @@ private:
 
 	/*
 	 * Add a command safely
+	 *
+	 * TODO: remove that
 	 */
 	void addCommand(ServerCommand command)
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
-
 		m_queue.push(std::move(command));
 	}
 
@@ -554,8 +551,6 @@ public:
 	{
 		using namespace std::placeholders;
 
-		std::lock_guard<std::mutex> lock(m_mutex);
-
 		irc_disconnect(m_session.get());
 		next(ServerState::Type::Dead);
 	}
@@ -569,8 +564,6 @@ public:
 	 */
 	inline void reconnect() noexcept
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
-
 		irc_disconnect(m_session.get());
 		next(ServerState::Type::Connecting);
 	}
@@ -608,12 +601,8 @@ public:
 	 * @param setinput
 	 * @param setoutput
 	 * @throw any exception that have been throw from user functions
-	 * @warning Not thread-safe
 	 */
-	inline void process(fd_set &setinput, fd_set &setoutput)
-	{
-		irc_process_select_descriptors(m_session.get(), &setinput, &setoutput);
-	}
+	void sync(fd_set &setinput, fd_set &setoutput) noexcept;
 
 	/**
 	 * Get the server information.
@@ -686,8 +675,6 @@ public:
 	 */
 	inline ServerState::Type type() const noexcept
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
-
 		return m_state.type();
 	}
 

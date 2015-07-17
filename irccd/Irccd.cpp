@@ -71,7 +71,7 @@ void Irccd::addPluginEvent(string, string, string, string, string, function<void
 			// TODO: match rules here
 			ev(*pair.second);
 		}
-		});
+	});
 
 	// TODO: register output to transports clients
 }
@@ -82,7 +82,7 @@ void Irccd::addTransportEvent(shared_ptr<TransportClientAbstract> tc, Event ev) 
 		try {
 			ev();
 		} catch (const std::exception &ex) {
-			// TODO: send the error
+			tc->error(ex.what());
 		}
 	});
 }
@@ -378,6 +378,8 @@ void Irccd::addServer(shared_ptr<Server> server) noexcept
 	server->onQuery.connect(bind(&Irccd::handleServerOnQuery, this, server, _1, _2));
 	server->onTopic.connect(bind(&Irccd::handleServerOnTopic, this, server, _1, _2, _3));
 	server->onUserMode.connect(bind(&Irccd::handleServerOnUserMode, this, server, _1, _2));
+
+	m_servers.emplace(server->info().name, move(server));
 }
 
 /* ---------------------------------------------------------
@@ -482,6 +484,8 @@ void Irccd::handleTransportReconnect(shared_ptr<TransportClientAbstract> tc, str
 	addTransportEvent(tc, [=] () {
 		// TODO
 	});
+
+	(void)server;
 }
 
 void Irccd::handleTransportReload(shared_ptr<TransportClientAbstract> tc, string plugin)
@@ -489,6 +493,8 @@ void Irccd::handleTransportReload(shared_ptr<TransportClientAbstract> tc, string
 	addTransportEvent(tc, [=] () {
 		// TODO
 	});
+
+	(void)plugin;
 }
 
 void Irccd::handleTransportTopic(shared_ptr<TransportClientAbstract> tc, string server, string channel, string topic)
@@ -503,6 +509,8 @@ void Irccd::handleTransportUnload(shared_ptr<TransportClientAbstract> tc, string
 	addTransportEvent(tc, [=] () {
 		// TODO
 	});
+
+	(void)plugin;
 }
 
 void Irccd::handleTransportUserMode(shared_ptr<TransportClientAbstract> tc, string server, string mode)
@@ -606,6 +614,27 @@ void Irccd::pluginUnload(const string &name)
 #endif
 #endif
 
+void Irccd::process(fd_set &setinput, fd_set &setoutput)
+{
+	/* 1. May be IPC */
+	if (FD_ISSET(m_socketServer.handle(), &setinput)) {
+		//processNotification();
+	}
+
+	/* 2. Check for transport clients */
+	for (auto &pair : m_lookupTransportClients) {
+		pair.second->sync(setinput, setoutput);
+	}
+
+	/* 3. Check for servers */
+	for (auto &pair : m_servers) {
+		pair.second->sync(setinput, setoutput);
+	}
+
+	(void)setinput;
+	(void)setoutput;
+}
+
 void Irccd::exec()
 {
 	fd_set setinput;
@@ -631,7 +660,7 @@ void Irccd::exec()
 		pair.second->prepare(setinput, setoutput, max);
 	}
 
-	/* 3. Add transports sockets */	
+	/* 3. Add transports sockets */
 	for (auto &pair : m_lookupTransportClients) {
 		set(setinput, pair.first);
 
@@ -653,6 +682,8 @@ void Irccd::exec()
 		Logger::warning() << "irccd: " << SocketAbstract::syserror() << std::endl;
 		return;
 	}
+
+	process(setinput, setoutput);
 
 #if 0
 	/* Skip if it's the service socket */
