@@ -41,7 +41,7 @@ namespace irccd {
  */
 class TransportClientAbstract {
 public:
-	/*
+	/**
 	 * Signal: onChannelNotice
 	 * --------------------------------------------------------
 	 *
@@ -296,7 +296,6 @@ protected:
 	void parse(const std::string &) const;
 
 	/* Do I/O */
-	virtual SocketAbstract::Handle handle() = 0;
 	virtual void receive() = 0;
 	virtual void send() = 0;
 
@@ -340,6 +339,11 @@ public:
 	{
 		return !m_output.empty();
 	}
+
+	/**
+	 * Get the underlying socket.
+	 */
+	virtual SocketAbstract &socket() noexcept = 0;
 };
 
 /**
@@ -364,6 +368,11 @@ public:
 	inline TransportClient(SocketTcp<Address> socket)
 		: m_socket{std::move(socket)}
 	{
+	}
+
+	SocketAbstract &socket() noexcept override
+	{
+		return m_socket;
 	}
 };
 
@@ -404,7 +413,7 @@ void TransportClient<Address>::receive()
 template <typename Address>
 void TransportClient<Address>::send()
 {
-	m_output.erase(0, send(m_output, false));
+	m_output.erase(0, m_socket.send(m_output));
 }
 
 } // !irccd

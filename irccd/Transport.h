@@ -141,9 +141,7 @@ public:
 	 */
 	std::unique_ptr<TransportClientAbstract> accept() override
 	{
-		// TODO
-		//return std::make_unique<TransportClient<Sock>>(m_socket.accept());
-		return nullptr;
+		return std::make_unique<TransportClient<Address>>(m_socket.accept());
 	}
 };
 

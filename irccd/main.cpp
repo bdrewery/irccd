@@ -247,6 +247,55 @@ void loadIdentities(Irccd &irccd, const Ini &config)
 	}
 }
 
+void loadListenerInet(Irccd &irccd, const IniSection &sc)
+{
+	// TODO ipv4 and ipv6 back
+	if (!sc.contains("port")) {
+		throw std::invalid_argument("missing port");
+	}
+
+	int port = std::stoi(sc["port"].value());
+
+	/* Optional stuff */
+	std::string address{"*"};
+
+	if (!sc.contains("address")) {
+		address = sc["address"].value();
+	}
+
+	irccd.addTransport(std::make_shared<TransportServerIpv4>(address, port));
+}
+
+void loadListenerUnix(Irccd &irccd, const IniSection &sc)
+{
+	(void)irccd;
+	(void)sc;
+}
+
+void loadListeners(Irccd &irccd, const Ini &config)
+{
+	for (const IniSection &section : config) {
+		if (section.key() == "listener") {
+			try {
+				if (!section.contains("type")) {
+					throw std::invalid_argument("missing type parameter");
+				}
+
+				auto type = section["type"].value();
+
+				if (type == "ip")
+					loadListenerInet(irccd, section);
+				else if (type == "unix")
+					loadListenerUnix(irccd, section);
+				else
+					throw std::invalid_argument("invalid type given");
+			} catch (const std::exception &ex) {
+				Logger::warning() << "transport: " << ex.what() << std::endl;
+			}
+		}
+	}
+}
+
 bool openConfig(Irccd &irccd, const std::string &path)
 {
 	try {
@@ -258,6 +307,7 @@ bool openConfig(Irccd &irccd, const std::string &path)
 		loadIdentities(irccd, config);
 		loadServers(irccd, config);
 		loadPlugins(irccd, config);
+		loadListeners(irccd, config);
 	} catch (const std::exception &ex) {
 		Logger::info() << getprogname() << ": " << path << ": " << ex.what() << std::endl;
 		return false;

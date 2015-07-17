@@ -41,7 +41,7 @@ JsonValue TransportClientAbstract::valueOr(const JsonObject &object, const std::
 
 void TransportClientAbstract::sync(fd_set &setinput, fd_set &setoutput)
 {
-	auto h = handle();
+	auto h = socket().handle();
 
 	if (FD_ISSET(h, &setinput)) {
 		Logger::debug() << "transport: receiving" << std::endl;

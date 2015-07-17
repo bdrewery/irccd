@@ -519,6 +519,12 @@ void Irccd::handleTransportUserMode(shared_ptr<TransportClientAbstract> tc, stri
 	});
 }
 
+void Irccd::addTransport(std::shared_ptr<TransportServerAbstract> ts)
+{
+
+	m_lookupTransportServers.emplace(ts->socket().handle(), move(ts));
+}
+
 #if defined(WITH_JS)
 
 void Irccd::loadPlugin(string path)
@@ -629,6 +635,17 @@ void Irccd::process(fd_set &setinput, fd_set &setoutput)
 		pair.second->sync(setinput, setoutput);
 	}
 
+	/* 3. Check for transport servers */
+	for (auto &pair : m_lookupTransportServers) {
+		if (FD_ISSET(pair.second->socket().handle(), &setinput)) {
+			Logger::debug() << "transport: new client" << std::endl;
+
+			auto client = pair.second->accept();
+
+			m_lookupTransportClients.emplace(client->socket().handle(), move(client));
+		}
+	}
+
 	/* 3. Check for servers */
 	for (auto &pair : m_servers) {
 		pair.second->sync(setinput, setoutput);
@@ -684,13 +701,18 @@ void Irccd::exec()
 		pair.second->prepare(setinput, setoutput, max);
 	}
 
-	/* 3. Add transports sockets */
+	/* 3. Add transports clients */
 	for (auto &pair : m_lookupTransportClients) {
 		set(setinput, pair.first);
 
 		if (pair.second->hasOutput()) {
 			set(setoutput, pair.first);
 		}
+	}
+
+	/* 4. Add transport servers */
+	for (auto &pair : m_lookupTransportServers) {
+		set(setinput, pair.first);
 	}
 
 	// 4. Do the selection
