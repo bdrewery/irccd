@@ -534,7 +534,7 @@ void TransportClientAbstract::error(std::string message)
 
 void TransportClientAbstract::send(std::string message)
 {
-	m_output += JsonValue::escape(message);
+	m_output += message;
 	m_output += "\r\n\r\n";
 }
 

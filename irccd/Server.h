@@ -139,104 +139,15 @@ using ServerCommand = std::function<bool ()>;
  * @class Server
  * @brief The class that connect to a IRC server
  *
- * The server is a class that stores callbacks which will be called on IRC
- * events. It is the lowest part of the connection to a server, it can be used
- * directly by the user to connect to a server.
+ * The server is a class that stores callbacks which will be called on IRC events. It is the lowest part of the
+ * connection to a server, it can be used directly by the user to connect to a server.
  *
- * It is primarily designed to be added in the ServerManager which will dispatch
- * these events automatically in the Irccd event queue.
+ * The server has several signals that will be emitted when data has arrived.
  *
- * Only functions marked as "Thread safe" are actually thread safe, otherwise
- * please read the comment for explanation.
+ * When adding a server to the irccd instance using Irccd::addServer, these signals are connected to generate
+ * events that will be dispatched to the plugins and to the transports.
  *
- * All handlers must not be changed if the server has been installed into a
- * ServerManager.
- *
- * <h3>The hierarchy / association diagram</h3>
- *
- * @code
- *                              m_state: std::unique_ptr<ServerState>
- * +---------------+               +---------------+
- * | Server        |---------------| ServerState   |
- * +---------------+             1 +---------------+
- *         |
- *         |
- *       1 | m_queue: std::queue<std::unique_ptr<ServerCommand>>
- * +---------------+
- * | ServerCommand |
- * +---------------+
- * @endcode
- *
- * <h3>The activity between threads</h3>
- *
- * When you use ServerManager to control servers, the activity has the following
- * workflow:
- *
- * @code
- *    Main loop          ServerManager (thread)                 Server                 Other threads
- *        |                    |                                   |                         |
- *        |                    | For all servers, do:              |                         |
- *        |                    v                                   |<------------------------|
- *        |            +---------------+                           |     cnotice(), message(), etc.
- *        |            | Update states |                           |         ^ Enqueue a command, lock for m_queue.
- *        |            +---------------+                           |
- * +---------------+           |      ^ Call Server::update        |          The user must not use any of the other functions.
- * | Wait          |           v                                   |
- * +---------------+   +---------------+                           |
- *         |           | Flush queue   |                           |
- *         |           +---------------+                           |
- *         |                   |      ^ Call Server::flush         |
- *         |                   v                                   |
- *         |           +---------------+                   +---------------+
- *         |           | Prepare       |------------------>| prepare()     |
- *         |           +---------------+                   +---------------+
- *         |                   |      ^ Call Server::prepare       |      ^ May change the m_state and reset session.
- *         |                   v                                   |
- *         |           +---------------+                   +---------------+
- *         |           | Process I/O   |------------------>| process()     |
- *         |           +---------------+                   +---------------+
- *         |                   |      ^ Call Server::process       |      ^ May call server callbacks.
- *         |                   |                                   |
- *         |<------------------|<----------------------------------|
- *            ^ Enqueue the event    ^
- *                                   | Notify with m_on* appropriate function
- * @endcode
- *
- * <h3>Processing the server</h3>
- *
- * To process the server, use the following functions:
- *
- * - update(), not thread safe, should only be used in the loop controlling the
- *   server. This function will change the state if needed.
- * - flush(), thread safe, this function will flush the queue of commands if
- *   possible. Should be used in the server loop.
- * - prepare(), not thread safe, this function will fill the appropriate fd_set
- *   and may also switch the server state if needed.
- * - process(), not thread safe, this function should be used after the select()
- *   call to dispatch the incoming/outgoing data.
- *
- * <h3>The server states</h3>
- *
- * The server state <strong>MUST</strong> must only use:
- *
- * - next()
- * - info()
- * - settings()
- *
- * For more information, see also ServerState.h
- *
- * <h3>The server commands</h3>
- *
- * The server contains several commands that are used to send data to the IRC
- * server,
- *
- * They try to send as much as possible data, they enqueue'ed to the server
- * using one of the user commands like cnotice(), message(), etc.
- *
- * They are then called via the flush() function and should never be called
- * anywhere else because it depends on m_session.
- *
- * For more information, see also ServerCommand.h
+ * Note: the server is set in non blocking mode, commands are placed in a queue and sent when only when they are ready.
  */
 class Server {
 public:
@@ -258,7 +169,6 @@ public:
 	 * Triggered when the server is successfully connected.
 	 */
 	Signal<> onConnect;
-
 
 	/**
 	 * Signal: onChannelNotice
@@ -463,16 +373,6 @@ private:
 	inline std::string strify(const char *s)
 	{
 		return (s == nullptr) ? "" : std::string(s);
-	}
-
-	/*
-	 * Add a command safely
-	 *
-	 * TODO: remove that
-	 */
-	void addCommand(ServerCommand command)
-	{
-		m_queue.push(std::move(command));
 	}
 
 public:
@@ -698,7 +598,7 @@ public:
 	 */
 	inline void cnotice(std::string channel, std::string message) noexcept
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			return irc_cmd_notice(this->m_session.get(), channel.c_str(), message.c_str()) == 0;
 		});
 	}
@@ -712,7 +612,7 @@ public:
 	 */
 	inline void invite(std::string target, std::string channel) noexcept
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			return irc_cmd_invite(this->m_session.get(), target.c_str(), channel.c_str()) == 0;
 		});
 	}
@@ -726,7 +626,7 @@ public:
 	 */
 	inline void join(std::string channel, std::string password = "") noexcept
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			const char *ptr = password.empty() ? nullptr : password.c_str();
 
 			return irc_cmd_join(this->m_session.get(), channel.c_str(), ptr) == 0;
@@ -744,7 +644,7 @@ public:
 	 */
 	inline void kick(std::string target, std::string channel, std::string reason = "") noexcept
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			return irc_cmd_kick(this->m_session.get(), target.c_str(), channel.c_str(), reason.c_str()) == 0;
 		});
 	}
@@ -759,7 +659,7 @@ public:
 	 */
 	inline void me(std::string target, std::string message)
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			return irc_cmd_me(m_session.get(), target.c_str(), message.c_str()) == 0;
 		});
 	}
@@ -773,7 +673,7 @@ public:
 	 */
 	inline void message(std::string target, std::string message)
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			return irc_cmd_msg(m_session.get(), target.c_str(), message.c_str()) == 0;
 		});
 	}
@@ -787,7 +687,7 @@ public:
 	 */
 	inline void mode(std::string channel, std::string mode)
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			return irc_cmd_channel_mode(m_session.get(), channel.c_str(), mode.c_str()) == 0;
 		});
 	}
@@ -800,7 +700,7 @@ public:
 	 */
 	inline void names(std::string channel)
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			return irc_cmd_names(m_session.get(), channel.c_str()) == 0;
 		});
 	}
@@ -813,7 +713,7 @@ public:
 	 */
 	inline void nick(std::string newnick)
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			return irc_cmd_nick(m_session.get(), newnick.c_str()) == 0;
 		});
 	}
@@ -827,7 +727,7 @@ public:
 	 */
 	inline void notice(std::string target, std::string message)
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			return irc_cmd_notice(m_session.get(), target.c_str(), message.c_str()) == 0;
 		});
 	}
@@ -844,7 +744,7 @@ public:
 	 */
 	inline void part(std::string channel, std::string /*reason = ""*/)
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			return irc_cmd_part(m_session.get(), channel.c_str()) == 0;
 		});
 	}
@@ -859,7 +759,7 @@ public:
 	 */
 	inline void send(std::string raw)
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			return irc_send_raw(m_session.get(), raw.c_str()) == 0;
 		});
 	}
@@ -873,7 +773,7 @@ public:
 	 */
 	inline void topic(std::string channel, std::string topic)
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			return irc_cmd_topic(m_session.get(), channel.c_str(), topic.c_str()) == 0;
 		});
 	}
@@ -886,7 +786,7 @@ public:
 	 */
 	inline void umode(std::string mode)
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			return irc_cmd_user_mode(m_session.get(), mode.c_str()) == 0;
 		});
 	}
@@ -899,7 +799,7 @@ public:
 	 */
 	inline void whois(std::string target)
 	{
-		addCommand([=] () {
+		m_queue.push([=] () {
 			return irc_cmd_whois(this->m_session.get(), target.c_str()) == 0;
 		});
 	}

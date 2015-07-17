@@ -342,6 +342,8 @@ public:
 
 	/**
 	 * Get the underlying socket.
+	 *
+	 * @return the socket
 	 */
 	virtual SocketAbstract &socket() noexcept = 0;
 };
@@ -370,6 +372,9 @@ public:
 	{
 	}
 
+	/**
+	 * @copydoc TransportClientAbstract::socket
+	 */
 	SocketAbstract &socket() noexcept override
 	{
 		return m_socket;

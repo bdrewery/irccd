@@ -27,9 +27,8 @@ set(
 	Server.h
 	ServerState.cpp
 	ServerState.h
-	Transport.h
-	TransportCommand.cpp
-	TransportCommand.h
+	TransportServer.cpp
+	TransportServer.h
 	TransportClient.cpp
 	TransportClient.h
 )

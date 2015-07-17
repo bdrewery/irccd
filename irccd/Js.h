@@ -384,7 +384,7 @@ duk_ret_t dukx_throw(duk_context *ctx, const Error &error)
 	duk_put_prop_string(ctx, -2, "name");
 	duk_push_string(ctx, error.message().c_str());
 	duk_put_prop_string(ctx, -2, "message");
-	duk_throw(ctx);	
+	duk_throw(ctx);
 
 	return 0;
 }
@@ -413,4 +413,3 @@ void dukpreload_server(duk_context *ctx) noexcept;
 } // !irccd
 
 #endif // !_IRCCD_JS_H_
-

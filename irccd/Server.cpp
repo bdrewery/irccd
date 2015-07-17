@@ -28,14 +28,14 @@ namespace irccd {
 
 void Server::handleConnect(const char *, const char **) noexcept
 {
-	// Reset the number of tried reconnection.
+	/* Reset the number of tried reconnection. */
 	m_settings.recocurrent = 0;
 
-	// Don't forget to notify.
+	/* Don't forget to change state and notify. */
 	next(ServerState::Connected);
 	onConnect();
 
-	// Auto join listed channels
+	/* Auto join listed channels. */
 	for (const ServerChannel &channel : m_settings.channels) {
 		Logger::info() << "server " << m_info.name << ": auto joining " << channel.name << std::endl;
 		join(channel.name, channel.password);
@@ -141,9 +141,9 @@ Server::Server(ServerInfo info, ServerIdentity identity, ServerSettings settings
 	: m_info(std::move(info))
 	, m_settings(std::move(settings))
 	, m_identity(std::move(identity))
-	, m_session(nullptr, nullptr)
-	, m_state(ServerState::Connecting)
-	, m_next(ServerState::Undefined)
+	, m_session{nullptr, nullptr}
+	, m_state{ServerState::Connecting}
+	, m_next{ServerState::Undefined}
 {
 	irc_callbacks_t callbacks;
 
@@ -202,9 +202,9 @@ Server::Server(ServerInfo info, ServerIdentity identity, ServerSettings settings
 		static_cast<Server *>(irc_get_ctx(session))->handleUserMode(orig, params);
 	};
 
-	m_session = Session(irc_create_session(&callbacks), irc_destroy_session);
+	m_session = Session{irc_create_session(&callbacks), irc_destroy_session};
 
-	// Save this to the session
+	/* Save this to the session */
 	irc_set_ctx(m_session.get(), this);
 }
 
@@ -217,7 +217,8 @@ Server::~Server()
 
 void Server::sync(fd_set &setinput, fd_set &setoutput) noexcept
 {
-	/* 1. Send maximum of command possible if available for write */
+	/*
+	 * 1. Send maximum of command possible if available for write */
 	/*
 	 * Break on the first failure to avoid changing the order of the
 	 * commands if any of them fails.

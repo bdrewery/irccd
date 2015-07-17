@@ -32,24 +32,35 @@
 #include <Socket.h>
 #include <SocketAddress.h>
 
-#if defined(WITH_JS)
-#  include "Plugin.h"
-#endif
-
-#include "Transport.h"
+#include "Plugin.h"
 #include "Server.h"
-//#include "ServerEvent.h"
+#include "TransportServer.h"
 
 namespace irccd {
 
 using Event = std::function<void ()>;
 using Events = std::vector<Event>;
 
+using ServerEvent = std::function<void (Plugin &)>;
 using Servers = std::unordered_map<std::string, std::shared_ptr<Server>>;
 
 template <typename T>
 using LookupTable = std::unordered_map<SocketAbstract::Handle, std::shared_ptr<T>>;
 
+/**
+ * @class Irccd
+ * @brief Irccd main instance
+ *
+ * This class is used as the main application event loop, it stores servers, plugins and transports.
+ *
+ * In a general manner, no code in irccd is thread-safe because irccd is mono-threaded except the JavaScript timer
+ * API.
+ *
+ * If you plan to add more threads to irccd, then the simpliest and safest way to execute thread-safe code is to
+ * register an event using Irccd::addEvent function which will be called during the event loop dispatching.
+ *
+ * Thus, except noticed as thread-safe, no function is assumed to be.
+ */
 class Irccd {
 private:
 	/* Main loop */
@@ -123,19 +134,31 @@ private:
 #endif
 
 	/* Private helpers */
-	void process(fd_set &setinput, fd_set &setoutput);
 	void dispatch();
+	void process(fd_set &setinput, fd_set &setoutput);
+	void exec();
+
+	/* Private event helpers */
+	void addTransportEvent(std::shared_ptr<TransportClientAbstract> tc, Event ev) noexcept;
+	void addServerEvent(std::string, std::string, std::string, std::string, std::string, ServerEvent) noexcept;
 
 public:
+	/**
+	 * Constructor that instanciate IPC.
+	 */
 	Irccd();
-	~Irccd();
 
 	/* ------------------------------------------------
-	 * Common routines
+	 * Event loop
 	 * ------------------------------------------------ */
 
-	void addTransportEvent(std::shared_ptr<TransportClientAbstract> tc, Event ev) noexcept;
-	void addServerEvent(std::string, std::string, std::string, std::string, std::string, std::function<void (Plugin &)>) noexcept;
+	/**
+	 * Add an event to the queue. This will immediately signals the event loop to interrupt itself to dispatch
+	 * the pending events.
+	 *
+	 * @param ev the event
+	 * @note Thread-safe
+	 */
 	void addEvent(Event ev) noexcept;
 
 	/* ------------------------------------------------
@@ -173,7 +196,7 @@ public:
 	/**
 	 * Add a new server to the application.
 	 *
-	 * @param args the arguments to pass to the Server constructor
+	 * @param sv the server
 	 */
 	void addServer(std::shared_ptr<Server> sv) noexcept;
 
@@ -201,6 +224,17 @@ public:
 	}
 
 	/* ------------------------------------------------
+	 * Transport management
+	 * ------------------------------------------------ */
+
+	/**
+	 * Add a transport server.
+	 *
+	 * @param ts the transport server
+	 */
+	void addTransport(std::shared_ptr<TransportServerAbstract> ts);
+
+	/* ------------------------------------------------
 	 * Plugin management
 	 * ------------------------------------------------ */
 
@@ -211,18 +245,7 @@ public:
 	 * @return the plugin
 	 * @throws std::out_of_range if not found
 	 */
-	inline std::shared_ptr<Plugin> findPlugin(const std::string &name) const
-	{
-		using namespace std::string_literals;
-
-		auto it = m_plugins.find(name);
-
-		if (it == m_plugins.end()) {
-			throw std::out_of_range("plugin "s + name + " not found"s);
-		}
-
-		return it->second;
-	}
+	std::shared_ptr<Plugin> findPlugin(const std::string &name) const;
 
 	/**
 	 * Add plugin configuration for the specified plugin.
@@ -263,14 +286,6 @@ public:
 		pluginFind(name)->onReload();
 	}
 #endif
-
-	/* ------------------------------------------------
-	 * Transport management
-	 * ------------------------------------------------ */
-
-	void addTransport(std::shared_ptr<TransportServerAbstract> ts);
-
-	void exec();
 
 	/**
 	 * Start the main loop.

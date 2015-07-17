@@ -24,11 +24,8 @@
  * @brief Transports for irccd
  */
 
-#include <cstdio>
 #include <memory>
-#include <sstream>
 #include <string>
-#include <type_traits>
 
 #include <IrccdConfig.h>
 
@@ -43,20 +40,16 @@ namespace irccd {
  * @brief Bring networking between irccd and irccdctl
  *
  * This class contains a master sockets for listening to TCP connections, it is
- * then processed by TransportService who select() them.
+ * then processed by irccd.
  *
  * The transport class supports the following domains:
  *
  * | Domain                | Class                 |
  * |-----------------------|-----------------------|
- * | IPv4, IPv6            | TransportServerIp   |
- * | Unix (not on Windows) | TransportServerUnix |
+ * | IPv4, IPv6            | TransportServerIp     |
+ * | Unix (not on Windows) | TransportServerUnix   |
  *
- * Note: IPv4 and IPv6 can be combined, using Transport::IPv4 | Transport::IPv6
- * makes the transport available on both domains.
- *
- * Because this class owns a socket that will be borrowed to a SocketListener, it is not copyable
- * and not movable so that underlying socket will never be invalidated.
+ * Note: IPv4 and IPv6 can be combined, using TransportServer::IPv6 and its option.
  */
 class TransportServerAbstract {
 private:
@@ -89,7 +82,7 @@ public:
 	 *
 	 * @return the new client
 	 */
-	virtual std::unique_ptr<TransportClientAbstract> accept() = 0;
+	virtual std::shared_ptr<TransportClientAbstract> accept() = 0;
 
 	/**
 	 * Get information about the transport.
@@ -137,9 +130,9 @@ public:
 	/**
 	 * @copydoc Transport::accept
 	 */
-	std::unique_ptr<TransportClientAbstract> accept() override
+	std::shared_ptr<TransportClientAbstract> accept() override
 	{
-		return std::make_unique<TransportClient<Address>>(m_socket.accept());
+		return std::make_shared<TransportClient<Address>>(m_socket.accept());
 	}
 };
 
@@ -149,74 +142,68 @@ public:
  */
 class TransportServerIpv6 : public TransportServer<address::Ipv6> {
 public:
-	TransportServerIpv6(std::string host, unsigned port, bool ipv6only = true)
-		: TransportServer{AF_INET6, address::Ipv6{std::move(host), port}}
-	{
-		int v6opt = ipv6only;
-
-		m_socket.set(IPPROTO_IPV6, IPV6_V6ONLY, v6opt);
-	}
+	/**
+	 * Create an IPv6 and optionally IPv4 transport.
+	 *
+	 * @param address the address (or * for any)
+	 * @param port the port
+	 * @param ipv6only set to true to make IPv6 only
+	 */
+	TransportServerIpv6(std::string address, unsigned port, bool ipv6only = true);
 
 	/**
 	 * @copydoc TransportAbstract::info
 	 */
-	std::string info() const override
-	{
-		std::ostringstream oss;
-
-		oss << "ipv6, address: " << m_socket.getsockname().ip() << ", "
-		    << "port: " << m_socket.getsockname().port();
-
-		return oss.str();
-	}
+	std::string info() const override;
 };
 
+/**
+ * @class TransportServerIpv4
+ * @brief Implementation of transports using IPv6
+ */
 class TransportServerIpv4 : public TransportServer<address::Ipv4> {
 public:
-	TransportServerIpv4(std::string host, unsigned port)
-		: TransportServer{AF_INET, address::Ipv4{std::move(host), port}}
-	{
-	}
+	/**
+	 * Create an IPv4 transport.
+	 *
+	 * @param address the address (or * for any)
+	 * @param port the port
+	 */
+	TransportServerIpv4(std::string host, unsigned port);
 
 	/**
 	 * @copydoc TransportAbstract::info
 	 */
-	std::string info() const override
-	{
-		std::ostringstream oss;
-
-		oss << "ipv4, address: " << m_socket.getsockname().ip() << ", "
-		    << "port: " << m_socket.getsockname().port();
-
-		return oss.str();
-	}
+	std::string info() const override;
 };
 
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 
+/**
+ * @class TransportServerUnix
+ * @brief Implementation of transports for Unix sockets
+ */
 class TransportServerUnix : public TransportServer<address::Unix> {
 private:
 	std::string m_path;
 
 public:
-	inline TransportServerUnix(std::string path)
-		: TransportServer{AF_UNIX, address::Unix{path, true}}
-		, m_path{std::move(path)}
-	{
-	}
+	/**
+	 * Create a Unix transport.
+	 *
+	 * @param path the path
+	 */
+	TransportServerUnix(std::string path);
 
-	~TransportServerUnix()
-	{
-		::remove(m_path.c_str());
-	}
+	/**
+	 * Destroy the transport and remove the file.
+	 */
+	~TransportServerUnix();
 
 	/**
 	 * @copydoc TransportAbstract::info
 	 */
-	std::string info() const override
-	{
-		return "unix, path: " + m_path;
-	}
+	std::string info() const override;
 };
 
 #endif // !_WIN32
