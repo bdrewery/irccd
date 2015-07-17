@@ -55,7 +55,8 @@ class Irccd {
 private:
 	/* Main loop */
 	static std::atomic<bool> m_running;
-	static std::condition_variable m_condition;
+
+	/* Mutex for addEvent */
 	std::mutex m_mutex;
 
 	/* IPC */
@@ -116,6 +117,12 @@ private:
 	void handleTransportUnload(std::shared_ptr<TransportClientAbstract> tc, std::string plugin);
 	void handleTransportUserMode(std::shared_ptr<TransportClientAbstract> tc, std::string server, std::string mode);
 
+	/* Timer slots */
+#if defined(WITH_JS)
+	void handleTimerSignal(std::shared_ptr<Plugin>, std::shared_ptr<Timer>);
+	void handleTimerEnd(std::shared_ptr<Plugin>, std::shared_ptr<Timer>);
+#endif
+
 	/* Private helpers */
 	void process(fd_set &setinput, fd_set &setoutput);
 	void dispatch();
@@ -171,30 +178,6 @@ public:
 	 */
 	void addServer(std::shared_ptr<Server> sv) noexcept;
 
-#if 0
-	/**
-	 * Disconnect a server and remove it.
-	 *
-	 * @param name the name
-	 * @throw std::exception if the server does not exist
-	 */
-	inline void serverDisconnect(const std::string &name)
-	{
-		serverFind(name)->disconnect();
-	}
-
-	/**
-	 * Force reconnection to a server.
-	 *
-	 * @param name the server name
-	 * @throw std::exception if the server does not exist
-	 */
-	inline void serverReconnect(const std::string &name)
-	{
-		serverFind(name)->reconnect();
-	}
-#endif
-
 	/**
 	 * Find a server by name.
 	 *
@@ -221,14 +204,6 @@ public:
 	/* ------------------------------------------------
 	 * Plugin management
 	 * ------------------------------------------------ */
-
-#if defined(WITH_JS)
-#if 0
-	inline bool pluginIsLoaded(const std::string &name) const noexcept
-	{
-		return m_plugins.count(name) > 0;
-	}
-#endif
 
 	/**
 	 * Find a plugin.
@@ -295,60 +270,6 @@ public:
 	 * ------------------------------------------------ */
 
 	void addTransport(std::shared_ptr<TransportServerAbstract> ts);
-
-#if 0
-
-	/* ------------------------------------------------
-	 * For threads only
-	 * ------------------------------------------------ */
-
-	/**
-	 * Add a new transport event.
-	 *
-	 * @param args the arguments to pass to the command constructor.
-	 * @note Thread-safe
-	 */
-	inline void transportAddCommand(TransportCommand command)
-	{
-		{
-			std::lock_guard<std::mutex> lock(m_mutex);
-
-			m_transportCommands.push(std::move(command));
-		}
-
-		m_condition.notify_one();
-	}
-
-#if defined(WITH_JS)
-	/**
-	 * Add a timer event.
-	 *
-	 * @param event the timer event
-	 * @note Thread-safe
-	 */
-	inline void timerAddEvent(TimerEvent event)
-	{
-		{
-			std::lock_guard<std::mutex> lock(m_mutex);
-
-			m_timerEvents.push_back(std::move(event));
-		}
-
-		m_condition.notify_one();
-	}
-#endif
-
-	inline void serverAddEvent(ServerEvent event)
-	{
-		{
-			std::lock_guard<std::mutex> lock(m_mutex);
-
-			m_serverEvents.push(std::move(event));
-		}
-
-		m_condition.notify_one();
-	}
-#endif
 
 	void exec();
 
@@ -576,7 +497,6 @@ public:
 
 } // !irccd
 
-#endif
 #endif
 
 #endif // !_IRCCD_H_

@@ -521,9 +521,44 @@ void Irccd::handleTransportUserMode(shared_ptr<TransportClientAbstract> tc, stri
 
 void Irccd::addTransport(std::shared_ptr<TransportServerAbstract> ts)
 {
-
 	m_lookupTransportServers.emplace(ts->socket().handle(), move(ts));
 }
+
+/* --------------------------------------------------------
+ * Timer slots
+ * -------------------------------------------------------- */
+
+#if defined(WITH_JS)
+
+void Irccd::handleTimerSignal(std::shared_ptr<Plugin> plugin, std::shared_ptr<Timer> timer)
+{
+	addEvent([this, plugin, timer] () {
+		duk_context *ctx = plugin->context();
+
+		dukx_assert_begin(ctx);
+		duk_push_global_object(ctx);
+		duk_get_prop_string(ctx, -1, "\xff" "irccd-timers");
+		duk_push_pointer(ctx, timer.get());
+		duk_get_prop(ctx, -2);
+		if (duk_pcall(ctx, 0) != 0) {
+			Logger::warning() << "plugin " << plugin->info().name
+					  << "failed to call timer: " << duk_safe_to_string(ctx, -1) << std::endl;
+		}
+
+		duk_pop(ctx);
+		duk_pop_2(ctx);
+		dukx_assert_equals(ctx);
+	});
+}
+
+void Irccd::handleTimerEnd(std::shared_ptr<Plugin> plugin, std::shared_ptr<Timer> timer)
+{
+	addEvent([this, plugin, timer] () {
+		plugin->timerRemove(timer);
+	});
+}
+
+#endif
 
 #if defined(WITH_JS)
 
@@ -577,47 +612,17 @@ void Irccd::loadPlugin(string path)
 		return;
 	}
 
-#if 0
 	/*
 	 * These signals will be called from the Timer thread.
 	 */
-	plugin->onTimerSignal.connect([this, plugin] (shared_ptr<Timer> timer) {
-		timerAddEvent({move(plugin), move(timer)});
-	});
-	plugin->onTimerEnd.connect([this, plugin] (shared_ptr<Timer> timer) {
-		timerAddEvent({move(plugin), move(timer), TimerEventType::End});
-	});
+	plugin->onTimerSignal.connect(bind(&Irccd::handleTimerSignal, this, plugin, _1));
+	plugin->onTimerEnd.connect(bind(&Irccd::handleTimerEnd, this, plugin, _1));
 	plugin->onLoad();
-#endif
 
 	m_plugins.emplace(plugin->info().name, move(plugin));
 }
 
-#if 0
-
-void Irccd::pluginUnload(const string &name)
-{
-	shared_ptr<Plugin> plugin = pluginFind(name);
-
-	plugin->onUnload();
-
-	/*
-	 * Erase any element in the timer event queue that match this plugin
-	 * to avoid calling the event of a plugin that is not in irccd anymore.
-	 */
-	for (auto it = m_timerEvents.begin(); it != m_timerEvents.end(); ) {
-		if (it->plugin() == plugin) {
-			it = m_timerEvents.erase(it);
-		} else {
-			++ it;
-		}
-	}
-
-	m_plugins.erase(plugin->info().name);
-}
-
-#endif
-#endif
+#endif // !WITH_JS
 
 void Irccd::process(fd_set &setinput, fd_set &setoutput)
 {
@@ -654,8 +659,6 @@ void Irccd::process(fd_set &setinput, fd_set &setoutput)
 
 void Irccd::dispatch()
 {
-	Logger::debug() << "irccd: dispatching " << m_events.size() << " event(s)" << std::endl;
-
 	/*
 	 * Make a copy because the events can add other events while we are iterating it. Also lock because the timers
 	 * may alter these events too.
@@ -670,6 +673,10 @@ void Irccd::dispatch()
 
 	/* Clear for safety */
 	m_events.clear();
+
+	if (copy.size() > 0) {
+		Logger::debug() << "irccd: dispatching " << copy.size() << " event(s)" << endl;
+	}
 
 	for (auto &ev : copy) {
 		ev();
@@ -723,8 +730,13 @@ void Irccd::exec()
 
 	int error = select(max + 1, &setinput, &setoutput, nullptr, &tv);
 
+	/* Skip anyway */
+	if (!m_running) {
+		return;
+	}
+
 	/* Skip on error */
-	if (error < 0) {
+	if (error < 0 && errno != EINTR) {
 		Logger::warning() << "irccd: " << SocketAbstract::syserror() << std::endl;
 		return;
 	}
@@ -742,486 +754,11 @@ void Irccd::run()
 
 void Irccd::stop()
 {
+	Logger::debug() << "irccd: requesting to stop now" << std::endl;
+
 	m_running = false;
-	m_condition.notify_one();
 }
 
 atomic<bool> Irccd::m_running{true};
-condition_variable Irccd::m_condition;
 
 } // !irccd
-
-#if 0
-
-using namespace literals;
-
-namespace irccd {
-
-Irccd::Irccd()
-	: m_running(true)
-	, m_foreground(false)
-{
-}
-
-void Irccd::initialize()
-{
-	ostringstream oss;
-
-	Socket::init();
-	Logger::setVerbose(false);
-
-#if defined(WITH_LUA)
-	// Add user's path
-	oss << Util::pathUser() << "plugins/";
-	PluginManager::instance().addPath(oss.str());
-
-	// Add system's path
-	oss.str("");
-	if (!Util::isAbsolute(MODDIR))
-		oss << Util::pathBase();
-
-	oss << MODDIR << Util::DIR_SEP;
-	PluginManager::instance().addPath(oss.str());
-#endif
-}
-
-bool Irccd::isOverriden(char c)
-{
-	return m_overriden.find(c) != m_overriden.end();
-}
-
-/*
- * Order is:
- * 1. Option -c passed to the command line
- * 2. User defined, usually ~/.config/irccd/irccd.conf
- * 3. Default cmake configured path, usually /usr/local/etc/irccd.conf
- */
-void Irccd::openConfig()
-{
-	Parser config;
-
-	// Open requested file by command line or default
-	try {
-		if (!isOverriden(Options::Config)) {
-			try {
-				m_configPath = Util::findConfiguration("irccd.conf");
-				config = Parser(m_configPath);
-			} catch (const runtime_error &ex) {
-				Logger::fatal(1, "irccd: %s", ex.what());
-			}
-		} else
-			config = Parser(m_configPath);
-	} catch (const runtime_error &ex) {
-		Logger::fatal(1, "irccd: could not open %s, exiting", m_configPath.c_str());
-	}
-
-	Logger::log("irccd: using configuration %s", m_configPath.c_str());
-
-	/*
-	 * Order is important, load everything we can before plugins so that
-	 * they can use identities, configuration and such, but servers
-	 * requires plugin to be loaded.
-	 */
-	readGeneral(config);
-	readIdentities(config);
-	readRules(config);
-	readListeners(config);
-	readPlugins(config);
-
-#if !defined(_WIN32)
-	if (!m_foreground) {
-		Logger::log("irccd: forking to background...");
-		(void)daemon(0, 0);
-	}
-#endif
-
-#if defined(WITH_LUA)
-	/* Now, we load plugins specified by command line */
-	for (auto s : m_wantedPlugins) {
-		try {
-			PluginManager::instance().load(s);
-		} catch (const exception &error) {
-			Logger::warn("irccd: %s", error.what());
-		}
-	}
-#endif
-
-	readServers(config);
-}
-
-void Irccd::readGeneral(const Parser &config)
-{
-	if (config.hasSection("general")) {
-		auto general = config.getSection("general");
-
-#if defined(WITH_LUA)
-		// Extract parameters that are needed for the next
-		if (general.hasOption("plugin-path"))
-			PluginManager::instance().addPath(general.getOption<string>("plugin-path"));
-#endif
-
-#if !defined(_WIN32)
-		if (general.hasOption("syslog"))
-			Logger::setSyslog(general.getOption<bool>("syslog"));
-		if (general.hasOption("foreground") && !isOverriden(Options::Foreground))
-			m_foreground = general.getOption<bool>("foreground");
-		if (general.hasOption("verbose") && !isOverriden(Options::Verbose))
-			Logger::setVerbose(general.getOption<bool>("verbose"));
-
-		m_uid = parse(general, "uid", false);
-		m_gid = parse(general, "gid", true);
-
-		if (setgid(m_gid) < 0)
-			Logger::warn("irccd: failed to set gid to %s: %s",
-			    idname(true).c_str(), strerror(errno));
-		if (setuid(m_uid) < 0)
-			Logger::warn("irccd: failed to set uid to %s: %s",
-			    idname(false).c_str(), strerror(errno));
-#endif
-	}
-}
-
-#if !defined(_WIN32)
-
-int Irccd::parse(const Section &section, const char *name, bool isgid)
-{
-	int result(0);
-
-	if (!section.hasOption(name))
-		return 0;
-
-	auto value = section.getOption<string>(name);
-
-	try {
-		if (isgid) {
-			auto group = getgrnam(value.c_str());
-			result = (group == nullptr) ? stoi(value) : group->gr_gid;
-		} else {
-			auto pw = getpwnam(value.c_str());
-			result = (pw == nullptr) ? stoi(value) : pw->pw_uid;
-		}
-	} catch (...) {
-		Logger::warn("irccd: invalid %sid %s", ((isgid) ? "g" : "u"), value.c_str());
-	}
-
-	return result;
-}
-
-string Irccd::idname(bool isgid)
-{
-	string result;
-
-	if (isgid) {
-		auto group = getgrgid(m_gid);
-		result = (group == nullptr) ? to_string(m_gid) : group->gr_name;
-	} else {
-		auto pw = getpwuid(m_uid);
-		result = (pw == nullptr) ? to_string(m_uid) : pw->pw_name;
-	}
-
-	return result;
-}
-
-#endif
-
-void Irccd::readPlugins(const Parser &config)
-{
-	// New way of loading plugins
-	if (config.hasSection("plugins")) {
-#if defined(WITH_LUA)
-		Section section = config.getSection("plugins");
-
-		for (auto opt : section) {
-			try {
-				if (opt.second.length() == 0)
-					PluginManager::instance().load(opt.first);
-				else
-					PluginManager::instance().load(opt.second, true);
-			} catch (const runtime_error &error) {
-				Logger::warn("irccd: %s", error.what());
-			}
-		}
-#else
-		(void)config;
-		Logger::warn("irccd: ignoring plugins, Lua support is disabled");
-#endif
-	}
-}
-
-void Irccd::readIdentities(const Parser &config)
-{
-	config.findSections("identity", [&] (const Section &s) {
-		Server::Identity identity;
-
-		try {
-			identity.name = s.requireOption<string>("name");
-
-			if (s.hasOption("nickname"))
-				identity.nickname = s.getOption<string>("nickname");
-			if (s.hasOption("username"))
-				identity.username = s.getOption<string>("username");
-			if (s.hasOption("realname"))
-				identity.realname = s.getOption<string>("realname");
-			if (s.hasOption("ctcp-version"))
-				identity.ctcpVersion = s.getOption<string>("ctcp-version");
-
-			Logger::log("identity: found identity %s (%s, %s, \"%s\")",
-			    identity.name.c_str(),
-			    identity.nickname.c_str(), identity.username.c_str(),
-			    identity.realname.c_str());
-
-			m_identities.push_back(identity);
-		} catch (const out_of_range &ex) {
-			Logger::log("identity: parameter %s", ex.what());
-		}
-	});
-}
-
-void Irccd::readRules(const Parser &config)
-{
-#if defined(WITH_LUA)
-	using string;
-
-	config.findSections("rule", [&] (const Section &s) {
-		RuleMap servers = getList(s, "servers");
-		RuleMap channels = getList(s, "channels");
-		RuleMap nicknames = getList(s, "nicknames");
-		RuleMap plugins = getList(s, "plugins");
-		RuleMap events = getList(s, "events");
-		RuleAction action{RuleAction::Accept};
-
-		if (!s.hasOption("action")) {
-			Logger::warn("rule: missing action");
-			return;
-		}
-
-		auto value = s.getOption<string>("action");
-
-		if (value == "drop") {
-			action = RuleAction::Drop;
-		} else if (value == "accept") {
-			action = RuleAction::Accept;
-		} else {
-			Logger::warn("rule: invalid action value `%s`", value.c_str());
-			return;
-		}
-
-		Logger::debug("rule: found rule (%s)", (action == RuleAction::Accept) ? "accept" : "drop");
-
-		RuleManager::instance().add(Rule{servers, channels, nicknames, plugins, events, action});
-	});
-#else
-	(void)config;
-	Logger::warn("irccd: ignoring rules, Lua support is disabled");
-#endif
-}
-
-void Irccd::readListeners(const Parser &config)
-{
-	config.findSections("listener", [&] (const Section &s) {
-		try {
-			string type = s.requireOption<string>("type");
-
-			if (type == "internet")
-				extractInternet(s);
-			else if (type == "unix") {
-#if !defined(_WIN32)
-				extractUnix(s);
-#else
-				Logger::warn("listener: unix sockets are not supported on Windows");
-#endif
-			} else
-				Logger::warn("listener: unknown listener type `%s'", type.c_str());
-		} catch (const exception &ex) {
-			Logger::warn("listener: parameter %s", ex.what());
-		}
-	});
-}
-
-void Irccd::extractInternet(const Section &s)
-{
-	vector<string> protocols;
-	string address = "*", family;
-	int port;
-	bool ipv4 = false, ipv6 = false;
-
-	if (s.hasOption("address"))
-		address = s.getOption<string>("address");
-
-	family = s.getOption<string>("family");
-	port = s.getOption<int>("port");
-
-	// extract list of family
-	protocols = Util::split(family, " \t");
-
-	for (auto p : protocols) {
-		if (p == "ipv4")
-			ipv4 = true;
-		else if (p == "ipv6")
-			ipv6 = true;
-		else {
-			Logger::warn("listener: parameter family is one of them: ipv4, ipv6");
-			Logger::warn("listener: defaulting to ipv4");
-
-			ipv4 = true;
-			ipv6 = false;
-		}
-	}
-
-	try {
-		int reuse = 1;
-
-		Socket inet((ipv6) ? AF_INET6 : AF_INET, SOCK_STREAM, 0);
-
-		inet.set(SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof (reuse));
-		if (ipv6) {
-			int mode = !ipv4;
-			inet.set(IPPROTO_IPV6, IPV6_V6ONLY, &mode, sizeof (mode));
-		}
-
-		inet.bind(BindAddressIP(address, port, (ipv6) ? AF_INET6 : AF_INET));
-		inet.listen(64);
-
-		Listener::instance().add(inet);
-		Logger::log("listener: listening for clients on port %d...", port);
-	} catch (const SocketError &ex) {
-		Logger::warn("listener: internet socket error: %s", ex.what());
-	}
-}
-
-#if !defined(_WIN32)
-void Irccd::extractUnix(const Section &s)
-{
-	auto path = s.requireOption<string>("path");
-
-	// First remove the dust
-	if (Util::exist(path) && remove(path.c_str()) < 0) {
-		Logger::warn("listener: error removing %s: %s", path.c_str(), strerror(errno));
-	} else {
-		try {
-			Socket un(AF_UNIX, SOCK_STREAM, 0);
-
-			un.bind(AddressUnix(path, true));
-			un.listen(64);
-
-			Listener::instance().add(un);
-			Logger::log("listener: listening for clients on %s...", path.c_str());
-		} catch (const SocketError &ex) {
-			Logger::warn("listener: unix socket error: %s", ex.what());
-		}
-	}
-}
-#endif
-
-void Irccd::readServers(const Parser &config)
-{
-	config.findSections("server", [&] (const Section &s) {
-		try {
-			Server::Info info;
-			Server::Identity identity;
-			Server::RetryInfo reco;
-			unsigned options = 0;
-
-			// Server information
-			info.name = s.requireOption<string>("name");
-			info.host = s.requireOption<string>("host");
-			info.port = s.requireOption<int>("port");
-
-			if (s.hasOption("command-char"))
-				info.command = s.getOption<string>("command-char");
-
-			// Some boolean options
-			if (s.hasOption("ssl") && s.getOption<bool>("ssl"))
-				options |= Server::OptionSsl;
-			if (s.hasOption("ssl-verify") && !s.getOption<bool>("ssl-verify"))
-				options |= Server::OptionSslNoVerify;
-			if (s.hasOption("join-invite") && s.getOption<bool>("join-invite"))
-				options |= Server::OptionJoinInvite;
-			if (s.hasOption("auto-rejoin") && s.getOption<bool>("auto-rejoin"))
-				options |= Server::OptionAutoRejoin;
-
-			if (s.hasOption("password"))
-				info.password = s.getOption<string>("password");
-
-			// Identity
-			if (s.hasOption("identity"))
-				identity = findIdentity(s.getOption<string>("identity"));
-
-			// Reconnection settings
-			if (s.hasOption("reconnect"))
-				reco.enabled = s.getOption<bool>("reconnect");
-			if (s.hasOption("reconnect-tries"))
-				reco.maxretries = s.getOption<int>("reconnect-tries");
-			if (s.hasOption("reconnect-timeout"))
-				reco.timeout = s.getOption<int>("reconnect-timeout");
-
-			auto server = make_shared<Server>(info, identity, reco, options);
-			auto &manager = ServerManager::instance();
-
-			// Extract channels to auto join
-			extractChannels(s, server);
-			if (manager.has(info.name))
-				Logger::warn("server %s: duplicated server", info.name.c_str());
-			else
-				manager.add(move(server));
-		} catch (const out_of_range &ex) {
-			Logger::warn("server: parameter %s", ex.what());
-		}
-	});
-}
-
-void Irccd::extractChannels(const Section &section, shared_ptr<Server> &server)
-{
-	vector<string> channels;
-	string list, name, password;
-
-	if (section.hasOption("channels")) {
-		list = section.getOption<string>("channels");
-		channels = Util::split(list, " \t");
-
-		for (const auto &s : channels)
-			server->addChannel(Server::toChannel(s));
-	}
-}
-
-Irccd::~Irccd()
-{
-	Socket::finish();
-}
-
-void Irccd::override(char c)
-{
-	m_overriden[c] = true;
-}
-
-void Irccd::setConfigPath(const string &path)
-{
-	m_configPath = path;
-}
-
-void Irccd::setForeground(bool mode)
-{
-	m_foreground = mode;
-}
-
-const Server::Identity &Irccd::findIdentity(const string &name)
-{
-	/*
-	 * When name is length 0 that mean user hasn't defined an identity
-	 * because it's optional, we don't write an empty message error.
-	 */
-	if (name.length() == 0)
-		return m_defaultIdentity;
-
-	for (const auto &i : m_identities)
-		if (i.name == name)
-			return i;
-
-	Logger::warn("identity: %s not found", name.c_str());
-
-	return m_defaultIdentity;
-}
-
-} // !irccd
-
-#endif

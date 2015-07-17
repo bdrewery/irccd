@@ -325,7 +325,6 @@ void stop(int)
 
 int main(int, char **argv)
 {
-	try {
 	using namespace irccd;
 
 	Logger::setVerbose(true);
@@ -333,7 +332,7 @@ int main(int, char **argv)
 	setprogname("irccd");
 	Util::setProgramPath(argv[0]);
 
-		Irccd irccd;
+	Irccd irccd;
 
 	signal(SIGINT, irccd::stop);
 	signal(SIGTERM, irccd::stop);
@@ -347,18 +346,6 @@ int main(int, char **argv)
 	}
 
 	irccd.run();
-	} catch (const irccd::SocketError &ex) {
-		std::cerr << ex.function() << ": " << ex.what() << std::endl;
-	}
 
 	return 0;
 }
-
-#if 0
-
-{
-	Logger::warn("usage: %s [-fv] [-c config] [-p pluginpath] [-P plugin]", getprogname());
-	Logger::fatal(1, "       %s test plugin.lua [command] [parameters...]", getprogname());
-}
-
-#endif

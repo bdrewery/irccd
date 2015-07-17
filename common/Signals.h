@@ -104,7 +104,7 @@ public:
 			id = m_stack.top();
 			m_stack.pop();
 		} else {
-			m_max ++;
+			id = m_max ++;
 		}
 
 		m_functions.emplace(id, std::move(function));

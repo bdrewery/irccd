@@ -108,6 +108,16 @@ public:
 	~Timer();
 
 	/**
+	 * Get the type of timer.
+	 *
+	 * @return the type.
+	 */
+	inline TimerType type() const noexcept
+	{
+		return m_type;
+	}
+
+	/**
 	 * Start the thread.
 	 *
 	 * This function should only be called from the irccd's event loop.
