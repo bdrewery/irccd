@@ -416,7 +416,7 @@ public:
 	inline void update() noexcept
 	{
 		if (m_next.type() != ServerState::Undefined) {
-			Logger::debug() << "server: switching to state: ";
+			Logger::debug() << "server " << m_info.name << ": switching to state ";
 
 			switch (m_next.type()) {
 			case ServerState::Connecting:

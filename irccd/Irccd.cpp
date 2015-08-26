@@ -166,23 +166,22 @@ void Irccd::addTransportEvent(shared_ptr<TransportClientAbstract> tc, Event ev) 
 	});
 }
 
-void Irccd::addServerEvent(string name, string server, string origin, string channel, string json, ServerEvent ev) noexcept
+void Irccd::addServerEvent(ServerEvent event) noexcept
 {
 	addEvent([=] () {
 		for (auto &pair : m_plugins) {
+			auto name = event.name(*pair.second);
+
 			// TODO: match rules here
 			(void)name;
-			(void)server;
-			(void)origin;
-			(void)channel;
 
-			ev(*pair.second);
+			event.exec(*pair.second);
 		}
 	});
 
 	/* Asynchronous send */
 	for (auto &pair : m_lookupTransportClients) {
-		pair.second->send(json);
+		pair.second->send(event.json);
 	}
 }
 
@@ -327,15 +326,20 @@ void Irccd::handleServerOnChannelNotice(shared_ptr<Server> server, string origin
 	ostringstream json;
 
 	json << "{"
-	     << "\"event\":\"ChannelNotice\","
+	     << "\"event\":\"channelNotice\","
 	     << "\"server\":\"" << server->info().name << "\","
 	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
 	     << "\"channel\":\"" << JsonValue::escape(channel) << "\","
 	     << "\"notice\":\"" << JsonValue::escape(notice) << "\""
 	     << "}";
 
-	addServerEvent("onChannelNotice", server->info().name, origin, channel, json.str(), [=] (Plugin &plugin) {
-		plugin.onChannelNotice(server, origin, channel, notice);
+	addServerEvent({server->info().name, origin, channel, json.str(),
+		[=] (Plugin &) -> string {
+			return "onChannelNotice";
+		},
+		[=] (Plugin &plugin) {
+			plugin.onChannelNotice(move(server), move(origin), move(channel), move(notice));
+		}
 	});
 }
 
@@ -350,8 +354,13 @@ void Irccd::handleServerOnConnect(shared_ptr<Server> server)
 	     << "\"server\":\"" << server->info().name << "\""
 	     << "}";
 
-	addServerEvent("onConnect", server->info().name, "", "", json.str(), [=] (Plugin &plugin) {
-		plugin.onConnect(move(server));
+	addServerEvent({server->info().name, /* origin */ "", /* channel */ "", json.str(),
+		[=] (Plugin &) -> string {
+			return "onConnect";
+		},
+		[=] (Plugin &plugin) {
+			plugin.onConnect(move(server));
+		}
 	});
 }
 
@@ -369,8 +378,13 @@ void Irccd::handleServerOnInvite(shared_ptr<Server> server, string origin, strin
 	     << "\"channel\":\"" << JsonValue::escape(channel) << "\""
 	     << "}";
 
-	addServerEvent("onInvite", server->info().name, origin, channel, json.str(), [=] (Plugin &plugin) {
-		plugin.onInvite(move(server), move(origin), move(channel));
+	addServerEvent({server->info().name, origin, channel, json.str(),
+		[=] (Plugin &) -> string {
+			return "onInvite";
+		},
+		[=] (Plugin &plugin) {
+			plugin.onInvite(move(server), move(origin), move(channel));
+		}
 	});
 }
 
@@ -388,8 +402,13 @@ void Irccd::handleServerOnJoin(shared_ptr<Server> server, string origin, string 
 	     << "\"channel\":\"" << JsonValue::escape(channel) << "\""
 	     << "}";
 
-	addServerEvent("onJoin", server->info().name, origin, channel, json.str(), [=] (Plugin &plugin) {
-		plugin.onJoin(move(server), move(origin), move(channel));
+	addServerEvent({server->info().name, origin, channel, json.str(),
+		[=] (Plugin &) -> string {
+			return "onJoin";
+		},
+		[=] (Plugin &plugin) {
+			plugin.onInvite(move(server), move(origin), move(channel));
+		}
 	});
 }
 
@@ -409,8 +428,13 @@ void Irccd::handleServerOnKick(shared_ptr<Server> server, string origin, string 
 	     << "\"reason\":\"" << JsonValue::escape(reason) << "\""
 	     << "}";
 
-	addServerEvent("onKick", server->info().name, origin, channel, json.str(), [=] (Plugin &plugin) {
-		plugin.onKick(move(server), move(origin), move(channel), move(target), move(reason));
+	addServerEvent({server->info().name, origin, channel, json.str(),
+		[=] (Plugin &) -> string {
+			return "onKick";
+		},
+		[=] (Plugin &plugin) {
+			plugin.onKick(move(server), move(origin), move(channel), move(target), move(reason));
+		}
 	});
 }
 
@@ -447,8 +471,13 @@ void Irccd::handleServerOnMe(shared_ptr<Server> server, string origin, string ta
 	     << "\"message\":\"" << JsonValue::escape(message) << "\""
 	     << "}";
 
-	addServerEvent("onMe", server->info().name, origin, target, json.str(), [=] (Plugin &plugin) {
-		plugin.onMe(move(server), move(origin), move(target), move(message));
+	addServerEvent({server->info().name, origin, target, json.str(),
+		[=] (Plugin &) -> string {
+			return "onMe";
+		},
+		[=] (Plugin &plugin) {
+			plugin.onMe(move(server), move(origin), move(target), move(message));
+		}
 	});
 }
 
@@ -467,8 +496,13 @@ void Irccd::handleServerOnMode(shared_ptr<Server> server, string origin, string 
 	     << "\"argument\":\"" << JsonValue::escape(arg) << "\""
 	     << "}";
 
-	addServerEvent("onMode", server->info().name, origin, channel, json.str(), [=] (Plugin &plugin) {
-		plugin.onMode(move(server), move(origin), move(channel), move(mode), move(arg));
+	addServerEvent({server->info().name, origin, channel, json.str(),
+		[=] (Plugin &) -> string {
+			return "onMode";
+		},
+		[=] (Plugin &plugin) {
+			plugin.onMode(move(server), move(origin), move(channel), move(mode), move(arg));
+		}
 	});
 }
 
@@ -486,8 +520,13 @@ void Irccd::handleServerOnNick(shared_ptr<Server> server, string origin, string 
 	     << "\"new\":\"" << nickname << "\""
 	     << "}";
 
-	addServerEvent("onNick", server->info().name, origin, "", json.str(), [=] (Plugin &plugin) {
-		plugin.onNick(move(server), move(origin), move(nickname));
+	addServerEvent({server->info().name, origin, /* channel */ "", json.str(),
+		[=] (Plugin &) -> string {
+			return "onNick";
+		},
+		[=] (Plugin &plugin) {
+			plugin.onNick(move(server), move(origin), move(nickname));
+		}
 	});
 }
 
@@ -505,8 +544,13 @@ void Irccd::handleServerOnNotice(shared_ptr<Server> server, string origin, strin
 	     << "\"notice\":\"" << JsonValue::escape(message) << "\""
 	     << "}";
 
-	addServerEvent("onNotice", server->info().name, origin, /* channel */ "", json.str(), [=] (Plugin &plugin) {
-		plugin.onNotice(move(server), move(origin), move(message));
+	addServerEvent({server->info().name, origin, /* channel */ "", json.str(),
+		[=] (Plugin &) -> string {
+			return "onNotice";
+		},
+		[=] (Plugin &plugin) {
+			plugin.onNotice(move(server), move(origin), move(message));
+		}
 	});
 }
 
@@ -525,8 +569,13 @@ void Irccd::handleServerOnPart(shared_ptr<Server> server, string origin, string 
 	     << "\"reason\":\"" << JsonValue::escape(reason) << "\""
 	     << "}";
 
-	addServerEvent("onPart", server->info().name, origin, channel, json.str(), [=] (Plugin &plugin) {
-		plugin.onPart(move(server), move(origin), move(channel), move(reason));
+	addServerEvent({server->info().name, origin, channel, json.str(),
+		[=] (Plugin &) -> string {
+			return "onPart";
+		},
+		[=] (Plugin &plugin) {
+			plugin.onPart(move(server), move(origin), move(channel), move(reason));
+		}
 	});
 }
 
@@ -553,8 +602,13 @@ void Irccd::handleServerOnTopic(shared_ptr<Server> server, string origin, string
 	     << "\"topic\":\"" << JsonValue::escape(topic) << "\""
 	     << "}";
 
-	addServerEvent("onTopic", server->info().name, origin, channel, json.str(), [=] (Plugin &plugin) {
-		plugin.onTopic(move(server), move(origin), move(channel), move(topic));
+	addServerEvent({server->info().name, origin, channel, json.str(),
+		[=] (Plugin &) -> string {
+			return "onTopic";
+		},
+		[=] (Plugin &plugin) {
+			plugin.onTopic(move(server), move(origin), move(channel), move(topic));
+		}
 	});
 }
 
@@ -572,8 +626,13 @@ void Irccd::handleServerOnUserMode(shared_ptr<Server> server, string origin, str
 	     << "\"mode\":\"" << JsonValue::escape(mode) << "\""
 	     << "}";
 
-	addServerEvent("onUserMode", server->info().name, origin, "", json.str(), [=] (Plugin &plugin) {
-		plugin.onUserMode(server, origin, mode);
+	addServerEvent({server->info().name, origin, /* channel */ "", json.str(),
+		[=] (Plugin &) -> string {
+			return "onUserMode";
+		},
+		[=] (Plugin &plugin) {
+			plugin.onUserMode(move(server), move(origin), move(mode));
+		}
 	});
 }
 

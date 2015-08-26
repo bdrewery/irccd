@@ -41,7 +41,22 @@ namespace irccd {
 using Event = std::function<void ()>;
 using Events = std::vector<Event>;
 
-using ServerEvent = std::function<void (Plugin &)>;
+/**
+ * @class ServerEvent
+ * @brief Structure that owns several informations about an IRC event
+ *
+ * This structure is used to dispatch the IRC event to the plugins and the transports.
+ */
+class ServerEvent {
+public:
+	std::string server;
+	std::string origin;
+	std::string target;
+	std::string json;
+	std::function<std::string (Plugin &)> name;
+	std::function<void (Plugin &)> exec;
+};
+
 using Servers = std::unordered_map<std::string, std::shared_ptr<Server>>;
 
 template <typename T>
@@ -140,7 +155,7 @@ private:
 
 	/* Private event helpers */
 	void addTransportEvent(std::shared_ptr<TransportClientAbstract> tc, Event ev) noexcept;
-	void addServerEvent(std::string, std::string, std::string, std::string, std::string, ServerEvent) noexcept;
+	void addServerEvent(ServerEvent) noexcept;
 
 public:
 	/**
