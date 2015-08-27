@@ -57,6 +57,28 @@ public:
 	std::function<void (Plugin &)> exec;
 };
 
+/**
+ * @enum ServerMessageType
+ * @brief Describe which type of message has been received
+ *
+ * On channels and queries, you may have a special command or a standard message depending on the
+ * beginning of the message.
+ *
+ * Example: `!reminder help' may invoke the command event if a plugin reminder exists.
+ */
+enum class ServerMessageType {
+	Command,		//!< special command
+	Message			//!< standard message
+};
+
+/**
+ * @brief Combine the type of message and its content
+ */
+using ServerMessagePair = std::pair<std::string, ServerMessageType>;
+
+/**
+ * @brief Table of servers
+ */
 using Servers = std::unordered_map<std::string, std::shared_ptr<Server>>;
 
 template <typename T>
@@ -149,6 +171,9 @@ private:
 #endif
 
 	/* Private helpers */
+#if defined(WITH_JS)
+	ServerMessagePair parseMessage(std::string message, Server &server, Plugin &plugin);
+#endif
 	void dispatch();
 	void process(fd_set &setinput, fd_set &setoutput);
 	void exec();

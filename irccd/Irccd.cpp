@@ -34,6 +34,51 @@ using namespace irccd::address;
 
 namespace irccd {
 
+#if defined(WITH_JS)
+
+ServerMessagePair Irccd::parseMessage(string message, Server &server, Plugin &plugin)
+{
+	string cc = server.settings().command;
+	string name = plugin.info().name;
+	string result = message;
+	bool iscommand = false;
+
+	// handle special commands "!<plugin> command"
+	if (cc.length() > 0) {
+		auto pos = result.find_first_of(" \t");
+		auto fullcommand = cc + name;
+
+		/*
+		 * If the message that comes is "!foo" without spaces we
+		 * compare the command char + the plugin name. If there
+		 * is a space, we check until we find a space, if not
+		 * typing "!foo123123" will trigger foo plugin.
+		 */
+		if (pos == string::npos) {
+			iscommand = result == fullcommand;
+		} else {
+			iscommand = result.length() >= fullcommand.length() &&
+			    result.compare(0, pos, fullcommand) == 0;
+		}
+
+		if (iscommand) {
+			/*
+			 * If no space is found we just set the message to "" otherwise
+			 * the plugin name will be passed through onCommand
+			 */
+			if (pos == string::npos) {
+				result = "";
+			} else {
+				result = message.substr(pos + 1);
+			}
+		}
+	}
+
+	return ServerMessagePair{result, ((iscommand) ? ServerMessageType::Command : ServerMessageType::Message)};
+}
+
+#endif
+
 void Irccd::dispatch()
 {
 	/*
@@ -453,7 +498,20 @@ void Irccd::handleServerOnMessage(shared_ptr<Server> server, string origin, stri
 	     << "\"message\":\"" << JsonValue::escape(message) << "\""
 	     << "}";
 
-	// TODO: handle onMessage/onCommand
+	addServerEvent({server->info().name, origin, channel, json.str(),
+		[=] (Plugin &plugin) -> string {
+			return parseMessage(message, *server, plugin).second == ServerMessageType::Command ? "onCommand" : "onMessage";
+		},
+		[=] (Plugin &plugin) {
+			ServerMessagePair pack = parseMessage(message, *server, plugin);
+
+			if (pack.second == ServerMessageType::Command) {
+				plugin.onCommand(move(server), move(channel), move(origin), move(message));
+			} else {
+				plugin.onMessage(move(server), move(channel), move(origin), move(message));
+			}
+		}
+	});
 }
 
 void Irccd::handleServerOnMe(shared_ptr<Server> server, string origin, string target, string message)
@@ -584,7 +642,29 @@ void Irccd::handleServerOnQuery(shared_ptr<Server> server, string origin, string
 	Logger::debug() << "server " << server->info().name << ": onQuery: "
 			<< "origin=" << origin << ", message=" << message << endl;
 
-	// TODO: like onMessage
+	ostringstream json;
+
+	json << "{"
+	     << "\"event\":\"query\","
+	     << "\"server\":\"" << server->info().name << "\","
+	     << "\"origin\":\"" << JsonValue::escape(origin) << "\","
+	     << "\"message\":\"" << JsonValue::escape(message) << "\""
+	     << "}";
+
+	addServerEvent({server->info().name, origin, /* channel */ "", json.str(),
+		[=] (Plugin &plugin) -> string {
+			return parseMessage(message, *server, plugin).second == ServerMessageType::Command ? "onQueryCommand" : "onQuery";
+		},
+		[=] (Plugin &plugin) {
+			ServerMessagePair pack = parseMessage(message, *server, plugin);
+
+			if (pack.second == ServerMessageType::Command) {
+				plugin.onQueryCommand(move(server), move(origin), move(message));
+			} else {
+				plugin.onQuery(move(server), move(origin), move(message));
+			}
+		}
+	});
 }
 
 void Irccd::handleServerOnTopic(shared_ptr<Server> server, string origin, string channel, string topic)
