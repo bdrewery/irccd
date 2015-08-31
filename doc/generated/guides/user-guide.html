@@ -668,11 +668,6 @@ libxdg-basedir, <a href="https://github.com/devnev/libxdg-basedir">https://githu
 </li>
 <li>
 <p>
-Lua 5.2, <a href="http://lua.org">http://lua.org</a> (optional).
-</p>
-</li>
-<li>
-<p>
 LuaJIT, <a href="http://luajit.org">http://luajit.org</a> (optional).
 </p>
 </li>
@@ -715,8 +710,7 @@ can still use <a href="#irccdctl">irccdctl</a> to manage irccd.</p></div>
 <td class="icon">
 <img src="icons/note.png" alt="Note">
 </td>
-<td class="content">If Lua is not found on your system, Lua support is automatically disabled, if
-you plan to use Lua, do the above command and switch Off to On.</td>
+<td class="content">Lua 5.2 is bundled with irccd and enabled by default.</td>
 </tr></table>
 </div>
 <div class="paragraph"><div class="title">Disable Lua documentation</div><p>If you don&#8217;t want to install Lua API documentation, use the following command.</p></div>
@@ -822,7 +816,7 @@ the same line.</p></div>
 <div class="paragraph"><p>The comment character is <strong>#</strong> and can live at the beginning or the end of a line.</p></div>
 <div class="listingblock">
 <div class="title">Correct config</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+<div class="content"><!-- Generator: GNU source-highlight 3.1.7
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -834,7 +828,7 @@ http://www.gnu.org/software/src-highlite -->
 <span style="color: #009900">host </span><span style="color: #990000">=</span> <span style="color: #FF0000">"localhost"</span>              <span style="font-style: italic"><span style="color: #9A1900"># this is a comment too</span></span></tt></pre></div></div>
 <div class="listingblock">
 <div class="title">Bad config</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+<div class="content"><!-- Generator: GNU source-highlight 3.1.7
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -885,7 +879,7 @@ application.</p></div>
 </div>
 <div class="listingblock">
 <div class="title">Example</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+<div class="content"><!-- Generator: GNU source-highlight 3.1.7
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -900,7 +894,7 @@ the standard directories, otherwise, provide the full path (including the .lua
 extension).</p></div>
 <div class="listingblock">
 <div class="title">Example</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+<div class="content"><!-- Generator: GNU source-highlight 3.1.7
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -948,7 +942,7 @@ default identity with <span class="monospaced">irccd</span> as nickname and user
 </ul></div>
 <div class="listingblock">
 <div class="title">Example</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+<div class="content"><!-- Generator: GNU source-highlight 3.1.7
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -1037,7 +1031,7 @@ section is also redefinable.</p></div>
 </ul></div>
 <div class="listingblock">
 <div class="title">Example</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+<div class="content"><!-- Generator: GNU source-highlight 3.1.7
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -1103,7 +1097,7 @@ Unix sockets, based on files (not available on Windows)
 </ul></div>
 <div class="listingblock">
 <div class="title">Example</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+<div class="content"><!-- Generator: GNU source-highlight 3.1.7
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -1126,7 +1120,7 @@ http://www.gnu.org/software/src-highlite -->
 </ul></div>
 <div class="listingblock">
 <div class="title">Example</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+<div class="content"><!-- Generator: GNU source-highlight 3.1.7
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -1153,7 +1147,7 @@ concern switch to a Unix socket if possible.</td>
 the one defined here does not exist for real.</p></div>
 <div class="listingblock">
 <div class="title">Example of <span class="monospaced">irccd.conf</span> file</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+<div class="content"><!-- Generator: GNU source-highlight 3.1.7
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -1367,7 +1361,7 @@ so for the hours and minutes, you can use <strong>%H:%M</strong>.</p></div>
 </ul></div>
 <div class="paragraph"><div class="title">Example with <span class="monospaced">logger</span></div><p>Using the plugin logger, you can use a configuration like this:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+<div class="content"><!-- Generator: GNU source-highlight 3.1.7
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -1407,7 +1401,7 @@ places at exactly the same <a href="#irccdpaths">irccd paths</a>.</p></div>
 </ul></div>
 <div class="listingblock">
 <div class="title">Example</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+<div class="content"><!-- Generator: GNU source-highlight 3.1.7
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -1455,7 +1449,7 @@ only one may be defined.</p></div>
 </ul></div>
 <div class="listingblock">
 <div class="title">Example</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+<div class="content"><!-- Generator: GNU source-highlight 3.1.7
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -1477,7 +1471,7 @@ http://www.gnu.org/software/src-highlite -->
 </ul></div>
 <div class="listingblock">
 <div class="title">Example</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.6
+<div class="content"><!-- Generator: GNU source-highlight 3.1.7
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -2007,7 +2001,8 @@ quotes.</p></div>
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-02-18 21:35:34 CET
+Last updated
+ 2015-08-31 11:41:38 CEST
 </div>
 </div>
 </body>

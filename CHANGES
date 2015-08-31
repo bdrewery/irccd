@@ -1,6 +1,10 @@
 IRC Client Daemon CHANGES
 =========================
 
+1.1.6 August 31, 2015
+---------------------------------------
+  * Import Lua 5.2.4 instead of using system.
+
 1.1.5 February 14, 2015
 ---------------------------------------
   * Fix Mac OS X build,

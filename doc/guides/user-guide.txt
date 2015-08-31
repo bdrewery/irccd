@@ -34,7 +34,6 @@ To build from sources, you need the following installed on your system:
 * cmake, http://www.cmake.org.
 * libxdg-basedir, https://github.com/devnev/libxdg-basedir. On Unix only
   (optional).
-* Lua 5.2, http://lua.org (optional).
 * LuaJIT, http://luajit.org (optional).
 * C++11 support.
 
@@ -73,8 +72,7 @@ When disabling Lua, the IRC bot can still be used as a message relayer, so you
 can still use <<irccdctl,irccdctl>> to manage irccd.
 
 [NOTE]
-If Lua is not found on your system, Lua support is automatically disabled, if
-you plan to use Lua, do the above command and switch Off to On.
+Lua 5.2 is bundled with irccd and enabled by default.
 
 .Disable Lua documentation
 If you don't want to install Lua API documentation, use the following command.

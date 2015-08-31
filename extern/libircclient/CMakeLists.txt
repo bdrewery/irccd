@@ -42,5 +42,3 @@ target_link_libraries(
 	ircclient
 	${OPENSSL_LIBRARIES}
 )
-
-# vim: set syntax=cmake:

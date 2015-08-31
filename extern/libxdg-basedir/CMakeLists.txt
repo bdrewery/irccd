@@ -26,6 +26,3 @@ add_library(
 	STATIC
 	src/basedir.c
 )
-
-# vim: set syntax=cmake:
-

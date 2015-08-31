@@ -21,8 +21,6 @@ Requirements
 
 Optional:
 
-* Lua 5.2 or higher (http://lua.org). This library is needed in order to use
-  irccd plugins.
 * LuaJIT 2.0 or higher (http://luajit.org). This library can be used as the
   Lua 5.2 alternative.
 

@@ -57,7 +57,11 @@ set(LUA_SUPPORT "disabled" PARENT_SCOPE)
 
 if (WITH_LUA52 OR WITH_LUAJIT)
 	if (WITH_LUA52)
-		find_package(Lua52)
+		add_subdirectory(
+			${CMAKE_SOURCE_DIR}/extern/lua
+			${CMAKE_BINARY_DIR}/lua
+		)
+		set(LUA52_FOUND TRUE)
 	elseif (WITH_LUAJIT)
 		find_package(LuaJIT)
 	endif ()
@@ -146,8 +150,8 @@ if (WITH_LUA52 OR WITH_LUAJIT)
 		)
 
 		if (WITH_LUA52)
-			list(APPEND INCLUDES ${LUA52_INCLUDE_DIR})
-			list(APPEND LIBRARIES ${LUA52_LIBRARIES})
+			list(APPEND INCLUDES ${CMAKE_SOURCE_DIR}/extern/lua/src)
+			list(APPEND LIBRARIES lua)
 			set(LUA_SUPPORT "enabled (Lua 5.2)" PARENT_SCOPE)
 		elseif (WITH_LUAJIT)
 			list(APPEND INCLUDES ${LUAJIT_INCLUDE_DIR})
@@ -164,8 +168,8 @@ endif ()
 # Compile libircclient as internal
 #
 add_subdirectory(
-	"${CMAKE_SOURCE_DIR}/extern/libircclient"
-	"${CMAKE_BINARY_DIR}/libircclient"
+	${CMAKE_SOURCE_DIR}/extern/libircclient
+	${CMAKE_BINARY_DIR}/libircclient
 )
 
 list(
@@ -222,11 +226,8 @@ if (WIN32)
 
     install(
         FILES
-            ${CMAKE_SOURCE_DIR}/win32/${WINARCH}/lua.dll
             ${CMAKE_SOURCE_DIR}/win32/${WINARCH}/libeay32.dll
             ${CMAKE_SOURCE_DIR}/win32/${WINARCH}/ssleay32.dll
         DESTINATION bin
     )
 endif ()
-
-# vim: set syntax=cmake:
