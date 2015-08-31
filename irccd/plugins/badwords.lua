@@ -18,7 +18,7 @@
 
 -- Plugin information
 AUTHOR		= "David Demelier <markand@malikania.fr>"
-VERSION		= "1.1"
+VERSION		= "1.1.6"
 COMMENT		= "Plugin to avoid bad language"
 LICENSE		= "ISC"
 

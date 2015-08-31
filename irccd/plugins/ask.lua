@@ -18,7 +18,7 @@
 
 -- Plugin information
 AUTHOR		= "David Demelier <markand@malikania.fr>"
-VERSION		= "1.1"
+VERSION		= "1.1.6"
 COMMENT		= "Crazy module for asking a medium"
 LICENSE		= "ISC"
 

@@ -18,7 +18,7 @@
 
 -- Plugin information
 AUTHOR		= "David Demelier <markand@malikania.fr>"
-VERSION		= "1.1"
+VERSION		= "1.1.6"
 COMMENT		= "Generic plugin to authenticate to services"
 LICENSE		= "ISC"
 
